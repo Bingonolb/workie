@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Info, MapPin } from "lucide-react";
+import { Info, MapPin, BadgeCheck, FileCheck, Package } from "lucide-react";
 import { useState } from "react";
 import type { Watch } from "@/lib/types";
 import { CONDITION_LABELS } from "@/lib/types";
@@ -50,6 +50,31 @@ export function WatchCard({ watch }: { watch: Watch }) {
             {[watch.city, watch.country].filter(Boolean).join(", ")}
           </p>
         )}
+        {watch.purchase_price && (
+          <p className="mt-2 text-lg font-bold">
+            {new Intl.NumberFormat("fr-FR").format(watch.purchase_price)} {watch.currency}
+          </p>
+        )}
+
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {watch.has_proof_of_purchase && (
+            <span className="flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] backdrop-blur">
+              <FileCheck size={11} /> Preuve d&apos;achat
+            </span>
+          )}
+          {watch.has_certificate_authenticity && (
+            <span className="flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] backdrop-blur">
+              <BadgeCheck size={11} /> Certificat d&apos;authenticité
+            </span>
+          )}
+          {(watch.has_box || watch.has_papers) && (
+            <span className="flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[11px] backdrop-blur">
+              <Package size={11} />
+              {watch.has_box && watch.has_papers ? "Full set" : watch.has_box ? "Boîte" : "Papiers"}
+            </span>
+          )}
+        </div>
+
         {showInfo && watch.description && (
           <p className="mt-3 rounded-xl bg-black/40 p-3 text-sm text-white/90">
             {watch.description}

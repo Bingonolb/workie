@@ -24,6 +24,12 @@ export async function createWatch(
   const description = String(formData.get("description") || "");
   const city = String(formData.get("city") || "");
   const country = String(formData.get("country") || "");
+  const priceRaw = String(formData.get("purchase_price") || "");
+  const currency = String(formData.get("currency") || "EUR");
+  const hasProof = formData.get("has_proof_of_purchase") === "on";
+  const hasCert = formData.get("has_certificate_authenticity") === "on";
+  const hasBox = formData.get("has_box") === "on";
+  const hasPapers = formData.get("has_papers") === "on";
   const files = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
 
   if (!brand || !model || !condition) {
@@ -57,6 +63,12 @@ export async function createWatch(
     city: city || null,
     country: country || null,
     photos: photoUrls,
+    purchase_price: priceRaw ? Number(priceRaw) : null,
+    currency,
+    has_proof_of_purchase: hasProof,
+    has_certificate_authenticity: hasCert,
+    has_box: hasBox,
+    has_papers: hasPapers,
   });
 
   if (error) {

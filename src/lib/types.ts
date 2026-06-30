@@ -26,6 +26,12 @@ export interface Watch {
   city: string | null;
   country: string | null;
   status: WatchStatus;
+  purchase_price: number | null;
+  currency: "EUR" | "USD" | "GBP" | "CHF";
+  has_proof_of_purchase: boolean;
+  has_certificate_authenticity: boolean;
+  has_box: boolean;
+  has_papers: boolean;
   created_at: string;
   updated_at: string;
 }
