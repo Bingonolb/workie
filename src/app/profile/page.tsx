@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { ProfileForm } from "@/components/ProfileForm";
+import { IdentityBadge } from "@/components/IdentityBadge";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types";
 
@@ -39,6 +40,9 @@ export default async function ProfilePage() {
             <p className="text-2xl font-bold">{matchesCount ?? 0}</p>
             <p className="text-sm text-neutral-500">Échanges</p>
           </div>
+        </div>
+        <div className="mb-6">
+          <IdentityBadge verified={(profile as Profile)?.identity_verified ?? false} />
         </div>
         <ProfileForm profile={profile as Profile} email={user!.email ?? ""} />
       </main>

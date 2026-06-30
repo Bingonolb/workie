@@ -9,6 +9,8 @@ export interface Profile {
   city: string | null;
   country: string | null;
   bio: string | null;
+  identity_verified: boolean;
+  identity_verified_at: string | null;
   created_at: string;
 }
 
