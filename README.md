@@ -74,6 +74,36 @@ Le fichier `.env.local` contient déjà les clés Supabase du projet `watchswap`
 
 Tu peux ensuite ajouter un nom de domaine personnalisé dans Vercel → Project Settings → Domains.
 
+## Connexion avec Google
+
+1. Va sur [console.cloud.google.com](https://console.cloud.google.com/), crée un projet (ou utilise un existant).
+2. Menu **APIs & Services → Credentials → Create Credentials → OAuth client ID**, type "Web application".
+3. Dans **Authorized redirect URIs**, ajoute l'URL de callback Supabase. Tu la trouves dans le dashboard Supabase → Authentication → Providers → Google (elle ressemble à `https://xtbdxfzbbuedlktpqpna.supabase.co/auth/v1/callback`).
+4. Copie le **Client ID** et le **Client Secret** générés.
+5. Dans le dashboard Supabase → Authentication → Providers → Google : active le provider, colle le Client ID et le Client Secret, sauvegarde.
+6. Dans Vercel (et `.env.local` en local), mets `NEXT_PUBLIC_SITE_URL` à l'URL réelle de ton site (ex: `https://watchswap-xxxx.vercel.app`).
+
+## Vérification d'identité (Stripe Identity)
+
+Avant qu'un échange ne soit finalisé entre deux utilisateurs (bouton "Confirmer l'échange" dans le chat), chacun doit avoir vérifié son identité (pièce d'identité + selfie) une fois. C'est géré par Stripe Identity : on ne stocke jamais nous-mêmes les pièces d'identité, seulement un statut "vérifié" sur le profil.
+
+1. Crée un compte sur [dashboard.stripe.com/register](https://dashboard.stripe.com/register).
+2. Dans le dashboard Stripe, active **Identity** (menu de gauche, ou [dashboard.stripe.com/identity](https://dashboard.stripe.com/identity)).
+3. Récupère ta clé secrète de test ou de prod dans **Developers → API keys** → `STRIPE_SECRET_KEY`.
+4. Crée un webhook dans **Developers → Webhooks → Add endpoint** :
+   - URL : `https://ton-domaine.vercel.app/api/stripe/webhook`
+   - Événements à écouter : `identity.verification_session.verified`, `identity.verification_session.requires_input`
+   - Copie le "Signing secret" → `STRIPE_WEBHOOK_SECRET`
+5. Récupère la clé `service_role` dans le dashboard Supabase → Project Settings → API → `SUPABASE_SERVICE_ROLE_KEY` (⚠️ secrète, ne jamais l'exposer côté client, seulement utilisée dans le webhook).
+6. Ajoute ces 3 variables dans Vercel (Project Settings → Environment Variables) et dans `.env.local` en local :
+   ```
+   STRIPE_SECRET_KEY=sk_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   SUPABASE_SERVICE_ROLE_KEY=...
+   ```
+
+Tant que ces clés ne sont pas configurées, le bouton "Vérifier mon identité" renverra une erreur — c'est normal en attendant la configuration.
+
 ## Administrer la base de données
 
 Dashboard Supabase du projet : [supabase.com/dashboard/project/xtbdxfzbbuedlktpqpna](https://supabase.com/dashboard/project/xtbdxfzbbuedlktpqpna)
@@ -83,6 +113,6 @@ Tu peux y voir les tables, les utilisateurs inscrits, les logs, et ajuster le pl
 
 - Génération des types TypeScript stricts depuis le schéma Supabase (`supabase gen types typescript`) pour remplacer le type `Database = any` actuel.
 - Notifications push/email quand on reçoit un match ou un message.
-- Vérification d'identité / système de notation des échanges pour la confiance entre utilisateurs.
+- Système de notation des échanges pour la confiance entre utilisateurs.
 - Pagination optimisée des conversations si un utilisateur a beaucoup de matchs.
 - Tests automatisés (actuellement non inclus).
