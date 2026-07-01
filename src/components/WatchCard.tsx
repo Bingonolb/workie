@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Info, MapPin, BadgeCheck, FileCheck, Package, Expand } from "lucide-react";
 import { useState } from "react";
 import type { Watch } from "@/lib/types";
@@ -26,14 +25,12 @@ export function WatchCard({ watch }: { watch: Watch }) {
           className="absolute inset-0 h-full w-full cursor-zoom-in"
           aria-label="Agrandir la photo"
         >
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={photo}
             alt={`${watch.brand} ${watch.model}`}
-            fill
             draggable={false}
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 420px"
-            priority
+            className="absolute inset-0 h-full w-full object-cover"
           />
         </button>
       ) : (
