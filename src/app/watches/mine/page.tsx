@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { CONDITION_LABELS, type Watch } from "@/lib/types";
 import { WatchStatusControls } from "@/components/WatchStatusControls";
 
 export default async function MyWatchesPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [user, supabase] = await Promise.all([getUser(), createClient()]);
 
   const { data: watches } = await supabase
     .from("watches").select("*").eq("owner_id", user!.id).order("created_at", { ascending: false });

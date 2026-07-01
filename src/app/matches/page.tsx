@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MessageCircle, Repeat2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 interface Row {
   id: string;
@@ -11,8 +11,7 @@ interface Row {
 }
 
 export default async function MatchesPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [user, supabase] = await Promise.all([getUser(), createClient()]);
 
   const { data } = await supabase
     .from("matches")

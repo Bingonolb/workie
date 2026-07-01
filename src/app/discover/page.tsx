@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { SwipeDeck } from "@/components/SwipeDeck";
 import { MatchesSidebar } from "@/components/MatchesSidebar";
 import { DevResetButton } from "@/components/DevResetButton";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import type { Watch } from "@/lib/types";
 import Link from "next/link";
 
@@ -12,8 +12,7 @@ export default async function DiscoverPage({
   searchParams: Promise<{ brand?: string; condition?: string }>;
 }) {
   const { brand, condition } = await searchParams;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [user, supabase] = await Promise.all([getUser(), createClient()]);
 
   const [{ count: myWatchesCount }, { data: feed }] = await Promise.all([
     supabase.from("watches").select("id", { count: "exact", head: true }).eq("owner_id", user!.id),

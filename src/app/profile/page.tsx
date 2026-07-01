@@ -2,12 +2,11 @@ import Link from "next/link";
 import { Shield, Plus, Settings, Camera } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { ProfileForm } from "@/components/ProfileForm";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import type { Profile, Watch as WatchType } from "@/lib/types";
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [user, supabase] = await Promise.all([getUser(), createClient()]);
 
   const [{ data: profile }, { data: watches }, { count: matchesCount }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle(),
