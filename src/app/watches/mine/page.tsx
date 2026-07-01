@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
@@ -43,7 +42,8 @@ export default async function MyWatchesPage() {
               <div key={w.id} className="overflow-hidden rounded-2xl bg-white shadow-sm">
                 <div className="relative h-48 w-full bg-neutral-100">
                   {w.photos?.[0] ? (
-                    <Image src={w.photos[0]} alt={w.brand} fill className="object-cover" />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={w.photos[0]} alt={w.brand} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-neutral-400">
                       Pas de photo

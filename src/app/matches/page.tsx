@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { createClient } from "@/lib/supabase/server";
@@ -53,12 +52,14 @@ export default async function MatchesPage() {
                   <div className="flex -space-x-3">
                     <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-white ring-1 ring-neutral-200">
                       {theirs.photos?.[0] && (
-                        <Image src={theirs.photos[0]} alt={theirs.brand} width={56} height={56} className="h-full w-full object-cover" />
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={theirs.photos[0]} alt={theirs.brand} className="h-full w-full object-cover" />
                       )}
                     </div>
                     <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-white ring-1 ring-neutral-200">
                       {mine.photos?.[0] && (
-                        <Image src={mine.photos[0]} alt={mine.brand} width={56} height={56} className="h-full w-full object-cover" />
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={mine.photos[0]} alt={mine.brand} className="h-full w-full object-cover" />
                       )}
                     </div>
                   </div>

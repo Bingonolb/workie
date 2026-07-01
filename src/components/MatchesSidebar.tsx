@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,13 +46,8 @@ export async function MatchesSidebar({ userId }: { userId: string }) {
                   className="h-14 w-14 shrink-0 overflow-hidden rounded-full ring-2 ring-brand"
                 >
                   {otherWatch.photos?.[0] && (
-                    <Image
-                      src={otherWatch.photos[0]}
-                      alt="match"
-                      width={56}
-                      height={56}
-                      className="h-full w-full object-cover"
-                    />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={otherWatch.photos[0]} alt="match" className="h-full w-full object-cover" />
                   )}
                 </Link>
               );
