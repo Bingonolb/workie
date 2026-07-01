@@ -160,15 +160,17 @@ export function WatchCard({ watch, onSwipe }: { watch: Watch; onSwipe?: (dir: "l
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-            {[
-              ["Marque", watch.brand],
-              ["Modèle", watch.model],
-              ["Année", watch.year?.toString() ?? "—"],
-              ["État", CONDITION_LABELS[watch.condition]],
-              watch.purchase_price ? ["Valeur", `${new Intl.NumberFormat("fr-FR").format(watch.purchase_price)} ${watch.currency}`] : null,
-              (watch.city || watch.country) ? ["Lieu", [watch.city, watch.country].filter(Boolean).join(", ")] : null,
-            ].filter(Boolean).map(([label, value]) => (
-              <div key={label as string} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: "10px 12px" }}>
+            {(
+              [
+                ["Marque", watch.brand],
+                ["Modèle", watch.model],
+                ["Année", watch.year?.toString() ?? "—"],
+                ["État", CONDITION_LABELS[watch.condition]],
+                watch.purchase_price ? ["Valeur", `${new Intl.NumberFormat("fr-FR").format(watch.purchase_price)} ${watch.currency}`] : null,
+                (watch.city || watch.country) ? ["Lieu", [watch.city, watch.country].filter(Boolean).join(", ")] : null,
+              ] as ([string, string] | null)[]
+            ).filter((x): x is [string, string] => x !== null).map(([label, value]) => (
+              <div key={label} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: "10px 12px" }}>
                 <p style={{ fontSize: 10, color: "#6b6b78", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</p>
                 <p style={{ fontSize: 13, fontWeight: 600 }}>{value}</p>
               </div>
