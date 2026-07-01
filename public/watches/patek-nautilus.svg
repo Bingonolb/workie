@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#0a1428"/>
+      <stop offset="100%" stop-color="#030810"/>
+    </radialGradient>
+    <radialGradient id="dial" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#3a6ea8"/>
+      <stop offset="100%" stop-color="#1a3d6e"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#bg)"/>
+
+  <!-- Bracelet top -->
+  <rect x="148" y="60" width="26" height="55" rx="4" fill="#8a8a8a"/>
+  <rect x="178" y="60" width="48" height="55" rx="4" fill="#c0c0c0"/>
+  <rect x="230" y="60" width="26" height="55" rx="4" fill="#8a8a8a"/>
+  <!-- Bracelet middle links -->
+  <rect x="148" y="358" width="26" height="55" rx="4" fill="#8a8a8a"/>
+  <rect x="178" y="358" width="48" height="55" rx="4" fill="#c0c0c0"/>
+  <rect x="230" y="358" width="26" height="55" rx="4" fill="#8a8a8a"/>
+
+  <!-- Case: Nautilus octagonal shape -->
+  <path d="M140 108 L108 140 L108 330 L140 362 L260 362 L292 330 L292 140 L260 108 Z" fill="#c8c8c8"/>
+  <path d="M144 112 L115 142 L115 326 L144 358 L256 358 L285 326 L285 142 L256 112 Z" fill="#d8d8d8"/>
+
+  <!-- Horizontal bar (Nautilus characteristic) -->
+  <rect x="115" y="220" width="170" height="30" rx="3" fill="#e0e0e0"/>
+
+  <!-- Dial -->
+  <path d="M152 122 L128 148 L128 322 L152 348 L248 348 L272 322 L272 148 L248 122 Z" fill="url(#dial)"/>
+
+  <!-- Horizontal grooves (tapisserie) -->
+  <g stroke="#3060a0" stroke-width="0.8" opacity="0.6">
+    <line x1="130" y1="155" x2="270" y2="155"/>
+    <line x1="130" y1="168" x2="270" y2="168"/>
+    <line x1="130" y1="181" x2="270" y2="181"/>
+    <line x1="130" y1="194" x2="270" y2="194"/>
+    <line x1="130" y1="207" x2="270" y2="207"/>
+    <line x1="130" y1="233" x2="270" y2="233"/>
+    <line x1="130" y1="246" x2="270" y2="246"/>
+    <line x1="130" y1="259" x2="270" y2="259"/>
+    <line x1="130" y1="272" x2="270" y2="272"/>
+    <line x1="130" y1="285" x2="270" y2="285"/>
+    <line x1="130" y1="298" x2="270" y2="298"/>
+    <line x1="130" y1="311" x2="270" y2="311"/>
+  </g>
+
+  <!-- Hour indices (baton, applied gold) -->
+  <g fill="#d4af37" opacity="0.9">
+    <rect x="196" y="134" width="8" height="14" rx="1"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(30,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(60,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(90,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(120,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(150,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(180,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(210,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(240,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(270,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(300,200,235)"/>
+    <rect x="196" y="134" width="8" height="14" rx="1" transform="rotate(330,200,235)"/>
+  </g>
+
+  <!-- Date at 3 -->
+  <rect x="248" y="227" width="20" height="14" rx="1.5" fill="#fff" stroke="#aaa" stroke-width="0.5"/>
+  <text x="258" y="238" text-anchor="middle" font-family="Arial" font-size="8" fill="#111" font-weight="700">16</text>
+
+  <!-- Brand -->
+  <text x="200" y="196" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#d4af37" letter-spacing="2">PATEK PHILIPPE</text>
+  <text x="200" y="208" text-anchor="middle" font-family="Arial" font-size="6.5" fill="#a0c0ff" letter-spacing="1.5">GENÈVE</text>
+  <text x="200" y="224" text-anchor="middle" font-family="Arial" font-size="8" fill="#c0d8ff" letter-spacing="1.5">NAUTILUS</text>
+
+  <!-- Hands (gold/blue) -->
+  <g transform="rotate(-40, 200, 235)">
+    <rect x="197.5" y="155" width="5" height="82" rx="2.5" fill="#d4af37"/>
+  </g>
+  <g transform="rotate(120, 200, 235)">
+    <rect x="198" y="170" width="4" height="58" rx="2" fill="#d4af37"/>
+  </g>
+  <g transform="rotate(200, 200, 235)">
+    <rect x="199.5" y="150" width="1.5" height="70" rx="0.75" fill="#e05050"/>
+    <rect x="199.5" y="220" width="1.5" height="18" rx="0.75" fill="#aaa"/>
+  </g>
+
+  <circle cx="200" cy="235" r="4" fill="#d4af37"/>
+
+  <!-- Calatrava cross logo -->
+  <g transform="translate(200, 175)" fill="#d4af37" opacity="0.6">
+    <rect x="-1" y="-5" width="2" height="10" rx="1"/>
+    <rect x="-5" y="-1" width="10" height="2" rx="1"/>
+  </g>
+
+  <text x="200" y="445" text-anchor="middle" font-family="Georgia,serif" font-size="12" fill="#d4af37" letter-spacing="3">PATEK PHILIPPE</text>
+  <text x="200" y="462" text-anchor="middle" font-family="Arial" font-size="9" fill="#3a6ea8" letter-spacing="4">NAUTILUS</text>
+</svg>

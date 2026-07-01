@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#181210"/>
+      <stop offset="100%" stop-color="#060404"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#bg)"/>
+
+  <!-- Case (cushion shape) -->
+  <rect x="82" y="105" width="236" height="270" rx="42" fill="#b8b8b8"/>
+  <rect x="86" y="109" width="228" height="262" rx="39" fill="#d0d0d0"/>
+
+  <!-- Bezel (black, domed, vintage) -->
+  <circle cx="200" cy="240" r="118" fill="#1a1a1a"/>
+  <circle cx="200" cy="240" r="114" fill="#111"/>
+
+  <!-- Snowflake pip at 12 -->
+  <g transform="translate(200,130)">
+    <rect x="-3" y="-6" width="6" height="12" rx="1" fill="#e8dcc8"/>
+    <rect x="-6" y="-1" width="12" height="3" rx="1" fill="#e8dcc8"/>
+    <rect x="-2" y="-8" width="4" height="4" rx="1" fill="#e8dcc8" transform="rotate(45)"/>
+  </g>
+
+  <!-- Bezel ticks -->
+  <g stroke="#e8dcc8" stroke-width="1.2" opacity="0.6">
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(6,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(12,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(18,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(24,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(30,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(36,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(42,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(48,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(54,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(60,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(66,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(72,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(78,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(84,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(90,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(96,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(102,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(108,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(114,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(120,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(126,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(132,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(138,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(144,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(150,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(156,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(162,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(168,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(174,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(180,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(186,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(192,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(198,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(204,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(210,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(216,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(222,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(228,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(234,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(240,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(246,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(252,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(258,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(264,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(270,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(276,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(282,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(288,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(294,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(300,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(306,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(312,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(318,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(324,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="137" transform="rotate(330,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(336,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(342,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(348,200,240)"/>
+    <line x1="200" y1="126" x2="200" y2="135" transform="rotate(354,200,240)"/>
+  </g>
+
+  <!-- Dial (black matte) -->
+  <circle cx="200" cy="240" r="102" fill="#141414"/>
+
+  <!-- Large luminous hour markers (vintage diver style) -->
+  <g fill="#e8dcc8" opacity="0.92">
+    <!-- 12: large rectangle -->
+    <rect x="192" y="150" width="16" height="22" rx="2"/>
+    <!-- 3 -->
+    <rect x="192" y="150" width="16" height="22" rx="2" transform="rotate(90,200,240)"/>
+    <!-- 6 -->
+    <rect x="192" y="150" width="16" height="22" rx="2" transform="rotate(180,200,240)"/>
+    <!-- 9 -->
+    <rect x="192" y="150" width="16" height="22" rx="2" transform="rotate(270,200,240)"/>
+    <!-- Others: circles -->
+    <circle cx="200" cy="155" r="8" transform="rotate(30,200,240)"/>
+    <circle cx="200" cy="155" r="8" transform="rotate(60,200,240)"/>
+    <circle cx="200" cy="155" r="8" transform="rotate(120,200,240)"/>
+    <circle cx="200" cy="155" r="8" transform="rotate(150,200,240)"/>
+    <circle cx="200" cy="155" r="8" transform="rotate(210,200,240)"/>
+    <circle cx="200" cy="155" r="8" transform="rotate(240,200,240)"/>
+    <circle cx="200" cy="155" r="8" transform="rotate(300,200,240)"/>
+    <circle cx="200" cy="155" r="8" transform="rotate(330,200,240)"/>
+  </g>
+
+  <!-- Brand text -->
+  <text x="200" y="203" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#e8e8e8" letter-spacing="2.5">TUDOR</text>
+  <text x="200" y="217" text-anchor="middle" font-family="Arial" font-size="6.5" fill="#888" letter-spacing="1.5">BLACK BAY FIFTY-EIGHT</text>
+
+  <!-- Snowflake hour hand -->
+  <g transform="rotate(-60, 200, 240)">
+    <rect x="195" y="167" width="10" height="78" rx="5" fill="#e8dcc8"/>
+    <!-- Snowflake tip -->
+    <rect x="196" y="162" width="8" height="8" rx="1" fill="#e8dcc8" transform="rotate(45,200,166)"/>
+  </g>
+  <!-- Snowflake minute hand -->
+  <g transform="rotate(110, 200, 240)">
+    <rect x="197" y="152" width="6" height="92" rx="3" fill="#e8dcc8"/>
+  </g>
+  <!-- Seconds -->
+  <g transform="rotate(200, 200, 240)">
+    <rect x="199.5" y="155" width="1.5" height="80" rx="0.75" fill="#e84040"/>
+    <rect x="199.5" y="235" width="1.5" height="18" rx="0.75" fill="#888"/>
+  </g>
+
+  <circle cx="200" cy="240" r="5" fill="#ccc" stroke="#aaa" stroke-width="0.5"/>
+
+  <!-- Crown with Tudor rose -->
+  <rect x="328" y="228" width="14" height="26" rx="5" fill="#c8c8c8" stroke="#aaa" stroke-width="0.5"/>
+
+  <text x="200" y="448" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#e8e8e8" letter-spacing="3">TUDOR</text>
+  <text x="200" y="465" text-anchor="middle" font-family="Arial" font-size="8" fill="#666" letter-spacing="3">BLACK BAY 58</text>
+</svg>

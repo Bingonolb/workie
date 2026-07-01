@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1a1010"/>
+      <stop offset="100%" stop-color="#060404"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#bg)"/>
+
+  <!-- Case (slightly tonneau-shaped) -->
+  <rect x="72" y="98" width="256" height="284" rx="40" fill="#c0c0c0"/>
+  <rect x="76" y="102" width="248" height="276" rx="37" fill="#d8d8d8"/>
+
+  <!-- Tachymeter bezel (black with silver text ring) -->
+  <circle cx="200" cy="240" r="122" fill="#111"/>
+  <circle cx="200" cy="240" r="116" fill="#0a0a0a"/>
+
+  <!-- Tachymeter marks -->
+  <g stroke="#aaa" stroke-width="1" opacity="0.8">
+    <line x1="200" y1="124" x2="200" y2="132" transform="rotate(0,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(30,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(60,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(90,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(120,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(150,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(180,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(210,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(240,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(270,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(300,200,240)"/>
+    <line x1="200" y1="124" x2="200" y2="130" transform="rotate(330,200,240)"/>
+  </g>
+  <text x="200" y="131" text-anchor="middle" font-family="Arial" font-size="6.5" fill="#bbb" letter-spacing="0.5">TACHYMETRE</text>
+
+  <!-- Dial (matte black) -->
+  <circle cx="200" cy="240" r="108" fill="#141414"/>
+  <circle cx="200" cy="240" r="104" fill="#111"/>
+
+  <!-- 3 sub-dials -->
+  <!-- 9h: running seconds -->
+  <circle cx="148" cy="240" r="28" fill="#1e1e1e" stroke="#333" stroke-width="0.8"/>
+  <g stroke="#ccc" stroke-width="0.6" opacity="0.5">
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(0,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(30,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(60,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(90,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(120,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(150,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(180,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(210,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(240,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(270,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(300,148,240)"/>
+    <line x1="148" y1="214" x2="148" y2="218" transform="rotate(330,148,240)"/>
+  </g>
+  <line x1="148" y1="240" x2="148" y2="218" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+  <text x="148" y="257" text-anchor="middle" font-family="Arial" font-size="5.5" fill="#666">60</text>
+
+  <!-- 3h: 12hr counter -->
+  <circle cx="252" cy="240" r="28" fill="#1e1e1e" stroke="#333" stroke-width="0.8"/>
+  <line x1="252" y1="240" x2="252" y2="218" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+  <text x="252" y="257" text-anchor="middle" font-family="Arial" font-size="5.5" fill="#666">12</text>
+
+  <!-- 6h: 30min counter -->
+  <circle cx="200" cy="300" r="24" fill="#1e1e1e" stroke="#333" stroke-width="0.8"/>
+  <line x1="200" y1="300" x2="200" y2="282" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+  <text x="200" y="316" text-anchor="middle" font-family="Arial" font-size="5.5" fill="#666">30</text>
+
+  <!-- Hour indices (dagger shape, luminous) -->
+  <g fill="#e8dcc8" opacity="0.9">
+    <!-- 12: two bars -->
+    <rect x="195" y="152" width="5" height="16" rx="1"/>
+    <rect x="202" y="152" width="5" height="16" rx="1"/>
+    <!-- 3 -->
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(90,200,240)"/>
+    <!-- 6 -->
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(180,200,240)"/>
+    <!-- 9 -->
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(270,200,240)"/>
+    <!-- Others -->
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(30,200,240)"/>
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(60,200,240)"/>
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(120,200,240)"/>
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(150,200,240)"/>
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(210,200,240)"/>
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(240,200,240)"/>
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(300,200,240)"/>
+    <rect x="196" y="152" width="8" height="14" rx="1" transform="rotate(330,200,240)"/>
+  </g>
+
+  <!-- Brand text -->
+  <text x="200" y="196" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#e8e8e8" letter-spacing="2">OMEGA</text>
+  <text x="200" y="209" text-anchor="middle" font-family="Arial" font-size="6.5" fill="#aaa" letter-spacing="1">SPEEDMASTER</text>
+  <text x="200" y="221" text-anchor="middle" font-family="Arial" font-size="5.5" fill="#777" letter-spacing="0.8">PROFESSIONAL · MOONWATCH</text>
+
+  <!-- Hands (dagger hands) -->
+  <g transform="rotate(-80, 200, 240)">
+    <polygon points="200,162 203.5,220 200,226 196.5,220" fill="#e8dcc8"/>
+  </g>
+  <g transform="rotate(150, 200, 240)">
+    <polygon points="200,178 202.5,230 200,234 197.5,230" fill="#e8dcc8"/>
+  </g>
+  <!-- Chrono hand (centre seconds) -->
+  <g transform="rotate(120, 200, 240)">
+    <rect x="199.5" y="165" width="1.5" height="75" rx="0.75" fill="#e84040"/>
+    <rect x="199.5" y="240" width="1.5" height="16" rx="0.75" fill="#555"/>
+  </g>
+
+  <circle cx="200" cy="240" r="4.5" fill="#ccc" stroke="#999" stroke-width="0.5"/>
+
+  <!-- Crown -->
+  <rect x="330" y="228" width="12" height="26" rx="4" fill="#c0c0c0" stroke="#999" stroke-width="0.5"/>
+  <!-- Pushers -->
+  <rect x="330" y="204" width="9" height="14" rx="3" fill="#bbb" stroke="#999" stroke-width="0.5"/>
+  <rect x="330" y="250" width="9" height="14" rx="3" fill="#bbb" stroke="#999" stroke-width="0.5"/>
+
+  <text x="200" y="448" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#e8e8e8" letter-spacing="3">OMEGA</text>
+  <text x="200" y="465" text-anchor="middle" font-family="Arial" font-size="8" fill="#666" letter-spacing="3">SPEEDMASTER</text>
+</svg>

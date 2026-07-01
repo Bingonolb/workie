@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#141820"/>
+      <stop offset="100%" stop-color="#060810"/>
+    </radialGradient>
+    <radialGradient id="dial" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#4a4e58"/>
+      <stop offset="100%" stop-color="#1e2028"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#bg)"/>
+
+  <!-- Bracelet -->
+  <rect x="150" y="55" width="100" height="60" rx="3" fill="#888"/>
+  <rect x="163" y="55" width="74" height="60" rx="3" fill="#b0b0b0"/>
+  <rect x="175" y="55" width="50" height="60" rx="3" fill="#cacaca"/>
+  <rect x="150" y="365" width="100" height="60" rx="3" fill="#888"/>
+  <rect x="163" y="365" width="74" height="60" rx="3" fill="#b0b0b0"/>
+  <rect x="175" y="365" width="50" height="60" rx="3" fill="#cacaca"/>
+
+  <!-- Case: octagonal -->
+  <polygon points="200,105 280,125 310,205 310,275 280,355 200,375 120,355 90,275 90,205 120,125" fill="#b8b8b8"/>
+  <polygon points="200,110 276,129 305,207 305,273 276,351 200,370 124,351 95,273 95,207 124,129" fill="#d0d0d0"/>
+
+  <!-- 8 screws (Royal Oak signature) -->
+  <g fill="#888" stroke="#666" stroke-width="0.5">
+    <circle cx="148" cy="148" r="6"/>
+    <line x1="145" y1="148" x2="151" y2="148" stroke="#555" stroke-width="1"/>
+    <line x1="148" y1="145" x2="148" y2="151" stroke="#555" stroke-width="1"/>
+    <circle cx="252" cy="148" r="6"/>
+    <line x1="249" y1="148" x2="255" y2="148" stroke="#555" stroke-width="1"/>
+    <line x1="252" y1="145" x2="252" y2="151" stroke="#555" stroke-width="1"/>
+    <circle cx="108" cy="220" r="6"/>
+    <line x1="105" y1="220" x2="111" y2="220" stroke="#555" stroke-width="1"/>
+    <line x1="108" y1="217" x2="108" y2="223" stroke="#555" stroke-width="1"/>
+    <circle cx="292" cy="220" r="6"/>
+    <line x1="289" y1="220" x2="295" y2="220" stroke="#555" stroke-width="1"/>
+    <line x1="292" y1="217" x2="292" y2="223" stroke="#555" stroke-width="1"/>
+    <circle cx="108" cy="300" r="6"/>
+    <line x1="105" y1="300" x2="111" y2="300" stroke="#555" stroke-width="1"/>
+    <line x1="108" y1="297" x2="108" y2="303" stroke="#555" stroke-width="1"/>
+    <circle cx="292" cy="300" r="6"/>
+    <line x1="289" y1="300" x2="295" y2="300" stroke="#555" stroke-width="1"/>
+    <line x1="292" y1="297" x2="292" y2="303" stroke="#555" stroke-width="1"/>
+    <circle cx="148" cy="372" r="6"/>
+    <line x1="145" y1="372" x2="151" y2="372" stroke="#555" stroke-width="1"/>
+    <line x1="148" y1="369" x2="148" y2="375" stroke="#555" stroke-width="1"/>
+    <circle cx="252" cy="372" r="6"/>
+    <line x1="249" y1="372" x2="255" y2="372" stroke="#555" stroke-width="1"/>
+    <line x1="252" y1="369" x2="252" y2="375" stroke="#555" stroke-width="1"/>
+  </g>
+
+  <!-- Dial octagon -->
+  <polygon points="200,128 268,145 292,213 292,307 268,375 200,392 132,375 108,307 108,213 132,145" fill="url(#dial)"/>
+
+  <!-- Grande Tapisserie pattern (small squares) -->
+  <g stroke="#3a3e48" stroke-width="0.6" opacity="0.7">
+    <line x1="120" y1="160" x2="280" y2="160"/>
+    <line x1="120" y1="174" x2="280" y2="174"/>
+    <line x1="120" y1="188" x2="280" y2="188"/>
+    <line x1="120" y1="202" x2="280" y2="202"/>
+    <line x1="120" y1="216" x2="280" y2="216"/>
+    <line x1="120" y1="244" x2="280" y2="244"/>
+    <line x1="120" y1="258" x2="280" y2="258"/>
+    <line x1="120" y1="272" x2="280" y2="272"/>
+    <line x1="120" y1="286" x2="280" y2="286"/>
+    <line x1="120" y1="300" x2="280" y2="300"/>
+    <line x1="120" y1="314" x2="280" y2="314"/>
+    <line x1="145" y1="155" x2="145" y2="365"/>
+    <line x1="168" y1="150" x2="168" y2="370"/>
+    <line x1="191" y1="148" x2="191" y2="372"/>
+    <line x1="214" y1="148" x2="214" y2="372"/>
+    <line x1="237" y1="150" x2="237" y2="370"/>
+    <line x1="260" y1="155" x2="260" y2="365"/>
+  </g>
+
+  <!-- Hour indices -->
+  <g fill="#c8a84b" opacity="0.9">
+    <rect x="196" y="148" width="8" height="14" rx="1"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(30,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(60,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(90,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(120,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(150,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(180,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(210,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(240,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(270,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(300,200,260)"/>
+    <rect x="196" y="148" width="8" height="14" rx="1" transform="rotate(330,200,260)"/>
+  </g>
+
+  <!-- Date at 3 -->
+  <rect x="252" y="252" width="20" height="14" rx="1.5" fill="#fff" stroke="#aaa" stroke-width="0.5"/>
+  <text x="262" y="263" text-anchor="middle" font-family="Arial" font-size="8" fill="#111" font-weight="700">15</text>
+
+  <!-- AP Royal Oak text -->
+  <text x="200" y="208" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="#c8a84b" letter-spacing="1.5">AUDEMARS PIGUET</text>
+  <text x="200" y="220" text-anchor="middle" font-family="Arial" font-size="7" fill="#888" letter-spacing="1">LE BRASSUS</text>
+  <text x="200" y="235" text-anchor="middle" font-family="Arial" font-size="8" fill="#aaa" letter-spacing="2">ROYAL OAK</text>
+  <text x="200" y="247" text-anchor="middle" font-family="Arial" font-size="6.5" fill="#666">AUTOMATIC · 39mm</text>
+
+  <!-- Hands -->
+  <g transform="rotate(-50, 200, 260)">
+    <rect x="197.5" y="173" width="5" height="90" rx="2.5" fill="#c8a84b"/>
+  </g>
+  <g transform="rotate(110, 200, 260)">
+    <rect x="198" y="190" width="4" height="68" rx="2" fill="#c8a84b"/>
+  </g>
+  <g transform="rotate(190, 200, 260)">
+    <rect x="199.5" y="167" width="1.5" height="76" rx="0.75" fill="#e05050"/>
+  </g>
+  <circle cx="200" cy="260" r="5" fill="#c8a84b"/>
+
+  <text x="200" y="448" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#c8a84b" letter-spacing="3">AUDEMARS PIGUET</text>
+  <text x="200" y="465" text-anchor="middle" font-family="Arial" font-size="9" fill="#4a4e58" letter-spacing="4">ROYAL OAK</text>
+</svg>

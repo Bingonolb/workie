@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1a0a08"/>
+      <stop offset="100%" stop-color="#080404"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#bg)"/>
+
+  <!-- Tonneau case (RM signature shape) -->
+  <path d="M138 108 Q110 130 105 200 Q105 270 130 362 Q160 390 200 392 Q240 390 270 362 Q295 270 295 200 Q295 130 262 108 Q232 90 200 88 Q168 90 138 108 Z" fill="#888"/>
+  <path d="M142 112 Q115 133 110 200 Q110 268 133 358 Q162 385 200 387 Q238 385 267 358 Q290 268 290 200 Q290 133 258 112 Q229 95 200 93 Q171 95 142 112 Z" fill="#aaa"/>
+
+  <!-- Case screws (RM signature) -->
+  <g fill="#777" stroke="#555" stroke-width="0.5">
+    <circle cx="150" cy="128" r="5"/>
+    <line x1="147" y1="128" x2="153" y2="128" stroke="#444" stroke-width="0.8"/>
+    <circle cx="250" cy="128" r="5"/>
+    <line x1="247" y1="128" x2="253" y2="128" stroke="#444" stroke-width="0.8"/>
+    <circle cx="126" cy="200" r="5"/>
+    <line x1="123" y1="200" x2="129" y2="200" stroke="#444" stroke-width="0.8"/>
+    <circle cx="274" cy="200" r="5"/>
+    <line x1="271" y1="200" x2="277" y2="200" stroke="#444" stroke-width="0.8"/>
+    <circle cx="136" cy="310" r="5"/>
+    <line x1="133" y1="310" x2="139" y2="310" stroke="#444" stroke-width="0.8"/>
+    <circle cx="264" cy="310" r="5"/>
+    <line x1="261" y1="310" x2="267" y2="310" stroke="#444" stroke-width="0.8"/>
+  </g>
+
+  <!-- Sapphire crystal / skeleton dial -->
+  <path d="M148 122 Q124 143 120 205 Q120 267 143 352 Q168 374 200 376 Q232 374 257 352 Q280 267 280 205 Q280 143 252 122 Q228 105 200 104 Q172 105 148 122 Z" fill="#0a0a0a" stroke="#333" stroke-width="0.5"/>
+
+  <!-- Movement bridges (skeleton) -->
+  <g fill="#c8a84b" opacity="0.8" stroke="#8a7030" stroke-width="0.5">
+    <!-- Main plate / bridges -->
+    <path d="M148 145 L165 145 L165 200 L200 200 L200 145 L252 145 L252 195 L230 195 L230 210 L252 210 L252 260 L200 260 L200 210 L165 210 L165 260 L148 260 Z" fill="none" stroke="#c8a84b" stroke-width="1.2"/>
+
+    <!-- Gear train visible -->
+    <circle cx="200" cy="200" r="18" fill="none" stroke="#c8a84b" stroke-width="1.5"/>
+    <circle cx="200" cy="200" r="12" fill="none" stroke="#c8a84b" stroke-width="0.8"/>
+    <circle cx="200" cy="200" r="6" fill="#c8a84b" opacity="0.6"/>
+
+    <!-- Gear 2 -->
+    <circle cx="165" cy="175" r="12" fill="none" stroke="#c8a84b" stroke-width="1.2"/>
+    <circle cx="165" cy="175" r="5" fill="#c8a84b" opacity="0.5"/>
+
+    <!-- Gear 3 -->
+    <circle cx="235" cy="175" r="10" fill="none" stroke="#c8a84b" stroke-width="1.2"/>
+    <circle cx="235" cy="175" r="4" fill="#c8a84b" opacity="0.5"/>
+
+    <!-- Balance wheel -->
+    <circle cx="240" cy="300" r="22" fill="none" stroke="#e8c84a" stroke-width="1.5"/>
+    <circle cx="240" cy="300" r="14" fill="none" stroke="#e8c84a" stroke-width="0.8"/>
+    <line x1="218" y1="300" x2="262" y2="300" stroke="#e8c84a" stroke-width="0.8"/>
+    <line x1="240" y1="278" x2="240" y2="322" stroke="#e8c84a" stroke-width="0.8"/>
+
+    <!-- Tourbillon cage outline at 6 -->
+    <circle cx="160" cy="308" r="20" fill="none" stroke="#c8a84b" stroke-width="1.2" stroke-dasharray="3 2"/>
+    <circle cx="160" cy="308" r="12" fill="none" stroke="#c8a84b" stroke-width="0.8"/>
+    <line x1="147" y1="308" x2="173" y2="308" stroke="#c8a84b" stroke-width="0.6"/>
+    <line x1="160" y1="295" x2="160" y2="321" stroke="#c8a84b" stroke-width="0.6"/>
+
+    <!-- Micro-rotor suggestion -->
+    <path d="M185 240 Q195 230 205 240 Q215 250 205 260 Q195 270 185 260 Z" fill="none" stroke="#c8a84b" stroke-width="1"/>
+  </g>
+
+  <!-- Hands (skeleton) -->
+  <g transform="rotate(-50, 200, 200)">
+    <rect x="198.5" y="130" width="3" height="72" rx="1.5" fill="#e8c84a" opacity="0.9"/>
+  </g>
+  <g transform="rotate(130, 200, 200)">
+    <rect x="199" y="142" width="2" height="56" rx="1" fill="#e8c84a" opacity="0.9"/>
+  </g>
+  <g transform="rotate(220, 200, 200)">
+    <rect x="199.5" y="126" width="1.5" height="66" rx="0.75" fill="#e84040" opacity="0.9"/>
+  </g>
+  <circle cx="200" cy="200" r="3.5" fill="#e8c84a"/>
+
+  <!-- Power reserve indicator -->
+  <rect x="175" y="155" width="50" height="8" rx="3" fill="#1a1a1a" stroke="#555" stroke-width="0.5"/>
+  <rect x="177" y="157" width="30" height="4" rx="2" fill="#c8a84b" opacity="0.7"/>
+  <text x="200" y="148" text-anchor="middle" font-family="Arial" font-size="5" fill="#888">POWER RESERVE</text>
+
+  <!-- Brand text -->
+  <text x="200" y="138" text-anchor="middle" font-family="Arial" font-size="7.5" fill="#c8a84b" letter-spacing="1.5">RICHARD MILLE</text>
+
+  <!-- RM number plate -->
+  <rect x="168" y="256" width="64" height="18" rx="2" fill="#111" stroke="#555" stroke-width="0.5"/>
+  <text x="200" y="268" text-anchor="middle" font-family="Arial" font-size="7" fill="#c8a84b" letter-spacing="1" font-weight="700">RM 11-03</text>
+
+  <!-- Crown / pushers on right -->
+  <rect x="280" y="178" width="12" height="10" rx="3" fill="#aaa" stroke="#888" stroke-width="0.5"/>
+  <rect x="282" y="210" width="10" height="22" rx="4" fill="#b8b8b8" stroke="#999" stroke-width="0.5"/>
+  <rect x="280" y="245" width="12" height="10" rx="3" fill="#aaa" stroke="#888" stroke-width="0.5"/>
+
+  <text x="200" y="445" text-anchor="middle" font-family="Arial" font-size="13" fill="#c8a84b" letter-spacing="3">RICHARD MILLE</text>
+  <text x="200" y="462" text-anchor="middle" font-family="Arial" font-size="9" fill="#555" letter-spacing="4">RM 11-03</text>
+</svg>
