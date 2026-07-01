@@ -70,6 +70,7 @@ export default async function ChatPage({
         matchId={matchId}
         currentUserId={user!.id}
         otherUsername={otherProfile?.username ?? "Collectionneur"}
+        otherAvatarUrl={otherProfile?.avatar_url}
         otherWatchLabel={`${otherWatch.brand} ${otherWatch.model}`}
         initialMessages={messages ?? []}
       />

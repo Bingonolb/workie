@@ -150,13 +150,13 @@ export function NewWatchForm() {
       </div>
 
       {state?.error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-brand-dark">{state.error}</p>
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{state.error}</p>
       )}
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-brand py-3 font-semibold text-white shadow-lg shadow-red-200 transition hover:bg-brand-dark disabled:opacity-60"
+        className="w-full rounded-full bg-brand py-3 font-semibold text-white shadow-lg shadow-black/10 transition hover:bg-brand-dark disabled:opacity-60"
       >
         {pending ? "Publication..." : "Publier la montre"}
       </button>

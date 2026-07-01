@@ -40,7 +40,7 @@ export function WatchStatusControls({
             startTransition(() => { void deleteWatch(watchId); });
           }
         }}
-        className="rounded-full border border-red-200 px-3 py-1.5 font-medium text-brand hover:bg-red-50"
+        className="rounded-full border border-red-200 px-3 py-1.5 font-medium text-red-600 hover:bg-red-50"
       >
         Supprimer
       </button>

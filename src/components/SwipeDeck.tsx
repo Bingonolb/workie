@@ -136,28 +136,28 @@ export function SwipeDeck({
         <button
           onClick={handleRewind}
           disabled={history.length === 0}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-amber-500 shadow-md transition hover:scale-105 disabled:opacity-40"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-gold shadow-md transition hover:scale-105 disabled:opacity-40"
         >
           <RotateCcw size={20} />
         </button>
         <button
           onClick={() => handleButton("pass")}
           disabled={!topWatch}
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-brand shadow-md transition hover:scale-105 disabled:opacity-40"
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-neutral-400 shadow-md transition hover:scale-105 hover:text-red-500 disabled:opacity-40"
         >
           <X size={28} />
         </button>
         <button
           onClick={() => handleButton("like")}
           disabled={!topWatch}
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-emerald-500 shadow-md transition hover:scale-105 disabled:opacity-40"
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-brand shadow-md transition hover:scale-105 disabled:opacity-40"
         >
           <Heart size={28} fill="currentColor" />
         </button>
         <button
           onClick={() => handleButton("superlike")}
           disabled={!topWatch}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-violet-500 shadow-md transition hover:scale-105 disabled:opacity-40"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-gold shadow-md transition hover:scale-105 disabled:opacity-40"
         >
           <Zap size={20} fill="currentColor" />
         </button>

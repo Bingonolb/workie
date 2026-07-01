@@ -24,7 +24,7 @@ export default async function Home() {
       <div className="mt-8 flex gap-3">
         <Link
           href="/signup"
-          className="rounded-full bg-brand px-6 py-3 font-semibold text-white shadow-lg shadow-red-200 transition hover:bg-brand-dark"
+          className="rounded-full bg-brand px-6 py-3 font-semibold text-white shadow-lg shadow-black/10 transition hover:bg-brand-dark"
         >
           Créer un compte
         </Link>

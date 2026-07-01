@@ -85,7 +85,7 @@ export function ExchangeConfirmationBar({
           )
         )}
       </div>
-      {error && <p className="mx-auto mt-2 max-w-2xl text-xs text-brand-dark">{error}</p>}
+      {error && <p className="mx-auto mt-2 max-w-2xl text-xs text-red-600">{error}</p>}
     </div>
   );
 }
