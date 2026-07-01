@@ -7,15 +7,25 @@ import { ProfileForm } from "@/components/ProfileForm";
 import Link from "next/link";
 import type { Profile, Watch as WatchType } from "@/lib/types";
 
-export function ProfileClient({ userId, email }: { userId: string; email: string }) {
+interface Props {
+  userId: string;
+  email: string;
+  initialProfile: Profile | null;
+  initialWatches: (WatchType & { photos: string[] })[];
+  initialMatchesCount: number;
+}
+
+export function ProfileClient({ userId, email, initialProfile, initialWatches, initialMatchesCount }: Props) {
   const supabase = createClient();
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile } = useQuery({
     queryKey: ["profile", userId],
     queryFn: async () => {
       const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
       return data as Profile | null;
     },
+    initialData: initialProfile,
+    staleTime: 3 * 60 * 1000,
   });
 
   const { data: watches = [] } = useQuery({
@@ -24,35 +34,22 @@ export function ProfileClient({ userId, email }: { userId: string; email: string
       const { data } = await supabase.from("watches").select("id,brand,model,photos,status").eq("owner_id", userId).order("created_at", { ascending: false });
       return (data ?? []) as unknown as (WatchType & { photos: string[] })[];
     },
+    initialData: initialWatches,
+    staleTime: 3 * 60 * 1000,
   });
 
-  const { data: matchesCount = 0 } = useQuery({
-    queryKey: ["matches-count", userId],
-    queryFn: async () => {
-      const { count } = await supabase.from("matches").select("id", { count: "exact", head: true }).or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`);
-      return count ?? 0;
-    },
-  });
-
-  const memberYear = new Date().getFullYear();
   const initial = (profile?.username?.[0] ?? email[0] ?? "?").toUpperCase();
-
-  if (profileLoading) return (
-    <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 28 }}>
-      {[320, 180].map((h, i) => <div key={i} style={{ height: h, borderRadius: 20, background: "#e8e8e8", animation: "pulse 1.2s ease-in-out infinite" }} />)}
-      <div style={{ height: 480, borderRadius: 20, background: "#e8e8e8", animation: "pulse 1.2s ease-in-out infinite" }} />
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}`}</style>
-    </div>
-  );
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 28, alignItems: "start" }}>
+      {/* Left column */}
       <div>
         <div style={{ background: "#fff", borderRadius: 20, border: "1px solid #e8e8e8", overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
           <div style={{ height: 100, background: "linear-gradient(135deg, #e8445a 0%, #ff7a8a 100%)" }} />
           <div style={{ padding: "0 20px", marginTop: -44, marginBottom: 16 }}>
             <div style={{ position: "relative", display: "inline-block" }}>
               {profile?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={profile.avatar_url} alt="avatar" style={{ width: 80, height: 80, borderRadius: 16, objectFit: "cover", border: "3px solid #fff", boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "block" }} />
               ) : (
                 <div style={{ width: 80, height: 80, borderRadius: 16, background: "linear-gradient(135deg, #e8445a, #ff7a8a)", border: "3px solid #fff", boxShadow: "0 4px 16px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -72,7 +69,11 @@ export function ProfileClient({ userId, email }: { userId: string; email: string
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderTop: "1px solid #f0f0f0" }}>
-            {[{ value: watches.length, label: "Montres" }, { value: matchesCount, label: "Échanges" }, { value: memberYear, label: "Depuis" }].map(({ value, label }, i) => (
+            {[
+              { value: watches.length, label: "Montres" },
+              { value: initialMatchesCount, label: "Échanges" },
+              { value: new Date().getFullYear(), label: "Depuis" },
+            ].map(({ value, label }, i) => (
               <div key={label} style={{ padding: "14px 0", textAlign: "center", borderRight: i < 2 ? "1px solid #f0f0f0" : "none" }}>
                 <p style={{ fontSize: 20, fontWeight: 800, color: "#e8445a" }}>{value}</p>
                 <p style={{ fontSize: 11, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</p>
@@ -83,7 +84,7 @@ export function ProfileClient({ userId, email }: { userId: string; email: string
           {!profile?.identity_verified ? (
             <div style={{ margin: "12px 16px 16px", padding: "12px 14px", background: "#fff8f8", border: "1px solid #ffd0d0", borderRadius: 12, display: "flex", alignItems: "center", gap: 10 }}>
               <Shield size={18} color="#e8445a" />
-              <div style={{ flex: 1 }}>
+              <div>
                 <p style={{ fontSize: 12, fontWeight: 700, color: "#333" }}>Vérifiez votre identité</p>
                 <p style={{ fontSize: 11, color: "#888" }}>Échangez 3× plus facilement.</p>
               </div>
@@ -96,7 +97,7 @@ export function ProfileClient({ userId, email }: { userId: string; email: string
           )}
         </div>
 
-        {watches.length > 0 && (
+        {watches.length > 0 ? (
           <div style={{ marginTop: 20, background: "#fff", borderRadius: 20, border: "1px solid #e8e8e8", padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <p style={{ fontSize: 14, fontWeight: 700, color: "#111" }}>Ma collection</p>
@@ -104,17 +105,16 @@ export function ProfileClient({ userId, email }: { userId: string; email: string
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
               {watches.slice(0, 6).map(w => (
-                <div key={w.id} style={{ aspectRatio: "1", borderRadius: 10, overflow: "hidden", background: "#f4f4f4", position: "relative" }}>
+                <div key={w.id} style={{ aspectRatio: "1", borderRadius: 10, overflow: "hidden", background: "#f4f4f4" }}>
                   {w.photos?.[0]
+                    // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={w.photos[0]} alt={w.brand} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#aaa" }}>{w.brand}</div>}
                 </div>
               ))}
             </div>
           </div>
-        )}
-
-        {watches.length === 0 && (
+        ) : (
           <Link href="/watches/new" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginTop: 20, borderRadius: 16, border: "1.5px dashed #ddd", padding: "24px 16px", textDecoration: "none", textAlign: "center", background: "#fff" }}>
             <div style={{ width: 44, height: 44, borderRadius: "50%", background: "#fff0f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Plus size={20} color="#e8445a" />
@@ -124,6 +124,7 @@ export function ProfileClient({ userId, email }: { userId: string; email: string
         )}
       </div>
 
+      {/* Right column — edit form */}
       <div style={{ background: "#fff", borderRadius: 20, border: "1px solid #e8e8e8", padding: "28px", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}>
           <Settings size={16} color="#aaa" />

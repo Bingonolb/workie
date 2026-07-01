@@ -8,10 +8,10 @@ import Link from "next/link";
 type WatchRow = { id: string; owner_id: string; brand: string; model: string; photos: string[] };
 type MatchRow = { id: string; created_at: string; watch_a: WatchRow; watch_b: WatchRow };
 
-export function MatchesClient({ userId }: { userId: string }) {
+export function MatchesClient({ userId, initialRows }: { userId: string; initialRows: MatchRow[] }) {
   const supabase = createClient();
 
-  const { data: rows = [], isLoading } = useQuery({
+  const { data: rows = [] } = useQuery({
     queryKey: ["matches", userId],
     queryFn: async () => {
       const { data } = await supabase
@@ -21,14 +21,9 @@ export function MatchesClient({ userId }: { userId: string }) {
         .order("created_at", { ascending: false });
       return (data ?? []) as unknown as MatchRow[];
     },
+    initialData: initialRows,
+    staleTime: 3 * 60 * 1000,
   });
-
-  if (isLoading) return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {[1,2,3].map(i => <div key={i} style={{ height: 82, borderRadius: 16, background: "#e8e8e8", animation: "pulse 1.2s ease-in-out infinite" }} />)}
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}`}</style>
-    </div>
-  );
 
   if (rows.length === 0) return (
     <div style={{ background: "#fff", borderRadius: 20, border: "1px solid #e8e8e8", padding: "60px 32px", textAlign: "center" }}>
@@ -55,12 +50,14 @@ export function MatchesClient({ userId }: { userId: string }) {
               <div style={{ position: "relative", width: 72, height: 56, flexShrink: 0 }}>
                 <div style={{ position: "absolute", left: 0, top: 0, width: 52, height: 52, borderRadius: 12, overflow: "hidden", border: "2.5px solid #fff", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
                   {theirs.photos?.[0]
-                    ? <img src={theirs.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />  // eslint-disable-line @next/next/no-img-element
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={theirs.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     : <div style={{ width: "100%", height: "100%", background: "#f4f4f4" }} />}
                 </div>
                 <div style={{ position: "absolute", left: 22, bottom: 0, width: 52, height: 52, borderRadius: 12, overflow: "hidden", border: "2.5px solid #fff", boxShadow: "0 0 0 2px rgba(232,68,90,0.3)" }}>
                   {mine.photos?.[0]
-                    ? <img src={mine.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />  // eslint-disable-line @next/next/no-img-element
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={mine.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     : <div style={{ width: "100%", height: "100%", background: "#f4f4f4" }} />}
                 </div>
               </div>
