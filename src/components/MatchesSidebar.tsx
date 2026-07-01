@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart } from "lucide-react";
+import { ChevronRight, Heart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export async function MatchesSidebar({ userId }: { userId: string }) {
@@ -7,10 +7,10 @@ export async function MatchesSidebar({ userId }: { userId: string }) {
 
   const { data: matches } = await supabase
     .from("matches")
-    .select("id, watch_a:watches!matches_watch_a_id_fkey(*), watch_b:watches!matches_watch_b_id_fkey(*)")
+    .select("id, watch_a:watches!matches_watch_a_id_fkey(id,owner_id,brand,model,photos), watch_b:watches!matches_watch_b_id_fkey(id,owner_id,brand,model,photos)")
     .or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`)
     .order("created_at", { ascending: false })
-    .limit(8);
+    .limit(6);
 
   const { count: likesCount } = await supabase
     .from("swipes")
@@ -26,60 +26,72 @@ export async function MatchesSidebar({ userId }: { userId: string }) {
   const rows = (matches ?? []) as unknown as Row[];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-      {/* Likes counter */}
-      <div style={{ background: "#111116", borderRadius: 16, border: "1px solid rgba(255,255,255,0.07)", padding: "16px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(201,168,76,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Heart size={18} color="#c9a84c" fill="#c9a84c" />
-        </div>
-        <div>
-          <p style={{ fontSize: 22, fontWeight: 800, color: "#c9a84c", lineHeight: 1 }}>{likesCount ?? 0}</p>
-          <p style={{ fontSize: 12, color: "#6b6b78", marginTop: 2 }}>likes sur tes montres</p>
-        </div>
-      </div>
-
-      {/* Recent matches */}
-      <div style={{ background: "#111116", borderRadius: 16, border: "1px solid rgba(255,255,255,0.07)", padding: "16px 20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "#f5f3ee" }}>Échanges récents</p>
-          <Link href="/matches" style={{ fontSize: 11, color: "#c9a84c", textDecoration: "none", fontWeight: 600 }}>Voir tout →</Link>
+      {/* Matchs */}
+      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #e8e8e8", padding: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <p style={{ fontSize: 16, fontWeight: 700, color: "#111" }}>Matchs</p>
+          <Link href="/matches" style={{ fontSize: 13, color: "#e8445a", textDecoration: "none", fontWeight: 600 }}>Voir tout</Link>
         </div>
 
         {rows.length === 0 ? (
-          <p style={{ fontSize: 13, color: "#6b6b78" }}>Pas encore de match. Continue à swiper !</p>
+          <p style={{ fontSize: 13, color: "#aaa" }}>Pas encore de match. Continue à swiper !</p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", gap: 10, overflowX: "auto" }} className="no-scrollbar">
             {rows.map(m => {
               const other = m.watch_a.owner_id === userId ? m.watch_b : m.watch_a;
-              const mine = m.watch_a.owner_id === userId ? m.watch_a : m.watch_b;
               return (
-                <Link key={m.id} href={`/messages/${m.id}`} style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-                  <div style={{ position: "relative", width: 44, height: 44, flexShrink: 0 }}>
-                    <div style={{ position: "absolute", left: 0, top: 0, width: 34, height: 34, borderRadius: 8, overflow: "hidden", border: "1.5px solid #08080a" }}>
-                      {other.photos?.[0] ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={other.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                      ) : <div style={{ width: "100%", height: "100%", background: "#1a1a20" }} />}
-                    </div>
-                    <div style={{ position: "absolute", right: 0, bottom: 0, width: 34, height: 34, borderRadius: 8, overflow: "hidden", border: "1.5px solid #08080a", boxShadow: "0 0 0 1.5px rgba(201,168,76,0.4)" }}>
-                      {mine.photos?.[0] ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={mine.photos[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                      ) : <div style={{ width: "100%", height: "100%", background: "#1a1a20" }} />}
-                    </div>
-                  </div>
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: "#f5f3ee", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {other.brand} {other.model}
-                    </p>
-                    <p style={{ fontSize: 11, color: "#6b6b78" }}>↔ {mine.brand} {mine.model}</p>
+                <Link key={m.id} href={`/messages/${m.id}`} style={{ flexShrink: 0, textDecoration: "none" }}>
+                  <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", border: "2.5px solid #e8445a", boxShadow: "0 0 0 2px #fff" }}>
+                    {other.photos?.[0] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={other.photos[0]} alt={other.brand} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    ) : (
+                      <div style={{ width: "100%", height: "100%", background: "#f4f4f4", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#888" }}>
+                        {other.brand[0]}
+                      </div>
+                    )}
                   </div>
                 </Link>
               );
             })}
           </div>
         )}
+
+        {/* Likes row */}
+        <div style={{ marginTop: 14, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderTop: "1px solid #f0f0f0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Heart size={16} fill="#e8445a" color="#e8445a" />
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{likesCount ?? 0} personnes ont liké</span>
+          </div>
+          <ChevronRight size={16} color="#ccc" />
+        </div>
+      </div>
+
+      {/* Filtres */}
+      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #e8e8e8", padding: "20px" }}>
+        <p style={{ fontSize: 16, fontWeight: 700, color: "#111", marginBottom: 16 }}>Filtres</p>
+        <form method="GET" action="/discover" style={{ display: "flex", flexDirection: "column" }}>
+          {[
+            { label: "Marque", name: "brand", defaultText: "Toutes" },
+            { label: "Modèle", name: "model", defaultText: "Tous" },
+            { label: "Année", name: "year", defaultText: "Toutes" },
+            { label: "État", name: "condition", defaultText: "Tous" },
+            { label: "Localisation", name: "location", defaultText: "Partout" },
+          ].map(({ label, name, defaultText }) => (
+            <div key={name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 0", borderBottom: "1px solid #f4f4f4" }}>
+              <span style={{ fontSize: 14, color: "#333" }}>{label}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 14, color: "#aaa" }}>{defaultText}</span>
+                <ChevronRight size={14} color="#ccc" />
+              </div>
+            </div>
+          ))}
+          <button type="submit" style={{ marginTop: 16, width: "100%", padding: "10px", borderRadius: 10, border: "1px solid #e8e8e8", background: "#f8f8f8", color: "#555", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+            Filtres avancés
+          </button>
+        </form>
       </div>
     </div>
   );

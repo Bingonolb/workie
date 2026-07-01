@@ -1,28 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #08080a;
-  --surface: #111116;
-  --surface-2: #1a1a20;
-  --foreground: #f5f3ee;
-  --muted: #6b6b78;
-  --brand: #c9a84c;
-  --brand-dark: #a8893a;
-  --brand-light: rgba(201,168,76,0.15);
-  --border: rgba(255,255,255,0.07);
-  --card-radius: 1.5rem;
+  --background: #f4f4f4;
+  --foreground: #111111;
+  --surface: #ffffff;
+  --muted: #888888;
+  --border: #e8e8e8;
+  --brand: #e8445a;
+  --brand-dark: #c93249;
+  --brand-light: #fff0f2;
+  --gold: #f5a623;
+  --green: #4cde8f;
+  --purple: #916bf4;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
   --color-muted: var(--muted);
+  --color-border: var(--border);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
   --color-brand-light: var(--brand-light);
-  --color-border: var(--border);
+  --color-gold: var(--gold);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -32,27 +33,20 @@ body {
   color: var(--foreground);
   font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100dvh;
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+@keyframes matchPop {
+  0%   { transform: scale(0.75); opacity: 0; }
+  70%  { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-match-pop { animation: matchPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+
 @keyframes slideUp {
   from { transform: translateY(100%); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-.animate-slide-up { animation: slideUp 0.32s cubic-bezier(0.32,0.72,0,1) both; }
-
-@keyframes matchPop {
-  0%   { transform: scale(0.7); opacity: 0; }
-  70%  { transform: scale(1.05); }
-  100% { transform: scale(1); opacity: 1; }
-}
-.animate-match-pop { animation: matchPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both; }
-
-@keyframes fadeIn {
-  from { opacity: 0; } to { opacity: 1; }
-}
-.animate-fade-in { animation: fadeIn 0.2s ease both; }
+.animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.32,0.72,0,1) both; }
