@@ -73,10 +73,21 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
 
-      {/* Hero cover with parallax */}
-      <div style={{ position: "relative", height: 320, overflow: "hidden" }}>
-        <ParallaxCover src={company.cover_url} gradient={`linear-gradient(135deg, ${sectorColor}, #f97316)`} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.2) 0%, rgba(13,13,19,0.95) 100%)" }} />
+      {/* Hero cover */}
+      <div style={{ position: "relative", height: 340, overflow: "hidden" }}>
+        {/* Image or gradient bg */}
+        {company.cover_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={company.cover_url}
+            alt=""
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
+          />
+        ) : (
+          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${sectorColor}, #f97316)` }} />
+        )}
+        {/* Top gradient — darkens so navbar stays readable */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.65) 0%, rgba(13,13,19,0.0) 40%, rgba(13,13,19,0.0) 50%, rgba(13,13,19,0.92) 100%)" }} />
 
         <div style={{ position: "absolute", bottom: 28, left: 0, right: 0 }}>
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
