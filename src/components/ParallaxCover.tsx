@@ -3,32 +3,32 @@
 import { useEffect, useRef } from "react";
 
 export function ParallaxCover({ src, gradient }: { src?: string | null; gradient?: string }) {
-  const imgRef = useRef<HTMLDivElement>(null);
+  const el = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = imgRef.current;
-    if (!el) return;
+    const node = el.current;
+    if (!node) return;
     const onScroll = () => {
-      const scrolled = window.scrollY;
-      el.style.transform = `scale(1.15) translateY(${scrolled * 0.3}px)`;
+      node.style.transform = `scale(1.15) translateY(${window.scrollY * 0.25}px)`;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const bg = src
+    ? `url(${src}) center / cover no-repeat`
+    : (gradient ?? "linear-gradient(135deg, #8b5cf6, #f97316)");
+
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
       <div
-        ref={imgRef}
+        ref={el}
         style={{
-          position: "absolute", inset: "-15%",
-          backgroundImage: src ? `url(${src})` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          background: !src ? (gradient ?? "linear-gradient(135deg, #8b5cf6, #f97316)") : undefined,
+          position: "absolute",
+          inset: "-20%",
+          background: bg,
           willChange: "transform",
           transform: "scale(1.15)",
-          transition: "transform 0.05s linear",
         }}
       />
     </div>
