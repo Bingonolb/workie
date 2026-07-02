@@ -43,9 +43,9 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false }: {
   const handleFav = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!isLoggedIn) { window.location.href = "/login"; return; }
+    setFav(f => !f);
     startTransition(async () => {
-      const res = await toggleFavorite(company.id);
-      setFav(res.isFav);
+      await toggleFavorite(company.id);
     });
   };
 

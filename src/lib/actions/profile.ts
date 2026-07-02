@@ -4,17 +4,10 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-type ActionState = { error?: string; success?: boolean } | undefined;
-
-export async function updateProfile(
-  _prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
+export async function updateProfile(formData: FormData): Promise<void> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Tu dois être connecté." };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
   const full_name = String(formData.get("full_name") || "");
   const city = String(formData.get("city") || "");
@@ -29,12 +22,12 @@ export async function updateProfile(
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(path, avatarFile, { contentType: avatarFile.type, upsert: true });
-    if (uploadError) return { error: uploadError.message };
+    if (uploadError) return;
     const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
     avatar_url = pub.publicUrl;
   }
 
-  const { error } = await supabase
+  await supabase
     .from("profiles")
     .update({
       full_name: full_name || null,
@@ -45,8 +38,5 @@ export async function updateProfile(
     })
     .eq("id", user.id);
 
-  if (error) return { error: error.message };
-
   revalidatePath("/profile");
-  return { success: true };
 }
