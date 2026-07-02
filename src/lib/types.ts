@@ -40,6 +40,9 @@ export interface Review {
   salary_chf: number | null;
   is_current: boolean;
   is_anonymous: boolean;
+  employment_type: "cdi" | "cdd" | "stage" | "alternance" | "freelance" | null;
+  start_year: number | null;
+  end_year: number | null;
   helpful_count: number;
   created_at: string;
 }

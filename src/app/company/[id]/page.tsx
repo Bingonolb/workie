@@ -245,14 +245,26 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   );
 }
 
+const EMPLOYMENT_LABELS: Record<string, string> = {
+  cdi: "CDI", cdd: "CDD", stage: "Stage", alternance: "Alternance", freelance: "Freelance",
+};
+
 function ReviewCard({ review }: { review: Review }) {
   const age = (() => {
     const d = new Date(review.created_at);
     const diff = Date.now() - d.getTime();
     const days = Math.floor(diff / 86400000);
+    if (days === 0) return "Aujourd'hui";
     if (days < 7) return `Il y a ${days}j`;
     if (days < 30) return `Il y a ${Math.floor(days / 7)} sem.`;
     return `Il y a ${Math.floor(days / 30)} mois`;
+  })();
+
+  const durationLabel = (() => {
+    if (review.is_current && review.start_year) return `Depuis ${review.start_year}`;
+    if (review.start_year && review.end_year) return `${review.start_year} – ${review.end_year}`;
+    if (review.start_year) return `Depuis ${review.start_year}`;
+    return null;
   })();
 
   return (
@@ -271,10 +283,25 @@ function ReviewCard({ review }: { review: Review }) {
           </div>
           {review.title && <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>}
         </div>
-        <div style={{ textAlign: "right", flexShrink: 0 }}>
+        <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", gap: 4 }}>
           <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{age}</p>
-          {review.job_title && <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{review.job_title}</p>}
-          {review.salary_chf && <p style={{ fontSize: 11, color: "#10b981", marginTop: 2 }}>CHF {Math.round(review.salary_chf / 1000)}k</p>}
+          {review.job_title && (
+            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-sub)", background: "var(--surface2)", borderRadius: 6, padding: "2px 8px" }}>
+              {review.job_title}
+            </span>
+          )}
+          {review.employment_type && (
+            <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
+              {EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type}
+              {durationLabel ? ` · ${durationLabel}` : ""}
+            </span>
+          )}
+          {review.is_current && (
+            <span style={{ fontSize: 10, fontWeight: 700, color: "#10b981" }}>● Employé actuel</span>
+          )}
+          {review.salary_chf && (
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>CHF {Math.round(review.salary_chf / 1000)}k / an</span>
+          )}
         </div>
       </div>
 
