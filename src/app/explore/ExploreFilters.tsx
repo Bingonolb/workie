@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Search, X, LayoutGrid, Layers } from "lucide-react";
 import { useTransition, useState } from "react";
 
 export function ExploreFilters({
@@ -11,13 +11,14 @@ export function ExploreFilters({
 }: {
   sectors: string[];
   cities: string[];
-  current: { sector?: string; city?: string; q?: string };
+  current: { sector?: string; city?: string; q?: string; view?: string };
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
   const [search, setSearch] = useState(current.q ?? "");
+  const view = current.view ?? "grid";
 
   const push = (key: string, value: string | undefined) => {
     const p = new URLSearchParams(searchParams.toString());
@@ -35,8 +36,9 @@ export function ExploreFilters({
 
   return (
     <div style={{ marginBottom: 28, display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Search bar */}
-      <div style={{ position: "relative", maxWidth: 480 }}>
+      {/* Top row: search + view toggle */}
+      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div style={{ position: "relative", flex: 1, maxWidth: 480 }}>
         <Search size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
         <input
           value={search}
@@ -49,6 +51,30 @@ export function ExploreFilters({
             outline: "none", boxSizing: "border-box",
           }}
         />
+        </div>
+
+        {/* View toggle */}
+        <div style={{ display: "flex", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, padding: 4, gap: 4, flexShrink: 0 }}>
+          {([
+            { v: "grid", icon: <LayoutGrid size={16} />, label: "Grille" },
+            { v: "swipe", icon: <Layers size={16} />, label: "Swipe" },
+          ] as const).map(({ v, icon, label }) => (
+            <button
+              key={v}
+              onClick={() => push("view", v === "grid" ? undefined : v)}
+              title={label}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "8px 14px", borderRadius: 9, border: "none",
+                background: view === v ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "transparent",
+                color: view === v ? "#fff" : "var(--text-muted)",
+                cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.2s",
+              }}
+            >
+              {icon} {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Filter pills */}
