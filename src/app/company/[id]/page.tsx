@@ -6,7 +6,17 @@ import { getCompany } from "@/lib/actions/companies";
 import { getReviews } from "@/lib/actions/reviews";
 import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
-import { Star, MapPin, Users, Globe, Linkedin, Twitter, Instagram, ArrowLeft, TrendingUp, Flame, CheckCircle } from "lucide-react";
+import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle } from "lucide-react";
+
+const LinkedinIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+);
+const TwitterIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+);
+const InstagramIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+);
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
 
@@ -201,17 +211,17 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   )}
                   {company.linkedin_url && (
                     <a href={`https://${company.linkedin_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#0077b5", textDecoration: "none" }}>
-                      <Linkedin size={14} /> LinkedIn
+                      <LinkedinIcon /> LinkedIn
                     </a>
                   )}
                   {company.twitter_url && (
                     <a href={`https://${company.twitter_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#1da1f2", textDecoration: "none" }}>
-                      <Twitter size={14} /> Twitter / X
+                      <TwitterIcon /> Twitter / X
                     </a>
                   )}
                   {company.instagram_url && (
                     <a href={`https://${company.instagram_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#ec4899", textDecoration: "none" }}>
-                      <Instagram size={14} /> Instagram
+                      <InstagramIcon /> Instagram
                     </a>
                   )}
                 </div>
