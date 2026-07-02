@@ -59,15 +59,6 @@ export interface Profile {
   created_at: string;
 }
 
-export interface Message {
-  id: string;
-  match_id: string;
-  sender_id: string;
-  content: string;
-  created_at: string;
-  read_at: string | null;
-}
-
 export type Database = any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const SECTOR_COLORS: Record<string, string> = {

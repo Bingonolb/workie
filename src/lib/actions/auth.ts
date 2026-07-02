@@ -28,7 +28,7 @@ export async function signUp(
     return { error: error.message };
   }
 
-  redirect("/discover");
+  redirect("/explore");
 }
 
 export async function signIn(
@@ -45,7 +45,7 @@ export async function signIn(
     return { error: "Email ou mot de passe incorrect." };
   }
 
-  redirect("/discover");
+  redirect("/explore");
 }
 
 export async function signOut() {
