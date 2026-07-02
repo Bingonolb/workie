@@ -7,6 +7,7 @@ import { getReviews } from "@/lib/actions/reviews";
 import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
 import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle } from "lucide-react";
+import { ParallaxCover } from "@/components/ParallaxCover";
 
 const LinkedinIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
@@ -72,14 +73,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
 
-      {/* Hero cover */}
-      <div style={{ position: "relative", height: 280, overflow: "hidden" }}>
-        {company.cover_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-        ) : (
-          <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #8b5cf6, #f97316)" }} />
-        )}
+      {/* Hero cover with parallax */}
+      <div style={{ position: "relative", height: 320, overflow: "hidden" }}>
+        <ParallaxCover src={company.cover_url} gradient={`linear-gradient(135deg, ${sectorColor}, #f97316)`} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.2) 0%, rgba(13,13,19,0.95) 100%)" }} />
 
         <div style={{ position: "absolute", bottom: 28, left: 0, right: 0 }}>

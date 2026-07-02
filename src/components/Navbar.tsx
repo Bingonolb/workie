@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
-import { Flame, Compass, User, LogOut } from "lucide-react";
+import { Flame, Compass, User, LogOut, Trophy } from "lucide-react";
 
 export async function Navbar() {
   const user = await getUser();
@@ -28,6 +28,7 @@ export async function Navbar() {
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           {[
             { href: "/explore", icon: <Compass size={15} />, label: "Explorer" },
+            { href: "/ranking", icon: <Trophy size={15} />, label: "Top 100" },
             { href: "/favorites", icon: <Flame size={15} />, label: "Favoris" },
             { href: "/profile", icon: <User size={15} />, label: "Profil" },
           ].map(({ href, icon, label }) => (
