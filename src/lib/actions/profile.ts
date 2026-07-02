@@ -22,9 +22,10 @@ export async function updateProfile(formData: FormData): Promise<void> {
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(path, avatarFile, { contentType: avatarFile.type, upsert: true });
-    if (uploadError) return;
-    const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-    avatar_url = pub.publicUrl;
+    if (!uploadError) {
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      avatar_url = pub.publicUrl;
+    }
   }
 
   await supabase

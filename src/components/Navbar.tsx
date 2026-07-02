@@ -52,7 +52,7 @@ export async function Navbar() {
               background: "none", border: "none", cursor: "pointer",
               color: "rgba(240,240,248,0.4)", fontSize: 13, fontWeight: 500, padding: "6px 10px", borderRadius: 8,
             }}>
-              <LogOut size={14} /> Déco
+              <LogOut size={14} /> Se déconnecter
             </button>
           </form>
         ) : (
