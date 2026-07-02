@@ -1,72 +1,74 @@
 import Link from "next/link";
-import { Bell, Plus } from "lucide-react";
 import { getUser } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
+import { Flame, Compass, User, LogOut } from "lucide-react";
 
-// No extra DB query — avatar and username loaded via NavbarAvatar client component
 export async function Navbar() {
   const user = await getUser();
-  const initial = (user?.email?.[0] ?? "?").toUpperCase();
 
   return (
-    <header style={{
+    <nav style={{
       position: "sticky", top: 0, zIndex: 40,
-      background: "#ffffff",
-      borderBottom: "1px solid #e8e8e8",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+      background: "rgba(13,13,19,0.85)", backdropFilter: "blur(16px)",
+      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      padding: "0 32px", height: 60,
+      display: "flex", alignItems: "center", justifyContent: "space-between",
     }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px", height: 64, display: "flex", alignItems: "center", gap: 40 }}>
-        <Link href="/discover" style={{ textDecoration: "none", fontWeight: 800, fontSize: 20, letterSpacing: "-0.03em", color: "#111", flexShrink: 0 }}>
-          Watch<span style={{ color: "#e8445a" }}>Swap</span>
-        </Link>
+      <Link href={user ? "/explore" : "/"} style={{ textDecoration: "none" }}>
+        <span style={{
+          fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em",
+          background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        }}>
+          workie
+        </span>
+      </Link>
 
-        <nav style={{ display: "flex", alignItems: "center", flex: 1 }}>
+      {user && (
+        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           {[
-            { href: "/discover", label: "Découvrir" },
-            { href: "/matches",  label: "Mes échanges" },
-            { href: "/messages", label: "Messages" },
-            { href: "/profile",  label: "Profil" },
-          ].map(({ href, label }) => (
+            { href: "/explore", icon: <Compass size={15} />, label: "Explorer" },
+            { href: "/favorites", icon: <Flame size={15} />, label: "Favoris" },
+            { href: "/profile", icon: <User size={15} />, label: "Profil" },
+          ].map(({ href, icon, label }) => (
             <Link key={href} href={href} style={{
-              padding: "0 18px", height: 64, display: "flex", alignItems: "center",
-              fontSize: 14, fontWeight: 500, color: "#555", textDecoration: "none",
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "7px 14px", borderRadius: 8,
+              fontSize: 14, fontWeight: 500, color: "rgba(240,240,248,0.65)",
+              textDecoration: "none",
             }}>
-              {label}
+              {icon} {label}
             </Link>
           ))}
-        </nav>
+        </div>
+      )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
-          <Link href="/watches/new" style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "#e8445a", color: "#fff", fontWeight: 700,
-            borderRadius: 8, padding: "8px 16px", textDecoration: "none", fontSize: 13,
-          }}>
-            <Plus size={14} strokeWidth={2.5} /> Ajouter
-          </Link>
-
-          <button style={{ background: "none", border: "none", cursor: "pointer", color: "#aaa", display: "flex" }}>
-            <Bell size={20} />
-          </button>
-
-          <Link href="/profile" style={{ textDecoration: "none" }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: "50%",
-              background: "linear-gradient(135deg, #e8445a, #ff7a8a)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 14, fontWeight: 700, color: "#fff",
-            }}>
-              {initial}
-            </div>
-          </Link>
-
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {user ? (
           <form action={signOut}>
-            <button type="submit" style={{ background: "none", border: "none", fontSize: 13, color: "#bbb", cursor: "pointer" }}>
-              Déco
+            <button type="submit" style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: "none", border: "none", cursor: "pointer",
+              color: "rgba(240,240,248,0.4)", fontSize: 13, fontWeight: 500, padding: "6px 10px", borderRadius: 8,
+            }}>
+              <LogOut size={14} /> Déco
             </button>
           </form>
-        </div>
+        ) : (
+          <>
+            <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: "rgba(240,240,248,0.55)", textDecoration: "none" }}>
+              Connexion
+            </Link>
+            <Link href="/signup" style={{
+              fontSize: 13, fontWeight: 700, textDecoration: "none",
+              background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+              color: "#fff", borderRadius: 8, padding: "8px 16px",
+            }}>
+              S&apos;inscrire
+            </Link>
+          </>
+        )}
       </div>
-    </header>
+    </nav>
   );
 }

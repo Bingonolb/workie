@@ -1,0 +1,303 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Navbar } from "@/components/Navbar";
+import { ReviewForm } from "@/components/ReviewForm";
+import { getCompany } from "@/lib/actions/companies";
+import { getReviews } from "@/lib/actions/reviews";
+import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
+import { getUser } from "@/lib/supabase/server";
+import { Star, MapPin, Users, Globe, Linkedin, Twitter, Instagram, ArrowLeft, TrendingUp, Flame, CheckCircle } from "lucide-react";
+import { SECTOR_COLORS } from "@/lib/types";
+import type { Review } from "@/lib/types";
+
+function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
+  return (
+    <span style={{ display: "inline-flex", gap: 2 }}>
+      {[1, 2, 3, 4, 5].map(n => (
+        <Star key={n} size={size}
+          fill={n <= Math.round(rating) ? "#f59e0b" : "transparent"}
+          color={n <= Math.round(rating) ? "#f59e0b" : "#3a3a4a"}
+          strokeWidth={1.5}
+        />
+      ))}
+    </span>
+  );
+}
+
+function RatingBar({ label, value }: { label: string; value: number | null }) {
+  if (!value) return null;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <span style={{ fontSize: 12, color: "var(--text-muted)", width: 130, flexShrink: 0 }}>{label}</span>
+      <div style={{ flex: 1, height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
+        <div style={{ width: `${(value / 5) * 100}%`, height: "100%", background: "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 3 }} />
+      </div>
+      <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", width: 30 }}>{Number(value).toFixed(1)}</span>
+    </div>
+  );
+}
+
+export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const [company, reviews, user, favIds] = await Promise.all([
+    getCompany(id),
+    getReviews(id),
+    getUser(),
+    getUserFavoriteIds(),
+  ]);
+
+  if (!company) notFound();
+
+  const isFav = favIds.includes(company.id);
+  const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
+
+  // Compute sub-ratings averages
+  const withRatings = reviews.filter(r => r.rating_culture);
+  const avgCulture = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_culture ?? 0), 0) / withRatings.length : null;
+  const avgMgmt = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_management ?? 0), 0) / withRatings.length : null;
+  const avgWl = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_worklife ?? 0), 0) / withRatings.length : null;
+  const avgCareer = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_career ?? 0), 0) / withRatings.length : null;
+
+  return (
+    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+      <Navbar />
+
+      {/* Hero cover */}
+      <div style={{ position: "relative", height: 280, overflow: "hidden" }}>
+        {company.cover_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        ) : (
+          <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #8b5cf6, #f97316)" }} />
+        )}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.2) 0%, rgba(13,13,19,0.95) 100%)" }} />
+
+        <div style={{ position: "absolute", bottom: 28, left: 0, right: 0 }}>
+          <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+            <div>
+              <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "rgba(255,255,255,0.5)", textDecoration: "none", marginBottom: 12 }}>
+                <ArrowLeft size={14} /> Retour
+              </Link>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <h1 style={{ fontSize: 36, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em" }}>{company.name}</h1>
+                {company.is_verified && <CheckCircle size={22} color="#10b981" fill="#10b981" />}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ padding: "4px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600, color: sectorColor, background: `${sectorColor}22`, border: `1px solid ${sectorColor}44` }}>
+                  {company.sector}
+                </span>
+                {company.subsector && <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{company.subsector}</span>}
+              </div>
+            </div>
+
+            {/* Favorite button */}
+            <form action={toggleFavorite.bind(null, company.id)}>
+              <button type="submit" style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "10px 20px", borderRadius: 12,
+                background: isFav ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.1)",
+                border: isFav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.15)",
+                color: isFav ? "#f97316" : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                backdropFilter: "blur(8px)",
+              }}>
+                <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <main style={{ maxWidth: 900, margin: "0 auto", padding: "36px 32px 80px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
+          {/* Left column */}
+          <div>
+            {/* Key stats */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 32 }}>
+              {[
+                { icon: <MapPin size={18} color="#8b5cf6" />, value: `${company.city}${company.canton ? `, ${company.canton}` : ""}`, label: "Localisation" },
+                { icon: <Users size={18} color="#f97316" />, value: company.employee_range, label: "Employés" },
+                { icon: <TrendingUp size={18} color="#10b981" />, value: company.avg_salary_chf ? `CHF ${Math.round(company.avg_salary_chf / 1000)}k` : "N/A", label: "Salaire moyen" },
+              ].map(({ icon, value, label }) => (
+                <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
+                  <div style={{ marginBottom: 8 }}>{icon}</div>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 2 }}>{value}</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Ratings breakdown */}
+            {company.review_count > 0 && (
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px", marginBottom: 32 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24 }}>
+                  <div style={{ textAlign: "center" }}>
+                    <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
+                    <Stars rating={company.avg_rating} size={18} />
+                    <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>{company.review_count} avis</p>
+                  </div>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+                    <RatingBar label="Ambiance / Culture" value={avgCulture} />
+                    <RatingBar label="Management" value={avgMgmt} />
+                    <RatingBar label="Vie pro/perso" value={avgWl} />
+                    <RatingBar label="Évolution" value={avgCareer} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Reviews */}
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 16 }}>
+              Avis des employés ({company.review_count})
+            </h2>
+
+            {reviews.length === 0 ? (
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "40px", textAlign: "center", marginBottom: 32 }}>
+                <p style={{ fontSize: 15, color: "var(--text-muted)" }}>Pas encore d&apos;avis. Sois le premier !</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
+                {reviews.map(r => <ReviewCard key={r.id} review={r} />)}
+              </div>
+            )}
+
+            {/* Post review */}
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partage ton expérience</h3>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>Ton avis est anonyme par défaut. Aide la communauté à faire les bons choix.</p>
+              {user ? (
+                <ReviewForm companyId={company.id} />
+              ) : (
+                <div style={{ textAlign: "center", padding: "24px" }}>
+                  <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>Connecte-toi pour partager un avis anonyme.</p>
+                  <Link href="/login" style={{
+                    display: "inline-block", background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                    color: "#fff", fontWeight: 700, borderRadius: 10, padding: "12px 28px", textDecoration: "none", fontSize: 14,
+                  }}>
+                    Se connecter
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right sidebar */}
+          <div style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 16 }}>
+            {company.description && (
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>
+                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
+              </div>
+            )}
+
+            {/* Links */}
+            {(company.website_url || company.linkedin_url || company.twitter_url || company.instagram_url) && (
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Réseaux</h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {company.website_url && (
+                    <a href={`https://${company.website_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+                      <Globe size={14} /> {company.website_url}
+                    </a>
+                  )}
+                  {company.linkedin_url && (
+                    <a href={`https://${company.linkedin_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#0077b5", textDecoration: "none" }}>
+                      <Linkedin size={14} /> LinkedIn
+                    </a>
+                  )}
+                  {company.twitter_url && (
+                    <a href={`https://${company.twitter_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#1da1f2", textDecoration: "none" }}>
+                      <Twitter size={14} /> Twitter / X
+                    </a>
+                  )}
+                  {company.instagram_url && (
+                    <a href={`https://${company.instagram_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#ec4899", textDecoration: "none" }}>
+                      <Instagram size={14} /> Instagram
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            {company.tags?.length > 0 && (
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Tags</h3>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {company.tags.map(tag => (
+                    <span key={tag} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 50, background: "var(--surface3)", color: "var(--text-muted)" }}>
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {company.founded_year && (
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "16px 20px", display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>Fondée en</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{company.founded_year}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function ReviewCard({ review }: { review: Review }) {
+  const age = (() => {
+    const d = new Date(review.created_at);
+    const diff = Date.now() - d.getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days < 7) return `Il y a ${days}j`;
+    if (days < 30) return `Il y a ${Math.floor(days / 7)} sem.`;
+    return `Il y a ${Math.floor(days / 30)} mois`;
+  })();
+
+  return (
+    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            {[1,2,3,4,5].map(n => (
+              <Star key={n} size={13}
+                fill={n <= Math.round(review.rating_overall) ? "#f59e0b" : "transparent"}
+                color={n <= Math.round(review.rating_overall) ? "#f59e0b" : "#3a3a4a"}
+                strokeWidth={1.5}
+              />
+            ))}
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{Number(review.rating_overall).toFixed(1)}</span>
+          </div>
+          {review.title && <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>}
+        </div>
+        <div style={{ textAlign: "right", flexShrink: 0 }}>
+          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{age}</p>
+          {review.job_title && <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{review.job_title}</p>}
+          {review.salary_chf && <p style={{ fontSize: 11, color: "#10b981", marginTop: 2 }}>CHF {Math.round(review.salary_chf / 1000)}k</p>}
+        </div>
+      </div>
+
+      <p style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.7, marginBottom: review.pros || review.cons ? 14 : 0 }}>
+        {review.content}
+      </p>
+
+      {(review.pros || review.cons) && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+          {review.pros && (
+            <div style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 10, padding: "10px 12px" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", marginBottom: 4 }}>👍 Points positifs</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.pros}</p>
+            </div>
+          )}
+          {review.cons && (
+            <div style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 10, padding: "10px 12px" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", marginBottom: 4 }}>👎 Points négatifs</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.cons}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,52 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f4f4f4;
-  --foreground: #111111;
-  --surface: #ffffff;
-  --muted: #888888;
-  --border: #e8e8e8;
-  --brand: #e8445a;
-  --brand-dark: #c93249;
-  --brand-light: #fff0f2;
-  --gold: #f5a623;
-  --green: #4cde8f;
-  --purple: #916bf4;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-muted: var(--muted);
-  --color-border: var(--border);
-  --color-brand: var(--brand);
-  --color-brand-dark: var(--brand-dark);
-  --color-brand-light: var(--brand-light);
-  --color-gold: var(--gold);
+  --color-brand: #8b5cf6;
+  --color-brand-dark: #7c3aed;
 }
 
-*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --bg: #0d0d13;
+  --surface: #16161f;
+  --surface2: #1e1e2a;
+  --surface3: #242433;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f8;
+  --text-muted: #7070a0;
+  --text-sub: #a0a0c0;
+  --brand: #8b5cf6;
+  --brand-dark: #7c3aed;
+  --brand-2: #f97316;
+  --brand-3: #ec4899;
+  --gradient: linear-gradient(135deg, #8b5cf6 0%, #f97316 100%);
+  --gold: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-@keyframes matchPop {
-  0%   { transform: scale(0.75); opacity: 0; }
-  70%  { transform: scale(1.04); }
-  100% { transform: scale(1); opacity: 1; }
-}
-.animate-match-pop { animation: matchPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
-
-@keyframes slideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-.animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.32,0.72,0,1) both; }
+::selection { background: rgba(139,92,246,0.3); }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+a { color: inherit; }
