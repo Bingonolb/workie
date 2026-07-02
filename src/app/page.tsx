@@ -39,10 +39,9 @@ export default async function Home() {
 
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 6,
-          background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)",
-          borderRadius: 50, padding: "6px 16px", marginBottom: 36, fontSize: 13, fontWeight: 600,
           background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(249,115,22,0.15))",
           border: "1px solid rgba(139,92,246,0.2)",
+          borderRadius: 50, padding: "6px 16px", marginBottom: 36, fontSize: 13, fontWeight: 600,
         } as React.CSSProperties}>
           <Zap size={13} color="#8b5cf6" fill="#8b5cf6" />
           <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
