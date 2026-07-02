@@ -172,17 +172,94 @@ export function SwipeView({
         </div>
       </div>
 
-      {/* Special power buttons row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <PowerBtn color="#ef4444" onClick={handlePenalty} label="-100" icon={<Skull size={14} />} title="Pénaliser (-100 pts)" />
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <ActionBtn color="#6b7280" onClick={() => advance("left")} disabled={!!gone}><X size={24} /></ActionBtn>
-          <ActionBtn color="#6366f1" onClick={() => current && router.push(`/company/${current.id}`)} disabled={!!gone} small><Info size={18} /></ActionBtn>
-          <ActionBtn color="#f97316" onClick={() => advance("right")} disabled={!!gone}>
-            <Flame size={24} fill={flameIds.has(current.id) ? "#f97316" : "none"} />
-          </ActionBtn>
-        </div>
-        <PowerBtn color="#8b5cf6" onClick={handleBoost} label="+100" icon={<Zap size={14} />} title="Booster (+100 pts)" />
+      {/* Action buttons — Tinder style */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+        {/* -100 penalty */}
+        <button onClick={handlePenalty} title="Pénaliser -100 pts" style={{
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+          width: 52, height: 52, borderRadius: "50%",
+          background: "linear-gradient(135deg, #1a0a0a, #2a0d0d)",
+          border: "2px solid rgba(239,68,68,0.5)",
+          color: "#ef4444", cursor: "pointer",
+          boxShadow: "0 4px 20px rgba(239,68,68,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
+          transition: "all 0.18s",
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 32px rgba(239,68,68,0.45), inset 0 1px 0 rgba(255,255,255,0.05)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 20px rgba(239,68,68,0.25), inset 0 1px 0 rgba(255,255,255,0.05)"; }}
+        >
+          <Skull size={15} />
+          <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
+        </button>
+
+        {/* Pass / X */}
+        <button onClick={() => advance("left")} disabled={!!gone} style={{
+          width: 64, height: 64, borderRadius: "50%",
+          background: "linear-gradient(135deg, #111118, #1a1a26)",
+          border: "2px solid rgba(239,68,68,0.4)",
+          color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
+          boxShadow: "0 6px 24px rgba(239,68,68,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+          transition: "all 0.18s",
+        }}
+          onMouseEnter={e => { if (!gone) { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 10px 36px rgba(239,68,68,0.4), inset 0 1px 0 rgba(255,255,255,0.06)"; } }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 24px rgba(239,68,68,0.2), inset 0 1px 0 rgba(255,255,255,0.06)"; }}
+        >
+          <X size={26} strokeWidth={2.5} />
+        </button>
+
+        {/* Info — small center */}
+        <button onClick={() => current && router.push(`/company/${current.id}`)} disabled={!!gone} style={{
+          width: 46, height: 46, borderRadius: "50%",
+          background: "linear-gradient(135deg, #0e0e1a, #16162a)",
+          border: "2px solid rgba(99,102,241,0.45)",
+          color: "#818cf8", display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
+          boxShadow: "0 4px 18px rgba(99,102,241,0.2)",
+          transition: "all 0.18s",
+        }}
+          onMouseEnter={e => { if (!gone) { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 28px rgba(99,102,241,0.4)"; } }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 18px rgba(99,102,241,0.2)"; }}
+        >
+          <Info size={18} strokeWidth={2} />
+        </button>
+
+        {/* Flame / Save */}
+        <button onClick={() => advance("right")} disabled={!!gone} style={{
+          width: 64, height: 64, borderRadius: "50%",
+          background: flameIds.has(current.id)
+            ? "linear-gradient(135deg, #f97316, #ea580c)"
+            : "linear-gradient(135deg, #1a0e04, #261508)",
+          border: flameIds.has(current.id) ? "2px solid rgba(249,115,22,0.8)" : "2px solid rgba(249,115,22,0.4)",
+          color: flameIds.has(current.id) ? "#fff" : "#f97316",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
+          boxShadow: flameIds.has(current.id)
+            ? "0 6px 28px rgba(249,115,22,0.6), inset 0 1px 0 rgba(255,255,255,0.15)"
+            : "0 6px 24px rgba(249,115,22,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+          transition: "all 0.18s",
+        }}
+          onMouseEnter={e => { if (!gone) { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 10px 36px rgba(249,115,22,0.5)"; } }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        >
+          <Flame size={26} fill={flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
+        </button>
+
+        {/* +100 boost */}
+        <button onClick={handleBoost} title="Booster +100 pts" style={{
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+          width: 52, height: 52, borderRadius: "50%",
+          background: "linear-gradient(135deg, #0d0a1a, #130d26)",
+          border: "2px solid rgba(139,92,246,0.5)",
+          color: "#a78bfa", cursor: "pointer",
+          boxShadow: "0 4px 20px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
+          transition: "all 0.18s",
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 32px rgba(139,92,246,0.45), inset 0 1px 0 rgba(255,255,255,0.05)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 20px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.05)"; }}
+        >
+          <Zap size={15} fill="#a78bfa" />
+          <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>+100</span>
+        </button>
       </div>
 
       <p style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", lineHeight: 1.6 }}>
@@ -293,26 +370,3 @@ function Chip({ icon, label, color }: { icon: React.ReactNode; label: string; co
   );
 }
 
-function ActionBtn({ children, color, onClick, disabled, small }: { children: React.ReactNode; color: string; onClick: () => void; disabled?: boolean; small?: boolean }) {
-  const size = small ? 50 : 62;
-  return (
-    <button onClick={onClick} disabled={disabled} style={{ width: size, height: size, borderRadius: "50%", background: "var(--surface)", border: `2px solid ${color}55`, color, display: "flex", alignItems: "center", justifyContent: "center", cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.5 : 1, transition: "all 0.2s", boxShadow: `0 4px 20px ${color}22` }}
-      onMouseEnter={e => { if (!disabled) (e.currentTarget as HTMLButtonElement).style.background = `${color}22`; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "var(--surface)"; }}
-    >
-      {children}
-    </button>
-  );
-}
-
-function PowerBtn({ color, onClick, label, icon, title }: { color: string; onClick: () => void; label: string; icon: React.ReactNode; title: string }) {
-  return (
-    <button onClick={onClick} title={title} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "8px 14px", borderRadius: 14, background: `${color}15`, border: `1px solid ${color}44`, color, cursor: "pointer", transition: "all 0.2s" }}
-      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = `${color}30`; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = `${color}15`; }}
-    >
-      {icon}
-      <span style={{ fontSize: 11, fontWeight: 800 }}>{label}</span>
-    </button>
-  );
-}
