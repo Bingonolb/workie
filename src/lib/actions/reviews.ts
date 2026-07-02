@@ -4,6 +4,18 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Review } from "@/lib/types";
 
+export async function getUserReviews(): Promise<(Review & { company_name: string })[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase
+    .from("reviews")
+    .select("*, companies(name)")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r: any) => ({ ...r, company_name: r.companies?.name ?? "Entreprise inconnue" }));
+}
+
 export async function getReviews(companyId: string) {
   const supabase = await createClient();
   const { data } = await supabase

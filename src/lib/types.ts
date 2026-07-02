@@ -20,6 +20,7 @@ export interface Company {
   review_count: number;
   tags: string[];
   is_verified: boolean;
+  score: number;
   created_at: string;
 }
 
