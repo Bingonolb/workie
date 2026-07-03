@@ -1,11 +1,10 @@
 "use client";
 
-import { useTransition, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTransition, useState, useRef } from "react";
 import { adminUpdateCompany, adminDeleteCompany } from "@/lib/actions/admin";
 import { SECTOR_COLORS, EMPLOYEE_RANGES } from "@/lib/types";
 import type { Company } from "@/lib/types";
-import { Trash2 } from "lucide-react";
+import { Trash2, ImageIcon } from "lucide-react";
 
 const SECTORS = Object.keys(SECTOR_COLORS);
 
@@ -24,7 +23,16 @@ export function AdminCompanyForm({ company }: { company: Company }) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const router = useRouter();
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [coverUrlValue, setCoverUrlValue] = useState(company.cover_url ?? "");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setCoverPreview(url);
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,8 +42,8 @@ export function AdminCompanyForm({ company }: { company: Company }) {
       const res = await adminUpdateCompany(company.id, formData);
       if (res.error) { setError(res.error); return; }
       setSuccess(true);
+      setCoverPreview(null);
       setTimeout(() => setSuccess(false), 3000);
-      router.refresh();
     });
   };
 
@@ -43,9 +51,12 @@ export function AdminCompanyForm({ company }: { company: Company }) {
     startTransition(async () => {
       const res = await adminDeleteCompany(company.id);
       if (res.error) { setError(res.error); return; }
-      router.push("/admin");
+      // Hard navigation — évite la tentative de rerender sur une entité supprimée
+      window.location.href = "/admin";
     });
   };
+
+  const displayCover = coverPreview ?? (coverUrlValue || null);
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -100,12 +111,54 @@ export function AdminCompanyForm({ company }: { company: Company }) {
         <textarea name="description" rows={3} defaultValue={company.description ?? ""} style={{ ...inp, resize: "vertical" }} />
       </div>
 
-      {/* URLs */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        <div>
-          <label style={lbl}>Cover URL</label>
-          <input name="cover_url" defaultValue={company.cover_url ?? ""} placeholder="https://..." style={inp} />
+      {/* Cover — URL + upload fichier */}
+      <div>
+        <label style={lbl}>Image de couverture</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <input
+            name="cover_url"
+            value={coverUrlValue}
+            onChange={e => { setCoverUrlValue(e.target.value); setCoverPreview(null); }}
+            placeholder="https://images.unsplash.com/..."
+            style={inp}
+          />
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>ou uploader un fichier :</span>
+            <label style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "7px 14px", borderRadius: 8, cursor: "pointer",
+              background: "var(--surface2)", border: "1px solid var(--border)",
+              fontSize: 12, fontWeight: 600, color: "var(--text-muted)",
+            }}>
+              <ImageIcon size={13} /> Choisir une image
+              <input ref={fileRef} name="cover_file" type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
+            </label>
+            {(coverPreview || coverUrlValue) && (
+              <button type="button" onClick={() => { setCoverPreview(null); setCoverUrlValue(""); if (fileRef.current) fileRef.current.value = ""; }} style={{
+                fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600,
+              }}>
+                ✕ Supprimer la bannière
+              </button>
+            )}
+          </div>
+
+          {/* Preview */}
+          {displayCover && (
+            <div style={{ position: "relative" }}>
+              {coverPreview && (
+                <div style={{ position: "absolute", top: 8, left: 8, background: "rgba(139,92,246,0.9)", borderRadius: 6, padding: "3px 10px", fontSize: 11, fontWeight: 700, color: "#fff" }}>
+                  Aperçu — non enregistré
+                </div>
+              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={displayCover} alt="" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 10, border: `2px solid ${coverPreview ? "#8b5cf6" : "var(--border)"}` }} />
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* Autres URLs */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div>
           <label style={lbl}>Logo URL</label>
           <input name="logo_url" defaultValue={company.logo_url ?? ""} placeholder="https://..." style={inp} />
@@ -115,50 +168,40 @@ export function AdminCompanyForm({ company }: { company: Company }) {
           <input name="website_url" defaultValue={company.website_url ?? ""} placeholder="https://..." style={inp} />
         </div>
         <div>
-          <label style={lbl}>LinkedIn URL</label>
+          <label style={lbl}>LinkedIn</label>
           <input name="linkedin_url" defaultValue={company.linkedin_url ?? ""} placeholder="https://linkedin.com/company/..." style={inp} />
+        </div>
+        <div>
+          <label style={lbl}>Tags (virgule)</label>
+          <input name="tags" defaultValue={company.tags?.join(", ") ?? ""} placeholder="tech, innovation" style={inp} />
         </div>
       </div>
 
-      {/* Tags */}
-      <div>
-        <label style={lbl}>Tags (séparés par virgule)</label>
-        <input name="tags" defaultValue={company.tags?.join(", ") ?? ""} placeholder="tech, innovation, startup" style={inp} />
-      </div>
-
       {/* Verified */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div>
+        <label style={lbl}>Statut</label>
         <select name="is_verified" defaultValue={company.is_verified ? "true" : "false"} style={{ ...inp, width: "auto", cursor: "pointer" }}>
           <option value="true">✓ Entreprise vérifiée</option>
           <option value="false">Non vérifiée</option>
         </select>
       </div>
 
-      {/* Cover preview */}
-      {company.cover_url && (
-        <div>
-          <label style={lbl}>Aperçu cover actuelle</label>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={company.cover_url} alt="" style={{ width: "100%", height: 140, objectFit: "cover", borderRadius: 10, border: "1px solid var(--border)" }} />
-        </div>
-      )}
-
       {/* Feedback */}
       {error && (
         <div style={{ padding: "12px 16px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, fontSize: 13, color: "#ef4444" }}>
-          {error}
+          ⚠ {error}
         </div>
       )}
       {success && (
         <div style={{ padding: "12px 16px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#10b981" }}>
-          ✓ Entreprise mise à jour
+          ✓ Entreprise mise à jour avec succès
         </div>
       )}
 
       {/* Actions */}
-      <div style={{ display: "flex", gap: 12 }}>
+      <div style={{ display: "flex", gap: 12, paddingTop: 4 }}>
         <button type="submit" disabled={pending} style={{
-          flex: 1, padding: "13px 0", borderRadius: 10, border: "none", cursor: "pointer",
+          flex: 1, padding: "13px 0", borderRadius: 10, border: "none", cursor: pending ? "not-allowed" : "pointer",
           background: "linear-gradient(135deg, #8b5cf6, #f97316)",
           color: "#fff", fontWeight: 700, fontSize: 14, opacity: pending ? 0.7 : 1,
         }}>
@@ -167,18 +210,30 @@ export function AdminCompanyForm({ company }: { company: Company }) {
 
         {!confirmDelete ? (
           <button type="button" onClick={() => setConfirmDelete(true)} style={{
-            padding: "13px 16px", borderRadius: 10, border: "1px solid rgba(239,68,68,0.3)",
-            background: "rgba(239,68,68,0.08)", color: "#ef4444", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 600, fontSize: 13,
+            padding: "13px 16px", borderRadius: 10,
+            border: "1px solid rgba(239,68,68,0.3)",
+            background: "rgba(239,68,68,0.08)", color: "#ef4444",
+            cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
+            fontWeight: 600, fontSize: 13,
           }}>
             <Trash2 size={15} /> Supprimer
           </button>
         ) : (
-          <button type="button" onClick={handleDelete} disabled={pending} style={{
-            padding: "13px 16px", borderRadius: 10, border: "none",
-            background: "#ef4444", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 13,
-          }}>
-            Confirmer la suppression
-          </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <button type="button" onClick={handleDelete} disabled={pending} style={{
+              padding: "10px 16px", borderRadius: 10, border: "none",
+              background: "#ef4444", color: "#fff", cursor: "pointer",
+              fontWeight: 700, fontSize: 13, whiteSpace: "nowrap",
+            }}>
+              {pending ? "Suppression..." : "✓ Confirmer la suppression"}
+            </button>
+            <button type="button" onClick={() => setConfirmDelete(false)} style={{
+              padding: "6px", background: "none", border: "none",
+              color: "var(--text-muted)", cursor: "pointer", fontSize: 12,
+            }}>
+              Annuler
+            </button>
+          </div>
         )}
       </div>
     </form>
