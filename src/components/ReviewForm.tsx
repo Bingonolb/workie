@@ -4,47 +4,38 @@ import { useActionState, useState } from "react";
 import { submitReview } from "@/lib/actions/reviews";
 import { ChevronRight, ChevronLeft, Briefcase, Star, MessageSquare, CheckCircle } from "lucide-react";
 
-// ─── constants ───────────────────────────────────────────────────────────────
-
 const EMPLOYMENT_TYPES = [
   { value: "cdi", label: "CDI" },
   { value: "cdd", label: "CDD" },
   { value: "stage", label: "Stage" },
   { value: "alternance", label: "Alternance" },
-  { value: "freelance", label: "Freelance / Indépendant" },
+  { value: "freelance", label: "Freelance" },
 ];
 
-const YEARS = Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i);
+const DURATION_RANGES = [
+  { value: "moins_6mois", label: "< 6 mois" },
+  { value: "6mois_2ans", label: "6 mois – 2 ans" },
+  { value: "plus_2ans", label: "+ 2 ans" },
+];
 
-const RATING_LABELS: Record<string, string> = {
-  1: "Catastrophique",
-  2: "Décevant",
-  3: "Correct",
-  4: "Bien",
-  5: "Excellent",
+const WORK_MODES = [
+  { value: "présentiel", label: "🏢 Présentiel" },
+  { value: "hybride", label: "🔀 Hybride" },
+  { value: "remote", label: "🏠 Remote" },
+];
+
+const RECOMMEND = [
+  { value: "oui", label: "👍 Oui" },
+  { value: "non", label: "👎 Non" },
+  { value: "ca_depend", label: "🤔 Ça dépend" },
+];
+
+const RATING_LABELS: Record<number, string> = {
+  1: "Catastrophique", 2: "Décevant", 3: "Correct", 4: "Bien", 5: "Excellent",
 };
 
-const SUB_RATINGS = [
-  { name: "rating_culture", label: "🌍 Ambiance & culture" },
-  { name: "rating_management", label: "👔 Management" },
-  { name: "rating_worklife", label: "⚖️ Équilibre vie pro/perso" },
-  { name: "rating_career", label: "🚀 Évolution de carrière" },
-];
-
-// ─── sub-components ───────────────────────────────────────────────────────────
-
-function StarPicker({
-  name,
-  label,
-  required,
-  value,
-  onChange,
-}: {
-  name: string;
-  label: string;
-  required?: boolean;
-  value: number;
-  onChange: (v: number) => void;
+function StarPicker({ name, label, required, value, onChange }: {
+  name: string; label: string; required?: boolean; value: number; onChange: (v: number) => void;
 }) {
   const [hover, setHover] = useState(0);
   const active = hover || value;
@@ -52,25 +43,15 @@ function StarPicker({
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-sub)" }}>{label}{required && " *"}</span>
-        {active > 0 && (
-          <span style={{ fontSize: 12, color: "#f59e0b", fontWeight: 600 }}>{RATING_LABELS[active]}</span>
-        )}
+        {active > 0 && <span style={{ fontSize: 12, color: "#f59e0b", fontWeight: 600 }}>{RATING_LABELS[active]}</span>}
       </div>
       <div style={{ display: "flex", gap: 6 }}>
         {[1, 2, 3, 4, 5].map(n => (
-          <button
-            key={n} type="button"
-            onMouseEnter={() => setHover(n)}
-            onMouseLeave={() => setHover(0)}
-            onClick={() => onChange(n)}
-            style={{
-              background: "none", border: "none", cursor: "pointer", padding: 2,
-              fontSize: 28,
+          <button key={n} type="button"
+            onMouseEnter={() => setHover(n)} onMouseLeave={() => setHover(0)} onClick={() => onChange(n)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 2, fontSize: 28,
               filter: n <= active ? "none" : "grayscale(1) opacity(0.25)",
-              transform: n <= active ? "scale(1.05)" : "scale(1)",
-              transition: "all 0.1s",
-            }}
-          >
+              transform: n <= active ? "scale(1.05)" : "scale(1)", transition: "all 0.1s" }}>
             ⭐
           </button>
         ))}
@@ -80,7 +61,26 @@ function StarPicker({
   );
 }
 
-// ─── step indicators ──────────────────────────────────────────────────────────
+function PillPicker({ options, value, onChange }: {
+  options: { value: string; label: string }[]; value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {options.map(o => (
+        <button key={o.value} type="button" onClick={() => onChange(o.value)}
+          style={{
+            padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer",
+            border: "1px solid", transition: "all 0.15s",
+            borderColor: value === o.value ? "#8b5cf6" : "var(--border2)",
+            background: value === o.value ? "rgba(139,92,246,0.15)" : "var(--surface2)",
+            color: value === o.value ? "#8b5cf6" : "var(--text-muted)",
+          }}>
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function StepBar({ step }: { step: number }) {
   const steps = [
@@ -96,8 +96,7 @@ function StepBar({ step }: { step: number }) {
         return (
           <div key={i} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : 0 }}>
             <div style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 50,
+              display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 50,
               background: done ? "rgba(16,185,129,0.15)" : active ? "rgba(139,92,246,0.15)" : "var(--surface3)",
               border: `1px solid ${done ? "rgba(16,185,129,0.3)" : active ? "rgba(139,92,246,0.4)" : "var(--border)"}`,
               color: done ? "#10b981" : active ? "#8b5cf6" : "var(--text-muted)",
@@ -116,32 +115,32 @@ function StepBar({ step }: { step: number }) {
   );
 }
 
-// ─── main form ────────────────────────────────────────────────────────────────
-
 export function ReviewForm({ companyId }: { companyId: string }) {
   const [step, setStep] = useState(0);
   const [state, formAction, pending] = useActionState(submitReview, undefined);
 
-  // step 1 state
+  // Step 0 — Emploi
   const [jobTitle, setJobTitle] = useState("");
   const [employmentType, setEmploymentType] = useState("cdi");
   const [isCurrent, setIsCurrent] = useState(true);
-  const [startYear, setStartYear] = useState("");
-  const [endYear, setEndYear] = useState("");
+  const [durationRange, setDurationRange] = useState("");
+  const [workMode, setWorkMode] = useState("");
   const [salary, setSalary] = useState("");
 
-  // step 2 state
+  // Step 1 — Notes
   const [ratingOverall, setRatingOverall] = useState(0);
-  const [ratingCulture, setRatingCulture] = useState(0);
   const [ratingMgmt, setRatingMgmt] = useState(0);
   const [ratingWl, setRatingWl] = useState(0);
+  const [ratingCulture, setRatingCulture] = useState(0);
   const [ratingCareer, setRatingCareer] = useState(0);
+  const [wouldRecommend, setWouldRecommend] = useState("");
 
-  // step 3 state
+  // Step 2 — Avis
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
   const [pros, setPros] = useState("");
   const [cons, setCons] = useState("");
+  const [content, setContent] = useState("");
+  const [knewBefore, setKnewBefore] = useState("");
 
   const [step1Err, setStep1Err] = useState("");
   const [step2Err, setStep2Err] = useState("");
@@ -149,10 +148,12 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   const goNext = () => {
     if (step === 0) {
       if (!jobTitle.trim()) { setStep1Err("Le poste est obligatoire."); return; }
+      if (!durationRange) { setStep1Err("La durée est obligatoire."); return; }
       setStep1Err("");
     }
     if (step === 1) {
       if (ratingOverall === 0) { setStep2Err("La note globale est obligatoire."); return; }
+      if (!wouldRecommend) { setStep2Err("Indiquer si tu recommanderais est obligatoire."); return; }
       setStep2Err("");
     }
     setStep(s => s + 1);
@@ -171,122 +172,85 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   return (
     <div>
       <StepBar step={step} />
-
       <form action={formAction}>
-        {/* Hidden fields — always submitted */}
+        {/* Hidden fields */}
         <input type="hidden" name="company_id" value={companyId} />
         <input type="hidden" name="job_title" value={jobTitle} />
         <input type="hidden" name="employment_type" value={employmentType} />
         <input type="hidden" name="is_current" value={String(isCurrent)} />
-        <input type="hidden" name="start_year" value={startYear} />
-        <input type="hidden" name="end_year" value={endYear} />
+        <input type="hidden" name="duration_range" value={durationRange} />
+        <input type="hidden" name="work_mode" value={workMode} />
         <input type="hidden" name="salary_chf" value={salary} />
         <input type="hidden" name="rating_overall" value={ratingOverall} />
         <input type="hidden" name="rating_culture" value={ratingCulture} />
         <input type="hidden" name="rating_management" value={ratingMgmt} />
         <input type="hidden" name="rating_worklife" value={ratingWl} />
         <input type="hidden" name="rating_career" value={ratingCareer} />
+        <input type="hidden" name="would_recommend" value={wouldRecommend} />
         <input type="hidden" name="title" value={title} />
-        <input type="hidden" name="content" value={content} />
         <input type="hidden" name="pros" value={pros} />
         <input type="hidden" name="cons" value={cons} />
+        <input type="hidden" name="content" value={content} />
+        <input type="hidden" name="knew_before" value={knewBefore} />
 
-        {/* ── Step 0 : Emploi ───────────────────────────────────── */}
+        {/* ── Step 0 : Emploi ── */}
         {step === 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <div>
               <label style={lbl}>Ton poste *</label>
-              <input
-                value={jobTitle}
-                onChange={e => setJobTitle(e.target.value)}
-                placeholder="Ex : Software Engineer, Marketing Manager..."
-                style={inp}
-              />
+              <input value={jobTitle} onChange={e => setJobTitle(e.target.value)}
+                placeholder="Ex : Software Engineer, Stage Marketing, CDI Finance..."
+                style={inp} />
             </div>
 
             <div>
               <label style={lbl}>Type de contrat *</label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {EMPLOYMENT_TYPES.map(t => (
-                  <button
-                    key={t.value}
-                    type="button"
-                    onClick={() => setEmploymentType(t.value)}
-                    style={{
-                      padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600,
-                      cursor: "pointer", border: "1px solid",
-                      borderColor: employmentType === t.value ? "#8b5cf6" : "var(--border2)",
-                      background: employmentType === t.value ? "rgba(139,92,246,0.15)" : "var(--surface2)",
-                      color: employmentType === t.value ? "#8b5cf6" : "var(--text-muted)",
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
+              <PillPicker options={EMPLOYMENT_TYPES} value={employmentType} onChange={setEmploymentType} />
             </div>
 
             <div>
-              <label style={lbl}>Statut actuel</label>
+              <label style={lbl}>Statut *</label>
               <div style={{ display: "flex", gap: 10 }}>
                 {[{ v: true, l: "Employé actuel" }, { v: false, l: "Ancien employé" }].map(({ v, l }) => (
-                  <button
-                    key={String(v)}
-                    type="button"
-                    onClick={() => setIsCurrent(v)}
+                  <button key={String(v)} type="button" onClick={() => setIsCurrent(v)}
                     style={{
                       flex: 1, padding: "10px 0", borderRadius: 8, fontSize: 13, fontWeight: 600,
-                      cursor: "pointer", border: "1px solid",
+                      cursor: "pointer", border: "1px solid", transition: "all 0.15s",
                       borderColor: isCurrent === v ? "#f97316" : "var(--border2)",
                       background: isCurrent === v ? "rgba(249,115,22,0.15)" : "var(--surface2)",
                       color: isCurrent === v ? "#f97316" : "var(--text-muted)",
-                    }}
-                  >
+                    }}>
                     {l}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: isCurrent ? "1fr" : "1fr 1fr", gap: 14 }}>
-              <div>
-                <label style={lbl}>Année de début</label>
-                <select value={startYear} onChange={e => setStartYear(e.target.value)} style={{ ...inp, background: "var(--surface2)" }}>
-                  <option value="">Choisir...</option>
-                  {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
-              </div>
-              {!isCurrent && (
-                <div>
-                  <label style={lbl}>Année de fin</label>
-                  <select value={endYear} onChange={e => setEndYear(e.target.value)} style={{ ...inp, background: "var(--surface2)" }}>
-                    <option value="">Choisir...</option>
-                    {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
-              )}
+            <div>
+              <label style={lbl}>Durée dans cette entreprise *</label>
+              <PillPicker options={DURATION_RANGES} value={durationRange} onChange={setDurationRange} />
             </div>
 
             <div>
-              <label style={lbl}>Salaire annuel brut CHF <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel — affiché anonymement)</span></label>
+              <label style={lbl}>Mode de travail <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
+              <PillPicker options={WORK_MODES} value={workMode} onChange={v => setWorkMode(v === workMode ? "" : v)} />
+            </div>
+
+            <div>
+              <label style={lbl}>Salaire annuel brut CHF <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel — anonyme)</span></label>
               <div style={{ position: "relative" }}>
                 <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-muted)", pointerEvents: "none" }}>CHF</span>
-                <input
-                  type="number"
-                  value={salary}
-                  onChange={e => setSalary(e.target.value)}
-                  placeholder="95000"
-                  style={{ ...inp, paddingLeft: 46 }}
-                />
+                <input type="number" value={salary} onChange={e => setSalary(e.target.value)}
+                  placeholder="95000" style={{ ...inp, paddingLeft: 46 }} />
               </div>
-              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>Ces infos aident la communauté à connaître les vrais salaires. Jamais attribué à ton nom.</p>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>Jamais attribué à ton nom. Aide la communauté à connaître les vrais salaires.</p>
             </div>
 
             {step1Err && <p style={{ fontSize: 13, color: "#ef4444" }}>{step1Err}</p>}
           </div>
         )}
 
-        {/* ── Step 1 : Notes ────────────────────────────────────── */}
+        {/* ── Step 1 : Notes ── */}
         {step === 1 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             <div style={{ background: "var(--surface2)", borderRadius: 14, padding: "20px 24px" }}>
@@ -296,76 +260,81 @@ export function ReviewForm({ companyId }: { companyId: string }) {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-muted)" }}>Notes par catégorie <span style={{ fontWeight: 400 }}>(optionnel)</span></p>
-              <StarPicker name="rating_culture" label="🌍 Ambiance & culture d'entreprise" value={ratingCulture} onChange={setRatingCulture} />
-              <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_management" label="👔 Qualité du management" value={ratingMgmt} onChange={setRatingMgmt} />
+              <StarPicker name="rating_management" label="👔 Management direct" value={ratingMgmt} onChange={setRatingMgmt} />
               <div style={{ height: 1, background: "var(--border)" }} />
               <StarPicker name="rating_worklife" label="⚖️ Équilibre vie pro / perso" value={ratingWl} onChange={setRatingWl} />
               <div style={{ height: 1, background: "var(--border)" }} />
+              <StarPicker name="rating_culture" label="🌍 Ambiance & culture" value={ratingCulture} onChange={setRatingCulture} />
+              <div style={{ height: 1, background: "var(--border)" }} />
               <StarPicker name="rating_career" label="🚀 Perspectives d'évolution" value={ratingCareer} onChange={setRatingCareer} />
+            </div>
+
+            <div>
+              <label style={lbl}>Recommanderais-tu cette entreprise ? *</label>
+              <div style={{ display: "flex", gap: 10 }}>
+                {RECOMMEND.map(r => (
+                  <button key={r.value} type="button" onClick={() => setWouldRecommend(r.value)}
+                    style={{
+                      flex: 1, padding: "12px 0", borderRadius: 8, fontSize: 14, fontWeight: 700,
+                      cursor: "pointer", border: "1px solid", transition: "all 0.15s",
+                      borderColor: wouldRecommend === r.value ? "#8b5cf6" : "var(--border2)",
+                      background: wouldRecommend === r.value ? "rgba(139,92,246,0.15)" : "var(--surface2)",
+                      color: wouldRecommend === r.value ? "#8b5cf6" : "var(--text-muted)",
+                    }}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {step2Err && <p style={{ fontSize: 13, color: "#ef4444" }}>{step2Err}</p>}
           </div>
         )}
 
-        {/* ── Step 2 : Avis ─────────────────────────────────────── */}
+        {/* ── Step 2 : Avis ── */}
         {step === 2 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-start" }}>
               <span style={{ fontSize: 16 }}>🔒</span>
               <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                Ton avis est <strong style={{ color: "var(--text)" }}>affiché anonymement</strong>. Seul ton poste et ta durée seront visibles. Ton identité reste confidentielle.
+                Ton avis est <strong style={{ color: "var(--text)" }}>affiché anonymement</strong>. Seul ton poste et ta durée seront visibles.
               </p>
             </div>
 
             <div>
-              <label style={lbl}>Titre de ton avis <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
-              <input
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Ex : Super boîte mais attention au rythme..."
-                style={inp}
-              />
+              <label style={lbl}>Titre <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
+              <input value={title} onChange={e => setTitle(e.target.value)}
+                placeholder="Ex : Bonne boîte mais attention au rythme..." style={inp} />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div>
-                <label style={lbl}>👍 Points positifs</label>
-                <textarea
-                  value={pros}
-                  onChange={e => setPros(e.target.value)}
-                  rows={3}
-                  placeholder="Ce que j'ai apprécié..."
-                  style={{ ...inp, resize: "vertical" }}
-                />
+                <label style={lbl}>👍 Points positifs *</label>
+                <textarea value={pros} onChange={e => setPros(e.target.value)} rows={3}
+                  placeholder="Ce que j'ai vraiment apprécié..." style={{ ...inp, resize: "vertical" }} />
               </div>
               <div>
-                <label style={lbl}>👎 Points négatifs</label>
-                <textarea
-                  value={cons}
-                  onChange={e => setCons(e.target.value)}
-                  rows={3}
-                  placeholder="Ce qui m'a déçu..."
-                  style={{ ...inp, resize: "vertical" }}
-                />
+                <label style={lbl}>👎 Points négatifs *</label>
+                <textarea value={cons} onChange={e => setCons(e.target.value)} rows={3}
+                  placeholder="Ce qui m'a déçu ou frustré..." style={{ ...inp, resize: "vertical" }} />
               </div>
             </div>
 
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                 <label style={lbl}>Ton avis complet * <span style={{ fontWeight: 400, opacity: 0.5 }}>(min. 50 caractères)</span></label>
-                <span style={{ fontSize: 11, color: content.length >= 50 ? "#10b981" : "var(--text-muted)" }}>
-                  {content.length}/50 min.
-                </span>
+                <span style={{ fontSize: 11, color: content.length >= 50 ? "#10b981" : "var(--text-muted)" }}>{content.length}/50</span>
               </div>
-              <textarea
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                rows={5}
-                placeholder="Décris ton expérience honnêtement : culture, projets, management, ambiance, ce que tu referais ou pas..."
-                style={{ ...inp, resize: "vertical" }}
-              />
+              <textarea value={content} onChange={e => setContent(e.target.value)} rows={5}
+                placeholder="Décris ton expérience honnêtement : projets, ambiance, management, ce que tu referais ou pas..."
+                style={{ ...inp, resize: "vertical" }} />
+            </div>
+
+            <div>
+              <label style={lbl}>💡 Ce que j'aurais voulu savoir avant <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
+              <textarea value={knewBefore} onChange={e => setKnewBefore(e.target.value)} rows={2}
+                placeholder="Un conseil à quelqu'un qui rejoint cette boîte..."
+                style={{ ...inp, resize: "vertical" }} />
             </div>
 
             {state?.error && (
@@ -376,49 +345,43 @@ export function ReviewForm({ companyId }: { companyId: string }) {
           </div>
         )}
 
-        {/* ── Navigation ────────────────────────────────────────── */}
+        {/* Navigation */}
         <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
           {step > 0 && (
-            <button
-              type="button"
-              onClick={() => setStep(s => s - 1)}
+            <button type="button" onClick={() => setStep(s => s - 1)}
               style={{
                 display: "flex", alignItems: "center", gap: 6,
                 padding: "12px 20px", borderRadius: 10, fontSize: 14, fontWeight: 600,
                 background: "var(--surface2)", border: "1px solid var(--border2)",
                 color: "var(--text-muted)", cursor: "pointer",
-              }}
-            >
+              }}>
               <ChevronLeft size={16} /> Retour
             </button>
           )}
 
           {step < 2 ? (
-            <button
-              type="button"
-              onClick={goNext}
+            <button type="button" onClick={goNext}
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 padding: "13px 0", borderRadius: 10, fontSize: 14, fontWeight: 700,
                 background: "linear-gradient(135deg, #8b5cf6, #f97316)",
                 border: "none", color: "#fff", cursor: "pointer",
-              }}
-            >
+              }}>
               Continuer <ChevronRight size={16} />
             </button>
           ) : (
-            <button
-              type="submit"
-              disabled={pending || content.length < 50}
+            <button type="submit"
+              disabled={pending || content.length < 50 || !pros.trim() || !cons.trim()}
               style={{
                 flex: 1, padding: "13px 0", borderRadius: 10, fontSize: 14, fontWeight: 700,
-                background: content.length >= 50 ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface3)",
-                border: "none", color: content.length >= 50 ? "#fff" : "var(--text-muted)",
-                cursor: content.length >= 50 ? "pointer" : "not-allowed",
+                background: (content.length >= 50 && pros.trim() && cons.trim())
+                  ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface3)",
+                border: "none",
+                color: (content.length >= 50 && pros.trim() && cons.trim()) ? "#fff" : "var(--text-muted)",
+                cursor: (content.length >= 50 && pros.trim() && cons.trim()) ? "pointer" : "not-allowed",
                 opacity: pending ? 0.6 : 1,
-              }}
-            >
-              {pending ? "Publication..." : "Publier mon avis"}
+              }}>
+              {pending ? "Publication..." : "Publier mon avis 🚀"}
             </button>
           )}
         </div>

@@ -48,11 +48,17 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const salary_chf = salary_raw ? Number(salary_raw) : null;
   const is_current = formData.get("is_current") === "true";
   const employment_type = String(formData.get("employment_type") || "cdi");
-  const start_year = Number(formData.get("start_year") || 0) || null;
-  const end_year = is_current ? null : (Number(formData.get("end_year") || 0) || null);
+  const duration_range = String(formData.get("duration_range") || "").trim() || null;
+  const work_mode = String(formData.get("work_mode") || "").trim() || null;
+  const would_recommend = String(formData.get("would_recommend") || "").trim() || null;
+  const knew_before = String(formData.get("knew_before") || "").trim() || null;
 
   if (!company_id || !job_title) return { error: "Le poste occupé est requis." };
+  if (!duration_range) return { error: "La durée dans l'entreprise est requise." };
   if (rating_overall < 1) return { error: "La note globale est requise." };
+  if (!would_recommend) return { error: "Indique si tu recommanderais cette entreprise." };
+  if (!pros || pros.length < 10) return { error: "Les points positifs sont requis (min. 10 caractères)." };
+  if (!cons || cons.length < 10) return { error: "Les points négatifs sont requis (min. 10 caractères)." };
   if (!content || content.length < 50) return { error: "L'avis doit faire au moins 50 caractères." };
 
   // Check if user already reviewed this company
@@ -69,8 +75,8 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
     company_id, user_id: user.id,
     rating_overall, rating_culture, rating_management, rating_worklife, rating_career,
     title, content, pros, cons, job_title, salary_chf,
-    is_current, is_anonymous: true, // always stored anonymously displayed
-    employment_type, start_year, end_year,
+    is_current, is_anonymous: true,
+    employment_type, duration_range, work_mode, would_recommend, knew_before,
   });
 
   if (error) return { error: error.message };

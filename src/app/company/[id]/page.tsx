@@ -265,6 +265,17 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 const EMPLOYMENT_LABELS: Record<string, string> = {
   cdi: "CDI", cdd: "CDD", stage: "Stage", alternance: "Alternance", freelance: "Freelance",
 };
+const DURATION_LABELS: Record<string, string> = {
+  moins_6mois: "< 6 mois", "6mois_2ans": "6 mois – 2 ans", plus_2ans: "+ 2 ans",
+};
+const WORK_MODE_LABELS: Record<string, string> = {
+  "présentiel": "🏢 Présentiel", hybride: "🔀 Hybride", remote: "🏠 Remote",
+};
+const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
+  oui: { label: "👍 Recommande", color: "#10b981" },
+  non: { label: "👎 Ne recommande pas", color: "#ef4444" },
+  ca_depend: { label: "🤔 Ça dépend", color: "#f59e0b" },
+};
 
 function ReviewCard({ review }: { review: Review }) {
   const age = (() => {
@@ -277,15 +288,11 @@ function ReviewCard({ review }: { review: Review }) {
     return `Il y a ${Math.floor(days / 30)} mois`;
   })();
 
-  const durationLabel = (() => {
-    if (review.is_current && review.start_year) return `Depuis ${review.start_year}`;
-    if (review.start_year && review.end_year) return `${review.start_year} – ${review.end_year}`;
-    if (review.start_year) return `Depuis ${review.start_year}`;
-    return null;
-  })();
+  const rec = (review as any).would_recommend ? RECOMMEND_LABELS[(review as any).would_recommend] : null;
 
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px" }}>
+      {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
@@ -293,10 +300,12 @@ function ReviewCard({ review }: { review: Review }) {
               <Star key={n} size={13}
                 fill={n <= Math.round(review.rating_overall) ? "#f59e0b" : "transparent"}
                 color={n <= Math.round(review.rating_overall) ? "#f59e0b" : "#3a3a4a"}
-                strokeWidth={1.5}
-              />
+                strokeWidth={1.5} />
             ))}
             <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{Number(review.rating_overall).toFixed(1)}</span>
+            {rec && (
+              <span style={{ fontSize: 11, fontWeight: 700, color: rec.color, marginLeft: 4 }}>{rec.label}</span>
+            )}
           </div>
           {review.title && <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>}
         </div>
@@ -307,12 +316,23 @@ function ReviewCard({ review }: { review: Review }) {
               {review.job_title}
             </span>
           )}
-          {review.employment_type && (
-            <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
-              {EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type}
-              {durationLabel ? ` · ${durationLabel}` : ""}
-            </span>
-          )}
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            {review.employment_type && (
+              <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
+                {EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type}
+              </span>
+            )}
+            {(review as any).duration_range && (
+              <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
+                {DURATION_LABELS[(review as any).duration_range] ?? (review as any).duration_range}
+              </span>
+            )}
+            {(review as any).work_mode && (
+              <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
+                {WORK_MODE_LABELS[(review as any).work_mode] ?? (review as any).work_mode}
+              </span>
+            )}
+          </div>
           {review.is_current && (
             <span style={{ fontSize: 10, fontWeight: 700, color: "#10b981" }}>● Employé actuel</span>
           )}
@@ -322,12 +342,14 @@ function ReviewCard({ review }: { review: Review }) {
         </div>
       </div>
 
-      <p style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.7, marginBottom: review.pros || review.cons ? 14 : 0 }}>
+      {/* Content */}
+      <p style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.7, marginBottom: 12 }}>
         {review.content}
       </p>
 
+      {/* Pros / Cons */}
       {(review.pros || review.cons) && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
           {review.pros && (
             <div style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 10, padding: "10px 12px" }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", marginBottom: 4 }}>👍 Points positifs</p>
@@ -340,6 +362,14 @@ function ReviewCard({ review }: { review: Review }) {
               <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.cons}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Knew before */}
+      {(review as any).knew_before && (
+        <div style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 10, padding: "10px 12px" }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 4 }}>💡 Ce que j'aurais voulu savoir avant</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{(review as any).knew_before}</p>
         </div>
       )}
     </div>
