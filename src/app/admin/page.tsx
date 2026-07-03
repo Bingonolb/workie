@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
-import { Shield, Plus, Pencil, ExternalLink } from "lucide-react";
+import { Shield, Plus, Pencil, ExternalLink, Star, MessageSquare, Users } from "lucide-react";
 import type { Company } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -12,11 +14,11 @@ export default async function AdminPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") redirect("/explore");
 
-  const { data: companies } = await supabase
-    .from("companies")
-    .select("*")
-    .order("sector", { ascending: true })
-    .order("name", { ascending: true });
+  const [{ data: companies }, { count: reviewCount }, { count: userCount }] = await Promise.all([
+    supabase.from("companies").select("*").order("sector", { ascending: true }).order("name", { ascending: true }),
+    supabase.from("reviews").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+  ]);
 
   const list = (companies ?? []) as Company[];
 
@@ -29,6 +31,23 @@ export default async function AdminPage() {
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 28px 100px" }}>
+
+        {/* KPI strip */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28 }}>
+          {[
+            { icon: <Users size={16} color="#8b5cf6" />, value: list.length, label: "Entreprises", color: "#8b5cf6" },
+            { icon: <MessageSquare size={16} color="#f97316" />, value: reviewCount ?? 0, label: "Avis publiés", color: "#f97316" },
+            { icon: <Star size={16} color="#10b981" />, value: userCount ?? 0, label: "Utilisateurs", color: "#10b981" },
+          ].map(({ icon, value, label, color }) => (
+            <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
+              <div>
+                <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>{value}</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>

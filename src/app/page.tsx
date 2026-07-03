@@ -1,11 +1,21 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/supabase/server";
+import { getUser, createClient } from "@/lib/supabase/server";
 import { ArrowRight, Star, Shield, Zap, Eye } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const user = await getUser();
   if (user) redirect("/explore");
+
+  const supabase = await createClient();
+  const [{ count: companyCount }, { count: reviewCount }] = await Promise.all([
+    supabase.from("companies").select("*", { count: "exact", head: true }),
+    supabase.from("reviews").select("*", { count: "exact", head: true }),
+  ]);
+  const nCompanies = companyCount ?? 0;
+  const nReviews = reviewCount ?? 0;
 
   return (
     <main style={{ minHeight: "100dvh", background: "#0d0d13", color: "#f0f0f8", display: "flex", flexDirection: "column" }}>
@@ -78,13 +88,21 @@ export default async function Home() {
           </Link>
         </div>
 
-        {/* Social proof */}
-        <div style={{ marginTop: 48, display: "flex", alignItems: "center", gap: 24, color: "rgba(240,240,248,0.35)", fontSize: 13 }}>
-          <span>🇨🇭 Focalisé Suisse</span>
-          <span>·</span>
-          <span>🔒 Avis anonymes</span>
-          <span>·</span>
-          <span>⚡ Données temps réel</span>
+        {/* Live stats */}
+        <div style={{ marginTop: 52, display: "flex", alignItems: "center", gap: 0, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, overflow: "hidden" }}>
+          {[
+            { value: `${nCompanies}`, label: "entreprises suisses", color: "#8b5cf6" },
+            { value: `${nReviews}`, label: "avis authentiques", color: "#f97316" },
+            { value: "100%", label: "anonyme", color: "#10b981" },
+          ].map(({ value, label, color }, i) => (
+            <div key={label} style={{
+              flex: 1, padding: "18px 24px", textAlign: "center",
+              borderRight: i < 2 ? "1px solid rgba(255,255,255,0.06)" : "none",
+            }}>
+              <p style={{ fontSize: 28, fontWeight: 900, color, letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
+              <p style={{ fontSize: 12, color: "rgba(240,240,248,0.4)", marginTop: 4 }}>{label}</p>
+            </div>
+          ))}
         </div>
       </section>
 

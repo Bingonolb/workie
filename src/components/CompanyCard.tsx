@@ -116,12 +116,21 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false }: {
         {/* Body */}
         <div style={{ padding: "14px 16px 16px" }}>
           {/* Stats row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             {company.avg_rating > 0 && <StarDisplay rating={company.avg_rating} />}
             {company.review_count > 0 && (
               <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{company.review_count} avis</span>
             )}
+            <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
+              <Flame size={12} fill="#f97316" color="#f97316" /> {company.score}
+            </span>
           </div>
+
+          {company.description && (
+            <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.55, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
+              {company.description}
+            </p>
+          )}
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
             <InfoChip icon={<MapPin size={12} />} label={company.city} />
