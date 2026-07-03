@@ -272,7 +272,7 @@ const WORK_MODE_LABELS: Record<string, string> = {
   "présentiel": "🏢 Présentiel", hybride: "🔀 Hybride", remote: "🏠 Remote",
 };
 const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
-  oui: { label: "👍 Recommande", color: "#10b981" },
+  oui: { label: "👍 Recommandé", color: "#10b981" },
   non: { label: "👎 Ne recommande pas", color: "#ef4444" },
   ca_depend: { label: "🤔 Ça dépend", color: "#f59e0b" },
 };
