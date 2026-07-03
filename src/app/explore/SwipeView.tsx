@@ -262,10 +262,18 @@ export function SwipeView({
         </button>
       </div>
 
-      <p style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", lineHeight: 1.6 }}>
-        Glisse à droite 🔥 pour sauvegarder · à gauche pour passer<br />
-        ⚡ +100 boost · 💀 -100 pénalité · clique pour le détail
-      </p>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
+          <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>
+          <span>✕ passer</span>
+          <span>ℹ détail</span>
+          <span>🔥 sauvegarder</span>
+          <span>⚡ <span style={{ color: "#a78bfa", fontWeight: 700 }}>+100</span> boost</span>
+        </div>
+        <p style={{ fontSize: 11, color: "var(--text-muted)", opacity: 0.6 }}>
+          Swipe droite pour sauvegarder · gauche pour passer
+        </p>
+      </div>
 
       <style>{`
         @keyframes fadeInOut {
