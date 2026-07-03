@@ -2,8 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { Company } from "@/lib/types";
-
-export const PAGE_SIZE = 12;
+import { PAGE_SIZE } from "@/lib/constants";
 
 export async function getCompanies(filters?: {
   sector?: string;
