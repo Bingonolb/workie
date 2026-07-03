@@ -62,12 +62,26 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   const isFav = favIds.includes(company.id);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
-  // Compute sub-ratings averages
+  // Sub-ratings averages
   const withRatings = reviews.filter(r => r.rating_culture);
   const avgCulture = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_culture ?? 0), 0) / withRatings.length : null;
   const avgMgmt = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_management ?? 0), 0) / withRatings.length : null;
   const avgWl = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_worklife ?? 0), 0) / withRatings.length : null;
   const avgCareer = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_career ?? 0), 0) / withRatings.length : null;
+
+  // Would recommend stats
+  const withRecommend = reviews.filter(r => (r as any).would_recommend);
+  const recOui = withRecommend.filter(r => (r as any).would_recommend === "oui").length;
+  const recPct = withRecommend.length ? Math.round((recOui / withRecommend.length) * 100) : null;
+
+  // Work mode breakdown
+  const withMode = reviews.filter(r => (r as any).work_mode);
+  const modeCounts = withMode.reduce((acc: Record<string, number>, r) => {
+    const m = (r as any).work_mode as string;
+    acc[m] = (acc[m] ?? 0) + 1;
+    return acc;
+  }, {});
+  const dominantMode = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
@@ -146,19 +160,43 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {/* Ratings breakdown */}
             {company.review_count > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px", marginBottom: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 20 }}>
                   <div style={{ textAlign: "center" }}>
                     <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
                     <Stars rating={company.avg_rating} size={18} />
                     <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>{company.review_count} avis</p>
                   </div>
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-                    <RatingBar label="Ambiance / Culture" value={avgCulture} />
-                    <RatingBar label="Management" value={avgMgmt} />
-                    <RatingBar label="Vie pro/perso" value={avgWl} />
-                    <RatingBar label="Évolution" value={avgCareer} />
+                    <RatingBar label="👔 Management" value={avgMgmt} />
+                    <RatingBar label="⚖️ Vie pro/perso" value={avgWl} />
+                    <RatingBar label="🌍 Culture" value={avgCulture} />
+                    <RatingBar label="🚀 Évolution" value={avgCareer} />
                   </div>
                 </div>
+
+                {/* Recommend + work mode badges */}
+                {(recPct !== null || dominantMode) && (
+                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap", paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+                    {recPct !== null && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, background: recPct >= 70 ? "rgba(16,185,129,0.1)" : recPct >= 40 ? "rgba(249,115,22,0.1)" : "rgba(239,68,68,0.1)", border: `1px solid ${recPct >= 70 ? "rgba(16,185,129,0.25)" : recPct >= 40 ? "rgba(249,115,22,0.25)" : "rgba(239,68,68,0.25)"}`, borderRadius: 10, padding: "8px 14px" }}>
+                        <span style={{ fontSize: 18 }}>{recPct >= 70 ? "👍" : recPct >= 40 ? "🤔" : "👎"}</span>
+                        <div>
+                          <p style={{ fontSize: 18, fontWeight: 900, color: recPct >= 70 ? "#10b981" : recPct >= 40 ? "#f97316" : "#ef4444", lineHeight: 1 }}>{recPct}%</p>
+                          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>recommandent</p>
+                        </div>
+                      </div>
+                    )}
+                    {dominantMode && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 14px" }}>
+                        <span style={{ fontSize: 18 }}>{dominantMode === "remote" ? "🏠" : dominantMode === "hybride" ? "🔀" : "🏢"}</span>
+                        <div>
+                          <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", lineHeight: 1.2, textTransform: "capitalize" }}>{dominantMode}</p>
+                          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>mode dominant</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
