@@ -24,7 +24,11 @@ export async function getCompanies(filters?: {
 
   if (filters?.sector) query = query.eq("sector", filters.sector);
   if (filters?.city) query = query.eq("city", filters.city);
-  if (filters?.search) query = query.ilike("name", `%${filters.search}%`);
+  if (filters?.search) {
+    const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
+    if (names.length === 1) query = query.ilike("name", `%${names[0]}%`);
+    else if (names.length > 1) query = query.in("name", names);
+  }
 
   const { data, count } = await query.range(from, to);
   return {
@@ -50,7 +54,11 @@ export async function getAllCompaniesForSwipe(filters?: {
 
   if (filters?.sector) query = query.eq("sector", filters.sector);
   if (filters?.city) query = query.eq("city", filters.city);
-  if (filters?.search) query = query.ilike("name", `%${filters.search}%`);
+  if (filters?.search) {
+    const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
+    if (names.length === 1) query = query.ilike("name", `%${names[0]}%`);
+    else if (names.length > 1) query = query.in("name", names);
+  }
 
   const { data } = await query.limit(200);
   return (data ?? []) as Company[];

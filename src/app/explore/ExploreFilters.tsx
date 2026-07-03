@@ -19,13 +19,16 @@ export function ExploreFilters({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
-  const [search, setSearch] = useState(current.q ?? "");
+  const [input, setInput] = useState("");
+  const [tags, setTags] = useState<string[]>(current.q ? current.q.split(",").map(s => s.trim()).filter(Boolean) : []);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const view = current.view ?? "grid";
 
-  const suggestions = search.length >= 1
-    ? allNames.filter(n => n.toLowerCase().includes(search.toLowerCase())).slice(0, 6)
+  const suggestions = input.length >= 1
+    ? allNames.filter(n =>
+        n.toLowerCase().includes(input.toLowerCase()) && !tags.includes(n)
+      ).slice(0, 6)
     : [];
 
   useEffect(() => {
@@ -38,42 +41,107 @@ export function ExploreFilters({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const pushQ = (newTags: string[]) => {
+    const p = new URLSearchParams(searchParams.toString());
+    if (newTags.length > 0) p.set("q", newTags.join(","));
+    else p.delete("q");
+    p.delete("page");
+    startTransition(() => router.push(`${pathname}?${p.toString()}`));
+  };
+
+  const addTag = (name: string) => {
+    const newTags = [...tags, name];
+    setTags(newTags);
+    setInput("");
+    setShowSuggestions(false);
+    pushQ(newTags);
+  };
+
+  const removeTag = (name: string) => {
+    const newTags = tags.filter(t => t !== name);
+    setTags(newTags);
+    pushQ(newTags);
+  };
+
   const push = (key: string, value: string | undefined) => {
     const p = new URLSearchParams(searchParams.toString());
     if (value) p.set(key, value);
     else p.delete(key);
+    p.delete("page");
     startTransition(() => router.push(`${pathname}?${p.toString()}`));
   };
 
   const clearAll = () => {
-    setSearch("");
+    setTags([]);
+    setInput("");
     startTransition(() => router.push(pathname));
   };
 
-  const hasFilters = current.sector || current.city || current.q;
+  const hasFilters = current.sector || current.city || tags.length > 0;
 
   return (
     <div style={{ marginBottom: 28, display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Top row: search + view toggle */}
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
         <div ref={wrapperRef} style={{ position: "relative", flex: 1, maxWidth: 480 }}>
-          <Search size={16} style={{ position: "absolute", left: 14, top: 14, color: "var(--text-muted)", zIndex: 1 }} />
-          <input
-            value={search}
-            onChange={e => { setSearch(e.target.value); setShowSuggestions(true); }}
-            onKeyDown={e => {
-              if (e.key === "Enter") { setShowSuggestions(false); push("q", search || undefined); }
-              if (e.key === "Escape") setShowSuggestions(false);
-            }}
-            onFocus={() => setShowSuggestions(true)}
-            placeholder="Rechercher une entreprise..."
-            style={{
-              width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
-              borderRadius: showSuggestions && suggestions.length > 0 ? "12px 12px 0 0" : 12,
-              padding: "12px 14px 12px 42px", fontSize: 14, color: "var(--text)",
-              outline: "none", boxSizing: "border-box",
-            }}
-          />
+          {/* Input with tags inside */}
+          <div style={{
+            display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6,
+            background: "var(--surface)", border: "1px solid var(--border2)",
+            borderRadius: showSuggestions && suggestions.length > 0 ? "12px 12px 0 0" : 12,
+            padding: "8px 12px 8px 42px", minHeight: 46, cursor: "text",
+            position: "relative",
+          }}
+            onClick={() => (wrapperRef.current?.querySelector("input") as HTMLInputElement)?.focus()}
+          >
+            <Search size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+
+            {/* Tags */}
+            {tags.map(tag => (
+              <span key={tag} style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                background: "rgba(139,92,246,0.18)", border: "1px solid rgba(139,92,246,0.4)",
+                borderRadius: 20, padding: "3px 10px 3px 10px",
+                fontSize: 13, fontWeight: 600, color: "#a78bfa",
+              }}>
+                {tag}
+                <button
+                  onMouseDown={e => { e.preventDefault(); removeTag(tag); }}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer",
+                    color: "#a78bfa", padding: 0, display: "flex", alignItems: "center",
+                    opacity: 0.7,
+                  }}
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+
+            {/* Input */}
+            <input
+              value={input}
+              onChange={e => { setInput(e.target.value); setShowSuggestions(true); }}
+              onKeyDown={e => {
+                if (e.key === "Escape") setShowSuggestions(false);
+                if (e.key === "Backspace" && input === "" && tags.length > 0) {
+                  removeTag(tags[tags.length - 1]);
+                }
+                if (e.key === "Enter" && input.trim()) {
+                  const match = allNames.find(n => n.toLowerCase() === input.toLowerCase());
+                  if (match) addTag(match);
+                }
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              placeholder={tags.length === 0 ? "Rechercher une entreprise..." : "Ajouter..."}
+              style={{
+                flex: 1, minWidth: 120, background: "transparent", border: "none",
+                fontSize: 14, color: "var(--text)", outline: "none", padding: "2px 0",
+              }}
+            />
+          </div>
+
+          {/* Suggestions dropdown */}
           {showSuggestions && suggestions.length > 0 && (
             <div style={{
               position: "absolute", top: "100%", left: 0, right: 0,
@@ -85,11 +153,7 @@ export function ExploreFilters({
               {suggestions.map((name, i) => (
                 <button
                   key={name}
-                  onMouseDown={() => {
-                    setSearch(name);
-                    setShowSuggestions(false);
-                    push("q", name);
-                  }}
+                  onMouseDown={() => addTag(name)}
                   style={{
                     width: "100%", textAlign: "left", padding: "10px 16px 10px 42px",
                     background: "transparent", border: "none", color: "var(--text)",
