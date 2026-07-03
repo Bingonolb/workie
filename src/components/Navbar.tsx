@@ -1,10 +1,16 @@
 import Link from "next/link";
-import { getUser } from "@/lib/supabase/server";
+import { getUser, createClient } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
-import { Flame, Compass, User, LogOut, Trophy } from "lucide-react";
+import { Flame, Compass, User, LogOut, Trophy, Shield } from "lucide-react";
 
 export async function Navbar() {
-  const user = await getUser();
+  const [user, supabase] = await Promise.all([getUser(), createClient()]);
+
+  let isAdmin = false;
+  if (user) {
+    const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    isAdmin = data?.role === "admin";
+  }
 
   return (
     <nav style={{
@@ -41,6 +47,19 @@ export async function Navbar() {
               {icon} {label}
             </Link>
           ))}
+
+          {isAdmin && (
+            <Link href="/admin" style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "5px 12px", borderRadius: 8, marginLeft: 4,
+              fontSize: 12, fontWeight: 700, color: "#8b5cf6",
+              textDecoration: "none",
+              background: "rgba(139,92,246,0.12)",
+              border: "1px solid rgba(139,92,246,0.25)",
+            }}>
+              <Shield size={13} /> Admin
+            </Link>
+          )}
         </div>
       )}
 
