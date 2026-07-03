@@ -323,7 +323,9 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                 <label style={lbl}>Ton avis complet * <span style={{ fontWeight: 400, opacity: 0.5 }}>(min. 50 caractères)</span></label>
-                <span style={{ fontSize: 11, color: content.length >= 50 ? "#10b981" : "var(--text-muted)" }}>{content.length}/50</span>
+                <span style={{ fontSize: 11, color: content.length >= 50 ? "#10b981" : "#f97316" }}>
+                  {content.length < 50 ? `encore ${50 - content.length} caractères min.` : "✓ Bon à publier"}
+                </span>
               </div>
               <textarea value={content} onChange={e => setContent(e.target.value)} rows={5}
                 placeholder="Décris ton expérience honnêtement : projets, ambiance, management, ce que tu referais ou pas..."
