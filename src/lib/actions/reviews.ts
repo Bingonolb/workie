@@ -75,7 +75,7 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
 
   if (error) return { error: error.message };
 
-  revalidatePath(`/company/${company_id}`);
+  revalidatePath("/", "layout");
   return { success: true };
 }
 

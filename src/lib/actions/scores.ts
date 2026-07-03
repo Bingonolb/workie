@@ -21,8 +21,7 @@ export async function addFlame(companyId: string): Promise<void> {
   } else {
     await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "flame", points: 1 });
   }
-  revalidatePath("/explore");
-  revalidatePath("/ranking");
+  revalidatePath("/", "layout");
 }
 
 export async function addBoost(companyId: string): Promise<void> {
@@ -30,7 +29,7 @@ export async function addBoost(companyId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
-  revalidatePath("/ranking");
+  revalidatePath("/", "layout");
 }
 
 export async function addPenalty(companyId: string): Promise<void> {
@@ -38,7 +37,7 @@ export async function addPenalty(companyId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
-  revalidatePath("/ranking");
+  revalidatePath("/", "layout");
 }
 
 export async function getTopCompanies(limit = 100) {
@@ -47,6 +46,8 @@ export async function getTopCompanies(limit = 100) {
     .from("companies")
     .select("id, name, sector, city, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified, tags")
     .order("score", { ascending: false })
+    .order("avg_rating", { ascending: false })
+    .order("review_count", { ascending: false })
     .limit(limit);
   return data ?? [];
 }

@@ -39,5 +39,5 @@ export async function updateProfile(formData: FormData): Promise<void> {
     })
     .eq("id", user.id);
 
-  revalidatePath("/profile");
+  revalidatePath("/", "layout");
 }
