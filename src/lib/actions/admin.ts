@@ -49,9 +49,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     const { error } = await supabase.from("companies").update(fields).eq("id", id);
     if (error) return { error: error.message };
 
-    revalidatePath("/admin");
-    revalidatePath(`/company/${id}`);
-    revalidatePath("/explore");
+    revalidatePath("/", "layout"); // bust tout le cache Next.js
     return {};
   } catch (e) {
     return { error: (e as Error).message };
@@ -82,8 +80,7 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
     const { error } = await supabase.from("companies").insert(fields);
     if (error) return { error: error.message };
 
-    revalidatePath("/admin");
-    revalidatePath("/explore");
+    revalidatePath("/", "layout");
     return {};
   } catch (e) {
     return { error: (e as Error).message };
@@ -95,8 +92,7 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
     const { supabase } = await requireAdmin();
     const { error } = await supabase.from("companies").delete().eq("id", id);
     if (error) return { error: error.message };
-    revalidatePath("/admin");
-    revalidatePath("/explore");
+    revalidatePath("/", "layout");
     return {};
   } catch (e) {
     return { error: (e as Error).message };

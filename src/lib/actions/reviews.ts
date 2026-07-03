@@ -90,11 +90,8 @@ export async function voteHelpful(reviewId: string): Promise<{ success?: boolean
 
   if (voteErr) return { error: "Déjà voté." };
 
-  await supabase
-    .from("reviews")
-    .update({ helpful_count: supabase.rpc("increment" as any, { row_id: reviewId }) })
-    .eq("id", reviewId);
+  await supabase.rpc("increment_helpful" as any, { review_id: reviewId });
 
-  revalidatePath(`/company`);
+  revalidatePath("/", "layout");
   return { success: true };
 }
