@@ -271,7 +271,7 @@ export function SwipeView({
           <span>⚡ <span style={{ color: "#a78bfa", fontWeight: 700 }}>+100</span> boost</span>
         </div>
         <p style={{ fontSize: 11, color: "var(--text-muted)", opacity: 0.6 }}>
-          Swipe droite pour sauvegarder · gauche pour passer
+          Swipe <span style={{ color: "#f97316", fontWeight: 700 }}>🔥 droite</span> pour sauvegarder · <span style={{ color: "#ef4444", fontWeight: 700 }}>✕ gauche</span> pour passer
         </p>
       </div>
 
