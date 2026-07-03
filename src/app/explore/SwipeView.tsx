@@ -143,7 +143,7 @@ export function SwipeView({
       </p>
 
       {/* Card stack */}
-      <div style={{ position: "relative", width: "min(440px, 92vw)", height: 590 }}>
+      <div style={{ position: "relative", width: "min(440px, 92vw)", height: 540 }}>
         {next && (
           <div style={{ position: "absolute", inset: 0, transform: "scale(0.95) translateY(12px)", pointerEvents: "none", zIndex: 0 }}>
             <SwipeCard company={next} flameIds={flameIds} overlayDir={null} overlayOpacity={0} />
