@@ -25,11 +25,13 @@ export default async function ExplorePage({
 
   const filters = { sector: params.sector, city: params.city, search: params.q };
 
-  const [user, favIds, flameIds] = await Promise.all([
+  const [user, favIds, flameIds, allCompaniesForNames] = await Promise.all([
     getUser(),
     getUserFavoriteIds(),
     getUserFlameIds(),
+    getAllCompaniesForSwipe(),
   ]);
+  const allNames = allCompaniesForNames.map(c => c.name);
 
   if (isSwipe) {
     const companies = await getAllCompaniesForSwipe(filters);
@@ -45,7 +47,7 @@ export default async function ExplorePage({
               <span style={{ color: "var(--text)", fontWeight: 700 }}>{companies.length}</span> entreprises à découvrir
             </p>
           </div>
-          <ExploreFilters sectors={SECTORS} cities={CITIES} current={params} />
+          <ExploreFilters sectors={SECTORS} cities={CITIES} current={params} allNames={allNames} />
           <SwipeView
             companies={companies as Company[]}
             initialFavIds={favIds}
@@ -73,7 +75,7 @@ export default async function ExplorePage({
           </p>
         </div>
 
-        <ExploreFilters sectors={SECTORS} cities={CITIES} current={params} />
+        <ExploreFilters sectors={SECTORS} cities={CITIES} current={params} allNames={allNames} />
 
         {companies.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>

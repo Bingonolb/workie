@@ -2,23 +2,41 @@
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, X, LayoutGrid, Layers } from "lucide-react";
-import { useTransition, useState } from "react";
+import { useTransition, useState, useEffect, useRef } from "react";
 
 export function ExploreFilters({
   sectors,
   cities,
   current,
+  allNames = [],
 }: {
   sectors: string[];
   cities: string[];
   current: { sector?: string; city?: string; q?: string; view?: string };
+  allNames?: string[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
   const [search, setSearch] = useState(current.q ?? "");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const view = current.view ?? "grid";
+
+  const suggestions = search.length >= 1
+    ? allNames.filter(n => n.toLowerCase().includes(search.toLowerCase())).slice(0, 6)
+    : [];
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const push = (key: string, value: string | undefined) => {
     const p = new URLSearchParams(searchParams.toString());
@@ -38,19 +56,56 @@ export function ExploreFilters({
     <div style={{ marginBottom: 28, display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Top row: search + view toggle */}
       <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        <div style={{ position: "relative", flex: 1, maxWidth: 480 }}>
-        <Search size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter") push("q", search || undefined); }}
-          placeholder="Rechercher une entreprise..."
-          style={{
-            width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
-            borderRadius: 12, padding: "12px 14px 12px 42px", fontSize: 14, color: "var(--text)",
-            outline: "none", boxSizing: "border-box",
-          }}
-        />
+        <div ref={wrapperRef} style={{ position: "relative", flex: 1, maxWidth: 480 }}>
+          <Search size={16} style={{ position: "absolute", left: 14, top: 14, color: "var(--text-muted)", zIndex: 1 }} />
+          <input
+            value={search}
+            onChange={e => { setSearch(e.target.value); setShowSuggestions(true); }}
+            onKeyDown={e => {
+              if (e.key === "Enter") { setShowSuggestions(false); push("q", search || undefined); }
+              if (e.key === "Escape") setShowSuggestions(false);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            placeholder="Rechercher une entreprise..."
+            style={{
+              width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
+              borderRadius: showSuggestions && suggestions.length > 0 ? "12px 12px 0 0" : 12,
+              padding: "12px 14px 12px 42px", fontSize: 14, color: "var(--text)",
+              outline: "none", boxSizing: "border-box",
+            }}
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div style={{
+              position: "absolute", top: "100%", left: 0, right: 0,
+              background: "var(--surface)", border: "1px solid var(--border2)",
+              borderTop: "none", borderRadius: "0 0 12px 12px",
+              zIndex: 50, overflow: "hidden",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            }}>
+              {suggestions.map((name, i) => (
+                <button
+                  key={name}
+                  onMouseDown={() => {
+                    setSearch(name);
+                    setShowSuggestions(false);
+                    push("q", name);
+                  }}
+                  style={{
+                    width: "100%", textAlign: "left", padding: "10px 16px 10px 42px",
+                    background: "transparent", border: "none", color: "var(--text)",
+                    fontSize: 14, cursor: "pointer",
+                    borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                    display: "flex", alignItems: "center", gap: 10,
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--surface2)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <Search size={13} style={{ color: "var(--text-muted)", flexShrink: 0, marginLeft: -26 }} />
+                  {name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* View toggle */}
