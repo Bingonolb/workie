@@ -41,9 +41,8 @@ export function AdminCompanyForm({ company }: { company: Company }) {
     startTransition(async () => {
       const res = await adminUpdateCompany(company.id, formData);
       if (res.error) { setError(res.error); return; }
-      setSuccess(true);
-      setCoverPreview(null);
-      setTimeout(() => setSuccess(false), 3000);
+      // Redirect back to admin list after successful save
+      window.location.href = "/admin";
     });
   };
 
