@@ -6,6 +6,7 @@ import { getUserFlameIds } from "@/lib/actions/scores";
 import { getUser } from "@/lib/supabase/server";
 import { ExploreFilters } from "./ExploreFilters";
 import { SwipeView } from "./SwipeView";
+import { Pagination } from "./Pagination";
 import type { Company } from "@/lib/types";
 
 const SECTORS = ["Tech", "Pharma", "Finance", "Conseil", "Sports & Fashion", "Horlogerie", "Alimentation", "Industrie", "Éducation & Recherche"];
@@ -14,17 +15,20 @@ const CITIES = ["Zurich", "Lausanne", "Basel", "Genève", "Bern", "Vevey", "Biel
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ sector?: string; city?: string; q?: string; view?: string }>;
+  searchParams: Promise<{ sector?: string; city?: string; q?: string; view?: string; page?: string }>;
 }) {
   const params = await searchParams;
   const isSwipe = params.view === "swipe";
+  const page = Math.max(1, parseInt(params.page ?? "1") || 1);
 
-  const [user, companies, favIds, flameIds] = await Promise.all([
+  const [user, result, favIds, flameIds] = await Promise.all([
     getUser(),
-    getCompanies({ sector: params.sector, city: params.city, search: params.q }),
+    getCompanies({ sector: params.sector, city: params.city, search: params.q, page }),
     getUserFavoriteIds(),
     getUserFlameIds(),
   ]);
+
+  const { companies, total, pageCount } = result;
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
@@ -35,7 +39,7 @@ export default async function ExplorePage({
             Explorer les entreprises
           </h1>
           <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
-            {companies.length} entreprise{companies.length > 1 ? "s" : ""} · Avis 100% authentiques
+            <span style={{ color: "var(--text)", fontWeight: 700 }}>{total}</span> entreprise{total > 1 ? "s" : ""} · Avis 100% authentiques
           </p>
         </div>
 
@@ -54,11 +58,17 @@ export default async function ExplorePage({
             isLoggedIn={!!user}
           />
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-            {(companies as Company[]).map(c => (
-              <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} />
-            ))}
-          </div>
+          <>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
+              {(companies as Company[]).map(c => (
+                <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} />
+              ))}
+            </div>
+
+            {pageCount > 1 && (
+              <Pagination page={page} pageCount={pageCount} total={total} params={params} />
+            )}
+          </>
         )}
       </main>
     </div>
