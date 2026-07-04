@@ -7,6 +7,7 @@ import { toggleFavorite } from "@/lib/actions/favorites";
 import { addFlame, addBoost, addPenalty } from "@/lib/actions/scores";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
+import { GuestModal } from "@/components/GuestModal";
 
 const SWIPE_THRESHOLD = 90;
 
@@ -27,6 +28,8 @@ export function SwipeView({
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
   const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
+  const [swipeCount, setSwipeCount] = useState(0);
+  const [showGuestModal, setShowGuestModal] = useState(false);
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const [drag, setDrag] = useState(0);
@@ -40,24 +43,26 @@ export function SwipeView({
     setTimeout(() => setToast(null), 1800);
   };
 
-  const requireLogin = () => { router.push("/login"); };
+  const requireLogin = useCallback(() => setShowGuestModal(true), []);
 
   const advance = useCallback((dir: "left" | "right") => {
     if (!current || gone) return;
+    if (!isLoggedIn && swipeCount >= 1) { requireLogin(); return; }
     setGone(dir);
-    if (dir === "right") {
-      if (!isLoggedIn) { requireLogin(); return; }
+    if (dir === "right" && isLoggedIn) {
       setFavIds(prev => { const n = new Set(prev); n.has(current.id) ? n.delete(current.id) : n.add(current.id); return n; });
       setFlameIds(prev => { const n = new Set(prev); n.has(current.id) ? n.delete(current.id) : n.add(current.id); return n; });
       toggleFavorite(current.id);
       addFlame(current.id);
       showToast("🔥 +1 flamme !", "#f97316");
+    } else if (dir === "right") {
+      showToast("👀 Découverte !", "#6b7280");
     } else {
       showToast("⏭ Passé", "#6b7280");
     }
-    setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 320);
+    setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); if (!isLoggedIn) setSwipeCount(c => c + 1); }, 320);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, gone, isLoggedIn]);
+  }, [current, gone, isLoggedIn, swipeCount, requireLogin]);
 
   const handleBoost = () => {
     if (!isLoggedIn) { requireLogin(); return; }
@@ -274,6 +279,8 @@ export function SwipeView({
           Swipe <span style={{ color: "#f97316", fontWeight: 700 }}>🔥 droite</span> pour sauvegarder · <span style={{ color: "#ef4444", fontWeight: 700 }}>✕ gauche</span> pour passer
         </p>
       </div>
+
+      {showGuestModal && !isLoggedIn && <GuestModal reviewCount={0} open />}
 
       <style>{`
         @keyframes fadeInOut {

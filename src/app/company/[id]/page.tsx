@@ -212,8 +212,17 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <p style={{ fontSize: 15, color: "var(--text-muted)" }}>Pas encore d&apos;avis. Sois le premier !</p>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
-                {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} />)}
+              <div style={{ position: "relative", marginBottom: 32 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} />)}
+                </div>
+                {!user && reviews.length > 1 && (
+                  <div style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0, height: 160,
+                    background: "linear-gradient(to bottom, transparent, var(--bg) 90%)",
+                    pointerEvents: "none",
+                  }} />
+                )}
               </div>
             )}
 

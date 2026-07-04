@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { signInWithGoogle } from "@/lib/actions/auth";
 
-export function GuestModal({ reviewCount }: { reviewCount: number }) {
-  const [visible, setVisible] = useState(false);
+export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: boolean }) {
+  const [timerVisible, setTimerVisible] = useState(false);
+  const visible = open !== undefined ? open : timerVisible;
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 800);
+    if (open !== undefined) return;
+    const timer = setTimeout(() => setTimerVisible(true), 800);
     return () => clearTimeout(timer);
-  }, []);
+  }, [open]);
 
   return (
     <>
