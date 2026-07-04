@@ -20,6 +20,7 @@ const InstagramIcon = () => (
 );
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
+import { GuestModal } from "@/components/GuestModal";
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
@@ -211,8 +212,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
-                {reviews.map(r => <ReviewCard key={r.id} review={r} />)}
+                {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} />)}
               </div>
+            )}
+
+            {/* Guest modal — shown after 1st review if not logged in */}
+            {!user && reviews.length > 0 && (
+              <GuestModal reviewCount={reviews.length} />
             )}
 
             {/* Post review */}
