@@ -15,11 +15,12 @@ function buildHref(params: Params, page: number) {
   return `/explore?${p.toString()}`;
 }
 
-export function Pagination({ page, pageCount, total, params }: {
+export function Pagination({ page, pageCount, total, params, isLoggedIn = false }: {
   page: number;
   pageCount: number;
   total: number;
   params: Params;
+  isLoggedIn?: boolean;
 }) {
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
@@ -57,8 +58,8 @@ export function Pagination({ page, pageCount, total, params }: {
         </span>
       )}
 
-      {/* Page numbers — show max 7 pages with ellipsis */}
-      {pages.map(p => {
+      {/* Page numbers — hidden for guests */}
+      {isLoggedIn && pages.map(p => {
         const show = p === 1 || p === pageCount || Math.abs(p - page) <= 2;
         const showEllipsis = !show && (p === 2 || p === pageCount - 1);
         if (showEllipsis) return (
@@ -72,8 +73,8 @@ export function Pagination({ page, pageCount, total, params }: {
         );
       })}
 
-      {/* Next */}
-      {page < pageCount ? (
+      {/* Next — hidden for guests */}
+      {isLoggedIn && (page < pageCount ? (
         <Link href={buildHref(params, page + 1)} style={btnBase}>
           <ChevronRight size={16} />
         </Link>
@@ -81,7 +82,7 @@ export function Pagination({ page, pageCount, total, params }: {
         <span style={{ ...btnBase, opacity: 0.3, cursor: "not-allowed" }}>
           <ChevronRight size={16} />
         </span>
-      )}
+      ))}
 
       <span style={{ fontSize: 12, color: "var(--text-muted)", marginLeft: 8 }}>
         Page {page} / {pageCount} · {total} entreprises

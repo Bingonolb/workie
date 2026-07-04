@@ -90,7 +90,7 @@ export default async function ExplorePage({
               ))}
             </div>
             {pageCount > 1 && (
-              <Pagination page={page} pageCount={pageCount} total={total} params={params} />
+              <Pagination page={page} pageCount={pageCount} total={total} params={params} isLoggedIn={!!user} />
             )}
           </>
         )}
