@@ -63,12 +63,15 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   const isFav = favIds.includes(company.id);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
-  // Sub-ratings averages
-  const withRatings = reviews.filter(r => r.rating_culture);
-  const avgCulture = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_culture ?? 0), 0) / withRatings.length : null;
-  const avgMgmt = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_management ?? 0), 0) / withRatings.length : null;
-  const avgWl = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_worklife ?? 0), 0) / withRatings.length : null;
-  const avgCareer = withRatings.length ? withRatings.reduce((s, r) => s + (r.rating_career ?? 0), 0) / withRatings.length : null;
+  // Sub-ratings averages — each computed independently to avoid null-as-zero bias
+  const subAvg = (field: "rating_culture" | "rating_management" | "rating_worklife" | "rating_career") => {
+    const subset = reviews.filter(r => r[field]);
+    return subset.length ? subset.reduce((s, r) => s + (r[field] as number), 0) / subset.length : null;
+  };
+  const avgCulture = subAvg("rating_culture");
+  const avgMgmt = subAvg("rating_management");
+  const avgWl = subAvg("rating_worklife");
+  const avgCareer = subAvg("rating_career");
 
   // Would recommend stats
   const withRecommend = reviews.filter(r => (r as any).would_recommend);
@@ -256,22 +259,22 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Réseaux</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {company.website_url && (
-                    <a href={`https://${company.website_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+                    <a href={/^https?:\/\//.test(company.website_url) ? company.website_url : `https://${company.website_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
                       <Globe size={14} /> {company.website_url}
                     </a>
                   )}
                   {company.linkedin_url && (
-                    <a href={`https://${company.linkedin_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#0077b5", textDecoration: "none" }}>
+                    <a href={/^https?:\/\//.test(company.linkedin_url) ? company.linkedin_url : `https://${company.linkedin_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#0077b5", textDecoration: "none" }}>
                       <LinkedinIcon /> LinkedIn
                     </a>
                   )}
                   {company.twitter_url && (
-                    <a href={`https://${company.twitter_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#1da1f2", textDecoration: "none" }}>
+                    <a href={/^https?:\/\//.test(company.twitter_url) ? company.twitter_url : `https://${company.twitter_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#1da1f2", textDecoration: "none" }}>
                       <TwitterIcon /> Twitter / X
                     </a>
                   )}
                   {company.instagram_url && (
-                    <a href={`https://${company.instagram_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#ec4899", textDecoration: "none" }}>
+                    <a href={/^https?:\/\//.test(company.instagram_url) ? company.instagram_url : `https://${company.instagram_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#ec4899", textDecoration: "none" }}>
                       <InstagramIcon /> Instagram
                     </a>
                   )}

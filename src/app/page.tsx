@@ -10,10 +10,12 @@ export default async function Home() {
   if (user) redirect("/explore");
 
   const supabase = await createClient();
-  const [{ count: companyCount }, { count: reviewCount }] = await Promise.all([
+  const [{ count: companyCount, error: e1 }, { count: reviewCount, error: e2 }] = await Promise.all([
     supabase.from("companies").select("*", { count: "exact", head: true }),
     supabase.from("reviews").select("*", { count: "exact", head: true }),
   ]);
+  if (e1) console.error("companies count:", e1.message);
+  if (e2) console.error("reviews count:", e2.message);
   const nCompanies = companyCount ?? 0;
   const nReviews = reviewCount ?? 0;
 

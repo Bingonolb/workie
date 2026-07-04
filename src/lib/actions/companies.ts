@@ -26,8 +26,10 @@ export async function getCompanies(filters?: {
   if (filters?.city) query = query.eq("city", filters.city);
   if (filters?.search) {
     const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
-    if (names.length === 1) query = query.ilike("name", `%${names[0]}%`);
-    else if (names.length > 1) query = query.in("name", names);
+    if (names.length === 1) {
+      const safe = names[0].replace(/[%_\\]/g, "\\$&");
+      query = query.ilike("name", `%${safe}%`);
+    } else if (names.length > 1) query = query.in("name", names);
   }
 
   const { data, count } = await query.range(from, to);
@@ -56,8 +58,10 @@ export async function getAllCompaniesForSwipe(filters?: {
   if (filters?.city) query = query.eq("city", filters.city);
   if (filters?.search) {
     const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
-    if (names.length === 1) query = query.ilike("name", `%${names[0]}%`);
-    else if (names.length > 1) query = query.in("name", names);
+    if (names.length === 1) {
+      const safe = names[0].replace(/[%_\\]/g, "\\$&");
+      query = query.ilike("name", `%${safe}%`);
+    } else if (names.length > 1) query = query.in("name", names);
   }
 
   const { data } = await query.limit(200);

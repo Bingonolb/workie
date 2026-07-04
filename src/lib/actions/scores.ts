@@ -28,6 +28,17 @@ export async function addBoost(companyId: string): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
+
+  const { data: existing } = await supabase
+    .from("score_events")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("user_id", user.id)
+    .eq("event_type", "boost")
+    .maybeSingle();
+
+  if (existing) return;
+
   await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
   revalidatePath("/", "layout");
 }
