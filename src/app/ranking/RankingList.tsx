@@ -15,6 +15,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
   const maxScore = Math.max(...companies.map(c => c.score), 1);
 
   const filtered = sector === "Tous" ? companies : companies.filter(c => c.sector === sector);
+  const rankMap = new Map(companies.map((c, i) => [c.id, i]));
 
   return (
     <div>
@@ -57,7 +58,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
       {/* Rows */}
       <div style={{ display: "flex", flexDirection: "column" }}>
         {filtered.map((c) => {
-          const globalRank = companies.indexOf(c);
+          const globalRank = rankMap.get(c.id) ?? 0;
           const sectorColor = SECTOR_COLORS[c.sector] ?? "#8b5cf6";
           const barPct = maxScore > 0 ? Math.min((c.score / maxScore) * 100, 100) : 0;
           const isTop3 = globalRank < 3;
@@ -156,8 +157,6 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
                       +{ratingPts}
                     </span>
-                  ) : communityPts > 0 ? (
-                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
                   ) : (
                     <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
                   )}

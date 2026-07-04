@@ -341,12 +341,7 @@ function ReviewCard({ review }: { review: Review }) {
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            {[1,2,3,4,5].map(n => (
-              <Star key={n} size={13}
-                fill={n <= Math.round(review.rating_overall) ? "#f59e0b" : "transparent"}
-                color={n <= Math.round(review.rating_overall) ? "#f59e0b" : "#3a3a4a"}
-                strokeWidth={1.5} />
-            ))}
+            <Stars rating={review.rating_overall} size={13} />
             <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{Number(review.rating_overall).toFixed(1)}</span>
             {rec && (
               <span style={{ fontSize: 11, fontWeight: 700, color: rec.color, marginLeft: 4 }}>{rec.label}</span>
