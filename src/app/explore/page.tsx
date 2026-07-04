@@ -89,8 +89,8 @@ export default async function ExplorePage({
                 <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} />
               ))}
             </div>
-            {pageCount > 1 && (
-              <Pagination page={page} pageCount={pageCount} total={total} params={params} isLoggedIn={!!user} />
+            {pageCount > 1 && !!user && (
+              <Pagination page={page} pageCount={pageCount} total={total} params={params} />
             )}
           </>
         )}
