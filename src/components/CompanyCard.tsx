@@ -126,9 +126,11 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false }: {
             {company.review_count > 0 && (
               <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{company.review_count} avis</span>
             )}
-            <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
-              <Flame size={12} fill="#f97316" color="#f97316" /> {company.score}
-            </span>
+            {company.score > 0 && (
+              <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
+                <Flame size={12} fill="#f97316" color="#f97316" /> {company.score}
+              </span>
+            )}
           </div>
 
           {company.description && (

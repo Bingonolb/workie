@@ -74,15 +74,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   const avgCareer = subAvg("rating_career");
 
   // Would recommend stats
-  const withRecommend = reviews.filter(r => (r as any).would_recommend);
-  const recOui = withRecommend.filter(r => (r as any).would_recommend === "oui").length;
+  const withRecommend = reviews.filter(r => r.would_recommend);
+  const recOui = withRecommend.filter(r => r.would_recommend === "oui").length;
   const recPct = withRecommend.length ? Math.round((recOui / withRecommend.length) * 100) : null;
 
-  // Work mode breakdown
-  const withMode = reviews.filter(r => (r as any).work_mode);
-  const modeCounts = withMode.reduce((acc: Record<string, number>, r) => {
-    const m = (r as any).work_mode as string;
-    acc[m] = (acc[m] ?? 0) + 1;
+  // Work mode breakdown — single-pass reduce
+  const modeCounts = reviews.reduce((acc: Record<string, number>, r) => {
+    if (r.work_mode) acc[r.work_mode] = (acc[r.work_mode] ?? 0) + 1;
     return acc;
   }, {});
   const dominantMode = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
@@ -219,8 +217,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Guest modal — shown after 1st review if not logged in */}
-            {!user && reviews.length > 0 && (
+            {/* Guest modal — only when there are more reviews to unlock */}
+            {!user && reviews.length > 1 && (
               <GuestModal reviewCount={reviews.length} />
             )}
 

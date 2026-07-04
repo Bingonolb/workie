@@ -145,6 +145,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   const [step1Err, setStep1Err] = useState("");
   const [step2Err, setStep2Err] = useState("");
 
+  const canSubmit = content.length >= 50 && pros.trim().length >= 10 && cons.trim().length >= 10;
+
   const goNext = () => {
     if (step === 0) {
       if (!jobTitle.trim()) { setStep1Err("Le poste est obligatoire."); return; }
@@ -373,14 +375,13 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </button>
           ) : (
             <button type="submit"
-              disabled={pending || content.length < 50 || !pros.trim() || !cons.trim()}
+              disabled={pending || !canSubmit}
               style={{
                 flex: 1, padding: "13px 0", borderRadius: 10, fontSize: 14, fontWeight: 700,
-                background: (content.length >= 50 && pros.trim() && cons.trim())
-                  ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface3)",
+                background: canSubmit ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface3)",
                 border: "none",
-                color: (content.length >= 50 && pros.trim() && cons.trim()) ? "#fff" : "var(--text-muted)",
-                cursor: (content.length >= 50 && pros.trim() && cons.trim()) ? "pointer" : "not-allowed",
+                color: canSubmit ? "#fff" : "var(--text-muted)",
+                cursor: canSubmit ? "pointer" : "not-allowed",
                 opacity: pending ? 0.6 : 1,
               }}>
               {pending ? "Publication..." : "Publier mon avis 🚀"}

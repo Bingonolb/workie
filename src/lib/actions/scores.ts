@@ -47,6 +47,21 @@ export async function addPenalty(companyId: string): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
+
+  // Restrict to admins only
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  if (profile?.role !== "admin") return;
+
+  const { data: existing } = await supabase
+    .from("score_events")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("user_id", user.id)
+    .eq("event_type", "penalty")
+    .maybeSingle();
+
+  if (existing) return;
+
   await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
   revalidatePath("/", "layout");
 }

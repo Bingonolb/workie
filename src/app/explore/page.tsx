@@ -21,8 +21,6 @@ export default async function ExplorePage({
 }) {
   const params = await searchParams;
   const isSwipe = params.view === "swipe";
-  const page = Math.max(1, parseInt(params.page ?? "1") || 1);
-
   const filters = { sector: params.sector, city: params.city, search: params.q };
 
   const [user, favIds, flameIds, allCompaniesForNames] = await Promise.all([
@@ -31,6 +29,9 @@ export default async function ExplorePage({
     getUserFlameIds(),
     getAllCompaniesForSwipe(),
   ]);
+
+  // Guests are locked to page 1 — enforced server-side, not just in UI
+  const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
   const allNames = allCompaniesForNames.map(c => c.name);
 
   if (isSwipe) {

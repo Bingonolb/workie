@@ -42,6 +42,10 @@ export interface Review {
   is_current: boolean;
   is_anonymous: boolean;
   employment_type: "cdi" | "cdd" | "stage" | "alternance" | "freelance" | null;
+  duration_range: string | null;
+  work_mode: "présentiel" | "hybride" | "remote" | null;
+  would_recommend: "oui" | "non" | "ca_depend" | null;
+  knew_before: string | null;
   start_year: number | null;
   end_year: number | null;
   helpful_count: number;
