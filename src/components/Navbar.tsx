@@ -34,7 +34,7 @@ export async function Navbar() {
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           {[
             { href: "/explore", icon: <Compass size={15} />, label: "Explorer" },
-            { href: "/ranking", icon: <Trophy size={15} />, label: "Top 100" },
+            { href: "/ranking", icon: <Trophy size={15} />, label: "Classement" },
             { href: "/favorites", icon: <Flame size={15} />, label: "Favoris" },
             { href: "/profile", icon: <User size={15} />, label: "Profil" },
           ].map(({ href, icon, label }) => (

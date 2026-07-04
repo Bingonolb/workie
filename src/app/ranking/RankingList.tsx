@@ -2,22 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Flame, Star, TrendingUp, ChevronUp } from "lucide-react";
+import { Flame, Star, TrendingUp, Zap } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 
 const SECTORS = ["Tous", "Tech", "Pharma", "Finance", "Conseil", "Sports & Fashion", "Horlogerie", "Alimentation", "Industrie", "Éducation & Recherche"];
 
+const MEDALS = ["🥇", "🥈", "🥉"];
+
 export function RankingTable({ companies }: { companies: Company[] }) {
   const [sector, setSector] = useState("Tous");
-  const maxScore = companies[0]?.score ?? 1;
+  const maxScore = Math.max(...companies.map(c => c.score), 1);
 
   const filtered = sector === "Tous" ? companies : companies.filter(c => c.sector === sector);
 
   return (
     <div>
       {/* Sector filter */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 28 }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 20px 20px" }}>
         {SECTORS.map(s => {
           const color = s === "Tous" ? "#8b5cf6" : (SECTOR_COLORS[s] ?? "#8b5cf6");
           const active = sector === s;
@@ -37,11 +39,13 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
       {/* Table header */}
       <div style={{
-        display: "grid", gridTemplateColumns: "52px 1fr 140px 80px 90px 110px",
-        padding: "8px 16px", marginBottom: 4,
+        display: "grid",
+        gridTemplateColumns: "52px 1fr 130px 100px 120px 100px",
+        padding: "8px 20px 10px",
+        borderTop: "1px solid var(--border)",
         borderBottom: "1px solid var(--border)",
       }}>
-        {["#", "Entreprise", "Secteur", "Note", "Salaire", "Score"].map((h, i) => (
+        {["#", "Entreprise", "Secteur", "Note · Avis", "Score avis", "Score total"].map((h, i) => (
           <span key={h} style={{
             fontSize: 11, fontWeight: 700, color: "var(--text-muted)",
             letterSpacing: "0.06em", textTransform: "uppercase",
@@ -52,18 +56,25 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
       {/* Rows */}
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {filtered.map((c, i) => {
+        {filtered.map((c) => {
           const globalRank = companies.indexOf(c);
           const sectorColor = SECTOR_COLORS[c.sector] ?? "#8b5cf6";
-          const barPct = maxScore > 0 ? (c.score / maxScore) * 100 : 0;
-          const isTop = globalRank < 3;
+          const barPct = maxScore > 0 ? Math.min((c.score / maxScore) * 100, 100) : 0;
+          const isTop3 = globalRank < 3;
+
+          // Estimate rating contribution: avg_rating * 20 * ln(review_count+1)
+          const ratingPts = c.avg_rating > 0 && c.review_count > 0
+            ? Math.round(c.avg_rating * 20 * Math.log(c.review_count + 1))
+            : 0;
+          const communityPts = c.score - ratingPts;
 
           return (
             <Link key={c.id} href={`/company/${c.id}`} style={{ textDecoration: "none" }}>
               <div
                 style={{
-                  display: "grid", gridTemplateColumns: "52px 1fr 140px 80px 90px 110px",
-                  alignItems: "center", padding: "13px 16px",
+                  display: "grid",
+                  gridTemplateColumns: "52px 1fr 130px 100px 120px 100px",
+                  alignItems: "center", padding: "14px 20px",
                   borderBottom: "1px solid var(--border)",
                   transition: "background 0.12s",
                   position: "relative", overflow: "hidden",
@@ -71,71 +82,105 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface2)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
               >
-                {/* Score bar background */}
+                {/* Score bar bg */}
                 <div style={{
                   position: "absolute", left: 0, top: 0, bottom: 0,
-                  width: `${barPct * 0.35}%`,
-                  background: `linear-gradient(90deg, ${sectorColor}08, transparent)`,
+                  width: `${barPct * 0.4}%`,
+                  background: `linear-gradient(90deg, ${sectorColor}0a, transparent)`,
                   pointerEvents: "none",
                 }} />
 
                 {/* Rank */}
                 <span style={{
-                  fontSize: isTop ? 13 : 13, fontWeight: 800,
+                  fontSize: 14, fontWeight: 900,
                   color: globalRank === 0 ? "#f97316" : globalRank === 1 ? "#9ca3af" : globalRank === 2 ? "#b45309" : "var(--text-muted)",
                   fontVariantNumeric: "tabular-nums",
                 }}>
-                  {globalRank === 0 ? "01" : globalRank === 1 ? "02" : globalRank === 2 ? "03" : String(globalRank + 1).padStart(2, "0")}
+                  {globalRank < 3 ? MEDALS[globalRank] : String(globalRank + 1).padStart(2, "0")}
                 </span>
 
                 {/* Company */}
                 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: `linear-gradient(135deg, ${sectorColor}44, ${sectorColor}22)` }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 8, overflow: "hidden",
+                    flexShrink: 0, background: `linear-gradient(135deg, ${sectorColor}44, ${sectorColor}22)`,
+                  }}>
                     {c.cover_url && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={c.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     )}
                   </div>
                   <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{
+                      fontSize: 14, fontWeight: 700, color: isTop3 ? "var(--text)" : "var(--text)",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
                       {c.name}
-                      {c.is_verified && <span style={{ fontSize: 10, color: "#10b981", marginLeft: 6, fontWeight: 600 }}>VÉRIFIÉ</span>}
+                      {c.is_verified && <span style={{ fontSize: 9, color: "#10b981", marginLeft: 6, fontWeight: 700, letterSpacing: "0.05em" }}>VÉRIFIÉ</span>}
                     </p>
                     <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{c.city}</p>
                   </div>
                 </div>
 
                 {/* Sector */}
-                <span style={{ fontSize: 11, fontWeight: 600, color: sectorColor, background: `${sectorColor}18`, border: `1px solid ${sectorColor}30`, borderRadius: 4, padding: "3px 8px", display: "inline-block", maxWidth: 130, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span style={{
+                  fontSize: 11, fontWeight: 600, color: sectorColor,
+                  background: `${sectorColor}18`, border: `1px solid ${sectorColor}30`,
+                  borderRadius: 4, padding: "3px 8px",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  display: "inline-block", maxWidth: 120,
+                }}>
                   {c.sector}
                 </span>
 
-                {/* Rating */}
-                <div style={{ display: "flex", alignItems: "center", gap: 4, justifyContent: "flex-end" }}>
+                {/* Note · Avis */}
+                <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
                   {c.avg_rating > 0 ? (
                     <>
                       <Star size={11} fill="#f59e0b" color="#f59e0b" />
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>{Number(c.avg_rating).toFixed(1)}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
+                        {Number(c.avg_rating).toFixed(1)}
+                      </span>
+                      {c.review_count > 0 && (
+                        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>· {c.review_count}</span>
+                      )}
                     </>
-                  ) : <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>}
+                  ) : (
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
+                  )}
                 </div>
 
-                {/* Salary */}
+                {/* Score avis (rating component) */}
                 <div style={{ textAlign: "right" }}>
-                  {c.avg_salary_chf ? (
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#10b981", fontVariantNumeric: "tabular-nums" }}>
-                      {Math.round(c.avg_salary_chf / 1000)}k
+                  {ratingPts > 0 ? (
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
+                      +{ratingPts}
                     </span>
-                  ) : <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>}
+                  ) : communityPts > 0 ? (
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
+                  ) : (
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
+                  )}
+                  {communityPts !== 0 && (
+                    <span style={{
+                      marginLeft: 6, fontSize: 11, fontWeight: 600,
+                      color: communityPts > 0 ? "#8b5cf6" : "#ef4444",
+                      fontVariantNumeric: "tabular-nums",
+                    }}>
+                      {communityPts > 0 ? `+${communityPts}` : communityPts}
+                      {communityPts > 0
+                        ? <Zap size={9} style={{ marginLeft: 2, verticalAlign: "middle" }} color="#8b5cf6" />
+                        : <Flame size={9} style={{ marginLeft: 2, verticalAlign: "middle" }} color="#ef4444" />}
+                    </span>
+                  )}
                 </div>
 
-                {/* Score */}
-                <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
-                  {c.score > 0 && <ChevronUp size={13} color="#f97316" strokeWidth={2.5} />}
-                  <Flame size={13} fill={isTop ? "#f97316" : "rgba(249,115,22,0.35)"} color={isTop ? "#f97316" : "rgba(249,115,22,0.35)"} />
+                {/* Score total */}
+                <div style={{ display: "flex", alignItems: "center", gap: 4, justifyContent: "flex-end" }}>
+                  <TrendingUp size={12} color={isTop3 ? "#f97316" : "var(--text-muted)"} />
                   <span style={{
-                    fontSize: 15, fontWeight: 900,
-                    color: isTop ? "#f97316" : "var(--text)",
+                    fontSize: 16, fontWeight: 900,
+                    color: isTop3 ? "#f97316" : c.score > 0 ? "var(--text)" : "var(--text-muted)",
                     fontVariantNumeric: "tabular-nums",
                   }}>
                     {c.score}
@@ -148,7 +193,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
         {filtered.length === 0 && (
           <div style={{ padding: "48px 16px", textAlign: "center", color: "var(--text-muted)" }}>
-            <p style={{ fontSize: 14 }}>Aucune entreprise dans ce secteur pour l'instant.</p>
+            <p style={{ fontSize: 14 }}>Aucune entreprise dans ce secteur pour l&apos;instant.</p>
           </div>
         )}
       </div>
