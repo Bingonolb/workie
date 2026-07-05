@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { CompanyCard } from "@/components/CompanyCard";
-import { getFavorites, getUserFavoriteIds } from "@/lib/actions/favorites";
+import { getFavorites } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
 import { Flame } from "lucide-react";
 
@@ -12,7 +12,8 @@ export default async function FavoritesPage() {
   const user = await getUser();
   if (!user) redirect("/login");
 
-  const [companies, favIds] = await Promise.all([getFavorites(), getUserFavoriteIds()]);
+  const companies = await getFavorites();
+  const favIds = companies.map(c => c.id);
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>

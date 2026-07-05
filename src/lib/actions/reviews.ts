@@ -16,13 +16,14 @@ export async function getUserReviews(): Promise<(Review & { company_name: string
   return (data ?? []).map((r: any) => ({ ...r, company_name: r.companies?.name ?? "Entreprise inconnue" }));
 }
 
-export async function getReviews(companyId: string) {
+export async function getReviews(companyId: string, limit = 100) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("reviews")
     .select("*")
     .eq("company_id", companyId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(limit);
   return (data ?? []) as Review[];
 }
 
@@ -53,7 +54,11 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const would_recommend = String(formData.get("would_recommend") || "").trim() || null;
   const knew_before = String(formData.get("knew_before") || "").trim() || null;
 
-  if (!company_id || !job_title) return { error: "Le poste occupé est requis." };
+  // Validate company exists before any other check
+  if (!company_id) return { error: "Entreprise manquante." };
+  const { data: companyExists } = await supabase.from("companies").select("id").eq("id", company_id).maybeSingle();
+  if (!companyExists) return { error: "Entreprise introuvable." };
+  if (!job_title) return { error: "Le poste occupé est requis." };
   if (!duration_range) return { error: "La durée dans l'entreprise est requise." };
   if (rating_overall < 1) return { error: "La note globale est requise." };
   if (!would_recommend) return { error: "Indique si tu recommanderais cette entreprise." };

@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { Navbar } from "@/components/Navbar";
 import { CompanyCard } from "@/components/CompanyCard";
-import { getCompanies, getAllCompaniesForSwipe } from "@/lib/actions/companies";
+import { getCompanies, getAllCompaniesForSwipe, getCompanyNames } from "@/lib/actions/companies";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import { getUserFlameIds } from "@/lib/actions/scores";
 import { getUser } from "@/lib/supabase/server";
@@ -12,7 +12,7 @@ import { Pagination } from "./Pagination";
 import type { Company } from "@/lib/types";
 
 const SECTORS = ["Tech", "Pharma", "Finance", "Conseil", "Sports & Fashion", "Horlogerie", "Alimentation", "Industrie", "Éducation & Recherche"];
-const CITIES = ["Zurich", "Lausanne", "Basel", "Genève", "Bern", "Vevey", "Biel/Bienne", "Zürich"];
+const CITIES = ["Zürich", "Lausanne", "Basel", "Genève", "Bern", "Vevey", "Biel/Bienne"];
 
 export default async function ExplorePage({
   searchParams,
@@ -23,16 +23,15 @@ export default async function ExplorePage({
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, city: params.city, search: params.q };
 
-  const [user, favIds, flameIds, allCompaniesForNames] = await Promise.all([
+  const [user, favIds, flameIds, allNames] = await Promise.all([
     getUser(),
     getUserFavoriteIds(),
     getUserFlameIds(),
-    getAllCompaniesForSwipe(),
+    getCompanyNames(), // names only — avoids SELECT * over 200 rows just for autocomplete
   ]);
 
   // Guests are locked to page 1 — enforced server-side, not just in UI
   const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
-  const allNames = allCompaniesForNames.map(c => c.name);
 
   if (isSwipe) {
     const companies = await getAllCompaniesForSwipe(filters);
