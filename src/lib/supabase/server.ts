@@ -27,3 +27,12 @@ export const getUser = cache(async () => {
   const { data: { user } } = await supabase.auth.getUser();
   return user;
 });
+
+// Cached per-request: isAdmin check shared across Navbar + any page that needs it.
+export const getIsAdmin = cache(async () => {
+  const user = await getUser();
+  if (!user) return false;
+  const supabase = await createClient();
+  const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  return data?.role === "admin";
+});

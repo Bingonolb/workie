@@ -6,17 +6,17 @@ import { Navbar } from "@/components/Navbar";
 import { ProfileForm } from "@/components/ProfileForm";
 import { ProfileReviews } from "./ProfileReviews";
 import { getUserReviews } from "@/lib/actions/reviews";
-import { getFavorites } from "@/lib/actions/favorites";
+import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import type { Profile } from "@/lib/types";
 
 export default async function ProfilePage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
   if (!user) redirect("/login");
 
-  const [{ data: profileRaw }, reviews, favorites] = await Promise.all([
+  const [{ data: profileRaw }, reviews, favIds] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     getUserReviews(),
-    getFavorites(),
+    getUserFavoriteIds(),
   ]);
 
   const profile = profileRaw as Profile | null;
@@ -81,7 +81,7 @@ export default async function ProfilePage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
           {([
             { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b" },
-            { emoji: "🔥", value: String(favorites.length), label: "Entreprises sauvegardées", color: "#f97316" },
+            { emoji: "🔥", value: String(favIds.length), label: "Entreprises sauvegardées", color: "#f97316" },
             { emoji: "📊", value: String(reviews.length), label: "Avis publiés", color: "#10b981" },
           ] as const).map(({ emoji, value, label, color }) => (
             <div key={label} style={{

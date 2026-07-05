@@ -28,7 +28,6 @@ export function SwipeView({
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
   const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
-  const [swipeCount, setSwipeCount] = useState(0);
   const [showGuestModal, setShowGuestModal] = useState(false);
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
@@ -50,7 +49,7 @@ export function SwipeView({
   const advance = useCallback((dir: "left" | "right") => {
     if (!current || gone) return;
     if (!isLoggedIn && swipeCountRef.current >= 1) { requireLogin(); return; }
-    if (!isLoggedIn) { swipeCountRef.current += 1; setSwipeCount(c => c + 1); }
+    if (!isLoggedIn) { swipeCountRef.current += 1; }
     setGone(dir);
     if (dir === "right" && isLoggedIn) {
       setFavIds(prev => { const n = new Set(prev); n.has(current.id) ? n.delete(current.id) : n.add(current.id); return n; });

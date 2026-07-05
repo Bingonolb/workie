@@ -1,16 +1,10 @@
 import Link from "next/link";
-import { getUser, createClient } from "@/lib/supabase/server";
+import { getUser, getIsAdmin } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
 import { Flame, Compass, User, LogOut, Trophy, Shield } from "lucide-react";
 
 export async function Navbar() {
-  const [user, supabase] = await Promise.all([getUser(), createClient()]);
-
-  let isAdmin = false;
-  if (user) {
-    const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-    isAdmin = data?.role === "admin";
-  }
+  const [user, isAdmin] = await Promise.all([getUser(), getIsAdmin()]);
 
   return (
     <nav style={{

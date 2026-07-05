@@ -22,9 +22,9 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     if (coverFile instanceof File && coverFile.size > 0) {
       const ext = coverFile.name.split(".").pop() || "jpg";
       const path = `covers/${id}/${randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
+      const { error: upErr } = await supabase.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
       if (!upErr) {
-        const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+        const { data: pub } = supabase.storage.from("covers").getPublicUrl(path);
         cover_url = pub.publicUrl;
       }
     }
