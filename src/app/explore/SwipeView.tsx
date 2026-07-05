@@ -54,7 +54,7 @@ export function SwipeView({
       setFlameIds(prev => { const n = new Set(prev); n.has(current.id) ? n.delete(current.id) : n.add(current.id); return n; });
       toggleFavorite(current.id);
       addFlame(current.id);
-      showToast("🔥 +1 flamme !", "#f97316");
+      showToast("🔥 Enregistré !", "#f97316");
     } else if (dir === "right") {
       showToast("👀 Découverte !", "#6b7280");
     } else {
