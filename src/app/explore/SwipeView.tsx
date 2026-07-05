@@ -352,7 +352,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
               ))}
             </span>
             <span style={{ fontSize: 14, fontWeight: 700, color: "#f59e0b" }}>{Number(company.avg_rating).toFixed(1)}</span>
-            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{company.review_count} avis</span>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)" }}>{company.review_count} avis</span>
           </div>
         )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -361,14 +361,14 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           {company.avg_salary_chf && <Chip icon={<TrendingUp size={12} />} label={`CHF ${Math.round(company.avg_salary_chf / 1000)}k`} color="#10b981" />}
         </div>
         {company.description && (
-          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {company.description}
           </p>
         )}
         {company.tags?.length > 0 && (
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {company.tags.slice(0, 4).map(tag => (
-              <span key={tag} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 50, background: "var(--surface3)", color: "var(--text-muted)" }}>#{tag}</span>
+              <span key={tag} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 50, background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}>#{tag}</span>
             ))}
           </div>
         )}
@@ -379,7 +379,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
 
 function Chip({ icon, label, color }: { icon: React.ReactNode; label: string; color?: string }) {
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: color ?? "var(--text-muted)", background: "var(--surface2)", borderRadius: 8, padding: "4px 10px" }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: color ?? "rgba(255,255,255,0.75)", background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "4px 10px" }}>
       {icon} {label}
     </span>
   );
