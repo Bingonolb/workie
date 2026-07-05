@@ -320,9 +320,9 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           </div>
         )}
         {overlayDir === "left" && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(107,114,128,${overlayOpacity * 0.35})` }}>
-            <div style={{ border: `4px solid rgba(107,114,128,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: `rgba(200,200,200,${overlayOpacity})` }}>PASS</span>
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(239,68,68,${overlayOpacity * 0.35})` }}>
+            <div style={{ border: `4px solid rgba(239,68,68,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
+              <span style={{ fontSize: 28, fontWeight: 900, color: `rgba(239,68,68,${overlayOpacity})` }}>✕ PASS</span>
             </div>
           </div>
         )}
