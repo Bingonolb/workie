@@ -2,9 +2,9 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull } from "lucide-react";
+import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
-import { addFlame, addBoost, addPenalty } from "@/lib/actions/scores";
+import { addFlame, addBoost } from "@/lib/actions/scores";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
@@ -33,6 +33,8 @@ export function SwipeView({
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const [drag, setDrag] = useState(0);
+  // Ref tracks guest swipe count synchronously — prevents fast-swipe bypass of the one-free-swipe gate
+  const swipeCountRef = useRef(0);
 
   const current = companies[index];
   const next = companies[index + 1];
@@ -47,7 +49,8 @@ export function SwipeView({
 
   const advance = useCallback((dir: "left" | "right") => {
     if (!current || gone) return;
-    if (!isLoggedIn && swipeCount >= 1) { requireLogin(); return; }
+    if (!isLoggedIn && swipeCountRef.current >= 1) { requireLogin(); return; }
+    if (!isLoggedIn) { swipeCountRef.current += 1; setSwipeCount(c => c + 1); }
     setGone(dir);
     if (dir === "right" && isLoggedIn) {
       setFavIds(prev => { const n = new Set(prev); n.has(current.id) ? n.delete(current.id) : n.add(current.id); return n; });
@@ -60,22 +63,15 @@ export function SwipeView({
     } else {
       showToast("✕ Passé", "#ef4444");
     }
-    setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); if (!isLoggedIn) setSwipeCount(c => c + 1); }, 320);
+    setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 320);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, gone, isLoggedIn, swipeCount, requireLogin]);
+  }, [current, gone, isLoggedIn, requireLogin]);
 
   const handleBoost = () => {
     if (!isLoggedIn) { requireLogin(); return; }
     if (!current) return;
     addBoost(current.id);
     showToast("⚡ +100 pts !", "#8b5cf6");
-  };
-
-  const handlePenalty = () => {
-    if (!isLoggedIn) { requireLogin(); return; }
-    if (!current) return;
-    addPenalty(current.id);
-    showToast("💀 -100 pts", "#ef4444");
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -180,23 +176,6 @@ export function SwipeView({
 
       {/* Action buttons — Tinder style */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {/* -100 penalty */}
-        <button onClick={handlePenalty} title="Pénaliser -100 pts" style={{
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
-          width: 52, height: 52, borderRadius: "50%",
-          background: "linear-gradient(135deg, #1a0a0a, #2a0d0d)",
-          border: "2px solid rgba(239,68,68,0.5)",
-          color: "#ef4444", cursor: "pointer",
-          boxShadow: "0 4px 20px rgba(239,68,68,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
-          transition: "all 0.18s",
-        }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 32px rgba(239,68,68,0.45), inset 0 1px 0 rgba(255,255,255,0.05)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 20px rgba(239,68,68,0.25), inset 0 1px 0 rgba(255,255,255,0.05)"; }}
-        >
-          <Skull size={15} />
-          <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
-        </button>
-
         {/* Pass / X */}
         <button onClick={() => advance("left")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
@@ -270,7 +249,6 @@ export function SwipeView({
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
-          <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>
           <span>✕ passer</span>
           <span>ℹ détail</span>
           <span>🔥 sauvegarder</span>

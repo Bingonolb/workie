@@ -20,7 +20,6 @@ const lbl: React.CSSProperties = {
 
 export function AdminCompanyForm({ company }: { company: Company }) {
   const [pending, startTransition] = useTransition();
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -41,7 +40,6 @@ export function AdminCompanyForm({ company }: { company: Company }) {
     startTransition(async () => {
       const res = await adminUpdateCompany(company.id, formData);
       if (res.error) { setError(res.error); return; }
-      // Redirect back to admin list after successful save
       window.location.href = "/admin";
     });
   };
@@ -191,11 +189,7 @@ export function AdminCompanyForm({ company }: { company: Company }) {
           ⚠ {error}
         </div>
       )}
-      {success && (
-        <div style={{ padding: "12px 16px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 10, fontSize: 13, fontWeight: 700, color: "#10b981" }}>
-          ✓ Entreprise mise à jour avec succès
-        </div>
-      )}
+
 
       {/* Actions */}
       <div style={{ display: "flex", gap: 12, paddingTop: 4 }}>

@@ -124,18 +124,31 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Favorite button */}
-            <form action={toggleFavorite.bind(null, company.id)}>
-              <button type="submit" style={{
+            {user ? (
+              <form action={toggleFavorite.bind(null, company.id)}>
+                <button type="submit" style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "10px 20px", borderRadius: 12,
+                  background: isFav ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.1)",
+                  border: isFav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.15)",
+                  color: isFav ? "#f97316" : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                  backdropFilter: "blur(8px)",
+                }}>
+                  <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
+                </button>
+              </form>
+            ) : (
+              <Link href="/login" style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "10px 20px", borderRadius: 12,
-                background: isFav ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.1)",
-                border: isFav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.15)",
-                color: isFav ? "#f97316" : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                color: "#fff", fontWeight: 600, fontSize: 14, textDecoration: "none",
                 backdropFilter: "blur(8px)",
               }}>
-                <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
-              </button>
-            </form>
+                <Flame size={16} fill="none" /> Sauvegarder
+              </Link>
+            )}
           </div>
         </div>
       </div>

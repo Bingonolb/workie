@@ -64,8 +64,15 @@ export async function getAllCompaniesForSwipe(filters?: {
     else if (names.length > 1) query = query.in("name", names);
   }
 
-  const { data } = await query.limit(200);
+  const { data } = await query.limit(800);
   return (data ?? []) as Company[];
+}
+
+// Lightweight — names only for autocomplete, avoids SELECT * over 200 rows
+export async function getCompanyNames(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("companies").select("name").order("name");
+  return (data ?? []).map((r: { name: string }) => r.name);
 }
 
 export async function getCompany(id: string) {
