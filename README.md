@@ -1,118 +1,364 @@
-# WatchSwap
+# Workie
 
-Application web "Tinder pour montres" : tu listes tes montres, tu swipes celles des autres, et quand vous vous likez mutuellement (toi sa montre, lui une des tiennes), un match se crée et vous pouvez discuter en temps réel pour organiser l'échange.
+**Workie** is a Swiss company review platform — think Glassdoor but built for the Swiss market with a Gen Z audience in mind. Employees leave anonymous reviews, rate companies, share salary data, and the community up- or down-votes companies through a real-time scoring system.
 
-## Stack
+---
 
-- **Next.js 16** (App Router, Server Components, Server Actions) + TypeScript + Tailwind CSS
-- **Supabase** : Auth (email/mot de passe), Postgres (schéma ci-dessous), Storage (photos), Realtime (chat)
-- **Framer Motion** pour le swipe façon Tinder, **Lucide** pour les icônes
-- Déploiement cible : **Vercel**, code source sur **GitHub**, développement local dans **VS Code**
+## Table of Contents
 
-## Fonctionnalités
+1. [Description](#description)
+2. [Tech Stack](#tech-stack)
+3. [Folder Structure](#folder-structure)
+4. [Local Setup](#local-setup)
+5. [Data Model](#data-model)
+6. [Scoring Formula](#scoring-formula)
+7. [Authentication Flow](#authentication-flow)
+8. [Key Features](#key-features)
+9. [Contribution Guide](#contribution-guide)
 
-- Inscription / connexion par email + mot de passe
-- Ajout de montres (marque, modèle, année, état, description, ville, jusqu'à 5 photos)
-- Gestion de ses montres (pause, réactivation, suppression)
-- Swipe deck (glisser à la souris/au doigt ou boutons J'aime / Passer / Super-like / Annuler)
-- Détection automatique des matchs réciproques (trigger SQL côté base de données)
-- Pop-up "It's a Match!"
-- Messagerie en temps réel par match (Supabase Realtime)
-- Page "Mes échanges" listant tous les matchs
-- Filtres par marque / état sur le fil de découverte
-- Profil utilisateur avec photo, ville, bio
+---
 
-## Pensé pour passer à l'échelle (100k+ utilisateurs)
+## Description
 
-- Le fil "Découvrir" est servi par une fonction SQL (`get_discover_feed`) qui exclut les montres déjà vues côté base de données via un `NOT EXISTS` indexé, avec pagination par curseur (`created_at`) — pas de chargement de toute la table en mémoire.
-- Toutes les clés étrangères et colonnes de filtre (`owner_id`, `status`, `created_at`, `swiper_id`, `target_watch_id`, etc.) sont indexées.
-- Les policies RLS utilisent `(select auth.uid())` plutôt que `auth.uid()` pour que Postgres évalue la fonction une seule fois par requête plutôt qu'une fois par ligne (recommandation officielle Supabase pour la perf à grande échelle).
-- La détection de match est faite par un trigger Postgres (`handle_new_swipe`), donc atomique et sans race condition côté serveur applicatif.
-- Les photos sont servies depuis Supabase Storage (CDN), pas depuis le serveur Next.js.
-- Supabase gère nativement le pooling de connexions (pgbouncer) — pas de configuration supplémentaire nécessaire pour scaler les connexions DB.
+Workie lets Swiss professionals find reliable, uncensored information about companies before they join. Key design principles:
 
-À surveiller quand le trafic grossira réellement : passer le plan Supabase en payant (le tier gratuit a des limites de stockage/bande passante), envisager un cache (Redis/Vercel KV) pour le fil de découverte si besoin, et un CDN d'images avec resize automatique (Supabase Storage le permet via les "image transformations").
+- Reviews are **100% anonymous by default** — only job title and tenure duration are shown.
+- A **gamified scoring system** (flames, boosts, penalties) produces a live company ranking.
+- Guest users can browse but are gated after the first swipe / first review; a `GuestModal` prompts sign-up.
+- The admin panel (`/admin`) lets privileged users create, update, and delete companies.
 
-## Schéma de base de données
+Target audience: Swiss professionals, recent graduates, and job-seekers aged 20–35.
 
-Tables : `profiles`, `watches`, `swipes`, `matches`, `messages`.
-Tout est déjà créé et configuré sur le projet Supabase `watchswap` (RLS activé partout, policies, buckets storage `watch-photos` et `avatars`, realtime activé sur `messages`).
+---
 
-## Lancer le projet en local (VS Code)
+## Tech Stack
 
-1. Installer [Node.js 20+](https://nodejs.org) et [VS Code](https://code.visualstudio.com/).
-2. Ouvrir le dossier `watchswap` dans VS Code.
-3. Ouvrir un terminal (`` Ctrl+` ``) et lancer :
-   ```bash
-   npm install
-   npm run dev
-   ```
-4. Ouvrir [http://localhost:3000](http://localhost:3000).
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript |
+| UI | React 19, inline styles (no CSS framework) |
+| Database | Supabase PostgreSQL |
+| Auth | Supabase Auth — Google OAuth + email/password |
+| ORM / SDK | `@supabase/ssr` (server + browser clients) |
+| File Storage | Supabase Storage (`avatars` bucket) |
+| Deployment | Vercel (auto-deploy on `git push main`) |
+| Icons | `lucide-react` |
 
-Le fichier `.env.local` contient déjà les clés Supabase du projet `watchswap` créé pour toi (URL + clé publique). Ne les partage pas publiquement si le repo GitHub est en mode privé non souhaité — sinon régénère-les depuis le dashboard Supabase.
+---
 
-## Mettre le code sur GitHub
+## Folder Structure
 
-1. Va sur [github.com/new](https://github.com/new), crée un nouveau repo (ex: `watchswap`), ne coche aucune case d'initialisation (pas de README/gitignore, ils existent déjà).
-2. Dans le terminal VS Code, à la racine du projet :
-   ```bash
-   git remote add origin https://github.com/TON-PSEUDO/watchswap.git
-   git branch -M main
-   git push -u origin main
-   ```
-3. Rafraîchis la page GitHub : ton code est en ligne.
+```
+src/
+├── app/                        # Next.js App Router pages
+│   ├── layout.tsx              # Root layout (QueryProvider wrapper)
+│   ├── page.tsx                # Landing page (guests only)
+│   ├── login/page.tsx          # Email + Google login
+│   ├── signup/page.tsx         # Email registration
+│   ├── explore/
+│   │   ├── page.tsx            # Grid + Swipe view of companies
+│   │   ├── SwipeView.tsx       # Tinder-style swipe client component
+│   │   ├── ExploreFilters.tsx  # Sector / city / search filters
+│   │   └── Pagination.tsx      # Page controls (logged-in only)
+│   ├── company/[id]/page.tsx   # Company detail + reviews + review form
+│   ├── ranking/
+│   │   ├── page.tsx            # Ranking page (top 100)
+│   │   └── RankingList.tsx     # Ranked table component
+│   ├── favorites/page.tsx      # User's saved companies
+│   ├── profile/
+│   │   ├── page.tsx            # Profile dashboard (reviews + edit form)
+│   │   └── ProfileReviews.tsx  # User's review history table
+│   ├── admin/
+│   │   ├── page.tsx            # Admin company list
+│   │   └── company/[id]/       # Create / edit company form
+│   └── auth/callback/route.ts  # Google OAuth callback handler
+│
+├── components/                 # Shared UI components
+│   ├── Navbar.tsx              # Top navigation (Server Component)
+│   ├── CompanyCard.tsx         # Card used in grid view
+│   ├── ReviewForm.tsx          # 3-step multi-page review wizard
+│   ├── GuestModal.tsx          # Bottom-sheet paywall for guests
+│   ├── ProfileForm.tsx         # Profile edit form
+│   ├── ParallaxCover.tsx       # Cover image with parallax effect
+│   └── AuthFormWorkie.tsx      # Login / signup form component
+│
+└── lib/
+    ├── types.ts                # TypeScript interfaces (Company, Review, Profile)
+    ├── constants.ts            # PAGE_SIZE = 12
+    ├── supabase/
+    │   ├── server.ts           # Server-side Supabase client + getUser() (React cache)
+    │   ├── client.ts           # Browser-side Supabase client
+    │   ├── admin.ts            # Service-role client (bypasses RLS — server only)
+    │   └── middleware.ts       # Session refresh + route protection
+    └── actions/
+        ├── auth.ts             # signUp, signIn, signOut, signInWithGoogle
+        ├── companies.ts        # getCompanies, getCompany, getAllCompaniesForSwipe, getCompanyNames
+        ├── reviews.ts          # getReviews, getUserReviews, submitReview, voteHelpful
+        ├── scores.ts           # addFlame, addBoost, addPenalty, getTopCompanies, getUserFlameIds
+        ├── favorites.ts        # toggleFavorite, getFavorites, getUserFavoriteIds
+        ├── profile.ts          # updateProfile (with avatar upload)
+        └── admin.ts            # adminAddCompany, adminUpdateCompany, adminDeleteCompany
+```
 
-## Déployer sur Vercel
+---
 
-1. Va sur [vercel.com/new](https://vercel.com/new) et connecte-toi avec ton compte GitHub.
-2. Sélectionne le repo `watchswap` puis clique sur **Import**.
-3. Vercel détecte automatiquement Next.js. Avant de cliquer sur **Deploy**, ouvre la section **Environment Variables** et ajoute :
-   - `NEXT_PUBLIC_SUPABASE_URL` = `https://xtbdxfzbbuedlktpqpna.supabase.co`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = `sb_publishable_5TZfXHC5G9n99L8GF7XEBA_RLcRsOmv`
-4. Clique sur **Deploy**. En ~1 minute, ton site est en ligne sur une URL `watchswap-xxxx.vercel.app`.
-5. À chaque `git push` sur `main`, Vercel redéploie automatiquement.
+## Local Setup
 
-Tu peux ensuite ajouter un nom de domaine personnalisé dans Vercel → Project Settings → Domains.
+### 1. Prerequisites
 
-## Connexion avec Google
+- Node.js 20+
+- A Supabase project (project ID: `xtbdxfzbbuedlktpqpna`)
 
-1. Va sur [console.cloud.google.com](https://console.cloud.google.com/), crée un projet (ou utilise un existant).
-2. Menu **APIs & Services → Credentials → Create Credentials → OAuth client ID**, type "Web application".
-3. Dans **Authorized redirect URIs**, ajoute l'URL de callback Supabase. Tu la trouves dans le dashboard Supabase → Authentication → Providers → Google (elle ressemble à `https://xtbdxfzbbuedlktpqpna.supabase.co/auth/v1/callback`).
-4. Copie le **Client ID** et le **Client Secret** générés.
-5. Dans le dashboard Supabase → Authentication → Providers → Google : active le provider, colle le Client ID et le Client Secret, sauvegarde.
-6. Dans Vercel (et `.env.local` en local), mets `NEXT_PUBLIC_SITE_URL` à l'URL réelle de ton site (ex: `https://watchswap-xxxx.vercel.app`).
+### 2. Clone and install
 
-## Vérification d'identité (Stripe Identity)
+```bash
+git clone <repo-url>
+cd workie
+npm install
+```
 
-Avant qu'un échange ne soit finalisé entre deux utilisateurs (bouton "Confirmer l'échange" dans le chat), chacun doit avoir vérifié son identité (pièce d'identité + selfie) une fois. C'est géré par Stripe Identity : on ne stocke jamais nous-mêmes les pièces d'identité, seulement un statut "vérifié" sur le profil.
+### 3. Environment variables
 
-1. Crée un compte sur [dashboard.stripe.com/register](https://dashboard.stripe.com/register).
-2. Dans le dashboard Stripe, active **Identity** (menu de gauche, ou [dashboard.stripe.com/identity](https://dashboard.stripe.com/identity)).
-3. Récupère ta clé secrète de test ou de prod dans **Developers → API keys** → `STRIPE_SECRET_KEY`.
-4. Crée un webhook dans **Developers → Webhooks → Add endpoint** :
-   - URL : `https://ton-domaine.vercel.app/api/stripe/webhook`
-   - Événements à écouter : `identity.verification_session.verified`, `identity.verification_session.requires_input`
-   - Copie le "Signing secret" → `STRIPE_WEBHOOK_SECRET`
-5. Récupère la clé `service_role` dans le dashboard Supabase → Project Settings → API → `SUPABASE_SERVICE_ROLE_KEY` (⚠️ secrète, ne jamais l'exposer côté client, seulement utilisée dans le webhook).
-6. Ajoute ces 3 variables dans Vercel (Project Settings → Environment Variables) et dans `.env.local` en local :
-   ```
-   STRIPE_SECRET_KEY=sk_...
-   STRIPE_WEBHOOK_SECRET=whsec_...
-   SUPABASE_SERVICE_ROLE_KEY=...
-   ```
+Create a `.env.local` file at the project root:
 
-Tant que ces clés ne sont pas configurées, le bouton "Vérifier mon identité" renverra une erreur — c'est normal en attendant la configuration.
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xtbdxfzbbuedlktpqpna.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-## Administrer la base de données
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are safe to expose in the browser.
+- `SUPABASE_SERVICE_ROLE_KEY` bypasses RLS — **never expose it client-side**.
+- `NEXT_PUBLIC_SITE_URL` is used to build the Google OAuth redirect URL.
 
-Dashboard Supabase du projet : [supabase.com/dashboard/project/xtbdxfzbbuedlktpqpna](https://supabase.com/dashboard/project/xtbdxfzbbuedlktpqpna)
-Tu peux y voir les tables, les utilisateurs inscrits, les logs, et ajuster le plan tarifaire si le trafic grossit.
+### 4. Run locally
 
-## Pistes d'amélioration
+```bash
+npm run dev
+```
 
-- Génération des types TypeScript stricts depuis le schéma Supabase (`supabase gen types typescript`) pour remplacer le type `Database = any` actuel.
-- Notifications push/email quand on reçoit un match ou un message.
-- Système de notation des échanges pour la confiance entre utilisateurs.
-- Pagination optimisée des conversations si un utilisateur a beaucoup de matchs.
-- Tests automatisés (actuellement non inclus).
+The app starts at `http://localhost:3000`.
+
+---
+
+## Data Model
+
+### `companies`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `zefix_uid` | text | Swiss company registry ID |
+| `name` | text | |
+| `sector` | text | One of 9 predefined sectors |
+| `subsector` | text | Optional |
+| `city` | text | |
+| `canton` | text | Optional |
+| `employee_range` | text | e.g. `"51-200"` |
+| `description` | text | |
+| `logo_url` | text | |
+| `cover_url` | text | Stored in Supabase Storage `avatars` bucket |
+| `website_url` | text | |
+| `linkedin_url` | text | |
+| `avg_rating` | numeric | Maintained by DB trigger or function |
+| `review_count` | int | Maintained by DB trigger or function |
+| `avg_salary_chf` | numeric | |
+| `tags` | text[] | |
+| `is_verified` | bool | Admin-controlled |
+| `score` | int | Computed — see formula below |
+| `founded_year` | int | |
+
+### `reviews`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `company_id` | uuid FK → companies | |
+| `user_id` | uuid FK → auth.users | nullable |
+| `rating_overall` | int 1–5 | Required |
+| `rating_culture` | int 1–5 | Optional |
+| `rating_management` | int 1–5 | Optional |
+| `rating_worklife` | int 1–5 | Optional |
+| `rating_career` | int 1–5 | Optional |
+| `title` | text | Optional |
+| `content` | text | Min. 50 chars |
+| `pros` | text | Min. 10 chars |
+| `cons` | text | Min. 10 chars |
+| `job_title` | text | Required |
+| `salary_chf` | numeric | Optional, anonymized |
+| `is_current` | bool | Current or former employee |
+| `is_anonymous` | bool | Always `true` currently |
+| `employment_type` | enum | `cdi / cdd / stage / alternance / freelance` |
+| `duration_range` | text | `moins_6mois / 6mois_2ans / plus_2ans` |
+| `work_mode` | enum | `présentiel / hybride / remote` |
+| `would_recommend` | enum | `oui / non / ca_depend` |
+| `knew_before` | text | Optional advice |
+| `helpful_count` | int | Incremented by `increment_helpful` RPC |
+
+### `score_events`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `company_id` | uuid FK | |
+| `user_id` | uuid FK | |
+| `event_type` | text | `flame / boost / penalty` |
+| `points` | int | +1 (flame), +100 (boost), -100 (penalty) |
+
+One flame per user per company (toggle). Boost is one-time; penalty is admin-only.
+
+### `favorites`
+
+| Column | Type |
+|---|---|
+| `user_id` | uuid FK |
+| `company_id` | uuid FK |
+| `created_at` | timestamptz |
+
+### `profiles`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid FK → auth.users | |
+| `username` | text | |
+| `full_name` | text | |
+| `avatar_url` | text | |
+| `city` | text | |
+| `country` | text | |
+| `bio` | text | |
+| `role` | text | `"admin"` for admin users |
+
+### `review_votes`
+
+| Column | Type |
+|---|---|
+| `user_id` | uuid FK |
+| `review_id` | uuid FK |
+
+Used to prevent duplicate "helpful" votes.
+
+---
+
+## Scoring Formula
+
+The company score is calculated as:
+
+```
+score = ROUND(avg_rating * 20 * LN(review_count + 1)) + SUM(score_events.points)
+```
+
+- `avg_rating` — average of all `rating_overall` values (1–5 scale)
+- `review_count` — total number of reviews for the company
+- The logarithm dampens the effect of very high review counts, rewarding quality over quantity
+- `score_events.points` — community contributions: flames (+1), boosts (+100), penalties (-100)
+
+The `score` column on the `companies` table must be kept in sync by a Supabase database function or trigger whenever a review or score event is inserted, updated, or deleted.
+
+---
+
+## Authentication Flow
+
+### Email / Password
+
+1. User fills the form on `/signup` or `/login`
+2. The form submits to a Server Action (`signUp` / `signIn` in `src/lib/actions/auth.ts`)
+3. The action calls `supabase.auth.signUp()` or `supabase.auth.signInWithPassword()`
+4. On success, `redirect("/explore")` is called server-side
+
+### Google OAuth
+
+1. User clicks "Continuer avec Google" (on `/login`, `/signup`, or `GuestModal`)
+2. A `<form action={signInWithGoogle}>` submits to the `signInWithGoogle` Server Action
+3. The action calls `supabase.auth.signInWithOAuth({ provider: "google" })` and redirects to Google
+4. Google redirects back to `NEXT_PUBLIC_SITE_URL/auth/callback`
+5. The route handler at `src/app/auth/callback/route.ts` exchanges the code for a session via `supabase.auth.exchangeCodeForSession(code)`
+6. User is redirected to `/explore`
+
+### Session Management
+
+- `src/lib/supabase/middleware.ts` refreshes the session cookie on every request and enforces route protection
+- `getUser()` in `src/lib/supabase/server.ts` is memoized with React `cache()` — called at most once per server render even if `Navbar` and the page both invoke it
+- Protected routes: `/profile`, `/favorites`, `/admin` redirect to `/login` if no session
+
+### Admin Access
+
+Admin status is checked by querying `profiles.role === "admin"`. This check is done in:
+- `Navbar.tsx` — to show the Admin link
+- `src/app/admin/page.tsx` — page-level redirect guard
+- `src/lib/actions/admin.ts` — `requireAdmin()` helper (throws on failure)
+- `src/lib/actions/scores.ts` — `addPenalty()` checks role before inserting
+
+---
+
+## Key Features
+
+### SwipeView (`src/app/explore/SwipeView.tsx`)
+
+Tinder-style card swipe built with pointer events (no external drag library).
+
+- Swipe right → saves company as favorite + adds a flame (+1 score)
+- Swipe left → passes
+- Action buttons: pass (X), info (→ company page), flame/save, boost (+100), penalty (-100)
+- Guests are limited to 1 swipe before `GuestModal` appears
+- Cards show the next company underneath as a peek
+
+### Company Ranking (`/ranking`)
+
+Displays the top 100 companies ordered by `score DESC, avg_rating DESC, review_count DESC`. The scoring formula is explained inline.
+
+### Guest Gating (`GuestModal`)
+
+A bottom-sheet modal that appears:
+- On `/company/[id]` after the first review preview (0.8s timer)
+- In `SwipeView` after the first swipe
+- Offers Google sign-in or email sign-up
+
+### Review System (`ReviewForm`)
+
+A 3-step wizard:
+1. **Step 0 — Employment**: job title, contract type, tenure, work mode, optional salary
+2. **Step 1 — Ratings**: overall star rating + 4 optional sub-ratings, would-recommend
+3. **Step 2 — Review**: pros, cons, full review text, optional "what I wish I knew"
+
+Server-side validation enforces: auth check, company existence, one-review-per-user-per-company, minimum length requirements. All reviews are stored as anonymous.
+
+---
+
+## Contribution Guide
+
+### Branches
+
+- `main` — production branch, auto-deployed to Vercel on push
+- Feature work: create a branch from `main`, e.g. `feat/review-moderation`
+- Do not push directly to `main` for significant changes — use a PR
+
+### Commit Style
+
+Use conventional commits:
+```
+feat: add review moderation queue
+fix: correct score update on review delete
+chore: bump supabase-ssr to 0.6
+```
+
+### Deployment
+
+Vercel is connected to the `main` branch. Every push triggers an automatic deploy. Preview deployments are created for PRs.
+
+Required environment variables in Vercel:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_SITE_URL` — must be set to the production domain
+
+### Database Migrations
+
+Use the Supabase dashboard or the Supabase CLI (`supabase db push`). The `createAdminClient()` in `src/lib/supabase/admin.ts` uses the service role key — it is server-only and must never be imported from a client component or committed to a public repository.
+
+### Adding a New Sector
+
+1. Add the sector string to `SECTORS` in `src/app/explore/page.tsx`
+2. Add a color mapping to `SECTOR_COLORS` in `src/lib/types.ts`
+3. Update the sector `<select>` in `src/app/admin/company/[id]/AdminCompanyForm.tsx`
