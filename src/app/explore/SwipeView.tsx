@@ -58,7 +58,7 @@ export function SwipeView({
     } else if (dir === "right") {
       showToast("👀 Découverte !", "#6b7280");
     } else {
-      showToast("⏭ Passé", "#6b7280");
+      showToast("✕ Passé", "#ef4444");
     }
     setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); if (!isLoggedIn) setSwipeCount(c => c + 1); }, 320);
   // eslint-disable-next-line react-hooks/exhaustive-deps
