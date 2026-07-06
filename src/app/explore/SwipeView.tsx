@@ -65,14 +65,16 @@ export function SwipeView({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, gone, isLoggedIn, requireLogin]);
 
-  const handleBoost = () => {
+  const handleBoost = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!isLoggedIn) { requireLogin(); return; }
     if (!current) return;
     addBoost(current.id);
     showToast("⚡ +100 pts !", "#8b5cf6");
   };
 
-  const handlePenalty = () => {
+  const handlePenalty = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!isLoggedIn) { requireLogin(); return; }
     if (!current) return;
     addPenalty(current.id);
