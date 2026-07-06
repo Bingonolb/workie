@@ -5,8 +5,8 @@ import { useActionState } from "react";
 type ActionResult = { error?: string } | undefined;
 
 const inp: React.CSSProperties = {
-  width: "100%", background: "#1e1e2a", border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 10, padding: "12px 14px", fontSize: 14, color: "#f0f0f8",
+  width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
+  borderRadius: 10, padding: "12px 14px", fontSize: 14, color: "var(--text)",
   outline: "none", boxSizing: "border-box",
 };
 
@@ -30,7 +30,7 @@ export function AuthFormWorkie({
         <input type="hidden" name="next" value={next} />
         <button type="submit" style={{
           width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-          background: "#fff", border: "none", borderRadius: 10, padding: "12px 16px",
+          background: "#fff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 10, padding: "12px 16px",
           fontWeight: 600, fontSize: 14, color: "#111", cursor: "pointer", marginBottom: 20,
         }}>
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -44,25 +44,25 @@ export function AuthFormWorkie({
       </form>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
-        <span style={{ fontSize: 12, color: "rgba(240,240,248,0.3)" }}>ou</span>
-        <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+        <div style={{ flex: 1, height: 1, background: "var(--border2)" }} />
+        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>ou</span>
+        <div style={{ flex: 1, height: 1, background: "var(--border2)" }} />
       </div>
 
       <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <input type="hidden" name="next" value={next} />
         {mode === "signup" && (
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(240,240,248,0.5)", marginBottom: 6 }}>Pseudo</label>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Pseudo</label>
             <input name="username" required placeholder="alex_workie" style={inp} />
           </div>
         )}
         <div>
-          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(240,240,248,0.5)", marginBottom: 6 }}>Email</label>
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email</label>
           <input type="email" name="email" required placeholder="toi@email.com" style={inp} />
         </div>
         <div>
-          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(240,240,248,0.5)", marginBottom: 6 }}>Mot de passe</label>
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Mot de passe</label>
           <input type="password" name="password" required minLength={6} placeholder="••••••••" style={inp} />
         </div>
 

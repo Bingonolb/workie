@@ -28,7 +28,7 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
       {[1, 2, 3, 4, 5].map(n => (
         <Star key={n} size={size}
           fill={n <= Math.round(rating) ? "#f59e0b" : "transparent"}
-          color={n <= Math.round(rating) ? "#f59e0b" : "#3a3a4a"}
+          color={n <= Math.round(rating) ? "#f59e0b" : "var(--border2)"}
           strokeWidth={1.5}
         />
       ))}

@@ -33,9 +33,9 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
         transition: "transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)",
       }}>
         <div style={{
-          background: "#13131c",
+          background: "var(--surface)",
           borderRadius: "24px 24px 0 0",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
+          borderTop: "1px solid var(--border2)",
           padding: "12px 24px 40px",
           maxWidth: 560,
           margin: "0 auto",
@@ -43,19 +43,19 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
           {/* Handle */}
           <div style={{
             width: 40, height: 4, borderRadius: 2,
-            background: "rgba(255,255,255,0.15)",
+            background: "var(--border2)",
             margin: "0 auto 28px",
           }} />
 
           {/* Header */}
           <div style={{ marginBottom: 8 }}>
             <p style={{
-              fontSize: 22, fontWeight: 900, color: "#f0f0f8",
+              fontSize: 22, fontWeight: 900, color: "var(--text)",
               letterSpacing: "-0.03em", marginBottom: 8,
             }}>
               Connecte-toi pour continuer
             </p>
-            <p style={{ fontSize: 14, color: "rgba(240,240,248,0.5)", lineHeight: 1.6 }}>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
               {reviewCount > 1
                 ? `Encore ${reviewCount - 1} avis à lire — salaires, retours d'expérience et conseils d'anciens employés.`
                 : "Accède aux avis complets, salaires réels et donne le tien — c'est 100% anonyme."}
@@ -67,7 +67,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
             <form action={signInWithGoogle}>
               <button type="submit" style={{
                 width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                background: "#fff", border: "none", borderRadius: 14,
+                background: "#fff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 14,
                 padding: "14px 20px", fontWeight: 600, fontSize: 15, color: "#111",
                 cursor: "pointer",
               }}>
@@ -83,9 +83,9 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
 
             {/* Divider */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
-              <span style={{ fontSize: 12, color: "rgba(240,240,248,0.3)" }}>ou</span>
-              <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
+              <div style={{ flex: 1, height: 1, background: "var(--border2)" }} />
+              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>ou</span>
+              <div style={{ flex: 1, height: 1, background: "var(--border2)" }} />
             </div>
 
             {/* Email signup */}
@@ -99,9 +99,9 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
             </Link>
 
             {/* Login */}
-            <p style={{ textAlign: "center", fontSize: 13, color: "rgba(240,240,248,0.35)", marginTop: 4 }}>
+            <p style={{ textAlign: "center", fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
               Déjà un compte ?{" "}
-              <Link href="/login" style={{ color: "#a78bfa", fontWeight: 600, textDecoration: "none" }}>
+              <Link href="/login" style={{ color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>
                 Se connecter
               </Link>
             </p>

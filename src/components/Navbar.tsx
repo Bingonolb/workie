@@ -35,7 +35,7 @@ export async function Navbar() {
             <Link key={href} href={href} style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "7px 14px", borderRadius: 8,
-              fontSize: 14, fontWeight: 500, color: "rgba(240,240,248,0.65)",
+              fontSize: 14, fontWeight: 500, color: "var(--text-muted)",
               textDecoration: "none",
             }}>
               {icon} {label}
@@ -63,14 +63,14 @@ export async function Navbar() {
             <button type="submit" style={{
               display: "flex", alignItems: "center", gap: 6,
               background: "none", border: "none", cursor: "pointer",
-              color: "rgba(240,240,248,0.4)", fontSize: 13, fontWeight: 500, padding: "6px 10px", borderRadius: 8,
+              color: "var(--text-muted)", fontSize: 13, fontWeight: 500, padding: "6px 10px", borderRadius: 8,
             }}>
               <LogOut size={14} /> Se déconnecter
             </button>
           </form>
         ) : (
           <>
-            <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: "rgba(240,240,248,0.55)", textDecoration: "none" }}>
+            <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: "var(--text-muted)", textDecoration: "none" }}>
               Connexion
             </Link>
             <Link href="/signup" style={{
