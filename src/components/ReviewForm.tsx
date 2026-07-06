@@ -145,7 +145,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   const [step1Err, setStep1Err] = useState("");
   const [step2Err, setStep2Err] = useState("");
 
-  const canSubmit = content.length >= 50 && pros.trim().length >= 10 && cons.trim().length >= 10;
+  const canSubmit = content.length >= 50 && pros.trim().length >= 10 && cons.trim().length >= 10
+    && ratingOverall > 0 && !!wouldRecommend;
 
   const goNext = () => {
     if (step === 0) {

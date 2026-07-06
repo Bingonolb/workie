@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { getTopCompanies } from "@/lib/actions/scores";
+import { createClient } from "@/lib/supabase/server";
 import { Flame, TrendingUp, Users, Star, Zap } from "lucide-react";
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
@@ -7,13 +8,18 @@ import type { Company } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function RankingPage() {
-  const companies = (await getTopCompanies(100)) as Company[];
+  const supabase = await createClient();
+  const [companies, { count: reviewCount }] = await Promise.all([
+    getTopCompanies(100),
+    supabase.from("reviews").select("*", { count: "exact", head: true }),
+  ]);
+  const typedCompanies = companies as Company[];
 
-  const withRating = companies.filter(c => c.avg_rating > 0);
+  const withRating = typedCompanies.filter(c => c.avg_rating > 0);
   const avgRating = withRating.length
     ? withRating.reduce((s, c) => s + c.avg_rating, 0) / withRating.length
     : 0;
-  const totalReviews = companies.reduce((s, c) => s + c.review_count, 0);
+  const totalReviews = reviewCount ?? 0;
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
@@ -64,7 +70,7 @@ export default async function RankingPage() {
         {/* KPI strip */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 32 }}>
           {[
-            { icon: <Users size={16} color="#8b5cf6" />, value: companies.length, label: "Entreprises classées", color: "#8b5cf6" },
+            { icon: <Users size={16} color="#8b5cf6" />, value: typedCompanies.length, label: "Entreprises classées", color: "#8b5cf6" },
             { icon: <Star size={16} color="#f59e0b" fill="#f59e0b" />, value: totalReviews, label: "Avis publiés", color: "#f59e0b" },
             { icon: <TrendingUp size={16} color="#10b981" />, value: avgRating > 0 ? Number(avgRating).toFixed(2) : "—", label: "Note moyenne", color: "#10b981" },
           ].map(({ icon, value, label, color }) => (
@@ -94,7 +100,7 @@ export default async function RankingPage() {
               <p style={{ fontSize: 13 }}>Explore les entreprises et dépose des avis pour alimenter le classement.</p>
             </div>
           ) : (
-            <RankingTable companies={companies} />
+            <RankingTable companies={typedCompanies} />
           )}
         </div>
       </main>

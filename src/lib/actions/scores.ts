@@ -60,7 +60,11 @@ export async function addPenalty(companyId: string): Promise<void> {
     .eq("event_type", "penalty")
     .maybeSingle();
 
-  if (existing) return;
+  if (existing) {
+    await supabase.from("score_events").delete().eq("id", existing.id);
+    revalidatePath("/", "layout");
+    return;
+  }
 
   await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
   revalidatePath("/", "layout");

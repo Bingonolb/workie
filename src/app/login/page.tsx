@@ -2,7 +2,9 @@ import Link from "next/link";
 import { signIn, signInWithGoogle } from "@/lib/actions/auth";
 import { AuthFormWorkie } from "@/components/AuthFormWorkie";
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const { next: rawNext } = await searchParams;
+  const next = rawNext && /^\/(?![/\\])/.test(rawNext) ? rawNext : "/explore";
   return (
     <main style={{ minHeight: "100dvh", background: "#0d0d13", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 40 }}>
@@ -22,7 +24,7 @@ export default function LoginPage() {
           <Link href="/signup" style={{ color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>S&apos;inscrire</Link>
         </p>
 
-        <AuthFormWorkie mode="login" action={signIn} googleAction={signInWithGoogle} />
+        <AuthFormWorkie mode="login" action={signIn} googleAction={signInWithGoogle} next={next} />
       </div>
     </main>
   );

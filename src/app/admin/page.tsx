@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
-import { Shield, Plus, Pencil, ExternalLink, Star, MessageSquare, Users } from "lucide-react";
+import { AdminCompanyList } from "./AdminCompanyList";
+import { Shield, Plus, Star, MessageSquare, Users } from "lucide-react";
 import type { Company } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -21,11 +22,6 @@ export default async function AdminPage() {
   ]);
 
   const list = (companies ?? []) as Company[];
-
-  const bySector = list.reduce<Record<string, Company[]>>((acc, c) => {
-    (acc[c.sector] ??= []).push(c);
-    return acc;
-  }, {});
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
@@ -72,76 +68,8 @@ export default async function AdminPage() {
           </Link>
         </div>
 
-        {/* Companies by sector */}
-        {Object.entries(bySector).map(([sector, companies]) => (
-          <div key={sector} style={{ marginBottom: 32 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>
-              {sector} · {companies.length}
-            </p>
-            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
-              {companies.map((c, i) => (
-                <div key={c.id} style={{
-                  display: "grid", gridTemplateColumns: "48px 1fr auto auto auto",
-                  alignItems: "center", gap: 16, padding: "12px 20px",
-                  borderBottom: i < companies.length - 1 ? "1px solid var(--border)" : "none",
-                }}>
-                  {/* Cover thumbnail */}
-                  <div style={{
-                    width: 48, height: 36, borderRadius: 8, overflow: "hidden", flexShrink: 0,
-                    background: "var(--surface2)",
-                  }}>
-                    {c.cover_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    )}
-                  </div>
-
-                  {/* Name + city */}
-                  <div>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{c.name}</p>
-                    <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{c.city}{c.canton ? `, ${c.canton}` : ""} · {c.employee_range} emp.</p>
-                  </div>
-
-                  {/* Rating */}
-                  <span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-                    ★ {Number(c.avg_rating).toFixed(1)}
-                  </span>
-
-                  {/* Verified badge */}
-                  <span style={{
-                    fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20,
-                    background: c.is_verified ? "rgba(16,185,129,0.12)" : "var(--surface2)",
-                    color: c.is_verified ? "#10b981" : "var(--text-muted)",
-                    border: c.is_verified ? "1px solid rgba(16,185,129,0.3)" : "1px solid var(--border)",
-                    whiteSpace: "nowrap",
-                  }}>
-                    {c.is_verified ? "✓ Vérifié" : "Non vérifié"}
-                  </span>
-
-                  {/* Actions */}
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <Link href={`/admin/company/${c.id}`} style={{
-                      display: "flex", alignItems: "center", gap: 5,
-                      padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
-                      background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)",
-                      color: "#8b5cf6", textDecoration: "none",
-                    }}>
-                      <Pencil size={12} /> Modifier
-                    </Link>
-                    <Link href={`/company/${c.id}`} target="_blank" style={{
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      width: 32, height: 32, borderRadius: 8,
-                      background: "var(--surface2)", border: "1px solid var(--border)",
-                      color: "var(--text-muted)", textDecoration: "none",
-                    }}>
-                      <ExternalLink size={13} />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+        {/* Companies list with search */}
+        <AdminCompanyList companies={list} />
       </main>
     </div>
   );

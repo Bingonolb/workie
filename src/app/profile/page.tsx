@@ -8,6 +8,7 @@ import { ProfileReviews } from "./ProfileReviews";
 import { getUserReviews } from "@/lib/actions/reviews";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import type { Profile } from "@/lib/types";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default async function ProfilePage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -21,7 +22,7 @@ export default async function ProfilePage() {
 
   const profile = profileRaw as Profile | null;
   const displayName = profile?.full_name || profile?.username || "Workie User";
-  const initial = displayName[0].toUpperCase();
+  const initial = (displayName[0] ?? "W").toUpperCase();
   const memberSince = new Date(user.created_at ?? Date.now()).toLocaleDateString("fr-CH", {
     month: "long",
     year: "numeric",
@@ -126,8 +127,10 @@ export default async function ProfilePage() {
             <ProfileReviews reviews={reviews} />
           </div>
 
-          {/* Edit form */}
-          <div style={{ position: "sticky", top: 80 }}>
+          {/* Right column */}
+          <div style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 16 }}>
+
+            {/* Edit form */}
             <div style={{
               background: "var(--surface)", border: "1px solid var(--border)",
               borderRadius: 18, overflow: "hidden",
@@ -139,6 +142,20 @@ export default async function ProfilePage() {
                 <ProfileForm profile={profile} email={user.email ?? ""} />
               </div>
             </div>
+
+            {/* Réglages */}
+            <div style={{
+              background: "var(--surface)", border: "1px solid var(--border)",
+              borderRadius: 18, overflow: "hidden",
+            }}>
+              <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Réglages</p>
+              </div>
+              <div style={{ padding: 22 }}>
+                <ThemeToggle />
+              </div>
+            </div>
+
           </div>
 
         </div>

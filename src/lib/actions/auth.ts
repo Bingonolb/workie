@@ -37,6 +37,8 @@ export async function signIn(
 ): Promise<ActionState> {
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
+  const rawNext = String(formData.get("next") || "");
+  const next = /^\/(?![/\\])/.test(rawNext) ? rawNext : "/explore";
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -45,7 +47,7 @@ export async function signIn(
     return { error: "Email ou mot de passe incorrect." };
   }
 
-  redirect("/explore");
+  redirect(next);
 }
 
 export async function signOut() {
@@ -54,12 +56,16 @@ export async function signOut() {
   redirect("/login");
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(formData: FormData) {
+  const rawNext = String(formData.get("next") || "");
+  const next = /^\/(?![/\\])/.test(rawNext) ? rawNext : "/explore";
+
   const supabase = await createClient();
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/auth/callback`,
+      redirectTo: `${base}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
 

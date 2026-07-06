@@ -5,8 +5,8 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const rawNext = searchParams.get("next") ?? "/explore";
-  // Only allow safe relative paths — block protocol-relative (// and /\) attacks
-  const next = /^\/(?![/\\])/.test(rawNext) ? rawNext : "/explore";
+  // Only allow safe relative paths — block protocol-relative, javascript: and data: attacks
+  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";
 
   if (code) {
     const supabase = await createClient();

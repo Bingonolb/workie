@@ -46,7 +46,7 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const cons = String(formData.get("cons") || "").trim() || null;
   const job_title = String(formData.get("job_title") || "").trim() || null;
   const salary_raw = String(formData.get("salary_chf") || "");
-  const salary_chf = salary_raw ? Number(salary_raw) : null;
+  const salary_chf = salary_raw ? (Number(salary_raw) || null) : null;
   const is_current = formData.get("is_current") === "true";
   const employment_type = String(formData.get("employment_type") || "cdi");
   const duration_range = String(formData.get("duration_range") || "").trim() || null;

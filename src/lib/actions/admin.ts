@@ -43,7 +43,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
       linkedin_url: String(formData.get("linkedin_url") || "") || null,
       avg_salary_chf: formData.get("avg_salary_chf") ? Number(formData.get("avg_salary_chf")) : null,
       is_verified: formData.get("is_verified") === "true",
-      tags: String(formData.get("tags") || "").split(",").map(t => t.trim()).filter(Boolean),
+      tags: String(formData.get("tags") || "").split(",").map(t => t.trim()).filter(t => t.length > 0 && t.length <= 40),
     };
 
     const { error } = await supabase.from("companies").update(fields).eq("id", id);
@@ -73,7 +73,7 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       website_url: String(formData.get("website_url") || "") || null,
       avg_salary_chf: formData.get("avg_salary_chf") ? Number(formData.get("avg_salary_chf")) : null,
       is_verified: false,
-      tags: String(formData.get("tags") || "").split(",").map(t => t.trim()).filter(Boolean),
+      tags: String(formData.get("tags") || "").split(",").map(t => t.trim()).filter(t => t.length > 0 && t.length <= 40),
       avg_rating: 0, review_count: 0, score: 0,
     };
 

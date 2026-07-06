@@ -9,8 +9,8 @@ export async function Navbar() {
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 40,
-      background: "rgba(13,13,19,0.85)", backdropFilter: "blur(16px)",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      background: "var(--nav-bg)", backdropFilter: "blur(16px)",
+      borderBottom: "1px solid var(--nav-border)",
       padding: "0 32px", height: 60,
       display: "flex", alignItems: "center", justifyContent: "space-between",
     }}>

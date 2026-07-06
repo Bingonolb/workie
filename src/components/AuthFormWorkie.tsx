@@ -14,10 +14,12 @@ export function AuthFormWorkie({
   mode,
   action,
   googleAction,
+  next = "/explore",
 }: {
   mode: "login" | "signup";
   action: (state: ActionResult, formData: FormData) => Promise<ActionResult>;
-  googleAction: () => Promise<void>;
+  googleAction: (formData: FormData) => Promise<void>;
+  next?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
 
@@ -25,6 +27,7 @@ export function AuthFormWorkie({
     <div>
       {/* Google button */}
       <form action={googleAction}>
+        <input type="hidden" name="next" value={next} />
         <button type="submit" style={{
           width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
           background: "#fff", border: "none", borderRadius: 10, padding: "12px 16px",
@@ -47,6 +50,7 @@ export function AuthFormWorkie({
       </div>
 
       <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <input type="hidden" name="next" value={next} />
         {mode === "signup" && (
           <div>
             <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(240,240,248,0.5)", marginBottom: 6 }}>Pseudo</label>
