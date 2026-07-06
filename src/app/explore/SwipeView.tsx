@@ -32,7 +32,6 @@ export function SwipeView({
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const [drag, setDrag] = useState(0);
-  // Ref tracks guest swipe count synchronously — prevents fast-swipe bypass of the one-free-swipe gate
   const swipeCountRef = useRef(0);
 
   const current = companies[index];
@@ -173,36 +172,36 @@ export function SwipeView({
         </div>
       </div>
 
-      {/* Action buttons — Tinder style */}
+      {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {/* Pass / X */}
+        {/* Pass */}
         <button onClick={() => advance("left")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
-          background: "linear-gradient(135deg, #111118, #1a1a26)",
+          background: "var(--surface)",
           border: "2px solid rgba(239,68,68,0.4)",
           color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center",
           cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
-          boxShadow: "0 6px 24px rgba(239,68,68,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+          boxShadow: "0 6px 24px rgba(239,68,68,0.15)",
           transition: "all 0.18s",
         }}
-          onMouseEnter={e => { if (!gone) { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 10px 36px rgba(239,68,68,0.4), inset 0 1px 0 rgba(255,255,255,0.06)"; } }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 24px rgba(239,68,68,0.2), inset 0 1px 0 rgba(255,255,255,0.06)"; }}
+          onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
           <X size={26} strokeWidth={2.5} />
         </button>
 
-        {/* Info — small center */}
+        {/* Info */}
         <button onClick={() => current && router.push(`/company/${current.id}`)} disabled={!!gone} style={{
           width: 46, height: 46, borderRadius: "50%",
-          background: "linear-gradient(135deg, #0e0e1a, #16162a)",
+          background: "var(--surface)",
           border: "2px solid rgba(99,102,241,0.45)",
           color: "#818cf8", display: "flex", alignItems: "center", justifyContent: "center",
           cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
-          boxShadow: "0 4px 18px rgba(99,102,241,0.2)",
+          boxShadow: "0 4px 18px rgba(99,102,241,0.15)",
           transition: "all 0.18s",
         }}
-          onMouseEnter={e => { if (!gone) { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 28px rgba(99,102,241,0.4)"; } }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 18px rgba(99,102,241,0.2)"; }}
+          onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
           <Info size={18} strokeWidth={2} />
         </button>
@@ -212,17 +211,15 @@ export function SwipeView({
           width: 64, height: 64, borderRadius: "50%",
           background: flameIds.has(current.id)
             ? "linear-gradient(135deg, #f97316, #ea580c)"
-            : "linear-gradient(135deg, #1a0e04, #261508)",
+            : "var(--surface)",
           border: flameIds.has(current.id) ? "2px solid rgba(249,115,22,0.8)" : "2px solid rgba(249,115,22,0.4)",
           color: flameIds.has(current.id) ? "#fff" : "#f97316",
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
-          boxShadow: flameIds.has(current.id)
-            ? "0 6px 28px rgba(249,115,22,0.6), inset 0 1px 0 rgba(255,255,255,0.15)"
-            : "0 6px 24px rgba(249,115,22,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+          boxShadow: flameIds.has(current.id) ? "0 6px 28px rgba(249,115,22,0.5)" : "0 6px 24px rgba(249,115,22,0.15)",
           transition: "all 0.18s",
         }}
-          onMouseEnter={e => { if (!gone) { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 10px 36px rgba(249,115,22,0.5)"; } }}
+          onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
           <Flame size={26} fill={flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
@@ -232,28 +229,29 @@ export function SwipeView({
         <button onClick={handleBoost} title="Booster +100 pts" style={{
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
           width: 52, height: 52, borderRadius: "50%",
-          background: "linear-gradient(135deg, #0d0a1a, #130d26)",
+          background: "var(--surface)",
           border: "2px solid rgba(139,92,246,0.5)",
-          color: "#a78bfa", cursor: "pointer",
-          boxShadow: "0 4px 20px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
+          color: "#8b5cf6", cursor: "pointer",
+          boxShadow: "0 4px 20px rgba(139,92,246,0.15)",
           transition: "all 0.18s",
         }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 32px rgba(139,92,246,0.45), inset 0 1px 0 rgba(255,255,255,0.05)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 20px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.05)"; }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
-          <Zap size={15} fill="#a78bfa" />
+          <Zap size={15} fill="#8b5cf6" />
           <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>+100</span>
         </button>
       </div>
 
+      {/* Legend */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
           <span>✕ passer</span>
           <span>ℹ détail</span>
           <span>🔥 sauvegarder</span>
-          <span>⚡ <span style={{ color: "#a78bfa", fontWeight: 700 }}>+100</span> boost</span>
+          <span>⚡ <span style={{ color: "#8b5cf6", fontWeight: 700 }}>+100</span> boost</span>
         </div>
-        <p style={{ fontSize: 11, color: "var(--text-muted)", opacity: 0.6 }}>
+        <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
           Swipe <span style={{ color: "#f97316", fontWeight: 700 }}>🔥 droite</span> pour sauvegarder · <span style={{ color: "#ef4444", fontWeight: 700 }}>✕ gauche</span> pour passer
         </p>
       </div>
@@ -280,7 +278,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
   const isFav = flameIds.has(company.id);
 
   return (
-    <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", userSelect: "none" }}>
+    <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
       <div style={{ height: "55%", position: "relative", overflow: "hidden" }}>
         {company.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -288,7 +286,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         ) : (
           <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg, ${sectorColor}, #f97316)` }} />
         )}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.1) 40%, rgba(13,13,19,0.9))" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.8))" }} />
 
         {overlayDir === "right" && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(249,115,22,${overlayOpacity * 0.35})` }}>
@@ -317,20 +315,21 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           <p style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
             {company.name}{company.is_verified && <span style={{ fontSize: 16, marginLeft: 8 }}>✓</span>}
           </p>
-          {company.subsector && <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", marginTop: 3 }}>{company.subsector}</p>}
+          {company.subsector && <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", marginTop: 3 }}>{company.subsector}</p>}
         </div>
       </div>
 
+      {/* Card body — uses CSS variables for light/dark compat */}
       <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
         {company.avg_rating > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ display: "flex", gap: 2 }}>
               {[1,2,3,4,5].map(n => (
-                <Star key={n} size={16} fill={n <= Math.round(company.avg_rating) ? "#f59e0b" : "transparent"} color={n <= Math.round(company.avg_rating) ? "#f59e0b" : "#3a3a4a"} strokeWidth={1.5} />
+                <Star key={n} size={16} fill={n <= Math.round(company.avg_rating) ? "#f59e0b" : "transparent"} color={n <= Math.round(company.avg_rating) ? "#f59e0b" : "var(--border2)"} strokeWidth={1.5} />
               ))}
             </span>
             <span style={{ fontSize: 14, fontWeight: 700, color: "#f59e0b" }}>{Number(company.avg_rating).toFixed(1)}</span>
-            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)" }}>{company.review_count} avis</span>
+            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{company.review_count} avis</span>
           </div>
         )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -339,14 +338,14 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           {company.avg_salary_chf && <Chip icon={<TrendingUp size={12} />} label={`CHF ${Math.round(company.avg_salary_chf / 1000)}k`} color="#10b981" />}
         </div>
         {company.description && (
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {company.description}
           </p>
         )}
         {company.tags?.length > 0 && (
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {company.tags.slice(0, 4).map(tag => (
-              <span key={tag} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 50, background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}>#{tag}</span>
+              <span key={tag} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 50, background: "var(--surface2)", color: "var(--text-muted)" }}>#{tag}</span>
             ))}
           </div>
         )}
@@ -357,9 +356,8 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
 
 function Chip({ icon, label, color }: { icon: React.ReactNode; label: string; color?: string }) {
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: color ?? "rgba(255,255,255,0.75)", background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "4px 10px" }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: color ?? "var(--text-muted)", background: "var(--surface2)", borderRadius: 8, padding: "4px 10px" }}>
       {icon} {label}
     </span>
   );
 }
-
