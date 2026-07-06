@@ -75,7 +75,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false }: {
           ) : (
             <div style={{ width: "100%", height: "100%", background: getGradient(company.name) }} />
           )}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(22,22,31,0.95))" }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.75))" }} />
 
           {/* Sector badge */}
           <div style={{
