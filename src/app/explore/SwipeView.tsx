@@ -2,9 +2,9 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap } from "lucide-react";
+import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
-import { addFlame, addBoost } from "@/lib/actions/scores";
+import { addFlame, addBoost, addPenalty } from "@/lib/actions/scores";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
@@ -70,6 +70,13 @@ export function SwipeView({
     if (!current) return;
     addBoost(current.id);
     showToast("⚡ +100 pts !", "#8b5cf6");
+  };
+
+  const handlePenalty = () => {
+    if (!isLoggedIn) { requireLogin(); return; }
+    if (!current) return;
+    addPenalty(current.id);
+    showToast("💀 -100 pts", "#ef4444");
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -174,6 +181,23 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+        {/* -100 penalty */}
+        <button onClick={handlePenalty} title="Pénaliser -100 pts" style={{
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+          width: 52, height: 52, borderRadius: "50%",
+          background: "var(--surface)",
+          border: "2px solid rgba(239,68,68,0.5)",
+          color: "#ef4444", cursor: "pointer",
+          boxShadow: "0 4px 20px rgba(239,68,68,0.15)",
+          transition: "all 0.18s",
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        >
+          <Skull size={15} />
+          <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
+        </button>
+
         {/* Pass */}
         <button onClick={() => advance("left")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
@@ -246,6 +270,7 @@ export function SwipeView({
       {/* Legend */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
+          <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>
           <span>✕ passer</span>
           <span>ℹ détail</span>
           <span>🔥 sauvegarder</span>
