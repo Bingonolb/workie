@@ -103,7 +103,7 @@ export default async function ExplorePage({
           </p>
         </div>
 
-        <ExploreFilters sectors={SECTORS} cities={CITIES} current={params} allNames={allNames} />
+        <ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params} allNames={allNames} />
 
         {!user && total > companies.length && (
           <div style={{

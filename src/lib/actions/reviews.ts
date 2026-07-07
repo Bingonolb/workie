@@ -90,20 +90,17 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   return { success: true };
 }
 
-export async function voteHelpful(reviewId: string): Promise<{ success?: boolean; error?: string }> {
+export async function voteHelpful(reviewId: string): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Connexion requise." };
+  if (!user) return;
 
   const { error: voteErr } = await supabase
     .from("review_votes")
     .insert({ user_id: user.id, review_id: reviewId });
 
-  if (voteErr) return { error: "Déjà voté." };
+  if (voteErr) return; // already voted
 
-  const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
-  if (rpcErr) return { error: rpcErr.message };
-
+  await supabase.rpc("increment_helpful", { review_id: reviewId });
   revalidatePath("/", "layout");
-  return { success: true };
 }
