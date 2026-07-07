@@ -169,7 +169,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </Link>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <h1 style={{ fontSize: 36, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em" }}>{company.name}</h1>
-                {company.is_verified && <CheckCircle size={22} color="#10b981" fill="#10b981" />}
+                {company.is_verified && (
+                  <svg viewBox="0 0 22 22" style={{ width: 26, height: 26, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                    <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
+                    <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
+                  </svg>
+                )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ padding: "4px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600, color: sectorColor, background: `${sectorColor}22`, border: `1px solid ${sectorColor}44` }}>

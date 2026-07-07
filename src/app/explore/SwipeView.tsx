@@ -350,7 +350,12 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         )}
         <div style={{ position: "absolute", bottom: 16, left: 20, right: 20 }}>
           <p style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-            {company.name}{company.is_verified && <span style={{ fontSize: 16, marginLeft: 8 }}>✓</span>}
+            {company.name}{company.is_verified && (
+              <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 7, width: 20, height: 20, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
+                <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
+              </svg>
+            )}
           </p>
           {company.subsector && <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", marginTop: 3 }}>{company.subsector}</p>}
         </div>

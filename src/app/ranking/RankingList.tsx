@@ -138,7 +138,12 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     }}>
                       {c.name}
-                      {c.is_verified && <span style={{ fontSize: 9, color: "#10b981", marginLeft: 6, fontWeight: 700, letterSpacing: "0.05em" }}>VÉRIFIÉ</span>}
+                      {c.is_verified && (
+                        <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 14, height: 14, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                          <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
+                          <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
+                        </svg>
+                      )}
                     </p>
                     <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{c.city}</p>
                   </div>
