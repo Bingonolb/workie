@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
-import { MapPin, Briefcase, ArrowRight, BadgeCheck } from "lucide-react";
+import { MapPin, Briefcase, ArrowRight, BadgeCheck, ExternalLink } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -24,8 +24,11 @@ type Job = {
   title: string;
   location: string | null;
   contract_type: string | null;
+  work_mode: string | null;
+  experience_level: string | null;
   salary_range: string | null;
   description: string | null;
+  apply_url: string | null;
   created_at: string;
   companies: {
     id: string;
@@ -52,11 +55,11 @@ export default async function JobsPage() {
   const supabase = await createClient();
   const { data: jobs } = await supabase
     .from("job_offers")
-    .select("id, title, location, contract_type, salary_range, description, created_at, companies(id, name, city, sector, logo_url, is_verified, avg_rating, review_count)")
+    .select("id, title, location, contract_type, work_mode, experience_level, salary_range, description, apply_url, created_at, companies(id, name, city, sector, logo_url, is_verified, avg_rating, review_count)")
     .eq("is_active", true)
     .order("created_at", { ascending: false });
 
-  const allJobs = (jobs ?? []) as Job[];
+  const allJobs = (jobs ?? []) as unknown as Job[];
 
   // Group unique sectors and contract types from jobs
   const sectors = [...new Set(allJobs.map(j => j.companies?.sector).filter(Boolean))] as string[];
@@ -135,6 +138,16 @@ export default async function JobsPage() {
                           {job.contract_type}
                         </span>
                       )}
+                      {job.work_mode && (
+                        <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 9px", borderRadius: 50, background: "rgba(16,185,129,0.08)", color: "#10b981" }}>
+                          {job.work_mode}
+                        </span>
+                      )}
+                      {job.experience_level && (
+                        <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 9px", borderRadius: 50, background: "rgba(249,115,22,0.08)", color: "#f97316" }}>
+                          {job.experience_level}
+                        </span>
+                      )}
                     </div>
 
                     {/* Company info */}
@@ -180,12 +193,20 @@ export default async function JobsPage() {
 
                   {/* CTA */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
-                    <Link href={`/company/${co.id}`} style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
-                      Voir la fiche <ArrowRight size={14} />
+                    {job.apply_url ? (
+                      <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
+                        style={{ display: "flex", alignItems: "center", gap: 6, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
+                        Postuler <ExternalLink size={13} />
+                      </a>
+                    ) : (
+                      <Link href={`/company/${co.id}`}
+                        style={{ display: "flex", alignItems: "center", gap: 6, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
+                        Voir la fiche <ArrowRight size={13} />
+                      </Link>
+                    )}
+                    <Link href={`/company/${co.id}`} style={{ fontSize: 11, color: "var(--text-muted)", textDecoration: "none", textAlign: "right" }}>
+                      {co.name} · {co.sector}
                     </Link>
-                    <span style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "right" }}>
-                      {co.sector}
-                    </span>
                   </div>
                 </div>
               );

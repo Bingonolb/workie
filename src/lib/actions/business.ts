@@ -223,17 +223,32 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
 export async function createJobOffer(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
   try {
     const { supabase, company } = await requireBusiness();
+
+    const title = String(formData.get("title") || "").trim();
+    if (!title) return { error: "Le titre du poste est obligatoire." };
+
+    const rawApplyUrl = String(formData.get("apply_url") || "").trim();
+    // Auto-prefix https:// if missing
+    const apply_url = rawApplyUrl
+      ? /^https?:\/\//i.test(rawApplyUrl) ? rawApplyUrl : `https://${rawApplyUrl}`
+      : null;
+
     const { error } = await supabase.from("job_offers").insert({
       company_id: company.id,
-      title: String(formData.get("title") || ""),
-      description: String(formData.get("description") || "") || null,
-      location: String(formData.get("location") || "") || null,
-      contract_type: String(formData.get("contract_type") || "") || null,
-      salary_range: String(formData.get("salary_range") || "") || null,
+      title,
+      description:       String(formData.get("description") || "") || null,
+      requirements:      String(formData.get("requirements") || "") || null,
+      location:          String(formData.get("location") || "") || null,
+      work_mode:         String(formData.get("work_mode") || "") || null,
+      contract_type:     String(formData.get("contract_type") || "") || null,
+      experience_level:  String(formData.get("experience_level") || "") || null,
+      salary_range:      String(formData.get("salary_range") || "") || null,
+      apply_url,
       is_active: true,
     });
     if (error) return { error: error.message };
     revalidatePath("/business/dashboard/jobs");
+    revalidatePath("/jobs");
     return { success: true };
   } catch (e) {
     return { error: (e as Error).message };

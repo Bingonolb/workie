@@ -62,22 +62,50 @@ export default function BusinessPage() {
           </span>
         </h1>
 
-        <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--text-muted)", maxWidth: 520, lineHeight: 1.7, margin: "0 auto 20px" }}>
-          Votre entreprise est déjà sur Workie. Des milliers de candidats lisent des avis sur vous. Il est temps de reprendre la main.
+        <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--text-muted)", maxWidth: 540, lineHeight: 1.7, margin: "0 auto 20px" }}>
+          Répondez aux avis, analysez votre attractivité, publiez vos offres. Tout ce dont vous avez besoin pour attirer les meilleurs profils — en toute transparence.
         </p>
 
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 48, opacity: 0.7 }}>
           Les 50 premières entreprises bénéficient du tarif fondateur · 99 CHF/mois à vie
         </p>
 
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/business/claim" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 32px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.3)" }}>
-            Revendiquer ma fiche <ArrowRight size={18} />
+        {/* Two-path choice */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, maxWidth: 680, margin: "0 auto", textAlign: "left" }}>
+          {/* Path A — existing company */}
+          <Link href="/business/claim" style={{ display: "flex", flexDirection: "column", gap: 0, padding: "28px 28px 24px", borderRadius: 20, background: "var(--surface)", border: "2px solid rgba(139,92,246,0.3)", textDecoration: "none", transition: "all 0.2s", boxShadow: "0 4px 24px rgba(139,92,246,0.1)" }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(139,92,246,0.12)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+              <BadgeCheck size={22} color="#8b5cf6" />
+            </div>
+            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8b5cf6", marginBottom: 8 }}>Fiche existante</p>
+            <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8, letterSpacing: "-0.02em" }}>Revendiquer ma fiche</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 20, flex: 1 }}>
+              Mon entreprise est déjà présente sur Workie, des employés ont déjà laissé des avis. Je veux reprendre la main sur ma fiche.
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, color: "#8b5cf6" }}>
+              Commencer <ArrowRight size={15} />
+            </div>
           </Link>
-          <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
-            Voir ma fiche actuelle
+
+          {/* Path B — new company */}
+          <Link href="/business/register" style={{ display: "flex", flexDirection: "column", gap: 0, padding: "28px 28px 24px", borderRadius: 20, background: "var(--surface)", border: "2px solid rgba(16,185,129,0.3)", textDecoration: "none", transition: "all 0.2s", boxShadow: "0 4px 24px rgba(16,185,129,0.08)" }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+              <Users size={22} color="#10b981" />
+            </div>
+            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#10b981", marginBottom: 8 }}>Nouvelle fiche</p>
+            <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8, letterSpacing: "-0.02em" }}>Créer ma page entreprise</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 20, flex: 1 }}>
+              Mon entreprise n&apos;est pas encore sur Workie. Je veux créer ma fiche, la personnaliser et publier mes offres dès aujourd&apos;hui.
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, color: "#10b981" }}>
+              Créer ma fiche <ArrowRight size={15} />
+            </div>
           </Link>
         </div>
+
+        <p style={{ marginTop: 24, fontSize: 12, color: "var(--text-muted)", opacity: 0.7 }}>
+          Déjà un compte ? <Link href="/business/login" style={{ color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>Se connecter →</Link>
+        </p>
       </section>
 
       {/* Features */}
@@ -149,9 +177,14 @@ export default function BusinessPage() {
               ))}
             </div>
 
-            <Link href="/business/claim" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "15px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 24px rgba(139,92,246,0.3)" }}>
-              Commencer maintenant <ArrowRight size={16} />
-            </Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Link href="/business/register" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "15px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 24px rgba(139,92,246,0.3)" }}>
+                Créer ma fiche entreprise <ArrowRight size={16} />
+              </Link>
+              <Link href="/business/claim" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 0", borderRadius: 12, background: "var(--surface2)", color: "var(--text-muted)", border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
+                Ma fiche existe déjà — la revendiquer
+              </Link>
+            </div>
             <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 14 }}>Sans engagement · Annulation possible à tout moment</p>
           </div>
         </div>
@@ -186,9 +219,14 @@ export default function BusinessPage() {
           Votre réputation vous attend.
         </h2>
         <p style={{ fontSize: 15, color: "var(--text-muted)", marginBottom: 40 }}>Chaque jour sans réponse, c&apos;est un candidat qui part chez un concurrent.</p>
-        <Link href="/business/claim" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 40px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
-          Revendiquer ma fiche <ArrowRight size={18} />
-        </Link>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/business/register" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 32px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
+            Créer ma fiche <ArrowRight size={17} />
+          </Link>
+          <Link href="/business/claim" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
+            Revendiquer une fiche existante
+          </Link>
+        </div>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 16 }}>
           <Shield size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />
           Vérification manuelle · Données sécurisées · Sans engagement

@@ -108,18 +108,51 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
 export async function getClaims() {
   try {
     const { supabase } = await requireAdmin();
+    const adminClient = createAdminClient();
+
     const { data, error } = await supabase
       .from("company_claims")
       .select("*")
       .order("created_at", { ascending: false });
     if (error) return { error: error.message };
-    return { claims: data ?? [] };
+
+    const claims = data ?? [];
+
+    // For each claim that has a company_id, check if it's already owned
+    const companyIds = [...new Set(claims.map(c => c.company_id).filter(Boolean))] as string[];
+    let ownerMap: Record<string, string> = {};
+
+    if (companyIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, claimed_company_id")
+        .in("claimed_company_id", companyIds);
+
+      if (profiles && profiles.length > 0) {
+        const usersRes = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+        const allUsers = usersRes.data?.users ?? [];
+        const emailById = Object.fromEntries(allUsers.map(u => [u.id, u.email ?? ""]));
+        for (const p of profiles) {
+          if (p.claimed_company_id) ownerMap[p.claimed_company_id] = emailById[p.id] ?? p.id;
+        }
+      }
+    }
+
+    return {
+      claims: claims.map(c => ({
+        ...c,
+        existing_owner: c.company_id ? (ownerMap[c.company_id] ?? null) : null,
+      })),
+    };
   } catch (e) {
     return { error: (e as Error).message };
   }
 }
 
-export async function approveClaim(claimId: string): Promise<{ error?: string; success?: boolean }> {
+export async function approveClaim(
+  claimId: string,
+  force = false,
+): Promise<{ error?: string; success?: boolean; alreadyOwned?: string }> {
   try {
     const { user: adminUser, supabase } = await requireAdmin();
     const adminClient = createAdminClient();
@@ -145,18 +178,39 @@ export async function approveClaim(claimId: string): Promise<{ error?: string; s
     }
     if (!companyId) return { error: `Aucune entreprise trouvée pour "${claim.company_name}". Créez-la d'abord dans le panel admin.` };
 
+    // Check for existing owner
+    const { data: existingOwnerProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("claimed_company_id", companyId)
+      .maybeSingle();
+
+    if (existingOwnerProfile && !force) {
+      // Identify existing owner's email for the admin
+      const listResult = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+      const users = listResult.data?.users ?? [];
+      const ownerEmail = users.find((u: { id: string; email?: string }) => u.id === existingOwnerProfile.id)?.email ?? existingOwnerProfile.id;
+      return {
+        alreadyOwned: ownerEmail,
+        error: `Cette entreprise est déjà revendiquée par ${ownerEmail}. Confirmez le transfert si vous souhaitez remplacer l'accès.`,
+      };
+    }
+
+    // If forcing a transfer, revoke previous owner's access first
+    if (existingOwnerProfile && force) {
+      await adminClient.from("profiles").update({ claimed_company_id: null }).eq("id", existingOwnerProfile.id);
+    }
+
     // Check if the work_email already has an account
-    const { data: existingUsers } = await adminClient.auth.admin.listUsers();
+    const { data: existingUsers } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
     const existing = existingUsers?.users?.find(u => u.email?.toLowerCase() === claim.work_email.toLowerCase());
 
     if (existing) {
-      // User already exists — just link the company to their profile
       await adminClient.from("profiles").upsert({
         id: existing.id,
         claimed_company_id: companyId,
       }, { onConflict: "id" });
     } else {
-      // Invite the user — they'll receive a setup email with magic link
       const { data: invited, error: inviteErr } = await adminClient.auth.admin.inviteUserByEmail(
         claim.work_email,
         {
@@ -165,8 +219,6 @@ export async function approveClaim(claimId: string): Promise<{ error?: string; s
         }
       );
       if (inviteErr) return { error: `Erreur d'invitation : ${inviteErr.message}` };
-
-      // Pre-create their profile with the company link
       if (invited?.user) {
         await adminClient.from("profiles").upsert({
           id: invited.user.id,
@@ -176,10 +228,7 @@ export async function approveClaim(claimId: string): Promise<{ error?: string; s
       }
     }
 
-    // Mark company as verified + subscribed
     await supabase.from("companies").update({ is_verified: true, is_subscribed: true }).eq("id", companyId);
-
-    // Update claim status
     await supabase.from("company_claims").update({
       status: "approved",
       company_id: companyId,

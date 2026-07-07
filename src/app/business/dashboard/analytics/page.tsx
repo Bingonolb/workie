@@ -28,7 +28,7 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* KPI row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
         {[
           { icon: <Star size={18} color="#f59e0b" fill="#f59e0b" />, label: "Note globale", value: `${avgOverall}/5` },
           { icon: <Users size={18} color="#8b5cf6" />, label: "Total avis", value: String(count) },

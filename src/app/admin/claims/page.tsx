@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { getClaims, approveClaim, rejectClaim } from "@/lib/actions/admin";
-import { CheckCircle, XCircle, Clock, Building2, Mail, User, Briefcase, ArrowLeft } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Building2, Mail, User, Briefcase, ArrowLeft, AlertTriangle, ArrowRightLeft } from "lucide-react";
 import Link from "next/link";
 
 type Claim = {
@@ -20,6 +20,7 @@ type Claim = {
   company_id: string | null;
   created_at: string;
   reviewed_at: string | null;
+  existing_owner: string | null;
 };
 
 const STATUS_COLORS: Record<string, { bg: string; color: string; label: string }> = {
@@ -28,11 +29,13 @@ const STATUS_COLORS: Record<string, { bg: string; color: string; label: string }
   rejected: { bg: "rgba(239,68,68,0.1)",   color: "#ef4444", label: "Refusée" },
 };
 
+type MsgState = { id: string; text: string; ok: boolean; alreadyOwned?: string } | null;
+
 export default function ClaimsPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
-  const [msg, setMsg] = useState<{ id: string; text: string; ok: boolean } | null>(null);
+  const [msg, setMsg] = useState<MsgState>(null);
   const [isPending, startTransition] = useTransition();
 
   const load = () => {
@@ -44,17 +47,31 @@ export default function ClaimsPage() {
 
   useEffect(() => { load(); }, []);
 
-  const handle = (id: string, action: "approve" | "reject") => {
+  const handle = (id: string, action: "approve" | "reject" | "force-approve") => {
     startTransition(async () => {
-      const fn = action === "approve" ? approveClaim : rejectClaim;
-      const res = await fn(id);
-      if (res.error) {
-        setMsg({ id, text: res.error, ok: false });
+      if (action === "reject") {
+        const res = await rejectClaim(id);
+        if (res.error) {
+          setMsg({ id, text: res.error, ok: false });
+        } else {
+          setMsg({ id, text: "Refusée", ok: true });
+          load();
+        }
       } else {
-        setMsg({ id, text: action === "approve" ? "Approuvée — email envoyé" : "Refusée", ok: true });
-        load();
+        const force = action === "force-approve";
+        const res = await approveClaim(id, force);
+        if (res.alreadyOwned) {
+          setMsg({ id, text: res.error ?? "", ok: false, alreadyOwned: res.alreadyOwned });
+        } else if (res.error) {
+          setMsg({ id, text: res.error, ok: false });
+        } else {
+          setMsg({ id, text: "Approuvée — email envoyé", ok: true });
+          load();
+        }
       }
-      setTimeout(() => setMsg(null), 4000);
+      if (action !== "approve" || !msg?.alreadyOwned) {
+        setTimeout(() => setMsg(null), 6000);
+      }
     });
   };
 
@@ -108,9 +125,23 @@ export default function ClaimsPage() {
             const status = claim.status ?? "pending";
             const sc = STATUS_COLORS[status] ?? STATUS_COLORS.pending;
             const isThisMsg = msg?.id === claim.id;
+            const isAlreadyOwned = isThisMsg && !!msg?.alreadyOwned;
 
             return (
-              <div key={claim.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div key={claim.id} style={{
+                background: "var(--surface)", border: `1px solid ${claim.existing_owner && status === "pending" ? "rgba(245,158,11,0.4)" : "var(--border)"}`,
+                borderRadius: 16, padding: "24px", display: "flex", flexDirection: "column", gap: 16,
+              }}>
+
+                {/* Already-owned warning banner */}
+                {claim.existing_owner && status === "pending" && (
+                  <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
+                    <AlertTriangle size={16} color="#f59e0b" style={{ flexShrink: 0 }} />
+                    <p style={{ fontSize: 12, color: "#f59e0b", fontWeight: 600 }}>
+                      ⚠️ Cette entreprise est déjà revendiquée par <strong>{claim.existing_owner}</strong>. Approuver transférera l'accès.
+                    </p>
+                  </div>
+                )}
 
                 {/* Header */}
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
@@ -157,14 +188,36 @@ export default function ClaimsPage() {
                 )}
 
                 {/* Feedback */}
-                {isThisMsg && (
+                {isThisMsg && !isAlreadyOwned && (
                   <p style={{ fontSize: 13, fontWeight: 600, color: msg.ok ? "#10b981" : "#ef4444" }}>
                     {msg.ok ? "✓ " : "✗ "}{msg.text}
                   </p>
                 )}
 
+                {/* Already-owned conflict resolution */}
+                {isAlreadyOwned && (
+                  <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 16px" }}>
+                    <p style={{ fontSize: 13, color: "#ef4444", fontWeight: 600, marginBottom: 12 }}>
+                      ⚠️ {msg?.text}
+                    </p>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button
+                        onClick={() => { setMsg(null); handle(claim.id, "force-approve"); }}
+                        disabled={isPending}
+                        style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 9, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+                        <ArrowRightLeft size={15} /> Confirmer le transfert
+                      </button>
+                      <button
+                        onClick={() => setMsg(null)}
+                        style={{ padding: "9px 16px", borderRadius: 9, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                        Annuler
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Actions */}
-                {status === "pending" && (
+                {status === "pending" && !isAlreadyOwned && (
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
                       onClick={() => handle(claim.id, "approve")}
@@ -182,7 +235,7 @@ export default function ClaimsPage() {
                 )}
 
                 {status === "approved" && (
-                  <p style={{ fontSize: 12, color: "#10b981" }}>✓ Email d'accès envoyé à {claim.work_email}</p>
+                  <p style={{ fontSize: 12, color: "#10b981" }}>✓ Email d&apos;accès envoyé à {claim.work_email}</p>
                 )}
               </div>
             );

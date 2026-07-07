@@ -49,7 +49,7 @@ export default async function SalairesPage() {
     .gt("salary_chf", 10000)
     .lt("salary_chf", 500000);
 
-  const all = (reviews ?? []) as Array<{
+  const all = (reviews ?? []) as unknown as Array<{
     salary_chf: number;
     job_title: string;
     employment_type: string;

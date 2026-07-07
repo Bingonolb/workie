@@ -34,10 +34,17 @@ function StarRow({ value }: { value: number }) {
   );
 }
 
-function ReplyForm({ reviewId, existing }: { reviewId: string; existing?: string }) {
+function ReplyForm({ reviewId, existing, onSuccess }: { reviewId: string; existing?: string; onSuccess?: () => void }) {
   const [state, action, pending] = useActionState(replyToReview, undefined);
   const [open, setOpen] = useState(!!existing);
   const [text, setText] = useState(existing ?? "");
+
+  useEffect(() => {
+    if (state?.success) {
+      setOpen(false);
+      onSuccess?.();
+    }
+  }, [state?.success]);
 
   if (!open) {
     return (
@@ -77,7 +84,7 @@ function ReplyForm({ reviewId, existing }: { reviewId: string; existing?: string
   );
 }
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({ review, onReload }: { review: Review; onReload: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const reply = review.company_replies?.[0];
   const recColor = review.would_recommend === "oui" ? "#10b981" : review.would_recommend === "non" ? "#ef4444" : "#f59e0b";
@@ -152,7 +159,7 @@ function ReviewCard({ review }: { review: Review }) {
             </div>
           )}
 
-          <ReplyForm reviewId={review.id} existing={reply?.content} />
+          <ReplyForm reviewId={review.id} existing={reply?.content} onSuccess={onReload} />
         </div>
       )}
     </div>
@@ -164,12 +171,14 @@ export default function ReviewsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unanswered">("all");
 
-  useEffect(() => {
+  const load = () => {
     getBusinessReviews().then(r => {
       setReviews((r.reviews as Review[]) ?? []);
       setLoading(false);
     });
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const filtered = filter === "unanswered"
     ? reviews.filter(r => !r.company_replies?.length)
@@ -203,7 +212,7 @@ export default function ReviewsPage() {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {filtered.map(r => <ReviewCard key={r.id} review={r} />)}
+          {filtered.map(r => <ReviewCard key={r.id} review={r} onReload={load} />)}
         </div>
       )}
     </div>

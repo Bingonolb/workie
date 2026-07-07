@@ -96,7 +96,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     getUser(),
     getUserFavoriteIds(),
     supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id),
-    supabase.from("job_offers").select("id, title, location, contract_type, salary_range, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false }),
+    supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false }),
   ]);
   const repliesMap = Object.fromEntries((repliesResult.data ?? []).map(r => [r.review_id, r]));
   const jobs = jobsResult.data ?? [];
@@ -408,14 +408,26 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   <span style={{ fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {jobs.map((job: { id: string; title: string; location: string | null; contract_type: string | null; salary_range: string | null; description: string | null; created_at: string }) => (
+                  {jobs.map((job: { id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null; experience_level: string | null; salary_range: string | null; apply_url: string | null; created_at: string }) => (
                     <div key={job.id} style={{ borderRadius: 10, background: "var(--surface2)", padding: "12px 14px", border: "1px solid var(--border2)" }}>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>{job.title}</p>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{job.title}</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 10 }}>
                         {job.contract_type && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>{job.contract_type}</span>}
+                        {job.work_mode && <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 50, background: "rgba(16,185,129,0.08)", color: "#10b981" }}>{job.work_mode}</span>}
                         {job.location && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>📍 {job.location}</span>}
                         {job.salary_range && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>💰 {job.salary_range}</span>}
                       </div>
+                      {job.apply_url ? (
+                        <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
+                          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "7px 0", borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 12, textDecoration: "none" }}>
+                          Postuler →
+                        </a>
+                      ) : (
+                        <Link href="/jobs"
+                          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "7px 0", borderRadius: 8, background: "var(--surface3, var(--border))", color: "var(--text-muted)", fontWeight: 600, fontSize: 12, textDecoration: "none" }}>
+                          Voir toutes les offres
+                        </Link>
+                      )}
                     </div>
                   ))}
                 </div>

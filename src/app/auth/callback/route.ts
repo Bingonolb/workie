@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type");
   const rawNext = searchParams.get("next") ?? "";
-  const next = /^\/(?![/\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "";
+  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "";
 
   const supabase = await createClient();
 

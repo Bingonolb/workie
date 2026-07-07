@@ -2,15 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { LayoutDashboard, Star, BarChart3, Briefcase, Settings, Eye, ArrowLeft } from "lucide-react";
-
-const NAV = [
-  { href: "/business/dashboard", label: "Vue d'ensemble", icon: <LayoutDashboard size={17} />, exact: true },
-  { href: "/business/dashboard/reviews", label: "Avis & Réponses", icon: <Star size={17} /> },
-  { href: "/business/dashboard/analytics", label: "Analytics", icon: <BarChart3 size={17} /> },
-  { href: "/business/dashboard/jobs", label: "Offres d'emploi", icon: <Briefcase size={17} /> },
-  { href: "/business/dashboard/profile", label: "Ma fiche", icon: <Settings size={17} /> },
-];
+import { DashboardNav } from "./DashboardNav";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
@@ -77,25 +69,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: "12px 12px" }}>
-          {NAV.map(({ href, label, icon }) => (
-            <Link key={href} href={href} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, fontSize: 13, fontWeight: 600, color: "var(--text-muted)", textDecoration: "none", marginBottom: 2, transition: "all 0.15s" }}
-              className="biz-nav-link">
-              {icon} {label}
-            </Link>
-          ))}
-
-          <div style={{ height: 1, background: "var(--border)", margin: "12px 0" }} />
-
-          <Link href={`/company/${company.id}?preview=1`} target="_blank"
-            style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, fontSize: 13, fontWeight: 600, color: "#8b5cf6", textDecoration: "none" }}>
-            <Eye size={17} /> Voir comme un employé
-          </Link>
-
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, fontSize: 13, fontWeight: 600, color: "var(--text-muted)", textDecoration: "none" }}>
-            <ArrowLeft size={17} /> Retour au site
-          </Link>
-        </nav>
+        <DashboardNav companyId={company.id} />
 
         {/* Bottom */}
         <div style={{ padding: "16px 20px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -109,9 +83,6 @@ export default async function BusinessDashboardLayout({ children }: { children: 
         {children}
       </main>
 
-      <style>{`
-        .biz-nav-link:hover { background: var(--surface2); color: var(--text); }
-      `}</style>
     </div>
   );
 }
