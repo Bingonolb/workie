@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { ReviewForm } from "@/components/ReviewForm";
 import { getCompany } from "@/lib/actions/companies";
 import { getReviews, voteHelpful } from "@/lib/actions/reviews";
+import { createClient } from "@/lib/supabase/server";
 import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
 import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle, ThumbsUp } from "lucide-react";
@@ -88,12 +89,17 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [company, reviews, user, favIds] = await Promise.all([
+  const supabase = await createClient();
+  const [company, reviews, user, favIds, repliesResult, jobsResult] = await Promise.all([
     getCompany(id),
     getReviews(id),
     getUser(),
     getUserFavoriteIds(),
+    supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id),
+    supabase.from("job_offers").select("id, title, location, contract_type, salary_range, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false }),
   ]);
+  const repliesMap = Object.fromEntries((repliesResult.data ?? []).map(r => [r.review_id, r]));
+  const jobs = jobsResult.data ?? [];
 
   if (!company) notFound();
 
@@ -298,7 +304,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             ) : (
               <div style={{ position: "relative", marginBottom: 32 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} />)}
+                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} />)}
                 </div>
                 {!user && reviews.length > 1 && (
                   <div style={{
@@ -394,6 +400,28 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
+            {/* Job offers */}
+            {jobs.length > 0 && (
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+                  💼 Offres d'emploi
+                  <span style={{ fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {jobs.map((job: { id: string; title: string; location: string | null; contract_type: string | null; salary_range: string | null; description: string | null; created_at: string }) => (
+                    <div key={job.id} style={{ borderRadius: 10, background: "var(--surface2)", padding: "12px 14px", border: "1px solid var(--border2)" }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>{job.title}</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {job.contract_type && <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>{job.contract_type}</span>}
+                        {job.location && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>📍 {job.location}</span>}
+                        {job.salary_range && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>💰 {job.salary_range}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Business CTA — only for non-subscribed companies */}
             {!company.is_subscribed && (
               <div style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "18px 20px" }}>
@@ -436,7 +464,7 @@ const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
   ca_depend: { label: "🤔 Ça dépend", color: "#f59e0b" },
 };
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({ review, reply }: { review: Review; reply?: { content: string; created_at: string } }) {
   const age = (() => {
     const d = new Date(review.created_at);
     const diff = Date.now() - d.getTime();
@@ -524,6 +552,20 @@ function ReviewCard({ review }: { review: Review }) {
         <div style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 10, padding: "10px 12px", marginBottom: 12 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 4 }}>💡 Ce que j'aurais voulu savoir avant</p>
           <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{(review as any).knew_before}</p>
+        </div>
+      )}
+
+      {/* Employer reply */}
+      {reply && (
+        <div style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", marginTop: 4, marginBottom: 8 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
+            <svg viewBox="0 0 22 22" style={{ width: 13, height: 13 }}><circle cx="11" cy="11" r="11" fill="#1D9BF0" /><path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" /></svg>
+            Réponse officielle de l'employeur
+          </p>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{reply.content}</p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6, opacity: 0.6 }}>
+            {new Date(reply.created_at).toLocaleDateString("fr-CH", { day: "numeric", month: "long", year: "numeric" })}
+          </p>
         </div>
       )}
 
