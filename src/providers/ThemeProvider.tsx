@@ -13,6 +13,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (saved === "light") {
       setTheme("light");
       document.documentElement.classList.add("light");
+    } else {
+      setTheme("dark");
+      document.documentElement.classList.remove("light");
     }
   }, []);
 
