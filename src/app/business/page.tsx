@@ -40,7 +40,7 @@ export default function BusinessPage() {
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <ThemeToggle />
           <Link href="/login" style={{ padding: "9px 16px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>Connexion</Link>
-          <Link href="/business/claim" style={{ padding: "9px 18px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff" }}>
+          <Link href="/business/login" style={{ padding: "9px 18px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff" }}>
             Revendiquer ma fiche
           </Link>
         </div>
@@ -71,7 +71,7 @@ export default function BusinessPage() {
         </p>
 
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/business/claim" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 32px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.3)" }}>
+          <Link href="/business/login" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 32px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.3)" }}>
             Revendiquer ma fiche <ArrowRight size={18} />
           </Link>
           <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
@@ -149,7 +149,7 @@ export default function BusinessPage() {
               ))}
             </div>
 
-            <Link href="/business/claim" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "15px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 24px rgba(139,92,246,0.3)" }}>
+            <Link href="/business/login" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "15px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 24px rgba(139,92,246,0.3)" }}>
               Commencer maintenant <ArrowRight size={16} />
             </Link>
             <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 14 }}>Sans engagement · Annulation possible à tout moment</p>
@@ -186,7 +186,7 @@ export default function BusinessPage() {
           Votre réputation vous attend.
         </h2>
         <p style={{ fontSize: 15, color: "var(--text-muted)", marginBottom: 40 }}>Chaque jour sans réponse, c&apos;est un candidat qui part chez un concurrent.</p>
-        <Link href="/business/claim" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 40px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
+        <Link href="/business/login" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 40px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
           Revendiquer ma fiche <ArrowRight size={18} />
         </Link>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 16 }}>
