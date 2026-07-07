@@ -406,7 +406,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 14 }}>
                   Vous représentez <strong style={{ color: "var(--text)" }}>{company.name}</strong> ? Revendiquez cette fiche pour répondre aux avis et accéder aux analytics.
                 </p>
-                <Link href="/business" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px 0", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
+                <Link href="/business/claim" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px 0", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
                   Revendiquer ma fiche
                 </Link>
                 <Link href="/business/login" style={{ display: "block", textAlign: "center", fontSize: 11, color: "var(--text-muted)", marginTop: 8, textDecoration: "none" }}>
