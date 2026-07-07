@@ -4,10 +4,10 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { ReviewForm } from "@/components/ReviewForm";
 import { getCompany } from "@/lib/actions/companies";
-import { getReviews } from "@/lib/actions/reviews";
+import { getReviews, voteHelpful } from "@/lib/actions/reviews";
 import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
-import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle } from "lucide-react";
+import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle, ThumbsUp } from "lucide-react";
 import { ParallaxCover } from "@/components/ParallaxCover";
 
 const LinkedinIcon = () => (
@@ -448,11 +448,27 @@ function ReviewCard({ review }: { review: Review }) {
 
       {/* Knew before */}
       {(review as any).knew_before && (
-        <div style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 10, padding: "10px 12px" }}>
+        <div style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 10, padding: "10px 12px", marginBottom: 12 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 4 }}>💡 Ce que j'aurais voulu savoir avant</p>
           <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{(review as any).knew_before}</p>
         </div>
       )}
+
+      {/* Helpful */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+        <form action={voteHelpful.bind(null, review.id)}>
+          <button type="submit" style={{
+            display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 8,
+            background: "var(--surface2)", border: "1px solid var(--border2)",
+            color: "var(--text-muted)", fontSize: 12, fontWeight: 600, cursor: "pointer",
+          }}>
+            <ThumbsUp size={13} /> Utile
+            {review.helpful_count > 0 && (
+              <span style={{ color: "#8b5cf6", fontWeight: 700 }}>{review.helpful_count}</span>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
