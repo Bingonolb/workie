@@ -18,7 +18,7 @@ export function ExploreFilters({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   const [input, setInput] = useState("");
   const [tags, setTags] = useState<string[]>(current.q ? current.q.split(",").map(s => s.trim()).filter(Boolean) : []);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -81,7 +81,7 @@ export function ExploreFilters({
   const hasFilters = current.sector || current.city || tags.length > 0;
 
   return (
-    <div style={{ marginBottom: 28, display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ marginBottom: 28, display: "flex", flexDirection: "column", gap: 16, opacity: isPending ? 0.7 : 1, transition: "opacity 0.2s" }}>
       {/* Top row: search + view toggle */}
       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
         <div ref={wrapperRef} style={{ position: "relative", flex: 1, maxWidth: 480 }}>
