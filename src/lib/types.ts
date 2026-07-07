@@ -60,6 +60,7 @@ export interface Profile {
   city: string | null;
   country: string | null;
   bio: string | null;
+  role: "user" | "admin" | null;
   created_at: string;
 }
 
