@@ -76,15 +76,20 @@ export default async function CheckoutPage() {
           </div>
 
           {hasStripe ? (
-            <form action="/api/business/checkout" method="POST">
-              <input type="hidden" name="price" value="monthly" />
-              <button type="submit" style={{ width: "100%", padding: "16px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 8px 24px rgba(139,92,246,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                Payer 99 CHF/mois <ArrowRight size={18} />
-              </button>
-              <button type="submit" name="price" value="annual" style={{ width: "100%", marginTop: 10, padding: "13px 0", borderRadius: 12, background: "var(--surface2)", color: "var(--text)", border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
-                Payer 890 CHF/an (–2 mois)
-              </button>
-            </form>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <form action="/api/business/checkout" method="POST">
+                <input type="hidden" name="price" value="monthly" />
+                <button type="submit" style={{ width: "100%", padding: "16px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 8px 24px rgba(139,92,246,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                  Payer 99 CHF/mois <ArrowRight size={18} />
+                </button>
+              </form>
+              <form action="/api/business/checkout" method="POST">
+                <input type="hidden" name="price" value="annual" />
+                <button type="submit" style={{ width: "100%", padding: "13px 0", borderRadius: 12, background: "var(--surface2)", color: "var(--text)", border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
+                  Payer 890 CHF/an (–2 mois)
+                </button>
+              </form>
+            </div>
           ) : (
             <div>
               <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 16, display: "flex", gap: 10, alignItems: "flex-start" }}>

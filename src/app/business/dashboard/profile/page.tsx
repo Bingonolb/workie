@@ -22,12 +22,19 @@ export default function ProfilePage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadCompany = () => {
     getBusinessCompany().then(r => {
       if (r.company) setCompany(r.company as Company);
       setLoading(false);
     });
-  }, []);
+  };
+
+  useEffect(() => { loadCompany(); }, []);
+
+  // Refresh company after successful save so hidden logo_url stays current
+  useEffect(() => {
+    if (state?.success) loadCompany();
+  }, [state?.success]);
 
   if (loading) return <div style={{ padding: 40, color: "var(--text-muted)" }}>Chargement...</div>;
   if (!company) return <div style={{ padding: 40, color: "#ef4444" }}>Erreur de chargement</div>;

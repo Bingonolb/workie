@@ -196,7 +196,8 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
 export async function replyToReview(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
   try {
     const { supabase, company } = await requireBusiness();
-    const review_id = String(formData.get("review_id"));
+    const review_id = String(formData.get("review_id") || "");
+    if (!review_id) return { error: "Avis introuvable." };
     const content = String(formData.get("content") || "").trim();
     if (!content || content.length < 10) return { error: "Réponse trop courte (min 10 caractères)." };
 
