@@ -138,7 +138,7 @@ export default async function Home() {
       {/* ── CTA employés ── */}
       <section style={{ padding: "72px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <div style={{ fontSize: 48, marginBottom: 24 }}>🇨🇭</div>
+          <div style={{ fontSize: 48, marginBottom: 24 }}>✦</div>
           <h2 style={{ fontSize: "clamp(26px, 5vw, 42px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 16 }}>
             Commence à explorer.
           </h2>
