@@ -144,9 +144,10 @@ export function ReviewForm({ companyId }: { companyId: string }) {
 
   const [step1Err, setStep1Err] = useState("");
   const [step2Err, setStep2Err] = useState("");
+  const [charteAccepted, setCharteAccepted] = useState(false);
 
   const canSubmit = content.length >= 50 && pros.trim().length >= 10 && cons.trim().length >= 10
-    && ratingOverall > 0 && !!wouldRecommend;
+    && ratingOverall > 0 && !!wouldRecommend && charteAccepted;
 
   const goNext = () => {
     if (step === 0) {
@@ -341,6 +342,41 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <textarea value={knewBefore} onChange={e => setKnewBefore(e.target.value)} rows={2}
                 placeholder="Un conseil à quelqu'un qui rejoint cette boîte..."
                 style={{ ...inp, resize: "vertical" }} />
+            </div>
+
+            {/* Charte d'engagement */}
+            <div style={{
+              background: "var(--surface2)", border: `1px solid ${charteAccepted ? "rgba(16,185,129,0.35)" : "var(--border2)"}`,
+              borderRadius: 14, padding: "16px 18px", transition: "border-color 0.2s",
+            }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 12, letterSpacing: "0.02em", textTransform: "uppercase" }}>
+                Charte de bonne foi
+              </p>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 7 }}>
+                {[
+                  "J'ai eu une expérience personnelle avec cette entreprise",
+                  "J'écris de bonne foi et sans intention malveillante",
+                  "Je n'invente pas de faits et ne diffame pas de personnes",
+                  "Je ne divulgue pas d'informations confidentielles",
+                  "Je n'utilise pas de langage insultant ou discriminatoire",
+                ].map((item, i) => (
+                  <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                    <span style={{ color: "#10b981", flexShrink: 0, marginTop: 1 }}>✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <label style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={charteAccepted}
+                  onChange={e => setCharteAccepted(e.target.checked)}
+                  style={{ width: 18, height: 18, accentColor: "#8b5cf6", cursor: "pointer", flexShrink: 0 }}
+                />
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>
+                  Je confirme respecter cette charte et j'engage ma responsabilité en cas de fausse déclaration.
+                </span>
+              </label>
             </div>
 
             {state?.error && (
