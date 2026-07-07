@@ -62,11 +62,12 @@ export default async function ExplorePage({
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
-  const [user, favIds, flameIds, allNames] = await Promise.all([
+  const [user, favIds, flameIds, allNames, isAdmin] = await Promise.all([
     getUser(),
     getUserFavoriteIds(),
     getUserFlameIds(),
     getCompanyNames(),
+    (await import("@/lib/supabase/server")).getIsAdmin(),
   ]);
 
   // Business users belong in the dashboard, not explore
@@ -106,6 +107,7 @@ export default async function ExplorePage({
             initialFavIds={favIds}
             initialFlameIds={flameIds}
             isLoggedIn={!!user}
+            isAdmin={isAdmin}
           />
         </main>
       </div>

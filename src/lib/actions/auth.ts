@@ -38,7 +38,7 @@ export async function signIn(
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
   const rawNext = String(formData.get("next") || "");
-  const next = /^\/(?![/\\])/.test(rawNext) ? rawNext : "/explore";
+  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -89,7 +89,7 @@ export async function signOut() {
 
 export async function signInWithGoogle(formData: FormData) {
   const rawNext = String(formData.get("next") || "");
-  const next = /^\/(?![/\\])/.test(rawNext) ? rawNext : "/explore";
+  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";
 
   const supabase = await createClient();
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
