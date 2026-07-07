@@ -51,20 +51,37 @@ function RatingBar({ label, value }: { label: string; value: number | null }) {
   );
 }
 
+const BASE_URL = "https://workie-biblingo.vercel.app";
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const company = await getCompany(id);
   if (!company) return { title: "Entreprise introuvable · Workie" };
   const desc = company.description
-    ? company.description.slice(0, 150) + (company.description.length > 150 ? "…" : "")
-    : `Avis sur ${company.name} — salaires, culture, management. Découvre les vraies conditions de travail sur Workie.`;
+    ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
+    : `Avis anonymes sur ${company.name} — salaires, culture, management. La vérité que Glassdoor ne te dit pas.`;
+  const url = `${BASE_URL}/company/${id}`;
+  const ogImage = company.cover_url
+    ? [{ url: company.cover_url, width: 1200, height: 630, alt: company.name }]
+    : [{ url: `${BASE_URL}/og-default.png`, width: 1200, height: 630, alt: "Workie" }];
   return {
     title: `${company.name} · Avis & Salaires · Workie`,
     description: desc,
+    alternates: { canonical: url },
     openGraph: {
-      title: `${company.name} sur Workie`,
+      title: `${company.name} — Avis & Salaires sur Workie`,
       description: desc,
-      ...(company.cover_url ? { images: [{ url: company.cover_url }] } : {}),
+      url,
+      siteName: "Workie",
+      type: "website",
+      locale: "fr_CH",
+      images: ogImage,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${company.name} — Avis & Salaires sur Workie`,
+      description: desc,
+      images: ogImage.map(i => i.url),
     },
   };
 }
@@ -105,8 +122,27 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   }, {});
   const dominantMode = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": company.name,
+    "url": company.website_url ?? undefined,
+    "description": company.description ?? undefined,
+    "address": { "@type": "PostalAddressSchema", "addressLocality": company.city, "addressCountry": "CH" },
+    ...(company.avg_rating > 0 ? {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": Number(company.avg_rating).toFixed(1),
+        "bestRating": "5",
+        "worstRating": "1",
+        "ratingCount": company.review_count,
+      }
+    } : {}),
+  };
+
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
 
       {/* Hero cover */}

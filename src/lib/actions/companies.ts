@@ -10,7 +10,7 @@ function escapeLike(s: string) {
 
 export async function getCompanies(filters?: {
   sector?: string;
-  city?: string;
+  canton?: string;
   search?: string;
   page?: number;
   sort?: string;
@@ -34,7 +34,7 @@ export async function getCompanies(filters?: {
   }
 
   if (filters?.sector) query = query.eq("sector", filters.sector);
-  if (filters?.city) query = query.eq("city", filters.city);
+  if (filters?.canton) query = query.eq("canton", filters.canton);
   if (filters?.search) {
     const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
     if (names.length === 1) query = query.ilike("name", `%${escapeLike(names[0])}%`);
@@ -53,7 +53,7 @@ export async function getCompanies(filters?: {
 // Pour le mode swipe — toutes les entreprises sans pagination
 export async function getAllCompaniesForSwipe(filters?: {
   sector?: string;
-  city?: string;
+  canton?: string;
   search?: string;
 }) {
   const supabase = await createClient();
@@ -64,7 +64,7 @@ export async function getAllCompaniesForSwipe(filters?: {
     .order("avg_rating", { ascending: false });
 
   if (filters?.sector) query = query.eq("sector", filters.sector);
-  if (filters?.city) query = query.eq("city", filters.city);
+  if (filters?.canton) query = query.eq("canton", filters.canton);
   if (filters?.search) {
     const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
     if (names.length === 1) query = query.ilike("name", `%${escapeLike(names[0])}%`);

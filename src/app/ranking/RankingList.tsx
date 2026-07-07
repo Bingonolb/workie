@@ -6,7 +6,7 @@ import { Flame, Star, TrendingUp, Zap, Search } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 
-const SECTORS = ["Tous", "Tech", "Pharma", "Finance", "Conseil", "Sports & Fashion", "Horlogerie", "Alimentation", "Industrie", "Éducation & Recherche"];
+const SECTORS = ["Tous", "Tech", "Finance", "Assurances", "Pharma", "Santé", "Conseil", "Industrie", "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture", "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie"];
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 

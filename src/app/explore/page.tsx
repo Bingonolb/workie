@@ -17,17 +17,39 @@ import { SwipeView } from "./SwipeView";
 import { Pagination } from "./Pagination";
 import type { Company } from "@/lib/types";
 
-const SECTORS = ["Tech", "Pharma", "Finance", "Conseil", "Sports & Fashion", "Horlogerie", "Alimentation", "Industrie", "Éducation & Recherche"];
-const CITIES = ["Zürich", "Lausanne", "Basel", "Genève", "Bern", "Vevey", "Biel/Bienne"];
+const SECTORS = [
+  "Tech", "Finance", "Assurances", "Pharma", "Santé",
+  "Conseil", "Industrie", "Automobile", "Horlogerie",
+  "Commerce", "Alimentation", "Agriculture",
+  "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie",
+];
+const CANTONS = [
+  { code: "ZH", name: "Zürich" },
+  { code: "GE", name: "Genève" },
+  { code: "VD", name: "Vaud" },
+  { code: "BE", name: "Bern" },
+  { code: "BS", name: "Bâle-Ville" },
+  { code: "BL", name: "Bâle-Camp." },
+  { code: "ZG", name: "Zug" },
+  { code: "NE", name: "Neuchâtel" },
+  { code: "LU", name: "Lucerne" },
+  { code: "SG", name: "St-Gallen" },
+  { code: "TI", name: "Tessin" },
+  { code: "FR", name: "Fribourg" },
+  { code: "VS", name: "Valais" },
+  { code: "AG", name: "Argovie" },
+  { code: "SH", name: "Schaffhouse" },
+  { code: "SO", name: "Soleure" },
+];
 
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ sector?: string; city?: string; q?: string; view?: string; page?: string; sort?: string }>;
+  searchParams: Promise<{ sector?: string; canton?: string; q?: string; view?: string; page?: string; sort?: string }>;
 }) {
   const params = await searchParams;
   const isSwipe = params.view === "swipe";
-  const filters = { sector: params.sector, city: params.city, search: params.q, sort: params.sort };
+  const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
   const [user, favIds, flameIds, allNames] = await Promise.all([
     getUser(),
@@ -53,7 +75,7 @@ export default async function ExplorePage({
               <span style={{ color: "var(--text)", fontWeight: 700 }}>{companies.length}</span> entreprises à découvrir
             </p>
           </div>
-          <ExploreFilters sectors={SECTORS} cities={CITIES} current={params} allNames={allNames} />
+          <ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params} allNames={allNames} />
           <SwipeView
             companies={companies as Company[]}
             initialFavIds={favIds}

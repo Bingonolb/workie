@@ -68,14 +68,45 @@ export type Database = any; // eslint-disable-line @typescript-eslint/no-explici
 
 export const SECTOR_COLORS: Record<string, string> = {
   "Tech": "#8b5cf6",
-  "Pharma": "#10b981",
   "Finance": "#3b82f6",
+  "Assurances": "#0ea5e9",
+  "Pharma": "#10b981",
+  "Santé": "#34d399",
   "Conseil": "#f59e0b",
-  "Sports & Fashion": "#ec4899",
-  "Horlogerie": "#f97316",
-  "Alimentation": "#84cc16",
   "Industrie": "#64748b",
+  "Automobile": "#6366f1",
+  "Horlogerie": "#f97316",
+  "Commerce": "#a855f7",
+  "Alimentation": "#84cc16",
+  "Agriculture": "#65a30d",
   "Éducation & Recherche": "#06b6d4",
+  "Sports & Fashion": "#ec4899",
+  "Transport": "#14b8a6",
+  "Énergie": "#eab308",
+  // Legacy aliases
+  "Sports & Mode": "#ec4899",
+  "Conseil & Services": "#f59e0b",
+};
+
+export const CANTON_NAMES: Record<string, string> = {
+  "ZH": "Zürich",
+  "GE": "Genève",
+  "VD": "Vaud",
+  "BE": "Bern",
+  "BS": "Bâle-Ville",
+  "BL": "Bâle-Camp.",
+  "ZG": "Zug",
+  "NE": "Neuchâtel",
+  "LU": "Lucerne",
+  "SG": "St-Gallen",
+  "TI": "Tessin",
+  "FR": "Fribourg",
+  "VS": "Valais",
+  "AG": "Argovie",
+  "SH": "Schaffhouse",
+  "SO": "Soleure",
+  "GR": "Grisons",
+  "AR": "Appenzell",
 };
 
 export const EMPLOYEE_RANGES = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10000", "10001+"];
