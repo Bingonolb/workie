@@ -216,6 +216,8 @@ export default async function Home() {
           {[
             { href: "/explore", label: "Explorer" },
             { href: "/ranking", label: "Classement" },
+            { href: "/jobs", label: "Offres d'emploi" },
+            { href: "/salaires", label: "Salaires" },
             { href: "/business", label: "Entreprises" },
           ].map(({ href, label }) => (
             <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500 }}>{label}</Link>

@@ -1,6 +1,10 @@
 import { getBusinessAnalytics } from "@/lib/actions/business";
-import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/supabase/server";
+import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://workie-biblingo.vercel.app";
 
 export default async function BusinessDashboardPage() {
   const data = await getBusinessAnalytics();
@@ -10,6 +14,29 @@ export default async function BusinessDashboardPage() {
   }
 
   const { count, avgOverall, avgManagement, avgWorklife, avgCulture, avgCareer, recommendRate, avgSalary, trend, dist, company } = data as Awaited<ReturnType<typeof getBusinessAnalytics>> & { company: Record<string, unknown> };
+
+  // New reviews in last 7 days
+  const supabase = await createClient();
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const { count: newReviews } = await supabase
+    .from("reviews")
+    .select("*", { count: "exact", head: true })
+    .eq("company_id", String(company?.id ?? ""))
+    .gte("created_at", weekAgo);
+
+  // Profile completeness
+  const co = company as Record<string, unknown>;
+  const fields = [
+    { label: "Description", done: !!co.description },
+    { label: "Logo", done: !!co.logo_url },
+    { label: "Photo de couverture", done: !!co.cover_url },
+    { label: "Site web", done: !!co.website_url },
+    { label: "LinkedIn", done: !!co.linkedin_url },
+  ];
+  const completedCount = fields.filter(f => f.done).length;
+  const completionPct = Math.round((completedCount / fields.length) * 100);
+
+  const shareUrl = `${SITE_URL}/company/${co.id}`;
 
   const kpis = [
     { label: "Note globale", value: avgOverall ?? "–", suffix: "/5", color: "#f59e0b", icon: <Star size={20} color="#f59e0b" fill="#f59e0b" /> },
@@ -38,6 +65,26 @@ export default async function BusinessDashboardPage() {
           Voici l&apos;état de votre réputation employeur pour <strong style={{ color: "var(--text)" }}>{String(company?.name ?? "")}</strong>.
         </p>
       </div>
+
+      {/* New reviews banner */}
+      {(newReviews ?? 0) > 0 && (
+        <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "16px 20px", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(139,92,246,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Star size={18} color="#8b5cf6" fill="#8b5cf6" />
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>
+                {newReviews} nouvel{(newReviews ?? 0) > 1 ? "aux" : ""} avis cette semaine
+              </p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Répondez rapidement — les candidats lisent vos réponses.</p>
+            </div>
+          </div>
+          <Link href="/business/dashboard/reviews" style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>
+            Répondre <ArrowRight size={14} />
+          </Link>
+        </div>
+      )}
 
       {/* No reviews banner */}
       {count === 0 && (
@@ -135,13 +182,13 @@ export default async function BusinessDashboardPage() {
       )}
 
       {/* Quick actions */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 28 }}>
         {[
           { href: "/business/dashboard/reviews", label: "Répondre aux avis", desc: "Gérez votre réputation", color: "#8b5cf6" },
           { href: "/business/dashboard/jobs", label: "Publier une offre", desc: "Attirez des candidats", color: "#f97316" },
           { href: "/business/dashboard/profile", label: "Compléter la fiche", desc: "Logo, photos, réseaux", color: "#10b981" },
         ].map(({ href, label, desc, color }) => (
-          <Link key={href} href={href} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 20px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "border-color 0.15s" }}>
+          <Link key={href} href={href} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 20px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div>
               <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 3 }}>{label}</p>
               <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{desc}</p>
@@ -150,6 +197,98 @@ export default async function BusinessDashboardPage() {
           </Link>
         ))}
       </div>
+
+      {/* Bottom row: profile completion + share link */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+
+        {/* Profile completeness */}
+        <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "22px 24px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Complétude de la fiche</p>
+            <span style={{ fontSize: 18, fontWeight: 900, color: completionPct === 100 ? "#10b981" : "#f59e0b" }}>{completionPct}%</span>
+          </div>
+          <div style={{ height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden", marginBottom: 16 }}>
+            <div style={{ height: "100%", width: `${completionPct}%`, background: completionPct === 100 ? "#10b981" : "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 3, transition: "width 0.5s" }} />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {fields.map(({ label, done }) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {done
+                  ? <CheckCircle size={14} color="#10b981" />
+                  : <Clock size={14} color="var(--text-muted)" />
+                }
+                <span style={{ fontSize: 12, color: done ? "var(--text)" : "var(--text-muted)", fontWeight: done ? 600 : 400 }}>{label}</span>
+              </div>
+            ))}
+          </div>
+          {completionPct < 100 && (
+            <Link href="/business/dashboard/profile" style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 16, fontSize: 13, fontWeight: 700, color: "#8b5cf6", textDecoration: "none" }}>
+              Compléter ma fiche <ArrowRight size={14} />
+            </Link>
+          )}
+        </div>
+
+        {/* Share link */}
+        <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "22px 24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <Share2 size={16} color="#8b5cf6" />
+            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Partager en interne</p>
+          </div>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 16 }}>
+            Envoyez ce lien à vos équipes pour les inviter à partager leur expérience. Plus d&apos;avis = plus de visibilité.
+          </p>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", fontSize: 12, color: "var(--text-muted)", fontFamily: "monospace", wordBreak: "break-all", marginBottom: 14 }}>
+            {shareUrl}
+          </div>
+          <ShareCopyButton url={shareUrl} />
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 10, lineHeight: 1.5 }}>
+            💡 Partagez ce lien par email, Slack, Teams — les avis sont 100% anonymes pour vos employés.
+          </p>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function ShareCopyButton({ url }: { url: string }) {
+  // Server component workaround: render as a simple link+button via client island
+  return (
+    <ShareCopyClient url={url} />
+  );
+}
+
+// Inline client component via "use client" trick — not possible in a server file.
+// We export it as a static <a> fallback that works without JS, with a data-copy attr
+// and a small inline script to handle the copy on click.
+function ShareCopyClient({ url }: { url: string }) {
+  return (
+    <>
+      <button
+        onClick={undefined}
+        data-copy-url={url}
+        style={{ width: "100%", padding: "10px 0", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+        suppressHydrationWarning
+      >
+        Copier le lien
+      </button>
+      <script
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function(){
+              var btn = document.querySelector('[data-copy-url]');
+              if(!btn) return;
+              btn.addEventListener('click', function(){
+                navigator.clipboard.writeText(btn.getAttribute('data-copy-url')).then(function(){
+                  var orig = btn.textContent;
+                  btn.textContent = '✓ Copié !';
+                  setTimeout(function(){ btn.textContent = orig; }, 2000);
+                });
+              });
+            })();
+          `,
+        }}
+      />
+    </>
   );
 }
