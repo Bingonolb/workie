@@ -50,6 +50,37 @@ export async function signIn(
   redirect(next);
 }
 
+export async function forgotPassword(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const email = String(formData.get("email") || "").trim();
+  if (!email) return { error: "Email requis." };
+
+  const supabase = await createClient();
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${base}/auth/callback?next=/reset-password`,
+  });
+
+  if (error) return { error: error.message };
+  return { error: undefined };
+}
+
+export async function resetPassword(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const password = String(formData.get("password") || "");
+  if (password.length < 6) return { error: "Le mot de passe doit faire au moins 6 caractères." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+
+  redirect("/explore");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

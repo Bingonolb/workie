@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
+import { ShareCopyButton } from "@/components/ShareCopyButton";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://workie-biblingo.vercel.app";
 
@@ -247,48 +248,5 @@ export default async function BusinessDashboardPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function ShareCopyButton({ url }: { url: string }) {
-  // Server component workaround: render as a simple link+button via client island
-  return (
-    <ShareCopyClient url={url} />
-  );
-}
-
-// Inline client component via "use client" trick — not possible in a server file.
-// We export it as a static <a> fallback that works without JS, with a data-copy attr
-// and a small inline script to handle the copy on click.
-function ShareCopyClient({ url }: { url: string }) {
-  return (
-    <>
-      <button
-        onClick={undefined}
-        data-copy-url={url}
-        style={{ width: "100%", padding: "10px 0", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
-        suppressHydrationWarning
-      >
-        Copier le lien
-      </button>
-      <script
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function(){
-              var btn = document.querySelector('[data-copy-url]');
-              if(!btn) return;
-              btn.addEventListener('click', function(){
-                navigator.clipboard.writeText(btn.getAttribute('data-copy-url')).then(function(){
-                  var orig = btn.textContent;
-                  btn.textContent = '✓ Copié !';
-                  setTimeout(function(){ btn.textContent = orig; }, 2000);
-                });
-              });
-            })();
-          `,
-        }}
-      />
-    </>
   );
 }

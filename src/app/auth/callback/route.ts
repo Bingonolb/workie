@@ -19,6 +19,11 @@ export async function GET(request: Request) {
     });
 
     if (!error) {
+      // Password reset flow
+      if (type === "recovery") {
+        return NextResponse.redirect(`${origin}/reset-password`);
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const companyIdFromMeta = user.user_metadata?.company_id as string | undefined;

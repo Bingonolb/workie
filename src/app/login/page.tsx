@@ -22,6 +22,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
           Pas encore de compte ?{" "}
           <Link href="/signup" style={{ color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>S&apos;inscrire</Link>
+          {" · "}
+          <Link href="/forgot-password" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Mot de passe oublié ?</Link>
         </p>
 
         <AuthFormWorkie mode="login" action={signIn} googleAction={signInWithGoogle} next={next} />
