@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { ArrowRight, Star, Shield, Zap, Eye } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -30,12 +31,13 @@ export default async function Home() {
         }}>
           workie
         </span>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <Link href="/login" style={{ padding: "9px 20px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <ThemeToggle />
+          <Link href="/login" style={{ padding: "9px 16px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
             Connexion
           </Link>
           <Link href="/signup" style={{
-            padding: "9px 20px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none",
+            padding: "9px 16px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none",
             background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff",
           }}>
             S&apos;inscrire

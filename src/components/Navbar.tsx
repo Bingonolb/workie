@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getUser, getIsAdmin } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
 import { Flame, Compass, User, LogOut, Trophy, Shield } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 export async function Navbar() {
   const [user, isAdmin] = await Promise.all([getUser(), getIsAdmin()]);
@@ -57,7 +58,8 @@ export async function Navbar() {
         </div>
       )}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <ThemeToggle />
         {user ? (
           <form action={signOut}>
             <button type="submit" style={{
