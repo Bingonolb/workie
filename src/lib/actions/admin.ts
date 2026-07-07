@@ -41,7 +41,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
       logo_url: String(formData.get("logo_url") || "") || null,
       website_url: String(formData.get("website_url") || "") || null,
       linkedin_url: String(formData.get("linkedin_url") || "") || null,
-      avg_salary_chf: formData.get("avg_salary_chf") ? Number(formData.get("avg_salary_chf")) : null,
+      avg_salary_chf: formData.get("avg_salary_chf") ? (Number(formData.get("avg_salary_chf")) || null) : null,
       is_verified: formData.get("is_verified") === "true",
       tags: String(formData.get("tags") || "").split(",").map(t => t.trim()).filter(t => t.length > 0 && t.length <= 40),
     };
@@ -71,7 +71,7 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       cover_url: String(formData.get("cover_url") || "") || null,
       logo_url: String(formData.get("logo_url") || "") || null,
       website_url: String(formData.get("website_url") || "") || null,
-      avg_salary_chf: formData.get("avg_salary_chf") ? Number(formData.get("avg_salary_chf")) : null,
+      avg_salary_chf: formData.get("avg_salary_chf") ? (Number(formData.get("avg_salary_chf")) || null) : null,
       is_verified: false,
       tags: String(formData.get("tags") || "").split(",").map(t => t.trim()).filter(t => t.length > 0 && t.length <= 40),
       avg_rating: 0, review_count: 0, score: 0,

@@ -101,7 +101,7 @@ export async function voteHelpful(reviewId: string): Promise<{ success?: boolean
 
   if (voteErr) return { error: "Déjà voté." };
 
-  const { error: rpcErr } = await supabase.rpc("increment_helpful" as any, { review_id: reviewId });
+  const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
   if (rpcErr) return { error: rpcErr.message };
 
   revalidatePath("/", "layout");

@@ -283,7 +283,7 @@ export function SwipeView({
         </p>
       </div>
 
-      {showGuestModal && !isLoggedIn && <GuestModal reviewCount={0} open />}
+      {showGuestModal && !isLoggedIn && <GuestModal reviewCount={companies.length} open />}
 
       <style>{`
         @keyframes fadeInOut {
