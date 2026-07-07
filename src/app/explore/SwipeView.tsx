@@ -289,6 +289,7 @@ export function SwipeView({
         </div>
         <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
           Swipe <span style={{ color: "#f97316", fontWeight: 700 }}>🔥 droite</span> pour sauvegarder · <span style={{ color: "#ef4444", fontWeight: 700 }}>✕ gauche</span> pour passer
+          {" "}&nbsp;·{" "}<kbd style={{ fontSize: 10, padding: "1px 5px", borderRadius: 4, background: "var(--surface3)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontFamily: "monospace" }}>←</kbd>{" "}<kbd style={{ fontSize: 10, padding: "1px 5px", borderRadius: 4, background: "var(--surface3)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontFamily: "monospace" }}>→</kbd>
         </p>
       </div>
 
