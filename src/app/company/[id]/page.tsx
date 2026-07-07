@@ -9,6 +9,7 @@ import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
 import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle, ThumbsUp } from "lucide-react";
 import { ParallaxCover } from "@/components/ParallaxCover";
+import { ShareButton } from "@/components/ShareButton";
 
 const LinkedinIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
@@ -142,32 +143,35 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
 
-            {/* Favorite button */}
-            {user ? (
-              <form action={toggleFavorite.bind(null, company.id)}>
-                <button type="submit" style={{
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <ShareButton name={company.name} url={`https://workie-biblingo.vercel.app/company/${company.id}`} />
+              {user ? (
+                <form action={toggleFavorite.bind(null, company.id)}>
+                  <button type="submit" style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "10px 20px", borderRadius: 12,
+                    background: isFav ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.1)",
+                    border: isFav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.15)",
+                    color: isFav ? "#f97316" : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                    backdropFilter: "blur(8px)",
+                  }}>
+                    <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
+                  </button>
+                </form>
+              ) : (
+                <Link href="/login" style={{
                   display: "flex", alignItems: "center", gap: 8,
                   padding: "10px 20px", borderRadius: 12,
-                  background: isFav ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.1)",
-                  border: isFav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.15)",
-                  color: isFav ? "#f97316" : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                  background: "rgba(255,255,255,0.1)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  color: "#fff", fontWeight: 600, fontSize: 14, textDecoration: "none",
                   backdropFilter: "blur(8px)",
                 }}>
-                  <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
-                </button>
-              </form>
-            ) : (
-              <Link href="/login" style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "10px 20px", borderRadius: 12,
-                background: "rgba(255,255,255,0.1)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                color: "#fff", fontWeight: 600, fontSize: 14, textDecoration: "none",
-                backdropFilter: "blur(8px)",
-              }}>
-                <Flame size={16} fill="none" /> Sauvegarder
-              </Link>
-            )}
+                  <Flame size={16} fill="none" /> Sauvegarder
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
