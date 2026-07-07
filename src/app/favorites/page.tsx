@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
@@ -7,6 +8,10 @@ import { CompanyCard } from "@/components/CompanyCard";
 import { getFavorites } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
 import { Flame } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Mes favoris · Workie",
+};
 
 export default async function FavoritesPage() {
   const user = await getUser();

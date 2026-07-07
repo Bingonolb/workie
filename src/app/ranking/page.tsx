@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
 import { getTopCompanies } from "@/lib/actions/scores";
 import { createClient } from "@/lib/supabase/server";
@@ -6,6 +7,11 @@ import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Classement des entreprises suisses · Workie",
+  description: "Le vrai classement des entreprises en Suisse — calculé sur les avis anonymes, les salaires et les votes de la communauté.",
+};
 
 export default async function RankingPage() {
   const supabase = await createClient();

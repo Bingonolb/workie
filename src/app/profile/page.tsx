@@ -33,6 +33,13 @@ export default async function ProfilePage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+      <style>{`
+        @media (max-width: 700px) {
+          .profile-kpi { grid-template-columns: 1fr !important; }
+          .profile-grid { grid-template-columns: 1fr !important; }
+          .profile-sidebar { position: static !important; }
+        }
+      `}</style>
       <Navbar />
 
       <main style={{ maxWidth: 1040, margin: "0 auto", padding: "40px 24px 100px" }}>
@@ -79,7 +86,7 @@ export default async function ProfilePage() {
         </div>
 
         {/* ── KPI strip ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
+        <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
           {([
             { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b" },
             { emoji: "🔥", value: String(favIds.length), label: "Entreprises sauvegardées", color: "#f97316" },
@@ -109,7 +116,7 @@ export default async function ProfilePage() {
         </div>
 
         {/* ── Main grid ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16, alignItems: "start" }}>
+        <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16, alignItems: "start" }}>
 
           {/* Reviews table */}
           <div style={{
@@ -128,7 +135,7 @@ export default async function ProfilePage() {
           </div>
 
           {/* Right column */}
-          <div style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="profile-sidebar" style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 16 }}>
 
             {/* Edit form */}
             <div style={{
