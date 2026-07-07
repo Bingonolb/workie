@@ -12,11 +12,25 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // If user was invited with company metadata, ensure profile is linked
+      if (user) {
+        const companyIdFromMeta = user.user_metadata?.company_id as string | undefined;
+        if (companyIdFromMeta) {
+          await supabase.from("profiles").upsert({
+            id: user.id,
+            claimed_company_id: companyIdFromMeta,
+            full_name: (user.user_metadata?.full_name as string | undefined) ?? (`${(user.user_metadata?.first_name as string | undefined) ?? ""} ${(user.user_metadata?.last_name as string | undefined) ?? ""}`.trim() || null),
+          }, { onConflict: "id" });
+          return NextResponse.redirect(`${origin}/business/dashboard`);
+        }
+      }
+
       // If a specific next was requested, honour it
       if (next) return NextResponse.redirect(`${origin}${next}`);
 
       // Otherwise check role to decide where to send the user
-      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
           .from("profiles")

@@ -32,7 +32,9 @@ export default async function BusinessDashboardLayout({ children }: { children: 
     .maybeSingle();
 
   if (!company) redirect("/business");
-  if (!company.is_subscribed) redirect("/business/checkout");
+  // Admins always bypass the subscription check
+  const isAdmin = profile.role === "admin";
+  if (!company.is_subscribed && !isAdmin) redirect("/business/checkout");
 
   return (
     <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>

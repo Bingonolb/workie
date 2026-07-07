@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient, getUser } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 async function requireAdmin() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -99,6 +100,110 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
     if (error) return { error: error.message };
     revalidatePath("/", "layout");
     return {};
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function getClaims() {
+  try {
+    const { supabase } = await requireAdmin();
+    const { data, error } = await supabase
+      .from("company_claims")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) return { error: error.message };
+    return { claims: data ?? [] };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function approveClaim(claimId: string): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const { user: adminUser, supabase } = await requireAdmin();
+    const adminClient = createAdminClient();
+
+    // Fetch the claim
+    const { data: claim, error: claimErr } = await supabase
+      .from("company_claims")
+      .select("*")
+      .eq("id", claimId)
+      .maybeSingle();
+    if (claimErr || !claim) return { error: "Demande introuvable." };
+    if (claim.status === "approved") return { error: "Déjà approuvée." };
+
+    // Find matching company — by company_id if set, otherwise by name
+    let companyId: string | null = claim.company_id ?? null;
+    if (!companyId) {
+      const { data: co } = await supabase
+        .from("companies")
+        .select("id")
+        .ilike("name", claim.company_name)
+        .maybeSingle();
+      companyId = co?.id ?? null;
+    }
+    if (!companyId) return { error: `Aucune entreprise trouvée pour "${claim.company_name}". Créez-la d'abord dans le panel admin.` };
+
+    // Check if the work_email already has an account
+    const { data: existingUsers } = await adminClient.auth.admin.listUsers();
+    const existing = existingUsers?.users?.find(u => u.email?.toLowerCase() === claim.work_email.toLowerCase());
+
+    if (existing) {
+      // User already exists — just link the company to their profile
+      await adminClient.from("profiles").upsert({
+        id: existing.id,
+        claimed_company_id: companyId,
+      }, { onConflict: "id" });
+    } else {
+      // Invite the user — they'll receive a setup email with magic link
+      const { data: invited, error: inviteErr } = await adminClient.auth.admin.inviteUserByEmail(
+        claim.work_email,
+        {
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/business/dashboard`,
+          data: { company_id: companyId, first_name: claim.first_name, last_name: claim.last_name },
+        }
+      );
+      if (inviteErr) return { error: `Erreur d'invitation : ${inviteErr.message}` };
+
+      // Pre-create their profile with the company link
+      if (invited?.user) {
+        await adminClient.from("profiles").upsert({
+          id: invited.user.id,
+          claimed_company_id: companyId,
+          full_name: `${claim.first_name} ${claim.last_name}`,
+        }, { onConflict: "id" });
+      }
+    }
+
+    // Mark company as verified + subscribed
+    await supabase.from("companies").update({ is_verified: true, is_subscribed: true }).eq("id", companyId);
+
+    // Update claim status
+    await supabase.from("company_claims").update({
+      status: "approved",
+      company_id: companyId,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: adminUser.id,
+    }).eq("id", claimId);
+
+    revalidatePath("/admin/claims");
+    return { success: true };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function rejectClaim(claimId: string): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const { user: adminUser, supabase } = await requireAdmin();
+    await supabase.from("company_claims").update({
+      status: "rejected",
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: adminUser.id,
+    }).eq("id", claimId);
+    revalidatePath("/admin/claims");
+    return { success: true };
   } catch (e) {
     return { error: (e as Error).message };
   }
