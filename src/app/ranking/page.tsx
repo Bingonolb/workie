@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function RankingPage() {
   const supabase = await createClient();
   const [companies, { count: reviewCount }] = await Promise.all([
-    getTopCompanies(100),
+    getTopCompanies(200),
     supabase.from("reviews").select("*", { count: "exact", head: true }),
   ]);
   const typedCompanies = companies as Company[];

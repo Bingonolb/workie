@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Flame, Star, TrendingUp, Zap } from "lucide-react";
+import { Flame, Star, TrendingUp, Zap, Search } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 
@@ -12,13 +12,34 @@ const MEDALS = ["🥇", "🥈", "🥉"];
 
 export function RankingTable({ companies }: { companies: Company[] }) {
   const [sector, setSector] = useState("Tous");
+  const [search, setSearch] = useState("");
   const maxScore = Math.max(...companies.map(c => c.score), 1);
 
-  const filtered = sector === "Tous" ? companies : companies.filter(c => c.sector === sector);
+  const q = search.trim().toLowerCase();
+  const filtered = companies
+    .filter(c => sector === "Tous" || c.sector === sector)
+    .filter(c => !q || c.name.toLowerCase().includes(q) || c.city?.toLowerCase().includes(q));
   const rankMap = new Map(companies.map((c, i) => [c.id, i]));
 
   return (
     <div>
+      {/* Search */}
+      <div style={{ padding: "0 20px 16px" }}>
+        <div style={{ position: "relative" }}>
+          <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Chercher une entreprise ou une ville..."
+            style={{
+              width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
+              borderRadius: 10, padding: "9px 12px 9px 34px", fontSize: 13, color: "var(--text)",
+              outline: "none", boxSizing: "border-box",
+            }}
+          />
+        </div>
+      </div>
+
       {/* Sector filter */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 20px 20px" }}>
         {SECTORS.map(s => {
