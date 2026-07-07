@@ -325,7 +325,7 @@ export default function ClaimPage() {
               </button>
             )}
             {step < 2 ? (
-              <button type="button" onClick={goNext} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 0", borderRadius: 10, border: "none", cursor: "pointer", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15 }}>
+              <button type="button" onClick={goNext} disabled={step === 0 && !selectedCompany} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 0", borderRadius: 10, border: "none", cursor: step === 0 && !selectedCompany ? "not-allowed" : "pointer", background: step === 0 && !selectedCompany ? "var(--surface2)" : "linear-gradient(135deg, #8b5cf6, #f97316)", color: step === 0 && !selectedCompany ? "var(--text-muted)" : "#fff", fontWeight: 700, fontSize: 15 }}>
                 Continuer <ArrowRight size={16} />
               </button>
             ) : (
