@@ -172,8 +172,15 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <main style={{ maxWidth: 900, margin: "0 auto", padding: "36px 32px 80px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
+      <style>{`
+        @media (max-width: 700px) {
+          .company-grid { grid-template-columns: 1fr !important; }
+          .company-sidebar { position: static !important; }
+          .company-stats-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+      `}</style>
+      <main style={{ maxWidth: 900, margin: "0 auto", padding: "36px 20px 80px" }}>
+        <div className="company-grid" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
           {/* Left column */}
           <div>
             {/* Key stats */}
@@ -284,7 +291,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Right sidebar */}
-          <div style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="company-sidebar" style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 16 }}>
             {company.description && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>

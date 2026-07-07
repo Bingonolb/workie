@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { getUser, getIsAdmin } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
-import { Flame, Compass, User, LogOut, Trophy, Shield } from "lucide-react";
+import { LogOut, Shield } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { NavLinks } from "./NavLinks";
 
 export async function Navbar() {
   const [user, isAdmin] = await Promise.all([getUser(), getIsAdmin()]);
@@ -26,23 +27,8 @@ export async function Navbar() {
       </Link>
 
       {user && (
-        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {[
-            { href: "/explore", icon: <Compass size={15} />, label: "Explorer" },
-            { href: "/ranking", icon: <Trophy size={15} />, label: "Classement" },
-            { href: "/favorites", icon: <Flame size={15} />, label: "Favoris" },
-            { href: "/profile", icon: <User size={15} />, label: "Profil" },
-          ].map(({ href, icon, label }) => (
-            <Link key={href} href={href} style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "7px 14px", borderRadius: 8,
-              fontSize: 14, fontWeight: 500, color: "var(--text-muted)",
-              textDecoration: "none",
-            }}>
-              {icon} {label}
-            </Link>
-          ))}
-
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <NavLinks />
           {isAdmin && (
             <Link href="/admin" style={{
               display: "flex", alignItems: "center", gap: 6,
