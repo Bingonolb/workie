@@ -13,8 +13,9 @@ export async function Navbar() {
       position: "sticky", top: 0, zIndex: 40,
       background: "var(--nav-bg)", backdropFilter: "blur(16px)",
       borderBottom: "1px solid var(--nav-border)",
-      padding: "0 32px", height: 60,
+      padding: "0 16px", height: 60,
       display: "flex", alignItems: "center", justifyContent: "space-between",
+      gap: 8,
     }}>
       <Link href={user ? "/explore" : "/"} style={{ textDecoration: "none" }}>
         <span style={{
