@@ -393,6 +393,27 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{company.founded_year}</span>
               </div>
             )}
+
+            {/* Business CTA — only for non-subscribed companies */}
+            {!company.is_subscribed && (
+              <div style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "18px 20px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 900, letterSpacing: "-0.02em" }}>
+                    <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
+                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 4, textTransform: "uppercase" as const }}>Business</span>
+                  </span>
+                </div>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 14 }}>
+                  Vous représentez <strong style={{ color: "var(--text)" }}>{company.name}</strong> ? Revendiquez cette fiche pour répondre aux avis et accéder aux analytics.
+                </p>
+                <Link href="/business" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px 0", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
+                  Revendiquer ma fiche
+                </Link>
+                <Link href="/business/login" style={{ display: "block", textAlign: "center", fontSize: 11, color: "var(--text-muted)", marginTop: 8, textDecoration: "none" }}>
+                  Déjà un compte ? Se connecter →
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </main>
