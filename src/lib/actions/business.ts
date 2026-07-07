@@ -201,6 +201,10 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
     const content = String(formData.get("content") || "").trim();
     if (!content || content.length < 10) return { error: "Réponse trop courte (min 10 caractères)." };
 
+    // Verify the review belongs to this company
+    const { data: review } = await supabase.from("reviews").select("id").eq("id", review_id).eq("company_id", company.id).maybeSingle();
+    if (!review) return { error: "Avis introuvable ou accès refusé." };
+
     // Upsert reply
     const { error } = await supabase.from("company_replies").upsert(
       { review_id, company_id: company.id, content, updated_at: new Date().toISOString() },
@@ -237,14 +241,14 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
 }
 
 export async function toggleJobOffer(id: string, is_active: boolean): Promise<void> {
-  const { supabase } = await requireBusiness();
-  await supabase.from("job_offers").update({ is_active }).eq("id", id);
+  const { supabase, company } = await requireBusiness();
+  await supabase.from("job_offers").update({ is_active }).eq("id", id).eq("company_id", company.id);
   revalidatePath("/business/dashboard/jobs");
 }
 
 export async function deleteJobOffer(id: string): Promise<void> {
-  const { supabase } = await requireBusiness();
-  await supabase.from("job_offers").delete().eq("id", id);
+  const { supabase, company } = await requireBusiness();
+  await supabase.from("job_offers").delete().eq("id", id).eq("company_id", company.id);
   revalidatePath("/business/dashboard/jobs");
 }
 
@@ -259,8 +263,10 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
       return { error: "Utilise ton email professionnel (domaine de l'entreprise)." };
     }
 
+    const rawCompanyId = String(formData.get("company_id") || "").trim();
     const { error } = await supabase.from("company_claims").insert({
       company_name: String(formData.get("company_name") || ""),
+      company_id: rawCompanyId || null,
       company_website: String(formData.get("company_website") || "") || null,
       employee_range: String(formData.get("employee_range") || "") || null,
       first_name: String(formData.get("first_name") || ""),
