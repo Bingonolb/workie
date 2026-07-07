@@ -46,10 +46,10 @@ export default async function BusinessDashboardLayout({ children }: { children: 
       }}>
         {/* Logo */}
         <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid var(--border)" }}>
-          <Link href="/" style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", textDecoration: "none" }}>
-            workie
+          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+            <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
+            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 5, textTransform: "uppercase" as const, opacity: 0.9 }}>Business</span>
           </Link>
-          <p style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginTop: 2 }}>Portail Entreprise</p>
         </div>
 
         {/* Company card */}

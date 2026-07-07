@@ -26,17 +26,13 @@ export default async function BusinessLoginPage() {
       <div style={{ width: "100%", maxWidth: 420 }}>
         {/* Logo + back */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40 }}>
-          <Link href="/" style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", textDecoration: "none" }}>
-            workie
+          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+            <span style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
+            <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 6, textTransform: "uppercase", opacity: 0.9 }}>Business</span>
           </Link>
           <Link href="/business" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500 }}>
             <ArrowLeft size={14} /> Espace entreprise
           </Link>
-        </div>
-
-        {/* Badge */}
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "5px 14px", marginBottom: 24, fontSize: 12, fontWeight: 700, color: "#8b5cf6" } as React.CSSProperties}>
-          <BadgeCheck size={13} /> Accès Portail Entreprise
         </div>
 
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "36px 32px" }}>
