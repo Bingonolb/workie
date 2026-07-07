@@ -51,8 +51,8 @@ export function SwipeView({
     if (!isLoggedIn) { swipeCountRef.current += 1; }
     setGone(dir);
     if (dir === "right" && isLoggedIn) {
-      setFavIds(prev => { const n = new Set(prev); n.has(current.id) ? n.delete(current.id) : n.add(current.id); return n; });
-      setFlameIds(prev => { const n = new Set(prev); n.has(current.id) ? n.delete(current.id) : n.add(current.id); return n; });
+      setFavIds(prev => { const n = new Set(prev); n.add(current.id); return n; });
+      setFlameIds(prev => { const n = new Set(prev); n.add(current.id); return n; });
       toggleFavorite(current.id);
       addFlame(current.id);
       showToast("🔥 Enregistré !", "#f97316");

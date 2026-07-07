@@ -33,6 +33,9 @@ export async function getCompanies(filters?: {
     query = query.order("score", { ascending: false }).order("avg_rating", { ascending: false }).order("name", { ascending: true });
   }
 
+  // Minimum 10 employees — exclude "1-10" range
+  query = query.neq("employee_range", "1-10");
+
   if (filters?.sector) query = query.eq("sector", filters.sector);
   if (filters?.canton) query = query.eq("canton", filters.canton);
   if (filters?.search) {
@@ -62,6 +65,8 @@ export async function getAllCompaniesForSwipe(filters?: {
     .select("*")
     .order("score", { ascending: false })
     .order("avg_rating", { ascending: false });
+
+  query = query.neq("employee_range", "1-10");
 
   if (filters?.sector) query = query.eq("sector", filters.sector);
   if (filters?.canton) query = query.eq("canton", filters.canton);

@@ -128,7 +128,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     "name": company.name,
     "url": company.website_url ?? undefined,
     "description": company.description ?? undefined,
-    "address": { "@type": "PostalAddressSchema", "addressLocality": company.city, "addressCountry": "CH" },
+    "address": { "@type": "PostalAddress", "addressLocality": company.city, "addressCountry": "CH" },
     ...(company.avg_rating > 0 ? {
       "aggregateRating": {
         "@type": "AggregateRating",

@@ -70,11 +70,12 @@ export async function addPenalty(companyId: string): Promise<void> {
   revalidatePath("/", "layout");
 }
 
-export async function getTopCompanies(limit = 100) {
+export async function getTopCompanies(limit = 200) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("companies")
-    .select("id, name, sector, city, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified, tags")
+    .select("id, name, sector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified, tags")
+    .neq("employee_range", "1-10")
     .order("score", { ascending: false })
     .order("avg_rating", { ascending: false })
     .order("review_count", { ascending: false })

@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Navbar } from "@/components/Navbar";
 
 export const metadata: Metadata = {
@@ -25,21 +26,31 @@ const SECTORS = [
 ];
 const CANTONS = [
   { code: "ZH", name: "Zürich" },
-  { code: "GE", name: "Genève" },
-  { code: "VD", name: "Vaud" },
   { code: "BE", name: "Bern" },
+  { code: "LU", name: "Lucerne" },
+  { code: "UR", name: "Uri" },
+  { code: "SZ", name: "Schwyz" },
+  { code: "OW", name: "Obwalden" },
+  { code: "NW", name: "Nidwalden" },
+  { code: "GL", name: "Glarus" },
+  { code: "ZG", name: "Zug" },
+  { code: "FR", name: "Fribourg" },
+  { code: "SO", name: "Soleure" },
   { code: "BS", name: "Bâle-Ville" },
   { code: "BL", name: "Bâle-Camp." },
-  { code: "ZG", name: "Zug" },
-  { code: "NE", name: "Neuchâtel" },
-  { code: "LU", name: "Lucerne" },
-  { code: "SG", name: "St-Gallen" },
-  { code: "TI", name: "Tessin" },
-  { code: "FR", name: "Fribourg" },
-  { code: "VS", name: "Valais" },
-  { code: "AG", name: "Argovie" },
   { code: "SH", name: "Schaffhouse" },
-  { code: "SO", name: "Soleure" },
+  { code: "AR", name: "Appenzell A.Rh." },
+  { code: "AI", name: "Appenzell I.Rh." },
+  { code: "SG", name: "St-Gallen" },
+  { code: "GR", name: "Grisons" },
+  { code: "AG", name: "Argovie" },
+  { code: "TG", name: "Thurgovie" },
+  { code: "TI", name: "Tessin" },
+  { code: "VD", name: "Vaud" },
+  { code: "VS", name: "Valais" },
+  { code: "NE", name: "Neuchâtel" },
+  { code: "GE", name: "Genève" },
+  { code: "JU", name: "Jura" },
 ];
 
 export default async function ExplorePage({
@@ -75,7 +86,7 @@ export default async function ExplorePage({
               <span style={{ color: "var(--text)", fontWeight: 700 }}>{companies.length}</span> entreprises à découvrir
             </p>
           </div>
-          <ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params} allNames={allNames} />
+          <Suspense fallback={null}><ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params} allNames={allNames} /></Suspense>
           <SwipeView
             companies={companies as Company[]}
             initialFavIds={favIds}
