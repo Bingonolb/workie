@@ -196,7 +196,7 @@ export default async function Home() {
                 {[
                   { icon: <BarChart3 size={20} color="#8b5cf6" />, label: "Analytics avancés" },
                   { icon: <MessageCircle size={20} color="#f97316" />, label: "Répondre aux avis" },
-                  { icon: <BadgeCheck size={20} color="#10b981" />, label: "Badge vérifié" },
+                  { icon: <svg viewBox="0 0 22 22" style={{ width: 20, height: 20 }}><circle cx="11" cy="11" r="11" fill="#1D9BF0" /><path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" /></svg>, label: "Badge vérifié" },
                 ].map(({ icon, label }) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, minWidth: 180 }}>
                     {icon}
