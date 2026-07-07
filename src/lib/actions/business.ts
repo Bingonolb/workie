@@ -1,0 +1,279 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/supabase/server";
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+async function requireBusiness() {
+  const [user, supabase] = await Promise.all([getUser(), createClient()]);
+  if (!user) throw new Error("Non authentifié");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, claimed_company_id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile?.claimed_company_id) throw new Error("Aucune entreprise liée");
+
+  const { data: company } = await supabase
+    .from("companies")
+    .select("*")
+    .eq("id", profile.claimed_company_id)
+    .maybeSingle();
+
+  if (!company) throw new Error("Entreprise introuvable");
+
+  return { user, supabase, company, profile };
+}
+
+// ── Getters ───────────────────────────────────────────────────────────────────
+
+export async function getBusinessCompany() {
+  try {
+    const { company } = await requireBusiness();
+    return { company };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function getBusinessReviews() {
+  try {
+    const { supabase, company } = await requireBusiness();
+
+    const { data: reviews } = await supabase
+      .from("reviews")
+      .select("*, company_replies(id, content, created_at)")
+      .eq("company_id", company.id)
+      .order("created_at", { ascending: false });
+
+    return { reviews: reviews ?? [] };
+  } catch (e) {
+    return { reviews: [], error: (e as Error).message };
+  }
+}
+
+export async function getBusinessAnalytics() {
+  try {
+    const { supabase, company } = await requireBusiness();
+
+    const { data: reviews } = await supabase
+      .from("reviews")
+      .select("rating_overall, rating_culture, rating_management, rating_worklife, rating_career, would_recommend, salary_chf, employment_type, work_mode, pros, cons, created_at")
+      .eq("company_id", company.id)
+      .order("created_at", { ascending: true });
+
+    const r = reviews ?? [];
+    const count = r.length;
+
+    const avg = (key: keyof typeof r[0]) =>
+      count > 0 ? (r.reduce((s, x) => s + (Number(x[key]) || 0), 0) / count).toFixed(1) : "–";
+
+    const recommendRate = count > 0
+      ? Math.round((r.filter(x => x.would_recommend === "oui").length / count) * 100)
+      : null;
+
+    const salaries = r.filter(x => x.salary_chf && x.salary_chf > 0).map(x => x.salary_chf as number);
+    const avgSalary = salaries.length > 0 ? Math.round(salaries.reduce((a, b) => a + b, 0) / salaries.length) : null;
+
+    // Trend: rating by month (last 12 months)
+    const monthlyMap: Record<string, number[]> = {};
+    r.forEach(rev => {
+      const month = rev.created_at?.slice(0, 7);
+      if (!month) return;
+      if (!monthlyMap[month]) monthlyMap[month] = [];
+      monthlyMap[month].push(Number(rev.rating_overall));
+    });
+    const trend = Object.entries(monthlyMap)
+      .slice(-12)
+      .map(([month, ratings]) => ({
+        month,
+        avg: Number((ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)),
+      }));
+
+    // Rating distribution
+    const dist = [1, 2, 3, 4, 5].map(n => ({
+      star: n,
+      count: r.filter(x => Math.round(Number(x.rating_overall)) === n).length,
+    }));
+
+    // Work mode
+    const workModes: Record<string, number> = {};
+    r.forEach(x => { if (x.work_mode) workModes[x.work_mode] = (workModes[x.work_mode] || 0) + 1; });
+
+    // Employment types
+    const empTypes: Record<string, number> = {};
+    r.forEach(x => { if (x.employment_type) empTypes[x.employment_type] = (empTypes[x.employment_type] || 0) + 1; });
+
+    return {
+      count,
+      avgOverall: avg("rating_overall"),
+      avgManagement: avg("rating_management"),
+      avgWorklife: avg("rating_worklife"),
+      avgCulture: avg("rating_culture"),
+      avgCareer: avg("rating_career"),
+      recommendRate,
+      avgSalary,
+      trend,
+      dist,
+      workModes,
+      empTypes,
+      company,
+    };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function getBusinessJobs() {
+  try {
+    const { supabase, company } = await requireBusiness();
+    const { data } = await supabase
+      .from("job_offers")
+      .select("*")
+      .eq("company_id", company.id)
+      .order("created_at", { ascending: false });
+    return { jobs: data ?? [], company };
+  } catch (e) {
+    return { jobs: [], error: (e as Error).message };
+  }
+}
+
+// ── Mutations ─────────────────────────────────────────────────────────────────
+
+export async function updateBusinessProfile(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const { supabase, company } = await requireBusiness();
+
+    const fields: Record<string, unknown> = {
+      description: String(formData.get("description") || "") || null,
+      website_url: String(formData.get("website_url") || "") || null,
+      linkedin_url: String(formData.get("linkedin_url") || "") || null,
+      twitter_url: String(formData.get("twitter_url") || "") || null,
+      instagram_url: String(formData.get("instagram_url") || "") || null,
+    };
+
+    // Logo upload
+    const logoFile = formData.get("logo_file");
+    if (logoFile instanceof File && logoFile.size > 0) {
+      const ext = logoFile.name.split(".").pop() || "jpg";
+      const path = `logos/${company.id}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("covers").upload(path, logoFile, { contentType: logoFile.type, upsert: true });
+      if (!upErr) {
+        const { data: pub } = supabase.storage.from("covers").getPublicUrl(path);
+        fields.logo_url = pub.publicUrl;
+      }
+    } else {
+      fields.logo_url = String(formData.get("logo_url") || "") || null;
+    }
+
+    // Cover upload
+    const coverFile = formData.get("cover_file");
+    if (coverFile instanceof File && coverFile.size > 0) {
+      const ext = coverFile.name.split(".").pop() || "jpg";
+      const path = `covers/${company.id}/business.${ext}`;
+      const { error: upErr } = await supabase.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
+      if (!upErr) {
+        const { data: pub } = supabase.storage.from("covers").getPublicUrl(path);
+        fields.cover_url = pub.publicUrl;
+      }
+    }
+
+    const { error } = await supabase.from("companies").update(fields).eq("id", company.id);
+    if (error) return { error: error.message };
+
+    revalidatePath("/business/dashboard/profile");
+    revalidatePath(`/company/${company.id}`);
+    return { success: true };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function replyToReview(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const { supabase, company } = await requireBusiness();
+    const review_id = String(formData.get("review_id"));
+    const content = String(formData.get("content") || "").trim();
+    if (!content || content.length < 10) return { error: "Réponse trop courte (min 10 caractères)." };
+
+    // Upsert reply
+    const { error } = await supabase.from("company_replies").upsert(
+      { review_id, company_id: company.id, content, updated_at: new Date().toISOString() },
+      { onConflict: "review_id" }
+    );
+    if (error) return { error: error.message };
+
+    revalidatePath("/business/dashboard/reviews");
+    revalidatePath(`/company/${company.id}`);
+    return { success: true };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function createJobOffer(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const { supabase, company } = await requireBusiness();
+    const { error } = await supabase.from("job_offers").insert({
+      company_id: company.id,
+      title: String(formData.get("title") || ""),
+      description: String(formData.get("description") || "") || null,
+      location: String(formData.get("location") || "") || null,
+      contract_type: String(formData.get("contract_type") || "") || null,
+      salary_range: String(formData.get("salary_range") || "") || null,
+      is_active: true,
+    });
+    if (error) return { error: error.message };
+    revalidatePath("/business/dashboard/jobs");
+    return { success: true };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
+export async function toggleJobOffer(id: string, is_active: boolean): Promise<void> {
+  const { supabase } = await requireBusiness();
+  await supabase.from("job_offers").update({ is_active }).eq("id", id);
+  revalidatePath("/business/dashboard/jobs");
+}
+
+export async function deleteJobOffer(id: string): Promise<void> {
+  const { supabase } = await requireBusiness();
+  await supabase.from("job_offers").delete().eq("id", id);
+  revalidatePath("/business/dashboard/jobs");
+}
+
+export async function submitClaim(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const supabase = await createClient();
+    const user = await getUser();
+
+    const work_email = String(formData.get("work_email") || "");
+    const banned = ["@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", "@icloud.com"];
+    if (banned.some(d => work_email.toLowerCase().endsWith(d))) {
+      return { error: "Utilise ton email professionnel (domaine de l'entreprise)." };
+    }
+
+    const { error } = await supabase.from("company_claims").insert({
+      company_name: String(formData.get("company_name") || ""),
+      company_website: String(formData.get("company_website") || "") || null,
+      employee_range: String(formData.get("employee_range") || "") || null,
+      first_name: String(formData.get("first_name") || ""),
+      last_name: String(formData.get("last_name") || ""),
+      job_title: String(formData.get("job_title") || ""),
+      job_level: String(formData.get("job_level") || ""),
+      work_email,
+      message: String(formData.get("message") || "") || null,
+      user_id: user?.id ?? null,
+    });
+
+    if (error) return { error: error.message };
+    return { success: true };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
