@@ -51,18 +51,14 @@ export default async function Home() {
         </div>
 
         <h1 style={{ fontSize: "clamp(38px, 8vw, 72px)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", marginBottom: 28, maxWidth: 820 }}>
-          Les vraies conditions{" "}
+          Les entreprises suisses,{" "}
           <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            de travail en Suisse.
+            sans filtre.
           </span>
         </h1>
 
-        <p style={{ fontSize: "clamp(16px, 2.5vw, 20px)", color: "var(--text-muted)", maxWidth: 540, lineHeight: 1.7, marginBottom: 20 }}>
-          Des avis d&apos;employés qui ne mentent pas. Des salaires que personne n&apos;ose afficher. Une plateforme faite pour <strong style={{ color: "var(--text)" }}>toi</strong>, pas pour les RH.
-        </p>
-
-        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 44, opacity: 0.7 }}>
-          Glassdoor ? Trop américain. LinkedIn ? Trop corporate. Workie, c&apos;est autre chose.
+        <p style={{ fontSize: "clamp(16px, 2.5vw, 20px)", color: "var(--text-muted)", maxWidth: 520, lineHeight: 1.7, marginBottom: 52 }}>
+          Avis d&apos;employés, salaires réels, ambiance de travail — tout ce que les offres d&apos;emploi ne disent jamais.
         </p>
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 56 }}>
@@ -94,13 +90,13 @@ export default async function Home() {
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>Comment ça marche</p>
           <h2 style={{ textAlign: "center", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 52 }}>
-            Simple. Anonyme. Honnête.
+            Trois étapes, zéro compromis.
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 24 }}>
             {[
-              { n: "01", icon: "🔍", title: "Cherche ton entreprise", desc: "Tape le nom, filtre par canton ou secteur. On a déjà référencé les employeurs clés en Suisse." },
-              { n: "02", icon: "📖", title: "Lis les vrais avis", desc: "Ambiance, management, salaires, évolution — des retours d'employés actuels et anciens, sans filtre RH." },
-              { n: "03", icon: "✍️", title: "Partage ton expérience", desc: "Anonymement. Ton avis aide des milliers de personnes à faire les bons choix. Et tu débloques plus de contenu." },
+              { n: "01", icon: "🔍", title: "Recherche", desc: "Par nom, canton ou secteur. Plus de 1 500 entreprises suisses référencées, des PME aux multinationales." },
+              { n: "02", icon: "📖", title: "Explore", desc: "Management, culture, salaires, évolution de carrière — des retours d'employés actuels et anciens." },
+              { n: "03", icon: "✍️", title: "Contribue", desc: "Partage ton expérience anonymement. Chaque avis renforce la valeur de la plateforme pour tous." },
             ].map(({ n, icon, title, desc }) => (
               <div key={n} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "32px 28px", position: "relative", overflow: "hidden" }}>
                 <span style={{ position: "absolute", top: 20, right: 20, fontSize: 12, fontWeight: 800, color: "var(--border2)", letterSpacing: "0.05em" }}>{n}</span>
@@ -118,14 +114,14 @@ export default async function Home() {
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>Pourquoi Workie</p>
           <h2 style={{ textAlign: "center", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 52 }}>
-            Fait pour toi, pas pour eux.
+            L&apos;information que tu mérites.
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
             {[
-              { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" />, bg: "rgba(245,158,11,0.1)", title: "Avis vérifiés", desc: "Chaque avis est soumis à une charte de bonne foi. Pas de faux avis commandités." },
-              { icon: <Shield size={22} color="#10b981" />, bg: "rgba(16,185,129,0.1)", title: "Anonymat total", desc: "Ton nom n'apparaît jamais. Partage sans craindre ton chef ou les RH." },
-              { icon: <TrendingUp size={22} color="#8b5cf6" />, bg: "rgba(139,92,246,0.1)", title: "Salaires réels", desc: "Les vrais chiffres, pas des fourchettes floues. Sache ce que tu vaux." },
-              { icon: <MessageCircle size={22} color="#f97316" />, bg: "rgba(249,115,22,0.1)", title: "Interface GenZ", desc: "Swipe, explore, note. Pas un annuaire d'entreprise des années 2000." },
+              { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" />, bg: "rgba(245,158,11,0.1)", title: "Avis authentiques", desc: "Chaque avis est soumis à une charte de bonne foi. Aucun contenu sponsorisé, aucune intervention des entreprises." },
+              { icon: <Shield size={22} color="#10b981" />, bg: "rgba(16,185,129,0.1)", title: "Anonymat garanti", desc: "Ton identité n'est jamais exposée. Tu partages librement, sans conséquences professionnelles." },
+              { icon: <TrendingUp size={22} color="#8b5cf6" />, bg: "rgba(139,92,246,0.1)", title: "Salaires réels", desc: "Des chiffres concrets, partagés anonymement par des employés en poste. Sache exactement ce que vaut ton profil." },
+              { icon: <MessageCircle size={22} color="#f97316" />, bg: "rgba(249,115,22,0.1)", title: "Simple et direct", desc: "Une expérience pensée pour aller à l'essentiel — chercher, comparer, décider." },
             ].map(({ icon, bg, title, desc }) => (
               <div key={title} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 20, padding: "28px 24px" }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
@@ -142,12 +138,12 @@ export default async function Home() {
       {/* ── CTA employés ── */}
       <section style={{ padding: "72px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <div style={{ fontSize: 48, marginBottom: 24 }}>🚀</div>
+          <div style={{ fontSize: 48, marginBottom: 24 }}>🇨🇭</div>
           <h2 style={{ fontSize: "clamp(26px, 5vw, 42px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 16 }}>
-            Prêt à voir la vérité ?
+            Commence à explorer.
           </h2>
           <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 40 }}>
-            Rejoins la communauté qui refuse le bullshit corporate. Gratuit, anonyme, suisse.
+            Gratuit, anonyme, et entièrement dédié au marché du travail suisse.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 36px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
