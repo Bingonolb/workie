@@ -1,6 +1,12 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
+
+export const metadata: Metadata = {
+  title: "Explorer les entreprises suisses · Workie",
+  description: "Découvre les avis anonymes et salaires des entreprises en Suisse. Tech, Pharma, Finance, Conseil et plus.",
+};
 import { CompanyCard } from "@/components/CompanyCard";
 import { getCompanies, getAllCompaniesForSwipe, getCompanyNames } from "@/lib/actions/companies";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
@@ -76,6 +82,21 @@ export default async function ExplorePage({
         </div>
 
         <ExploreFilters sectors={SECTORS} cities={CITIES} current={params} allNames={allNames} />
+
+        {!user && total > companies.length && (
+          <div style={{
+            background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
+            border: "1px solid rgba(139,92,246,0.2)",
+            borderRadius: 16, padding: "16px 20px", marginBottom: 20,
+            display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
+          }}>
+            <span style={{ fontSize: 20 }}>🔒</span>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", flex: 1 }}>
+              <strong style={{ color: "var(--text)" }}>{total - companies.length} entreprises supplémentaires</strong> disponibles.{" "}
+              <a href="/signup" style={{ color: "#8b5cf6", fontWeight: 700, textDecoration: "none" }}>Créer un compte gratuit</a> pour tout voir.
+            </p>
+          </div>
+        )}
 
         {companies.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>

@@ -310,7 +310,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
                 placeholder="Ex : Bonne boîte mais attention au rythme..." style={inp} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <style>{`@media (max-width: 500px) { .review-pros-cons { grid-template-columns: 1fr !important; } }`}</style>
+            <div className="review-pros-cons" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div>
                 <label style={lbl}>👍 Points positifs *</label>
                 <textarea value={pros} onChange={e => setPros(e.target.value)} rows={3}
