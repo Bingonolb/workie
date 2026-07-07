@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { ReviewForm } from "@/components/ReviewForm";
@@ -47,6 +48,24 @@ function RatingBar({ label, value }: { label: string; value: number | null }) {
       <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", width: 30 }}>{Number(value).toFixed(1)}</span>
     </div>
   );
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const company = await getCompany(id);
+  if (!company) return { title: "Entreprise introuvable · Workie" };
+  const desc = company.description
+    ? company.description.slice(0, 150) + (company.description.length > 150 ? "…" : "")
+    : `Avis sur ${company.name} — salaires, culture, management. Découvre les vraies conditions de travail sur Workie.`;
+  return {
+    title: `${company.name} · Avis & Salaires · Workie`,
+    description: desc,
+    openGraph: {
+      title: `${company.name} sur Workie`,
+      description: desc,
+      ...(company.cover_url ? { images: [{ url: company.cover_url }] } : {}),
+    },
+  };
 }
 
 export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
