@@ -22,7 +22,7 @@ export default async function Home() {
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
       {/* Navbar */}
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 48px", borderBottom: "1px solid var(--border)" }}>
+      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid var(--border)" }}>
         <span style={{
           fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em",
           background: "linear-gradient(135deg, #8b5cf6, #f97316)",
@@ -44,7 +44,7 @@ export default async function Home() {
       </nav>
 
       {/* Hero */}
-      <section style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 48px 60px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+      <section style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 24px 48px", textAlign: "center", position: "relative", overflow: "hidden" }}>
         {/* Gradient orbs */}
         <div style={{ position: "absolute", top: "10%", left: "15%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: "10%", right: "10%", width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
@@ -61,56 +61,56 @@ export default async function Home() {
           </span>
         </div>
 
-        <h1 style={{ fontSize: 68, fontWeight: 900, lineHeight: 1.02, letterSpacing: "-0.04em", marginBottom: 28, maxWidth: 800 }}>
+        <h1 style={{ fontSize: "clamp(36px, 8vw, 68px)", fontWeight: 900, lineHeight: 1.02, letterSpacing: "-0.04em", marginBottom: 28, maxWidth: 800 }}>
           Les entreprises suisses,{" "}
           <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             sans filtre.
           </span>
         </h1>
 
-        <p style={{ fontSize: 20, color: "var(--text-muted)", maxWidth: 520, lineHeight: 1.65, marginBottom: 52 }}>
+        <p style={{ fontSize: "clamp(15px, 2.5vw, 20px)", color: "var(--text-muted)", maxWidth: 520, lineHeight: 1.65, marginBottom: 48 }}>
           Swipe des entreprises, lis de vrais avis d&apos;employés, et découvre les salaires réels. Fini le bullshit de Glassdoor.
         </p>
 
-        <div style={{ display: "flex", gap: 16 }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
           <Link href="/signup" style={{
-            display: "flex", alignItems: "center", gap: 10, padding: "16px 32px", borderRadius: 14,
+            display: "flex", alignItems: "center", gap: 10, padding: "14px 28px", borderRadius: 14,
             background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff",
-            fontWeight: 700, fontSize: 16, textDecoration: "none",
+            fontWeight: 700, fontSize: 15, textDecoration: "none",
             boxShadow: "0 8px 32px rgba(139,92,246,0.3)",
           }}>
             Commencer gratuitement <ArrowRight size={18} />
           </Link>
           <Link href="/explore" style={{
-            display: "flex", alignItems: "center", gap: 8, padding: "16px 32px", borderRadius: 14,
+            display: "flex", alignItems: "center", gap: 8, padding: "14px 28px", borderRadius: 14,
             border: "1px solid var(--border2)", color: "var(--text-muted)",
-            fontWeight: 600, fontSize: 16, textDecoration: "none",
+            fontWeight: 600, fontSize: 15, textDecoration: "none",
           }}>
             <Eye size={18} /> Voir sans s&apos;inscrire
           </Link>
         </div>
 
         {/* Live stats */}
-        <div style={{ marginTop: 52, display: "flex", alignItems: "center", gap: 0, background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 16, overflow: "hidden" }}>
+        <div style={{ marginTop: 44, display: "flex", alignItems: "center", gap: 0, background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 16, overflow: "hidden", width: "100%", maxWidth: 520 }}>
           {[
-            { value: `${nCompanies}`, label: "entreprises suisses", color: "#8b5cf6" },
-            { value: `${nReviews}`, label: "avis authentiques", color: "#f97316" },
+            { value: `${nCompanies}`, label: "entreprises", color: "#8b5cf6" },
+            { value: `${nReviews}`, label: "avis", color: "#f97316" },
             { value: "100%", label: "anonyme", color: "#10b981" },
           ].map(({ value, label, color }, i) => (
             <div key={label} style={{
-              flex: 1, padding: "18px 24px", textAlign: "center",
+              flex: 1, padding: "16px 12px", textAlign: "center",
               borderRight: i < 2 ? "1px solid var(--border)" : "none",
             }}>
-              <p style={{ fontSize: 28, fontWeight: 900, color, letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
-              <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
+              <p style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 900, color, letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Features */}
-      <section style={{ background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "64px 48px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 32 }}>
+      <section style={{ background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "48px 24px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
           {[
             { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" />, title: "Avis authentiques", desc: "De vrais employés, pas des RH. Notes, commentaires, salaires — tout est là." },
             { icon: <Shield size={22} color="#10b981" />, title: "100% anonyme", desc: "Partage ton expérience sans risque. Ton identité est protégée par défaut." },
@@ -128,7 +128,7 @@ export default async function Home() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: "60px 48px", textAlign: "center" }}>
+      <section style={{ padding: "48px 24px", textAlign: "center" }}>
         <h2 style={{ fontSize: 36, fontWeight: 900, marginBottom: 16, letterSpacing: "-0.03em" }}>
           Prêt à voir la vérité ?
         </h2>
@@ -144,7 +144,7 @@ export default async function Home() {
         </Link>
       </section>
 
-      <footer style={{ borderTop: "1px solid var(--border)", padding: "20px 48px", textAlign: "center", fontSize: 13, color: "var(--text-muted)" }}>
+      <footer style={{ borderTop: "1px solid var(--border)", padding: "20px 24px", textAlign: "center", fontSize: 13, color: "var(--text-muted)" }}>
         © 2026 Workie · Tous droits réservés · 🇨🇭 Made in Switzerland
       </footer>
     </main>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
@@ -64,6 +64,15 @@ export function SwipeView({
     setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 320);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, gone, isLoggedIn, requireLogin]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") advance("right");
+      else if (e.key === "ArrowLeft") advance("left");
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [advance]);
 
   const handleBoost = (e: React.MouseEvent) => {
     e.stopPropagation();

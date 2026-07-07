@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Search, X, LayoutGrid, Layers } from "lucide-react";
+import { Search, X, LayoutGrid, Layers, ArrowUpDown } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
 
 export function ExploreFilters({
@@ -12,7 +12,7 @@ export function ExploreFilters({
 }: {
   sectors: string[];
   cities: string[];
-  current: { sector?: string; city?: string; q?: string; view?: string };
+  current: { sector?: string; city?: string; q?: string; view?: string; sort?: string };
   allNames?: string[];
 }) {
   const router = useRouter();
@@ -24,6 +24,7 @@ export function ExploreFilters({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const view = current.view ?? "grid";
+  const sort = current.sort ?? "score";
 
   const suggestions = input.length >= 1
     ? allNames.filter(n =>
@@ -236,6 +237,31 @@ export function ExploreFilters({
           </button>
         )}
       </div>
+
+      {/* Sort row — only in grid view */}
+      {view !== "swipe" && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: "var(--text-muted)", flexShrink: 0 }}>
+            <ArrowUpDown size={13} /> Trier par :
+          </span>
+          {([
+            { v: "score", label: "Score" },
+            { v: "rating", label: "Note" },
+            { v: "reviews", label: "Avis" },
+            { v: "name", label: "Nom A→Z" },
+          ] as const).map(({ v, label }) => (
+            <button key={v} onClick={() => push("sort", v === "score" ? undefined : v)}
+              style={{
+                padding: "5px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                border: sort === v ? "1px solid #8b5cf6" : "1px solid var(--border2)",
+                background: sort === v ? "rgba(139,92,246,0.15)" : "var(--surface)",
+                color: sort === v ? "#8b5cf6" : "var(--text-muted)",
+              }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

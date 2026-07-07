@@ -13,18 +13,25 @@ export async function getCompanies(filters?: {
   city?: string;
   search?: string;
   page?: number;
+  sort?: string;
 }) {
   const supabase = await createClient();
   const page = Math.max(1, filters?.page ?? 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  let query = supabase
-    .from("companies")
-    .select("*", { count: "exact" })
-    .order("score", { ascending: false })
-    .order("avg_rating", { ascending: false })
-    .order("name", { ascending: true });
+  const sort = filters?.sort ?? "score";
+  let query = supabase.from("companies").select("*", { count: "exact" });
+
+  if (sort === "rating") {
+    query = query.order("avg_rating", { ascending: false }).order("review_count", { ascending: false }).order("name", { ascending: true });
+  } else if (sort === "reviews") {
+    query = query.order("review_count", { ascending: false }).order("avg_rating", { ascending: false }).order("name", { ascending: true });
+  } else if (sort === "name") {
+    query = query.order("name", { ascending: true });
+  } else {
+    query = query.order("score", { ascending: false }).order("avg_rating", { ascending: false }).order("name", { ascending: true });
+  }
 
   if (filters?.sector) query = query.eq("sector", filters.sector);
   if (filters?.city) query = query.eq("city", filters.city);

@@ -17,11 +17,11 @@ const CITIES = ["Zürich", "Lausanne", "Basel", "Genève", "Bern", "Vevey", "Bie
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ sector?: string; city?: string; q?: string; view?: string; page?: string }>;
+  searchParams: Promise<{ sector?: string; city?: string; q?: string; view?: string; page?: string; sort?: string }>;
 }) {
   const params = await searchParams;
   const isSwipe = params.view === "swipe";
-  const filters = { sector: params.sector, city: params.city, search: params.q };
+  const filters = { sector: params.sector, city: params.city, search: params.q, sort: params.sort };
 
   const [user, favIds, flameIds, allNames] = await Promise.all([
     getUser(),
@@ -59,7 +59,7 @@ export default async function ExplorePage({
     );
   }
 
-  const result = await getCompanies({ ...filters, page });
+  const result = await getCompanies({ ...filters, page, sort: params.sort });
   const { companies, total, pageCount } = result;
 
   return (
