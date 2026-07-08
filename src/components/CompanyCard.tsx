@@ -31,10 +31,11 @@ function StarDisplay({ rating }: { rating: number }) {
   );
 }
 
-export function CompanyCard({ company, isFav = false, isLoggedIn = false }: {
+export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusiness = false }: {
   company: Company;
   isFav?: boolean;
   isLoggedIn?: boolean;
+  isBusiness?: boolean;
 }) {
   const [fav, setFav] = useState(isFav);
   const [pending, startTransition] = useTransition();
@@ -87,22 +88,24 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false }: {
             {company.sector}
           </div>
 
-          {/* Flame / Favorite */}
-          <button
-            onClick={handleFav}
-            disabled={pending}
-            style={{
-              position: "absolute", top: 10, right: 10,
-              width: 36, height: 36, borderRadius: "50%",
-              background: fav ? "rgba(249,115,22,0.9)" : "rgba(13,13,19,0.7)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", backdropFilter: "blur(8px)",
-              transition: "all 0.2s",
-            }}
-          >
-            <Flame size={16} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.6)"} />
-          </button>
+          {/* Flame / Favorite — hidden for business users */}
+          {!isBusiness && (
+            <button
+              onClick={handleFav}
+              disabled={pending}
+              style={{
+                position: "absolute", top: 10, right: 10,
+                width: 36, height: 36, borderRadius: "50%",
+                background: fav ? "rgba(249,115,22,0.9)" : "rgba(13,13,19,0.7)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", backdropFilter: "blur(8px)",
+                transition: "all 0.2s",
+              }}
+            >
+              <Flame size={16} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.6)"} />
+            </button>
+          )}
 
           {/* Company name over cover */}
           <div style={{ position: "absolute", bottom: 10, left: 14, right: 50 }}>

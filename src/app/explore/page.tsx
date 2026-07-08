@@ -62,12 +62,14 @@ export default async function ExplorePage({
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
-  const [user, favIds, flameIds, isAdmin] = await Promise.all([
+  const [user, favIds, flameIds, isAdmin, bizCompanyId] = await Promise.all([
     getUser(),
     getUserFavoriteIds(),
     getUserFlameIds(),
     (await import("@/lib/supabase/server")).getIsAdmin(),
+    (await import("@/lib/supabase/server")).getBusinessCompanyId(),
   ]);
+  const isBusiness = !!bizCompanyId;
 
 
   // Guests are locked to page 1 — enforced server-side, not just in UI
@@ -144,7 +146,7 @@ export default async function ExplorePage({
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
               {(companies as Company[]).map(c => (
-                <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} />
+                <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />
               ))}
             </div>
             {pageCount > 1 && !!user && (

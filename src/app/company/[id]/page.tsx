@@ -438,8 +438,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Business CTA — only for non-subscribed companies */}
-            {!company.is_subscribed && (
+            {/* Business CTA — only for non-subscribed companies and non-business users */}
+            {!company.is_subscribed && !isBusiness && (
               <div style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "18px 20px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                   <span style={{ fontSize: 13, fontWeight: 900, letterSpacing: "-0.02em" }}>
