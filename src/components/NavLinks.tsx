@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Flame, User, Trophy, Briefcase, TrendingUp } from "lucide-react";
+import { Compass, Flame, User, Trophy, TrendingUp } from "lucide-react";
 
 const LINKS = [
   { href: "/explore", icon: <Compass size={15} />, label: "Explorer" },
   { href: "/ranking", icon: <Trophy size={15} />, label: "Classement" },
-  { href: "/jobs", icon: <Briefcase size={15} />, label: "Offres" },
   { href: "/salaires", icon: <TrendingUp size={15} />, label: "Salaires" },
   { href: "/favorites", icon: <Flame size={15} />, label: "Favoris" },
   { href: "/profile", icon: <User size={15} />, label: "Profil" },
