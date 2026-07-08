@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getUser, createClient } from "@/lib/supabase/server";
+import { getUser, createClient, createAdminClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { AdminCompanyList } from "./AdminCompanyList";
 import { Shield, Plus, Star, MessageSquare, Users, Inbox } from "lucide-react";
@@ -15,8 +15,9 @@ export default async function AdminPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") redirect("/explore");
 
+  const adminClient = createAdminClient();
   const [{ data: companies }, { count: reviewCount }, { count: userCount }, { count: pendingClaims }] = await Promise.all([
-    supabase.from("companies").select("*").order("sector", { ascending: true }).order("name", { ascending: true }).limit(5000),
+    adminClient.from("companies").select("*").order("sector", { ascending: true }).order("name", { ascending: true }).limit(10000),
     supabase.from("reviews").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("company_claims").select("*", { count: "exact", head: true }).or("status.is.null,status.eq.pending"),
