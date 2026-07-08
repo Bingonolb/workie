@@ -16,7 +16,7 @@ export default async function AdminPage() {
   if (profile?.role !== "admin") redirect("/explore");
 
   const [{ data: companies }, { count: reviewCount }, { count: userCount }, { count: pendingClaims }] = await Promise.all([
-    supabase.from("companies").select("*").order("sector", { ascending: true }).order("name", { ascending: true }),
+    supabase.from("companies").select("*").order("sector", { ascending: true }).order("name", { ascending: true }).limit(5000),
     supabase.from("reviews").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("company_claims").select("*", { count: "exact", head: true }).or("status.is.null,status.eq.pending"),
