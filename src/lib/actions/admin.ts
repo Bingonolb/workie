@@ -15,7 +15,8 @@ async function requireAdmin() {
 
 export async function adminUpdateCompany(id: string, formData: FormData): Promise<{ error?: string }> {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const admin = createAdminClient();
 
     // Handle cover file upload (takes priority over URL field)
     let cover_url: string | null = String(formData.get("cover_url") || "") || null;
@@ -23,9 +24,9 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     if (coverFile instanceof File && coverFile.size > 0) {
       const ext = coverFile.name.split(".").pop() || "jpg";
       const path = `covers/${id}/${randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
+      const { error: upErr } = await admin.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
       if (!upErr) {
-        const { data: pub } = supabase.storage.from("covers").getPublicUrl(path);
+        const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
         cover_url = pub.publicUrl;
       }
     }
@@ -49,7 +50,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
       tags: String(formData.get("tags") || "").split(",").map(t => t.trim()).filter(t => t.length > 0 && t.length <= 40),
     };
 
-    const { error } = await supabase.from("companies").update(fields).eq("id", id);
+    const { error } = await admin.from("companies").update(fields).eq("id", id);
     if (error) return { error: error.message };
 
     revalidatePath("/", "layout"); // bust tout le cache Next.js
