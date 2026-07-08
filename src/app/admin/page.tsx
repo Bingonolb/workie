@@ -16,14 +16,30 @@ export default async function AdminPage() {
   if (profile?.role !== "admin") redirect("/explore");
 
   const adminClient = createAdminClient();
-  const [{ data: companies }, { count: reviewCount }, { count: userCount }, { count: pendingClaims }] = await Promise.all([
-    adminClient.from("companies").select("*").order("sector", { ascending: true }).order("name", { ascending: true }).limit(10000),
+  const [{ count: reviewCount }, { count: userCount }, { count: pendingClaims }] = await Promise.all([
     supabase.from("reviews").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("company_claims").select("*", { count: "exact", head: true }).or("status.is.null,status.eq.pending"),
   ]);
 
-  const list = (companies ?? []) as Company[];
+  // Fetch all companies in batches to bypass PostgREST max-rows limit
+  const allCompanies: Company[] = [];
+  const BATCH = 1000;
+  let from = 0;
+  while (true) {
+    const { data } = await adminClient
+      .from("companies")
+      .select("*")
+      .order("sector", { ascending: true })
+      .order("name", { ascending: true })
+      .range(from, from + BATCH - 1);
+    if (!data || data.length === 0) break;
+    allCompanies.push(...(data as Company[]));
+    if (data.length < BATCH) break;
+    from += BATCH;
+  }
+
+  const list = allCompanies;
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
