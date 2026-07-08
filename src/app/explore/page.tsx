@@ -103,6 +103,7 @@ export default async function ExplorePage({
           </div>
           <Suspense fallback={null}><ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params} allNames={allNames} /></Suspense>
           <SwipeView
+            key={`${params.sector ?? ""}-${params.canton ?? ""}-${params.q ?? ""}`}
             companies={companies as Company[]}
             initialFavIds={favIds}
             initialFlameIds={flameIds}
