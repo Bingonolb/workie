@@ -83,18 +83,19 @@ export function ExploreFilters({
   const activeCanton = cantons.find(c => c.code === current.canton);
 
   return (
-    <div style={{ marginBottom: 24, display: "flex", flexDirection: "column", gap: 10, opacity: isPending ? 0.6 : 1, transition: "opacity 0.15s" }}>
+    <div style={{ marginBottom: 20, display: "flex", flexDirection: "column", gap: 8, opacity: isPending ? 0.6 : 1, transition: "opacity 0.15s" }}>
 
-      {/* Row 1: search + view toggle */}
-      <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+      {/* Row 1: search + view toggle + reset */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        {/* Search */}
         <div ref={wrapperRef} style={{ position: "relative", flex: 1, minWidth: 0 }}>
           <div style={{
             display: "flex", flexWrap: "wrap", alignItems: "center", gap: 5,
             background: "var(--surface)", border: "1px solid var(--border2)",
             borderRadius: showSuggestions && suggestions.length > 0 ? "12px 12px 0 0" : 12,
-            padding: "8px 12px 8px 38px", minHeight: 44, cursor: "text", position: "relative",
+            padding: "0 12px 0 38px", minHeight: 42, cursor: "text", position: "relative",
           }} onClick={() => (wrapperRef.current?.querySelector("input") as HTMLInputElement)?.focus()}>
-            <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+            <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
             {tags.map(tag => (
               <span key={tag} style={{
                 display: "inline-flex", alignItems: "center", gap: 4,
@@ -103,7 +104,7 @@ export function ExploreFilters({
               }}>
                 {tag}
                 <button onMouseDown={e => { e.preventDefault(); removeTag(tag); }}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#a78bfa", padding: 0, display: "flex", alignItems: "center" }}>
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#a78bfa", padding: 0, display: "flex" }}>
                   <X size={11} />
                 </button>
               </span>
@@ -121,7 +122,7 @@ export function ExploreFilters({
               }}
               onFocus={() => setShowSuggestions(true)}
               placeholder={tags.length === 0 ? "Rechercher une entreprise..." : "Ajouter..."}
-              style={{ flex: 1, minWidth: 100, background: "transparent", border: "none", fontSize: 14, color: "var(--text)", outline: "none", padding: "1px 0" }}
+              style={{ flex: 1, minWidth: 80, background: "transparent", border: "none", fontSize: 14, color: "var(--text)", outline: "none", padding: "11px 0" }}
             />
           </div>
           {showSuggestions && suggestions.length > 0 && (
@@ -141,7 +142,6 @@ export function ExploreFilters({
                   onMouseEnter={e => (e.currentTarget.style.background = "var(--surface2)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                 >
-                  <Search size={12} style={{ color: "var(--text-muted)", position: "absolute", marginLeft: -24, marginTop: 1 }} />
                   {name}
                 </button>
               ))}
@@ -150,7 +150,7 @@ export function ExploreFilters({
         </div>
 
         {/* View toggle */}
-        <div style={{ display: "flex", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, padding: 4, gap: 4, flexShrink: 0 }}>
+        <div style={{ display: "flex", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, padding: 3, gap: 3, flexShrink: 0 }}>
           {([
             { v: "grid", icon: <LayoutGrid size={15} />, label: "Grille" },
             { v: "swipe", icon: <Layers size={15} />, label: "Swipe" },
@@ -162,31 +162,42 @@ export function ExploreFilters({
                 background: view === v ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "transparent",
                 color: view === v ? "#fff" : "var(--text-muted)",
                 cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s",
+                whiteSpace: "nowrap",
               }}>
-              {icon}
-              <span style={{ display: "none" }} className="sm-show">{label}</span>
+              {icon} {label}
             </button>
           ))}
         </div>
+
+        {/* Reset — only when filters active */}
+        {hasFilters && (
+          <button onClick={clearAll} style={{
+            display: "flex", alignItems: "center", gap: 4, padding: "7px 12px",
+            borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", flexShrink: 0,
+            border: "1px solid rgba(239,68,68,0.3)", background: "rgba(239,68,68,0.08)", color: "#ef4444",
+            whiteSpace: "nowrap",
+          }}>
+            <X size={13} /> Réinitialiser
+          </button>
+        )}
       </div>
 
-      {/* Row 2: sector scroll + canton button */}
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        {/* Sectors — horizontal scroll, no wrap */}
-        <div style={{ flex: 1, minWidth: 0, overflowX: "auto", display: "flex", gap: 6, paddingBottom: 2, scrollbarWidth: "none" }}>
-          <style>{`.sector-scroll::-webkit-scrollbar { display: none; }`}</style>
-          <div className="sector-scroll" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+      {/* Row 2: sectors (scroll) + canton button */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {/* Sectors — horizontal scroll */}
+        <div style={{ flex: 1, minWidth: 0, overflowX: "auto", scrollbarWidth: "none" }}>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", width: "max-content" }}>
             {sectors.map(s => {
               const color = SECTOR_COLORS[s] ?? "#8b5cf6";
               const active = current.sector === s;
               return (
                 <button key={s} onClick={() => push("sector", active ? undefined : s)}
                   style={{
-                    padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, whiteSpace: "nowrap",
+                    padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600,
                     border: active ? `1.5px solid ${color}` : "1px solid var(--border2)",
                     background: active ? `${color}22` : "var(--surface)",
                     color: active ? color : "var(--text-muted)",
-                    cursor: "pointer", transition: "all 0.12s", flexShrink: 0,
+                    cursor: "pointer", transition: "all 0.12s", whiteSpace: "nowrap", flexShrink: 0,
                   }}>
                   {s}
                 </button>
@@ -195,7 +206,7 @@ export function ExploreFilters({
           </div>
         </div>
 
-        {/* Canton button → dropdown panel */}
+        {/* Canton dropdown */}
         <div ref={cantonRef} style={{ position: "relative", flexShrink: 0 }}>
           <button onClick={() => setShowCantonPanel(v => !v)} style={{
             display: "flex", alignItems: "center", gap: 6, padding: "5px 13px",
@@ -214,50 +225,39 @@ export function ExploreFilters({
             <div style={{
               position: "absolute", top: "calc(100% + 8px)", right: 0,
               background: "var(--surface)", border: "1px solid var(--border2)",
-              borderRadius: 16, padding: 14, zIndex: 60,
+              borderRadius: 16, padding: 12, zIndex: 60,
               boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
               display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 5,
-              width: 280,
+              width: 270,
             }}>
               {cantons.map(c => {
                 const active = current.canton === c.code;
                 return (
                   <button key={c.code} onClick={() => { push("canton", active ? undefined : c.code); setShowCantonPanel(false); }}
                     style={{
-                      padding: "6px 8px", borderRadius: 8, fontSize: 11, fontWeight: 600,
+                      padding: "6px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600,
                       border: active ? "1.5px solid #f97316" : "1px solid var(--border)",
                       background: active ? "rgba(249,115,22,0.15)" : "transparent",
                       color: active ? "#f97316" : "var(--text-muted)",
-                      cursor: "pointer", textAlign: "center", transition: "all 0.1s",
+                      cursor: "pointer", textAlign: "center", transition: "all 0.1s", lineHeight: 1.3,
                     }}
                     onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "var(--surface2)"; }}
                     onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
                   >
-                    <div style={{ fontSize: 9, opacity: 0.6, lineHeight: 1 }}>{c.code}</div>
-                    <div style={{ lineHeight: 1.3 }}>{c.name}</div>
+                    <div style={{ fontSize: 9, opacity: 0.55 }}>{c.code}</div>
+                    <div>{c.name}</div>
                   </button>
                 );
               })}
             </div>
           )}
         </div>
-
-        {/* Reset */}
-        {hasFilters && (
-          <button onClick={clearAll} style={{
-            display: "flex", alignItems: "center", gap: 4, padding: "5px 10px",
-            borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer", flexShrink: 0,
-            border: "1px solid rgba(239,68,68,0.3)", background: "rgba(239,68,68,0.08)", color: "#ef4444",
-          }}>
-            <X size={12} />
-          </button>
-        )}
       </div>
 
-      {/* Sort row — grid only */}
+      {/* Row 3: sort — grid only */}
       {view !== "swipe" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, overflowX: "auto", scrollbarWidth: "none" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.05em", textTransform: "uppercase", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.05em", textTransform: "uppercase" as const, flexShrink: 0 }}>
             <ArrowUpDown size={11} /> Trier
           </span>
           {([
@@ -268,7 +268,7 @@ export function ExploreFilters({
           ] as const).map(({ v, label }) => (
             <button key={v} onClick={() => push("sort", v === "score" ? undefined : v)}
               style={{
-                padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
+                padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap",
                 border: sort === v ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
                 background: sort === v ? "rgba(139,92,246,0.15)" : "var(--surface)",
                 color: sort === v ? "#8b5cf6" : "var(--text-muted)",
@@ -279,6 +279,8 @@ export function ExploreFilters({
           ))}
         </div>
       )}
+
+      <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
     </div>
   );
 }
