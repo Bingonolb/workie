@@ -58,9 +58,8 @@ export function SwipeView({
   const goneRef = useRef(gone);
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const advanceRef = useRef<(dir: "left" | "right") => void>(() => {});
-  const currentRef = useRef(current);
+  const currentRef = useRef<typeof companies[0] | undefined>(undefined);
   goneRef.current = gone;
-  currentRef.current = current;
   const swipeCountRef = useRef(0);
   const fetchingRef = useRef(false);
   const nextOffsetRef = useRef(initialCompanies.length);
@@ -83,6 +82,7 @@ export function SwipeView({
 
   const current = companies[index];
   const next = companies[index + 1];
+  currentRef.current = current;
   const totalSeen = index;
 
   const showToast = (msg: string, color: string) => {
