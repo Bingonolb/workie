@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { getUser, getIsAdmin } from "@/lib/supabase/server";
+import { getUser, getIsAdmin, getBusinessCompanyId } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
-import { LogOut, Shield } from "lucide-react";
+import { LogOut, Shield, LayoutDashboard } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
 
 export async function Navbar() {
-  const [user, isAdmin] = await Promise.all([getUser(), getIsAdmin()]);
+  const [user, isAdmin, bizCompanyId] = await Promise.all([getUser(), getIsAdmin(), getBusinessCompanyId()]);
+  const isBusiness = !!bizCompanyId;
 
   return (
     <nav style={{
@@ -17,7 +18,7 @@ export async function Navbar() {
       display: "flex", alignItems: "center", justifyContent: "space-between",
       gap: 8,
     }}>
-      <Link href={user ? "/explore" : "/"} style={{ textDecoration: "none" }}>
+      <Link href={isBusiness ? "/business/dashboard" : user ? "/explore" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{
           fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em",
           background: "linear-gradient(135deg, #8b5cf6, #f97316)",
@@ -25,22 +26,42 @@ export async function Navbar() {
         }}>
           workie
         </span>
+        {isBusiness && (
+          <span style={{ fontSize: 10, fontWeight: 800, color: "#8b5cf6", background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 6, padding: "2px 7px", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+            business
+          </span>
+        )}
       </Link>
 
       {user && (
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <NavLinks />
-          {isAdmin && (
-            <Link href="/admin" style={{
+          {isBusiness ? (
+            <Link href="/business/dashboard" style={{
               display: "flex", alignItems: "center", gap: 6,
-              padding: "5px 12px", borderRadius: 8, marginLeft: 4,
-              fontSize: 12, fontWeight: 700, color: "#8b5cf6",
+              padding: "6px 14px", borderRadius: 8,
+              fontSize: 13, fontWeight: 700, color: "#8b5cf6",
               textDecoration: "none",
               background: "rgba(139,92,246,0.12)",
               border: "1px solid rgba(139,92,246,0.25)",
             }}>
-              <Shield size={13} /> Admin
+              <LayoutDashboard size={14} /> Tableau de bord
             </Link>
+          ) : (
+            <>
+              <NavLinks />
+              {isAdmin && (
+                <Link href="/admin" style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  padding: "5px 12px", borderRadius: 8, marginLeft: 4,
+                  fontSize: 12, fontWeight: 700, color: "#8b5cf6",
+                  textDecoration: "none",
+                  background: "rgba(139,92,246,0.12)",
+                  border: "1px solid rgba(139,92,246,0.25)",
+                }}>
+                  <Shield size={13} /> Admin
+                </Link>
+              )}
+            </>
           )}
         </div>
       )}
