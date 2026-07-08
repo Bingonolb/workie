@@ -170,7 +170,17 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
         <div style={{ position: "absolute", bottom: 28, left: 0, right: 0 }}>
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-            <div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 20 }}>
+              {/* Logo overlay */}
+              {company.logo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={company.logo_url}
+                  alt={`${company.name} logo`}
+                  style={{ width: 88, height: 88, borderRadius: 16, objectFit: "contain", background: "#fff", border: "3px solid rgba(255,255,255,0.15)", flexShrink: 0, boxShadow: "0 4px 24px rgba(0,0,0,0.4)" }}
+                />
+              )}
+              <div>
               <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 12, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", padding: "6px 14px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
                 <ArrowLeft size={14} /> Retour
               </Link>
@@ -189,6 +199,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 </span>
                 {company.subsector && <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{company.subsector}</span>}
               </div>
+            </div>
             </div>
 
             {/* Actions */}
