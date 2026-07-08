@@ -53,6 +53,7 @@ export function SwipeView({
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const [drag, setDrag] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   // Mirror mutable values in refs so touch event closures don't go stale
   const goneRef = useRef(gone);
@@ -111,7 +112,7 @@ export function SwipeView({
     } else {
       showToast("✕ Passé", "#ef4444");
     }
-    setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 320);
+    setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 280);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, gone, isLoggedIn, requireLogin]);
   advanceRef.current = advance;
@@ -154,6 +155,7 @@ export function SwipeView({
       if (goneRef.current) return;
       const t = e.touches[0];
       dragStart.current = { x: t.clientX, y: t.clientY };
+      setIsDragging(true);
     };
 
     const onTouchMove = (e: TouchEvent) => {
@@ -161,10 +163,10 @@ export function SwipeView({
       const t = e.touches[0];
       const dx = t.clientX - dragStart.current.x;
       const dy = t.clientY - dragStart.current.y;
-      // Prevent scroll only when horizontal swipe is dominant
       if (Math.abs(dx) > Math.abs(dy)) {
         e.preventDefault();
-        setDrag(dx);
+        // Slight resistance makes it feel more physical
+        setDrag(dx * 0.92);
       }
     };
 
@@ -174,15 +176,15 @@ export function SwipeView({
       const dx = t.clientX - dragStart.current.x;
       const dy = t.clientY - dragStart.current.y;
       dragStart.current = null;
+      setIsDragging(false);
       if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
-        // Tap — navigate to company
         const c = currentRef.current;
         if (c) router.push(`/company/${c.id}`);
         setDrag(0);
         return;
       }
-      if (dx > SWIPE_THRESHOLD) advanceRef.current("right");
-      else if (dx < -SWIPE_THRESHOLD) advanceRef.current("left");
+      if (dx * 0.92 > SWIPE_THRESHOLD) advanceRef.current("right");
+      else if (dx * 0.92 < -SWIPE_THRESHOLD) advanceRef.current("left");
       else setDrag(0);
     };
 
@@ -211,16 +213,18 @@ export function SwipeView({
   const onMouseDown = (e: React.MouseEvent) => {
     if (gone) return;
     dragStart.current = { x: e.clientX, y: e.clientY };
+    setIsDragging(true);
   };
   const onMouseMove = (e: React.MouseEvent) => {
     if (!dragStart.current || gone) return;
-    setDrag(e.clientX - dragStart.current.x);
+    setDrag((e.clientX - dragStart.current.x) * 0.92);
   };
   const onMouseUp = (e: React.MouseEvent) => {
     if (!dragStart.current) return;
-    const dx = e.clientX - dragStart.current.x;
+    const dx = (e.clientX - dragStart.current.x) * 0.92;
     const dy = e.clientY - dragStart.current.y;
     dragStart.current = null;
+    setIsDragging(false);
     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) { setDrag(0); return; }
     if (dx > SWIPE_THRESHOLD) advance("right");
     else if (dx < -SWIPE_THRESHOLD) advance("left");
@@ -245,7 +249,7 @@ export function SwipeView({
     );
   }
 
-  const rotate = drag / 18;
+  const rotate = drag / 14;
   const overlayOpacity = Math.min(Math.abs(drag) / SWIPE_THRESHOLD, 1);
   const isRight = drag > 20;
   const isLeft = drag < -20;
@@ -269,7 +273,11 @@ export function SwipeView({
           </div>
         )}
         {next && (
-          <div style={{ position: "absolute", inset: 0, transform: "scale(0.95) translateY(12px)", pointerEvents: "none", zIndex: 0 }}>
+          <div style={{
+            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+            transform: gone ? "scale(1) translateY(0)" : "scale(0.95) translateY(12px)",
+            transition: gone ? "transform 0.28s cubic-bezier(0.34,1.2,0.64,1)" : "none",
+          }}>
             <SwipeCard company={next} flameIds={flameIds} overlayDir={null} overlayOpacity={0} />
           </div>
         )}
@@ -278,10 +286,15 @@ export function SwipeView({
           style={{
             position: "absolute", inset: 0, zIndex: 1,
             transform: gone
-              ? `translateX(${gone === "right" ? 600 : -600}px) rotate(${gone === "right" ? 20 : -20}deg)`
+              ? `translateX(${gone === "right" ? 650 : -650}px) rotate(${gone === "right" ? 22 : -22}deg)`
               : `translateX(${drag}px) rotate(${rotate}deg)`,
-            transition: drag !== 0 || gone ? "none" : "transform 0.32s cubic-bezier(0.4,0,0.2,1)",
-            cursor: "grab", touchAction: "none",
+            transition: isDragging
+              ? "none"
+              : gone
+                ? "transform 0.26s cubic-bezier(0.4, 0, 1, 1)"
+                : "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            cursor: isDragging ? "grabbing" : "grab",
+            touchAction: "none",
           }}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
