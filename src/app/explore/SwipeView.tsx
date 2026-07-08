@@ -199,11 +199,6 @@ export function SwipeView({
         </div>
       )}
 
-      {/* Counter — just the card number, no total to avoid confusion */}
-      <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
-        <span style={{ fontWeight: 700, color: "var(--text)" }}>#{totalSeen}</span>
-      </p>
-
       {/* Card stack */}
       <div style={{ position: "relative", width: "min(440px, 92vw)", height: 540 }}>
         {next && (
