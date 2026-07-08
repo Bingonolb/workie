@@ -5,6 +5,147 @@
   --color-brand-dark: #7c3aed;
 }
 
+/* ─── Responsive utilities ─────────────────────────────────────── */
+
+/* Prevent horizontal overflow on all pages */
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+/* Page wrapper — paddings shrink on mobile */
+.page-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 32px 80px;
+}
+@media (max-width: 768px) {
+  .page-main { padding: 20px 16px 80px; }
+}
+
+/* Section max-width variants */
+.page-main-sm  { max-width: 900px;  margin: 0 auto; padding: 36px 32px 80px; }
+.page-main-md  { max-width: 1100px; margin: 0 auto; padding: 40px 28px 100px; }
+@media (max-width: 768px) {
+  .page-main-sm  { padding: 20px 16px 80px; }
+  .page-main-md  { padding: 20px 16px 80px; }
+}
+
+/* KPI grid — 4 col → 2 col → 1 col */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+/* Company grid — auto-fill already responsive, just fix min-width on mobile */
+@media (max-width: 480px) {
+  [style*="minmax(300px"] { grid-template-columns: 1fr !important; }
+}
+
+/* Hero cover — shorter on mobile */
+.hero-cover { position: relative; height: 340px; overflow: hidden; }
+@media (max-width: 768px) { .hero-cover { height: 220px; } }
+
+/* Hero text — smaller on mobile */
+@media (max-width: 768px) {
+  .hero-title { font-size: 24px !important; }
+  .hero-actions { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
+/* Navbar links — hide on mobile (hamburger handled separately) */
+@media (max-width: 768px) {
+  .nav-links-desktop { display: none !important; }
+}
+
+/* Two-column layout → stacked on mobile */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .two-col { grid-template-columns: 1fr; }
+  .two-col-sidebar { order: -1; }
+}
+
+/* Stat grid 3-col → 1-col */
+.stat-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 768px) { .stat-grid-3 { grid-template-columns: 1fr; gap: 10px; } }
+
+/* Ranking table — horizontal scroll on mobile */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Filter row — wrap on mobile */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Business dashboard sidebar — hidden on mobile, toggle with class */
+.biz-sidebar {
+  width: 240px;
+  min-height: 100dvh;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .biz-layout { flex-direction: column !important; }
+  .biz-sidebar {
+    width: 100%;
+    min-height: unset;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .biz-sidebar nav { flex-direction: row !important; padding: 8px 12px !important; overflow-x: auto; white-space: nowrap; }
+  .biz-sidebar nav a, .biz-sidebar nav button { margin-bottom: 0 !important; flex-shrink: 0; }
+  .biz-sidebar-header { display: none; }
+}
+
+/* Pros/cons grid → stack on mobile */
+@media (max-width: 600px) {
+  [style*="gridTemplateColumns: \"1fr 1fr\""] { grid-template-columns: 1fr !important; }
+}
+
+/* Salary/ranking header → wrap */
+@media (max-width: 600px) {
+  .page-header-row { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+}
+
+/* ExploreFilters — pill scrollable row on mobile */
+@media (max-width: 768px) {
+  .explore-filters { overflow-x: auto; flex-wrap: nowrap !important; }
+  .explore-filters::-webkit-scrollbar { display: none; }
+}
+
+/* Landing page enterprise section: 2-col → stacked on mobile */
+.landing-biz-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .landing-biz-grid { grid-template-columns: 1fr; }
+  .landing-biz-grid-aside { display: none; }
+}
+
+/* Landing page navbar — hide "Se connecter" label on tiny screens */
+@media (max-width: 480px) {
+  .nav-logout-label { display: none !important; }
+  .nav-login-link { display: none !important; }
+}
+
 :root {
   --bg: #0d0d13;
   --surface: #16161f;

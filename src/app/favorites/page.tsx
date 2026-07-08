@@ -23,7 +23,7 @@ export default async function FavoritesPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
-      <main style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 32px 80px" }}>
+      <main className="page-main-md">
         <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>
           Mes favoris 🔥
         </h1>

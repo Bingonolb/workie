@@ -141,7 +141,7 @@ export default async function SalairesPage() {
         </div>
       </section>
 
-      <main style={{ maxWidth: 900, margin: "0 auto", padding: "36px 20px 80px" }}>
+      <main className="page-main-sm">
 
         {totalCount === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px" }}>
@@ -154,7 +154,7 @@ export default async function SalairesPage() {
         ) : (
           <>
             {/* KPIs globaux */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 36 }}>
+            <div className="stat-grid-3" style={{ marginBottom: 36 }}>
               {[
                 { label: "Salaire médian CH", value: formatSalary(overallMedian), color: "#8b5cf6", icon: "🇨🇭" },
                 { label: "Salaire moyen CH", value: formatSalary(overallAvg), color: "#f97316", icon: "📊" },
@@ -175,7 +175,7 @@ export default async function SalairesPage() {
                   <TrendingUp size={18} color="#8b5cf6" />
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaire médian par secteur</h2>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div className="table-scroll"><div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 340 }}>
                   {sectorStats.map(({ sector, median, min, max, count }) => {
                     const color = SECTOR_COLORS[sector] ?? "#8b5cf6";
                     return (
@@ -196,7 +196,7 @@ export default async function SalairesPage() {
                       </div>
                     );
                   })}
-                </div>
+                </div></div>
                 <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
                   Secteurs avec minimum 2 données · Salaires bruts annuels en CHF · Données anonymes issues d&apos;avis employés
                 </p>
@@ -210,7 +210,7 @@ export default async function SalairesPage() {
                   <Users size={18} color="#f97316" />
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaires moyens par poste</h2>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div className="table-scroll"><div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 360 }}>
                   {jobStats.map(({ job_title, avg, count }, i) => (
                     <div key={job_title} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <span style={{ fontSize: 11, color: "var(--text-muted)", width: 20, textAlign: "right", flexShrink: 0, fontWeight: 700 }}>{i + 1}</span>
@@ -224,7 +224,7 @@ export default async function SalairesPage() {
                       </span>
                     </div>
                   ))}
-                </div>
+                </div></div>
                 <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
                   Postes avec minimum 2 données · Salaires bruts annuels en CHF · Les intitulés de postes sont saisis librement par les employés
                 </p>

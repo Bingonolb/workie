@@ -160,7 +160,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       <Navbar />
 
       {/* Hero cover */}
-      <div style={{ position: "relative", height: 340, overflow: "hidden" }}>
+      <div className="hero-cover">
         {/* Image or gradient bg */}
         {company.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -249,8 +249,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           .company-stats-grid { grid-template-columns: 1fr 1fr !important; }
         }
       `}</style>
-      <main style={{ maxWidth: 900, margin: "0 auto", padding: "36px 20px 80px" }}>
-        <div className="company-grid" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
+      <main className="page-main-sm">
+        <div className="company-grid two-col" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
           {/* Left column */}
           <div>
             {/* Key stats */}

@@ -30,7 +30,7 @@ export default async function RankingPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
-      <main style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 32px 80px" }}>
+      <main className="page-main-md">
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
@@ -49,7 +49,7 @@ export default async function RankingPage() {
         </div>
 
         {/* KPI strip */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 32 }}>
+        <div className="stat-grid-3" style={{ marginBottom: 32 }}>
           {[
             { icon: <Users size={16} color="#8b5cf6" />, value: typedCompanies.length, label: "Entreprises classées", color: "#8b5cf6" },
             { icon: <Star size={16} color="#f59e0b" fill="#f59e0b" />, value: totalReviews, label: "Avis publiés", color: "#f59e0b" },

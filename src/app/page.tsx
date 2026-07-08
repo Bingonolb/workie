@@ -28,7 +28,7 @@ export default async function Home() {
         </span>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <ThemeToggle />
-          <Link href="/login" style={{ padding: "9px 16px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
+          <Link href="/login" className="nav-login-link" style={{ padding: "9px 16px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
             Connexion
           </Link>
           <Link href="/signup" style={{ padding: "9px 18px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff" }}>
@@ -159,11 +159,10 @@ export default async function Home() {
       {/* ── Section Entreprises (discrète, en bas) ── */}
       <section style={{ padding: "64px 24px" }}>
         <div style={{ maxWidth: 860, margin: "0 auto" }}>
-          <div style={{
+          <div className="landing-biz-grid" style={{
             background: "linear-gradient(135deg, rgba(139,92,246,0.05), rgba(249,115,22,0.04))",
             border: "1px solid rgba(139,92,246,0.15)",
             borderRadius: 24, padding: "48px 40px",
-            display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "center",
           }}>
             <div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "4px 12px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#8b5cf6" }}>
@@ -191,7 +190,7 @@ export default async function Home() {
                 </span>
               </div>
             </div>
-            <div style={{ textAlign: "center", flexShrink: 0 }}>
+            <div className="landing-biz-grid-aside" style={{ textAlign: "center", flexShrink: 0 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
                   { icon: <BarChart3 size={20} color="#8b5cf6" />, label: "Analytics avancés" },

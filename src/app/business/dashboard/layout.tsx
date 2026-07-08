@@ -29,17 +29,12 @@ export default async function BusinessDashboardLayout({ children }: { children: 
   if (!company.is_subscribed && !isAdmin) redirect("/business/checkout");
 
   return (
-    <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
+    <div className="biz-layout" style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
 
       {/* Sidebar */}
-      <aside style={{
-        width: 240, flexShrink: 0, borderRight: "1px solid var(--border)",
-        display: "flex", flexDirection: "column",
-        background: "var(--surface)",
-        position: "sticky", top: 0, height: "100dvh", overflowY: "auto",
-      }}>
+      <aside className="biz-sidebar">
         {/* Logo */}
-        <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid var(--border)" }}>
+        <div className="biz-sidebar-header" style={{ padding: "20px 20px 16px", borderBottom: "1px solid var(--border)" }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
             <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
             <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 5, textTransform: "uppercase" as const, opacity: 0.9 }}>Business</span>
@@ -47,7 +42,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
         </div>
 
         {/* Company card */}
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+        <div className="biz-sidebar-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {company.logo_url
               ? <img src={company.logo_url} alt={company.name} style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", border: "1px solid var(--border)" }} />
@@ -71,8 +66,8 @@ export default async function BusinessDashboardLayout({ children }: { children: 
         {/* Nav */}
         <DashboardNav companyId={company.id} />
 
-        {/* Bottom */}
-        <div style={{ padding: "16px 20px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        {/* Bottom — hidden on mobile (in nav row instead) */}
+        <div className="biz-sidebar-header" style={{ padding: "16px 20px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{user.email?.split("@")[0]}</p>
           <ThemeToggle />
         </div>

@@ -110,7 +110,7 @@ export default async function ExplorePage({
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
-      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "36px 32px 80px" }}>
+      <main className="page-main">
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontSize: 32, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>
             Explorer les entreprises

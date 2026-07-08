@@ -75,7 +75,7 @@ export async function Navbar() {
               background: "none", border: "none", cursor: "pointer",
               color: "var(--text-muted)", fontSize: 13, fontWeight: 500, padding: "6px 10px", borderRadius: 8,
             }}>
-              <LogOut size={14} /> Se déconnecter
+              <LogOut size={14} /> <span className="nav-logout-label">Se déconnecter</span>
             </button>
           </form>
         ) : (
