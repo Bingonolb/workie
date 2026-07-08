@@ -104,6 +104,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
   if (!company) notFound();
 
+  // Business users can browse but not fav/review
+  let isBusiness = false;
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
+    isBusiness = !!profile?.claimed_company_id;
+  }
+
   const isFav = favIds.includes(company.id);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
@@ -205,7 +212,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {/* Actions */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
               <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
-              {user ? (
+              {user && !isBusiness ? (
                 <form action={toggleFavorite.bind(null, company.id)}>
                   <button type="submit" style={{
                     display: "flex", alignItems: "center", gap: 8,
@@ -218,7 +225,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                     <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
                   </button>
                 </form>
-              ) : (
+              ) : (!isBusiness && (
                 <Link href="/login" style={{
                   display: "flex", alignItems: "center", gap: 8,
                   padding: "10px 20px", borderRadius: 12,
@@ -229,7 +236,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 }}>
                   <Flame size={16} fill="none" /> Sauvegarder
                 </Link>
-              )}
+              ))}
             </div>
           </div>
         </div>
@@ -337,7 +344,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
               <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partage ton expérience</h3>
               <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>Ton avis est anonyme par défaut. Aide la communauté à faire les bons choix.</p>
-              {user ? (
+              {isBusiness ? (
+                <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)", fontSize: 14 }}>
+                  Les comptes business ne peuvent pas publier d&apos;avis.
+                </div>
+              ) : user ? (
                 <ReviewForm companyId={company.id} />
               ) : (
                 <div style={{ textAlign: "center", padding: "24px" }}>

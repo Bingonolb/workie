@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Star, BarChart3, Briefcase, Settings, Eye, ArrowLeft } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Star, BarChart3, Briefcase, Settings, Eye, ArrowLeft, LogOut } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
   { href: "/business/dashboard", label: "Vue d'ensemble", icon: <LayoutDashboard size={17} />, exact: true },
@@ -14,6 +15,13 @@ const NAV = [
 
 export function DashboardNav({ companyId }: { companyId: string }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+  }
 
   return (
     <>
@@ -63,6 +71,14 @@ export function DashboardNav({ companyId }: { companyId: string }) {
         >
           <ArrowLeft size={17} /> Retour au site
         </Link>
+
+        <button
+          onClick={handleLogout}
+          className="biz-nav-link"
+          style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, fontSize: 13, fontWeight: 600, color: "#ef4444", background: "transparent", border: "none", cursor: "pointer", width: "100%", textAlign: "left" }}
+        >
+          <LogOut size={17} /> Se déconnecter
+        </button>
       </nav>
     </>
   );

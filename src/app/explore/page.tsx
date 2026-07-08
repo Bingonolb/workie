@@ -69,19 +69,6 @@ export default async function ExplorePage({
     (await import("@/lib/supabase/server")).getIsAdmin(),
   ]);
 
-  // Business users belong in the dashboard, not explore
-  if (user) {
-    const supabase = await (await import("@/lib/supabase/server")).createClient();
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("claimed_company_id")
-      .eq("id", user.id)
-      .maybeSingle();
-    if (profile?.claimed_company_id) {
-      const { redirect } = await import("next/navigation");
-      redirect("/business/dashboard");
-    }
-  }
 
   // Guests are locked to page 1 — enforced server-side, not just in UI
   const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
