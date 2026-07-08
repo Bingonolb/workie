@@ -185,22 +185,22 @@ export function SwipeView({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
-      {/* Toast */}
-      {toast && (
-        <div key={toast.msg + Date.now()} style={{
-          position: "fixed", top: 90, left: "50%", transform: "translateX(-50%)",
-          background: toast.color, color: "#fff", fontWeight: 800, fontSize: 16,
-          padding: "10px 28px", borderRadius: 50, zIndex: 100,
-          boxShadow: `0 8px 32px ${toast.color}66`,
-          animation: "fadeInOut 1.8s ease forwards",
-          whiteSpace: "nowrap",
-        }}>
-          {toast.msg}
-        </div>
-      )}
-
       {/* Card stack */}
       <div style={{ position: "relative", width: "min(440px, 92vw)", height: 540 }}>
+        {/* Toast — centered on the card */}
+        {toast && (
+          <div key={toast.msg + Date.now()} style={{
+            position: "absolute", top: "50%", left: "50%",
+            transform: "translate(-50%, -50%)",
+            background: toast.color, color: "#fff", fontWeight: 800, fontSize: 18,
+            padding: "12px 32px", borderRadius: 50, zIndex: 10,
+            boxShadow: `0 8px 32px ${toast.color}88`,
+            animation: "fadeInOut 1.8s ease forwards",
+            whiteSpace: "nowrap", pointerEvents: "none",
+          }}>
+            {toast.msg}
+          </div>
+        )}
         {next && (
           <div style={{ position: "absolute", inset: 0, transform: "scale(0.95) translateY(12px)", pointerEvents: "none", zIndex: 0 }}>
             <SwipeCard company={next} flameIds={flameIds} overlayDir={null} overlayOpacity={0} />
