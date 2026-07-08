@@ -98,7 +98,7 @@ export default async function ExplorePage({
               Explorer
             </h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
-              <span style={{ color: "var(--text)", fontWeight: 700 }}>{companies.length}</span> entreprises à découvrir
+              Chargement au fil des swipes
             </p>
           </div>
           <Suspense fallback={null}><ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params} allNames={allNames} /></Suspense>
@@ -108,6 +108,7 @@ export default async function ExplorePage({
             initialFlameIds={flameIds}
             isLoggedIn={!!user}
             isAdmin={isAdmin}
+            filters={filters}
           />
         </main>
       </div>

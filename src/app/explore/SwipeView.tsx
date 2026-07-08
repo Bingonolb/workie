@@ -5,36 +5,58 @@ import { useRouter } from "next/navigation";
 import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { addFlame, addBoost, addPenalty } from "@/lib/actions/scores";
+import { fetchSwipePage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
 
 const SWIPE_THRESHOLD = 90;
+const PREFETCH_AHEAD = 10; // start loading next batch when this many cards remain
 
 export function SwipeView({
-  companies,
+  companies: initialCompanies,
   initialFavIds,
   initialFlameIds,
   isLoggedIn,
   isAdmin = false,
+  filters,
 }: {
   companies: Company[];
   initialFavIds: string[];
   initialFlameIds: string[];
   isLoggedIn: boolean;
   isAdmin?: boolean;
+  filters?: { sector?: string; canton?: string; search?: string };
 }) {
   const router = useRouter();
+  const [companies, setCompanies] = useState<Company[]>(initialCompanies);
   const [index, setIndex] = useState(0);
   const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
   const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const [exhausted, setExhausted] = useState(false);
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const [drag, setDrag] = useState(0);
   const swipeCountRef = useRef(0);
+  const fetchingRef = useRef(false);
+  const nextOffsetRef = useRef(initialCompanies.length);
+
+  // Prefetch next batch when approaching the end
+  useEffect(() => {
+    if (exhausted || fetchingRef.current) return;
+    if (index < companies.length - PREFETCH_AHEAD) return;
+    fetchingRef.current = true;
+    fetchSwipePage(filters, nextOffsetRef.current).then(batch => {
+      fetchingRef.current = false;
+      if (batch.length === 0) { setExhausted(true); return; }
+      nextOffsetRef.current += batch.length;
+      setCompanies(prev => [...prev, ...batch]);
+      if (batch.length < 50) setExhausted(true);
+    });
+  }, [index, companies.length, filters, exhausted]);
 
   const current = companies[index];
   const next = companies[index + 1];

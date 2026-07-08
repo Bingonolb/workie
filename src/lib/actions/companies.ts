@@ -53,38 +53,42 @@ export async function getCompanies(filters?: {
   };
 }
 
-// Pour le mode swipe — toutes les entreprises sans pagination
+const SWIPE_PAGE_SIZE = 50;
+
+// Pour le mode swipe — premier batch seulement (lazy loading ensuite)
 export async function getAllCompaniesForSwipe(filters?: {
   sector?: string;
   canton?: string;
   search?: string;
 }) {
-  const supabase = await createClient();
+  return fetchSwipePage(filters, 0);
+}
 
-  function buildQuery() {
-    let q = supabase
-      .from("companies")
-      .select("*")
-      .order("score", { ascending: false })
-      .order("avg_rating", { ascending: false })
-      .neq("employee_range", "1-10");
-    if (filters?.sector) q = q.eq("sector", filters.sector);
-    if (filters?.canton) q = q.eq("canton", filters.canton);
-    if (filters?.search) {
-      const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
-      if (names.length === 1) q = q.ilike("name", `%${escapeLike(names[0])}%`);
-      else if (names.length > 1) q = q.in("name", names);
-    }
-    return q;
+// Appelé depuis le client pour charger le prochain batch
+export async function fetchSwipePage(
+  filters: { sector?: string; canton?: string; search?: string } | undefined,
+  offset: number
+) {
+  const supabase = await createClient();
+  let q = supabase
+    .from("companies")
+    .select("*")
+    .order("score", { ascending: false, nullsFirst: false })
+    .order("avg_rating", { ascending: false, nullsFirst: false })
+    .order("name", { ascending: true })
+    .neq("employee_range", "1-10")
+    .range(offset, offset + SWIPE_PAGE_SIZE - 1);
+
+  if (filters?.sector) q = q.eq("sector", filters.sector);
+  if (filters?.canton) q = q.eq("canton", filters.canton);
+  if (filters?.search) {
+    const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
+    if (names.length === 1) q = q.ilike("name", `%${escapeLike(names[0])}%`);
+    else if (names.length > 1) q = q.in("name", names);
   }
 
-  // Fetch in two batches to bypass PostgREST's 1000-row default limit
-  const [r1, r2] = await Promise.all([
-    buildQuery().range(0, 999),
-    buildQuery().range(1000, 1999),
-  ]);
-
-  return [...(r1.data ?? []), ...(r2.data ?? [])] as Company[];
+  const { data } = await q;
+  return (data ?? []) as Company[];
 }
 
 // Lightweight — names only for autocomplete, avoids SELECT * over 200 rows
