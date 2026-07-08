@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
 import { getTopCompanies } from "@/lib/actions/scores";
 import { createClient } from "@/lib/supabase/server";
-import { Flame, TrendingUp, Users, Star, Zap } from "lucide-react";
+import { TrendingUp, Users, Star } from "lucide-react";
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
 
@@ -46,31 +46,6 @@ export default async function RankingPage() {
           <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.6 }}>
             Score calculé sur les étoiles des avis, les flammes et les boosts de la communauté.
           </p>
-        </div>
-
-        {/* Formula card */}
-        <div style={{
-          background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
-          border: "1px solid rgba(139,92,246,0.2)",
-          borderRadius: 16, padding: "18px 24px", marginBottom: 28,
-          display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap",
-        }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", flexShrink: 0 }}>
-            Formule
-          </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", fontSize: 13, fontWeight: 600 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 5, color: "#f59e0b" }}>
-              <Star size={13} fill="#f59e0b" color="#f59e0b" /> Note × 20 × ln(avis + 1)
-            </span>
-            <span style={{ color: "var(--text-muted)" }}>+</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 5, color: "#f97316" }}>
-              <Flame size={13} fill="#f97316" color="#f97316" /> Flammes
-            </span>
-            <span style={{ color: "var(--text-muted)" }}>+</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 5, color: "#8b5cf6" }}>
-              <Zap size={13} fill="#8b5cf6" color="#8b5cf6" /> Boosts (+100) − Pénalités (−100)
-            </span>
-          </div>
         </div>
 
         {/* KPI strip */}

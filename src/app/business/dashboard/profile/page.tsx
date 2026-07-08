@@ -83,7 +83,7 @@ export default function ProfilePage() {
                       if (f) setLogoPreview(URL.createObjectURL(f));
                     }} />
                   </label>
-                  <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>PNG, JPG · max 2MB</p>
+                  <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>PNG, JPG · max 10MB</p>
                 </div>
               </div>
               <input type="hidden" name="logo_url" value={String(company.logo_url ?? "")} />
@@ -101,6 +101,7 @@ export default function ProfilePage() {
                   if (f) setCoverPreview(URL.createObjectURL(f));
                 }} />
               </label>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>PNG, JPG · max 10MB · recommandé 1920×1080</p>
             </div>
           </div>
         </div>

@@ -106,7 +106,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false }: {
 
           {/* Company name over cover */}
           <div style={{ position: "absolute", bottom: 10, left: 14, right: 50 }}>
-            <p style={{ fontSize: 17, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+            <p style={{ fontSize: 15, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
               {company.name}
               {company.is_verified && (
                 <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 16, height: 16, flexShrink: 0 }} aria-label="Entreprise vérifiée">

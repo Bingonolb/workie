@@ -171,7 +171,7 @@ export function ExploreFilters({
             <div ref={panelRef} style={{
               position: "absolute", top: "calc(100% + 8px)", right: 0,
               background: "var(--surface)", border: "1px solid var(--border2)",
-              borderRadius: 18, padding: 20, zIndex: 100,
+              borderRadius: 18, padding: 20, zIndex: 500,
               boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
               width: "min(480px, 92vw)",
             }}>

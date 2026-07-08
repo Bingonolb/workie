@@ -358,7 +358,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {company.website_url && (
                     <a href={/^https?:\/\//.test(company.website_url) ? company.website_url : `https://${company.website_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
-                      <Globe size={14} /> {company.website_url}
+                      <Globe size={14} /> Site internet
                     </a>
                   )}
                   {company.linkedin_url && (

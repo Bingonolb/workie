@@ -76,14 +76,16 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             animation: "fadeIn 0.18s ease",
           }}
         >
-          <div style={{
+          <div className="job-modal" style={{
             background: "var(--surface)", borderRadius: 20,
             border: "1px solid var(--border2)",
             width: "100%", maxWidth: 520, maxHeight: "85vh",
             overflowY: "auto", padding: "28px",
             boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
             animation: "slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1)",
-          }}>
+            scrollbarWidth: "thin",
+            scrollbarColor: "var(--border2) transparent",
+          } as React.CSSProperties}>
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
               <div>
@@ -168,6 +170,9 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
       <style>{`
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
         @keyframes slideUp { from { transform: translateY(20px) scale(0.97); opacity: 0 } to { transform: translateY(0) scale(1); opacity: 1 } }
+        .job-modal::-webkit-scrollbar { width: 4px; }
+        .job-modal::-webkit-scrollbar-track { background: transparent; }
+        .job-modal::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
       `}</style>
     </>
   );
