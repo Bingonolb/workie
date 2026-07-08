@@ -185,13 +185,22 @@ export function SwipeView({
       else setDrag(0);
     };
 
+    // Android Chrome fires a synthetic click ~300ms after touchend.
+    // We block it on the card to prevent double-navigation on tap.
+    const onClickCapture = (e: MouseEvent) => {
+      // Only block if the touch already handled navigation (dragStart is null = gesture completed)
+      if (!dragStart.current) e.stopPropagation();
+    };
+
     el.addEventListener("touchstart", onTouchStart, { passive: true });
     el.addEventListener("touchmove", onTouchMove, { passive: false });
     el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("click", onClickCapture, { capture: true });
     return () => {
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
       el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("click", onClickCapture, { capture: true });
     };
   // Re-attach when card changes (new company) so currentRef is always fresh
   // eslint-disable-next-line react-hooks/exhaustive-deps
