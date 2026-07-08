@@ -11,7 +11,16 @@ import { SECTOR_COLORS } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
 
 const SWIPE_THRESHOLD = 90;
-const PREFETCH_AHEAD = 10; // start loading next batch when this many cards remain
+const PREFETCH_AHEAD = 25;
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export function SwipeView({
   companies: initialCompanies,
@@ -29,7 +38,9 @@ export function SwipeView({
   filters?: { sector?: string; canton?: string; search?: string };
 }) {
   const router = useRouter();
-  const [companies, setCompanies] = useState<Company[]>(initialCompanies);
+
+  // Shuffle on first render so order varies per session
+  const [companies, setCompanies] = useState<Company[]>(() => shuffle(initialCompanies));
   const [index, setIndex] = useState(0);
   const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
@@ -37,6 +48,8 @@ export function SwipeView({
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [exhausted, setExhausted] = useState(false);
+  // Track all companies seen/acted on this session to avoid re-showing them in new batches
+  const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const [drag, setDrag] = useState(0);
@@ -44,7 +57,7 @@ export function SwipeView({
   const fetchingRef = useRef(false);
   const nextOffsetRef = useRef(initialCompanies.length);
 
-  // Prefetch next batch when approaching the end
+  // Prefetch next batch silently, well before the user reaches the end
   useEffect(() => {
     if (exhausted || fetchingRef.current) return;
     if (index < companies.length - PREFETCH_AHEAD) return;
@@ -53,14 +66,16 @@ export function SwipeView({
       fetchingRef.current = false;
       if (batch.length === 0) { setExhausted(true); return; }
       nextOffsetRef.current += batch.length;
-      setCompanies(prev => [...prev, ...batch]);
+      // Filter out companies already acted on this session
+      const fresh = shuffle(batch.filter(c => !actedIds.current.has(c.id)));
+      if (fresh.length > 0) setCompanies(prev => [...prev, ...fresh]);
       if (batch.length < 50) setExhausted(true);
     });
   }, [index, companies.length, filters, exhausted]);
 
   const current = companies[index];
   const next = companies[index + 1];
-  const total = companies.length;
+  const totalSeen = index + 1;
 
   const showToast = (msg: string, color: string) => {
     setToast({ msg, color });
@@ -69,10 +84,13 @@ export function SwipeView({
 
   const requireLogin = useCallback(() => setShowGuestModal(true), []);
 
+  const markActed = (id: string) => actedIds.current.add(id);
+
   const advance = useCallback((dir: "left" | "right") => {
     if (!current || gone) return;
     if (!isLoggedIn && swipeCountRef.current >= 1) { requireLogin(); return; }
     if (!isLoggedIn) { swipeCountRef.current += 1; }
+    markActed(current.id);
     setGone(dir);
     if (dir === "right" && isLoggedIn) {
       setFavIds(prev => { const n = new Set(prev); n.add(current.id); return n; });
@@ -102,6 +120,7 @@ export function SwipeView({
     e.stopPropagation();
     if (!isLoggedIn) { requireLogin(); return; }
     if (!current) return;
+    markActed(current.id);
     addBoost(current.id);
     showToast("⚡ +100 pts !", "#8b5cf6");
   };
@@ -110,6 +129,7 @@ export function SwipeView({
     e.stopPropagation();
     if (!isLoggedIn) { requireLogin(); return; }
     if (!current) return;
+    markActed(current.id);
     addPenalty(current.id);
     showToast("💀 -100 pts", "#ef4444");
   };
@@ -145,9 +165,9 @@ export function SwipeView({
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 500, gap: 16 }}>
         <div style={{ fontSize: 52 }}>🔥</div>
         <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)" }}>Tu as tout exploré !</p>
-        <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{total} entreprises vues</p>
+        <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{totalSeen} entreprises découvertes</p>
         <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-          <button onClick={() => { setIndex(0); setGone(null); setDrag(0); }} style={{ padding: "12px 24px", borderRadius: 50, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
+          <button onClick={() => { setCompanies(shuffle(companies)); setIndex(0); setGone(null); setDrag(0); actedIds.current = new Set(); }} style={{ padding: "12px 24px", borderRadius: 50, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
             Recommencer
           </button>
           <a href="/ranking" style={{ padding: "12px 24px", borderRadius: 50, background: "var(--surface)", color: "var(--text)", fontWeight: 700, fontSize: 14, border: "1px solid var(--border2)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -179,9 +199,9 @@ export function SwipeView({
         </div>
       )}
 
-      {/* Counter */}
+      {/* Counter — just the card number, no total to avoid confusion */}
       <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
-        <span style={{ fontWeight: 700, color: "var(--text)" }}>{index + 1}</span> / {total}
+        <span style={{ fontWeight: 700, color: "var(--text)" }}>#{totalSeen}</span>
       </p>
 
       {/* Card stack */}
@@ -216,7 +236,6 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {/* -100 penalty — admin only */}
         {isAdmin && (
           <button onClick={handlePenalty} title="Pénaliser -100 pts" style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
@@ -235,7 +254,6 @@ export function SwipeView({
           </button>
         )}
 
-        {/* Pass */}
         <button onClick={() => advance("left")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
           background: "var(--surface)",
@@ -251,7 +269,6 @@ export function SwipeView({
           <X size={26} strokeWidth={2.5} />
         </button>
 
-        {/* Info */}
         <button onClick={() => current && router.push(`/company/${current.id}`)} disabled={!!gone} style={{
           width: 46, height: 46, borderRadius: "50%",
           background: "var(--surface)",
@@ -267,7 +284,6 @@ export function SwipeView({
           <Info size={18} strokeWidth={2} />
         </button>
 
-        {/* Flame / Save */}
         <button onClick={() => advance("right")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
           background: flameIds.has(current.id)
@@ -286,7 +302,6 @@ export function SwipeView({
           <Flame size={26} fill={flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
         </button>
 
-        {/* +100 boost */}
         <button onClick={handleBoost} title="Booster +100 pts" style={{
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
           width: 52, height: 52, borderRadius: "50%",
@@ -387,7 +402,6 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         </div>
       </div>
 
-      {/* Card body — uses CSS variables for light/dark compat */}
       <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
         {company.avg_rating > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
