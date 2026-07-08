@@ -53,6 +53,14 @@ export function SwipeView({
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const [drag, setDrag] = useState(0);
+  const cardRef = useRef<HTMLDivElement>(null);
+  // Mirror mutable values in refs so touch event closures don't go stale
+  const goneRef = useRef(gone);
+  const advanceRef = useRef(advance);
+  const currentRef = useRef(current);
+  goneRef.current = gone;
+  advanceRef.current = advance;
+  currentRef.current = current;
   const swipeCountRef = useRef(0);
   const fetchingRef = useRef(false);
   const nextOffsetRef = useRef(initialCompanies.length);
@@ -134,27 +142,76 @@ export function SwipeView({
     showToast("💀 -100 pts", "#ef4444");
   };
 
-  const onPointerDown = (e: React.PointerEvent) => {
+  // Native touch handlers — React touch events are passive by default on iOS,
+  // meaning e.preventDefault() is ignored and the browser hijacks the gesture
+  // as a scroll. We attach manually with { passive: false } to fix this.
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (goneRef.current) return;
+      const t = e.touches[0];
+      dragStart.current = { x: t.clientX, y: t.clientY };
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragStart.current || goneRef.current) return;
+      const t = e.touches[0];
+      const dx = t.clientX - dragStart.current.x;
+      const dy = t.clientY - dragStart.current.y;
+      // Prevent scroll only when horizontal swipe is dominant
+      if (Math.abs(dx) > Math.abs(dy)) {
+        e.preventDefault();
+        setDrag(dx);
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!dragStart.current) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - dragStart.current.x;
+      const dy = t.clientY - dragStart.current.y;
+      dragStart.current = null;
+      if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+        // Tap — navigate to company
+        const c = currentRef.current;
+        if (c) router.push(`/company/${c.id}`);
+        setDrag(0);
+        return;
+      }
+      if (dx > SWIPE_THRESHOLD) advanceRef.current("right");
+      else if (dx < -SWIPE_THRESHOLD) advanceRef.current("left");
+      else setDrag(0);
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  // Re-attach when card changes (new company) so currentRef is always fresh
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  // Desktop mouse handlers (pointer events work fine without passive concern)
+  const onMouseDown = (e: React.MouseEvent) => {
     if (gone) return;
     dragStart.current = { x: e.clientX, y: e.clientY };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
-
-  const onPointerMove = (e: React.PointerEvent) => {
+  const onMouseMove = (e: React.MouseEvent) => {
     if (!dragStart.current || gone) return;
     setDrag(e.clientX - dragStart.current.x);
   };
-
-  const onPointerUp = (e: React.PointerEvent) => {
+  const onMouseUp = (e: React.MouseEvent) => {
     if (!dragStart.current) return;
     const dx = e.clientX - dragStart.current.x;
     const dy = e.clientY - dragStart.current.y;
     dragStart.current = null;
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
-      if (current) router.push(`/company/${current.id}`);
-      setDrag(0);
-      return;
-    }
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) { setDrag(0); return; }
     if (dx > SWIPE_THRESHOLD) advance("right");
     else if (dx < -SWIPE_THRESHOLD) advance("left");
     else setDrag(0);
@@ -207,18 +264,19 @@ export function SwipeView({
           </div>
         )}
         <div
+          ref={cardRef}
           style={{
             position: "absolute", inset: 0, zIndex: 1,
             transform: gone
               ? `translateX(${gone === "right" ? 600 : -600}px) rotate(${gone === "right" ? 20 : -20}deg)`
               : `translateX(${drag}px) rotate(${rotate}deg)`,
-            transition: dragStart.current ? "none" : "transform 0.32s cubic-bezier(0.4,0,0.2,1)",
+            transition: drag !== 0 || gone ? "none" : "transform 0.32s cubic-bezier(0.4,0,0.2,1)",
             cursor: "grab", touchAction: "none",
           }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerLeave={e => { if (dragStart.current) onPointerUp(e); }}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={e => { if (dragStart.current) onMouseUp(e as React.MouseEvent); }}
         >
           <SwipeCard
             company={current}
