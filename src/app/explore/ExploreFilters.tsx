@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Search, X, LayoutGrid, Layers, ArrowUpDown, ChevronDown, MapPin } from "lucide-react";
+import { Search, X, LayoutGrid, Layers, SlidersHorizontal } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
 import { SECTOR_COLORS } from "@/lib/types";
 
@@ -25,23 +25,25 @@ export function ExploreFilters({
     current.q ? current.q.split(",").map(s => s.trim()).filter(Boolean) : []
   );
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showCantonPanel, setShowCantonPanel] = useState(false);
-  const [showSort, setShowSort] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const cantonRef = useRef<HTMLDivElement>(null);
+  const [showPanel, setShowPanel] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const view = current.view ?? "grid";
   const sort = current.sort ?? "score";
   const activeCanton = cantons.find(c => c.code === current.canton);
-  const hasFilters = current.sector || current.canton || tags.length > 0;
+  const activeCount = (current.sector ? 1 : 0) + (current.canton ? 1 : 0) + (sort !== "score" ? 1 : 0);
 
   const suggestions = input.length >= 1
-    ? allNames.filter(n => n.toLowerCase().includes(input.toLowerCase()) && !tags.includes(n)).slice(0, 7)
+    ? allNames.filter(n => n.toLowerCase().includes(input.toLowerCase()) && !tags.includes(n)).slice(0, 8)
     : [];
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) setShowSuggestions(false);
-      if (cantonRef.current && !cantonRef.current.contains(e.target as Node)) setShowCantonPanel(false);
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowSuggestions(false);
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        const btn = document.getElementById("filter-btn");
+        if (!btn?.contains(e.target as Node)) setShowPanel(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -72,36 +74,20 @@ export function ExploreFilters({
   };
 
   const clearAll = () => {
-    setTags([]); setInput(""); setShowCantonPanel(false);
-    startTransition(() => router.push(pathname));
+    setTags([]); setInput(""); setShowPanel(false);
+    startTransition(() => router.push(pathname + (view !== "grid" ? `?view=${view}` : "")));
   };
 
-  const pill = (active: boolean, color: string, onClick: () => void, children: React.ReactNode) => (
-    <button onClick={onClick} style={{
-      display: "inline-flex", alignItems: "center", gap: 5,
-      padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600,
-      flexShrink: 0, whiteSpace: "nowrap", cursor: "pointer",
-      border: active ? `1.5px solid ${color}` : "1px solid var(--border2)",
-      background: active ? `color-mix(in srgb, ${color} 15%, transparent)` : "var(--surface)",
-      color: active ? color : "var(--text-muted)",
-      transition: "all 0.12s",
-    }}>{children}</button>
-  );
-
   return (
-    <div style={{ marginBottom: 20, opacity: isPending ? 0.6 : 1, transition: "opacity 0.15s" }}>
-      <style>{`
-        .filter-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; align-items: center; }
-        .filter-scroll::-webkit-scrollbar { display: none; }
-      `}</style>
+    <div style={{ marginBottom: 20, opacity: isPending ? 0.65 : 1, transition: "opacity 0.15s" }}>
 
-      {/* ── Row 1 : search + view toggle ── */}
+      {/* ── Row 1: search + view toggle + filter button ── */}
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
 
         {/* Search */}
-        <div ref={wrapperRef} style={{ position: "relative", flex: 1 }}>
+        <div ref={searchRef} style={{ position: "relative", flex: 1 }}>
           <div
-            onClick={() => (wrapperRef.current?.querySelector("input") as HTMLInputElement)?.focus()}
+            onClick={() => (searchRef.current?.querySelector("input") as HTMLInputElement)?.focus()}
             style={{
               display: "flex", flexWrap: "wrap", alignItems: "center", gap: 5,
               background: "var(--surface)", border: "1px solid var(--border2)",
@@ -122,27 +108,32 @@ export function ExploreFilters({
               value={input}
               onChange={e => { setInput(e.target.value); setShowSuggestions(true); }}
               onKeyDown={e => {
-                if (e.key === "Escape") setShowSuggestions(false);
+                if (e.key === "Escape") { setShowSuggestions(false); setInput(""); }
                 if (e.key === "Backspace" && input === "" && tags.length > 0) removeTag(tags[tags.length - 1]);
                 if (e.key === "Enter" && input.trim()) {
                   const match = allNames.find(n => n.toLowerCase() === input.toLowerCase());
                   if (match) addTag(match);
+                  else if (input.trim().length > 1) addTag(input.trim());
                 }
               }}
-              onFocus={() => setShowSuggestions(true)}
+              onFocus={() => input.length >= 1 && setShowSuggestions(true)}
               placeholder={tags.length === 0 ? "Rechercher une entreprise..." : "Ajouter..."}
               style={{ flex: 1, minWidth: 80, background: "transparent", border: "none", fontSize: 14, color: "var(--text)", outline: "none", padding: "11px 0" }}
             />
             {(input || tags.length > 0) && (
-              <button onMouseDown={e => { e.preventDefault(); setInput(""); setTags([]); pushQ([]); }} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 0, display: "flex" }}>
+              <button onMouseDown={e => { e.preventDefault(); setInput(""); if (tags.length > 0) { setTags([]); pushQ([]); } setShowSuggestions(false); }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 0, display: "flex" }}>
                 <X size={15} />
               </button>
             )}
           </div>
+
+          {/* Suggestions — fixed position to avoid any clipping */}
           {showSuggestions && suggestions.length > 0 && (
-            <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "var(--surface)", border: "1px solid var(--border2)", borderTop: "none", borderRadius: "0 0 12px 12px", zIndex: 50, overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
+            <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "var(--surface)", border: "1px solid var(--border2)", borderTop: "none", borderRadius: "0 0 12px 12px", zIndex: 200, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}>
               {suggestions.map((name, i) => (
-                <button key={name} onMouseDown={() => addTag(name)} style={{ width: "100%", textAlign: "left", padding: "10px 14px 10px 38px", background: "transparent", border: "none", color: "var(--text)", fontSize: 13, cursor: "pointer", borderTop: i > 0 ? "1px solid var(--border)" : "none" }}
+                <button key={name} onMouseDown={() => addTag(name)}
+                  style={{ width: "100%", textAlign: "left", padding: "10px 14px 10px 38px", background: "transparent", border: "none", color: "var(--text)", fontSize: 13, cursor: "pointer", borderTop: i > 0 ? "1px solid var(--border)" : "none", display: "block" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "var(--surface2)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
                   {name}
@@ -152,7 +143,123 @@ export function ExploreFilters({
           )}
         </div>
 
-        {/* View toggle — icon only, saves space */}
+        {/* Filtres button */}
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          <button
+            id="filter-btn"
+            onClick={() => setShowPanel(v => !v)}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              height: 42, padding: "0 14px", borderRadius: 12,
+              border: showPanel || activeCount > 0 ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
+              background: showPanel || activeCount > 0 ? "rgba(139,92,246,0.12)" : "var(--surface)",
+              color: activeCount > 0 ? "#8b5cf6" : "var(--text-muted)",
+              cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s",
+            }}
+          >
+            <SlidersHorizontal size={15} />
+            <span>Filtres</span>
+            {activeCount > 0 && (
+              <span style={{ background: "#8b5cf6", color: "#fff", borderRadius: 50, fontSize: 10, fontWeight: 800, padding: "1px 6px", minWidth: 18, textAlign: "center" }}>
+                {activeCount}
+              </span>
+            )}
+          </button>
+
+          {/* Filter panel */}
+          {showPanel && (
+            <div ref={panelRef} style={{
+              position: "absolute", top: "calc(100% + 8px)", right: 0,
+              background: "var(--surface)", border: "1px solid var(--border2)",
+              borderRadius: 18, padding: 20, zIndex: 100,
+              boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+              width: "min(480px, 92vw)",
+            }}>
+              {/* Sectors */}
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Secteur</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+                {sectors.map(s => {
+                  const color = SECTOR_COLORS[s] ?? "#8b5cf6";
+                  const active = current.sector === s;
+                  return (
+                    <button key={s} onClick={() => push("sector", active ? undefined : s)}
+                      style={{
+                        padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                        border: active ? `1.5px solid ${color}` : "1px solid var(--border2)",
+                        background: active ? `color-mix(in srgb, ${color} 15%, transparent)` : "transparent",
+                        color: active ? color : "var(--text-muted)", transition: "all 0.1s",
+                      }}>
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Cantons */}
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Canton</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))", gap: 5, marginBottom: view !== "swipe" ? 18 : 0 }}>
+                {cantons.map(c => {
+                  const active = current.canton === c.code;
+                  return (
+                    <button key={c.code} onClick={() => push("canton", active ? undefined : c.code)}
+                      style={{
+                        padding: "6px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer",
+                        border: active ? "1.5px solid #f97316" : "1px solid var(--border)",
+                        background: active ? "rgba(249,115,22,0.15)" : "transparent",
+                        color: active ? "#f97316" : "var(--text-muted)",
+                        textAlign: "center", lineHeight: 1.4, transition: "all 0.1s",
+                      }}
+                      onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "var(--surface2)"; }}
+                      onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+                    >
+                      <div style={{ fontSize: 9, opacity: 0.5 }}>{c.code}</div>
+                      {c.name}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Sort — grid only */}
+              {view !== "swipe" && (
+                <>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Trier par</p>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {([
+                      { v: "score", label: "Score" },
+                      { v: "rating", label: "Meilleure note" },
+                      { v: "reviews", label: "Plus d'avis" },
+                      { v: "name", label: "A → Z" },
+                    ] as const).map(({ v, label }) => (
+                      <button key={v} onClick={() => push("sort", v === "score" ? undefined : v)}
+                        style={{
+                          padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                          border: sort === v ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
+                          background: sort === v ? "rgba(139,92,246,0.15)" : "transparent",
+                          color: sort === v ? "#8b5cf6" : "var(--text-muted)", transition: "all 0.1s",
+                        }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Footer */}
+              {(activeCount > 0) && (
+                <div style={{ borderTop: "1px solid var(--border)", marginTop: 18, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <button onClick={clearAll} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
+                    Tout réinitialiser
+                  </button>
+                  <button onClick={() => setShowPanel(false)} style={{ padding: "7px 18px", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer" }}>
+                    Voir les résultats
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* View toggle */}
         <div style={{ display: "flex", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, padding: 3, gap: 3, flexShrink: 0 }}>
           {([
             { v: "grid", icon: <LayoutGrid size={16} />, label: "Grille" },
@@ -170,93 +277,31 @@ export function ExploreFilters({
             </button>
           ))}
         </div>
-
-        {/* Reset */}
-        {hasFilters && (
-          <button onClick={clearAll} title="Réinitialiser les filtres" style={{ width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 10, border: "1px solid rgba(239,68,68,0.3)", background: "rgba(239,68,68,0.08)", color: "#ef4444", cursor: "pointer", flexShrink: 0 }}>
-            <X size={15} />
-          </button>
-        )}
       </div>
 
-      {/* ── Row 2 : sectors (scroll) + canton (fixed right) + sort (grid only) ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 0, minWidth: 0 }}>
-        {/* Sectors — scrollable, fades out on right */}
-        <div style={{ flex: 1, minWidth: 0, position: "relative", overflow: "hidden" }}>
-          <div className="filter-scroll" style={{ paddingRight: 8 }}>
-            {sectors.map(s => {
-              const color = SECTOR_COLORS[s] ?? "#8b5cf6";
-              const active = current.sector === s;
-              return pill(active, color, () => push("sector", active ? undefined : s), s);
-            })}
-            {/* Sort pills — inline with sectors, grid only */}
-            {view !== "swipe" && (
-              <>
-                <span style={{ width: 1, height: 20, background: "var(--border2)", flexShrink: 0, margin: "0 4px" }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", flexShrink: 0, display: "flex", alignItems: "center", gap: 3 }}><ArrowUpDown size={11} /></span>
-                {([
-                  { v: "score", label: "Score" },
-                  { v: "rating", label: "Note" },
-                  { v: "reviews", label: "Avis" },
-                  { v: "name", label: "A→Z" },
-                ] as const).map(({ v, label }) =>
-                  pill(sort === v, "#8b5cf6", () => push("sort", v === "score" ? undefined : v), label)
-                )}
-              </>
-            )}
-          </div>
-          {/* Fade edge */}
-          <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: 32, background: "linear-gradient(to right, transparent, var(--bg))", pointerEvents: "none" }} />
-        </div>
-
-        {/* Canton — fixed right, never scrolls away */}
-        <div ref={cantonRef} style={{ position: "relative", flexShrink: 0, marginLeft: 6 }}>
-          <button onClick={() => setShowCantonPanel(v => !v)} style={{
-            display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 13px",
-            borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap",
-            border: activeCanton ? "1.5px solid #f97316" : "1px solid var(--border2)",
-            background: activeCanton ? "rgba(249,115,22,0.15)" : "var(--surface)",
-            color: activeCanton ? "#f97316" : "var(--text-muted)",
-            transition: "all 0.12s",
-          }}>
-            <MapPin size={12} />
-            {activeCanton ? activeCanton.name : "Canton"}
-            <ChevronDown size={12} style={{ transform: showCantonPanel ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-          </button>
-
-          {showCantonPanel && (
-            <div style={{
-              position: "absolute", top: "calc(100% + 8px)", right: 0,
-              background: "var(--surface)", border: "1px solid var(--border2)",
-              borderRadius: 16, padding: 12, zIndex: 60,
-              boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
-              display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4,
-              width: 260,
-            }}>
-              {cantons.map(c => {
-                const active = current.canton === c.code;
-                return (
-                  <button key={c.code}
-                    onClick={() => { push("canton", active ? undefined : c.code); setShowCantonPanel(false); }}
-                    style={{
-                      padding: "6px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600,
-                      border: active ? "1.5px solid #f97316" : "1px solid var(--border)",
-                      background: active ? "rgba(249,115,22,0.15)" : "transparent",
-                      color: active ? "#f97316" : "var(--text-muted)",
-                      cursor: "pointer", textAlign: "center", lineHeight: 1.3, transition: "all 0.1s",
-                    }}
-                    onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "var(--surface2)"; }}
-                    onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-                  >
-                    <div style={{ fontSize: 9, opacity: 0.5 }}>{c.code}</div>
-                    <div>{c.name}</div>
-                  </button>
-                );
-              })}
-            </div>
+      {/* Active filter chips summary */}
+      {(current.sector || activeCanton || (sort !== "score" && view !== "swipe")) && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+          {current.sector && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: `${SECTOR_COLORS[current.sector] ?? "#8b5cf6"}18`, border: `1px solid ${SECTOR_COLORS[current.sector] ?? "#8b5cf6"}44`, color: SECTOR_COLORS[current.sector] ?? "#8b5cf6" }}>
+              {current.sector}
+              <button onClick={() => push("sector", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
+            </span>
+          )}
+          {activeCanton && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.3)", color: "#f97316" }}>
+              📍 {activeCanton.name}
+              <button onClick={() => push("canton", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
+            </span>
+          )}
+          {sort !== "score" && view !== "swipe" && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#8b5cf6" }}>
+              ↑ {sort === "rating" ? "Meilleure note" : sort === "reviews" ? "Plus d'avis" : "A→Z"}
+              <button onClick={() => push("sort", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
+            </span>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
