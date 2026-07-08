@@ -184,9 +184,9 @@ export function SwipeView({
   const isLeft = drag < -20;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+    <div className="swipe-container" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
       {/* Card stack */}
-      <div style={{ position: "relative", width: "min(326px, calc(92vw - 114px))", height: 480 }}>
+      <div style={{ position: "relative", width: "min(420px, 96vw)", height: "min(500px, 56vh)", touchAction: "none" }}>
         {/* Toast — top of card, smooth slide-in */}
         {toast && (
           <div key={toast.msg} style={{

@@ -62,14 +62,10 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         border: "1px solid var(--border)",
         borderRadius: 20,
         overflow: "hidden",
-        transition: "transform 0.2s, box-shadow 0.2s",
         cursor: "pointer",
-      }}
-        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.4)"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = ""; (e.currentTarget as HTMLDivElement).style.boxShadow = ""; }}
-      >
+      }}>
         {/* Cover */}
-        <div style={{ height: 140, position: "relative", overflow: "hidden" }}>
+        <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
           {company.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -95,7 +91,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
               disabled={pending}
               style={{
                 position: "absolute", top: 10, right: 10,
-                width: 36, height: 36, borderRadius: "50%",
+                width: 44, height: 44, borderRadius: "50%",
                 background: fav ? "rgba(249,115,22,0.9)" : "rgba(13,13,19,0.7)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 display: "flex", alignItems: "center", justifyContent: "center",
