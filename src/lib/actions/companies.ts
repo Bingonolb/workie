@@ -94,7 +94,7 @@ export async function fetchSwipePage(
 // Lightweight — names only for autocomplete, avoids SELECT * over 200 rows
 export async function getCompanyNames(): Promise<string[]> {
   const supabase = await createClient();
-  const { data } = await supabase.from("companies").select("name").order("name");
+  const { data } = await supabase.from("companies").select("name").order("name").limit(10000);
   return (data ?? []).map((r: { name: string }) => r.name);
 }
 
