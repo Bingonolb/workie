@@ -75,7 +75,7 @@ export function SwipeView({
 
   const current = companies[index];
   const next = companies[index + 1];
-  const totalSeen = index + 1;
+  const totalSeen = index;
 
   const showToast = (msg: string, color: string) => {
     setToast({ msg, color });
