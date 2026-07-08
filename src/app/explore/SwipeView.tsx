@@ -187,15 +187,15 @@ export function SwipeView({
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
       {/* Card stack */}
       <div style={{ position: "relative", width: "min(440px, 92vw)", height: 540 }}>
-        {/* Toast — centered on the card */}
+        {/* Toast — top of card, smooth slide-in */}
         {toast && (
-          <div key={toast.msg + Date.now()} style={{
-            position: "absolute", top: "50%", left: "50%",
-            transform: "translate(-50%, -50%)",
-            background: toast.color, color: "#fff", fontWeight: 800, fontSize: 18,
-            padding: "12px 32px", borderRadius: 50, zIndex: 10,
-            boxShadow: `0 8px 32px ${toast.color}88`,
-            animation: "fadeInOut 1.8s ease forwards",
+          <div key={toast.msg} style={{
+            position: "absolute", top: 20, left: "50%",
+            transform: "translateX(-50%)",
+            background: toast.color, color: "#fff", fontWeight: 800, fontSize: 15,
+            padding: "9px 26px", borderRadius: 50, zIndex: 10,
+            boxShadow: `0 6px 24px ${toast.color}88`,
+            animation: "toastSlide 1.8s cubic-bezier(0.34,1.56,0.64,1) forwards",
             whiteSpace: "nowrap", pointerEvents: "none",
           }}>
             {toast.msg}
@@ -332,11 +332,11 @@ export function SwipeView({
       {showGuestModal && !isLoggedIn && <GuestModal reviewCount={companies.length} open />}
 
       <style>{`
-        @keyframes fadeInOut {
-          0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
-          15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-          80% { opacity: 1; }
-          100% { opacity: 0; }
+        @keyframes toastSlide {
+          0%   { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.85); }
+          18%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+          75%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+          100% { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(0.95); }
         }
       `}</style>
     </div>
