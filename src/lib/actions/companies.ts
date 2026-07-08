@@ -76,7 +76,7 @@ export async function getAllCompaniesForSwipe(filters?: {
     else if (names.length > 1) query = query.in("name", names);
   }
 
-  const { data } = await query;
+  const { data } = await query.limit(2000);
   return (data ?? []) as Company[];
 }
 
