@@ -5,38 +5,56 @@ import { Search, X, LayoutGrid, Layers, SlidersHorizontal } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
 import { SECTOR_COLORS } from "@/lib/types";
 
+type Suggestion = { id: string; name: string; city: string; sector: string };
+
 export function ExploreFilters({
   sectors,
   cantons,
   current,
-  allNames = [],
 }: {
   sectors: string[];
   cantons: { code: string; name: string }[];
   current: { sector?: string; canton?: string; q?: string; view?: string; sort?: string };
-  allNames?: string[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [input, setInput] = useState("");
-  const [tags, setTags] = useState<string[]>(
-    current.q ? current.q.split(",").map(s => s.trim()).filter(Boolean) : []
-  );
+
+  // Search state
+  const [input, setInput] = useState(current.q ?? "");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showPanel, setShowPanel] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Filter panel state
+  const [showPanel, setShowPanel] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+
   const view = current.view ?? "grid";
   const sort = current.sort ?? "score";
   const activeCanton = cantons.find(c => c.code === current.canton);
   const activeCount = (current.sector ? 1 : 0) + (current.canton ? 1 : 0) + (sort !== "score" ? 1 : 0);
 
-  const suggestions = input.length >= 1
-    ? allNames.filter(n => n.toLowerCase().includes(input.toLowerCase()) && !tags.includes(n)).slice(0, 8)
-    : [];
+  // Fetch suggestions from API with debounce
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (input.trim().length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(input.trim())}`);
+        const data = await res.json();
+        setSuggestions(data.companies ?? []);
+        setShowSuggestions(true);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 220);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [input]);
 
+  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowSuggestions(false);
@@ -56,87 +74,92 @@ export function ExploreFilters({
     startTransition(() => router.push(`${pathname}?${p.toString()}`));
   };
 
-  const pushQ = (newTags: string[]) => {
+  const submitSearch = (q: string) => {
+    setShowSuggestions(false);
     const p = new URLSearchParams(searchParams.toString());
-    if (newTags.length > 0) p.set("q", newTags.join(",")); else p.delete("q");
+    if (q.trim()) p.set("q", q.trim()); else p.delete("q");
     p.delete("page");
     startTransition(() => router.push(`${pathname}?${p.toString()}`));
   };
 
-  const addTag = (name: string) => {
-    const next = [...tags, name];
-    setTags(next); setInput(""); setShowSuggestions(false); pushQ(next);
-  };
-
-  const removeTag = (name: string) => {
-    const next = tags.filter(t => t !== name);
-    setTags(next); pushQ(next);
+  const clearSearch = () => {
+    setInput("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+    const p = new URLSearchParams(searchParams.toString());
+    p.delete("q");
+    p.delete("page");
+    startTransition(() => router.push(`${pathname}?${p.toString()}`));
   };
 
   const clearAll = () => {
-    setTags([]); setInput(""); setShowPanel(false);
+    setInput("");
+    setSuggestions([]);
+    setShowPanel(false);
     startTransition(() => router.push(pathname + (view !== "grid" ? `?view=${view}` : "")));
   };
 
   return (
     <div style={{ marginBottom: 20, opacity: isPending ? 0.65 : 1, transition: "opacity 0.15s" }}>
 
-      {/* ── Row 1: search + view toggle + filter button ── */}
+      {/* ── Row 1: search + filter button + view toggle ── */}
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
 
         {/* Search */}
         <div ref={searchRef} style={{ position: "relative", flex: 1 }}>
-          <div
-            onClick={() => (searchRef.current?.querySelector("input") as HTMLInputElement)?.focus()}
-            style={{
-              display: "flex", flexWrap: "wrap", alignItems: "center", gap: 5,
-              background: "var(--surface)", border: "1px solid var(--border2)",
-              borderRadius: showSuggestions && suggestions.length > 0 ? "12px 12px 0 0" : 12,
-              padding: "0 12px 0 38px", minHeight: 42, cursor: "text", position: "relative",
-            }}
-          >
-            <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
-            {tags.map(tag => (
-              <span key={tag} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(139,92,246,0.18)", border: "1px solid rgba(139,92,246,0.4)", borderRadius: 20, padding: "2px 9px", fontSize: 12, fontWeight: 600, color: "#a78bfa" }}>
-                {tag}
-                <button onMouseDown={e => { e.preventDefault(); removeTag(tag); }} style={{ background: "none", border: "none", cursor: "pointer", color: "#a78bfa", padding: 0, display: "flex" }}>
-                  <X size={11} />
-                </button>
-              </span>
-            ))}
+          <div style={{ position: "relative" }}>
+            <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none", zIndex: 1 }} />
             <input
               value={input}
-              onChange={e => { setInput(e.target.value); setShowSuggestions(true); }}
+              onChange={e => setInput(e.target.value)}
               onKeyDown={e => {
-                if (e.key === "Escape") { setShowSuggestions(false); setInput(""); }
-                if (e.key === "Backspace" && input === "" && tags.length > 0) removeTag(tags[tags.length - 1]);
-                if (e.key === "Enter" && input.trim()) {
-                  const match = allNames.find(n => n.toLowerCase() === input.toLowerCase());
-                  if (match) addTag(match);
-                  else if (input.trim().length > 1) addTag(input.trim());
-                }
+                if (e.key === "Enter") submitSearch(input);
+                if (e.key === "Escape") { setShowSuggestions(false); }
               }}
-              onFocus={() => input.length >= 1 && setShowSuggestions(true)}
-              placeholder={tags.length === 0 ? "Rechercher une entreprise..." : "Ajouter..."}
-              style={{ flex: 1, minWidth: 80, background: "transparent", border: "none", fontSize: 14, color: "var(--text)", outline: "none", padding: "11px 0" }}
+              onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+              placeholder="Rechercher une entreprise..."
+              style={{
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
+                borderRadius: showSuggestions && suggestions.length > 0 ? "12px 12px 0 0" : 12,
+                padding: "0 36px 0 38px", height: 42, fontSize: 14, color: "var(--text)",
+                outline: "none", boxSizing: "border-box",
+              }}
             />
-            {(input || tags.length > 0) && (
-              <button onMouseDown={e => { e.preventDefault(); setInput(""); if (tags.length > 0) { setTags([]); pushQ([]); } setShowSuggestions(false); }}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 0, display: "flex" }}>
+            {input && (
+              <button
+                onMouseDown={e => { e.preventDefault(); clearSearch(); }}
+                style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", padding: 4 }}
+              >
                 <X size={15} />
               </button>
             )}
           </div>
 
-          {/* Suggestions — fixed position to avoid any clipping */}
+          {/* Suggestions dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "var(--surface)", border: "1px solid var(--border2)", borderTop: "none", borderRadius: "0 0 12px 12px", zIndex: 200, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}>
-              {suggestions.map((name, i) => (
-                <button key={name} onMouseDown={() => addTag(name)}
-                  style={{ width: "100%", textAlign: "left", padding: "10px 14px 10px 38px", background: "transparent", border: "none", color: "var(--text)", fontSize: 13, cursor: "pointer", borderTop: i > 0 ? "1px solid var(--border)" : "none", display: "block" }}
+            <div style={{
+              position: "absolute", top: "100%", left: 0, right: 0,
+              background: "var(--surface)", border: "1px solid var(--border2)",
+              borderTop: "none", borderRadius: "0 0 12px 12px",
+              zIndex: 600, overflow: "hidden",
+              boxShadow: "0 12px 32px rgba(0,0,0,0.4)",
+            }}>
+              {suggestions.map((s, i) => (
+                <button
+                  key={s.id}
+                  onMouseDown={() => { setInput(s.name); submitSearch(s.name); }}
+                  style={{
+                    width: "100%", textAlign: "left", padding: "10px 14px 10px 38px",
+                    background: "transparent", border: "none", color: "var(--text)",
+                    fontSize: 13, cursor: "pointer",
+                    borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+                  }}
                   onMouseEnter={e => (e.currentTarget.style.background = "var(--surface2)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                  {name}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  <span>{s.name}</span>
+                  <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{s.city}</span>
                 </button>
               ))}
             </div>
@@ -279,9 +302,15 @@ export function ExploreFilters({
         </div>
       </div>
 
-      {/* Active filter chips summary */}
-      {(current.sector || activeCanton || (sort !== "score" && view !== "swipe")) && (
+      {/* Active filter chips */}
+      {(current.q || current.sector || activeCanton || (sort !== "score" && view !== "swipe")) && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+          {current.q && (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#8b5cf6" }}>
+              🔍 {current.q}
+              <button onClick={clearSearch} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
+            </span>
+          )}
           {current.sector && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: `${SECTOR_COLORS[current.sector] ?? "#8b5cf6"}18`, border: `1px solid ${SECTOR_COLORS[current.sector] ?? "#8b5cf6"}44`, color: SECTOR_COLORS[current.sector] ?? "#8b5cf6" }}>
               {current.sector}

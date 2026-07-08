@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Découvre les avis anonymes et salaires des entreprises en Suisse. Tech, Pharma, Finance, Conseil et plus.",
 };
 import { CompanyCard } from "@/components/CompanyCard";
-import { getCompanies, getAllCompaniesForSwipe, getCompanyNames } from "@/lib/actions/companies";
+import { getCompanies, getAllCompaniesForSwipe } from "@/lib/actions/companies";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import { getUserFlameIds } from "@/lib/actions/scores";
 import { getUser } from "@/lib/supabase/server";
@@ -62,11 +62,10 @@ export default async function ExplorePage({
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
-  const [user, favIds, flameIds, allNames, isAdmin] = await Promise.all([
+  const [user, favIds, flameIds, isAdmin] = await Promise.all([
     getUser(),
     getUserFavoriteIds(),
     getUserFlameIds(),
-    getCompanyNames(),
     (await import("@/lib/supabase/server")).getIsAdmin(),
   ]);
 
@@ -101,7 +100,7 @@ export default async function ExplorePage({
               Chargement au fil des swipes
             </p>
           </div>
-          <Suspense fallback={null}><ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params} allNames={allNames} /></Suspense>
+          <Suspense fallback={null}><ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params}  /></Suspense>
           <SwipeView
             key={`${params.sector ?? ""}-${params.canton ?? ""}-${params.q ?? ""}`}
             companies={companies as Company[]}
@@ -132,7 +131,7 @@ export default async function ExplorePage({
           </p>
         </div>
 
-        <ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params} allNames={allNames} />
+        <ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params}  />
 
         {!user && total > companies.length && (
           <div style={{

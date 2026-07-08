@@ -39,9 +39,7 @@ export async function getCompanies(filters?: {
   if (filters?.sector) query = query.eq("sector", filters.sector);
   if (filters?.canton) query = query.eq("canton", filters.canton);
   if (filters?.search) {
-    const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
-    if (names.length === 1) query = query.ilike("name", `%${escapeLike(names[0])}%`);
-    else if (names.length > 1) query = query.in("name", names);
+    query = query.ilike("name", `%${escapeLike(filters.search.trim())}%`);
   }
 
   const { data, count } = await query.range(from, to);
@@ -82,21 +80,13 @@ export async function fetchSwipePage(
   if (filters?.sector) q = q.eq("sector", filters.sector);
   if (filters?.canton) q = q.eq("canton", filters.canton);
   if (filters?.search) {
-    const names = filters.search.split(",").map(s => s.trim()).filter(Boolean);
-    if (names.length === 1) q = q.ilike("name", `%${escapeLike(names[0])}%`);
-    else if (names.length > 1) q = q.in("name", names);
+    q = q.ilike("name", `%${escapeLike(filters.search.trim())}%`);
   }
 
   const { data } = await q;
   return (data ?? []) as Company[];
 }
 
-// Lightweight — names only for autocomplete, avoids SELECT * over 200 rows
-export async function getCompanyNames(): Promise<string[]> {
-  const supabase = await createClient();
-  const { data } = await supabase.from("companies").select("name").order("name").limit(10000);
-  return (data ?? []).map((r: { name: string }) => r.name);
-}
 
 export async function getCompany(id: string) {
   const supabase = await createClient();
