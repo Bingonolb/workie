@@ -56,10 +56,10 @@ export function SwipeView({
   const cardRef = useRef<HTMLDivElement>(null);
   // Mirror mutable values in refs so touch event closures don't go stale
   const goneRef = useRef(gone);
-  const advanceRef = useRef(advance);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const advanceRef = useRef<(dir: "left" | "right") => void>(() => {});
   const currentRef = useRef(current);
   goneRef.current = gone;
-  advanceRef.current = advance;
   currentRef.current = current;
   const swipeCountRef = useRef(0);
   const fetchingRef = useRef(false);
@@ -114,6 +114,7 @@ export function SwipeView({
     setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 320);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, gone, isLoggedIn, requireLogin]);
+  advanceRef.current = advance;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
