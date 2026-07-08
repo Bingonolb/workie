@@ -191,13 +191,9 @@ export function ExploreFilters({
 
           {/* Filter panel */}
           {showPanel && (
-            <div ref={panelRef} style={{
-              position: "absolute", top: "calc(100% + 8px)", right: 0,
-              background: "var(--surface)", border: "1px solid var(--border2)",
-              borderRadius: 18, padding: 20, zIndex: 500,
-              boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
-              width: "min(480px, 92vw)",
-            }}>
+            <>
+              <div className="filter-panel-overlay" onClick={() => setShowPanel(false)} />
+              <div ref={panelRef} className="filter-panel">
               {/* Sectors */}
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Secteur</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
@@ -279,6 +275,7 @@ export function ExploreFilters({
                 </div>
               )}
             </div>
+            </>
           )}
         </div>
 

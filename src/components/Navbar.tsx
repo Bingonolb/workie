@@ -44,7 +44,7 @@ export async function Navbar() {
               background: "rgba(139,92,246,0.12)",
               border: "1px solid rgba(139,92,246,0.25)",
             }}>
-              <LayoutDashboard size={14} /> Tableau de bord
+              <LayoutDashboard size={14} /> <span className="nav-label">Tableau de bord</span>
             </Link>
           ) : (
             <>
@@ -58,7 +58,7 @@ export async function Navbar() {
                   background: "rgba(139,92,246,0.12)",
                   border: "1px solid rgba(139,92,246,0.25)",
                 }}>
-                  <Shield size={13} /> Admin
+                  <Shield size={13} /> <span className="nav-label">Admin</span>
                 </Link>
               )}
             </>

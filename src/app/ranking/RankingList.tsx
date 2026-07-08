@@ -60,19 +60,20 @@ export function RankingTable({ companies }: { companies: Company[] }) {
       </div>
 
       {/* Table header */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "52px 1fr 130px 100px 120px 100px",
-        padding: "8px 20px 10px",
-        borderTop: "1px solid var(--border)",
-        borderBottom: "1px solid var(--border)",
-      }}>
-        {["#", "Entreprise", "Secteur", "Note · Avis", "Score avis", "Score total"].map((h, i) => (
-          <span key={h} style={{
+      <div className="ranking-header">
+        {[
+          { label: "#", cls: "" },
+          { label: "Entreprise", cls: "" },
+          { label: "Secteur", cls: "ranking-col-sector" },
+          { label: "Note · Avis", cls: "ranking-col-note" },
+          { label: "Score avis", cls: "ranking-col-score-avis" },
+          { label: "Score total", cls: "" },
+        ].map(({ label, cls }, i) => (
+          <span key={label} className={cls} style={{
             fontSize: 11, fontWeight: 700, color: "var(--text-muted)",
             letterSpacing: "0.06em", textTransform: "uppercase",
             textAlign: i >= 3 ? "right" : "left",
-          }}>{h}</span>
+          }}>{label}</span>
         ))}
       </div>
 
@@ -91,16 +92,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           const communityPts = c.score - ratingPts;
 
           return (
-            <Link key={c.id} href={`/company/${c.id}`} style={{ textDecoration: "none" }}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "52px 1fr 130px 100px 120px 100px",
-                  alignItems: "center", padding: "14px 20px",
-                  borderBottom: "1px solid var(--border)",
-                  transition: "background 0.12s",
-                  position: "relative", overflow: "hidden",
-                }}
+            <Link key={c.id} href={`/company/${c.id}`} className="ranking-row"
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface2)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
               >
@@ -150,7 +142,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                 </div>
 
                 {/* Sector */}
-                <span style={{
+                <span className="ranking-col-sector" style={{
                   fontSize: 11, fontWeight: 600, color: sectorColor,
                   background: `${sectorColor}18`, border: `1px solid ${sectorColor}30`,
                   borderRadius: 4, padding: "3px 8px",
@@ -161,7 +153,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                 </span>
 
                 {/* Note · Avis */}
-                <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
+                <div className="ranking-col-note" style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
                   {c.avg_rating > 0 ? (
                     <>
                       <Star size={11} fill="#f59e0b" color="#f59e0b" />
@@ -178,7 +170,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                 </div>
 
                 {/* Score avis (rating component) */}
-                <div style={{ textAlign: "right" }}>
+                <div className="ranking-col-score-avis" style={{ textAlign: "right" }}>
                   {ratingPts > 0 ? (
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
                       +{ratingPts}
@@ -211,7 +203,6 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                     {c.score}
                   </span>
                 </div>
-              </div>
             </Link>
           );
         })}
