@@ -52,7 +52,7 @@ function RatingBar({ label, value }: { label: string; value: number | null }) {
   );
 }
 
-const BASE_URL = "https://workie-biblingo.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -192,7 +192,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
             {/* Actions */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-              <ShareButton name={company.name} url={`https://workie-biblingo.vercel.app/company/${company.id}`} />
+              <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
               {user ? (
                 <form action={toggleFavorite.bind(null, company.id)}>
                   <button type="submit" style={{

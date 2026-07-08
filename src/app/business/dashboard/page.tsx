@@ -5,7 +5,7 @@ import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2
 import Link from "next/link";
 import { ShareCopyButton } from "@/components/ShareCopyButton";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://workie-biblingo.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
 export default async function BusinessDashboardPage() {
   const data = await getBusinessAnalytics();

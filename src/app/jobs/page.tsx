@@ -8,7 +8,7 @@ import { SECTOR_COLORS } from "@/lib/types";
 export const metadata: Metadata = {
   title: "Offres d'emploi en Suisse · Workie",
   description: "Toutes les offres d'emploi des entreprises vérifiées sur Workie. Salaires, culture, avis — choisissez en connaissance de cause.",
-  alternates: { canonical: "https://workie-biblingo.vercel.app/jobs" },
+  alternates: { canonical: "https://www.workie.ch/jobs" },
 };
 
 const CONTRACT_COLORS: Record<string, { bg: string; color: string }> = {

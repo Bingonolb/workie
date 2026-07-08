@@ -7,7 +7,7 @@ import { SECTOR_COLORS } from "@/lib/types";
 export const metadata: Metadata = {
   title: "Salaires en Suisse par secteur · Workie",
   description: "Salaires réels et anonymes des employés suisses par secteur, poste et type de contrat. Données issues d'avis vérifiés sur Workie.",
-  alternates: { canonical: "https://workie-biblingo.vercel.app/salaires" },
+  alternates: { canonical: "https://www.workie.ch/salaires" },
 };
 
 type SectorStat = {
