@@ -186,7 +186,7 @@ export function SwipeView({
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
       {/* Card stack */}
-      <div style={{ position: "relative", width: "min(440px, 92vw)", height: "min(460px, calc(100dvh - 360px))" }}>
+      <div style={{ position: "relative", height: "min(460px, calc(100dvh - 370px))", aspectRatio: "3/4", maxWidth: "min(380px, 88vw)", margin: "0 auto" }}>
         {/* Toast — top of card, smooth slide-in */}
         {toast && (
           <div key={toast.msg} style={{
