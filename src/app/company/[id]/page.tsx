@@ -43,8 +43,8 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
 function RatingBar({ label, value }: { label: string; value: number | null }) {
   if (!value) return null;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-      <span style={{ fontSize: 12, color: "var(--text-muted)", width: 130, flexShrink: 0 }}>{label}</span>
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <span className="rating-bar-label" style={{ fontSize: 12, color: "var(--text-muted)", width: 120, flexShrink: 0 }}>{label}</span>
       <div style={{ flex: 1, height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
         <div style={{ width: `${(value / 5) * 100}%`, height: "100%", background: "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 3 }} />
       </div>
@@ -175,42 +175,43 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         {/* Top gradient — darkens so navbar stays readable */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.65) 0%, rgba(13,13,19,0.0) 40%, rgba(13,13,19,0.0) 50%, rgba(13,13,19,0.92) 100%)" }} />
 
-        <div style={{ position: "absolute", bottom: 28, left: 0, right: 0 }}>
-          <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 20 }}>
+        <div className="company-hero-bottom" style={{ position: "absolute", bottom: 24, left: 0, right: 0 }}>
+          <div className="company-hero-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "0 28px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
               {/* Logo overlay */}
               {company.logo_url && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
+                  className="company-hero-logo"
                   src={company.logo_url}
                   alt={`${company.name} logo`}
-                  style={{ width: 88, height: 88, borderRadius: 16, objectFit: "contain", background: "#fff", border: "3px solid rgba(255,255,255,0.15)", flexShrink: 0, boxShadow: "0 4px 24px rgba(0,0,0,0.4)" }}
+                  style={{ width: 76, height: 76, borderRadius: 14, objectFit: "contain", background: "#fff", border: "3px solid rgba(255,255,255,0.15)", flexShrink: 0, boxShadow: "0 4px 24px rgba(0,0,0,0.4)" }}
                 />
               )}
               <div>
-              <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 12, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", padding: "6px 14px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
+              <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 10, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
                 <ArrowLeft size={14} /> Retour
               </Link>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                <h1 style={{ fontSize: 36, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em" }}>{company.name}</h1>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <h1 className="company-hero-title" style={{ fontSize: 30, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em" }}>{company.name}</h1>
                 {company.is_verified && (
-                  <svg viewBox="0 0 22 22" style={{ width: 26, height: 26, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                  <svg viewBox="0 0 22 22" style={{ width: 22, height: 22, flexShrink: 0 }} aria-label="Entreprise vérifiée">
                     <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                     <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
                   </svg>
                 )}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ padding: "4px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600, color: sectorColor, background: `${sectorColor}22`, border: `1px solid ${sectorColor}44` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <span style={{ padding: "3px 10px", borderRadius: 50, fontSize: 12, fontWeight: 600, color: sectorColor, background: `${sectorColor}22`, border: `1px solid ${sectorColor}44` }}>
                   {company.sector}
                 </span>
-                {company.subsector && <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{company.subsector}</span>}
+                {company.subsector && <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{company.subsector}</span>}
               </div>
             </div>
             </div>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
               <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
               {user && !isBusiness ? (
                 <form action={toggleFavorite.bind(null, company.id)}>
@@ -220,7 +221,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                     background: isFav ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.1)",
                     border: isFav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.15)",
                     color: isFav ? "#f97316" : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
-                    backdropFilter: "blur(8px)",
+                    backdropFilter: "blur(8px)", minHeight: 44,
                   }}>
                     <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
                   </button>
@@ -547,7 +548,7 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
 
       {/* Pros / Cons */}
       {(review.pros || review.cons) && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+        <div className="review-pros-cons" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
           {review.pros && (
             <div style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 10, padding: "10px 12px" }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", marginBottom: 4 }}>👍 Points positifs</p>

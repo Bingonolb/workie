@@ -67,6 +67,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
       {/* Modal */}
       {open && (
         <div
+          className="job-modal-overlay"
           onClick={e => { if (e.target === e.currentTarget) setOpen(false); }}
           style={{
             position: "fixed", inset: 0, zIndex: 200,

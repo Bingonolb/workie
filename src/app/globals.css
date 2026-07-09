@@ -310,6 +310,59 @@ a { color: inherit; }
   .page-main-md { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
 }
 
+/* ─── Business dashboard pages ─────────────────────────────────── */
+
+.biz-page { padding: 36px 40px; }
+@media (max-width: 768px) {
+  .biz-page { padding: 20px 16px calc(72px + env(safe-area-inset-bottom)); }
+  .biz-2col { grid-template-columns: 1fr !important; }
+  .biz-form-2col { grid-template-columns: 1fr !important; }
+  /* Bigger touch targets for biz action buttons */
+  .biz-action-btn { padding: 10px 14px !important; }
+  /* Jobs page header: stack create btn below */
+  .biz-jobs-header { flex-direction: column !important; align-items: flex-start !important; }
+  .biz-jobs-header > *:last-child { width: 100% !important; }
+  .biz-jobs-header button { width: 100% !important; justify-content: center !important; }
+  /* Submit full width on mobile */
+  .biz-submit-row { justify-content: stretch !important; }
+  .biz-submit-row button { width: 100% !important; }
+}
+
+/* ─── Company page hero ─────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .company-hero-inner {
+    padding: 0 14px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .company-hero-title { font-size: 22px !important; letter-spacing: "-0.02em" !important; }
+  .company-hero-logo { width: 52px !important; height: 52px !important; border-radius: 10px !important; }
+  .company-hero-actions { justify-content: flex-start !important; }
+  .company-hero-bottom { bottom: 16px !important; }
+  /* Review pros/cons → stack */
+  .review-pros-cons { grid-template-columns: 1fr !important; }
+  /* Rating bar label too wide → shrink */
+  .rating-bar-label { width: 100px !important; font-size: 11px !important; }
+}
+
+/* ─── Job offer modal → bottom sheet on mobile ──────────────────── */
+
+@media (max-width: 640px) {
+  .job-modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .job-modal {
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92vh !important;
+    padding: 20px 16px calc(32px + env(safe-area-inset-bottom)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
 /* ─── Mobile typography & spacing fixes ────────────────────────── */
 
 /* Page titles */

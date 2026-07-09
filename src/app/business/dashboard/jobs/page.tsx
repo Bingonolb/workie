@@ -100,7 +100,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
         </div>
 
         {/* Contrat + mode */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div className="biz-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
           <div>
             <label style={lbl}>Type de contrat *</label>
             <PillGroup options={CONTRACT_TYPES} value={contractType} onChange={setContractType} color="#8b5cf6" />
@@ -112,7 +112,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
         </div>
 
         {/* Lieu + salaire */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+        <div className="biz-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
           <div>
             <label style={lbl}>Localisation</label>
             <input name="location" placeholder="Ex : Genève, Zurich, Remote Suisse…" style={inp} />
@@ -155,7 +155,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8 }}>
+        <div className="biz-submit-row" style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8 }}>
           <button type="button" onClick={() => setOpen(false)}
             style={{ padding: "11px 24px", borderRadius: 10, background: "var(--surface)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
             Annuler
@@ -206,16 +206,19 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
 
         <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
           <button onClick={() => setExpanded(e => !e)} title="Détails"
-            style={{ padding: "7px 10px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)" }}>
-            {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            className="biz-action-btn"
+            style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
           <button onClick={onToggle} title={job.is_active ? "Désactiver" : "Activer"}
-            style={{ padding: "7px 10px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)" }}>
-            {job.is_active ? <EyeOff size={15} /> : <Eye size={15} />}
+            className="biz-action-btn"
+            style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {job.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
           <button onClick={onDelete} title="Supprimer"
-            style={{ padding: "7px 10px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", cursor: "pointer", color: "#ef4444" }}>
-            <Trash2 size={15} />
+            className="biz-action-btn"
+            style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", cursor: "pointer", color: "#ef4444", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Trash2 size={16} />
           </button>
         </div>
       </div>
@@ -275,8 +278,8 @@ export default function JobsPage() {
   const inactive = jobs.filter(j => !j.is_active).length;
 
   return (
-    <div style={{ padding: "36px 40px", maxWidth: 900 }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, gap: 16 }}>
+    <div className="biz-page" style={{ maxWidth: 900 }}>
+      <div className="biz-jobs-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, gap: 16 }}>
         <div>
           <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Offres d&apos;emploi</h1>
           <p style={{ fontSize: 14, color: "var(--text-muted)" }}>

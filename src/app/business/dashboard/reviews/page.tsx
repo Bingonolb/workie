@@ -118,7 +118,7 @@ function ReviewCard({ review, onReload }: { review: Review; onReload: () => void
         <div style={{ padding: "0 20px 20px", borderTop: "1px solid var(--border)" }}>
           {review.title && <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginTop: 16, marginBottom: 10 }}>"{review.title}"</p>}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+          <div className="review-pros-cons" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
             {review.pros && (
               <div style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 10, padding: "12px 14px" }}>
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", marginBottom: 6 }}>👍 Points positifs</p>
@@ -185,7 +185,7 @@ export default function ReviewsPage() {
     : reviews;
 
   return (
-    <div style={{ padding: "36px 40px", maxWidth: 860 }}>
+    <div className="biz-page" style={{ maxWidth: 860 }}>
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Avis & Réponses</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Répondez aux avis pour montrer que vous êtes à l'écoute. Vos réponses sont visibles publiquement.</p>

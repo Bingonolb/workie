@@ -40,7 +40,7 @@ export default function ProfilePage() {
   if (!company) return <div style={{ padding: 40, color: "#ef4444" }}>Erreur de chargement</div>;
 
   return (
-    <div style={{ padding: "36px 40px", maxWidth: 760 }}>
+    <div className="biz-page" style={{ maxWidth: 760 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Ma fiche entreprise</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Ces informations sont visibles publiquement sur votre fiche Workie.</p>
@@ -64,7 +64,7 @@ export default function ProfilePage() {
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Identité visuelle</p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div className="biz-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
             <div>
               <label style={lbl}>Logo</label>
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
@@ -133,7 +133,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <div className="biz-submit-row" style={{ display: "flex", justifyContent: "flex-end" }}>
           <button type="submit" disabled={pending} style={{ padding: "13px 32px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, cursor: "pointer", opacity: pending ? 0.6 : 1 }}>
             {pending ? "Enregistrement..." : "Enregistrer les modifications"}
           </button>

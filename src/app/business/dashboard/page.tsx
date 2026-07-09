@@ -56,7 +56,7 @@ export default async function BusinessDashboardPage() {
   const maxDist = Math.max(...(dist?.map((d: { count: number }) => d.count) ?? [1]), 1);
 
   return (
-    <div style={{ padding: "36px 40px", maxWidth: 1100 }}>
+    <div className="biz-page" style={{ maxWidth: 1100 }}>
       {/* Header */}
       <div style={{ marginBottom: 36 }}>
         <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>
@@ -115,7 +115,7 @@ export default async function BusinessDashboardPage() {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
+      <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
         {/* Catégories */}
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Notes par catégorie</p>
@@ -200,7 +200,7 @@ export default async function BusinessDashboardPage() {
       </div>
 
       {/* Bottom row: profile completion + share link */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
 
         {/* Profile completeness */}
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "22px 24px" }}>
