@@ -40,7 +40,7 @@ export function ExploreFilters({
   // Fetch suggestions from API with debounce
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (input.trim().length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    if (input.trim().length < 1) { setSuggestions([]); setShowSuggestions(false); return; }
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(`/api/companies/search?q=${encodeURIComponent(input.trim())}`);
@@ -50,7 +50,7 @@ export function ExploreFilters({
       } catch {
         setSuggestions([]);
       }
-    }, 220);
+    }, 120);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [input]);
 
@@ -147,7 +147,7 @@ export function ExploreFilters({
               {suggestions.map((s, i) => (
                 <button
                   key={s.id}
-                  onMouseDown={() => { setInput(s.name); submitSearch(s.name); }}
+                  onMouseDown={e => { e.preventDefault(); setInput(s.name); submitSearch(s.name); }}
                   style={{
                     width: "100%", textAlign: "left", padding: "10px 14px 10px 38px",
                     background: "transparent", border: "none", color: "var(--text)",

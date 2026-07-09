@@ -3,6 +3,8 @@ import type { Metadata, Viewport } from "next";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
+  viewportFit: "cover",
 };
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
