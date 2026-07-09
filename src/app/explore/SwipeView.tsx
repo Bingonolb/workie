@@ -257,7 +257,7 @@ export function SwipeView({
   return (
     <div className="swipe-container" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
       {/* Card stack */}
-      <div style={{ position: "relative", width: "min(420px, 96vw)", height: "min(500px, 56vh)", touchAction: "none" }}>
+      <div style={{ position: "relative", width: "min(420px, 96vw)", height: "min(500px, 56vh)", touchAction: "pan-y" }}>
         {/* Toast — top of card, smooth slide-in */}
         {toast && (
           <div key={toast.msg} style={{
@@ -294,7 +294,7 @@ export function SwipeView({
                 ? "transform 0.26s cubic-bezier(0.4, 0, 1, 1)"
                 : "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
             cursor: isDragging ? "grabbing" : "grab",
-            touchAction: "none",
+            touchAction: "pan-y",
           }}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
