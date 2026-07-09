@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardNav } from "./DashboardNav";
+import { BottomNav } from "@/components/BottomNav";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
@@ -29,6 +30,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
   if (!company.is_subscribed && !isAdmin) redirect("/business/checkout");
 
   return (
+    <>
     <div className="biz-layout" style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
 
       {/* Sidebar */}
@@ -79,5 +81,8 @@ export default async function BusinessDashboardLayout({ children }: { children: 
       </main>
 
     </div>
+    {/* Bottom tab bar — mobile only */}
+    <BottomNav isBusiness={true} />
+    </>
   );
 }

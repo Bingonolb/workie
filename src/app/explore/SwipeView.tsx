@@ -395,8 +395,8 @@ export function SwipeView({
         </button>
       </div>
 
-      {/* Legend */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+      {/* Legend — hidden on mobile */}
+      <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
           {isAdmin && <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
           <span>✕ passer</span>
@@ -433,7 +433,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
 
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
-      <div style={{ height: "55%", position: "relative", overflow: "hidden" }}>
+      <div className="img-placeholder" style={{ height: "55%", position: "relative", overflow: "hidden" }}>
         {company.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />

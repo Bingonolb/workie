@@ -160,7 +160,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       <Navbar />
 
       {/* Hero cover */}
-      <div className="hero-cover">
+      <div className="hero-cover img-placeholder">
         {/* Image or gradient bg */}
         {company.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element

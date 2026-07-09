@@ -363,6 +363,27 @@ a { color: inherit; }
   }
 }
 
+/* ─── Image loading placeholders ───────────────────────────────── */
+
+/* Shimmer animation for loading state */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.img-placeholder {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+/* Auth pages — card tighter on small phones */
+.auth-card { padding: 36px 32px; }
+@media (max-width: 400px) { .auth-card { padding: 24px 18px; } }
+
+/* Swipe legend — hide on mobile (buttons are self-explanatory) */
+.swipe-legend { display: flex; }
+@media (max-width: 640px) { .swipe-legend { display: none !important; } }
+
 /* ─── Mobile typography & spacing fixes ────────────────────────── */
 
 /* Page titles */

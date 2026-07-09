@@ -65,7 +65,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div className="card-cover" style={{ height: 150, position: "relative", overflow: "hidden" }}>
+        <div className="card-cover img-placeholder" style={{ height: 150, position: "relative", overflow: "hidden" }}>
           {company.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />

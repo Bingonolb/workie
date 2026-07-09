@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </span>
       </Link>
 
-      <div style={{ width: "100%", maxWidth: 400, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "36px 32px" }}>
+      <div className="auth-card" style={{ width: "100%", maxWidth: 400, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Connexion</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
           Pas encore de compte ?{" "}
