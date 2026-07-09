@@ -45,15 +45,15 @@ export default async function ProfilePage() {
       <main className="page-main-md">
 
         {/* ── Header ── */}
-        <div style={{
+        <div className="profile-header" style={{
           background: "var(--surface)",
           border: "1px solid var(--border)",
           borderRadius: 20,
-          padding: "28px 32px",
+          padding: "24px 28px",
           marginBottom: 20,
           display: "flex",
           alignItems: "center",
-          gap: 24,
+          gap: 20,
         }}>
           {/* Avatar */}
           <div style={{

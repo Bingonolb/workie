@@ -65,7 +65,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
+        <div className="card-cover" style={{ height: 150, position: "relative", overflow: "hidden" }}>
           {company.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -105,7 +105,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 
           {/* Company name over cover */}
           <div style={{ position: "absolute", bottom: 10, left: 14, right: 50 }}>
-            <p style={{ fontSize: 15, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
+            <p className="card-company-name" style={{ fontSize: 14, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
               {company.name}
               {company.is_verified && (
                 <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 16, height: 16, flexShrink: 0 }} aria-label="Entreprise vérifiée">

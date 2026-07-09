@@ -264,3 +264,86 @@ a { color: inherit; }
 
 /* Swipe page — prevent scroll hijack */
 .swipe-container { touch-action: pan-y; user-select: none; }
+
+/* ─── Bottom navigation (mobile only) ──────────────────────────── */
+
+.bottom-nav { display: none; }
+
+@media (max-width: 768px) {
+  /* Show bottom nav */
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: calc(58px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--nav-border);
+    z-index: 50;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 4px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    flex: 1;
+    transition: color 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .bottom-nav-item.active { color: var(--brand); }
+
+  /* Hide desktop nav links on mobile */
+  .nav-links-desktop { display: none !important; }
+
+  /* Push page content above bottom nav */
+  .page-main    { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
+  .page-main-sm { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
+  .page-main-md { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
+}
+
+/* ─── Mobile typography & spacing fixes ────────────────────────── */
+
+/* Page titles */
+@media (max-width: 640px) {
+  .page-title { font-size: 22px !important; }
+  .page-subtitle { font-size: 13px !important; }
+}
+
+/* Company card — tighter text on mobile */
+@media (max-width: 480px) {
+  .card-company-name { font-size: 13px !important; }
+  .card-cover { height: 130px !important; }
+}
+
+/* Landing hero buttons — stack + full width */
+@media (max-width: 600px) {
+  .hero-cta-row {
+    flex-direction: column !important;
+    width: 100%;
+  }
+  .hero-cta-row a {
+    width: 100% !important;
+    justify-content: center !important;
+    box-sizing: border-box;
+  }
+  .landing-nav { padding: 14px 16px !important; }
+  .landing-hero { padding: 48px 20px 40px !important; }
+  .landing-section { padding: 48px 20px !important; }
+  .landing-biz-grid { padding: 28px 20px !important; }
+  .landing-footer { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
+  .landing-footer-links { display: none !important; }
+}
+
+/* Profile header — stack on small screens */
+@media (max-width: 500px) {
+  .profile-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+}

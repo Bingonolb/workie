@@ -22,7 +22,7 @@ export default async function Home() {
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
 
       {/* ── Navbar ── */}
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100, backdropFilter: "blur(12px)" }}>
+      <nav className="landing-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100, backdropFilter: "blur(12px)" }}>
         <span style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           workie
         </span>
@@ -38,7 +38,7 @@ export default async function Home() {
       </nav>
 
       {/* ── Hero ── */}
-      <section style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "72px 24px 56px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+      <section className="landing-hero" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 24px 48px", textAlign: "center", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "5%", left: "10%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: "5%", right: "8%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(249,115,22,0.10) 0%, transparent 70%)", pointerEvents: "none" }} />
 
@@ -61,7 +61,7 @@ export default async function Home() {
           Avis d&apos;employés, salaires réels, ambiance de travail — tout ce que les offres d&apos;emploi ne disent jamais.
         </p>
 
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 56 }}>
+        <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 48, width: "100%", maxWidth: 480 }}>
           <Link href="/signup" style={{ display: "flex", alignItems: "center", gap: 10, padding: "15px 32px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.3)" }}>
             Commencer gratuitement <ArrowRight size={18} />
           </Link>
@@ -86,7 +86,7 @@ export default async function Home() {
       </section>
 
       {/* ── Comment ça marche ── */}
-      <section style={{ padding: "72px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+      <section className="landing-section" style={{ padding: "60px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>Comment ça marche</p>
           <h2 style={{ textAlign: "center", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 52 }}>
@@ -110,7 +110,7 @@ export default async function Home() {
       </section>
 
       {/* ── Features ── */}
-      <section style={{ padding: "72px 24px" }}>
+      <section className="landing-section" style={{ padding: "60px 24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <p style={{ textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>Pourquoi Workie</p>
           <h2 style={{ textAlign: "center", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 52 }}>
@@ -136,7 +136,7 @@ export default async function Home() {
       </section>
 
       {/* ── CTA employés ── */}
-      <section style={{ padding: "72px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", textAlign: "center" }}>
+      <section className="landing-section" style={{ padding: "60px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
           <div style={{ fontSize: 48, marginBottom: 24 }}>✦</div>
           <h2 style={{ fontSize: "clamp(26px, 5vw, 42px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 16 }}>
@@ -209,13 +209,12 @@ export default async function Home() {
       </section>
 
       {/* ── Footer ── */}
-      <footer style={{ borderTop: "1px solid var(--border)", padding: "24px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-        <span style={{ fontSize: 13, color: "var(--text-muted)" }}>© 2026 Workie · 🇨🇭 Made in Switzerland</span>
-        <div style={{ display: "flex", gap: 20 }}>
+      <footer className="landing-footer" style={{ borderTop: "1px solid var(--border)", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <span style={{ fontSize: 13, color: "var(--text-muted)" }}>© 2026 Workie · 🇨🇭</span>
+        <div className="landing-footer-links" style={{ display: "flex", gap: 20 }}>
           {[
             { href: "/explore", label: "Explorer" },
             { href: "/ranking", label: "Classement" },
-            { href: "/jobs", label: "Offres d'emploi" },
             { href: "/salaires", label: "Salaires" },
             { href: "/business", label: "Entreprises" },
           ].map(({ href, label }) => (

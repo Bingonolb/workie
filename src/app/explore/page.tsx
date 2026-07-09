@@ -80,7 +80,7 @@ export default async function ExplorePage({
     return (
       <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
         <Navbar />
-        <main style={{ maxWidth: 600, margin: "0 auto", padding: "24px 16px 80px" }}>
+        <main style={{ maxWidth: 600, margin: "0 auto", padding: "24px 16px 100px" }}>
           <div style={{ marginBottom: 24 }}>
             <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 4 }}>
               Explorer
