@@ -86,6 +86,31 @@ export function NewCampaignForm({
   const [durationDays, setDurationDays] = useState(14);
   const totalBudget = dailyBudget * durationDays;
 
+  const today = new Date().toISOString().slice(0, 10);
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(() => {
+    const d = new Date(); d.setDate(d.getDate() + 14);
+    return d.toISOString().slice(0, 10);
+  });
+
+  const handleDurationChange = (days: number) => {
+    setDurationDays(days);
+    const d = new Date(startDate); d.setDate(d.getDate() + days);
+    setEndDate(d.toISOString().slice(0, 10));
+  };
+
+  const handleStartDateChange = (val: string) => {
+    setStartDate(val);
+    const d = new Date(val); d.setDate(d.getDate() + durationDays);
+    setEndDate(d.toISOString().slice(0, 10));
+  };
+
+  const handleEndDateChange = (val: string) => {
+    setEndDate(val);
+    const diff = Math.round((new Date(val).getTime() - new Date(startDate).getTime()) / 86400000);
+    if (diff > 0 && diff <= 90) setDurationDays(diff);
+  };
+
   const [imagePreview, setImagePreview] = useState<string>(prefill?.imageUrl ?? "");
   const [imageUrl, setImageUrl] = useState(prefill?.imageUrl ?? "");
   const [headline, setHeadline] = useState(prefill?.headline ?? "");
@@ -434,7 +459,7 @@ export function NewCampaignForm({
                 <span style={{ fontSize: 26, fontWeight: 900, color: "#f97316", letterSpacing: "-0.02em" }}>{durationLabel}</span>
               </div>
               <input type="range" min={1} max={90} step={1} value={durationDays}
-                onChange={e => setDurationDays(Number(e.target.value))}
+                onChange={e => handleDurationChange(Number(e.target.value))}
                 style={{ width: "100%", accentColor: "#f97316", height: 4 }} />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
                 <span>1 jour</span><span>3 mois</span>
@@ -453,13 +478,15 @@ export function NewCampaignForm({
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Date de début</label>
-              <input name="start_date" type="date" style={inp} defaultValue={new Date().toISOString().slice(0, 10)} />
+              <input name="start_date" type="date" style={inp} value={startDate}
+                onChange={e => handleStartDateChange(e.target.value)} />
             </div>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                Date de fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-muted)", fontSize: 11 }}>· optionnel</span>
+                Date de fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-muted)", fontSize: 11 }}>· calculée automatiquement</span>
               </label>
-              <input name="end_date" type="date" style={inp} />
+              <input name="end_date" type="date" style={inp} value={endDate}
+                onChange={e => handleEndDateChange(e.target.value)} />
             </div>
           </div>
         </div>
