@@ -35,10 +35,12 @@ function CompanySearch({ onSelect }: { onSelect: (c: CompanyResult) => void }) {
   const [results, setResults] = useState<CompanyResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(-1);
   const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (query.length < 2) { setResults([]); setOpen(false); return; }
+    if (query.length < 1) { setResults([]); setOpen(false); setActiveIdx(-1); return; }
     setLoading(true);
     const t = setTimeout(async () => {
       try {
@@ -46,49 +48,66 @@ function CompanySearch({ onSelect }: { onSelect: (c: CompanyResult) => void }) {
         const data = await res.json();
         setResults(data.companies ?? []);
         setOpen(true);
+        setActiveIdx(-1);
       } finally {
         setLoading(false);
       }
-    }, 250);
+    }, 120);
     return () => clearTimeout(t);
   }, [query]);
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  const handleSelect = (c: CompanyResult) => {
+    onSelect(c);
+    setQuery(c.name);
+    setOpen(false);
+    setActiveIdx(-1);
+    inputRef.current?.blur();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!open || results.length === 0) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx(i => Math.min(i + 1, results.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIdx(i => Math.max(i - 1, -1)); }
+    else if (e.key === "Enter" && activeIdx >= 0) { e.preventDefault(); handleSelect(results[activeIdx]); }
+    else if (e.key === "Escape") { setOpen(false); setActiveIdx(-1); }
+  };
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <div style={{ position: "relative" }}>
         <Search size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-        {loading && <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: "var(--text-muted)" }}>...</span>}
+        {loading && <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: "var(--text-muted)" }}>…</span>}
         <input
+          ref={inputRef}
           value={query}
           onChange={e => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder="Rechercher votre entreprise sur Workie..."
-          style={{ ...inp, paddingLeft: 40 }}
+          style={{ ...inp, paddingLeft: 40, fontSize: 16 }}
           autoComplete="off"
         />
       </div>
       {open && results.length > 0 && (
         <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 100, overflow: "hidden" }}>
-          {results.map(c => (
-            <button key={c.id} type="button" onClick={() => { onSelect(c); setQuery(c.name); setOpen(false); }}
-              style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid var(--border)" }}>
+          {results.map((c, i) => (
+            <button key={c.id} type="button"
+              onPointerDown={e => { e.preventDefault(); handleSelect(c); }}
+              onPointerEnter={() => setActiveIdx(i)}
+              onPointerLeave={() => setActiveIdx(-1)}
+              style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: i === activeIdx ? "var(--surface2)" : "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid var(--border)" }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff", flexShrink: 0 }}>
                 {c.name[0]}
               </div>
               <div>
-                <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 1 }}>{c.name}</p>
+                <p style={{ fontSize: 14, fontWeight: i === activeIdx ? 700 : 600, color: "var(--text)", marginBottom: 1 }}>{c.name}</p>
                 <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{c.city} · {c.sector}</p>
               </div>
             </button>
           ))}
         </div>
       )}
-      {open && results.length === 0 && !loading && query.length >= 2 && (
+      {open && results.length === 0 && !loading && query.length >= 1 && (
         <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, padding: "16px", zIndex: 100, textAlign: "center" }}>
           <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 10 }}>Aucun résultat pour « {query} »</p>
           <Link href="/business/register" style={{ fontSize: 13, color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>

@@ -272,13 +272,25 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     const supabase = await createClient();
     const user = await getUser();
 
-    const work_email = String(formData.get("work_email") || "");
+    const work_email = String(formData.get("work_email") || "").trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(work_email)) return { error: "Adresse email invalide." };
     const banned = ["@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", "@icloud.com"];
-    if (banned.some(d => work_email.toLowerCase().endsWith(d))) {
+    if (banned.some(d => work_email.endsWith(d))) {
       return { error: "Utilise ton email professionnel (domaine de l'entreprise)." };
     }
 
     const rawCompanyId = String(formData.get("company_id") || "").trim();
+
+    // Prevent duplicate claims for the same email + company
+    const { data: existing } = await supabase
+      .from("company_claims")
+      .select("id")
+      .eq("work_email", work_email)
+      .eq("company_id", rawCompanyId)
+      .maybeSingle();
+    if (existing) return { error: "Une demande a déjà été soumise pour cet email et cette entreprise. Notre équipe reviendra vers vous sous 48h ouvrées." };
+
     const { error } = await supabase.from("company_claims").insert({
       company_name: String(formData.get("company_name") || ""),
       company_id: rawCompanyId || null,
