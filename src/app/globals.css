@@ -311,7 +311,7 @@ main, .page-main, .page-main-sm, .page-main-md {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--nav-border);
-    z-index: 50;
+    z-index: 10001;
     align-items: center;
     justify-content: space-around;
   }

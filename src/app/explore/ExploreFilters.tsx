@@ -199,9 +199,8 @@ export function ExploreFilters({
                     <div
                       key={s.id}
                       onClick={() => {
-                        setInput(s.name);
-                        submitSearch(s.name);
-                        inputRef.current?.blur();
+                        setShowSuggestions(false);
+                        router.push(`/company/${s.id}`);
                       }}
                       style={{
                         padding: "11px 16px 11px 40px",
