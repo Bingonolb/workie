@@ -3,6 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, X, LayoutGrid, Layers, SlidersHorizontal } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { SECTOR_COLORS } from "@/lib/types";
 
 type Suggestion = { id: string; name: string; city: string; sector: string };
@@ -27,6 +28,7 @@ export function ExploreFilters({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
   const [loading, setLoading] = useState(false);
+  const [dropdownRect, setDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,6 +55,10 @@ export function ExploreFilters({
         setSuggestions(data.companies ?? []);
         setShowSuggestions(true);
         setActiveIdx(-1);
+        if (inputRef.current) {
+          const r = inputRef.current.getBoundingClientRect();
+          setDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width });
+        }
       } catch {
         setSuggestions([]);
       } finally {
@@ -148,7 +154,7 @@ export function ExploreFilters({
               autoComplete="off"
               style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
-                borderRadius: showSuggestions && suggestions.length > 0 ? "12px 12px 0 0" : 12,
+                borderRadius: 12,
                 padding: "0 36px 0 38px", height: 42, fontSize: 16, color: "var(--text)",
                 outline: "none", boxSizing: "border-box",
               }}
@@ -163,53 +169,58 @@ export function ExploreFilters({
             )}
           </div>
 
-          {/* Suggestions dropdown */}
-          {showSuggestions && (loading || suggestions.length > 0) && (
-            <div
-              onPointerDown={e => { e.preventDefault(); e.stopPropagation(); setShowSuggestions(false); }}
-              style={{ position: "fixed", inset: 0, zIndex: 598, background: "transparent" }}
-            />
-          )}
-          {showSuggestions && (loading || suggestions.length > 0) && (
-            <div style={{
-                position: "absolute", top: "100%", left: 0, right: 0,
+          {/* Suggestions dropdown — rendered in a portal so it sits above everything on mobile */}
+          {showSuggestions && (loading || suggestions.length > 0) && dropdownRect && createPortal(
+            <>
+              {/* Backdrop: captures any touch outside the dropdown */}
+              <div
+                onPointerDown={e => { e.preventDefault(); e.stopPropagation(); setShowSuggestions(false); }}
+                style={{ position: "fixed", inset: 0, zIndex: 9998 }}
+              />
+              {/* Dropdown */}
+              <div style={{
+                position: "fixed",
+                top: dropdownRect.top,
+                left: dropdownRect.left,
+                width: dropdownRect.width,
                 background: "var(--surface)", border: "1px solid var(--border2)",
-                borderTop: "none", borderRadius: "0 0 12px 12px",
-                zIndex: 600, overflow: "hidden",
+                borderRadius: 12, zIndex: 9999, overflow: "hidden",
                 boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
               }}>
-              {loading && suggestions.length === 0 ? (
-                <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
-              ) : suggestions.map((s, i) => {
-                const isActive = i === activeIdx;
-                return (
-                  <div
-                    key={s.id}
-                    onPointerDown={e => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setInput(s.name);
-                      submitSearch(s.name);
-                      inputRef.current?.blur();
-                    }}
-                    style={{
-                      padding: "11px 16px 11px 40px",
-                      background: isActive ? "var(--surface2)" : "transparent",
-                      cursor: "pointer",
-                      borderTop: i > 0 ? "1px solid var(--border)" : "none",
-                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
-                      transition: "background 0.1s",
-                      userSelect: "none",
-                    }}
-                    onPointerEnter={() => setActiveIdx(i)}
-                    onPointerLeave={() => setActiveIdx(-1)}
-                  >
-                    <span style={{ fontSize: 14, color: "var(--text)", fontWeight: isActive ? 600 : 400, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
-                    <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{s.city}</span>
-                  </div>
-                );
-              })}
-            </div>
+                {loading && suggestions.length === 0 ? (
+                  <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
+                ) : suggestions.map((s, i) => {
+                  const isActive = i === activeIdx;
+                  return (
+                    <div
+                      key={s.id}
+                      onPointerDown={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setInput(s.name);
+                        submitSearch(s.name);
+                        inputRef.current?.blur();
+                      }}
+                      style={{
+                        padding: "11px 16px 11px 40px",
+                        background: isActive ? "var(--surface2)" : "transparent",
+                        cursor: "pointer",
+                        borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+                        transition: "background 0.1s",
+                        userSelect: "none",
+                      }}
+                      onPointerEnter={() => setActiveIdx(i)}
+                      onPointerLeave={() => setActiveIdx(-1)}
+                    >
+                      <span style={{ fontSize: 14, color: "var(--text)", fontWeight: isActive ? 600 : 400, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+                      <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{s.city}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>,
+            document.body
           )}
         </div>
 
