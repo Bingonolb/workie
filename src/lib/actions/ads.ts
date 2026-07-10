@@ -88,6 +88,7 @@ export async function getActiveAds(opts?: {
   format?: AdFormat;
   canton?: string;
   sector?: string;
+  limit?: number;
 }): Promise<AdCampaign[]> {
   try {
     const supabase = await createClient();
@@ -96,16 +97,60 @@ export async function getActiveAds(opts?: {
       .from("ad_campaigns")
       .select("*")
       .eq("status", "active")
-      .lte("start_date", today);
+      .lte("start_date", today)
+      .order("spent_chf", { ascending: true }); // prioritise less-spent campaigns
     if (opts?.format) q = q.eq("format", opts.format);
-    const { data } = await q.limit(10);
-    return ((data ?? []) as AdCampaign[]).filter(ad => {
+    const { data } = await q.limit(50); // fetch pool, then filter + shuffle
+
+    const pool = ((data ?? []) as AdCampaign[]).filter(ad => {
       if (ad.end_date && ad.end_date < today) return false;
       if (ad.spent_chf >= ad.total_budget_chf) return false;
       if (opts?.canton && ad.target_cantons.length > 0 && !ad.target_cantons.includes(opts.canton)) return false;
       if (opts?.sector && ad.target_sectors.length > 0 && !ad.target_sectors.includes(opts.sector)) return false;
       return true;
     });
+
+    // Fisher-Yates shuffle for rotation
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    return pool.slice(0, opts?.limit ?? 10);
+  } catch { return []; }
+}
+
+export async function getCampaignDailyStats(campaignId: string): Promise<{ day: string; impressions: number; clicks: number }[]> {
+  try {
+    const { supabase } = await requireBusiness();
+    const [impRes, clkRes] = await Promise.all([
+      supabase.from("ad_impressions")
+        .select("viewed_at")
+        .eq("campaign_id", campaignId)
+        .gte("viewed_at", new Date(Date.now() - 30 * 86400000).toISOString()),
+      supabase.from("ad_clicks")
+        .select("clicked_at")
+        .eq("campaign_id", campaignId)
+        .gte("clicked_at", new Date(Date.now() - 30 * 86400000).toISOString()),
+    ]);
+
+    const impByDay: Record<string, number> = {};
+    for (const row of impRes.data ?? []) {
+      const d = row.viewed_at.slice(0, 10);
+      impByDay[d] = (impByDay[d] ?? 0) + 1;
+    }
+    const clkByDay: Record<string, number> = {};
+    for (const row of clkRes.data ?? []) {
+      const d = row.clicked_at.slice(0, 10);
+      clkByDay[d] = (clkByDay[d] ?? 0) + 1;
+    }
+
+    const days: { day: string; impressions: number; clicks: number }[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      days.push({ day: d, impressions: impByDay[d] ?? 0, clicks: clkByDay[d] ?? 0 });
+    }
+    return days;
   } catch { return []; }
 }
 

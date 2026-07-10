@@ -5,8 +5,28 @@ import { ExternalLink } from "lucide-react";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { AdCampaign } from "@/lib/actions/ads";
 
+const FREQ_CAP = 3; // max impressions per campaign per session
+
+function hasHitFreqCap(campaignId: string): boolean {
+  try {
+    const key = `ad_freq_${campaignId}`;
+    const count = parseInt(sessionStorage.getItem(key) ?? "0", 10);
+    return count >= FREQ_CAP;
+  } catch { return false; }
+}
+
+function incrementFreqCap(campaignId: string) {
+  try {
+    const key = `ad_freq_${campaignId}`;
+    const count = parseInt(sessionStorage.getItem(key) ?? "0", 10);
+    sessionStorage.setItem(key, String(count + 1));
+  } catch { /* */ }
+}
+
 export function AdSquareCard({ ad }: { ad: AdCampaign }) {
   useEffect(() => {
+    if (hasHitFreqCap(ad.id)) return;
+    incrementFreqCap(ad.id);
     trackAdImpression(ad.id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ad.id]);
