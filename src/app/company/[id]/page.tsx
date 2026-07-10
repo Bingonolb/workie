@@ -12,6 +12,7 @@ import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle, 
 import { ParallaxCover } from "@/components/ParallaxCover";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
+import { ViewTracker } from "@/components/ViewTracker";
 
 const LinkedinIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
@@ -156,6 +157,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="page-root">
+      <ViewTracker companyId={company.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
 

@@ -56,15 +56,48 @@ export async function getBusinessReviews() {
   }
 }
 
+// ── Visitor profile helpers ────────────────────────────────────────────────────
+
+function detectSeniority(title: string): string {
+  const t = title.toLowerCase();
+  if (/\b(ceo|cto|cfo|coo|cpo|chro|pdg|dg|président|vp|vice.pr[eé]sident|directeur.g[eé]n[eé]ral|managing.director)\b/.test(t)) return "C-Level / VP";
+  if (/\b(directeur|director|head.of|chief|responsable|chef.de|associate.director)\b/.test(t)) return "Directeur";
+  if (/\b(manager|lead|principal|staff|senior|confirmé|exp[eé]riment[eé]|expert|architecte|tech.lead)\b/.test(t)) return "Senior / Lead";
+  if (/\b(junior|stagiaire|apprenti|alternant|d[eé]butant|intern|assistant|trainee)\b/.test(t)) return "Junior / Stagiaire";
+  return "Intermédiaire";
+}
+
+function detectFunction(title: string): string {
+  const t = title.toLowerCase();
+  if (/\b(dev|développeur|software|engineer|ingénieur|data|it|tech|architecte|devops|sre|cloud|qa|infra|backend|frontend|fullstack)\b/.test(t)) return "Tech / IT";
+  if (/\b(finance|comptable|contr[oô]leur|audit|trésor|risk|crédit|financi)\b/.test(t)) return "Finance";
+  if (/\b(rh|hr|people|talent|recrutement|recruteur|hrbp|formation|paie|ressources humaines)\b/.test(t)) return "RH / People";
+  if (/\b(marketing|communication|digital|brand|seo|content|social media|pr|publicité)\b/.test(t)) return "Marketing / Comm";
+  if (/\b(commercial|sales|vente|business dev|account|customer|client|key account)\b/.test(t)) return "Commercial / Sales";
+  if (/\b(op[eé]ration|supply|logistique|production|qualité|lean|project manager|chef de projet|programme)\b/.test(t)) return "Opérations / PM";
+  if (/\b(juridique|legal|compliance|droit|avocat|notaire)\b/.test(t)) return "Juridique";
+  if (/\b(consultant|conseil|consulting|strategy|stratégie|advisory)\b/.test(t)) return "Conseil / Strat.";
+  return "Autre";
+}
+
 export async function getBusinessAnalytics() {
   try {
     const { supabase, company } = await requireBusiness();
 
-    const { data: reviews } = await supabase
-      .from("reviews")
-      .select("rating_overall, rating_culture, rating_management, rating_worklife, rating_career, would_recommend, salary_chf, employment_type, work_mode, pros, cons, created_at")
-      .eq("company_id", company.id)
-      .order("created_at", { ascending: true });
+    const [reviewsRes, viewsRes] = await Promise.all([
+      supabase
+        .from("reviews")
+        .select("rating_overall, rating_culture, rating_management, rating_worklife, rating_career, would_recommend, salary_chf, employment_type, work_mode, pros, cons, created_at, job_title, is_current")
+        .eq("company_id", company.id)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("company_views")
+        .select("viewed_at")
+        .eq("company_id", company.id)
+        .gte("viewed_at", new Date(Date.now() - 90 * 86400000).toISOString()),
+    ]);
+
+    const { data: reviews } = reviewsRes;
 
     const r = reviews ?? [];
     const count = r.length;
@@ -108,6 +141,46 @@ export async function getBusinessAnalytics() {
     const empTypes: Record<string, number> = {};
     r.forEach(x => { if (x.employment_type) empTypes[x.employment_type] = (empTypes[x.employment_type] || 0) + 1; });
 
+    // ── Reviewer profiles (from job_title) ──────────────────────────────────
+    const seniority: Record<string, number> = {};
+    const functions: Record<string, number> = {};
+    const currentVsFormer = { current: 0, former: 0 };
+    r.forEach(x => {
+      if (x.job_title) {
+        const s = detectSeniority(x.job_title);
+        seniority[s] = (seniority[s] || 0) + 1;
+        const f = detectFunction(x.job_title);
+        functions[f] = (functions[f] || 0) + 1;
+      }
+      if (x.is_current) currentVsFormer.current++;
+      else currentVsFormer.former++;
+    });
+
+    // ── Page view stats ──────────────────────────────────────────────────────
+    const views = viewsRes.data ?? [];
+    const now = Date.now();
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    const weekAgo = now - 7 * 86400000;
+    const monthAgo = now - 30 * 86400000;
+
+    const viewsToday = views.filter(v => new Date(v.viewed_at) >= todayStart).length;
+    const viewsWeek  = views.filter(v => new Date(v.viewed_at).getTime() >= weekAgo).length;
+    const viewsMonth = views.filter(v => new Date(v.viewed_at).getTime() >= monthAgo).length;
+    const viewsTotal = views.length;
+
+    // Daily view trend — last 30 days
+    const dailyViewMap: Record<string, number> = {};
+    views.filter(v => new Date(v.viewed_at).getTime() >= monthAgo).forEach(v => {
+      const day = v.viewed_at.slice(0, 10);
+      dailyViewMap[day] = (dailyViewMap[day] || 0) + 1;
+    });
+    // Fill in all 30 days (even zeros)
+    const viewTrend: { day: string; count: number }[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now - i * 86400000).toISOString().slice(0, 10);
+      viewTrend.push({ day: d, count: dailyViewMap[d] ?? 0 });
+    }
+
     return {
       count,
       avgOverall: avg("rating_overall"),
@@ -121,6 +194,14 @@ export async function getBusinessAnalytics() {
       dist,
       workModes,
       empTypes,
+      seniority,
+      functions,
+      currentVsFormer,
+      viewsToday,
+      viewsWeek,
+      viewsMonth,
+      viewsTotal,
+      viewTrend,
       company,
     };
   } catch (e) {
@@ -265,6 +346,14 @@ export async function toggleJobOffer(id: string, is_active: boolean): Promise<{ 
   } catch (e) {
     return { error: (e as Error).message };
   }
+}
+
+export async function trackCompanyView(companyId: string): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("company_views").insert({ company_id: companyId, user_id: user?.id ?? null });
+  } catch { /* silent */ }
 }
 
 export async function deleteJobOffer(id: string): Promise<{ error?: string }> {
