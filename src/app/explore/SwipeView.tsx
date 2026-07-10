@@ -9,6 +9,8 @@ import { fetchSwipePage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
+import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
+import type { AdCampaign } from "@/lib/actions/ads";
 
 const SWIPE_THRESHOLD = 90;
 const PREFETCH_AHEAD = 25;
@@ -29,6 +31,7 @@ export function SwipeView({
   isLoggedIn,
   isAdmin = false,
   filters,
+  swipeAds = [],
 }: {
   companies: Company[];
   initialFavIds: string[];
@@ -36,6 +39,7 @@ export function SwipeView({
   isLoggedIn: boolean;
   isAdmin?: boolean;
   filters?: { sector?: string; canton?: string; search?: string };
+  swipeAds?: AdCampaign[];
 }) {
   const router = useRouter();
 
@@ -48,6 +52,8 @@ export function SwipeView({
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [exhausted, setExhausted] = useState(false);
+  const [adOverlay, setAdOverlay] = useState<AdCampaign | null>(null);
+  const adShownAt = useRef<Set<number>>(new Set());
   // Track all companies seen/acted on this session to avoid re-showing them in new batches
   const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
 
@@ -64,6 +70,18 @@ export function SwipeView({
   const swipeCountRef = useRef(0);
   const fetchingRef = useRef(false);
   const nextOffsetRef = useRef(initialCompanies.length);
+
+  // Show swipe ad overlay every 10 swipes
+  useEffect(() => {
+    if (swipeAds.length === 0 || index === 0) return;
+    if (index % 10 === 0 && !adShownAt.current.has(index)) {
+      adShownAt.current.add(index);
+      const ad = swipeAds[Math.floor(index / 10 - 1) % swipeAds.length];
+      setAdOverlay(ad);
+      trackAdImpression(ad.id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
 
   // Prefetch next batch silently, well before the user reaches the end
   useEffect(() => {
@@ -411,6 +429,74 @@ export function SwipeView({
       </div>
 
       {showGuestModal && !isLoggedIn && <GuestModal reviewCount={companies.length} open />}
+
+      {/* Swipe ad overlay */}
+      {adOverlay && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          padding: "24px 20px",
+        }}>
+          <div style={{
+            width: "min(400px, 94vw)", background: "var(--surface)",
+            borderRadius: 24, overflow: "hidden",
+            boxShadow: "0 32px 80px rgba(0,0,0,0.6)",
+          }}>
+            {/* Sponsored label */}
+            <div style={{ background: "var(--surface2)", padding: "8px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                Sponsorisé
+              </span>
+              <button onClick={() => setAdOverlay(null)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: 18, padding: "0 4px" }}>
+                ✕
+              </button>
+            </div>
+            {/* Image */}
+            <div style={{ position: "relative", paddingTop: "56%", overflow: "hidden" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={adOverlay.image_url} alt={adOverlay.headline}
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+            {/* Content */}
+            <div style={{ padding: "20px 20px 24px" }}>
+              <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", lineHeight: 1.2, marginBottom: 8 }}>
+                {adOverlay.headline}
+              </p>
+              {adOverlay.body_text && (
+                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 16 }}>
+                  {adOverlay.body_text}
+                </p>
+              )}
+              <div style={{ display: "flex", gap: 10 }}>
+                <a
+                  href={adOverlay.cta_url}
+                  target="_blank"
+                  rel="noopener noreferrer sponsored"
+                  onClick={() => { trackAdClick(adOverlay.id); setAdOverlay(null); }}
+                  style={{
+                    flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+                    gap: 6, padding: "13px", borderRadius: 12,
+                    background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                    color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none",
+                  }}
+                >
+                  {adOverlay.cta_label}
+                </a>
+                <button onClick={() => setAdOverlay(null)}
+                  style={{
+                    padding: "13px 16px", borderRadius: 12, border: "1px solid var(--border2)",
+                    background: "transparent", color: "var(--text-muted)", fontSize: 13,
+                    fontWeight: 600, cursor: "pointer",
+                  }}>
+                  Ignorer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes toastSlide {

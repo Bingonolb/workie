@@ -188,6 +188,7 @@ export default async function BusinessDashboardPage() {
           { href: "/business/dashboard/reviews", label: "Répondre aux avis", desc: "Gérez votre réputation", color: "#8b5cf6" },
           { href: "/business/dashboard/jobs", label: "Publier une offre", desc: "Attirez des candidats", color: "#f97316" },
           { href: "/business/dashboard/profile", label: "Compléter la fiche", desc: "Logo, photos, réseaux", color: "#10b981" },
+          { href: "/business/dashboard/ads", label: "Publicités", desc: "Sponsorisez votre marque", color: "#ec4899" },
         ].map(({ href, label, desc, color }) => (
           <Link key={href} href={href} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 20px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div>

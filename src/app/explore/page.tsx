@@ -16,6 +16,8 @@ import { getUser } from "@/lib/supabase/server";
 import { ExploreFilters } from "./ExploreFilters";
 import { SwipeView } from "./SwipeView";
 import { Pagination } from "./Pagination";
+import { AdSquareCard } from "@/components/AdSquareCard";
+import { getActiveAds } from "@/lib/actions/ads";
 import type { Company } from "@/lib/types";
 
 const SECTORS = [
@@ -73,12 +75,14 @@ export default async function ExplorePage({
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
-  const [user, favIds, flameIds, isAdmin, bizCompanyId] = await Promise.all([
+  const [user, favIds, flameIds, isAdmin, bizCompanyId, squareAds, swipeAds] = await Promise.all([
     getUser(),
     getUserFavoriteIds(),
     getUserFlameIds(),
     (await import("@/lib/supabase/server")).getIsAdmin(),
     (await import("@/lib/supabase/server")).getBusinessCompanyId(),
+    getActiveAds({ format: "square", canton: params.canton, sector: params.sector }),
+    getActiveAds({ format: "swipe" }),
   ]);
   const isBusiness = !!bizCompanyId;
 
@@ -109,6 +113,7 @@ export default async function ExplorePage({
             isLoggedIn={!!user}
             isAdmin={isAdmin}
             filters={filters}
+          swipeAds={swipeAds}
           />
         </main>
       </div>
@@ -156,8 +161,11 @@ export default async function ExplorePage({
         ) : (
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-              {(companies as Company[]).map(c => (
-                <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />
+              {(companies as Company[]).map((c, i) => (
+                <>
+                  <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />
+                  {i === 7 && squareAds[0] && <AdSquareCard key={`ad-${squareAds[0].id}`} ad={squareAds[0]} />}
+                </>
               ))}
             </div>
             {pageCount > 1 && !!user && (
