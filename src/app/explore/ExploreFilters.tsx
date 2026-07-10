@@ -169,12 +169,16 @@ export function ExploreFilters({
             )}
           </div>
 
-          {/* Suggestions dropdown — rendered in a portal so it sits above everything on mobile */}
+          {/* Suggestions dropdown — portal into body, onClick not onPointerDown for selection */}
           {showSuggestions && (loading || suggestions.length > 0) && dropdownRect && createPortal(
             <>
-              {/* Backdrop: captures any touch outside the dropdown */}
+              {/*
+                Backdrop: pointerDown only prevents input blur (keeps dropdown alive for click).
+                onClick closes the dropdown AFTER the full touch sequence — never before.
+              */}
               <div
-                onPointerDown={e => { e.preventDefault(); e.stopPropagation(); setShowSuggestions(false); }}
+                onPointerDown={e => e.preventDefault()}
+                onClick={e => { e.stopPropagation(); setShowSuggestions(false); }}
                 style={{ position: "fixed", inset: 0, zIndex: 9998 }}
               />
               {/* Dropdown */}
@@ -194,9 +198,8 @@ export function ExploreFilters({
                   return (
                     <div
                       key={s.id}
-                      onPointerDown={e => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                      onPointerDown={e => e.preventDefault()}
+                      onClick={() => {
                         setInput(s.name);
                         submitSearch(s.name);
                         inputRef.current?.blur();
@@ -209,6 +212,7 @@ export function ExploreFilters({
                         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
                         transition: "background 0.1s",
                         userSelect: "none",
+                        touchAction: "manipulation",
                       }}
                       onPointerEnter={() => setActiveIdx(i)}
                       onPointerLeave={() => setActiveIdx(-1)}
