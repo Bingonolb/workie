@@ -166,7 +166,7 @@ export function ExploreFilters({
           {/* Suggestions dropdown */}
           {showSuggestions && (loading || suggestions.length > 0) && (
             <div
-              onPointerDown={() => setShowSuggestions(false)}
+              onPointerDown={e => { e.preventDefault(); e.stopPropagation(); setShowSuggestions(false); }}
               style={{ position: "fixed", inset: 0, zIndex: 598, background: "transparent" }}
             />
           )}
