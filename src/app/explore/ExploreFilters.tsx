@@ -25,8 +25,11 @@ export function ExploreFilters({
   const [input, setInput] = useState(current.q ?? "");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Filter panel state
   const [showPanel, setShowPanel] = useState(false);
@@ -40,17 +43,22 @@ export function ExploreFilters({
   // Fetch suggestions from API with debounce
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (input.trim().length < 1) { setSuggestions([]); setShowSuggestions(false); return; }
+    const q = input.trim();
+    if (q.length < 1) { setSuggestions([]); setShowSuggestions(false); setLoading(false); return; }
+    setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(input.trim())}`);
+        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(q)}`);
         const data = await res.json();
         setSuggestions(data.companies ?? []);
         setShowSuggestions(true);
+        setActiveIdx(-1);
       } catch {
         setSuggestions([]);
+      } finally {
+        setLoading(false);
       }
-    }, 120);
+    }, 80);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [input]);
 
@@ -110,18 +118,38 @@ export function ExploreFilters({
           <div style={{ position: "relative" }}>
             <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none", zIndex: 1 }} />
             <input
+              ref={inputRef}
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={e => { setInput(e.target.value); setActiveIdx(-1); }}
               onKeyDown={e => {
-                if (e.key === "Enter") submitSearch(input);
-                if (e.key === "Escape") { setShowSuggestions(false); }
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setActiveIdx(i => Math.min(i + 1, suggestions.length - 1));
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setActiveIdx(i => Math.max(i - 1, -1));
+                } else if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (activeIdx >= 0 && suggestions[activeIdx]) {
+                    const s = suggestions[activeIdx];
+                    setInput(s.name);
+                    submitSearch(s.name);
+                  } else {
+                    submitSearch(input);
+                  }
+                } else if (e.key === "Escape") {
+                  setShowSuggestions(false);
+                  setActiveIdx(-1);
+                }
               }}
               onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+              onBlur={() => { setTimeout(() => setShowSuggestions(false), 150); }}
               placeholder="Rechercher une entreprise..."
+              autoComplete="off"
               style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
                 borderRadius: showSuggestions && suggestions.length > 0 ? "12px 12px 0 0" : 12,
-                padding: "0 36px 0 38px", height: 42, fontSize: 14, color: "var(--text)",
+                padding: "0 36px 0 38px", height: 42, fontSize: 16, color: "var(--text)",
                 outline: "none", boxSizing: "border-box",
               }}
             />
@@ -136,32 +164,44 @@ export function ExploreFilters({
           </div>
 
           {/* Suggestions dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
+          {showSuggestions && (loading || suggestions.length > 0) && (
             <div style={{
               position: "absolute", top: "100%", left: 0, right: 0,
               background: "var(--surface)", border: "1px solid var(--border2)",
               borderTop: "none", borderRadius: "0 0 12px 12px",
               zIndex: 600, overflow: "hidden",
-              boxShadow: "0 12px 32px rgba(0,0,0,0.4)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
             }}>
-              {suggestions.map((s, i) => (
-                <button
-                  key={s.id}
-                  onMouseDown={e => { e.preventDefault(); setInput(s.name); submitSearch(s.name); }}
-                  style={{
-                    width: "100%", textAlign: "left", padding: "10px 14px 10px 38px",
-                    background: "transparent", border: "none", color: "var(--text)",
-                    fontSize: 13, cursor: "pointer",
-                    borderTop: i > 0 ? "1px solid var(--border)" : "none",
-                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "var(--surface2)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                >
-                  <span>{s.name}</span>
-                  <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{s.city}</span>
-                </button>
-              ))}
+              {loading && suggestions.length === 0 ? (
+                <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
+              ) : suggestions.map((s, i) => {
+                const isActive = i === activeIdx;
+                return (
+                  <div
+                    key={s.id}
+                    onPointerDown={e => {
+                      e.preventDefault();
+                      setInput(s.name);
+                      submitSearch(s.name);
+                      inputRef.current?.blur();
+                    }}
+                    style={{
+                      padding: "11px 16px 11px 40px",
+                      background: isActive ? "var(--surface2)" : "transparent",
+                      cursor: "pointer",
+                      borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+                      transition: "background 0.1s",
+                      userSelect: "none",
+                    }}
+                    onPointerEnter={() => setActiveIdx(i)}
+                    onPointerLeave={() => setActiveIdx(-1)}
+                  >
+                    <span style={{ fontSize: 14, color: "var(--text)", fontWeight: isActive ? 600 : 400, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{s.city}</span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
