@@ -196,20 +196,19 @@ export function ExploreFilters({
                 ) : suggestions.map((s, i) => {
                   const isActive = i === activeIdx;
                   return (
-                    <div
+                    <button
                       key={s.id}
+                      type="button"
                       onClick={() => {
                         setShowSuggestions(false);
                         router.push(`/company/${s.id}`);
                       }}
                       style={{
-                        padding: "11px 16px 11px 40px",
+                        width: "100%", padding: "11px 16px 11px 40px",
                         background: isActive ? "var(--surface2)" : "transparent",
-                        cursor: "pointer",
-                        borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                        border: "none", borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                        cursor: "pointer", textAlign: "left",
                         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
-                        transition: "background 0.1s",
-                        userSelect: "none",
                         touchAction: "manipulation",
                       }}
                       onPointerEnter={() => setActiveIdx(i)}
@@ -217,7 +216,7 @@ export function ExploreFilters({
                     >
                       <span style={{ fontSize: 14, color: "var(--text)", fontWeight: isActive ? 600 : 400, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
                       <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{s.city}</span>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
