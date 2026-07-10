@@ -161,11 +161,9 @@ export default async function ExplorePage({
         ) : (
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-              {(companies as Company[]).map((c, i) => (
-                <>
-                  <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />
-                  {i === 7 && squareAds[0] && <AdSquareCard key={`ad-${squareAds[0].id}`} ad={squareAds[0]} />}
-                </>
+              {squareAds[0] && <AdSquareCard key={`ad-${squareAds[0].id}`} ad={squareAds[0]} />}
+              {(companies as Company[]).map((c) => (
+                <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />
               ))}
             </div>
             {pageCount > 1 && !!user && (
