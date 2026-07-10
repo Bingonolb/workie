@@ -155,7 +155,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   };
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+    <div className="page-root">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
 

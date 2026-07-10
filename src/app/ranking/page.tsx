@@ -28,7 +28,7 @@ export default async function RankingPage() {
   const totalReviews = reviewCount ?? 0;
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+    <div className="page-root">
       <Navbar />
       <main className="page-main-md">
 

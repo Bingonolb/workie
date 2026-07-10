@@ -120,7 +120,7 @@ export default async function SalairesPage() {
   const maxJobAvg = Math.max(...jobStats.map(j => j.avg), 1);
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+    <div className="page-root">
       <Navbar />
 
       {/* Hero */}

@@ -78,7 +78,7 @@ export default async function ExplorePage({
   if (isSwipe) {
     const companies = await getAllCompaniesForSwipe(filters);
     return (
-      <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+      <div className="page-root">
         <Navbar />
         <main style={{ maxWidth: 600, margin: "0 auto", padding: "24px 16px 100px" }}>
           <div style={{ marginBottom: 24 }}>
@@ -108,7 +108,7 @@ export default async function ExplorePage({
   const { companies, total, pageCount } = result;
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+    <div className="page-root">
       <Navbar />
       <main className="page-main">
         <div style={{ marginBottom: 28 }}>

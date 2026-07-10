@@ -21,7 +21,7 @@ export default async function FavoritesPage() {
   const favIds = companies.map(c => c.id);
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+    <div className="page-root">
       <Navbar />
       <main className="page-main-md">
         <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>

@@ -76,10 +76,13 @@ a { color: inherit; }
 /* ─── Page wrappers ─────────────────────────────────────────────── */
 
 /* Prevent any page from overflowing horizontally */
-main, .page-main, .page-main-sm, .page-main-md {
+main, .page-main, .page-main-sm, .page-main-md, .page-root {
   overflow-x: hidden;
   width: 100%;
+  max-width: 100vw;
 }
+/* Also catch any deeply nested div wrapping pages */
+.page-root { min-height: 100dvh; background: var(--bg); }
 
 .page-main    { max-width: 1200px; margin: 0 auto; padding: 36px 32px 80px; }
 .page-main-sm { max-width: 900px;  margin: 0 auto; padding: 36px 32px 80px; }

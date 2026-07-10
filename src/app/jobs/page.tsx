@@ -66,7 +66,7 @@ export default async function JobsPage() {
   const contracts = [...new Set(allJobs.map(j => j.contract_type).filter(Boolean))] as string[];
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+    <div className="page-root">
       <Navbar />
 
       {/* Hero */}

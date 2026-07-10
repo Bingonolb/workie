@@ -32,7 +32,7 @@ export default async function ProfilePage() {
     : null;
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+    <div className="page-root">
       <style>{`
         @media (max-width: 700px) {
           .profile-kpi { grid-template-columns: 1fr !important; }
