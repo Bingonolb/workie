@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, Clock, CheckCircle, XCircle, PauseCircle } from "lucide-react";
-import { getBusinessCampaigns, getCampaignDailyStats } from "@/lib/actions/ads";
+import { getBusinessCampaigns, getCampaignDailyStats, getCampaignCantonStats } from "@/lib/actions/ads";
 import { Navbar } from "@/components/Navbar";
 import { AdStatsChart } from "../AdStatsChart";
 
@@ -29,7 +29,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   const campaign = campaigns.find(c => c.id === id);
   if (!campaign) notFound();
 
-  const stats = await getCampaignDailyStats(id);
+  const [stats, cantonStats] = await Promise.all([
+    getCampaignDailyStats(id),
+    getCampaignCantonStats(id),
+  ]);
 
   const st = STATUS_CONFIG[campaign.status] ?? STATUS_CONFIG.pending;
   const budgetPct = campaign.total_budget_chf > 0
@@ -174,8 +177,67 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         {/* 30-day chart */}
         {stats.length > 0 && (
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 20px 4px", marginBottom: 20 }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 4, paddingLeft: 0 }}>Évolution sur 30 jours</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>Évolution sur 30 jours</p>
             <AdStatsChart stats={stats} />
+          </div>
+        )}
+
+        {/* Canton breakdown */}
+        {cantonStats.length > 0 && (
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "22px 24px", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Répartition géographique</p>
+              <span style={{ fontSize: 11, color: "var(--text-muted)", background: "rgba(255,255,255,0.05)", padding: "3px 10px", borderRadius: 50 }}>
+                Détecté par IP · {cantonStats.reduce((s, c) => s + c.impressions, 0).toLocaleString("fr-CH")} vues localisées
+              </span>
+            </div>
+
+            {(() => {
+              const maxImp = cantonStats[0]?.impressions ?? 1;
+              const targeted = campaign.target_cantons;
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {cantonStats.map(({ canton, impressions, clicks }) => {
+                    const pct = Math.round((impressions / maxImp) * 100);
+                    const ctrVal = impressions > 0 ? ((clicks / impressions) * 100).toFixed(1) : "0.0";
+                    const isTargeted = targeted.length === 0 || targeted.includes(canton);
+                    return (
+                      <div key={canton}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 5 }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: isTargeted ? "var(--text)" : "var(--text-muted)", width: 28, flexShrink: 0 }}>{canton}</span>
+                          <div style={{ flex: 1, height: 7, borderRadius: 50, background: "var(--surface2)", overflow: "hidden" }}>
+                            <div style={{
+                              height: "100%", width: `${pct}%`, borderRadius: 50,
+                              background: isTargeted ? "linear-gradient(90deg, #8b5cf6, #f97316)" : "rgba(255,255,255,0.12)",
+                              transition: "width 0.5s",
+                            }} />
+                          </div>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", width: 40, textAlign: "right", flexShrink: 0 }}>{impressions.toLocaleString("fr-CH")}</span>
+                          <span style={{ fontSize: 11, color: "#10b981", width: 42, textAlign: "right", flexShrink: 0 }}>{ctrVal}%</span>
+                          {!isTargeted && targeted.length > 0 && (
+                            <span style={{ fontSize: 9, fontWeight: 700, color: "#f59e0b", background: "rgba(245,158,11,0.1)", padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>hors cible</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div style={{ display: "flex", gap: 16, marginTop: 6, paddingTop: 12, borderTop: "1px solid var(--border)", fontSize: 11, color: "var(--text-muted)" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <span style={{ width: 12, height: 7, borderRadius: 50, background: "linear-gradient(90deg, #8b5cf6, #f97316)", display: "inline-block" }} /> Dans la cible
+                    </span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <span style={{ width: 12, height: 7, borderRadius: 50, background: "rgba(255,255,255,0.12)", display: "inline-block" }} /> Hors cible (impressions organiques)
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {cantonStats.length === 0 && campaign.status === "active" && (
+          <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px", marginBottom: 20, textAlign: "center" }}>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>📍 La répartition géographique apparaîtra dès les premières impressions.</p>
           </div>
         )}
       </div>

@@ -2,11 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { calculateCPM } from "@/lib/ads/pricing";
 import type { AdFormat } from "@/lib/ads/pricing";
+
+async function getViewerGeo(): Promise<{ canton: string | null; city: string | null }> {
+  try {
+    const h = await headers();
+    // Vercel injects these automatically on all deployments
+    const region = h.get("x-vercel-ip-country-region"); // e.g. "GE", "VD", "ZH"
+    const city   = h.get("x-vercel-ip-city");           // e.g. "Geneva"
+    return { canton: region ?? null, city: city ?? null };
+  } catch { return { canton: null, city: null }; }
+}
 
 export type AdCampaign = {
   id: string;
@@ -243,18 +254,63 @@ export async function adminSetCampaignStatus(
 
 export async function trackAdImpression(campaignId: string): Promise<void> {
   try {
-    const supabase = await createClient();
+    const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("ad_impressions").insert({ campaign_id: campaignId, user_id: user?.id ?? null });
-    await supabase.rpc("increment_ad_impression", { p_campaign_id: campaignId });
+    await Promise.all([
+      supabase.from("ad_impressions").insert({
+        campaign_id: campaignId,
+        user_id: user?.id ?? null,
+        viewer_canton: geo.canton,
+        viewer_city: geo.city,
+      }),
+      supabase.rpc("increment_ad_impression", { p_campaign_id: campaignId }),
+    ]);
   } catch { /* silent */ }
 }
 
 export async function trackAdClick(campaignId: string): Promise<void> {
   try {
-    const supabase = await createClient();
+    const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("ad_clicks").insert({ campaign_id: campaignId, user_id: user?.id ?? null });
-    await supabase.rpc("increment_ad_click", { p_campaign_id: campaignId });
+    await Promise.all([
+      supabase.from("ad_clicks").insert({
+        campaign_id: campaignId,
+        user_id: user?.id ?? null,
+        viewer_canton: geo.canton,
+      }),
+      supabase.rpc("increment_ad_click", { p_campaign_id: campaignId }),
+    ]);
   } catch { /* silent */ }
+}
+
+export async function getCampaignCantonStats(campaignId: string): Promise<{ canton: string; impressions: number; clicks: number }[]> {
+  try {
+    const { supabase } = await requireBusiness();
+    const [impRes, clkRes] = await Promise.all([
+      supabase.from("ad_impressions")
+        .select("viewer_canton")
+        .eq("campaign_id", campaignId)
+        .not("viewer_canton", "is", null),
+      supabase.from("ad_clicks")
+        .select("viewer_canton")
+        .eq("campaign_id", campaignId)
+        .not("viewer_canton", "is", null),
+    ]);
+
+    const impByC: Record<string, number> = {};
+    for (const r of impRes.data ?? []) {
+      const c = r.viewer_canton as string;
+      impByC[c] = (impByC[c] ?? 0) + 1;
+    }
+    const clkByC: Record<string, number> = {};
+    for (const r of clkRes.data ?? []) {
+      const c = r.viewer_canton as string;
+      clkByC[c] = (clkByC[c] ?? 0) + 1;
+    }
+
+    return Object.entries(impByC)
+      .map(([canton, impressions]) => ({ canton, impressions, clicks: clkByC[canton] ?? 0 }))
+      .sort((a, b) => b.impressions - a.impressions)
+      .slice(0, 10);
+  } catch { return []; }
 }
