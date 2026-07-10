@@ -57,7 +57,13 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
   );
 }
 
-export function NewCampaignForm() {
+export function NewCampaignForm({
+  companyName = "",
+  companyLogo = null,
+}: {
+  companyName?: string;
+  companyLogo?: string | null;
+}) {
   const [state, action, pending] = useActionState(createCampaign, undefined);
 
   const [format, setFormat] = useState<"square" | "swipe">("square");
@@ -201,31 +207,50 @@ export function NewCampaignForm() {
               </div>
             </div>
 
-            {/* Preview panel */}
+            {/* Preview panel — Instagram-style ad card */}
             {imagePreview && (
-              <div style={{ borderRadius: 16, overflow: "hidden", position: "relative", background: "var(--surface2)", minHeight: 200 }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imagePreview}
-                  alt="preview"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  onError={() => setImagePreview("")}
-                />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75))" }} />
-                {headline && (
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "16px" }}>
-                    <p style={{ fontSize: 14, fontWeight: 800, color: "#fff", marginBottom: 6 }}>{headline}</p>
-                    {bodyText && <p style={{ fontSize: 11, color: "rgba(255,255,255,0.75)", marginBottom: 8 }}>{bodyText}</p>}
-                    <div style={{ display: "inline-block", padding: "6px 14px", borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 12, fontWeight: 700, color: "#fff" }}>
-                      {ctaLabel}
+              <div style={{ borderRadius: 16, overflow: "hidden", background: "var(--surface2)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", flexDirection: "column" }}>
+                {/* Header: company identity */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "rgba(255,255,255,0.03)" }}>
+                  {companyLogo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={companyLogo} alt="" style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "#fff" }}>
+                      {companyName.charAt(0).toUpperCase() || "W"}
+                    </div>
+                  )}
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", lineHeight: 1 }}>{companyName || "Votre entreprise"}</p>
+                    <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>Sponsorisé · Workie</p>
+                  </div>
+                </div>
+
+                {/* Image */}
+                <div style={{ position: "relative", paddingTop: "56%", overflow: "hidden" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imagePreview}
+                    alt="preview"
+                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                    onError={() => setImagePreview("")}
+                  />
+                </div>
+
+                {/* Footer: text + CTA */}
+                <div style={{ padding: "12px 14px", background: "rgba(255,255,255,0.02)" }}>
+                  {headline && <p style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 4, lineHeight: 1.3 }}>{headline}</p>}
+                  {bodyText && <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>{bodyText}</p>}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 10, color: "var(--text-muted)" }}>workie.ch</span>
+                    <div style={{ padding: "6px 14px", borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 12, fontWeight: 700, color: "#fff" }}>
+                      {ctaLabel || "En savoir plus"}
                     </div>
                   </div>
-                )}
-                <div style={{ position: "absolute", top: 10, left: 10, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", borderRadius: 50, padding: "3px 10px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                  Sponsorisé
                 </div>
-                <div style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.4)", borderRadius: 50, padding: "2px 8px", fontSize: 10, color: "rgba(255,255,255,0.5)" }}>
-                  Aperçu
+
+                <div style={{ padding: "6px 14px", borderTop: "1px solid rgba(255,255,255,0.05)", fontSize: 10, color: "var(--text-muted)", textAlign: "center" }}>
+                  Aperçu · L&apos;affichage final peut varier légèrement
                 </div>
               </div>
             )}
