@@ -6,7 +6,7 @@ type ActionResult = { error?: string } | undefined;
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
-  borderRadius: 10, padding: "12px 14px", fontSize: 14, color: "var(--text)",
+  borderRadius: 10, padding: "12px 14px", fontSize: 16, color: "var(--text)",
   outline: "none", boxSizing: "border-box",
 };
 

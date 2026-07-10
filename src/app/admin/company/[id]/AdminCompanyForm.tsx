@@ -10,7 +10,7 @@ const SECTORS = Object.keys(SECTOR_COLORS);
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface2)", border: "1px solid var(--border)",
-  borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "var(--text)",
+  borderRadius: 10, padding: "10px 14px", fontSize: 16, color: "var(--text)",
   outline: "none", boxSizing: "border-box",
 };
 const lbl: React.CSSProperties = {

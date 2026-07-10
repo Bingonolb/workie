@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { getClaims, approveClaim, rejectClaim } from "@/lib/actions/admin";
-import { CheckCircle, XCircle, Clock, Building2, Mail, User, Briefcase, ArrowLeft, AlertTriangle, ArrowRightLeft } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Building2, Mail, User, Briefcase, ArrowLeft, AlertTriangle, ArrowRightLeft, Link2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 type Claim = {
@@ -15,6 +15,7 @@ type Claim = {
   job_title: string;
   job_level: string;
   work_email: string;
+  zefix_url: string | null;
   message: string | null;
   status: string | null;
   company_id: string | null;
@@ -180,6 +181,13 @@ export default function ClaimsPage() {
                     Reçue le {new Date(claim.created_at).toLocaleDateString("fr-CH", { day: "numeric", month: "long", year: "numeric" })}
                   </div>
                 </div>
+
+                {claim.zefix_url && (
+                  <a href={claim.zefix_url} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "6px 12px", textDecoration: "none", width: "fit-content" }}>
+                    <Link2 size={13} /> Fiche Zefix <ExternalLink size={11} />
+                  </a>
+                )}
 
                 {claim.message && (
                   <div style={{ background: "var(--surface2)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, borderLeft: "3px solid var(--border2)" }}>

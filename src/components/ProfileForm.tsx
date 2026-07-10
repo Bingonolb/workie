@@ -8,7 +8,7 @@ import { ImageIcon } from "lucide-react";
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface2)", border: "1px solid var(--border2, var(--border))",
-  borderRadius: 10, padding: "11px 14px", fontSize: 14, color: "var(--text)",
+  borderRadius: 10, padding: "11px 14px", fontSize: 16, color: "var(--text)",
   outline: "none", boxSizing: "border-box", transition: "border-color 0.2s",
 };
 const lbl: React.CSSProperties = {

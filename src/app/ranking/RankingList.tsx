@@ -33,7 +33,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
             placeholder="Chercher une entreprise ou une ville..."
             style={{
               width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
-              borderRadius: 10, padding: "9px 12px 9px 34px", fontSize: 13, color: "var(--text)",
+              borderRadius: 10, padding: "9px 12px 9px 34px", fontSize: 16, color: "var(--text)",
               outline: "none", boxSizing: "border-box",
             }}
           />
@@ -41,7 +41,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
       </div>
 
       {/* Sector filter */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 20px 20px" }}>
+      <div className="ranking-sectors" style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 20px 20px" }}>
         {SECTORS.map(s => {
           const color = s === "Tous" ? "#8b5cf6" : (SECTOR_COLORS[s] ?? "#8b5cf6");
           const active = sector === s;

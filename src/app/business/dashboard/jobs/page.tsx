@@ -25,7 +25,7 @@ type Job = {
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
-  borderRadius: 10, padding: "11px 14px", fontSize: 14, color: "var(--text)",
+  borderRadius: 10, padding: "11px 14px", fontSize: 16, color: "var(--text)",
   outline: "none", boxSizing: "border-box",
 };
 const lbl: React.CSSProperties = {
@@ -96,7 +96,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
         {/* Titre */}
         <div>
           <label style={lbl}>Intitulé du poste *</label>
-          <input name="title" required placeholder="Ex : Développeur Full-Stack Senior, HR Business Partner…" style={{ ...inp, fontSize: 15, fontWeight: 600 }} />
+          <input name="title" required placeholder="Ex : Développeur Full-Stack Senior, HR Business Partner…" style={{ ...inp, fontWeight: 600 }} />
         </div>
 
         {/* Contrat + mode */}

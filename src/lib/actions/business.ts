@@ -273,6 +273,10 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     const user = await getUser();
 
     const work_email = String(formData.get("work_email") || "").trim().toLowerCase();
+    const rawZefixUrl = String(formData.get("zefix_url") || "").trim();
+    const zefix_url = rawZefixUrl
+      ? /^https?:\/\//i.test(rawZefixUrl) ? rawZefixUrl : `https://${rawZefixUrl}`
+      : null;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(work_email)) return { error: "Adresse email invalide." };
     const banned = ["@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", "@icloud.com"];
@@ -301,6 +305,7 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
       job_title: String(formData.get("job_title") || ""),
       job_level: String(formData.get("job_level") || ""),
       work_email,
+      zefix_url,
       message: String(formData.get("message") || "") || null,
       user_id: user?.id ?? null,
     });

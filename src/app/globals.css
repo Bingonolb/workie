@@ -462,3 +462,119 @@ main, .page-main, .page-main-sm, .page-main-md {
 @media (max-width: 500px) {
   .profile-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
 }
+
+/* Profile reviews table — hide secondary columns on mobile */
+@media (max-width: 600px) {
+  .profile-reviews-col-contract,
+  .profile-reviews-col-salary { display: none !important; }
+  .profile-reviews-grid {
+    grid-template-columns: 1fr 70px 80px !important;
+  }
+}
+
+/* Ranking sector filters — horizontal scroll on mobile */
+@media (max-width: 640px) {
+  .ranking-sectors {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .ranking-sectors::-webkit-scrollbar { display: none; }
+  .ranking-sectors button { flex-shrink: 0; }
+}
+
+/* ─── Form polish — global ──────────────────────────────────────── */
+
+/* Brand focus ring on all inputs & textareas & selects */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(139,92,246,0.6) !important;
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.12) !important;
+  outline: none !important;
+}
+
+/* Input with icon wrapper */
+.inp-icon-wrap {
+  position: relative;
+}
+.inp-icon-wrap .inp-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+.inp-icon-wrap input,
+.inp-icon-wrap textarea {
+  padding-left: 40px !important;
+}
+
+/* Form section header */
+.form-section {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+  margin-top: 8px;
+}
+.form-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Helper text below inputs */
+.inp-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+/* Pill picker — consistent touch targets */
+.pill-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text-muted);
+  transition: all 0.15s;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+}
+.pill-btn.active {
+  border-color: #8b5cf6;
+  background: rgba(139,92,246,0.12);
+  color: #8b5cf6;
+}
+.pill-btn:hover:not(.active) {
+  border-color: var(--border2);
+  background: var(--surface3);
+  color: var(--text);
+}
+
+/* Optional badge */
+.badge-optional {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+}

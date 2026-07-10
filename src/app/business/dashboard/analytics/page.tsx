@@ -21,7 +21,7 @@ export default async function AnalyticsPage() {
   ];
 
   return (
-    <div style={{ padding: "36px 40px", maxWidth: 1000 }}>
+    <div className="biz-page" style={{ maxWidth: 1000 }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Analytics</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Analyse détaillée de votre réputation employeur et des tendances de vos équipes.</p>

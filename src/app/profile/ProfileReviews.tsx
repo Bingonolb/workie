@@ -43,12 +43,12 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
   return (
     <div>
       {/* Table header */}
-      <div style={{
+      <div className="profile-reviews-grid" style={{
         display: "grid", gridTemplateColumns: "1fr 90px 80px 80px 80px",
         padding: "8px 20px", borderBottom: "1px solid var(--border)",
       }}>
         {["Entreprise / Poste", "Contrat", "Note", "Salaire", "Date"].map((h, i) => (
-          <span key={h} style={{
+          <span key={h} className={i === 1 ? "profile-reviews-col-contract" : i === 3 ? "profile-reviews-col-salary" : ""} style={{
             fontSize: 11, fontWeight: 700, color: "var(--text-muted)",
             letterSpacing: "0.06em", textTransform: "uppercase",
             textAlign: i >= 2 ? "right" : "left",
@@ -64,6 +64,7 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
         return (
           <Link key={r.id} href={`/company/${r.company_id}`} style={{ textDecoration: "none" }}>
             <div
+              className="profile-reviews-grid"
               style={{
                 display: "grid", gridTemplateColumns: "1fr 90px 80px 80px 80px",
                 alignItems: "center", padding: "14px 20px",
@@ -96,7 +97,7 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
               </div>
 
               {/* Contract */}
-              <span style={{
+              <span className="profile-reviews-col-contract" style={{
                 fontSize: 11, fontWeight: 600,
                 color: "var(--text-sub)", background: "var(--surface3)",
                 border: "1px solid var(--border)", borderRadius: 4,
@@ -115,7 +116,7 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
               </div>
 
               {/* Salary */}
-              <div style={{ textAlign: "right" }}>
+              <div className="profile-reviews-col-salary" style={{ textAlign: "right" }}>
                 {r.salary_chf ? (
                   <span style={{ fontSize: 13, fontWeight: 700, color: "#10b981", fontVariantNumeric: "tabular-nums" }}>
                     {Math.round(r.salary_chf / 1000)}k

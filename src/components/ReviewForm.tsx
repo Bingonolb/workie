@@ -68,13 +68,7 @@ function PillPicker({ options, value, onChange }: {
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
       {options.map(o => (
         <button key={o.value} type="button" onClick={() => onChange(o.value)}
-          style={{
-            padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer",
-            border: "1px solid", transition: "all 0.15s",
-            borderColor: value === o.value ? "#8b5cf6" : "var(--border2)",
-            background: value === o.value ? "rgba(139,92,246,0.15)" : "var(--surface2)",
-            color: value === o.value ? "#8b5cf6" : "var(--text-muted)",
-          }}>
+          className={`pill-btn${value === o.value ? " active" : ""}`}>
           {o.label}
         </button>
       ))}
@@ -217,13 +211,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <div style={{ display: "flex", gap: 10 }}>
                 {[{ v: true, l: "Employé actuel" }, { v: false, l: "Ancien employé" }].map(({ v, l }) => (
                   <button key={String(v)} type="button" onClick={() => setIsCurrent(v)}
-                    style={{
-                      flex: 1, padding: "10px 0", borderRadius: 8, fontSize: 13, fontWeight: 600,
-                      cursor: "pointer", border: "1px solid", transition: "all 0.15s",
-                      borderColor: isCurrent === v ? "#f97316" : "var(--border2)",
-                      background: isCurrent === v ? "rgba(249,115,22,0.15)" : "var(--surface2)",
-                      color: isCurrent === v ? "#f97316" : "var(--text-muted)",
-                    }}>
+                    className={`pill-btn${isCurrent === v ? " active" : ""}`}
+                    style={{ flex: 1, justifyContent: "center" }}>
                     {l}
                   </button>
                 ))}
@@ -236,18 +225,18 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </div>
 
             <div>
-              <label style={lbl}>Mode de travail <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
+              <label style={lbl}>Mode de travail <span className="badge-optional">Optionnel</span></label>
               <PillPicker options={WORK_MODES} value={workMode} onChange={v => setWorkMode(v === workMode ? "" : v)} />
             </div>
 
             <div>
-              <label style={lbl}>Salaire annuel brut CHF <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel — anonyme)</span></label>
+              <label style={lbl}>Salaire annuel brut CHF <span className="badge-optional">Optionnel · Anonyme</span></label>
               <div style={{ position: "relative" }}>
                 <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-muted)", pointerEvents: "none" }}>CHF</span>
                 <input type="number" value={salary} onChange={e => setSalary(e.target.value)}
                   placeholder="95000" style={{ ...inp, paddingLeft: 46 }} />
               </div>
-              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>Jamais attribué à ton nom. Aide la communauté à connaître les vrais salaires.</p>
+              <p className="inp-hint">Jamais attribué à ton nom — aide la communauté à connaître les vrais salaires.</p>
             </div>
 
             {step1Err && <p style={{ fontSize: 13, color: "#ef4444" }}>{step1Err}</p>}
@@ -278,13 +267,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <div style={{ display: "flex", gap: 10 }}>
                 {RECOMMEND.map(r => (
                   <button key={r.value} type="button" onClick={() => setWouldRecommend(r.value)}
-                    style={{
-                      flex: 1, padding: "12px 0", borderRadius: 8, fontSize: 14, fontWeight: 700,
-                      cursor: "pointer", border: "1px solid", transition: "all 0.15s",
-                      borderColor: wouldRecommend === r.value ? "#8b5cf6" : "var(--border2)",
-                      background: wouldRecommend === r.value ? "rgba(139,92,246,0.15)" : "var(--surface2)",
-                      color: wouldRecommend === r.value ? "#8b5cf6" : "var(--text-muted)",
-                    }}>
+                    className={`pill-btn${wouldRecommend === r.value ? " active" : ""}`}
+                    style={{ flex: 1, justifyContent: "center", fontSize: 14, padding: "12px 0" }}>
                     {r.label}
                   </button>
                 ))}
@@ -306,7 +290,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </div>
 
             <div>
-              <label style={lbl}>Titre <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
+              <label style={lbl}>Titre <span className="badge-optional">Optionnel</span></label>
               <input value={title} onChange={e => setTitle(e.target.value)}
                 placeholder="Ex : Bonne boîte mais attention au rythme..." style={inp} />
             </div>
@@ -338,7 +322,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </div>
 
             <div>
-              <label style={lbl}>💡 Ce que j'aurais voulu savoir avant <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
+              <label style={lbl}>💡 Ce que j'aurais voulu savoir avant <span className="badge-optional">Optionnel</span></label>
               <textarea value={knewBefore} onChange={e => setKnewBefore(e.target.value)} rows={2}
                 placeholder="Un conseil à quelqu'un qui rejoint cette boîte..."
                 style={{ ...inp, resize: "vertical" }} />
@@ -433,7 +417,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
-  borderRadius: 10, padding: "11px 14px", fontSize: 14, color: "var(--text)",
+  borderRadius: 10, padding: "11px 14px", fontSize: 16, color: "var(--text)",
   outline: "none", boxSizing: "border-box",
 };
 const lbl: React.CSSProperties = {
