@@ -166,8 +166,12 @@ export function ExploreFilters({
           {/* Suggestions dropdown */}
           {showSuggestions && (loading || suggestions.length > 0) && (
             <div
-              onPointerDown={e => e.stopPropagation()}
-              style={{
+              onPointerDown={() => setShowSuggestions(false)}
+              style={{ position: "fixed", inset: 0, zIndex: 598, background: "transparent" }}
+            />
+          )}
+          {showSuggestions && (loading || suggestions.length > 0) && (
+            <div style={{
                 position: "absolute", top: "100%", left: 0, right: 0,
                 background: "var(--surface)", border: "1px solid var(--border2)",
                 borderTop: "none", borderRadius: "0 0 12px 12px",
