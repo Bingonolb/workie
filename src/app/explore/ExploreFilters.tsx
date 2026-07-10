@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Search, X, LayoutGrid, Layers, SlidersHorizontal } from "lucide-react";
+import { Search, X, LayoutGrid, Layers, SlidersHorizontal, ArrowLeft } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { SECTOR_COLORS } from "@/lib/types";
 
 type Suggestion = { id: string; name: string; city: string; sector: string };
@@ -22,16 +23,22 @@ export function ExploreFilters({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  // Search state
+  // Desktop search state
   const [input, setInput] = useState(current.q ?? "");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
   const [loading, setLoading] = useState(false);
-  const [dropdownRect, setDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Mobile full-screen search modal
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileInput, setMobileInput] = useState("");
+  const [mobileSuggestions, setMobileSuggestions] = useState<Suggestion[]>([]);
+  const [mobileLoading, setMobileLoading] = useState(false);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
 
   // Filter panel state
   const [showPanel, setShowPanel] = useState(false);
@@ -42,7 +49,7 @@ export function ExploreFilters({
   const activeCanton = cantons.find(c => c.code === current.canton);
   const activeCount = (current.sector ? 1 : 0) + (current.canton ? 1 : 0) + (sort !== "score" ? 1 : 0);
 
-  // Fetch suggestions from API with debounce
+  // Desktop: fetch suggestions
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const q = input.trim();
@@ -55,10 +62,6 @@ export function ExploreFilters({
         setSuggestions(data.companies ?? []);
         setShowSuggestions(true);
         setActiveIdx(-1);
-        if (inputRef.current) {
-          const r = inputRef.current.getBoundingClientRect();
-          setDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width });
-        }
       } catch {
         setSuggestions([]);
       } finally {
@@ -68,7 +71,36 @@ export function ExploreFilters({
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [input]);
 
-  // Close dropdowns on outside click
+  // Mobile: fetch suggestions for modal
+  useEffect(() => {
+    if (!mobileSearchOpen) return;
+    const q = mobileInput.trim();
+    if (q.length < 1) { setMobileSuggestions([]); setMobileLoading(false); return; }
+    setMobileLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        setMobileSuggestions(data.companies ?? []);
+      } catch {
+        setMobileSuggestions([]);
+      } finally {
+        setMobileLoading(false);
+      }
+    }, 80);
+    return () => clearTimeout(t);
+  }, [mobileInput, mobileSearchOpen]);
+
+  // Auto-focus mobile input when modal opens
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      setMobileInput(input);
+      setMobileSuggestions([]);
+      setTimeout(() => mobileInputRef.current?.focus(), 60);
+    }
+  }, [mobileSearchOpen, input]);
+
+  // Close desktop dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowSuggestions(false);
@@ -113,6 +145,12 @@ export function ExploreFilters({
     startTransition(() => router.push(pathname + (view !== "grid" ? `?view=${view}` : "")));
   };
 
+  const openMobileSearch = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setMobileSearchOpen(true);
+    }
+  };
+
   return (
     <div style={{ marginBottom: 20, opacity: isPending ? 0.65 : 1, transition: "opacity 0.15s" }}>
 
@@ -127,6 +165,7 @@ export function ExploreFilters({
               ref={inputRef}
               value={input}
               onChange={e => { setInput(e.target.value); setActiveIdx(-1); }}
+              onFocus={openMobileSearch}
               onKeyDown={e => {
                 if (e.key === "ArrowDown") {
                   e.preventDefault();
@@ -137,9 +176,8 @@ export function ExploreFilters({
                 } else if (e.key === "Enter") {
                   e.preventDefault();
                   if (activeIdx >= 0 && suggestions[activeIdx]) {
-                    const s = suggestions[activeIdx];
-                    setInput(s.name);
-                    submitSearch(s.name);
+                    router.push(`/company/${suggestions[activeIdx].id}`);
+                    setShowSuggestions(false);
                   } else {
                     submitSearch(input);
                   }
@@ -148,15 +186,13 @@ export function ExploreFilters({
                   setActiveIdx(-1);
                 }
               }}
-              onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
               onBlur={() => { setTimeout(() => setShowSuggestions(false), 150); }}
               placeholder="Rechercher une entreprise..."
               autoComplete="off"
               style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
-                borderRadius: 12,
-                padding: "0 36px 0 38px", height: 42, fontSize: 16, color: "var(--text)",
-                outline: "none", boxSizing: "border-box",
+                borderRadius: 12, padding: "0 36px 0 38px", height: 42, fontSize: 16,
+                color: "var(--text)", outline: "none", boxSizing: "border-box",
               }}
             />
             {input && (
@@ -169,59 +205,44 @@ export function ExploreFilters({
             )}
           </div>
 
-          {/* Suggestions dropdown — portal into body, onClick not onPointerDown for selection */}
-          {showSuggestions && (loading || suggestions.length > 0) && dropdownRect && createPortal(
-            <>
-              {/*
-                Backdrop: pointerDown only prevents input blur (keeps dropdown alive for click).
-                onClick closes the dropdown AFTER the full touch sequence — never before.
-              */}
-              <div
-                onPointerDown={e => e.preventDefault()}
-                onClick={e => { e.stopPropagation(); setShowSuggestions(false); }}
-                style={{ position: "fixed", inset: 0, zIndex: 9998 }}
-              />
-              {/* Dropdown */}
-              <div style={{
-                position: "fixed",
-                top: dropdownRect.top,
-                left: dropdownRect.left,
-                width: dropdownRect.width,
-                background: "var(--surface)", border: "1px solid var(--border2)",
-                borderRadius: 12, zIndex: 9999, overflow: "hidden",
-                boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
-              }}>
-                {loading && suggestions.length === 0 ? (
-                  <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
-                ) : suggestions.map((s, i) => {
-                  const isActive = i === activeIdx;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => {
-                        setShowSuggestions(false);
-                        router.push(`/company/${s.id}`);
-                      }}
-                      style={{
-                        width: "100%", padding: "11px 16px 11px 40px",
-                        background: isActive ? "var(--surface2)" : "transparent",
-                        border: "none", borderTop: i > 0 ? "1px solid var(--border)" : "none",
-                        cursor: "pointer", textAlign: "left",
-                        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
-                        touchAction: "manipulation",
-                      }}
-                      onPointerEnter={() => setActiveIdx(i)}
-                      onPointerLeave={() => setActiveIdx(-1)}
-                    >
-                      <span style={{ fontSize: 14, color: "var(--text)", fontWeight: isActive ? 600 : 400, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
-                      <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{s.city}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </>,
-            document.body
+          {/* Desktop dropdown — hidden on mobile via CSS */}
+          {showSuggestions && (loading || suggestions.length > 0) && (
+            <div className="search-dropdown-desktop" style={{
+              position: "absolute", top: "100%", left: 0, right: 0,
+              background: "var(--surface)", border: "1px solid var(--border2)",
+              borderTop: "none", borderRadius: "0 0 12px 12px",
+              zIndex: 600, overflow: "hidden",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
+            }}>
+              {loading && suggestions.length === 0 ? (
+                <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
+              ) : suggestions.map((s, i) => {
+                const isActive = i === activeIdx;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onMouseDown={e => {
+                      e.preventDefault();
+                      setShowSuggestions(false);
+                      router.push(`/company/${s.id}`);
+                    }}
+                    style={{
+                      width: "100%", padding: "11px 16px 11px 40px",
+                      background: isActive ? "var(--surface2)" : "transparent",
+                      border: "none", borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                      cursor: "pointer", textAlign: "left",
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+                    }}
+                    onMouseEnter={() => setActiveIdx(i)}
+                    onMouseLeave={() => setActiveIdx(-1)}
+                  >
+                    <span style={{ fontSize: 14, color: "var(--text)", fontWeight: isActive ? 600 : 400, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{s.city}</span>
+                  </button>
+                );
+              })}
+            </div>
           )}
         </div>
 
@@ -253,87 +274,84 @@ export function ExploreFilters({
             <>
               <div className="filter-panel-overlay" onClick={() => setShowPanel(false)} />
               <div ref={panelRef} className="filter-panel">
-              {/* Sectors */}
-              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Secteur</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
-                {sectors.map(s => {
-                  const color = SECTOR_COLORS[s] ?? "#8b5cf6";
-                  const active = current.sector === s;
-                  return (
-                    <button key={s} onClick={() => push("sector", active ? undefined : s)}
-                      style={{
-                        padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                        border: active ? `1.5px solid ${color}` : "1px solid var(--border2)",
-                        background: active ? `color-mix(in srgb, ${color} 15%, transparent)` : "transparent",
-                        color: active ? color : "var(--text-muted)", transition: "all 0.1s",
-                      }}>
-                      {s}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Cantons */}
-              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Canton</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))", gap: 5, marginBottom: view !== "swipe" ? 18 : 0 }}>
-                {cantons.map(c => {
-                  const active = current.canton === c.code;
-                  return (
-                    <button key={c.code} onClick={() => push("canton", active ? undefined : c.code)}
-                      style={{
-                        padding: "6px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer",
-                        border: active ? "1.5px solid #f97316" : "1px solid var(--border)",
-                        background: active ? "rgba(249,115,22,0.15)" : "transparent",
-                        color: active ? "#f97316" : "var(--text-muted)",
-                        textAlign: "center", lineHeight: 1.4, transition: "all 0.1s",
-                      }}
-                      onMouseEnter={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "var(--surface2)"; }}
-                      onMouseLeave={e => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-                    >
-                      <div style={{ fontSize: 9, opacity: 0.5 }}>{c.code}</div>
-                      {c.name}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Sort — grid only */}
-              {view !== "swipe" && (
-                <>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Trier par</p>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {([
-                      { v: "score", label: "Score" },
-                      { v: "rating", label: "Meilleure note" },
-                      { v: "reviews", label: "Plus d'avis" },
-                      { v: "name", label: "A → Z" },
-                    ] as const).map(({ v, label }) => (
-                      <button key={v} onClick={() => push("sort", v === "score" ? undefined : v)}
+                {/* Sectors */}
+                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Secteur</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+                  {sectors.map(s => {
+                    const color = SECTOR_COLORS[s] ?? "#8b5cf6";
+                    const active = current.sector === s;
+                    return (
+                      <button key={s} onClick={() => push("sector", active ? undefined : s)}
                         style={{
                           padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                          border: sort === v ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
-                          background: sort === v ? "rgba(139,92,246,0.15)" : "transparent",
-                          color: sort === v ? "#8b5cf6" : "var(--text-muted)", transition: "all 0.1s",
+                          border: active ? `1.5px solid ${color}` : "1px solid var(--border2)",
+                          background: active ? `color-mix(in srgb, ${color} 15%, transparent)` : "transparent",
+                          color: active ? color : "var(--text-muted)", transition: "all 0.1s",
                         }}>
-                        {label}
+                        {s}
                       </button>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Footer */}
-              {(activeCount > 0) && (
-                <div style={{ borderTop: "1px solid var(--border)", marginTop: 18, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <button onClick={clearAll} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
-                    Tout réinitialiser
-                  </button>
-                  <button onClick={() => setShowPanel(false)} style={{ padding: "7px 18px", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer" }}>
-                    Voir les résultats
-                  </button>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+
+                {/* Cantons */}
+                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Canton</p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))", gap: 5, marginBottom: view !== "swipe" ? 18 : 0 }}>
+                  {cantons.map(c => {
+                    const active = current.canton === c.code;
+                    return (
+                      <button key={c.code} onClick={() => push("canton", active ? undefined : c.code)}
+                        style={{
+                          padding: "6px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer",
+                          border: active ? "1.5px solid #f97316" : "1px solid var(--border)",
+                          background: active ? "rgba(249,115,22,0.15)" : "transparent",
+                          color: active ? "#f97316" : "var(--text-muted)",
+                          textAlign: "center", lineHeight: 1.4, transition: "all 0.1s",
+                        }}>
+                        <div style={{ fontSize: 9, opacity: 0.5 }}>{c.code}</div>
+                        {c.name}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Sort — grid only */}
+                {view !== "swipe" && (
+                  <>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Trier par</p>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {([
+                        { v: "score", label: "Score" },
+                        { v: "rating", label: "Meilleure note" },
+                        { v: "reviews", label: "Plus d'avis" },
+                        { v: "name", label: "A → Z" },
+                      ] as const).map(({ v, label }) => (
+                        <button key={v} onClick={() => push("sort", v === "score" ? undefined : v)}
+                          style={{
+                            padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                            border: sort === v ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
+                            background: sort === v ? "rgba(139,92,246,0.15)" : "transparent",
+                            color: sort === v ? "#8b5cf6" : "var(--text-muted)", transition: "all 0.1s",
+                          }}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Footer */}
+                {activeCount > 0 && (
+                  <div style={{ borderTop: "1px solid var(--border)", marginTop: 18, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <button onClick={clearAll} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
+                      Tout réinitialiser
+                    </button>
+                    <button onClick={() => setShowPanel(false)} style={{ padding: "7px 18px", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer" }}>
+                      Voir les résultats
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
@@ -386,6 +404,104 @@ export function ExploreFilters({
             </span>
           )}
         </div>
+      )}
+
+      {/* ── Mobile full-screen search modal ── */}
+      {mobileSearchOpen && createPortal(
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 10100,
+          background: "var(--bg)", display: "flex", flexDirection: "column",
+        }}>
+          {/* Header */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "12px 16px", borderBottom: "1px solid var(--border)",
+            flexShrink: 0,
+          }}>
+            <button
+              onClick={() => setMobileSearchOpen(false)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text)", padding: 6, display: "flex", flexShrink: 0 }}
+            >
+              <ArrowLeft size={22} />
+            </button>
+            <div style={{ position: "relative", flex: 1 }}>
+              <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
+              <input
+                ref={mobileInputRef}
+                value={mobileInput}
+                onChange={e => setMobileInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === "Enter" && mobileSuggestions[0]) {
+                    setMobileSearchOpen(false);
+                    router.push(`/company/${mobileSuggestions[0].id}`);
+                  } else if (e.key === "Escape") {
+                    setMobileSearchOpen(false);
+                  }
+                }}
+                placeholder="Rechercher une entreprise..."
+                autoComplete="off"
+                style={{
+                  width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
+                  borderRadius: 10, padding: "0 36px 0 36px", height: 42, fontSize: 16,
+                  color: "var(--text)", outline: "none", boxSizing: "border-box",
+                }}
+              />
+              {mobileInput && (
+                <button
+                  onClick={() => setMobileInput("")}
+                  style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", padding: 4 }}
+                >
+                  <X size={15} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Suggestions list */}
+          <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" as const }}>
+            {mobileLoading && (
+              <div style={{ padding: "20px 16px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
+            )}
+            {!mobileLoading && mobileInput.length > 0 && mobileSuggestions.length === 0 && (
+              <div style={{ padding: "20px 16px", fontSize: 14, color: "var(--text-muted)", textAlign: "center" }}>
+                Aucun résultat pour « {mobileInput} »
+              </div>
+            )}
+            {mobileSuggestions.map((s, i) => (
+              <Link
+                key={s.id}
+                href={`/company/${s.id}`}
+                onClick={() => setMobileSearchOpen(false)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  padding: "14px 16px",
+                  borderBottom: "1px solid var(--border)",
+                  textDecoration: "none",
+                  background: i % 2 === 0 ? "transparent" : "rgba(0,0,0,0.02)",
+                }}
+              >
+                <div style={{
+                  width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                  background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 16, fontWeight: 800, color: "#fff",
+                }}>
+                  {s.name[0]}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{s.city} · {s.sector}</p>
+                </div>
+              </Link>
+            ))}
+            {!mobileInput && (
+              <div style={{ padding: "24px 16px", textAlign: "center" }}>
+                <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Commence à taper pour rechercher une entreprise</p>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
