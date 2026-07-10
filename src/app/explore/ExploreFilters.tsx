@@ -165,13 +165,15 @@ export function ExploreFilters({
 
           {/* Suggestions dropdown */}
           {showSuggestions && (loading || suggestions.length > 0) && (
-            <div style={{
-              position: "absolute", top: "100%", left: 0, right: 0,
-              background: "var(--surface)", border: "1px solid var(--border2)",
-              borderTop: "none", borderRadius: "0 0 12px 12px",
-              zIndex: 600, overflow: "hidden",
-              boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
-            }}>
+            <div
+              onPointerDown={e => e.stopPropagation()}
+              style={{
+                position: "absolute", top: "100%", left: 0, right: 0,
+                background: "var(--surface)", border: "1px solid var(--border2)",
+                borderTop: "none", borderRadius: "0 0 12px 12px",
+                zIndex: 600, overflow: "hidden",
+                boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
+              }}>
               {loading && suggestions.length === 0 ? (
                 <div style={{ padding: "12px 16px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
               ) : suggestions.map((s, i) => {
@@ -181,6 +183,7 @@ export function ExploreFilters({
                     key={s.id}
                     onPointerDown={e => {
                       e.preventDefault();
+                      e.stopPropagation();
                       setInput(s.name);
                       submitSearch(s.name);
                       inputRef.current?.blur();
