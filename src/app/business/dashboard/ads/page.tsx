@@ -1,79 +1,90 @@
 import Link from "next/link";
-import { ArrowLeft, Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, ChevronRight } from "lucide-react";
-import { getBusinessCampaigns, getCampaignDailyStats } from "@/lib/actions/ads";
+import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft } from "lucide-react";
+import { getBusinessCampaigns } from "@/lib/actions/ads";
 import { Navbar } from "@/components/Navbar";
-import { AdStatsChart } from "./AdStatsChart";
 
 const STATUS_CONFIG = {
-  pending:   { label: "En attente",  color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  icon: <Clock size={13} /> },
-  active:    { label: "Active",      color: "#10b981", bg: "rgba(16,185,129,0.12)",   icon: <CheckCircle size={13} /> },
-  paused:    { label: "Pausée",      color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",   icon: <PauseCircle size={13} /> },
-  completed: { label: "Terminée",    color: "#6b7280", bg: "rgba(107,114,128,0.12)",  icon: <CheckCircle size={13} /> },
-  rejected:  { label: "Rejetée",     color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={13} /> },
+  pending:   { label: "En attente",  color: "#f59e0b", bg: "rgba(245,158,11,0.1)",   icon: <Clock size={12} />,       dot: "#f59e0b" },
+  active:    { label: "Active",      color: "#10b981", bg: "rgba(16,185,129,0.1)",    icon: <CheckCircle size={12} />, dot: "#10b981" },
+  paused:    { label: "Pausée",      color: "#8b5cf6", bg: "rgba(139,92,246,0.1)",    icon: <PauseCircle size={12} />, dot: "#8b5cf6" },
+  completed: { label: "Terminée",    color: "#6b7280", bg: "rgba(107,114,128,0.1)",   icon: <CheckCircle size={12} />, dot: "#6b7280" },
+  rejected:  { label: "Rejetée",     color: "#ef4444", bg: "rgba(239,68,68,0.1)",     icon: <XCircle size={12} />,     dot: "#ef4444" },
 } as const;
 
-const FORMAT_LABEL: Record<string, string> = { square: "Carré", swipe: "Swipe" };
+function ctr(imp: number, clk: number) {
+  if (!imp) return "–";
+  return `${((clk / imp) * 100).toFixed(1)}%`;
+}
 
-function ctr(impressions: number, clicks: number) {
-  if (!impressions) return "–";
-  return `${((clicks / impressions) * 100).toFixed(1)}%`;
+function budgetPct(spent: number, total: number) {
+  if (!total) return 0;
+  return Math.min(100, Math.round((spent / total) * 100));
 }
 
 export default async function AdsPage() {
   const { campaigns = [], error } = await getBusinessCampaigns();
 
-  // Fetch daily stats for all campaigns in parallel
-  const dailyStats = await Promise.all(
-    campaigns.map(c => getCampaignDailyStats(c.id).then(s => ({ id: c.id, stats: s })))
-  );
-  const statsByid = Object.fromEntries(dailyStats.map(d => [d.id, d.stats]));
+  const counts = {
+    all: campaigns.length,
+    active: campaigns.filter(c => c.status === "active").length,
+    pending: campaigns.filter(c => c.status === "pending").length,
+    paused: campaigns.filter(c => c.status === "paused").length,
+    completed: campaigns.filter(c => c.status === "completed").length,
+    rejected: campaigns.filter(c => c.status === "rejected").length,
+  };
 
-  // Aggregate totals across all campaigns
   const totalImpressions = campaigns.reduce((s, c) => s + c.impression_count, 0);
   const totalClicks = campaigns.reduce((s, c) => s + c.click_count, 0);
   const totalSpent = campaigns.reduce((s, c) => s + Number(c.spent_chf), 0);
+  const activeCampaigns = campaigns.filter(c => c.status === "active");
 
   return (
     <div className="page-root">
       <Navbar />
-      <div className="biz-page" style={{ maxWidth: 900 }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
+      <div className="biz-page" style={{ maxWidth: 960 }}>
+
+        {/* ── Header ── */}
+        <Link href="/business/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
+          <ArrowLeft size={14} /> Dashboard
+        </Link>
+
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
           <div>
-            <Link href="/business/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 12 }}>
-              <ArrowLeft size={14} /> Dashboard
-            </Link>
-            <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>Mes publicités</h1>
-            <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 4 }}>
-              Créez des campagnes sponsorisées visibles sur Workie.
+            <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 4 }}>Publicités</h1>
+            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
+              {campaigns.length === 0 ? "Aucune campagne · Lancez votre première pub" : `${campaigns.length} campagne${campaigns.length > 1 ? "s" : ""} · ${activeCampaigns.length} active${activeCampaigns.length > 1 ? "s" : ""}`}
             </p>
           </div>
           <Link href="/business/dashboard/ads/new" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
-            padding: "12px 22px", borderRadius: 12,
+            padding: "11px 22px", borderRadius: 12,
             background: "linear-gradient(135deg, #8b5cf6, #f97316)",
             color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
+            boxShadow: "0 4px 20px rgba(139,92,246,0.35)",
           }}>
-            <Plus size={16} /> Nouvelle campagne
+            <Plus size={16} /> Nouvelle pub
           </Link>
         </div>
 
         {error && (
-          <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px", color: "#ef4444", fontSize: 14, marginBottom: 24 }}>
+          <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px", color: "#ef4444", fontSize: 14, marginBottom: 20 }}>
             {error}
           </div>
         )}
 
         {campaigns.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 24px" }}>
-            <div style={{ fontSize: 52, marginBottom: 20 }}>📣</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune campagne</h2>
-            <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 420, margin: "0 auto 28px", lineHeight: 1.7 }}>
-              Lancez votre première campagne publicitaire et touchez des milliers de candidats actifs sur Workie.
+          /* ── Empty state ── */
+          <div style={{ textAlign: "center", padding: "80px 24px 60px" }}>
+            <div style={{ width: 72, height: 72, borderRadius: 22, background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(249,115,22,0.1))", border: "1px solid rgba(139,92,246,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", fontSize: 32 }}>
+              📣
+            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune campagne pour l&apos;instant</h2>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 28px", lineHeight: 1.7 }}>
+              Sponsorisez votre marque auprès de milliers de candidats actifs en Suisse.
             </p>
             <Link href="/business/dashboard/ads/new" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "12px 24px", borderRadius: 12,
+              padding: "13px 26px", borderRadius: 12,
               background: "linear-gradient(135deg, #8b5cf6, #f97316)",
               color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
             }}>
@@ -82,16 +93,16 @@ export default async function AdsPage() {
           </div>
         ) : (
           <>
-            {/* Global KPIs */}
-            {campaigns.length > 1 && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28 }}>
+            {/* ── Global KPIs ── */}
+            {campaigns.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 24 }}>
                 {[
-                  { label: "Vues totales", value: totalImpressions.toLocaleString("fr-CH"), icon: <Eye size={15} />, color: "#8b5cf6" },
-                  { label: "Clics totaux", value: totalClicks.toLocaleString("fr-CH"), icon: <MousePointer size={15} />, color: "#f97316" },
-                  { label: "CTR moyen", value: ctr(totalImpressions, totalClicks), icon: <TrendingUp size={15} />, color: "#10b981" },
+                  { label: "Vues totales", value: totalImpressions.toLocaleString("fr-CH"), icon: <Eye size={14} />, color: "#8b5cf6" },
+                  { label: "Clics totaux", value: totalClicks.toLocaleString("fr-CH"), icon: <MousePointer size={14} />, color: "#f97316" },
+                  { label: "CTR moyen", value: ctr(totalImpressions, totalClicks), icon: <TrendingUp size={14} />, color: "#10b981" },
                 ].map(({ label, value, icon, color }) => (
-                  <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", color, flexShrink: 0 }}>{icon}</div>
+                  <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", color, flexShrink: 0 }}>{icon}</div>
                     <div>
                       <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{value}</p>
                       <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>{label}</p>
@@ -100,117 +111,170 @@ export default async function AdsPage() {
                 ))}
               </div>
             )}
-            {campaigns.length > 1 && (
-              <div style={{ marginBottom: 8, fontSize: 12, color: "var(--text-muted)" }}>
+            {totalSpent > 0 && (
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>
                 Budget total dépensé : <strong style={{ color: "var(--text)" }}>CHF {totalSpent.toFixed(2)}</strong>
-              </div>
+              </p>
             )}
 
-            {/* Campaign cards */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* ── Status tabs (client-side filtering via CSS) ── */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+              {([
+                ["all", "Toutes", counts.all],
+                ["active", "Actives", counts.active],
+                ["pending", "En attente", counts.pending],
+                ["paused", "Pausées", counts.paused],
+                ["completed", "Terminées", counts.completed],
+                ["rejected", "Rejetées", counts.rejected],
+              ] as [string, string, number][]).filter(([status, , n]) => status === "all" || n > 0).map(([status, label, n]) => (
+                <a key={status} href={`?tab=${status}`} style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 600,
+                  textDecoration: "none",
+                  border: "1px solid var(--border2)",
+                  background: "transparent",
+                  color: "var(--text-muted)",
+                }}>
+                  {status !== "all" && (
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: STATUS_CONFIG[status as keyof typeof STATUS_CONFIG]?.dot ?? "#6b7280", display: "inline-block" }} />
+                  )}
+                  {label}
+                  {n > 0 && <span style={{ fontSize: 11, background: "rgba(255,255,255,0.07)", padding: "1px 6px", borderRadius: 50 }}>{n}</span>}
+                </a>
+              ))}
+            </div>
+
+            {/* ── Campaign list ── */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {campaigns.map(c => {
                 const st = STATUS_CONFIG[c.status] ?? STATUS_CONFIG.pending;
-                const budgetPct = c.total_budget_chf > 0 ? Math.min(100, Math.round((c.spent_chf / c.total_budget_chf) * 100)) : 0;
-                const stats = statsByid[c.id] ?? [];
-                const last7Impressions = stats.slice(-7).reduce((s, d) => s + d.impressions, 0);
-                const last7Clicks = stats.slice(-7).reduce((s, d) => s + d.clicks, 0);
+                const pct = budgetPct(Number(c.spent_chf), Number(c.total_budget_chf));
+                const remaining = Math.max(0, Number(c.total_budget_chf) - Number(c.spent_chf));
 
                 return (
-                  <div key={c.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, overflow: "hidden" }}>
-                    {/* Top row */}
-                    <div style={{ display: "flex", gap: 16, padding: "20px 20px 16px", alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <div key={c.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden", transition: "border-color 0.15s" }}>
+                    <div style={{ display: "flex", gap: 0, alignItems: "stretch" }}>
+
                       {/* Thumbnail */}
-                      <div style={{ width: 72, height: 72, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: "var(--surface2)" }}>
+                      <div style={{ width: 90, flexShrink: 0, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={c.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={c.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        <div style={{ position: "absolute", bottom: 6, left: 6, fontSize: 9, fontWeight: 800, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                          {c.format === "square" ? "⬛" : "📱"} {c.format}
+                        </div>
                       </div>
 
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
-                          <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", margin: 0 }}>{c.headline}</h2>
-                          <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>
-                            {FORMAT_LABEL[c.format] ?? c.format}
-                          </span>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 50, background: st.bg, color: st.color }}>
-                            {st.icon} {st.label}
-                          </span>
+                      {/* Main content */}
+                      <div style={{ flex: 1, padding: "14px 16px", minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+                              <h2 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 280 }}>{c.headline}</h2>
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 50, background: st.bg, color: st.color, flexShrink: 0 }}>
+                                {st.icon} {st.label}
+                              </span>
+                            </div>
+                            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0 }}>
+                              CHF {c.daily_budget_chf}/j · CPM CHF {Number(c.cpm_chf).toFixed(2)}
+                              {c.target_cantons.length > 0 && ` · 📍 ${c.target_cantons.slice(0, 3).join(", ")}${c.target_cantons.length > 3 ? ` +${c.target_cantons.length - 3}` : ""}`}
+                            </p>
+                          </div>
+
+                          {/* Stats */}
+                          <div style={{ display: "flex", gap: 16, flexShrink: 0 }}>
+                            <div style={{ textAlign: "right" }}>
+                              <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{c.impression_count.toLocaleString("fr-CH")}</p>
+                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><Eye size={10} /> vues</p>
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                              <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{c.click_count.toLocaleString("fr-CH")}</p>
+                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><MousePointer size={10} /> clics</p>
+                            </div>
+                            <div style={{ textAlign: "right" }}>
+                              <p style={{ fontSize: 16, fontWeight: 900, color: "#10b981", lineHeight: 1 }}>{ctr(c.impression_count, c.click_count)}</p>
+                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><TrendingUp size={10} /> CTR</p>
+                            </div>
+                          </div>
                         </div>
-                        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                          CHF {c.daily_budget_chf}/j · CPM CHF {Number(c.cpm_chf).toFixed(2)}
-                          {c.target_cantons.length > 0 && ` · 📍 ${c.target_cantons.join(", ")}`}
-                          {c.target_sectors.length > 0 && ` · 🏭 ${c.target_sectors.join(", ")}`}
-                        </p>
+
+                        {/* Budget bar */}
+                        <div>
+                          <div style={{ height: 4, borderRadius: 50, background: "var(--surface2)", overflow: "hidden", marginBottom: 4 }}>
+                            <div style={{ height: "100%", width: `${pct}%`, background: pct >= 90 ? "#ef4444" : "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 50 }} />
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)" }}>
+                            <span>CHF {Number(c.spent_chf).toFixed(2)} dépensé · {pct}%</span>
+                            <span>CHF {remaining.toFixed(2)} restant</span>
+                          </div>
+                        </div>
+
                         {c.admin_note && c.status === "rejected" && (
-                          <p style={{ fontSize: 12, color: "#ef4444", marginTop: 6, background: "rgba(239,68,68,0.06)", padding: "6px 10px", borderRadius: 8 }}>
+                          <p style={{ fontSize: 11, color: "#ef4444", marginTop: 8, background: "rgba(239,68,68,0.06)", padding: "5px 10px", borderRadius: 7 }}>
                             ⚠ {c.admin_note}
                           </p>
                         )}
                       </div>
-
-                      {/* Stats */}
-                      <div style={{ display: "flex", gap: 20, flexShrink: 0 }}>
-                        <div style={{ textAlign: "center" }}>
-                          <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)" }}>{c.impression_count.toLocaleString("fr-CH")}</p>
-                          <p style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 3, justifyContent: "center" }}><Eye size={11} /> Vues</p>
-                          {last7Impressions > 0 && <p style={{ fontSize: 10, color: "#10b981" }}>+{last7Impressions} / 7j</p>}
-                        </div>
-                        <div style={{ textAlign: "center" }}>
-                          <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)" }}>{c.click_count.toLocaleString("fr-CH")}</p>
-                          <p style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 3, justifyContent: "center" }}><MousePointer size={11} /> Clics</p>
-                          {last7Clicks > 0 && <p style={{ fontSize: 10, color: "#10b981" }}>+{last7Clicks} / 7j</p>}
-                        </div>
-                        <div style={{ textAlign: "center" }}>
-                          <p style={{ fontSize: 20, fontWeight: 900, color: "#10b981" }}>{ctr(c.impression_count, c.click_count)}</p>
-                          <p style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 3, justifyContent: "center" }}><TrendingUp size={11} /> CTR</p>
-                        </div>
-                      </div>
                     </div>
 
-                    {/* Budget bar */}
-                    <div style={{ padding: "0 20px 14px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)", marginBottom: 5 }}>
-                        <span>Budget utilisé · {budgetPct}%</span>
-                        <span>CHF {Number(c.spent_chf).toFixed(2)} / {Number(c.total_budget_chf).toFixed(2)}</span>
-                      </div>
-                      <div style={{ height: 5, borderRadius: 50, background: "var(--surface2)", overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${budgetPct}%`, background: budgetPct >= 90 ? "#ef4444" : "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 50, transition: "width 0.4s" }} />
-                      </div>
+                    {/* Action bar */}
+                    <div style={{ borderTop: "1px solid var(--border)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.01)" }}>
+                      <Link href={`/business/dashboard/ads/${c.id}`} style={{
+                        fontSize: 12, fontWeight: 700, color: "#8b5cf6", textDecoration: "none",
+                        padding: "5px 12px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)", background: "rgba(139,92,246,0.06)",
+                      }}>
+                        Voir les stats
+                      </Link>
+                      <Link
+                        href={`/business/dashboard/ads/new?dup=${c.id}&headline=${encodeURIComponent(c.headline)}&format=${c.format}&cta_label=${encodeURIComponent(c.cta_label)}&cta_url=${encodeURIComponent(c.cta_url)}&daily=${c.daily_budget_chf}&image=${encodeURIComponent(c.image_url)}`}
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: 5,
+                          fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textDecoration: "none",
+                          padding: "5px 12px", borderRadius: 8, border: "1px solid var(--border2)", background: "transparent",
+                        }}
+                      >
+                        <Copy size={11} /> Dupliquer
+                      </Link>
+                      <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-muted)" }}>
+                        {c.start_date}{c.end_date ? ` → ${c.end_date}` : ""}
+                      </span>
                     </div>
-
-                    {/* 30-day chart (client component) */}
-                    {stats.length > 0 && c.status !== "pending" && (
-                      <AdStatsChart stats={stats} />
-                    )}
-
-                    {/* Link to detail */}
-                    <Link href={`/business/dashboard/ads/${c.id}`} style={{
-                      display: "flex", alignItems: "center", justifyContent: "space-between",
-                      padding: "12px 20px", borderTop: "1px solid var(--border)",
-                      fontSize: 13, color: "var(--text-muted)", textDecoration: "none",
-                      transition: "background 0.15s",
-                    }}>
-                      <span>Voir les détails</span>
-                      <ChevronRight size={15} />
-                    </Link>
                   </div>
                 );
               })}
             </div>
+
+            {/* ── Quick new campaign CTA ── */}
+            <Link href="/business/dashboard/ads/new" style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              marginTop: 16, padding: "16px", borderRadius: 16,
+              border: "1.5px dashed rgba(139,92,246,0.3)", background: "rgba(139,92,246,0.03)",
+              color: "#8b5cf6", fontWeight: 700, fontSize: 14, textDecoration: "none",
+              transition: "all 0.2s",
+            }}>
+              <Plus size={18} /> Lancer une nouvelle campagne
+            </Link>
           </>
         )}
 
         {/* Info box */}
-        <div style={{ marginTop: 36, background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 16, padding: "20px 24px" }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Comment ça fonctionne ?</p>
-          <ul style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.8, paddingLeft: 18 }}>
-            <li>Créez votre campagne (format, visuel, ciblage, budget)</li>
-            <li>Notre équipe valide votre annonce sous 24h ouvrées</li>
-            <li>Une fois active, votre pub apparaît dans les résultats Workie</li>
-            <li>Paiement par virement bancaire après validation — coordonnées fournies par email</li>
-            <li>La campagne s&apos;arrête automatiquement quand le budget total est atteint</li>
-          </ul>
+        <div style={{ marginTop: 28, background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.12)", borderRadius: 14, padding: "16px 20px" }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Comment ça fonctionne</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+            {[
+              { step: "1", text: "Créez votre campagne avec visuel et ciblage" },
+              { step: "2", text: "Notre équipe valide sous 24h ouvrées" },
+              { step: "3", text: "Votre pub apparaît sur Workie selon votre budget" },
+              { step: "4", text: "Paiement par virement après validation" },
+            ].map(({ step, text }) => (
+              <div key={step} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(139,92,246,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 900, color: "#8b5cf6", flexShrink: 0, marginTop: 1 }}>{step}</div>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>{text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

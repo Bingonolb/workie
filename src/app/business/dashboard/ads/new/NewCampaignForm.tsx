@@ -57,29 +57,40 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
   );
 }
 
+type Prefill = {
+  headline?: string;
+  format?: "square" | "swipe";
+  ctaLabel?: string;
+  ctaUrl?: string;
+  dailyBudget?: number;
+  imageUrl?: string;
+};
+
 export function NewCampaignForm({
   companyName = "",
   companyLogo = null,
+  prefill,
 }: {
   companyName?: string;
   companyLogo?: string | null;
+  prefill?: Prefill;
 }) {
   const [state, action, pending] = useActionState(createCampaign, undefined);
 
-  const [format, setFormat] = useState<"square" | "swipe">("square");
+  const [format, setFormat] = useState<"square" | "swipe">(prefill?.format ?? "square");
   const [selectedCantons, setSelectedCantons] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
 
   // Smart budget: dailyBudget × durationDays = totalBudget
-  const [dailyBudget, setDailyBudget] = useState(20);
+  const [dailyBudget, setDailyBudget] = useState(prefill?.dailyBudget ?? 20);
   const [durationDays, setDurationDays] = useState(14);
   const totalBudget = dailyBudget * durationDays;
 
-  const [imagePreview, setImagePreview] = useState<string>("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [headline, setHeadline] = useState("");
+  const [imagePreview, setImagePreview] = useState<string>(prefill?.imageUrl ?? "");
+  const [imageUrl, setImageUrl] = useState(prefill?.imageUrl ?? "");
+  const [headline, setHeadline] = useState(prefill?.headline ?? "");
   const [bodyText, setBodyText] = useState("");
-  const [ctaLabel, setCtaLabel] = useState("En savoir plus");
+  const [ctaLabel, setCtaLabel] = useState(prefill?.ctaLabel ?? "En savoir plus");
 
   const cpm = calculateCPM(format, selectedCantons, selectedSectors);
   const dailyImpressions = estimateDailyImpressions(dailyBudget, cpm);
@@ -171,89 +182,149 @@ export function NewCampaignForm({
         <div style={card}>
           <SectionHeader icon={<ImageIcon size={18} />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
 
-          {/* Image upload zone */}
-          <div style={{ display: "grid", gridTemplateColumns: imagePreview ? "1fr 1fr" : "1fr", gap: 16, marginBottom: 20 }}>
-            <div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+            {/* Left: inputs */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <label style={{
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                gap: 10, padding: "32px 20px", borderRadius: 16,
-                border: imagePreview ? "1.5px solid rgba(139,92,246,0.3)" : "2px dashed rgba(255,255,255,0.12)",
-                cursor: "pointer", background: imagePreview ? "rgba(139,92,246,0.04)" : "rgba(255,255,255,0.02)",
-                transition: "all 0.2s", minHeight: 160,
+                gap: 10, padding: "28px 20px", borderRadius: 16, flex: 1,
+                border: imagePreview ? "1.5px solid rgba(139,92,246,0.4)" : "2px dashed rgba(255,255,255,0.12)",
+                cursor: "pointer", background: imagePreview ? "rgba(139,92,246,0.05)" : "rgba(255,255,255,0.02)",
+                transition: "all 0.2s",
               }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Upload size={20} color="var(--text-muted)" />
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: imagePreview ? "rgba(139,92,246,0.15)" : "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Upload size={18} color={imagePreview ? "#8b5cf6" : "var(--text-muted)"} />
                 </div>
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 4 }}>
-                    {imagePreview ? "Changer d'image" : "Uploader une image HD"}
+                  <p style={{ fontSize: 14, fontWeight: 700, color: imagePreview ? "#8b5cf6" : "var(--text)", marginBottom: 3 }}>
+                    {imagePreview ? "✓ Image chargée — changer" : "Uploader une image HD"}
                   </p>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>PNG, JPG, WebP · Max 10 MB</p>
+                  <p style={{ fontSize: 11, color: "var(--text-muted)" }}>PNG, JPG, WebP · Max 10 MB</p>
                 </div>
                 <input type="file" name="image_file" accept="image/*" style={{ display: "none" }}
                   onChange={e => { const f = e.target.files?.[0]; if (f) { setImageUrl(""); setImagePreview(URL.createObjectURL(f)); } }} />
               </label>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "12px 0" }}>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
                 <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>OU URL</span>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
+                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
               </div>
 
               <div style={{ position: "relative" }}>
-                <ExternalLink size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
+                <ExternalLink size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
                 <input style={{ ...inp, paddingLeft: 40 }} placeholder="https://votre-cdn.com/image-hd.jpg" value={imageUrl}
-                  onChange={e => { setImageUrl(e.target.value); if (e.target.value) setImagePreview(e.target.value); else setImagePreview(""); }} />
+                  onChange={e => { setImageUrl(e.target.value); setImagePreview(e.target.value ? e.target.value : ""); }} />
               </div>
             </div>
 
-            {/* Preview panel — Instagram-style ad card */}
-            {imagePreview && (
-              <div style={{ borderRadius: 16, overflow: "hidden", background: "var(--surface2)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", flexDirection: "column" }}>
-                {/* Header: company identity */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "rgba(255,255,255,0.03)" }}>
-                  {companyLogo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={companyLogo} alt="" style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }} />
-                  ) : (
-                    <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "#fff" }}>
-                      {companyName.charAt(0).toUpperCase() || "W"}
-                    </div>
-                  )}
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", lineHeight: 1 }}>{companyName || "Votre entreprise"}</p>
-                    <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>Sponsorisé · Workie</p>
+            {/* Right: realistic format preview */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Aperçu · Format {format === "square" ? "carré" : "swipe"}
+              </p>
+
+              {format === "square" ? (
+                /* ── SQUARE preview: mini explore grid ── */
+                <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 14, padding: 10, border: "1px solid rgba(255,255,255,0.07)" }}>
+                  {/* Fake grid row above */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 6 }}>
+                    {["LVMH", "Nestlé"].map(n => (
+                      <div key={n} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 10, padding: "8px 10px", height: 52, display: "flex", alignItems: "flex-end" }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)" }}>{n}</span>
+                      </div>
+                    ))}
                   </div>
-                </div>
-
-                {/* Image */}
-                <div style={{ position: "relative", paddingTop: "56%", overflow: "hidden" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={imagePreview}
-                    alt="preview"
-                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                    onError={() => setImagePreview("")}
-                  />
-                </div>
-
-                {/* Footer: text + CTA */}
-                <div style={{ padding: "12px 14px", background: "rgba(255,255,255,0.02)" }}>
-                  {headline && <p style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 4, lineHeight: 1.3 }}>{headline}</p>}
-                  {bodyText && <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>{bodyText}</p>}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 10, color: "var(--text-muted)" }}>workie.ch</span>
-                    <div style={{ padding: "6px 14px", borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 12, fontWeight: 700, color: "#fff" }}>
-                      {ctaLabel || "En savoir plus"}
+                  {/* THE AD CARD */}
+                  <div style={{ borderRadius: 12, overflow: "hidden", border: "1.5px solid rgba(139,92,246,0.35)", background: "var(--surface)", marginBottom: 6, gridColumn: "1/-1" }}>
+                    <div style={{ position: "relative", paddingTop: "52%", overflow: "hidden", background: "rgba(255,255,255,0.05)" }}>
+                      {imagePreview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imagePreview} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
+                      ) : (
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <ImageIcon size={24} color="rgba(255,255,255,0.15)" />
+                        </div>
+                      )}
+                      <div style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", borderRadius: 50, padding: "2px 7px", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sponsorisé</div>
+                    </div>
+                    <div style={{ padding: "8px 10px 10px" }}>
+                      <p style={{ fontSize: 11, fontWeight: 800, color: "var(--text)", marginBottom: 5, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
+                      {bodyText && <p style={{ fontSize: 9, color: "var(--text-muted)", marginBottom: 6, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{bodyText}</p>}
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 9, fontWeight: 800, color: "#fff" }}>
+                        {ctaLabel || "En savoir plus"} →
+                      </div>
                     </div>
                   </div>
+                  {/* Fake grid row below */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                    {["UBS", "Rolex"].map(n => (
+                      <div key={n} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 10, padding: "8px 10px", height: 52, display: "flex", alignItems: "flex-end" }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)" }}>{n}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 9, color: "var(--text-muted)", textAlign: "center", marginTop: 8 }}>Votre annonce dans la grille d&apos;exploration</p>
                 </div>
-
-                <div style={{ padding: "6px 14px", borderTop: "1px solid rgba(255,255,255,0.05)", fontSize: 10, color: "var(--text-muted)", textAlign: "center" }}>
-                  Aperçu · L&apos;affichage final peut varier légèrement
+              ) : (
+                /* ── SWIPE preview: phone frame with overlay ── */
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div style={{
+                    width: 180, background: "#0a0a0a", borderRadius: 28, padding: "8px 6px",
+                    border: "2px solid rgba(255,255,255,0.12)",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.04)",
+                    position: "relative",
+                  }}>
+                    {/* Notch */}
+                    <div style={{ width: 60, height: 6, borderRadius: 3, background: "rgba(255,255,255,0.15)", margin: "0 auto 6px" }} />
+                    {/* Screen */}
+                    <div style={{ borderRadius: 20, overflow: "hidden", background: "rgba(255,255,255,0.05)", position: "relative" }}>
+                      {/* Background card (fake swipe card behind) */}
+                      <div style={{ height: 280, background: "rgba(255,255,255,0.03)", display: "flex", alignItems: "flex-end", padding: 10 }}>
+                        <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>Entreprise suivante…</p>
+                      </div>
+                      {/* Ad overlay */}
+                      <div style={{
+                        position: "absolute", inset: 0,
+                        background: "rgba(0,0,0,0.82)", backdropFilter: "blur(4px)",
+                        display: "flex", flexDirection: "column",
+                      }}>
+                        {/* Header */}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", background: "rgba(255,255,255,0.05)" }}>
+                          <span style={{ fontSize: 7, fontWeight: 800, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Sponsorisé</span>
+                          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1 }}>✕</span>
+                        </div>
+                        {/* Image */}
+                        <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+                          {imagePreview ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={imagePreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
+                          ) : (
+                            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <ImageIcon size={28} color="rgba(255,255,255,0.15)" />
+                            </div>
+                          )}
+                        </div>
+                        {/* Content */}
+                        <div style={{ padding: "10px 10px 12px" }}>
+                          <p style={{ fontSize: 11, fontWeight: 900, color: "#fff", marginBottom: 4, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
+                          {bodyText && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.65)", marginBottom: 8, lineHeight: 1.4 }}>{bodyText.slice(0, 60)}{bodyText.length > 60 ? "…" : ""}</p>}
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <div style={{ flex: 1, padding: "6px 8px", borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 8, fontWeight: 800, color: "#fff", textAlign: "center" }}>
+                              {ctaLabel || "En savoir plus"}
+                            </div>
+                            <div style={{ padding: "6px 8px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.2)", fontSize: 8, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Ignorer</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Home indicator */}
+                    <div style={{ width: 50, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)", margin: "6px auto 0" }} />
+                  </div>
+                  <p style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 10, textAlign: "center" }}>S&apos;affiche tous les 10 swipes</p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Text fields */}
@@ -282,7 +353,7 @@ export function NewCampaignForm({
             <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>URL de destination *</label>
             <div style={{ position: "relative" }}>
               <ExternalLink size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
-              <input name="cta_url" required style={{ ...inp, paddingLeft: 42 }} placeholder="https://votre-site.ch" />
+              <input name="cta_url" required style={{ ...inp, paddingLeft: 42 }} placeholder="https://votre-site.ch" defaultValue={prefill?.ctaUrl ?? ""} />
             </div>
           </div>
         </div>
