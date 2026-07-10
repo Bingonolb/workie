@@ -41,14 +41,16 @@ export function NewCampaignForm() {
   const [selectedCantons, setSelectedCantons] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [dailyBudget, setDailyBudget] = useState(20);
-  const [totalBudget, setTotalBudget] = useState(100);
+  const [totalBudget, setTotalBudget] = useState(200);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [imageUrl, setImageUrl] = useState("");
 
   const cpm = calculateCPM(format, selectedCantons, selectedSectors);
   const dailyImpressions = estimateDailyImpressions(dailyBudget, cpm);
   const dailyReach = estimateDailyReach(dailyBudget, cpm);
-  const durationDays = dailyBudget > 0 ? Math.floor(totalBudget / dailyBudget) : 0;
+  const effectiveTotal = Math.max(totalBudget, dailyBudget);
+  const durationDays = dailyBudget > 0 ? Math.floor(effectiveTotal / dailyBudget) : 0;
+  const durationLabel = durationDays >= 30 ? `${Math.round(durationDays / 30)}mois` : `${durationDays}j`;
 
   const toggleCanton = (code: string) =>
     setSelectedCantons(p => p.includes(code) ? p.filter(c => c !== code) : [...p, code]);
@@ -184,13 +186,17 @@ export function NewCampaignForm() {
           <div>
             <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Budget journalier (CHF)</label>
             <input type="range" min={5} max={500} step={5} value={dailyBudget}
-              onChange={e => { const v = Number(e.target.value); setDailyBudget(v); if (totalBudget < v) setTotalBudget(v); }}
+              onChange={e => setDailyBudget(Number(e.target.value))}
               style={{ width: "100%", accentColor: "#8b5cf6" }} />
-            <p style={{ fontSize: 18, fontWeight: 900, color: "#8b5cf6", marginTop: 4 }}>CHF {dailyBudget}</p>
+            <p style={{ fontSize: 18, fontWeight: 900, color: "#8b5cf6", marginTop: 4 }}>CHF {dailyBudget}/j</p>
           </div>
           <div>
-            <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>Budget total (CHF)</label>
-            <input type="range" min={dailyBudget} max={5000} step={10} value={totalBudget}
+            <label style={{ fontSize: 13, color: "var(--text-muted)", display: "block", marginBottom: 6 }}>
+              Budget total (CHF) <span style={{ fontSize: 11, color: totalBudget < dailyBudget ? "#ef4444" : "var(--text-muted)" }}>
+                {totalBudget < dailyBudget ? "⚠ doit être ≥ journalier" : ""}
+              </span>
+            </label>
+            <input type="range" min={5} max={5000} step={10} value={totalBudget}
               onChange={e => setTotalBudget(Number(e.target.value))}
               style={{ width: "100%", accentColor: "#f97316" }} />
             <p style={{ fontSize: 18, fontWeight: 900, color: "#f97316", marginTop: 4 }}>CHF {totalBudget}</p>
@@ -216,7 +222,7 @@ export function NewCampaignForm() {
               { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "coût / 1 000 vues" },
               { label: "Vues/jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions estimées" },
               { label: "Reach/jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes uniques" },
-              { label: "Durée", value: `${durationDays}j`, sub: "au budget total" },
+              { label: "Durée", value: durationLabel, sub: `≈ ${durationDays} jours` },
             ].map(({ label, value, sub }) => (
               <div key={label} style={{ textAlign: "center" }}>
                 <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</p>
