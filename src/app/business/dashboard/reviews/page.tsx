@@ -48,7 +48,7 @@ function ReplyForm({ reviewId, existing, onSuccess }: { reviewId: string; existi
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "8px 14px", cursor: "pointer" }}>
+      <button onClick={() => { setText(existing ?? ""); setOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "8px 14px", cursor: "pointer" }}>
         <MessageCircle size={14} /> {existing ? "Modifier la réponse" : "Répondre à cet avis"}
       </button>
     );
@@ -75,7 +75,7 @@ function ReplyForm({ reviewId, existing, onSuccess }: { reviewId: string; existi
         <button type="submit" disabled={pending || text.trim().length < 10} style={{ padding: "9px 20px", borderRadius: 8, background: text.trim().length >= 10 ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface2)", color: text.trim().length >= 10 ? "#fff" : "var(--text-muted)", border: "none", fontWeight: 700, fontSize: 13, cursor: text.trim().length >= 10 ? "pointer" : "not-allowed", opacity: pending ? 0.6 : 1 }}>
           {pending ? "Publication..." : "Publier la réponse"}
         </button>
-        <button type="button" onClick={() => setOpen(false)} style={{ padding: "9px 16px", borderRadius: 8, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+        <button type="button" onClick={() => { setOpen(false); setText(existing ?? ""); }} style={{ padding: "9px 16px", borderRadius: 8, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
           Annuler
         </button>
       </div>
@@ -169,13 +169,18 @@ function ReviewCard({ review, onReload }: { review: Review; onReload: () => void
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [filter, setFilter] = useState<"all" | "unanswered">("all");
 
   const load = () => {
-    getBusinessReviews().then(r => {
-      setReviews((r.reviews as Review[]) ?? []);
-      setLoading(false);
-    });
+    setLoadError("");
+    getBusinessReviews()
+      .then(r => {
+        if (r.error) setLoadError(r.error);
+        setReviews((r.reviews as Review[]) ?? []);
+      })
+      .catch(e => setLoadError((e as Error).message))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -199,6 +204,12 @@ export default function ReviewsPage() {
           </button>
         ))}
       </div>
+
+      {loadError && (
+        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 16px", fontSize: 13, color: "#ef4444", marginBottom: 20 }}>
+          Erreur de chargement : {loadError}
+        </div>
+      )}
 
       {loading ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

@@ -257,20 +257,29 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [actionError, setActionError] = useState("");
+
   const load = () => {
-    getBusinessJobs().then(r => { setJobs((r.jobs as Job[]) ?? []); setLoading(false); });
+    getBusinessJobs()
+      .then(r => { setJobs((r.jobs as Job[]) ?? []); })
+      .catch(e => setActionError((e as Error).message))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
 
   const handleToggle = async (id: string, current: boolean) => {
-    await toggleJobOffer(id, !current);
+    setActionError("");
+    const res = await toggleJobOffer(id, !current);
+    if (res.error) { setActionError(res.error); return; }
     setJobs(prev => prev.map(j => j.id === id ? { ...j, is_active: !current } : j));
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Supprimer cette offre définitivement ?")) return;
-    await deleteJobOffer(id);
+    setActionError("");
+    const res = await deleteJobOffer(id);
+    if (res.error) { setActionError(res.error); return; }
     setJobs(prev => prev.filter(j => j.id !== id));
   };
 
@@ -279,6 +288,11 @@ export default function JobsPage() {
 
   return (
     <div className="biz-page" style={{ maxWidth: 900 }}>
+      {actionError && (
+        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#ef4444", marginBottom: 20 }}>
+          {actionError}
+        </div>
+      )}
       <div className="biz-jobs-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, gap: 16 }}>
         <div>
           <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Offres d&apos;emploi</h1>

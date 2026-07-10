@@ -144,15 +144,15 @@ export function ReviewForm({ companyId }: { companyId: string }) {
     && ratingOverall > 0 && !!wouldRecommend && charteAccepted;
 
   const goNext = () => {
+    setStep1Err("");
+    setStep2Err("");
     if (step === 0) {
       if (!jobTitle.trim()) { setStep1Err("Le poste est obligatoire."); return; }
       if (!durationRange) { setStep1Err("La durée est obligatoire."); return; }
-      setStep1Err("");
     }
     if (step === 1) {
       if (ratingOverall === 0) { setStep2Err("La note globale est obligatoire."); return; }
       if (!wouldRecommend) { setStep2Err("Indiquer si tu recommanderais est obligatoire."); return; }
-      setStep2Err("");
     }
     setStep(s => s + 1);
   };

@@ -199,7 +199,8 @@ export async function approveClaim(
 
     // If forcing a transfer, revoke previous owner's access first
     if (existingOwnerProfile && force) {
-      await adminClient.from("profiles").update({ claimed_company_id: null }).eq("id", existingOwnerProfile.id);
+      const { error: revokeErr } = await adminClient.from("profiles").update({ claimed_company_id: null }).eq("id", existingOwnerProfile.id);
+      if (revokeErr) return { error: `Impossible de révoquer l'accès précédent : ${revokeErr.message}` };
     }
 
     // Check if the work_email already has an account

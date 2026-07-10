@@ -255,16 +255,28 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
   }
 }
 
-export async function toggleJobOffer(id: string, is_active: boolean): Promise<void> {
-  const { supabase, company } = await requireBusiness();
-  await supabase.from("job_offers").update({ is_active }).eq("id", id).eq("company_id", company.id);
-  revalidatePath("/business/dashboard/jobs");
+export async function toggleJobOffer(id: string, is_active: boolean): Promise<{ error?: string }> {
+  try {
+    const { supabase, company } = await requireBusiness();
+    const { error } = await supabase.from("job_offers").update({ is_active }).eq("id", id).eq("company_id", company.id);
+    if (error) return { error: error.message };
+    revalidatePath("/business/dashboard/jobs");
+    return {};
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 }
 
-export async function deleteJobOffer(id: string): Promise<void> {
-  const { supabase, company } = await requireBusiness();
-  await supabase.from("job_offers").delete().eq("id", id).eq("company_id", company.id);
-  revalidatePath("/business/dashboard/jobs");
+export async function deleteJobOffer(id: string): Promise<{ error?: string }> {
+  try {
+    const { supabase, company } = await requireBusiness();
+    const { error } = await supabase.from("job_offers").delete().eq("id", id).eq("company_id", company.id);
+    if (error) return { error: error.message };
+    revalidatePath("/business/dashboard/jobs");
+    return {};
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 }
 
 export async function submitClaim(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {

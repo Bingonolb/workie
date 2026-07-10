@@ -90,17 +90,24 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   return { success: true };
 }
 
-export async function voteHelpful(reviewId: string): Promise<void> {
+export async function voteHelpful(reviewId: string): Promise<{ error?: string; alreadyVoted?: boolean }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) return { error: "Non authentifié" };
 
   const { error: voteErr } = await supabase
     .from("review_votes")
     .insert({ user_id: user.id, review_id: reviewId });
 
-  if (voteErr) return; // already voted
+  if (voteErr) return { alreadyVoted: true }; // unique constraint = already voted
 
-  await supabase.rpc("increment_helpful", { review_id: reviewId });
+  const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
+  if (rpcErr) {
+    // Rollback the vote insert to keep counts consistent
+    await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
+    return { error: rpcErr.message };
+  }
+
   revalidatePath("/", "layout");
+  return {};
 }
