@@ -198,7 +198,6 @@ export function ExploreFilters({
                   return (
                     <div
                       key={s.id}
-                      onPointerDown={e => e.preventDefault()}
                       onClick={() => {
                         setInput(s.name);
                         submitSearch(s.name);
