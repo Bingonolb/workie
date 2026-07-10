@@ -76,13 +76,30 @@ a { color: inherit; }
 /* ─── Page wrappers ─────────────────────────────────────────────── */
 
 /* Prevent any page from overflowing horizontally */
-main, .page-main, .page-main-sm, .page-main-md, .page-root {
+main, .page-main, .page-main-sm, .page-main-md {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
+}
+
+/* Page root: flex column like the business layout — this is what blocks overflow */
+.page-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg);
   overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
 }
-/* Also catch any deeply nested div wrapping pages */
-.page-root { min-height: 100dvh; background: var(--bg); }
+
+/* All direct children of page-root get min-width: 0 so they can't push wider */
+.page-root > * {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
 
 .page-main    { max-width: 1200px; margin: 0 auto; padding: 36px 32px 80px; }
 .page-main-sm { max-width: 900px;  margin: 0 auto; padding: 36px 32px 80px; }
