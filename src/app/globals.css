@@ -485,6 +485,29 @@ main, .page-main, .page-main-sm, .page-main-md {
   .ranking-sectors button { flex-shrink: 0; }
 }
 
+/* ─── Jobs page — mobile card layout ───────────────────────────── */
+.job-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+@media (max-width: 600px) {
+  .job-card {
+    grid-template-columns: 1fr;
+  }
+  .job-card-cta {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+  .job-card-cta a {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
 /* ─── Form polish — global ──────────────────────────────────────── */
 
 /* Brand focus ring on all inputs & textareas & selects */

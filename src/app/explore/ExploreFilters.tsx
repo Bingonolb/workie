@@ -47,7 +47,7 @@ export function ExploreFilters({
   const view = current.view ?? "grid";
   const sort = current.sort ?? "score";
   const activeCanton = cantons.find(c => c.code === current.canton);
-  const activeCount = (current.sector ? 1 : 0) + (current.canton ? 1 : 0) + (sort !== "score" ? 1 : 0);
+  const activeCount = (current.sector ? 1 : 0) + (current.canton ? 1 : 0) + (sort !== "score" ? 1 : 0) + (current.q ? 1 : 0);
 
   // Desktop: fetch suggestions
   useEffect(() => {
@@ -140,13 +140,15 @@ export function ExploreFilters({
 
   const clearAll = () => {
     setInput("");
+    setMobileInput("");
     setSuggestions([]);
+    setMobileSearchOpen(false);
     setShowPanel(false);
     startTransition(() => router.push(pathname + (view !== "grid" ? `?view=${view}` : "")));
   };
 
   const openMobileSearch = () => {
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
+    if (typeof window !== "undefined" && window.innerWidth < 640) {
       setMobileSearchOpen(true);
     }
   };

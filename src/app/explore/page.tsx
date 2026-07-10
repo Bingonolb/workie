@@ -58,7 +58,18 @@ export default async function ExplorePage({
 }: {
   searchParams: Promise<{ sector?: string; canton?: string; q?: string; view?: string; page?: string; sort?: string }>;
 }) {
-  const params = await searchParams;
+  const raw = await searchParams;
+  // Sanitize all URL params
+  const VALID_SORTS = ["score", "rating", "reviews", "name"] as const;
+  const VALID_VIEWS = ["grid", "swipe"] as const;
+  const params = {
+    sector: raw.sector && SECTORS.includes(raw.sector) ? raw.sector : undefined,
+    canton: raw.canton && CANTONS.some(c => c.code === raw.canton) ? raw.canton : undefined,
+    q: raw.q ? raw.q.slice(0, 100).trim() || undefined : undefined,
+    view: raw.view && (VALID_VIEWS as readonly string[]).includes(raw.view) ? raw.view : undefined,
+    page: raw.page,
+    sort: raw.sort && (VALID_SORTS as readonly string[]).includes(raw.sort) ? raw.sort : undefined,
+  };
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
@@ -122,7 +133,7 @@ export default async function ExplorePage({
 
         <ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params}  />
 
-        {!user && total > companies.length && (
+        {!user && companies.length > 0 && total > companies.length && (
           <div style={{
             background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
             border: "1px solid rgba(139,92,246,0.2)",

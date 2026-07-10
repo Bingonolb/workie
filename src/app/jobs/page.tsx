@@ -128,7 +128,7 @@ export default async function JobsPage() {
               const contractStyle = job.contract_type ? (CONTRACT_COLORS[job.contract_type] ?? { bg: "var(--surface2)", color: "var(--text-muted)" }) : null;
 
               return (
-                <div key={job.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "22px 24px", display: "grid", gridTemplateColumns: "1fr auto", gap: 16, alignItems: "center" }}>
+                <div key={job.id} className="job-card" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "22px 24px" }}>
                   <div>
                     {/* Job title + badges */}
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
@@ -192,7 +192,7 @@ export default async function JobsPage() {
                   </div>
 
                   {/* CTA */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
+                  <div className="job-card-cta" style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
                     {job.apply_url ? (
                       <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
                         style={{ display: "flex", alignItems: "center", gap: 6, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>

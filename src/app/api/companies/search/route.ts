@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q")?.trim() ?? "";
+  const q = (searchParams.get("q") ?? "").trim().slice(0, 100);
   if (q.length < 1) return NextResponse.json({ companies: [] });
 
   const supabase = await createClient();
