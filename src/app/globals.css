@@ -258,17 +258,21 @@ main, .page-main, .page-main-sm, .page-main-md {
   flex-shrink: 0;
 }
 @media (max-width: 768px) {
-  .biz-layout  { flex-direction: column !important; }
-  .biz-sidebar {
-    width: 100%;
-    min-height: unset;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-  }
-  .biz-sidebar nav { flex-direction: row !important; padding: 8px 12px !important; overflow-x: auto; white-space: nowrap; }
-  .biz-sidebar nav a, .biz-sidebar nav button { margin-bottom: 0 !important; flex-shrink: 0; }
-  .biz-sidebar-header { display: none; }
+  .biz-sidebar { display: none; }
+  .biz-mobile-header { display: flex !important; }
+}
+.biz-mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--nav-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 40;
 }
 
 /* ─── Landing page ──────────────────────────────────────────────── */
