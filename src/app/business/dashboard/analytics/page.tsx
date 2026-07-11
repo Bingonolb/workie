@@ -1,8 +1,6 @@
 import { getBusinessAnalytics } from "@/lib/actions/business";
-import { TrendingUp, Users, Star, ThumbsUp, Eye, BarChart2 } from "lucide-react";
+import { TrendingUp, Users, Star, ThumbsUp, Eye, BarChart2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
 
 function Bar({ pct, color, label, value }: { pct: number; color: string; label: string; value: string }) {
   return (
@@ -32,12 +30,7 @@ export default async function AnalyticsPage() {
   const data = await getBusinessAnalytics();
 
   if ("error" in data && data.error) {
-    return (
-      <div className="page-root">
-        <Navbar />
-        <div className="biz-page" style={{ color: "#ef4444" }}>{data.error}</div>
-      </div>
-    );
+    return <div className="biz-page" style={{ color: "#ef4444" }}>{data.error}</div>;
   }
 
   const {
@@ -67,9 +60,7 @@ export default async function AnalyticsPage() {
   ];
 
   return (
-    <div className="page-root">
-      <Navbar />
-      <div className="biz-page" style={{ maxWidth: 1000 }}>
+    <div className="biz-page" style={{ maxWidth: 1000 }}>
         <Link href="/business/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 16 }}>
           <ArrowLeft size={14} /> Dashboard
         </Link>
@@ -321,7 +312,6 @@ export default async function AnalyticsPage() {
             <p style={{ fontSize: 14 }}>Partagez votre fiche Workie en interne pour commencer à collecter des données.</p>
           </div>
         )}
-      </div>
     </div>
   );
 }

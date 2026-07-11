@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Star, BarChart3, Briefcase, Settings, Eye, LogOut, Compass, Trophy } from "lucide-react";
+import { LayoutDashboard, Star, BarChart3, Briefcase, Settings, Eye, LogOut, Compass, Trophy, Megaphone } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
@@ -10,6 +10,7 @@ const NAV = [
   { href: "/business/dashboard/reviews", label: "Avis & Réponses", icon: <Star size={17} /> },
   { href: "/business/dashboard/analytics", label: "Analytics", icon: <BarChart3 size={17} /> },
   { href: "/business/dashboard/jobs", label: "Offres d'emploi", icon: <Briefcase size={17} /> },
+  { href: "/business/dashboard/ads", label: "Publicités", icon: <Megaphone size={17} /> },
   { href: "/business/dashboard/profile", label: "Ma fiche", icon: <Settings size={17} /> },
 ];
 

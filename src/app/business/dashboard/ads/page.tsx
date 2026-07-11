@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft } from "lucide-react";
 import { getBusinessCampaigns } from "@/lib/actions/ads";
-import { Navbar } from "@/components/Navbar";
 
 const STATUS_CONFIG = {
   pending:   { label: "En attente",  color: "#f59e0b", bg: "rgba(245,158,11,0.1)",   icon: <Clock size={12} />,       dot: "#f59e0b" },
@@ -39,9 +38,7 @@ export default async function AdsPage() {
   const activeCampaigns = campaigns.filter(c => c.status === "active");
 
   return (
-    <div className="page-root">
-      <Navbar />
-      <div className="biz-page" style={{ maxWidth: 960 }}>
+    <div className="biz-page" style={{ maxWidth: 960 }}>
 
         {/* ── Header ── */}
         <Link href="/business/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
@@ -273,7 +270,6 @@ export default async function AdsPage() {
             ))}
           </div>
         </div>
-      </div>
     </div>
   );
 }

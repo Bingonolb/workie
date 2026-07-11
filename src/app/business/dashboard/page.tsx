@@ -182,13 +182,32 @@ export default async function BusinessDashboardPage() {
         </div>
       )}
 
+      {/* Pub CTA banner */}
+      <Link href="/business/dashboard/ads" style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20,
+        marginBottom: 20, padding: "20px 24px", borderRadius: 18, textDecoration: "none",
+        background: "linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(249,115,22,0.1) 100%)",
+        border: "1px solid rgba(139,92,246,0.3)",
+        flexWrap: "wrap",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📣</div>
+          <div>
+            <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 3 }}>Boostez votre visibilité avec une pub</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Sponsorisez votre marque auprès de milliers de candidats actifs en Suisse.</p>
+          </div>
+        </div>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", flexShrink: 0 }}>
+          Créer une campagne <ArrowRight size={14} />
+        </span>
+      </Link>
+
       {/* Quick actions */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 28 }}>
         {[
           { href: "/business/dashboard/reviews", label: "Répondre aux avis", desc: "Gérez votre réputation", color: "#8b5cf6" },
           { href: "/business/dashboard/jobs", label: "Publier une offre", desc: "Attirez des candidats", color: "#f97316" },
           { href: "/business/dashboard/profile", label: "Compléter la fiche", desc: "Logo, photos, réseaux", color: "#10b981" },
-          { href: "/business/dashboard/ads", label: "Publicités", desc: "Sponsorisez votre marque", color: "#ec4899" },
         ].map(({ href, label, desc, color }) => (
           <Link key={href} href={href} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 20px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div>

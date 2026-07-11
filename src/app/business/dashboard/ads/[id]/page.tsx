@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, Clock, CheckCircle, XCircle, PauseCircle } from "lucide-react";
 import { getBusinessCampaigns, getCampaignDailyStats, getCampaignCantonStats } from "@/lib/actions/ads";
-import { Navbar } from "@/components/Navbar";
 import { AdStatsChart } from "../AdStatsChart";
 
 const STATUS_CONFIG = {
@@ -51,9 +50,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   const avgDailyClk = Math.round(campaign.click_count / durationDays);
 
   return (
-    <div className="page-root">
-      <Navbar />
-      <div className="biz-page" style={{ maxWidth: 860 }}>
+    <div className="biz-page" style={{ maxWidth: 860 }}>
         <Link href="/business/dashboard/ads" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
           <ArrowLeft size={14} /> Mes publicités
         </Link>
@@ -240,7 +237,6 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>📍 La répartition géographique apparaîtra dès les premières impressions.</p>
           </div>
         )}
-      </div>
     </div>
   );
 }
