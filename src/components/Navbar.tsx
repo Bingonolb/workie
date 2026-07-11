@@ -48,7 +48,7 @@ export async function Navbar() {
                 background: "rgba(139,92,246,0.12)",
                 border: "1px solid rgba(139,92,246,0.25)",
               }}>
-                <LayoutDashboard size={14} /> Tableau de bord
+                <LayoutDashboard size={14} /> Dashboard
               </Link>
             ) : (
               <>

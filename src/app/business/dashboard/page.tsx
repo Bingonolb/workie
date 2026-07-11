@@ -60,7 +60,7 @@ export default async function BusinessDashboardPage() {
       {/* Header */}
       <div style={{ marginBottom: 36 }}>
         <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>
-          Bonjour 👋
+          Dashboard
         </h1>
         <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
           Voici l&apos;état de votre réputation employeur pour <strong style={{ color: "var(--text)" }}>{String(company?.name ?? "")}</strong>.

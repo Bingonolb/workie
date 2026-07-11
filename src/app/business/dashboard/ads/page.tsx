@@ -20,8 +20,9 @@ function budgetPct(spent: number, total: number) {
   return Math.min(100, Math.round((spent / total) * 100));
 }
 
-export default async function AdsPage() {
-  const { campaigns = [], error } = await getBusinessCampaigns();
+export default async function AdsPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
+  const [{ campaigns = [], error }, sp] = await Promise.all([getBusinessCampaigns(), searchParams]);
+  const activeTab = sp.tab ?? "all";
 
   const counts = {
     all: campaigns.length,
@@ -114,7 +115,7 @@ export default async function AdsPage() {
               </p>
             )}
 
-            {/* ── Status tabs (client-side filtering via CSS) ── */}
+            {/* ── Status tabs ── */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
               {([
                 ["all", "Toutes", counts.all],
@@ -123,14 +124,16 @@ export default async function AdsPage() {
                 ["paused", "Pausées", counts.paused],
                 ["completed", "Terminées", counts.completed],
                 ["rejected", "Rejetées", counts.rejected],
-              ] as [string, string, number][]).filter(([status, , n]) => status === "all" || n > 0).map(([status, label, n]) => (
+              ] as [string, string, number][]).filter(([status, , n]) => status === "all" || n > 0).map(([status, label, n]) => {
+                const isActive = activeTab === status;
+                return (
                 <a key={status} href={`?tab=${status}`} style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 600,
                   textDecoration: "none",
-                  border: "1px solid var(--border2)",
-                  background: "transparent",
-                  color: "var(--text-muted)",
+                  border: isActive ? "1px solid #8b5cf6" : "1px solid var(--border2)",
+                  background: isActive ? "rgba(139,92,246,0.12)" : "transparent",
+                  color: isActive ? "#8b5cf6" : "var(--text-muted)",
                 }}>
                   {status !== "all" && (
                     <span style={{ width: 7, height: 7, borderRadius: "50%", background: STATUS_CONFIG[status as keyof typeof STATUS_CONFIG]?.dot ?? "#6b7280", display: "inline-block" }} />
@@ -138,12 +141,12 @@ export default async function AdsPage() {
                   {label}
                   {n > 0 && <span style={{ fontSize: 11, background: "rgba(255,255,255,0.07)", padding: "1px 6px", borderRadius: 50 }}>{n}</span>}
                 </a>
-              ))}
+              )})}
             </div>
 
             {/* ── Campaign list ── */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {campaigns.map(c => {
+              {campaigns.filter(c => activeTab === "all" || c.status === activeTab).map(c => {
                 const st = STATUS_CONFIG[c.status] ?? STATUS_CONFIG.pending;
                 const pct = budgetPct(Number(c.spent_chf), Number(c.total_budget_chf));
                 const remaining = Math.max(0, Number(c.total_budget_chf) - Number(c.spent_chf));

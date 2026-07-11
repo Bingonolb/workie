@@ -6,7 +6,7 @@ import { LayoutDashboard, Star, BarChart3, Briefcase, Settings, Eye, LogOut, Com
 import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
-  { href: "/business/dashboard", label: "Vue d'ensemble", icon: <LayoutDashboard size={17} />, exact: true },
+  { href: "/business/dashboard", label: "Dashboard", icon: <LayoutDashboard size={17} />, exact: true },
   { href: "/business/dashboard/reviews", label: "Avis & Réponses", icon: <Star size={17} /> },
   { href: "/business/dashboard/analytics", label: "Analytics", icon: <BarChart3 size={17} /> },
   { href: "/business/dashboard/jobs", label: "Offres d'emploi", icon: <Briefcase size={17} /> },
