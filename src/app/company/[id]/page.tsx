@@ -93,12 +93,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const supabase = await createClient();
   const [company, reviews, user, favIds, repliesResult, jobsResult] = await Promise.all([
-    getCompany(id),
-    getReviews(id),
-    getUser(),
-    getUserFavoriteIds(),
-    supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id),
-    supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false }),
+    getCompany(id).catch(() => null),
+    getReviews(id).catch(() => [] as Review[]),
+    getUser().catch(() => null),
+    getUserFavoriteIds().catch(() => [] as string[]),
+    Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
+    Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
   ]);
   const repliesMap = Object.fromEntries((repliesResult.data ?? []).map(r => [r.review_id, r]));
   const jobs = jobsResult.data ?? [];

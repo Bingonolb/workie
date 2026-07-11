@@ -76,13 +76,13 @@ export default async function ExplorePage({
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
   const [user, favIds, flameIds, isAdmin, bizCompanyId, squareAds, swipeAds] = await Promise.all([
-    getUser(),
-    getUserFavoriteIds(),
-    getUserFlameIds(),
-    (await import("@/lib/supabase/server")).getIsAdmin(),
-    (await import("@/lib/supabase/server")).getBusinessCompanyId(),
-    getActiveAds({ format: "square", canton: params.canton, sector: params.sector }),
-    getActiveAds({ format: "swipe" }),
+    getUser().catch(() => null),
+    getUserFavoriteIds().catch(() => [] as string[]),
+    getUserFlameIds().catch(() => [] as string[]),
+    import("@/lib/supabase/server").then(m => m.getIsAdmin()).catch(() => false),
+    import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
+    getActiveAds({ format: "square", canton: params.canton, sector: params.sector }).catch(() => []),
+    getActiveAds({ format: "swipe" }).catch(() => []),
   ]);
   const isBusiness = !!bizCompanyId;
 
