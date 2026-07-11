@@ -13,9 +13,11 @@ export function ShareButton({ name, url }: { name: string; url: string }) {
         return;
       } catch { /* user cancelled */ }
     }
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard denied */ }
   };
 
   return (

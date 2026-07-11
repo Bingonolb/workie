@@ -172,6 +172,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
 
 function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; onDelete: () => void }) {
   const [expanded, setExpanded] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <div style={{ background: "var(--surface2)", border: `1px solid ${job.is_active ? "var(--border)" : "var(--border)"}`, borderRadius: 16, overflow: "hidden", opacity: job.is_active ? 1 : 0.65 }}>
@@ -215,11 +216,24 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
             style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {job.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
-          <button onClick={onDelete} title="Supprimer"
-            className="biz-action-btn"
-            style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", cursor: "pointer", color: "#ef4444", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Trash2 size={16} />
-          </button>
+          {confirmDelete ? (
+            <>
+              <button onClick={onDelete} title="Confirmer la suppression"
+                style={{ padding: "6px 12px", borderRadius: 8, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.4)", cursor: "pointer", color: "#ef4444", fontSize: 12, fontWeight: 700, minHeight: 44 }}>
+                Confirmer
+              </button>
+              <button onClick={() => setConfirmDelete(false)} title="Annuler"
+                style={{ padding: "6px 10px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", fontSize: 12, minHeight: 44 }}>
+                Annuler
+              </button>
+            </>
+          ) : (
+            <button onClick={() => setConfirmDelete(true)} title="Supprimer"
+              className="biz-action-btn"
+              style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", cursor: "pointer", color: "#ef4444", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Trash2 size={16} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -276,7 +290,6 @@ export default function JobsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer cette offre définitivement ?")) return;
     setActionError("");
     const res = await deleteJobOffer(id);
     if (res.error) { setActionError(res.error); return; }
