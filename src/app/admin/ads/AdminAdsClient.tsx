@@ -1,10 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, MousePointer, CheckCircle, XCircle, PauseCircle, ArrowLeft, ExternalLink } from "lucide-react";
+import { Eye, MousePointer, CheckCircle, XCircle, PauseCircle, ArrowLeft, ExternalLink, Calendar } from "lucide-react";
 import Link from "next/link";
 import { getAdminCampaigns, adminSetCampaignStatus } from "@/lib/actions/ads";
 import type { AdCampaign } from "@/lib/actions/ads";
+
+function daysRemaining(endDate: string | null): { label: string; urgent: boolean } {
+  if (!endDate) return { label: "Sans limite", urgent: false };
+  const diff = Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000);
+  if (diff < 0) return { label: "Expirée", urgent: true };
+  if (diff === 0) return { label: "Dernier jour", urgent: true };
+  return { label: `${diff}j restants`, urgent: diff <= 3 };
+}
 
 type Campaign = AdCampaign & { company_name: string; company_logo: string | null };
 
@@ -24,6 +32,7 @@ export function AdminAdsClient() {
   const [error, setError] = useState<string | null>(null);
   const [actionNote, setActionNote] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("pending");
 
   useEffect(() => {
@@ -35,14 +44,15 @@ export function AdminAdsClient() {
 
   const handleStatus = async (id: string, status: "active" | "paused" | "rejected") => {
     setBusy(id);
+    setActionError(null);
     const res = await adminSetCampaignStatus(id, status, actionNote[id]);
-    if (res.error) alert(res.error);
+    if (res.error) setActionError(res.error);
     else setCampaigns(prev => prev.map(c => c.id === id ? { ...c, status, admin_note: actionNote[id] ?? c.admin_note } : c));
     setBusy(null);
   };
 
   const filtered = campaigns.filter(c => filter === "all" || c.status === filter);
-  const counts: Record<string, number> = {};
+  const counts: Record<string, number> = { all: campaigns.length };
   campaigns.forEach(c => { counts[c.status] = (counts[c.status] ?? 0) + 1; });
 
   return (
@@ -54,6 +64,7 @@ export function AdminAdsClient() {
       <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>Validez, pausez ou rejetez les campagnes soumises par les entreprises.</p>
 
       {error && <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px", color: "#ef4444", fontSize: 14, marginBottom: 20 }}>{error}</div>}
+      {actionError && <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px", color: "#ef4444", fontSize: 14, marginBottom: 20 }}>⚠ {actionError}</div>}
 
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 24 }}>
         {[
@@ -113,6 +124,23 @@ export function AdminAdsClient() {
                     <span>CPM CHF {Number(c.cpm_chf).toFixed(2)}</span>
                     {c.target_cantons.length > 0 && <span>📍 {c.target_cantons.join(", ")}</span>}
                     {c.target_sectors.length > 0 && <span>🏭 {c.target_sectors.join(", ")}</span>}
+                  </div>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 6 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--text-muted)" }}>
+                      <Calendar size={11} /> {c.start_date}{c.end_date ? ` → ${c.end_date}` : ""}
+                    </span>
+                    {(() => {
+                      const { label, urgent } = daysRemaining(c.end_date);
+                      return (
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 50,
+                          background: urgent ? "rgba(239,68,68,0.1)" : "rgba(16,185,129,0.1)",
+                          color: urgent ? "#ef4444" : "#10b981",
+                          border: `1px solid ${urgent ? "rgba(239,68,68,0.25)" : "rgba(16,185,129,0.25)"}`,
+                        }}>
+                          {label}
+                        </span>
+                      );
+                    })()}
                   </div>
 
                   <a href={c.cta_url} target="_blank" rel="noopener noreferrer"

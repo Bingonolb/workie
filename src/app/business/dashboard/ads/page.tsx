@@ -10,6 +10,14 @@ const STATUS_CONFIG = {
   rejected:  { label: "Rejetée",     color: "#ef4444", bg: "rgba(239,68,68,0.1)",     icon: <XCircle size={12} />,     dot: "#ef4444" },
 } as const;
 
+function daysRemaining(endDate: string | null): { label: string; urgent: boolean } {
+  if (!endDate) return { label: "Sans limite", urgent: false };
+  const diff = Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000);
+  if (diff < 0) return { label: "Expirée", urgent: true };
+  if (diff === 0) return { label: "Dernier jour", urgent: true };
+  return { label: `${diff}j restants`, urgent: diff <= 3 };
+}
+
 function ctr(imp: number, clk: number) {
   if (!imp) return "–";
   return `${((clk / imp) * 100).toFixed(1)}%`;
@@ -234,8 +242,21 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                       >
                         <Copy size={11} /> Dupliquer
                       </Link>
-                      <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-muted)" }}>
-                        {c.start_date}{c.end_date ? ` → ${c.end_date}` : ""}
+                      <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                          {c.start_date}{c.end_date ? ` → ${c.end_date}` : ""}
+                        </span>
+                        {(() => {
+                          const { label, urgent } = daysRemaining(c.end_date);
+                          return (
+                            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 50,
+                              background: urgent ? "rgba(239,68,68,0.1)" : "rgba(16,185,129,0.08)",
+                              color: urgent ? "#ef4444" : "#10b981",
+                            }}>
+                              {label}
+                            </span>
+                          );
+                        })()}
                       </span>
                     </div>
                   </div>
