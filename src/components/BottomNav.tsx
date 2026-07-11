@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Trophy, TrendingUp, Flame, User, LayoutDashboard, Star, BarChart3, Briefcase, Settings } from "lucide-react";
+import { Compass, Trophy, TrendingUp, Flame, User, LayoutDashboard, Star, Briefcase, Settings } from "lucide-react";
 
 const USER_LINKS = [
   { href: "/explore",   Icon: Compass,    label: "Explorer",    exact: true },
@@ -12,9 +12,9 @@ const USER_LINKS = [
 ];
 
 const BIZ_LINKS = [
-  { href: "/business/dashboard",           Icon: LayoutDashboard, label: "Tableau",   exact: true },
+  { href: "/explore",                      Icon: Compass,         label: "Explorer",  exact: true },
+  { href: "/business/dashboard",           Icon: LayoutDashboard, label: "Dashboard", exact: true },
   { href: "/business/dashboard/reviews",   Icon: Star,            label: "Avis",      exact: false },
-  { href: "/business/dashboard/analytics", Icon: BarChart3,       label: "Analytics", exact: false },
   { href: "/business/dashboard/jobs",      Icon: Briefcase,       label: "Offres",    exact: false },
   { href: "/business/dashboard/profile",   Icon: Settings,        label: "Ma fiche",  exact: false },
 ];

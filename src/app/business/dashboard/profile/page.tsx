@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState, useActionState } from "react";
+import { useRouter } from "next/navigation";
 import { getBusinessCompany, updateBusinessProfile } from "@/lib/actions/business";
-import { CheckCircle, Upload } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { CheckCircle, Upload, LogOut } from "lucide-react";
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
@@ -16,9 +18,16 @@ const lbl: React.CSSProperties = {
 type Company = Record<string, string | number | boolean | null | undefined>;
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const [state, action, pending] = useActionState(updateBusinessProfile, undefined);
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+  }
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
@@ -139,6 +148,16 @@ export default function ProfilePage() {
           </button>
         </div>
       </form>
+
+      {/* Se déconnecter — visible surtout sur mobile (sidebar masquée) */}
+      <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--border)" }}>
+        <button
+          onClick={handleLogout}
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 18px", borderRadius: 10, border: "1px solid rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.05)", color: "#ef4444", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+        >
+          <LogOut size={16} /> Se déconnecter
+        </button>
+      </div>
     </div>
   );
 }
