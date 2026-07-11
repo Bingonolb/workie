@@ -16,8 +16,8 @@ export default async function ProfilePage() {
 
   const [{ data: profileRaw }, reviews, favIds] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    getUserReviews(),
-    getUserFavoriteIds(),
+    getUserReviews().catch(() => [] as Awaited<ReturnType<typeof getUserReviews>>),
+    getUserFavoriteIds().catch(() => [] as string[]),
   ]);
 
   const profile = profileRaw as Profile | null;

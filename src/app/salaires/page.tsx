@@ -43,11 +43,12 @@ export default async function SalairesPage() {
   const supabase = await createClient();
 
   // Fetch all reviews with salary + company sector
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select("salary_chf, job_title, employment_type, company_id, companies(sector)")
-    .gt("salary_chf", 10000)
-    .lt("salary_chf", 500000);
+  const { data: reviews } = await Promise.resolve(
+    supabase.from("reviews")
+      .select("salary_chf, job_title, employment_type, company_id, companies(sector)")
+      .gt("salary_chf", 10000)
+      .lt("salary_chf", 500000)
+  ).catch(() => ({ data: null }));
 
   const all = (reviews ?? []) as unknown as Array<{
     salary_chf: number;

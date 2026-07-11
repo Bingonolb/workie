@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 export default async function RankingPage() {
   const supabase = await createClient();
   const [companies, { count: reviewCount }] = await Promise.all([
-    getTopCompanies(200),
-    supabase.from("reviews").select("*", { count: "exact", head: true }),
+    getTopCompanies(200).catch(() => [] as Company[]),
+    Promise.resolve(supabase.from("reviews").select("*", { count: "exact", head: true })).catch(() => ({ count: 0 })),
   ]);
   const typedCompanies = companies as Company[];
 

@@ -17,7 +17,7 @@ export default async function FavoritesPage() {
   const user = await getUser();
   if (!user) redirect("/login");
 
-  const companies = await getFavorites();
+  const companies = await getFavorites().catch(() => []);
   const favIds = companies.map(c => c.id);
 
   return (

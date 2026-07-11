@@ -53,11 +53,12 @@ function timeAgo(date: string) {
 
 export default async function JobsPage() {
   const supabase = await createClient();
-  const { data: jobs } = await supabase
-    .from("job_offers")
-    .select("id, title, location, contract_type, work_mode, experience_level, salary_range, description, apply_url, created_at, companies(id, name, city, sector, logo_url, is_verified, avg_rating, review_count)")
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
+  const { data: jobs } = await Promise.resolve(
+    supabase.from("job_offers")
+      .select("id, title, location, contract_type, work_mode, experience_level, salary_range, description, apply_url, created_at, companies(id, name, city, sector, logo_url, is_verified, avg_rating, review_count)")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+  ).catch(() => ({ data: null }));
 
   const allJobs = (jobs ?? []) as unknown as Job[];
 
