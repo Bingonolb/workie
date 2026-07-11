@@ -20,7 +20,7 @@ export async function getCompanies(filters?: {
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const sort = filters?.sort ?? "score";
+  const sort = filters?.sort ?? "recent";
   let query = supabase.from("companies").select("*", { count: "exact" });
 
   if (sort === "rating") {
@@ -29,8 +29,11 @@ export async function getCompanies(filters?: {
     query = query.order("review_count", { ascending: false }).order("avg_rating", { ascending: false }).order("name", { ascending: true });
   } else if (sort === "name") {
     query = query.order("name", { ascending: true });
-  } else {
+  } else if (sort === "score") {
     query = query.order("score", { ascending: false }).order("avg_rating", { ascending: false }).order("name", { ascending: true });
+  } else {
+    // "recent" — default: newest companies first
+    query = query.order("created_at", { ascending: false }).order("name", { ascending: true });
   }
 
   // Minimum 10 employees — exclude "1-10" range

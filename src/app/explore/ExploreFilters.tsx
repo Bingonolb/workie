@@ -45,9 +45,9 @@ export function ExploreFilters({
   const panelRef = useRef<HTMLDivElement>(null);
 
   const view = current.view ?? "grid";
-  const sort = current.sort ?? "score";
+  const sort = current.sort ?? "recent";
   const activeCanton = cantons.find(c => c.code === current.canton);
-  const activeCount = (current.sector ? 1 : 0) + (current.canton ? 1 : 0) + (sort !== "score" ? 1 : 0) + (current.q ? 1 : 0);
+  const activeCount = (current.sector ? 1 : 0) + (current.canton ? 1 : 0) + (sort !== "recent" ? 1 : 0) + (current.q ? 1 : 0);
 
   // Desktop: fetch suggestions
   useEffect(() => {
@@ -323,12 +323,13 @@ export function ExploreFilters({
                     <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Trier par</p>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {([
+                        { v: "recent", label: "Récentes" },
                         { v: "score", label: "Score" },
                         { v: "rating", label: "Meilleure note" },
                         { v: "reviews", label: "Plus d'avis" },
                         { v: "name", label: "A → Z" },
                       ] as const).map(({ v, label }) => (
-                        <button key={v} onClick={() => push("sort", v === "score" ? undefined : v)}
+                        <button key={v} onClick={() => push("sort", v === "recent" ? undefined : v)}
                           style={{
                             padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
                             border: sort === v ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
@@ -379,7 +380,7 @@ export function ExploreFilters({
       </div>
 
       {/* Active filter chips */}
-      {(current.q || current.sector || activeCanton || (sort !== "score" && view !== "swipe")) && (
+      {(current.q || current.sector || activeCanton || (sort !== "recent" && view !== "swipe")) && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
           {current.q && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#8b5cf6" }}>
@@ -399,9 +400,9 @@ export function ExploreFilters({
               <button onClick={() => push("canton", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
             </span>
           )}
-          {sort !== "score" && view !== "swipe" && (
+          {sort !== "recent" && view !== "swipe" && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#8b5cf6" }}>
-              ↑ {sort === "rating" ? "Meilleure note" : sort === "reviews" ? "Plus d'avis" : "A→Z"}
+              ↑ {sort === "score" ? "Score" : sort === "rating" ? "Meilleure note" : sort === "reviews" ? "Plus d'avis" : "A→Z"}
               <button onClick={() => push("sort", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
             </span>
           )}

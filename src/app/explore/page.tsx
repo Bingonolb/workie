@@ -62,7 +62,7 @@ export default async function ExplorePage({
 }) {
   const raw = await searchParams;
   // Sanitize all URL params
-  const VALID_SORTS = ["score", "rating", "reviews", "name"] as const;
+  const VALID_SORTS = ["recent", "score", "rating", "reviews", "name"] as const;
   const VALID_VIEWS = ["grid", "swipe"] as const;
   const params = {
     sector: raw.sector && SECTORS.includes(raw.sector) ? raw.sector : undefined,
