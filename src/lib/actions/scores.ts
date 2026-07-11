@@ -21,7 +21,8 @@ export async function addFlame(companyId: string): Promise<void> {
   } else {
     await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "flame", points: 1 });
   }
-  revalidatePath("/", "layout");
+  revalidatePath("/explore");
+  revalidatePath(`/company/${companyId}`);
 }
 
 export async function addBoost(companyId: string): Promise<void> {
@@ -40,7 +41,8 @@ export async function addBoost(companyId: string): Promise<void> {
   if (existing) return;
 
   await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
-  revalidatePath("/", "layout");
+  revalidatePath("/explore");
+  revalidatePath(`/company/${companyId}`);
 }
 
 export async function addPenalty(companyId: string): Promise<void> {
@@ -62,12 +64,14 @@ export async function addPenalty(companyId: string): Promise<void> {
 
   if (existing) {
     await supabase.from("score_events").delete().eq("id", existing.id);
-    revalidatePath("/", "layout");
+    revalidatePath("/explore");
+    revalidatePath(`/company/${companyId}`);
     return;
   }
 
   await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
-  revalidatePath("/", "layout");
+  revalidatePath("/explore");
+  revalidatePath(`/company/${companyId}`);
 }
 
 export async function getTopCompanies(limit = 200) {

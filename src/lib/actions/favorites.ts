@@ -17,7 +17,8 @@ export async function toggleFavorite(companyId: string): Promise<void> {
   } else {
     await supabase.from("favorites").insert({ user_id: user.id, company_id: companyId });
   }
-  revalidatePath("/", "layout");
+  revalidatePath("/profile");
+  revalidatePath(`/company/${companyId}`);
 }
 
 export async function getFavorites(): Promise<Company[]> {

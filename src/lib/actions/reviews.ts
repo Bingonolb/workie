@@ -86,7 +86,8 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
 
   if (error) return { error: error.message };
 
-  revalidatePath("/", "layout");
+  revalidatePath(`/company/${company_id}`);
+  revalidatePath("/explore");
   return { success: true };
 }
 
@@ -108,6 +109,5 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
     return { error: rpcErr.message };
   }
 
-  revalidatePath("/", "layout");
   return {};
 }
