@@ -1,28 +1,21 @@
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
-import { AdminCompanyForm } from "./AdminCompanyForm";
+import { AdminNewCompanyForm } from "./AdminNewCompanyForm";
 import { ArrowLeft, Shield } from "lucide-react";
-import type { Company } from "@/lib/types";
 
-export default async function AdminEditCompanyPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function AdminNewCompanyPage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") redirect("/explore");
 
-  const { data } = await supabase.from("companies").select("*").eq("id", id).maybeSingle();
-  if (!data) notFound();
-  const company = data as Company;
-
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
       <main style={{ maxWidth: 800, margin: "0 auto", padding: "40px 28px 100px" }}>
-
         <Link href="/admin" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 24 }}>
           <ArrowLeft size={14} /> Retour au panel
         </Link>
@@ -33,16 +26,15 @@ export default async function AdminEditCompanyPage({ params }: { params: Promise
           </div>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>
-              {company.name}
+              Ajouter une entreprise
             </h1>
-            <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Modifier les informations</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Créer une nouvelle fiche entreprise</p>
           </div>
         </div>
 
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: 28 }}>
-          <AdminCompanyForm company={company} />
+          <AdminNewCompanyForm />
         </div>
-
       </main>
     </div>
   );
