@@ -244,7 +244,7 @@ export async function adminSetCampaignStatus(
     const admin = createAdminClient();
     const { error } = await admin
       .from("ad_campaigns")
-      .update({ status, admin_note: note ?? null, updated_at: new Date().toISOString() })
+      .update({ status, admin_note: note ?? null })
       .eq("id", campaignId);
     if (error) return { error: error.message };
     revalidatePath("/admin/ads");

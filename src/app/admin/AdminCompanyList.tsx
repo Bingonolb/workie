@@ -59,7 +59,7 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
             onKeyDown={e => {
               if (e.key === "Escape") { setShowSuggestions(false); }
               if (e.key === "Enter" && suggestions.length > 0) {
-                setInput(suggestions[0].name);
+                router.push(`/admin/company/${suggestions[0].id}`);
                 setShowSuggestions(false);
               }
             }}
@@ -91,7 +91,7 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
             {suggestions.map((c, i) => (
               <button
                 key={c.id}
-                onMouseDown={() => { setInput(c.name); setShowSuggestions(false); }}
+                onMouseDown={() => { router.push(`/admin/company/${c.id}`); setShowSuggestions(false); }}
                 style={{
                   width: "100%", textAlign: "left", padding: "10px 16px 10px 42px",
                   background: "transparent", border: "none", color: "var(--text)",
@@ -104,7 +104,7 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
               >
                 <Search size={13} style={{ color: "var(--text-muted)", flexShrink: 0, marginLeft: -26 }} />
                 <span style={{ flex: 1 }}>{c.name}</span>
-                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{c.sector}</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{c.city} · {c.sector}</span>
               </button>
             ))}
           </div>

@@ -294,13 +294,12 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
 
     // Upsert reply
     const { error } = await supabase.from("company_replies").upsert(
-      { review_id, company_id: company.id, content, updated_at: new Date().toISOString() },
+      { review_id, company_id: company.id, content },
       { onConflict: "review_id" }
     );
     if (error) return { error: error.message };
 
     revalidatePath("/business/dashboard/reviews");
-    revalidatePath(`/company/${company.id}`);
     return { success: true };
   } catch (e) {
     return { error: (e as Error).message };
