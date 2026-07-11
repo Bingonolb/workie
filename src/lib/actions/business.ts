@@ -84,7 +84,7 @@ export async function getBusinessAnalytics() {
   try {
     const { supabase, company } = await requireBusiness();
 
-    const [reviewsRes, viewsRes] = await Promise.all([
+    const [reviewsRes, viewsRes, favsRes] = await Promise.all([
       supabase
         .from("reviews")
         .select("rating_overall, rating_culture, rating_management, rating_worklife, rating_career, would_recommend, salary_chf, employment_type, work_mode, pros, cons, created_at, job_title, is_current")
@@ -95,6 +95,10 @@ export async function getBusinessAnalytics() {
         .select("viewed_at")
         .eq("company_id", company.id)
         .gte("viewed_at", new Date(Date.now() - 90 * 86400000).toISOString()),
+      supabase
+        .from("favorites")
+        .select("created_at", { count: "exact" })
+        .eq("company_id", company.id),
     ]);
 
     const { data: reviews } = reviewsRes;
@@ -157,6 +161,7 @@ export async function getBusinessAnalytics() {
     });
 
     // ── Page view stats ──────────────────────────────────────────────────────
+    const favoritesCount = favsRes.count ?? 0;
     const views = viewsRes.data ?? [];
     const now = Date.now();
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
@@ -202,6 +207,7 @@ export async function getBusinessAnalytics() {
       viewsMonth,
       viewsTotal,
       viewTrend,
+      favoritesCount,
       company,
     };
   } catch (e) {
