@@ -32,10 +32,10 @@ export default function ProfilePage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
   const loadCompany = () => {
-    getBusinessCompany().then(r => {
-      if (r.company) setCompany(r.company as Company);
-      setLoading(false);
-    });
+    getBusinessCompany()
+      .then(r => { if (r.company) setCompany(r.company as Company); })
+      .catch(() => { /* shows "Erreur de chargement" state */ })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { loadCompany(); }, []);
