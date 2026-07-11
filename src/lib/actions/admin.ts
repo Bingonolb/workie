@@ -181,7 +181,37 @@ export async function approveClaim(
         .maybeSingle();
       companyId = co?.id ?? null;
     }
-    if (!companyId) return { error: `Aucune entreprise trouvée pour "${claim.company_name}". Créez-la d'abord dans le panel admin.` };
+    if (!companyId) {
+      // Auto-create the company from claim data (new company claim)
+      const rawMsg = claim.message ?? "";
+      const sectorMatch = rawMsg.match(/Secteur:\s*([^·\n]+)/);
+      const cantonMatch = rawMsg.match(/Canton:\s*([^·\n]+)/);
+      const cityMatch   = rawMsg.match(/Ville:\s*([^·\n]+)/);
+
+      const website = claim.company_website
+        ? (/^https?:\/\//i.test(claim.company_website) ? claim.company_website : `https://${claim.company_website}`)
+        : null;
+
+      const { data: newCo, error: createErr } = await adminClient
+        .from("companies")
+        .insert({
+          name: claim.company_name,
+          sector: sectorMatch?.[1]?.trim() || "Conseil",
+          city:   cityMatch?.[1]?.trim()   || "Suisse",
+          canton: cantonMatch?.[1]?.trim() || null,
+          website_url:    website,
+          employee_range: claim.employee_range || "11-50",
+          avg_rating: 0, review_count: 0, score: 0,
+          is_verified: false,
+        })
+        .select("id")
+        .maybeSingle();
+
+      if (createErr || !newCo) {
+        return { error: `Impossible de créer l'entreprise automatiquement : ${createErr?.message ?? "Erreur inconnue"}` };
+      }
+      companyId = newCo.id;
+    }
 
     // Check for existing owner
     const { data: existingOwnerProfile } = await supabase
