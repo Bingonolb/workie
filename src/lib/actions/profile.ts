@@ -4,10 +4,10 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-export async function updateProfile(formData: FormData): Promise<void> {
+export async function updateProfile(formData: FormData): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) return { error: "Non authentifié" };
 
   const full_name = String(formData.get("full_name") || "");
   const city = String(formData.get("city") || "");
@@ -28,7 +28,7 @@ export async function updateProfile(formData: FormData): Promise<void> {
     }
   }
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       full_name: full_name || null,
@@ -39,5 +39,7 @@ export async function updateProfile(formData: FormData): Promise<void> {
     })
     .eq("id", user.id);
 
+  if (error) return { error: error.message };
   revalidatePath("/profile");
+  return {};
 }

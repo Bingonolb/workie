@@ -19,6 +19,7 @@ const lbl: React.CSSProperties = {
 export function ProfileForm({ profile, email }: { profile: Profile | null; email: string }) {
   const [pending, startTransition] = useTransition();
   const [success, setSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -34,7 +35,9 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
-      await updateProfile(formData);
+      setSaveError(null);
+      const res = await updateProfile(formData);
+      if (res?.error) { setSaveError(res.error); return; }
       setSuccess(true);
       setAvatarPreview(null);
       router.refresh();
@@ -102,7 +105,8 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <style>{`@media (max-width: 480px) { .profile-2col { grid-template-columns: 1fr !important; } }`}</style>
+      <div className="profile-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div style={{ gridColumn: "1 / -1" }}>
           <label style={lbl}>Nom complet</label>
           <input name="full_name" defaultValue={profile?.full_name ?? ""} placeholder="Alex Martin" style={inp}
@@ -137,6 +141,11 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
         Email : <span style={{ color: "var(--text)" }}>{email}</span>
       </div>
 
+      {saveError && (
+        <div style={{ padding: "12px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, fontSize: 14, fontWeight: 600, color: "#ef4444" }}>
+          ⚠ {saveError}
+        </div>
+      )}
       {success && (
         <div style={{ padding: "12px 16px", background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 10, fontSize: 14, fontWeight: 600, color: "#10b981", textAlign: "center" }}>
           ✓ Profil mis à jour !
