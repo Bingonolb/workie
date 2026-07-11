@@ -40,10 +40,10 @@ export default function ClaimsPage() {
   const [isPending, startTransition] = useTransition();
 
   const load = () => {
-    getClaims().then(r => {
-      if (r.claims) setClaims(r.claims as Claim[]);
-      setLoading(false);
-    });
+    getClaims()
+      .then(r => { if (r.claims) setClaims(r.claims as Claim[]); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
