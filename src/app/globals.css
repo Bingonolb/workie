@@ -362,6 +362,21 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* ─── Business dashboard pages ─────────────────────────────────── */
 
+/* Campaign form card — padding scales with screen width */
+.biz-form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+@media (max-width: 640px) {
+  .biz-form-card { padding: 16px; border-radius: 16px; }
+}
+@media (max-width: 380px) {
+  .biz-form-card { padding: 14px 12px; }
+}
+
 .biz-page { padding: 36px 40px; }
 @media (max-width: 768px) {
   .biz-page { padding: 20px 16px calc(72px + env(safe-area-inset-bottom)); }

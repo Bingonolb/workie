@@ -38,10 +38,6 @@ const inp: React.CSSProperties = {
   color: "var(--text)", outline: "none", boxSizing: "border-box", transition: "border-color 0.15s",
 };
 
-const card: React.CSSProperties = {
-  background: "var(--surface)", border: "1px solid var(--border)",
-  borderRadius: 20, padding: "28px 28px", marginBottom: 20,
-};
 
 function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) {
   return (
@@ -159,7 +155,7 @@ export function NewCampaignForm({
 
       {/* Page title */}
       <div style={{ marginBottom: 36 }}>
-        <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>Nouvelle campagne</h1>
+        <h1 style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>Nouvelle campagne</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Votre annonce sera visible par les utilisateurs de Workie selon votre ciblage.</p>
       </div>
 
@@ -172,9 +168,9 @@ export function NewCampaignForm({
         <input type="hidden" name="image_url" value={imageUrl} />
 
         {/* ── FORMAT ─────────────────────────────────────────────────── */}
-        <div style={card}>
+        <div className="biz-form-card">
           <SectionHeader icon={<Zap size={18} />} title="Format d'annonce" subtitle="Choisissez comment votre pub apparaîtra aux utilisateurs" />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             {(["square", "swipe"] as const).map(f => (
               <button key={f} type="button" onClick={() => setFormat(f)} style={{
                 padding: "22px 20px", borderRadius: 16, cursor: "pointer", textAlign: "left",
@@ -205,7 +201,7 @@ export function NewCampaignForm({
         </div>
 
         {/* ── CREATIVE ───────────────────────────────────────────────── */}
-        <div style={card}>
+        <div className="biz-form-card">
           <SectionHeader icon={<ImageIcon size={18} />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
 
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -354,7 +350,7 @@ export function NewCampaignForm({
           </div>
 
           {/* Text fields */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Titre *</label>
               <input name="headline" required style={inp} placeholder="Rejoignez notre équipe !" maxLength={60}
@@ -385,7 +381,7 @@ export function NewCampaignForm({
         </div>
 
         {/* ── TARGETING ──────────────────────────────────────────────── */}
-        <div style={card}>
+        <div className="biz-form-card">
           <SectionHeader icon={<Target size={18} />} title="Ciblage" subtitle="Plus vous ciblez précisément, plus le CPM augmente — mais meilleure est la qualité de l'audience." />
 
           <div style={{ marginBottom: 22 }}>
@@ -434,11 +430,11 @@ export function NewCampaignForm({
         </div>
 
         {/* ── BUDGET ─────────────────────────────────────────────────── */}
-        <div style={card}>
+        <div className="biz-form-card">
           <SectionHeader icon={<DollarSign size={18} />} title="Budget" subtitle="Ajustez le budget journalier et la durée — le total se calcule automatiquement." />
 
           {/* Smart sliders */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginBottom: 28 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginBottom: 28 }}>
             {/* Daily */}
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
@@ -476,7 +472,7 @@ export function NewCampaignForm({
           </div>
 
           {/* Dates */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Date de début</label>
               <input name="start_date" type="date" style={inp} value={startDate}

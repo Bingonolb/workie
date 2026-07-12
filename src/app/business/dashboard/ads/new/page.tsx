@@ -1,4 +1,3 @@
-import { Navbar } from "@/components/Navbar";
 import { NewCampaignForm } from "./NewCampaignForm";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -36,13 +35,10 @@ export default async function NewCampaignPage({
   } : undefined;
 
   return (
-    <div className="page-root">
-      <Navbar />
-      <NewCampaignForm
-        companyName={company?.name ?? ""}
-        companyLogo={company?.logo_url ?? null}
-        prefill={prefill}
-      />
-    </div>
+    <NewCampaignForm
+      companyName={company?.name ?? ""}
+      companyLogo={company?.logo_url ?? null}
+      prefill={prefill}
+    />
   );
 }
