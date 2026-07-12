@@ -36,12 +36,16 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
       setSaveError(null);
-      const res = await updateProfile(formData);
-      if (res?.error) { setSaveError(res.error); return; }
-      setSuccess(true);
-      setAvatarPreview(null);
-      router.refresh();
-      setTimeout(() => setSuccess(false), 3000);
+      try {
+        const res = await updateProfile(formData);
+        if (res?.error) { setSaveError(res.error); return; }
+        setSuccess(true);
+        setAvatarPreview(null);
+        router.refresh();
+        setTimeout(() => setSuccess(false), 3000);
+      } catch (err) {
+        setSaveError((err as Error).message ?? "Une erreur est survenue.");
+      }
     });
   };
 

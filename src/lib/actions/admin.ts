@@ -64,7 +64,8 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
 
 export async function adminAddCompany(formData: FormData): Promise<{ error?: string }> {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
+    const supabase = createAdminClient();
 
     const fields = {
       name: String(formData.get("name") || ""),
@@ -264,8 +265,8 @@ export async function approveClaim(
       }
     }
 
-    await supabase.from("companies").update({ is_verified: true, is_subscribed: true }).eq("id", companyId);
-    await supabase.from("company_claims").update({
+    await adminClient.from("companies").update({ is_verified: true, is_subscribed: true }).eq("id", companyId);
+    await adminClient.from("company_claims").update({
       status: "approved",
       company_id: companyId,
       reviewed_at: new Date().toISOString(),

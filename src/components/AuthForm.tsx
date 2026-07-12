@@ -19,7 +19,8 @@ export function AuthForm({
   const [state, formAction, pending] = useActionState(action, undefined);
 
   return (
-    <form action={formAction} className="w-full max-w-sm space-y-4">
+    <div className="w-full max-w-sm space-y-4">
+    <form action={formAction} className="space-y-4">
       {mode === "signup" && (
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700">
@@ -101,9 +102,11 @@ export function AuthForm({
         <span className="h-px flex-1 bg-neutral-200" />
       </div>
 
+    </form>
+
+    <form action={signInWithGoogle}>
       <button
         type="submit"
-        formAction={signInWithGoogle}
         className="flex w-full items-center justify-center gap-2 rounded-full border border-neutral-300 py-3 font-semibold text-neutral-700 transition hover:bg-neutral-50"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -115,5 +118,6 @@ export function AuthForm({
         Continuer avec Google
       </button>
     </form>
+    </div>
   );
 }

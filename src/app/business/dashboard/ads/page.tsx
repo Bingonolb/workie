@@ -78,7 +78,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
           </div>
         )}
 
-        {campaigns.length === 0 ? (
+        {!error && campaigns.length === 0 ? (
           /* ── Empty state ── */
           <div style={{ textAlign: "center", padding: "80px 24px 60px" }}>
             <div style={{ width: 72, height: 72, borderRadius: 22, background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(249,115,22,0.1))", border: "1px solid rgba(139,92,246,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", fontSize: 32 }}>

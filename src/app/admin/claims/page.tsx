@@ -63,6 +63,8 @@ export default function ClaimsPage() {
         const res = await approveClaim(id, force);
         if (res.alreadyOwned) {
           setMsg({ id, text: res.error ?? "", ok: false, alreadyOwned: res.alreadyOwned });
+          // Don't auto-clear — user must confirm or cancel the transfer
+          return;
         } else if (res.error) {
           setMsg({ id, text: res.error, ok: false });
         } else {
@@ -70,9 +72,7 @@ export default function ClaimsPage() {
           load();
         }
       }
-      if (action !== "approve" || !msg?.alreadyOwned) {
-        setTimeout(() => setMsg(null), 6000);
-      }
+      setTimeout(() => setMsg(null), 6000);
     });
   };
 

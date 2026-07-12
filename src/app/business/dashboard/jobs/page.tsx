@@ -275,7 +275,10 @@ export default function JobsPage() {
 
   const load = () => {
     getBusinessJobs()
-      .then(r => { setJobs((r.jobs as Job[]) ?? []); })
+      .then(r => {
+        if (r.error) { setActionError(r.error); return; }
+        setJobs((r.jobs as Job[]) ?? []);
+      })
       .catch(e => setActionError((e as Error).message))
       .finally(() => setLoading(false));
   };
@@ -284,16 +287,20 @@ export default function JobsPage() {
 
   const handleToggle = async (id: string, current: boolean) => {
     setActionError("");
-    const res = await toggleJobOffer(id, !current);
-    if (res.error) { setActionError(res.error); return; }
-    setJobs(prev => prev.map(j => j.id === id ? { ...j, is_active: !current } : j));
+    try {
+      const res = await toggleJobOffer(id, !current);
+      if (res.error) { setActionError(res.error); return; }
+      setJobs(prev => prev.map(j => j.id === id ? { ...j, is_active: !current } : j));
+    } catch (e) { setActionError((e as Error).message); }
   };
 
   const handleDelete = async (id: string) => {
     setActionError("");
-    const res = await deleteJobOffer(id);
-    if (res.error) { setActionError(res.error); return; }
-    setJobs(prev => prev.filter(j => j.id !== id));
+    try {
+      const res = await deleteJobOffer(id);
+      if (res.error) { setActionError(res.error); return; }
+      setJobs(prev => prev.filter(j => j.id !== id));
+    } catch (e) { setActionError((e as Error).message); }
   };
 
   const active = jobs.filter(j => j.is_active).length;

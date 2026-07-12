@@ -33,6 +33,10 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Tu dois être connecté pour poster un avis." };
 
+  // Business accounts cannot post reviews
+  const { data: userProfile } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
+  if (userProfile?.claimed_company_id) return { error: "Les comptes entreprise ne peuvent pas publier d'avis." };
+
   const company_id = String(formData.get("company_id") || "");
   const rating_overall = Number(formData.get("rating_overall") || 0);
   const rating_culture = Number(formData.get("rating_culture") || 0) || null;
@@ -92,12 +96,17 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
+  const { data: profile } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
+  if (profile?.claimed_company_id) return { error: "Les comptes entreprise ne peuvent pas voter." };
 
   const { error: voteErr } = await supabase
     .from("review_votes")
     .insert({ user_id: user.id, review_id: reviewId });
 
-  if (voteErr) return { alreadyVoted: true }; // unique constraint = already voted
+  if (voteErr) {
+    if (voteErr.code === "23505") return { alreadyVoted: true }; // unique constraint violation
+    return { error: voteErr.message };
+  }
 
   const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
   if (rpcErr) {
