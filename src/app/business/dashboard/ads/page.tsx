@@ -41,8 +41,8 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
     rejected: campaigns.filter(c => c.status === "rejected").length,
   };
 
-  const totalImpressions = campaigns.reduce((s, c) => s + c.impression_count, 0);
-  const totalClicks = campaigns.reduce((s, c) => s + c.click_count, 0);
+  const totalImpressions = campaigns.reduce((s, c) => s + Number(c.impression_count), 0);
+  const totalClicks = campaigns.reduce((s, c) => s + Number(c.click_count), 0);
   const totalSpent = campaigns.reduce((s, c) => s + (Number(c.spent_chf) || 0), 0);
   const activeCampaigns = campaigns.filter(c => c.status === "active");
 
@@ -191,15 +191,15 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                           {/* Stats */}
                           <div style={{ display: "flex", gap: 16, flexShrink: 0 }}>
                             <div style={{ textAlign: "right" }}>
-                              <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{c.impression_count.toLocaleString("fr-CH")}</p>
+                              <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(c.impression_count).toLocaleString("fr-CH")}</p>
                               <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><Eye size={10} /> vues</p>
                             </div>
                             <div style={{ textAlign: "right" }}>
-                              <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{c.click_count.toLocaleString("fr-CH")}</p>
+                              <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(c.click_count).toLocaleString("fr-CH")}</p>
                               <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><MousePointer size={10} /> clics</p>
                             </div>
                             <div style={{ textAlign: "right" }}>
-                              <p style={{ fontSize: 16, fontWeight: 900, color: "#10b981", lineHeight: 1 }}>{ctr(c.impression_count, c.click_count)}</p>
+                              <p style={{ fontSize: 16, fontWeight: 900, color: "#10b981", lineHeight: 1 }}>{ctr(Number(c.impression_count), Number(c.click_count))}</p>
                               <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><TrendingUp size={10} /> CTR</p>
                             </div>
                           </div>
