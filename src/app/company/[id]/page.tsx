@@ -536,7 +536,7 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
             )}
           </div>
           {review.is_current && (
-            <span style={{ fontSize: 10, fontWeight: 700, color: "#10b981" }}>● Employé actuel</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>● Employé actuel</span>
           )}
           {review.salary_chf && (
             <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>CHF {Math.round(review.salary_chf / 1000)}k / an</span>
@@ -555,13 +555,13 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
           {review.pros && (
             <div style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 10, padding: "10px 12px" }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", marginBottom: 4 }}>👍 Points positifs</p>
-              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.pros}</p>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.pros}</p>
             </div>
           )}
           {review.cons && (
             <div style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 10, padding: "10px 12px" }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", marginBottom: 4 }}>👎 Points négatifs</p>
-              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.cons}</p>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.cons}</p>
             </div>
           )}
         </div>
@@ -571,7 +571,7 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
       {(review as any).knew_before && (
         <div style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 10, padding: "10px 12px", marginBottom: 12 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 4 }}>💡 Ce que j'aurais voulu savoir avant</p>
-          <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>{(review as any).knew_before}</p>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>{(review as any).knew_before}</p>
         </div>
       )}
 
