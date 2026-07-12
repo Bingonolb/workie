@@ -590,7 +590,7 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
 
       {/* Helpful */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-        <form action={voteHelpful.bind(null, review.id) as (f: FormData) => Promise<void>}>
+        <form action={voteHelpful.bind(null, review.id) as unknown as (f: FormData) => Promise<void>}>
           <button type="submit" style={{
             display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 8,
             background: "var(--surface2)", border: "1px solid var(--border2)",
