@@ -82,7 +82,7 @@ export default async function ExplorePage({
     import("@/lib/supabase/server").then(m => m.getIsAdmin()).catch(() => false),
     import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
     getActiveAds({ format: "square", canton: params.canton, sector: params.sector }).catch(() => []),
-    getActiveAds({ format: "swipe" }).catch(() => []),
+    getActiveAds({ format: "swipe", canton: params.canton, sector: params.sector }).catch(() => []),
   ]);
   const isBusiness = !!bizCompanyId;
 
@@ -162,10 +162,20 @@ export default async function ExplorePage({
         ) : (
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-              {squareAds[0] && <AdSquareCard key={`ad-${squareAds[0].id}`} ad={squareAds[0]} />}
-              {(companies as Company[]).map((c) => (
-                <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />
-              ))}
+              {(() => {
+                // Inject ads after positions 3 and 9 (0-indexed) — never at position 0
+                const AD_SLOTS = [3, 9];
+                const items: React.ReactNode[] = [];
+                let adCursor = 0;
+                (companies as Company[]).forEach((c, i) => {
+                  if (adCursor < squareAds.length && AD_SLOTS[adCursor] === i) {
+                    const ad = squareAds[adCursor++];
+                    items.push(<AdSquareCard key={`ad-${ad.id}`} ad={ad} />);
+                  }
+                  items.push(<CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />);
+                });
+                return items;
+              })()}
             </div>
             {pageCount > 1 && !!user && (
               <Pagination page={page} pageCount={pageCount} total={total} params={params} />

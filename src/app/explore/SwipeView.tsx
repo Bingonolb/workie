@@ -55,7 +55,8 @@ export function SwipeView({
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [exhausted, setExhausted] = useState(false);
   const [adOverlay, setAdOverlay] = useState<AdCampaign | null>(null);
-  const adShownAt = useRef<Set<number>>(new Set());
+  // Next index at which to show a swipe ad — randomized so the interval feels natural
+  const nextAdAt = useRef(10 + Math.floor(Math.random() * 6)); // first ad between swipe 10-15
   // Track all companies seen/acted on this session to avoid re-showing them in new batches
   const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
 
@@ -73,15 +74,15 @@ export function SwipeView({
   const fetchingRef = useRef(false);
   const nextOffsetRef = useRef(initialCompanies.length);
 
-  // Show swipe ad overlay every 10 swipes
+  // Show swipe ad at a randomized interval (not a fixed cadence users can predict)
   useEffect(() => {
-    if (swipeAds.length === 0 || index === 0) return;
-    if (index % 10 === 0 && !adShownAt.current.has(index)) {
-      adShownAt.current.add(index);
-      const ad = swipeAds[Math.floor(index / 10 - 1) % swipeAds.length];
-      setAdOverlay(ad);
-      trackAdImpression(ad.id);
-    }
+    if (swipeAds.length === 0 || index < nextAdAt.current) return;
+    // Pick a random ad from the pool
+    const ad = swipeAds[Math.floor(Math.random() * swipeAds.length)];
+    setAdOverlay(ad);
+    trackAdImpression(ad.id);
+    // Schedule the next ad 10-17 swipes from now
+    nextAdAt.current = index + 10 + Math.floor(Math.random() * 8);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
