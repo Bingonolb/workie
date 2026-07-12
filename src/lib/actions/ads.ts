@@ -115,7 +115,7 @@ export async function getActiveAds(opts?: {
 
     const pool = ((data ?? []) as AdCampaign[]).filter(ad => {
       if (ad.end_date && ad.end_date < today) return false;
-      if (ad.spent_chf >= ad.total_budget_chf) return false;
+      if (Number(ad.spent_chf) >= Number(ad.total_budget_chf)) return false;
       if (opts?.canton && ad.target_cantons.length > 0 && !ad.target_cantons.includes(opts.canton)) return false;
       if (opts?.sector && ad.target_sectors.length > 0 && !ad.target_sectors.includes(opts.sector)) return false;
       return true;

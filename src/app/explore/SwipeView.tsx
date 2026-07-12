@@ -96,7 +96,7 @@ export function SwipeView({
       const fresh = shuffle(batch.filter(c => !actedIds.current.has(c.id)));
       if (fresh.length > 0) setCompanies(prev => [...prev, ...fresh]);
       if (batch.length < 50) setExhausted(true);
-    });
+    }).catch(() => { fetchingRef.current = false; });
   }, [index, companies.length, filters, exhausted]);
 
   const current = companies[index];
