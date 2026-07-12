@@ -106,8 +106,10 @@ export async function getBusinessAnalytics() {
     const r = reviews ?? [];
     const count = r.length;
 
-    const avg = (key: keyof typeof r[0]) =>
-      count > 0 ? (r.reduce((s, x) => s + (Number(x[key]) || 0), 0) / count).toFixed(1) : "–";
+    const avg = (key: keyof typeof r[0]) => {
+      const vals = r.map(x => Number(x[key])).filter(v => v > 0);
+      return vals.length > 0 ? (vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(1) : "–";
+    };
 
     const recommendRate = count > 0
       ? Math.round((r.filter(x => x.would_recommend === "oui").length / count) * 100)
