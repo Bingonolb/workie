@@ -3,10 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function isBusiness(supabase: any, userId: string): Promise<boolean> {
+  const { data } = await supabase.from("profiles").select("claimed_company_id").eq("id", userId).maybeSingle();
+  return !!data?.claimed_company_id;
+}
+
 export async function addFlame(companyId: string): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
+  if (await isBusiness(supabase, user.id)) return;
 
   const { data: existing } = await supabase
     .from("score_events")
@@ -29,6 +36,7 @@ export async function addBoost(companyId: string): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
+  if (await isBusiness(supabase, user.id)) return;
 
   const { data: existing } = await supabase
     .from("score_events")

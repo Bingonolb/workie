@@ -30,6 +30,7 @@ export function SwipeView({
   initialFlameIds,
   isLoggedIn,
   isAdmin = false,
+  isBusiness = false,
   filters,
   swipeAds = [],
 }: {
@@ -38,6 +39,7 @@ export function SwipeView({
   initialFlameIds: string[];
   isLoggedIn: boolean;
   isAdmin?: boolean;
+  isBusiness?: boolean;
   filters?: { sector?: string; canton?: string; search?: string };
   swipeAds?: AdCampaign[];
 }) {
@@ -121,9 +123,11 @@ export function SwipeView({
     setGone(dir);
     if (dir === "right" && isLoggedIn) {
       setFavIds(prev => { const n = new Set(prev); n.add(current.id); return n; });
-      setFlameIds(prev => { const n = new Set(prev); n.add(current.id); return n; });
       toggleFavorite(current.id);
-      addFlame(current.id);
+      if (!isBusiness) {
+        setFlameIds(prev => { const n = new Set(prev); n.add(current.id); return n; });
+        addFlame(current.id);
+      }
       showToast("🔥 Enregistré !", "#f97316");
     } else if (dir === "right") {
       showToast("👀 Découverte !", "#6b7280");
@@ -330,7 +334,7 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {isAdmin && (
+        {isAdmin && !isBusiness && (
           <button onClick={handlePenalty} title="Pénaliser -100 pts" style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
             width: 52, height: 52, borderRadius: "50%",
@@ -396,7 +400,7 @@ export function SwipeView({
           <Flame size={26} fill={flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
         </button>
 
-        <button onClick={handleBoost} title="Booster +100 pts" style={{
+        {!isBusiness && <button onClick={handleBoost} title="Booster +100 pts" style={{
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
           width: 52, height: 52, borderRadius: "50%",
           background: "var(--surface)",
@@ -410,7 +414,7 @@ export function SwipeView({
         >
           <Zap size={15} fill="#8b5cf6" />
           <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>+100</span>
-        </button>
+        </button>}
       </div>
 
       {/* Legend — hidden on mobile */}

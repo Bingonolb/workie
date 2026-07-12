@@ -112,8 +112,9 @@ export default async function ExplorePage({
             initialFlameIds={flameIds}
             isLoggedIn={!!user}
             isAdmin={isAdmin}
+            isBusiness={isBusiness}
             filters={filters}
-          swipeAds={swipeAds}
+            swipeAds={swipeAds}
           />
         </main>
       </div>
