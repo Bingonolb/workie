@@ -170,11 +170,14 @@ export default async function BusinessDashboardPage() {
             {trend.map(({ month, avg: a }) => {
               const h = a != null ? Math.max(8, (a / 5) * 80) : 4;
               const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
+              const MONTHS_FR = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];
+              const [y, mo] = month.split("-");
+              const label = `${MONTHS_FR[parseInt(mo) - 1]} ${y.slice(2)}`;
               return (
                 <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                   <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600 }}>{a ?? "–"}</span>
                   <div style={{ width: "100%", height: h, background: color, borderRadius: 4, opacity: 0.8 }} />
-                  <span style={{ fontSize: 9, color: "var(--text-muted)", transform: "rotate(-30deg)", transformOrigin: "center" }}>{month.slice(5)}</span>
+                  <span style={{ fontSize: 8, color: "var(--text-muted)", whiteSpace: "nowrap" }}>{label}</span>
                 </div>
               );
             })}

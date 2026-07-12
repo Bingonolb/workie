@@ -121,7 +121,7 @@ export default async function AnalyticsPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
         {[
-          { icon: <Star size={18} color="#f59e0b" fill="#f59e0b" />, label: "Note globale", value: `${avgOverall}/5` },
+          { icon: <Star size={18} color="#f59e0b" fill="#f59e0b" />, label: "Note globale", value: avgOverall !== "–" ? `${avgOverall}/5` : "–" },
           { icon: <Users size={18} color="#8b5cf6" />, label: "Total avis", value: String(count) },
           { icon: <ThumbsUp size={18} color="#10b981" />, label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–" },
           { icon: <TrendingUp size={18} color="#f97316" />, label: "Salaire moyen", value: avgSalary ? `${Math.round(avgSalary / 1000)}k CHF` : "–" },
@@ -281,11 +281,14 @@ export default async function AnalyticsPage() {
                 {trend.map(({ month, avg: a }) => {
                   const h = a != null ? Math.max(8, (a / 5) * 100) : 4;
                   const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
+                  const MONTHS_FR = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];
+                  const [y, mo] = month.split("-");
+                  const label = `${MONTHS_FR[parseInt(mo) - 1]} ${y.slice(2)}`;
                   return (
                     <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color }}>{a ?? "–"}</span>
-                      <div title={a != null ? `${month}: ${a}/5` : `${month}: aucun avis`} style={{ width: "100%", height: h, background: color, borderRadius: "4px 4px 0 0", opacity: 0.85 }} />
-                      <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{month.slice(5)}/{month.slice(2, 4)}</span>
+                      <div title={a != null ? `${label}: ${a}/5` : `${label}: aucun avis`} style={{ width: "100%", height: h, background: color, borderRadius: "4px 4px 0 0", opacity: 0.85 }} />
+                      <span style={{ fontSize: 9, color: "var(--text-muted)", whiteSpace: "nowrap" }}>{label}</span>
                     </div>
                   );
                 })}

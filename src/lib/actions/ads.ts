@@ -109,6 +109,7 @@ export async function getActiveAds(opts?: {
       .select("*")
       .eq("status", "active")
       .lte("start_date", today)
+      .or(`end_date.is.null,end_date.gte.${today}`)
       .order("spent_chf", { ascending: true }); // prioritise less-spent campaigns
     if (opts?.format) q = q.eq("format", opts.format);
     const { data } = await q.limit(50); // fetch pool, then filter + shuffle
@@ -251,6 +252,8 @@ export async function adminSetCampaignStatus(
       .eq("id", campaignId);
     if (error) return { error: error.message };
     revalidatePath("/admin/ads");
+    revalidatePath("/business/dashboard/ads");
+    revalidatePath("/explore");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
