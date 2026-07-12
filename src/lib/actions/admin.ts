@@ -100,8 +100,9 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
 
 export async function adminDeleteCompany(id: string): Promise<{ error?: string }> {
   try {
-    const { supabase } = await requireAdmin();
-    const { error } = await supabase.from("companies").delete().eq("id", id);
+    await requireAdmin();
+    const admin = createAdminClient();
+    const { error } = await admin.from("companies").delete().eq("id", id);
     if (error) return { error: error.message };
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
@@ -113,10 +114,10 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
 
 export async function getClaims() {
   try {
-    const { supabase } = await requireAdmin();
+    await requireAdmin();
     const adminClient = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
       .from("company_claims")
       .select("*")
       .order("created_at", { ascending: false });
@@ -129,7 +130,7 @@ export async function getClaims() {
     let ownerMap: Record<string, string> = {};
 
     if (companyIds.length > 0) {
-      const { data: profiles } = await supabase
+      const { data: profiles } = await adminClient
         .from("profiles")
         .select("id, claimed_company_id")
         .in("claimed_company_id", companyIds);
@@ -282,8 +283,9 @@ export async function approveClaim(
 
 export async function rejectClaim(claimId: string): Promise<{ error?: string; success?: boolean }> {
   try {
-    const { user: adminUser, supabase } = await requireAdmin();
-    await supabase.from("company_claims").update({
+    const { user: adminUser } = await requireAdmin();
+    const adminClient = createAdminClient();
+    await adminClient.from("company_claims").update({
       status: "rejected",
       reviewed_at: new Date().toISOString(),
       reviewed_by: adminUser.id,

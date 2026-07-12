@@ -155,11 +155,11 @@ export function AdminAdsClient() {
 
                 <div style={{ display: "flex", gap: 16, flexShrink: 0, alignItems: "flex-start" }}>
                   <div style={{ textAlign: "center" }}>
-                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)" }}>{c.impression_count.toLocaleString("fr-CH")}</p>
+                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)" }}>{Number(c.impression_count).toLocaleString("fr-CH")}</p>
                     <p style={{ fontSize: 10, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 2 }}><Eye size={10} /> vues</p>
                   </div>
                   <div style={{ textAlign: "center" }}>
-                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)" }}>{c.click_count.toLocaleString("fr-CH")}</p>
+                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)" }}>{Number(c.click_count).toLocaleString("fr-CH")}</p>
                     <p style={{ fontSize: 10, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 2 }}><MousePointer size={10} /> clics</p>
                   </div>
                 </div>
