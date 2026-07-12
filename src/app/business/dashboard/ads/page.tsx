@@ -43,7 +43,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
 
   const totalImpressions = campaigns.reduce((s, c) => s + c.impression_count, 0);
   const totalClicks = campaigns.reduce((s, c) => s + c.click_count, 0);
-  const totalSpent = campaigns.reduce((s, c) => s + Number(c.spent_chf), 0);
+  const totalSpent = campaigns.reduce((s, c) => s + (Number(c.spent_chf) || 0), 0);
   const activeCampaigns = campaigns.filter(c => c.status === "active");
 
   return (

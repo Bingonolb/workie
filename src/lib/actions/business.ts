@@ -113,7 +113,7 @@ export async function getBusinessAnalytics() {
       ? Math.round((r.filter(x => x.would_recommend === "oui").length / count) * 100)
       : null;
 
-    const salaries = r.filter(x => x.salary_chf && x.salary_chf > 0).map(x => x.salary_chf as number);
+    const salaries = r.filter(x => x.salary_chf && Number(x.salary_chf) > 0).map(x => Number(x.salary_chf));
     const avgSalary = salaries.length > 0 ? Math.round(salaries.reduce((a, b) => a + b, 0) / salaries.length) : null;
 
     // Trend: rating by month (last 12 months)

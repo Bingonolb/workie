@@ -65,6 +65,9 @@ function CompanySearch({ onSelect }: { onSelect: (c: CompanyResult) => void }) {
         setResults(data.companies ?? []);
         setOpen(true);
         setActiveIdx(-1);
+      } catch {
+        setResults([]);
+        setOpen(false);
       } finally {
         setLoading(false);
       }

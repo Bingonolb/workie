@@ -44,7 +44,7 @@ function ReplyForm({ reviewId, existing, onSuccess }: { reviewId: string; existi
       setOpen(false);
       onSuccess?.();
     }
-  }, [state?.success]);
+  }, [state?.success, onSuccess]);
 
   if (!open) {
     return (
@@ -176,7 +176,7 @@ export default function ReviewsPage() {
     setLoadError("");
     getBusinessReviews()
       .then(r => {
-        if (r.error) setLoadError(r.error);
+        if (r.error) { setLoadError(r.error); return; }
         setReviews((r.reviews as Review[]) ?? []);
       })
       .catch(e => setLoadError((e as Error).message))

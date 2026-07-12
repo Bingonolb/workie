@@ -45,10 +45,13 @@ export function AdminAdsClient() {
   const handleStatus = async (id: string, status: "active" | "paused" | "rejected") => {
     setBusy(id);
     setActionError(null);
-    const res = await adminSetCampaignStatus(id, status, actionNote[id]);
-    if (res.error) setActionError(res.error);
-    else setCampaigns(prev => prev.map(c => c.id === id ? { ...c, status, admin_note: actionNote[id] ?? c.admin_note } : c));
-    setBusy(null);
+    try {
+      const res = await adminSetCampaignStatus(id, status, actionNote[id]);
+      if (res.error) setActionError(res.error);
+      else setCampaigns(prev => prev.map(c => c.id === id ? { ...c, status, admin_note: actionNote[id] ?? c.admin_note } : c));
+    } finally {
+      setBusy(null);
+    }
   };
 
   const filtered = campaigns.filter(c => filter === "all" || c.status === filter);
