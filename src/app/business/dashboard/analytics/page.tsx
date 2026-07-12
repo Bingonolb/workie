@@ -88,28 +88,25 @@ export default async function AnalyticsPage() {
       {viewTrend && viewTrend.length > 0 && (
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px", marginBottom: 28 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Vues par jour — 30 derniers jours</p>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 80 }}>
-            {viewTrend.map(({ day, count: cnt }) => {
-              const h = maxViewDay > 0 ? Math.max(2, (cnt / maxViewDay) * 80) : 2;
-              const isToday = day === new Date().toISOString().slice(0, 10);
-              return (
-                <div key={day} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                  {cnt > 0 && <span style={{ fontSize: 8, color: "var(--text-muted)", lineHeight: 1 }}>{cnt}</span>}
-                  <div
-                    title={`${day} : ${cnt} vue${cnt !== 1 ? "s" : ""}`}
-                    style={{
-                      width: "100%", height: h, borderRadius: "3px 3px 0 0",
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", margin: "0 -4px" }}>
+            <div style={{ minWidth: 560, padding: "0 4px" }}>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 72 }}>
+                {viewTrend.map(({ day, count: cnt }) => {
+                  const h = maxViewDay > 0 ? Math.max(2, (cnt / maxViewDay) * 72) : 2;
+                  const isToday = day === new Date().toISOString().slice(0, 10);
+                  return (
+                    <div key={day} style={{ flex: 1, minWidth: 12, height: h, borderRadius: "3px 3px 0 0",
                       background: isToday ? "#10b981" : cnt > 0 ? "#8b5cf6" : "var(--border)",
                       opacity: isToday ? 1 : cnt > 0 ? 0.75 : 0.3,
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 10, color: "var(--text-muted)" }}>
-            <span>{viewTrend[0]?.day.slice(5).replace("-", "/")}</span>
-            <span style={{ color: "#10b981", fontWeight: 700 }}>Aujourd'hui</span>
+                    }} title={`${day} : ${cnt} vue${cnt !== 1 ? "s" : ""}`} />
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 10, color: "var(--text-muted)" }}>
+                <span>{viewTrend[0]?.day.slice(5).replace("-", "/")}</span>
+                <span style={{ color: "#10b981", fontWeight: 700 }}>Aujourd'hui</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -174,7 +171,7 @@ export default async function AnalyticsPage() {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
             {/* Distribution */}
             <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 18 }}>Distribution des notes</p>
@@ -227,7 +224,7 @@ export default async function AnalyticsPage() {
           <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
             <Users size={13} /> Profil des personnes qui ont laissé un avis
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
             <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px" }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 18 }}>Niveau hiérarchique</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -277,21 +274,32 @@ export default async function AnalyticsPage() {
           {trend && trend.length > 1 && (
             <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Évolution mensuelle de la note</p>
-              <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 100 }}>
-                {trend.map(({ month, avg: a }) => {
-                  const h = a != null ? Math.max(8, (a / 5) * 100) : 4;
-                  const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
-                  const MONTHS_FR = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];
-                  const [y, mo] = month.split("-");
-                  const label = `${MONTHS_FR[parseInt(mo) - 1]} ${y.slice(2)}`;
-                  return (
-                    <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color }}>{a ?? "–"}</span>
-                      <div title={a != null ? `${label}: ${a}/5` : `${label}: aucun avis`} style={{ width: "100%", height: h, background: color, borderRadius: "4px 4px 0 0", opacity: 0.85 }} />
-                      <span style={{ fontSize: 9, color: "var(--text-muted)", whiteSpace: "nowrap" }}>{label}</span>
-                    </div>
-                  );
-                })}
+              <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", margin: "0 -4px" }}>
+              <div style={{ minWidth: 480, display: "flex", gap: 8, padding: "0 4px" }}>
+                {(() => {
+                  const MONTHS_SHORT = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];
+                  const BAR_H = 88;
+                  return trend.map(({ month, avg: a }, idx) => {
+                    const [y, mo] = month.split("-");
+                    const isJan = mo === "01";
+                    const showYear = idx === 0 || isJan;
+                    const label = showYear
+                      ? `${MONTHS_SHORT[parseInt(mo) - 1]} '${y.slice(2)}`
+                      : MONTHS_SHORT[parseInt(mo) - 1];
+                    const h = a != null ? Math.max(4, (a / 5) * BAR_H) : 4;
+                    const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
+                    return (
+                      <div key={month} style={{ flex: 1, minWidth: 32, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 10, color, fontWeight: 700, lineHeight: "13px", minHeight: 13 }}>{a ?? "–"}</span>
+                        <div style={{ width: "100%", height: BAR_H, display: "flex", alignItems: "flex-end" }}>
+                          <div title={a != null ? `${label}: ${a}/5` : `${label}: aucun avis`} style={{ width: "100%", height: h, background: color, borderRadius: "4px 4px 0 0", opacity: 0.85 }} />
+                        </div>
+                        <span style={{ fontSize: 9, color: showYear ? "var(--text-sub)" : "var(--text-muted)", fontWeight: showYear ? 700 : 400, whiteSpace: "nowrap", marginTop: 2 }}>{label}</span>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
               </div>
             </div>
           )}

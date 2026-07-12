@@ -166,21 +166,35 @@ export default async function BusinessDashboardPage() {
       {trend && trend.length > 0 && (
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px", marginBottom: 32 }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Évolution de la note (12 derniers mois)</p>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 80 }}>
-            {trend.map(({ month, avg: a }) => {
-              const h = a != null ? Math.max(8, (a / 5) * 80) : 4;
-              const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
-              const MONTHS_FR = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];
-              const [y, mo] = month.split("-");
-              const label = `${MONTHS_FR[parseInt(mo) - 1]} ${y.slice(2)}`;
-              return (
-                <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600 }}>{a ?? "–"}</span>
-                  <div style={{ width: "100%", height: h, background: color, borderRadius: 4, opacity: 0.8 }} />
-                  <span style={{ fontSize: 8, color: "var(--text-muted)", whiteSpace: "nowrap" }}>{label}</span>
-                </div>
-              );
-            })}
+          {/* Scrollable on mobile — bars never get crushed below 36px */}
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", margin: "0 -4px" }}>
+            <div style={{ minWidth: 460, display: "flex", gap: 5, padding: "0 4px" }}>
+              {(() => {
+                const MONTHS_SHORT = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];
+                const BAR_H = 72;
+                return trend.map(({ month, avg: a }, idx) => {
+                  const [y, mo] = month.split("-");
+                  const isJan = mo === "01";
+                  const showYear = idx === 0 || isJan;
+                  const label = showYear
+                    ? `${MONTHS_SHORT[parseInt(mo) - 1]} '${y.slice(2)}`
+                    : MONTHS_SHORT[parseInt(mo) - 1];
+                  const h = a != null ? Math.max(4, (a / 5) * BAR_H) : 4;
+                  const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
+                  return (
+                    <div key={month} style={{ flex: 1, minWidth: 28, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                      <span style={{ fontSize: 9, color, fontWeight: 700, lineHeight: "12px", minHeight: 12 }}>{a ?? "–"}</span>
+                      <div style={{ width: "100%", height: BAR_H, display: "flex", alignItems: "flex-end" }}>
+                        <div style={{ width: "100%", height: h, background: color, borderRadius: "3px 3px 0 0", opacity: 0.85 }} />
+                      </div>
+                      <span style={{ fontSize: 8, color: showYear ? "var(--text-sub)" : "var(--text-muted)", fontWeight: showYear ? 700 : 400, whiteSpace: "nowrap", marginTop: 2 }}>
+                        {label}
+                      </span>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
           </div>
         </div>
       )}

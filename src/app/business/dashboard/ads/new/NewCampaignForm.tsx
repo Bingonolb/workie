@@ -208,7 +208,7 @@ export function NewCampaignForm({
         <div style={card}>
           <SectionHeader icon={<ImageIcon size={18} />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* Left: inputs */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <label style={{
@@ -503,20 +503,20 @@ export function NewCampaignForm({
             <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: "auto" }}>Basée sur les données de la plateforme</span>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 1 }}>
             {[
               { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "coût / 1 000 vues", icon: <DollarSign size={14} />, color: "#8b5cf6" },
               { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions estimées", icon: <Eye size={14} />, color: "#6366f1" },
               { label: "Personnes / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "portée unique estimée", icon: <MousePointer size={14} />, color: "#f97316" },
               { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} />, color: "#10b981" },
-            ].map(({ label, value, sub, icon, color }, i) => (
+            ].map(({ label, value, sub, icon, color }) => (
               <div key={label} style={{
-                textAlign: "center", padding: "16px 12px",
-                borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.07)" : "none",
+                textAlign: "center", padding: "16px 10px",
+                borderLeft: "1px solid rgba(255,255,255,0.07)",
               }}>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 8, color }}>{icon}</div>
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
-                <p style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 4 }}>{value}</p>
+                <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 4 }}>{value}</p>
                 <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{sub}</p>
               </div>
             ))}
