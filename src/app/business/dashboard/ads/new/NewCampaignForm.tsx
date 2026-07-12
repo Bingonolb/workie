@@ -467,19 +467,23 @@ export function NewCampaignForm({
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {dailyBudget} × {durationDays} jours</div>
           </div>
 
-          {/* Dates — compact row, always 2 cols */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <div style={{ minWidth: 0 }}>
+          {/* Dates — compact row, always 2 cols, overflow:hidden clips iOS native date input */}
+          <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ flex: "1 1 0px", minWidth: 0 }}>
               <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Début</label>
-              <input name="start_date" type="date" style={{ ...inp, height: 40, fontSize: 13, padding: "0 10px", minWidth: 0 }} value={startDate}
-                onChange={e => handleStartDateChange(e.target.value)} />
+              <div style={{ overflow: "hidden", borderRadius: 12 }}>
+                <input name="start_date" type="date" style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} value={startDate}
+                  onChange={e => handleStartDateChange(e.target.value)} />
+              </div>
             </div>
-            <div style={{ minWidth: 0 }}>
+            <div style={{ flex: "1 1 0px", minWidth: 0 }}>
               <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                Fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, fontSize: 10 }}>· calculée auto</span>
+                Fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, fontSize: 10 }}>· auto</span>
               </label>
-              <input name="end_date" type="date" style={{ ...inp, height: 40, fontSize: 13, padding: "0 10px", minWidth: 0 }} value={endDate}
-                onChange={e => handleEndDateChange(e.target.value)} />
+              <div style={{ overflow: "hidden", borderRadius: 12 }}>
+                <input name="end_date" type="date" style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} value={endDate}
+                  onChange={e => handleEndDateChange(e.target.value)} />
+              </div>
             </div>
           </div>
         </div>
