@@ -279,12 +279,12 @@ export default async function AnalyticsPage() {
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Évolution mensuelle de la note</p>
               <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 100 }}>
                 {trend.map(({ month, avg: a }) => {
-                  const h = Math.max(8, (a / 5) * 100);
-                  const color = a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
+                  const h = a != null ? Math.max(8, (a / 5) * 100) : 4;
+                  const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
                   return (
                     <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color }}>{a}</span>
-                      <div title={`${month}: ${a}/5`} style={{ width: "100%", height: h, background: color, borderRadius: "4px 4px 0 0", opacity: 0.85 }} />
+                      <span style={{ fontSize: 11, fontWeight: 700, color }}>{a ?? "–"}</span>
+                      <div title={a != null ? `${month}: ${a}/5` : `${month}: aucun avis`} style={{ width: "100%", height: h, background: color, borderRadius: "4px 4px 0 0", opacity: 0.85 }} />
                       <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{month.slice(5)}/{month.slice(2, 4)}</span>
                     </div>
                   );
