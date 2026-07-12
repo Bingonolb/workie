@@ -168,11 +168,11 @@ export default async function BusinessDashboardPage() {
           <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Évolution de la note (12 derniers mois)</p>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 80 }}>
             {trend.map(({ month, avg: a }) => {
-              const h = Math.max(8, (a / 5) * 80);
-              const color = a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
+              const h = a != null ? Math.max(8, (a / 5) * 80) : 4;
+              const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
               return (
                 <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600 }}>{a}</span>
+                  <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600 }}>{a ?? "–"}</span>
                   <div style={{ width: "100%", height: h, background: color, borderRadius: 4, opacity: 0.8 }} />
                   <span style={{ fontSize: 9, color: "var(--text-muted)", transform: "rotate(-30deg)", transformOrigin: "center" }}>{month.slice(5)}</span>
                 </div>
