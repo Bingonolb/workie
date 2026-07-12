@@ -75,23 +75,29 @@ export default async function ExplorePage({
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
+  // Compute page before the Promise.all so we skip the squareAds fetch on page 2+
+  // (guests are always page 1, so provisionalPage is reliable for the ad-fetch decision)
+  const provisionalPage = Math.max(1, parseInt(raw.page ?? "1") || 1);
+
   const [user, favIds, flameIds, isAdmin, bizCompanyId, squareAds, swipeAds] = await Promise.all([
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
     getUserFlameIds().catch(() => [] as string[]),
     import("@/lib/supabase/server").then(m => m.getIsAdmin()).catch(() => false),
     import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
-    getActiveAds({ format: "square", canton: params.canton, sector: params.sector }).catch(() => []),
-    getActiveAds({ format: "swipe", canton: params.canton, sector: params.sector }).catch(() => []),
+    // Bug 2 fix: skip DB fetch entirely on page 2+ — don't fetch then discard
+    !isSwipe && provisionalPage === 1
+      ? getActiveAds({ format: "square", canton: params.canton, sector: params.sector }).catch(() => [])
+      : Promise.resolve([]),
+    isSwipe
+      ? getActiveAds({ format: "swipe", canton: params.canton, sector: params.sector }).catch(() => [])
+      : Promise.resolve([]),
   ]);
   const isBusiness = !!bizCompanyId;
 
   // Guests are locked to page 1 — enforced server-side, not just in UI
   const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
 
-  // Ads only appear on page 1 — injecting on every pagination page is aggressive
-  // and never done on professional platforms (LinkedIn, Glassdoor, Indeed)
-  const adsForGrid = page === 1 ? squareAds : [];
 
   if (isSwipe) {
     const companies = await getAllCompaniesForSwipe(filters);
@@ -126,6 +132,9 @@ export default async function ExplorePage({
 
   const result = await getCompanies({ ...filters, page, sort: params.sort });
   const { companies, total, pageCount } = result;
+  // Bugs 2+3 fix: ads only on page 1 (no fetch wasted on page 2+, done above),
+  // and only when ≥4 results so slot at index 3 is always reachable
+  const adsForGrid = page === 1 && companies.length >= 4 ? squareAds : [];
 
   return (
     <div className="page-root">

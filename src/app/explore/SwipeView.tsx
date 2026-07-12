@@ -77,14 +77,19 @@ export function SwipeView({
   // Show swipe ad at a randomized interval (not a fixed cadence users can predict)
   useEffect(() => {
     if (swipeAds.length === 0 || index < nextAdAt.current) return;
-    // Pick a random ad from the pool
     const ad = swipeAds[Math.floor(Math.random() * swipeAds.length)];
     setAdOverlay(ad);
-    trackAdImpression(ad.id);
     // Schedule the next ad 10-17 swipes from now
     nextAdAt.current = index + 10 + Math.floor(Math.random() * 8);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
+
+  // Bug 4 fix: track impression only after the overlay is actually committed to the DOM,
+  // not at trigger time (avoids counting impressions that never render)
+  useEffect(() => {
+    if (adOverlay) trackAdImpression(adOverlay.id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adOverlay]);
 
   // Prefetch next batch silently, well before the user reaches the end
   useEffect(() => {

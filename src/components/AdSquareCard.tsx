@@ -22,11 +22,18 @@ function incrementFreqCap(campaignId: string) {
 
 export function AdSquareCard({ ad }: { ad: AdCampaign }) {
   const cardRef = useRef<HTMLDivElement>(null);
-  // Hidden if already seen FREQ_CAP times this session — avoids rendering a "ghost" card
-  const [hidden, setHidden] = useState(false);
+  // null = not yet determined (avoids SSR/client hydration mismatch)
+  // true = show, false = hide (freq cap hit)
+  const [visible, setVisible] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (getFreqCount(ad.id) >= FREQ_CAP) { setHidden(true); return; }
+    // Runs only on client — sessionStorage not available server-side
+    setVisible(getFreqCount(ad.id) < FREQ_CAP);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ad.id]);
+
+  useEffect(() => {
+    if (!visible) return;
     const el = cardRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
@@ -42,9 +49,10 @@ export function AdSquareCard({ ad }: { ad: AdCampaign }) {
     observer.observe(el);
     return () => observer.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ad.id]);
+  }, [visible, ad.id]);
 
-  if (hidden) return null;
+  // null = not yet hydrated, false = freq cap hit — both render nothing
+  if (!visible) return null;
 
   return (
     <div ref={cardRef} style={{
