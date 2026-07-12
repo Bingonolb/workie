@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ExternalLink } from "lucide-react";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { AdCampaign } from "@/lib/actions/ads";
@@ -24,15 +24,29 @@ function incrementFreqCap(campaignId: string) {
 }
 
 export function AdSquareCard({ ad }: { ad: AdCampaign }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (hasHitFreqCap(ad.id)) return;
-    incrementFreqCap(ad.id);
-    trackAdImpression(ad.id);
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          observer.disconnect();
+          incrementFreqCap(ad.id);
+          trackAdImpression(ad.id);
+        }
+      },
+      { threshold: 0.5 } // at least 50% visible before counting
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ad.id]);
 
   return (
-    <div style={{
+    <div ref={cardRef} style={{
       background: "var(--surface)",
       border: "1px solid rgba(139,92,246,0.25)",
       borderRadius: 20,

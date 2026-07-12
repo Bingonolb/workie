@@ -55,7 +55,7 @@ export function ExploreFilters({
     const q = input.trim();
     if (q.length < 1) { setSuggestions([]); setShowSuggestions(false); setLoading(false); return; }
     setLoading(true);
-    debounceRef.current = setTimeout(async () => {
+    debounceRef.current = setTimeout(async () => { // 300ms debounce
       try {
         const res = await fetch(`/api/companies/search?q=${encodeURIComponent(q)}`);
         const data = await res.json();
@@ -67,7 +67,7 @@ export function ExploreFilters({
       } finally {
         setLoading(false);
       }
-    }, 80);
+    }, 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [input]);
 
@@ -87,7 +87,7 @@ export function ExploreFilters({
       } finally {
         setMobileLoading(false);
       }
-    }, 80);
+    }, 300);
     return () => clearTimeout(t);
   }, [mobileInput, mobileSearchOpen]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, MapPin, ExternalLink } from "lucide-react";
 
 type Job = {
@@ -27,6 +27,13 @@ function Badge({ label, color }: { label: string; color: string }) {
 
 export function JobOfferCard({ job, companyName }: { job: Job; companyName: string }) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
 
   return (
     <>

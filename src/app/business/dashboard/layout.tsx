@@ -48,7 +48,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {company.logo_url
               ? <img src={company.logo_url} alt={company.name} style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", border: "1px solid var(--border)" }} />
-              : <div style={{ width: 36, height: 36, borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: "#fff" }}>{company.name[0]}</div>
+              : <div style={{ width: 36, height: 36, borderRadius: 8, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: "#fff" }}>{(company.name || "?")[0]}</div>
             }
             <div style={{ minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -60,7 +60,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
                   </svg>
                 )}
               </div>
-              <p style={{ fontSize: 11, color: "var(--text-muted)" }}>Abonnement actif</p>
+              <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{company.is_subscribed ? "Abonnement actif" : "Accès admin"}</p>
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {company.logo_url
               ? <img src={company.logo_url} alt={company.name} style={{ width: 28, height: 28, borderRadius: 7, objectFit: "cover", border: "1px solid var(--border)" }} />
-              : <div style={{ width: 28, height: 28, borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: "#fff" }}>{company.name[0]}</div>
+              : <div style={{ width: 28, height: 28, borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: "#fff" }}>{(company.name || "?")[0]}</div>
             }
             <ThemeToggle />
           </div>

@@ -15,7 +15,8 @@ export async function toggleFavorite(companyId: string): Promise<void> {
   if (existing) {
     await supabase.from("favorites").delete().eq("user_id", user.id).eq("company_id", companyId);
   } else {
-    await supabase.from("favorites").insert({ user_id: user.id, company_id: companyId });
+    const { error } = await supabase.from("favorites").insert({ user_id: user.id, company_id: companyId });
+    if (error && error.code !== "23505") throw error; // ignore unique violation (concurrent insert)
   }
   revalidatePath("/profile");
   revalidatePath(`/company/${companyId}`);
