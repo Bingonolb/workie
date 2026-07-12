@@ -1,0 +1,49 @@
+name: Smoke Test — Pages critiques
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  smoke:
+    name: Vérifie les pages critiques en prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Attendre le déploiement Vercel (~2 min)
+        run: sleep 120
+
+      - name: Vérifier les pages critiques
+        run: |
+          BASE="https://www.workie.ch"
+          WEVENZ="be6be3f8-f817-41ad-9dfa-014c3ee7e5e0"
+          FAIL=0
+
+          check() {
+            local label="$1"
+            local url="$2"
+            local status=$(curl -s -o /tmp/body.txt -w "%{http_code}" --max-time 20 "$url")
+            local body=$(cat /tmp/body.txt)
+            if [ "$status" != "200" ]; then
+              echo "❌ $label → HTTP $status ($url)"
+              FAIL=1
+            elif echo "$body" | grep -q "Une erreur s'est produite"; then
+              echo "❌ $label → error boundary détecté ($url)"
+              FAIL=1
+            else
+              echo "✅ $label → OK ($status)"
+            fi
+          }
+
+          check "Accueil"          "$BASE/"
+          check "Explorer"         "$BASE/explore"
+          check "Fiche Wevenz"     "$BASE/company/$WEVENZ"
+          check "Login"            "$BASE/login"
+
+          if [ "$FAIL" -ne 0 ]; then
+            echo ""
+            echo "💥 Un ou plusieurs smoke tests ont échoué — vérifier le déploiement Vercel."
+            exit 1
+          fi
+
+          echo ""
+          echo "🎉 Tous les smoke tests sont OK."
