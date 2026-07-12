@@ -467,8 +467,8 @@ export function NewCampaignForm({
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {dailyBudget} × {durationDays} jours</div>
           </div>
 
-          {/* Dates */}
-          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          {/* Dates — always 2 cols, date fields are compact enough on any phone */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div style={{ minWidth: 0 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Date de début</label>
               <input name="start_date" type="date" style={{ ...inp, minWidth: 0 }} value={startDate}
@@ -485,31 +485,30 @@ export function NewCampaignForm({
         </div>
 
         {/* ── PERFORMANCE ESTIMATE ────────────────────────────────────── */}
-        <div style={{
+        <div className="biz-form-card" style={{
           background: "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(249,115,22,0.05) 100%)",
-          border: "1px solid rgba(139,92,246,0.25)", borderRadius: 20, padding: "24px 28px", marginBottom: 24,
+          border: "1px solid rgba(139,92,246,0.25)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
             <Info size={16} color="#8b5cf6" />
             <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Estimation de performance</p>
-            <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: "auto" }}>Basée sur les données de la plateforme</span>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 1 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 1 }}>
             {[
-              { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "coût / 1 000 vues", icon: <DollarSign size={14} />, color: "#8b5cf6" },
-              { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions estimées", icon: <Eye size={14} />, color: "#6366f1" },
-              { label: "Personnes / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "portée unique estimée", icon: <MousePointer size={14} />, color: "#f97316" },
+              { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "/ 1 000 vues", icon: <DollarSign size={14} />, color: "#8b5cf6" },
+              { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions", icon: <Eye size={14} />, color: "#6366f1" },
+              { label: "Portée / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes uniques", icon: <MousePointer size={14} />, color: "#f97316" },
               { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} />, color: "#10b981" },
             ].map(({ label, value, sub, icon, color }) => (
               <div key={label} style={{
-                textAlign: "center", padding: "16px 10px",
+                textAlign: "center", padding: "14px 8px",
                 borderLeft: "1px solid rgba(255,255,255,0.07)",
               }}>
-                <div style={{ display: "flex", justifyContent: "center", marginBottom: 8, color }}>{icon}</div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
-                <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 4 }}>{value}</p>
-                <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{sub}</p>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 6, color }}>{icon}</div>
+                <p style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
+                <p style={{ fontSize: "clamp(16px, 4vw, 22px)", fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 3 }}>{value}</p>
+                <p style={{ fontSize: 10, color: "var(--text-muted)" }}>{sub}</p>
               </div>
             ))}
           </div>
@@ -526,12 +525,12 @@ export function NewCampaignForm({
           <button type="submit" disabled={pending} style={{
             flex: 1, padding: "16px", borderRadius: 14,
             background: pending ? "rgba(255,255,255,0.08)" : "linear-gradient(135deg, #8b5cf6, #f97316)",
-            color: "#fff", fontWeight: 800, fontSize: 16, border: "none",
+            color: "#fff", fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", border: "none",
             cursor: pending ? "not-allowed" : "pointer",
             transition: "opacity 0.2s",
             opacity: pending ? 0.7 : 1,
           }}>
-            {pending ? "Envoi en cours…" : `Soumettre · CHF ${totalBudget.toLocaleString("fr-CH")}`}
+            {pending ? "Envoi en cours…" : <><span>Soumettre</span><span style={{ opacity: 0.8 }}> · CHF {totalBudget.toLocaleString("fr-CH")}</span></>}
           </button>
           <Link href="/business/dashboard/ads" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", whiteSpace: "nowrap" }}>
             Annuler
