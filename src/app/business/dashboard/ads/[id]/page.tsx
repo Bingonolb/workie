@@ -101,7 +101,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         </div>
 
         {/* KPI grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 20 }}>
+        <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 20 }}>
           {/* Left col: totals */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 20px" }}>
@@ -123,7 +123,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 20px" }}>
               <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>Période récente</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
                 {[
                   { label: "Aujourd'hui", imp: today?.impressions ?? 0, clk: today?.clicks ?? 0 },
                   { label: "7 derniers jours", imp: last7Imp, clk: last7Clk },

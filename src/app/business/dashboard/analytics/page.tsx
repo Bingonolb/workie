@@ -88,7 +88,7 @@ export default async function AnalyticsPage() {
       {viewTrend && viewTrend.length > 0 && (
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px", marginBottom: 28 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Vues par jour — 30 derniers jours</p>
-          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", margin: "0 -4px" }}>
+          <div className="scroll-x" style={{ margin: "0 -4px" }}>
             <div style={{ minWidth: 560, padding: "0 4px" }}>
               <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 72 }}>
                 {viewTrend.map(({ day, count: cnt }) => {
@@ -274,7 +274,7 @@ export default async function AnalyticsPage() {
           {trend && trend.length > 1 && (
             <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Évolution mensuelle de la note</p>
-              <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", margin: "0 -4px" }}>
+              <div className="scroll-x" style={{ margin: "0 -4px" }}>
               <div style={{ minWidth: 480, display: "flex", gap: 8, padding: "0 4px" }}>
                 {(() => {
                   const MONTHS_SHORT = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];

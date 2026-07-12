@@ -201,6 +201,15 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+/* Horizontal scroll without visible scrollbar — for inline charts */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.scroll-x::-webkit-scrollbar { display: none; }
+
 /* ─── Filter panel — bottom sheet on mobile ─────────────────────── */
 
 .filter-panel {

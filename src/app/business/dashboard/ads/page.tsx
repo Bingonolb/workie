@@ -101,7 +101,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
           <>
             {/* ── Global KPIs ── */}
             {campaigns.length > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 24 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 24 }}>
                 {[
                   { label: "Vues totales", value: totalImpressions.toLocaleString("fr-CH"), icon: <Eye size={14} />, color: "#8b5cf6" },
                   { label: "Clics totaux", value: totalClicks.toLocaleString("fr-CH"), icon: <MousePointer size={14} />, color: "#f97316" },
@@ -280,7 +280,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
         {/* Info box */}
         <div style={{ marginTop: 28, background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.12)", borderRadius: 14, padding: "16px 20px" }}>
           <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Comment ça fonctionne</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
             {[
               { step: "1", text: "Créez votre campagne avec visuel et ciblage" },
               { step: "2", text: "Notre équipe valide sous 24h ouvrées" },

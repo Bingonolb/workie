@@ -167,7 +167,7 @@ export default async function BusinessDashboardPage() {
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px", marginBottom: 32 }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Évolution de la note (12 derniers mois)</p>
           {/* Scrollable on mobile — bars never get crushed below 36px */}
-          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", margin: "0 -4px" }}>
+          <div className="scroll-x" style={{ margin: "0 -4px" }}>
             <div style={{ minWidth: 460, display: "flex", gap: 5, padding: "0 4px" }}>
               {(() => {
                 const MONTHS_SHORT = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];
