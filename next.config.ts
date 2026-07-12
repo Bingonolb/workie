@@ -33,7 +33,9 @@ export default withSentryConfig(nextConfig, {
   project: "workie-nextjs",
   silent: true,
   widenClientFileUpload: true,
-  hideSourceMaps: true,
-  disableLogger: true,
-  automaticVercelMonitors: true,
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+    automaticVercelMonitors: true,
+  },
 });
