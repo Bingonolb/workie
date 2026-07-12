@@ -4,11 +4,12 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { ReviewForm } from "@/components/ReviewForm";
 import { getCompany } from "@/lib/actions/companies";
-import { getReviews, voteHelpful } from "@/lib/actions/reviews";
+import { getReviews } from "@/lib/actions/reviews";
 import { createClient } from "@/lib/supabase/server";
 import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
-import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle, ThumbsUp } from "lucide-react";
+import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle } from "lucide-react";
+import { HelpfulButton } from "@/components/HelpfulButton";
 import { ParallaxCover } from "@/components/ParallaxCover";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
@@ -590,18 +591,7 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
 
       {/* Helpful */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-        <form action={voteHelpful.bind(null, review.id) as unknown as (f: FormData) => Promise<void>}>
-          <button type="submit" style={{
-            display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 8,
-            background: "var(--surface2)", border: "1px solid var(--border2)",
-            color: "var(--text-muted)", fontSize: 12, fontWeight: 600, cursor: "pointer",
-          }}>
-            <ThumbsUp size={13} /> Utile
-            {review.helpful_count > 0 && (
-              <span style={{ color: "#8b5cf6", fontWeight: 700 }}>{review.helpful_count}</span>
-            )}
-          </button>
-        </form>
+        <HelpfulButton reviewId={review.id} initialCount={review.helpful_count} />
       </div>
     </div>
   );
