@@ -86,9 +86,12 @@ export default async function ExplorePage({
   ]);
   const isBusiness = !!bizCompanyId;
 
-
   // Guests are locked to page 1 — enforced server-side, not just in UI
   const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
+
+  // Ads only appear on page 1 — injecting on every pagination page is aggressive
+  // and never done on professional platforms (LinkedIn, Glassdoor, Indeed)
+  const adsForGrid = page === 1 ? squareAds : [];
 
   if (isSwipe) {
     const companies = await getAllCompaniesForSwipe(filters);
@@ -168,8 +171,8 @@ export default async function ExplorePage({
                 const items: React.ReactNode[] = [];
                 let adCursor = 0;
                 (companies as Company[]).forEach((c, i) => {
-                  if (adCursor < squareAds.length && AD_SLOTS[adCursor] === i) {
-                    const ad = squareAds[adCursor++];
+                  if (adCursor < adsForGrid.length && AD_SLOTS[adCursor] === i) {
+                    const ad = adsForGrid[adCursor++];
                     items.push(<AdSquareCard key={`ad-${ad.id}`} ad={ad} />);
                   }
                   items.push(<CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />);

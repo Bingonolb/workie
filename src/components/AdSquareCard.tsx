@@ -1,33 +1,32 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { AdCampaign } from "@/lib/actions/ads";
 
-const FREQ_CAP = 3; // max impressions per campaign per session
+// Max times a given ad can appear per session before hiding itself entirely
+const FREQ_CAP = 2;
 
-function hasHitFreqCap(campaignId: string): boolean {
-  try {
-    const key = `ad_freq_${campaignId}`;
-    const count = parseInt(sessionStorage.getItem(key) ?? "0", 10);
-    return count >= FREQ_CAP;
-  } catch { return false; }
+function getFreqCount(campaignId: string): number {
+  try { return parseInt(sessionStorage.getItem(`ad_freq_${campaignId}`) ?? "0", 10); }
+  catch { return 0; }
 }
 
 function incrementFreqCap(campaignId: string) {
   try {
     const key = `ad_freq_${campaignId}`;
-    const count = parseInt(sessionStorage.getItem(key) ?? "0", 10);
-    sessionStorage.setItem(key, String(count + 1));
+    sessionStorage.setItem(key, String(getFreqCount(campaignId) + 1));
   } catch { /* */ }
 }
 
 export function AdSquareCard({ ad }: { ad: AdCampaign }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  // Hidden if already seen FREQ_CAP times this session — avoids rendering a "ghost" card
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    if (hasHitFreqCap(ad.id)) return;
+    if (getFreqCount(ad.id) >= FREQ_CAP) { setHidden(true); return; }
     const el = cardRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
@@ -38,12 +37,14 @@ export function AdSquareCard({ ad }: { ad: AdCampaign }) {
           trackAdImpression(ad.id);
         }
       },
-      { threshold: 0.5 } // at least 50% visible before counting
+      { threshold: 0.5 }
     );
     observer.observe(el);
     return () => observer.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ad.id]);
+
+  if (hidden) return null;
 
   return (
     <div ref={cardRef} style={{
