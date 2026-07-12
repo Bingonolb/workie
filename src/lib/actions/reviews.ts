@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Review } from "@/lib/types";
 
@@ -89,6 +90,8 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
 
   if (error) return { error: error.message };
 
+  revalidatePath(`/company/${company_id}`);
+  revalidatePath("/profile");
   return { success: true };
 }
 
@@ -114,6 +117,10 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
     await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
     return { error: rpcErr.message };
   }
+
+  // Revalidate the company page so the helpful count is fresh for next visitors
+  const { data: rev } = await supabase.from("reviews").select("company_id").eq("id", reviewId).maybeSingle();
+  if (rev?.company_id) revalidatePath(`/company/${rev.company_id}`);
 
   return {};
 }

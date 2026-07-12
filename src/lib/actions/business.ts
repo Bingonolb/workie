@@ -116,7 +116,7 @@ export async function getBusinessAnalytics() {
     const salaries = r.filter(x => x.salary_chf && Number(x.salary_chf) > 0).map(x => Number(x.salary_chf));
     const avgSalary = salaries.length > 0 ? Math.round(salaries.reduce((a, b) => a + b, 0) / salaries.length) : null;
 
-    // Trend: rating by month (last 12 months)
+    // Trend: rating by month (last 12 months) — fill every month so chart has no gaps
     const monthlyMap: Record<string, number[]> = {};
     r.forEach(rev => {
       const month = rev.created_at?.slice(0, 7);
@@ -124,12 +124,18 @@ export async function getBusinessAnalytics() {
       if (!monthlyMap[month]) monthlyMap[month] = [];
       monthlyMap[month].push(Number(rev.rating_overall));
     });
-    const trend = Object.entries(monthlyMap)
-      .slice(-12)
-      .map(([month, ratings]) => ({
+    const trend: { month: string; avg: number | null }[] = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(1);
+      d.setMonth(d.getMonth() - i);
+      const month = d.toISOString().slice(0, 7);
+      const ratings = monthlyMap[month];
+      trend.push({
         month,
-        avg: Number((ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)),
-      }));
+        avg: ratings ? Number((ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)) : null,
+      });
+    }
 
     // Rating distribution
     const dist = [1, 2, 3, 4, 5].map(n => ({
@@ -300,6 +306,7 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
     if (error) return { error: error.message };
 
     revalidatePath("/business/dashboard/reviews");
+    revalidatePath(`/company/${company.id}`);
     return { success: true };
   } catch (e) {
     return { error: (e as Error).message };
