@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft } from "lucide-react";
 import { getBusinessCampaigns } from "@/lib/actions/ads";
 
@@ -159,9 +160,12 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                 const pct = budgetPct(Number(c.spent_chf), Number(c.total_budget_chf));
                 const remaining = Math.max(0, Number(c.total_budget_chf) - Number(c.spent_chf));
 
+                const cardStyle: CSSProperties = { position: "relative", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden", transition: "border-color 0.15s" };
                 return (
-                  <div key={c.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden", transition: "border-color 0.15s" }}>
-                    <div style={{ display: "flex", gap: 0, alignItems: "stretch" }}>
+                  <div key={c.id} style={cardStyle}>
+                    {/* Full-card link — action buttons sit above via z-index */}
+                    <Link href={`/business/dashboard/ads/${c.id}`} style={{ position: "absolute", inset: 0, zIndex: 0 }} aria-label={c.headline} />
+                    <div style={{ display: "flex", gap: 0, alignItems: "stretch", position: "relative", zIndex: 1 }}>
 
                       {/* Thumbnail */}
                       <div style={{ width: 90, flexShrink: 0, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
@@ -225,7 +229,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                     </div>
 
                     {/* Action bar */}
-                    <div style={{ borderTop: "1px solid var(--border)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.01)" }}>
+                    <div style={{ borderTop: "1px solid var(--border)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.01)", position: "relative", zIndex: 1 }}>
                       <Link href={`/business/dashboard/ads/${c.id}`} style={{
                         fontSize: 12, fontWeight: 700, color: "#8b5cf6", textDecoration: "none",
                         padding: "5px 12px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)", background: "rgba(139,92,246,0.06)",

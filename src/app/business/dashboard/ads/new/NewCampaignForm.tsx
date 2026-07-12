@@ -434,13 +434,11 @@ export function NewCampaignForm({
           <SectionHeader icon={<DollarSign size={18} />} title="Budget" subtitle="Ajustez le budget journalier et la durée — le total se calcule automatiquement." />
 
           {/* Smart sliders */}
-          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, marginBottom: 28 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
             {/* Daily */}
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Par jour</label>
-                <span style={{ fontSize: 26, fontWeight: 900, color: "#8b5cf6", letterSpacing: "-0.02em" }}>CHF {dailyBudget}</span>
-              </div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 4 }}>Par jour</label>
+              <div style={{ fontSize: "clamp(20px, 5vw, 26px)", fontWeight: 900, color: "#8b5cf6", letterSpacing: "-0.02em", marginBottom: 10, lineHeight: 1 }}>CHF {dailyBudget}</div>
               <input type="range" min={5} max={500} step={5} value={dailyBudget}
                 onChange={e => setDailyBudget(Number(e.target.value))}
                 style={{ width: "100%", accentColor: "#8b5cf6", height: 4 }} />
@@ -451,10 +449,8 @@ export function NewCampaignForm({
 
             {/* Duration */}
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-                <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Durée</label>
-                <span style={{ fontSize: 26, fontWeight: 900, color: "#f97316", letterSpacing: "-0.02em" }}>{durationLabel}</span>
-              </div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 4 }}>Durée</label>
+              <div style={{ fontSize: "clamp(20px, 5vw, 26px)", fontWeight: 900, color: "#f97316", letterSpacing: "-0.02em", marginBottom: 10, lineHeight: 1 }}>{durationLabel}</div>
               <input type="range" min={1} max={90} step={1} value={durationDays}
                 onChange={e => handleDurationChange(Number(e.target.value))}
                 style={{ width: "100%", accentColor: "#f97316", height: 4 }} />
@@ -465,24 +461,24 @@ export function NewCampaignForm({
           </div>
 
           {/* Total badge */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "14px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 24 }}>
-            <span style={{ fontSize: 14, color: "var(--text-muted)" }}>Budget total</span>
-            <span style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>CHF {totalBudget.toLocaleString("fr-CH")}</span>
-            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>= CHF {dailyBudget} × {durationDays}j</span>
+          <div style={{ padding: "14px 16px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 24, textAlign: "center" }}>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Budget total</div>
+            <div style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", lineHeight: 1 }}>CHF {totalBudget.toLocaleString("fr-CH")}</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {dailyBudget} × {durationDays} jours</div>
           </div>
 
           {/* Dates */}
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Date de début</label>
-              <input name="start_date" type="date" style={inp} value={startDate}
+              <input name="start_date" type="date" style={{ ...inp, minWidth: 0 }} value={startDate}
                 onChange={e => handleStartDateChange(e.target.value)} />
             </div>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                Date de fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-muted)", fontSize: 11 }}>· calculée automatiquement</span>
+                Date de fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-muted)", fontSize: 11 }}>· auto</span>
               </label>
-              <input name="end_date" type="date" style={inp} value={endDate}
+              <input name="end_date" type="date" style={{ ...inp, minWidth: 0 }} value={endDate}
                 onChange={e => handleEndDateChange(e.target.value)} />
             </div>
           </div>
