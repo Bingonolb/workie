@@ -66,7 +66,7 @@ export default async function SalairesPage() {
     const sector = r.companies?.sector;
     if (!sector) return;
     if (!sectorMap[sector]) sectorMap[sector] = [];
-    sectorMap[sector].push(r.salary_chf);
+    sectorMap[sector].push(Number(r.salary_chf));
   });
 
   const sectorStats: SectorStat[] = Object.entries(sectorMap)
@@ -94,7 +94,7 @@ export default async function SalairesPage() {
     const title = r.job_title?.trim();
     if (!title || title.length < 3) return;
     if (!jobMap[title]) jobMap[title] = [];
-    jobMap[title].push(r.salary_chf);
+    jobMap[title].push(Number(r.salary_chf));
   });
 
   const jobStats: JobStat[] = Object.entries(jobMap)
@@ -108,7 +108,7 @@ export default async function SalairesPage() {
     .slice(0, 20);
 
   // Overall stats
-  const allSalaries = all.map(r => r.salary_chf).sort((a, b) => a - b);
+  const allSalaries = all.map(r => Number(r.salary_chf)).sort((a, b) => a - b);
   const overallAvg = allSalaries.length > 0
     ? Math.round(allSalaries.reduce((a, b) => a + b, 0) / allSalaries.length)
     : 0;
