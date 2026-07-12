@@ -79,7 +79,7 @@ export default async function AnalyticsPage() {
               {icon}
               <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600 }}>{label}</span>
             </div>
-            <p style={{ fontSize: 28, fontWeight: 900, color, letterSpacing: "-0.03em" }}>{(value as number).toLocaleString("fr-CH")}</p>
+            <p style={{ fontSize: 28, fontWeight: 900, color, letterSpacing: "-0.03em" }}>{((value ?? 0) as number).toLocaleString("fr-CH")}</p>
           </div>
         ))}
       </div>
@@ -254,8 +254,8 @@ export default async function AnalyticsPage() {
             <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 16 }}>Employé actuel vs. ancien employé</p>
             <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
               {[
-                { label: "Employés actuels", cnt: currentVsFormer.current, color: "#10b981" },
-                { label: "Anciens employés", cnt: currentVsFormer.former, color: "#6b7280" },
+                { label: "Employés actuels", cnt: currentVsFormer?.current ?? 0, color: "#10b981" },
+                { label: "Anciens employés", cnt: currentVsFormer?.former ?? 0, color: "#6b7280" },
               ].map(({ label, cnt, color }) => {
                 const pct = count > 0 ? Math.round((cnt / count) * 100) : 0;
                 return (
@@ -268,7 +268,7 @@ export default async function AnalyticsPage() {
                 );
               })}
               <div style={{ flex: 1, minWidth: 120, height: 10, borderRadius: 50, background: "#6b7280", overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${count > 0 ? Math.round((currentVsFormer.current / count) * 100) : 0}%`, background: "#10b981", borderRadius: 50 }} />
+                <div style={{ height: "100%", width: `${count > 0 ? Math.round(((currentVsFormer?.current ?? 0) / count) * 100) : 0}%`, background: "#10b981", borderRadius: 50 }} />
               </div>
             </div>
           </div>

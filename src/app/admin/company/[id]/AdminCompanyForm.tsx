@@ -29,6 +29,7 @@ export function AdminCompanyForm({ company }: { company: Company }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
     const url = URL.createObjectURL(file);
     setCoverPreview(url);
   };

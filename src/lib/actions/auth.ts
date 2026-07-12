@@ -12,9 +12,14 @@ export async function signUp(
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
   const username = String(formData.get("username") || "").trim();
+  const rawNext = String(formData.get("next") || "");
+  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";
 
   if (!email || !password || !username) {
     return { error: "Tous les champs sont requis." };
+  }
+  if (password.length < 6) {
+    return { error: "Le mot de passe doit faire au moins 6 caractères." };
   }
 
   const supabase = await createClient();
@@ -28,7 +33,7 @@ export async function signUp(
     return { error: error.message };
   }
 
-  redirect("/explore");
+  redirect(next);
 }
 
 export async function signIn(

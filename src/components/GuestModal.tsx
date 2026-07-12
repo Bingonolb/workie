@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { signInWithGoogle } from "@/lib/actions/auth";
 
 export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: boolean }) {
   const [timerVisible, setTimerVisible] = useState(false);
-  const visible = open !== undefined ? open : timerVisible;
+  const [dismissed, setDismissed] = useState(false);
+  const pathname = usePathname();
+  const visible = !dismissed && (open !== undefined ? open : timerVisible);
 
   useEffect(() => {
     if (open !== undefined) return;
@@ -16,15 +19,19 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
 
   return (
     <>
-      {/* Overlay */}
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 50,
-        background: "rgba(0,0,0,0.6)",
-        backdropFilter: "blur(2px)",
-        opacity: visible ? 1 : 0,
-        transition: "opacity 0.3s ease",
-        pointerEvents: visible ? "auto" : "none",
-      }} />
+      {/* Overlay — click to dismiss */}
+      <div
+        onClick={() => setDismissed(true)}
+        style={{
+          position: "fixed", inset: 0, zIndex: 50,
+          background: "rgba(0,0,0,0.6)",
+          backdropFilter: "blur(2px)",
+          opacity: visible ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          pointerEvents: visible ? "auto" : "none",
+          cursor: "pointer",
+        }}
+      />
 
       {/* Bottom sheet */}
       <div style={{
@@ -65,6 +72,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
           <div style={{ margin: "24px 0 0", display: "flex", flexDirection: "column", gap: 12 }}>
             {/* Google */}
             <form action={signInWithGoogle}>
+              <input type="hidden" name="next" value={pathname} />
               <button type="submit" style={{
                 width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
                 background: "#fff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 14,

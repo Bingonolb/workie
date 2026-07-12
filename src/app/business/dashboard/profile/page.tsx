@@ -89,7 +89,7 @@ export default function ProfilePage() {
                     <Upload size={14} /> Choisir
                     <input type="file" name="logo_file" accept="image/*" style={{ display: "none" }} onChange={e => {
                       const f = e.target.files?.[0];
-                      if (f) setLogoPreview(URL.createObjectURL(f));
+                      if (f) { if (logoPreview) URL.revokeObjectURL(logoPreview); setLogoPreview(URL.createObjectURL(f)); }
                     }} />
                   </label>
                   <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>PNG, JPG · max 10MB</p>
@@ -107,7 +107,7 @@ export default function ProfilePage() {
                 <Upload size={14} /> Changer la photo
                 <input type="file" name="cover_file" accept="image/*" style={{ display: "none" }} onChange={e => {
                   const f = e.target.files?.[0];
-                  if (f) setCoverPreview(URL.createObjectURL(f));
+                  if (f) { if (coverPreview) URL.revokeObjectURL(coverPreview); setCoverPreview(URL.createObjectURL(f)); }
                 }} />
               </label>
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>PNG, JPG · max 10MB · recommandé 1920×1080</p>

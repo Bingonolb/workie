@@ -19,9 +19,11 @@ export default async function BusinessDashboardPage() {
   // New reviews in last 7 days
   const supabase = await createClient();
   const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-  const { count: newReviews } = await Promise.resolve(
-    supabase.from("reviews").select("*", { count: "exact", head: true }).eq("company_id", String(company?.id ?? "")).gte("created_at", weekAgo)
-  ).catch(() => ({ count: 0 }));
+  const { count: newReviews } = await supabase
+    .from("reviews")
+    .select("*", { count: "exact", head: true })
+    .eq("company_id", String(company?.id ?? ""))
+    .gte("created_at", weekAgo);
 
   // Profile completeness
   const co = company as Record<string, unknown>;

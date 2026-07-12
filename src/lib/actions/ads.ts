@@ -190,10 +190,13 @@ export async function createCampaign(
     const total_budget_chf = Number(formData.get("total_budget_chf") || 0);
     if (total_budget_chf < daily_budget_chf) return { error: "Budget total doit être ≥ budget journalier." };
 
-    const target_cantons = JSON.parse(String(formData.get("target_cantons") || "[]")) as string[];
-    const target_sectors = JSON.parse(String(formData.get("target_sectors") || "[]")) as string[];
+    let target_cantons: string[] = [];
+    let target_sectors: string[] = [];
+    try { target_cantons = JSON.parse(String(formData.get("target_cantons") || "[]")); } catch { target_cantons = []; }
+    try { target_sectors = JSON.parse(String(formData.get("target_sectors") || "[]")); } catch { target_sectors = []; }
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
     const end_date = String(formData.get("end_date") || "") || null;
+    if (end_date && end_date <= start_date) return { error: "La date de fin doit être après la date de début." };
     const cpm_chf = calculateCPM(format, target_cantons, target_sectors);
 
     // Image: file upload or URL

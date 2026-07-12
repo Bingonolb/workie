@@ -17,9 +17,9 @@ export default async function AdminPage() {
 
   const adminClient = createAdminClient();
   const [{ count: reviewCount }, { count: userCount }, { count: pendingClaims }] = await Promise.all([
-    supabase.from("reviews").select("*", { count: "exact", head: true }),
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("company_claims").select("*", { count: "exact", head: true }).or("status.is.null,status.eq.pending"),
+    adminClient.from("reviews").select("*", { count: "exact", head: true }),
+    adminClient.from("profiles").select("*", { count: "exact", head: true }),
+    adminClient.from("company_claims").select("*", { count: "exact", head: true }).or("status.is.null,status.eq.pending"),
   ]);
 
   // Fetch all companies in batches to bypass PostgREST max-rows limit

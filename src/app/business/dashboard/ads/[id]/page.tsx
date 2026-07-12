@@ -44,7 +44,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   const today = stats.find(d => d.day === new Date().toISOString().slice(0, 10));
 
   const durationDays = campaign.start_date
-    ? Math.max(1, Math.round((Date.now() - new Date(campaign.start_date).getTime()) / 86400000))
+    ? Math.max(1, Math.round(
+        (campaign.end_date
+          ? new Date(campaign.end_date).getTime()
+          : Date.now()
+        ) - new Date(campaign.start_date).getTime()) / 86400000)
     : 1;
   const avgDailyImp = Math.round(campaign.impression_count / durationDays);
   const avgDailyClk = Math.round(campaign.click_count / durationDays);
@@ -58,9 +62,12 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         {/* Header card */}
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, overflow: "hidden", marginBottom: 20 }}>
           <div style={{ display: "flex", gap: 20, padding: "22px 24px", flexWrap: "wrap" }}>
-            <div style={{ width: 100, height: 100, borderRadius: 14, overflow: "hidden", flexShrink: 0, background: "var(--surface2)" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={campaign.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <div style={{ width: 100, height: 100, borderRadius: 14, overflow: "hidden", flexShrink: 0, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {campaign.image_url
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={campaign.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <span style={{ fontSize: 36 }}>📣</span>
+              }
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>

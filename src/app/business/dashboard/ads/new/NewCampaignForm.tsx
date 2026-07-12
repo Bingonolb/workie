@@ -108,7 +108,8 @@ export function NewCampaignForm({
   const handleEndDateChange = (val: string) => {
     setEndDate(val);
     const diff = Math.round((new Date(val).getTime() - new Date(startDate).getTime()) / 86400000);
-    if (diff > 0 && diff <= 90) setDurationDays(diff);
+    if (diff <= 0) return; // invalid: end before start — server will reject
+    if (diff <= 90) setDurationDays(diff);
   };
 
   const [imagePreview, setImagePreview] = useState<string>(prefill?.imageUrl ?? "");
