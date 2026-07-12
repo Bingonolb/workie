@@ -467,18 +467,18 @@ export function NewCampaignForm({
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {dailyBudget} × {durationDays} jours</div>
           </div>
 
-          {/* Dates — always 2 cols, date fields are compact enough on any phone */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          {/* Dates — compact row, always 2 cols */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div style={{ minWidth: 0 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Date de début</label>
-              <input name="start_date" type="date" style={{ ...inp, minWidth: 0 }} value={startDate}
+              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Début</label>
+              <input name="start_date" type="date" style={{ ...inp, height: 40, fontSize: 13, padding: "0 10px", minWidth: 0 }} value={startDate}
                 onChange={e => handleStartDateChange(e.target.value)} />
             </div>
             <div style={{ minWidth: 0 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                Date de fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-muted)", fontSize: 11 }}>· auto</span>
+              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, fontSize: 10 }}>· calculée auto</span>
               </label>
-              <input name="end_date" type="date" style={{ ...inp, minWidth: 0 }} value={endDate}
+              <input name="end_date" type="date" style={{ ...inp, height: 40, fontSize: 13, padding: "0 10px", minWidth: 0 }} value={endDate}
                 onChange={e => handleEndDateChange(e.target.value)} />
             </div>
           </div>
