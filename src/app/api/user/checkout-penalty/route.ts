@@ -1,0 +1,34 @@
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+import { getUser } from "@/lib/supabase/server";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export async function POST(request: Request) {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer_email: user.email,
+    line_items: [{
+      price_data: {
+        currency: "chf",
+        product_data: {
+          name: "Workie — Pass Pénalité 💀",
+          description: "Accès à vie au bouton -100 pts pour signaler les entreprises toxiques",
+        },
+        unit_amount: 990, // 9.90 CHF
+      },
+      quantity: 1,
+    }],
+    client_reference_id: user.id,
+    metadata: { type: "penalty_pass", user_id: user.id },
+    success_url: `${baseUrl}/explore?mode=swipe&penalty_unlocked=1`,
+    cancel_url:  `${baseUrl}/explore?mode=swipe`,
+  });
+
+  return NextResponse.redirect(session.url!, 303);
+}

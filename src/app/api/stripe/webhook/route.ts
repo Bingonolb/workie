@@ -23,6 +23,16 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // One-time penalty pass purchase
+      if (session.mode === "payment" && session.metadata?.type === "penalty_pass") {
+        const userId = session.metadata.user_id ?? session.client_reference_id;
+        if (userId) {
+          await supabase.from("profiles").update({ has_penalty_pass: true }).eq("id", userId);
+        }
+        break;
+      }
+
       const companyId = session.client_reference_id;
       if (!companyId || session.mode !== "subscription") break;
 

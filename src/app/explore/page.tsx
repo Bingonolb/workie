@@ -95,6 +95,19 @@ export default async function ExplorePage({
   ]);
   const isBusiness = !!bizCompanyId;
 
+  // Fetch penalty pass status for logged-in non-business users
+  let hasPenaltyPass = false;
+  if (user && !isBusiness && !isAdmin) {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("has_penalty_pass")
+      .eq("id", user.id)
+      .maybeSingle();
+    hasPenaltyPass = profile?.has_penalty_pass ?? false;
+  }
+
   // Guests are locked to page 1 — enforced server-side, not just in UI
   const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
 
@@ -122,6 +135,7 @@ export default async function ExplorePage({
             isLoggedIn={!!user}
             isAdmin={isAdmin}
             isBusiness={isBusiness}
+            hasPenaltyPass={hasPenaltyPass}
             filters={filters}
             swipeAds={swipeAds}
           />

@@ -38,6 +38,7 @@ export function SwipeView({
   isLoggedIn,
   isAdmin = false,
   isBusiness = false,
+  hasPenaltyPass = false,
   filters,
   swipeAds = [],
 }: {
@@ -47,6 +48,7 @@ export function SwipeView({
   isLoggedIn: boolean;
   isAdmin?: boolean;
   isBusiness?: boolean;
+  hasPenaltyPass?: boolean;
   filters?: { sector?: string; canton?: string; search?: string };
   swipeAds?: AdCampaign[];
 }) {
@@ -70,6 +72,7 @@ export function SwipeView({
   const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const [showPenaltyUpgrade, setShowPenaltyUpgrade] = useState(false);
   const [exhausted, setExhausted] = useState(false);
   // Track all companies seen/acted on this session to avoid re-showing them in new batches
   const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
@@ -183,7 +186,8 @@ export function SwipeView({
     e.stopPropagation();
     if (isAd(current)) return;
     if (!isLoggedIn) { requireLogin(); return; }
-    if (!isAdmin || !current) return;
+    if (!current) return;
+    if (!isAdmin && !hasPenaltyPass) { setShowPenaltyUpgrade(true); return; }
     markActed((current as Company).id);
     addPenalty((current as Company).id);
     showToast("💀 -100 pts", "#ef4444");
@@ -359,21 +363,26 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {(!isLoggedIn || isAdmin) && !isBusiness && !isAd(current) && (
-          <button onClick={handlePenalty} title="Pénaliser -100 pts" style={{
+        {isLoggedIn && !isBusiness && !isAd(current) && (
+          <button onClick={handlePenalty} title={isAdmin || hasPenaltyPass ? "Pénaliser -100 pts" : "Débloquer le -100 pts"} style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
             width: 52, height: 52, borderRadius: "50%",
             background: "var(--surface)",
-            border: "2px solid rgba(239,68,68,0.5)",
-            color: "#ef4444", cursor: "pointer",
-            boxShadow: "0 4px 20px rgba(239,68,68,0.15)",
+            border: `2px solid ${isAdmin || hasPenaltyPass ? "rgba(239,68,68,0.5)" : "rgba(107,114,128,0.3)"}`,
+            color: isAdmin || hasPenaltyPass ? "#ef4444" : "var(--text-muted)",
+            cursor: "pointer",
+            boxShadow: isAdmin || hasPenaltyPass ? "0 4px 20px rgba(239,68,68,0.15)" : "none",
             transition: "all 0.18s",
+            position: "relative",
           }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
           >
             <Skull size={15} />
             <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
+            {!isAdmin && !hasPenaltyPass && (
+              <span style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, borderRadius: "50%", background: "var(--surface2)", border: "1px solid var(--border2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9 }}>🔒</span>
+            )}
           </button>
         )}
 
@@ -445,7 +454,7 @@ export function SwipeView({
       {/* Legend — hidden on mobile */}
       <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
-          {(!isLoggedIn || isAdmin) && !isBusiness && <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
+          {isLoggedIn && !isBusiness && <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
           <span>✕ passer</span>
           <span>ℹ détail</span>
           <span>🔥 sauvegarder</span>
@@ -458,6 +467,31 @@ export function SwipeView({
       </div>
 
       {showGuestModal && !isLoggedIn && <GuestModal reviewCount={companies.filter(c => !isAd(c)).length} open />}
+
+      {/* Penalty pass upgrade modal */}
+      {showPenaltyUpgrade && (
+        <>
+          <div onClick={() => setShowPenaltyUpgrade(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", zIndex: 10010 }} />
+          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(420px, 92vw)", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 24, padding: "36px 32px", textAlign: "center" }}>
+            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24 }}>💀</div>
+            <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 10, color: "var(--text)" }}>Pénaliser une entreprise</h2>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 28 }}>
+              Le bouton <strong style={{ color: "#ef4444" }}>-100 pts</strong> te permet de signaler une entreprise toxique et d&apos;impacter son classement.<br /><br />
+              Débloque cette fonctionnalité pour <strong style={{ color: "var(--text)" }}>9.90 CHF</strong> — accès à vie.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <form action="/api/user/checkout-penalty" method="POST">
+                <button type="submit" style={{ width: "100%", padding: "14px 0", borderRadius: 12, background: "linear-gradient(135deg, #ef4444, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>
+                  Débloquer pour 9.90 CHF
+                </button>
+              </form>
+              <button onClick={() => setShowPenaltyUpgrade(false)} style={{ background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "8px 0" }}>
+                Plus tard
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       <style>{`
         @keyframes toastSlide {
