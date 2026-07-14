@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useActionState } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Building2, CheckCircle, Plus, Shield, Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { submitClaim } from "@/lib/actions/business";
-import { createClient } from "@/lib/supabase/client";
 
 const EMPLOYEE_RANGES = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"];
 const SECTORS = ["Tech", "Finance", "Assurances", "Pharma", "Santé", "Conseil", "Industrie", "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture", "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie"];
@@ -45,16 +43,8 @@ const lbl: React.CSSProperties = {
 };
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [step, setStep] = useState(0);
   const [state, action, pending] = useActionState(submitClaim, undefined);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) router.replace("/auth/login?next=/business/register");
-    });
-  }, [router]);
 
   // Step 0 — Entreprise
   const [companyName, setCompanyName] = useState("");

@@ -438,14 +438,6 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     const supabase = await createClient();
     const user = await getUser();
 
-    // Require authentication — prevents anonymous bot spam
-    if (!user) return { error: "Tu dois être connecté pour soumettre une demande." };
-
-    // Require confirmed email
-    if (!user.email_confirmed_at) {
-      return { error: "Confirme ton adresse email avant de soumettre une demande." };
-    }
-
     const work_email = String(formData.get("work_email") || "").trim().toLowerCase();
     const rawZefixUrl = String(formData.get("zefix_url") || "").trim();
     const zefix_url = rawZefixUrl
