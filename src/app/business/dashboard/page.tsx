@@ -43,7 +43,7 @@ export default async function BusinessDashboardPage() {
     { label: "Note globale", value: avgOverall ?? "–", suffix: "/5", color: "#f59e0b", icon: <Star size={20} color="#f59e0b" fill="#f59e0b" /> },
     { label: "Total avis", value: count, suffix: "", color: "#8b5cf6", icon: <MessageCircle size={20} color="#8b5cf6" /> },
     { label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–", suffix: "", color: "#10b981", icon: <TrendingUp size={20} color="#10b981" /> },
-    { label: "Salaire moyen", value: avgSalary ? `${(avgSalary / 1000).toFixed(0)}k` : "–", suffix: " CHF", color: "#f97316", icon: <Users size={20} color="#f97316" /> },
+    { label: "Salaire moyen", value: avgSalary ? `${(Number(avgSalary) / 1000).toFixed(0)}k` : "–", suffix: " CHF", color: "#f97316", icon: <Users size={20} color="#f97316" /> },
   ];
 
   const categoryRatings = [

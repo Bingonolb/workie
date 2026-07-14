@@ -9,6 +9,8 @@ import { getUserReviews } from "@/lib/actions/reviews";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import type { Profile } from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { signOut } from "@/lib/actions/auth";
+import Link from "next/link";
 
 export default async function ProfilePage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -88,31 +90,31 @@ export default async function ProfilePage() {
         {/* ── KPI strip ── */}
         <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
           {([
-            { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b" },
-            { emoji: "🔥", value: String(favIds.length), label: "Entreprises sauvegardées", color: "#f97316" },
-            { emoji: "📊", value: String(reviews.length), label: "Avis publiés", color: "#10b981" },
-          ] as const).map(({ emoji, value, label, color }) => (
-            <div key={label} style={{
-              background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16,
-              padding: "18px 22px", display: "flex", alignItems: "center", gap: 14,
-            }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: 12,
-                background: `${color}18`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 20, flexShrink: 0,
-              }}>
-                {emoji}
+            { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b", href: null },
+            { emoji: "🔥", value: String(favIds.length), label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
+            { emoji: "📊", value: String(reviews.length), label: "Avis publiés", color: "#10b981", href: null },
+          ] as { emoji: string; value: string; label: string; color: string; href: string | null }[]).map(({ emoji, value, label, color, href }) => {
+            const inner = (
+              <>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
+                  {emoji}
+                </div>
+                <div>
+                  <p style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
+                  <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
+                </div>
+              </>
+            );
+            return href ? (
+              <Link key={label} href={href} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14, textDecoration: "none" }}>
+                {inner}
+              </Link>
+            ) : (
+              <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14 }}>
+                {inner}
               </div>
-              <div>
-                <p style={{
-                  fontSize: 24, fontWeight: 900, color: "var(--text)",
-                  fontVariantNumeric: "tabular-nums", letterSpacing: "-0.03em", lineHeight: 1,
-                }}>{value}</p>
-                <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* ── Main grid ── */}
@@ -158,8 +160,18 @@ export default async function ProfilePage() {
               <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Réglages</p>
               </div>
-              <div style={{ padding: 22 }}>
+              <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 16 }}>
                 <ThemeToggle />
+                <form action={signOut}>
+                  <button type="submit" style={{
+                    width: "100%", padding: "11px 16px", borderRadius: 10,
+                    background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
+                    color: "#ef4444", fontWeight: 600, fontSize: 13, cursor: "pointer",
+                    textAlign: "left",
+                  }}>
+                    Se déconnecter
+                  </button>
+                </form>
               </div>
             </div>
 

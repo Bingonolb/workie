@@ -23,7 +23,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
       <div
         onClick={() => setDismissed(true)}
         style={{
-          position: "fixed", inset: 0, zIndex: 50,
+          position: "fixed", inset: 0, zIndex: 10002,
           background: "rgba(0,0,0,0.6)",
           backdropFilter: "blur(2px)",
           opacity: visible ? 1 : 0,
@@ -35,7 +35,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
 
       {/* Bottom sheet */}
       <div style={{
-        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 51,
+        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 10003,
         transform: visible ? "translateY(0)" : "translateY(100%)",
         transition: "transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)",
       }}>

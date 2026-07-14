@@ -19,6 +19,7 @@ export async function toggleFavorite(companyId: string): Promise<void> {
     if (error && error.code !== "23505") throw error; // ignore unique violation (concurrent insert)
   }
   revalidatePath("/profile");
+  revalidatePath("/favorites");
   revalidatePath(`/company/${companyId}`);
 }
 

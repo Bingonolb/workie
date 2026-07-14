@@ -51,7 +51,8 @@ function timeAgo(date: string) {
   return `Il y a ${Math.floor(days / 30)} mois`;
 }
 
-export default async function JobsPage() {
+export default async function JobsPage({ searchParams }: { searchParams: Promise<{ sector?: string; contract?: string }> }) {
+  const { sector: filterSector, contract: filterContract } = await searchParams;
   const supabase = await createClient();
   const { data: jobs } = await Promise.resolve(
     supabase.from("job_offers")
@@ -65,6 +66,13 @@ export default async function JobsPage() {
   // Group unique sectors and contract types from jobs
   const sectors = [...new Set(allJobs.map(j => j.companies?.sector).filter(Boolean))] as string[];
   const contracts = [...new Set(allJobs.map(j => j.contract_type).filter(Boolean))] as string[];
+
+  // Apply filters
+  const filteredJobs = allJobs.filter(j => {
+    if (filterSector && j.companies?.sector !== filterSector) return false;
+    if (filterContract && j.contract_type !== filterContract) return false;
+    return true;
+  });
 
   return (
     <div className="page-root">
@@ -90,26 +98,55 @@ export default async function JobsPage() {
 
       <main style={{ maxWidth: 860, margin: "0 auto", padding: "36px 20px 80px" }}>
 
-        {/* Stats */}
+        {/* Stats + filters */}
         {allJobs.length > 0 && (
-          <div style={{ display: "flex", gap: 20, marginBottom: 28, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>
-              <strong style={{ color: "var(--text)" }}>{allJobs.length}</strong> offre{allJobs.length > 1 ? "s" : ""} active{allJobs.length > 1 ? "s" : ""}
-            </span>
-            {contracts.map(c => {
-              const style = CONTRACT_COLORS[c] ?? { bg: "var(--surface2)", color: "var(--text-muted)" };
-              const count = allJobs.filter(j => j.contract_type === c).length;
-              return (
-                <span key={c} style={{ fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 50, background: style.bg, color: style.color }}>
-                  {c} · {count}
-                </span>
-              );
-            })}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+              <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>
+                <strong style={{ color: "var(--text)" }}>{filteredJobs.length}</strong>
+                {filteredJobs.length !== allJobs.length ? ` / ${allJobs.length}` : ""} offre{allJobs.length > 1 ? "s" : ""}
+              </span>
+              {(filterSector || filterContract) && (
+                <Link href="/jobs" style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 50, background: "rgba(239,68,68,0.1)", color: "#ef4444", textDecoration: "none" }}>
+                  ✕ Effacer les filtres
+                </Link>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {contracts.map(c => {
+                const style = CONTRACT_COLORS[c] ?? { bg: "var(--surface2)", color: "var(--text-muted)" };
+                const active = filterContract === c;
+                const params = new URLSearchParams();
+                if (!active) params.set("contract", c);
+                if (filterSector) params.set("sector", filterSector);
+                return (
+                  <Link key={c} href={`/jobs?${params}`} style={{ fontSize: 12, fontWeight: 700, padding: "5px 12px", borderRadius: 50, background: active ? style.color : style.bg, color: active ? "#fff" : style.color, textDecoration: "none", border: `1px solid ${style.color}44` }}>
+                    {c}
+                  </Link>
+                );
+              })}
+              {sectors.map(s => {
+                const active = filterSector === s;
+                const params = new URLSearchParams();
+                if (!active) params.set("sector", s);
+                if (filterContract) params.set("contract", filterContract);
+                return (
+                  <Link key={s} href={`/jobs?${params}`} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 50, background: active ? "var(--text)" : "var(--surface2)", color: active ? "var(--bg)" : "var(--text-muted)", textDecoration: "none", border: "1px solid var(--border2)" }}>
+                    {s}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         )}
 
         {/* Job list */}
-        {allJobs.length === 0 ? (
+        {filteredJobs.length === 0 && filterSector || filteredJobs.length === 0 && filterContract ? (
+          <div style={{ textAlign: "center", padding: "60px 24px" }}>
+            <p style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucune offre pour ce filtre</p>
+            <Link href="/jobs" style={{ fontSize: 14, color: "#8b5cf6", textDecoration: "none", fontWeight: 600 }}>Voir toutes les offres</Link>
+          </div>
+        ) : allJobs.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px" }}>
             <Briefcase size={56} style={{ opacity: 0.15, margin: "0 auto 24px", display: "block" }} />
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune offre pour le moment</h2>
@@ -122,7 +159,7 @@ export default async function JobsPage() {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {allJobs.map(job => {
+            {filteredJobs.map(job => {
               const co = job.companies;
               if (!co) return null;
               const sectorColor = SECTOR_COLORS[co.sector] ?? "#8b5cf6";

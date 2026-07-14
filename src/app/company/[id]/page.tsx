@@ -27,6 +27,7 @@ const InstagramIcon = () => (
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
+import { GuestSaveButton } from "@/components/GuestSaveButton";
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
@@ -153,7 +154,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         "ratingValue": Number(company.avg_rating).toFixed(1),
         "bestRating": "5",
         "worstRating": "1",
-        "ratingCount": company.review_count,
+        "ratingCount": Number(company.review_count),
       }
     } : {}),
   };
@@ -231,18 +232,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                     <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
                   </button>
                 </form>
-              ) : (!isBusiness && (
-                <Link href="/login" style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "10px 20px", borderRadius: 12,
-                  background: "rgba(255,255,255,0.1)",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  color: "#fff", fontWeight: 600, fontSize: 14, textDecoration: "none",
-                  backdropFilter: "blur(8px)",
-                }}>
-                  <Flame size={16} fill="none" /> Sauvegarder
-                </Link>
-              ))}
+              ) : (!isBusiness && <GuestSaveButton />)}
             </div>
           </div>
         </div>
