@@ -25,7 +25,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
         style={{
           position: "fixed", inset: 0, zIndex: 10002,
           background: "rgba(0,0,0,0.6)",
-          backdropFilter: "blur(2px)",
+          backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)",
           opacity: visible ? 1 : 0,
           transition: "opacity 0.3s ease",
           pointerEvents: visible ? "auto" : "none",

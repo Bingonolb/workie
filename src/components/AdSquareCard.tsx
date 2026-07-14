@@ -67,7 +67,7 @@ export function AdSquareCard({ ad }: { ad: AdCampaign }) {
       {/* Sponsored label */}
       <div style={{
         position: "absolute", top: 12, left: 12, zIndex: 2,
-        background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
+        background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
         borderRadius: 50, padding: "3px 10px",
         fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.75)",
         letterSpacing: "0.06em", textTransform: "uppercase",

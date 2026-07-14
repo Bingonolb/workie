@@ -195,7 +195,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 />
               )}
               <div>
-              <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 10, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
+              <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 10, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
                 <ArrowLeft size={14} /> Retour
               </Link>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -227,7 +227,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                     background: isFav ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.1)",
                     border: isFav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.15)",
                     color: isFav ? "#f97316" : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
-                    backdropFilter: "blur(8px)", minHeight: 44,
+                    backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", minHeight: 44,
                   }}>
                     <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
                   </button>

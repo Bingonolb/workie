@@ -79,7 +79,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
             position: "absolute", top: 12, left: 12,
             background: `${sectorColor}22`, border: `1px solid ${sectorColor}44`,
             borderRadius: 50, padding: "4px 10px", fontSize: 11, fontWeight: 600,
-            color: sectorColor, backdropFilter: "blur(8px)",
+            color: sectorColor, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
           }}>
             {company.sector}
           </div>
@@ -95,7 +95,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
                 background: fav ? "rgba(249,115,22,0.9)" : "rgba(13,13,19,0.7)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", backdropFilter: "blur(8px)",
+                cursor: "pointer", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
                 transition: "all 0.2s",
               }}
             >

@@ -30,7 +30,7 @@ export function ShareButton({ name, url }: { name: string; url: string }) {
         background: "rgba(255,255,255,0.1)",
         border: "1px solid rgba(255,255,255,0.15)",
         color: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
-        backdropFilter: "blur(8px)", transition: "all 0.2s",
+        backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", transition: "all 0.2s",
       }}
     >
       {copied ? <Check size={15} /> : <Share2 size={15} />}

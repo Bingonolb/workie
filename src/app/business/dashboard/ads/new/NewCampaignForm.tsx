@@ -282,7 +282,7 @@ export function NewCampaignForm({
                           <ImageIcon size={24} color="rgba(255,255,255,0.15)" />
                         </div>
                       )}
-                      <div style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", borderRadius: 50, padding: "2px 7px", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sponsorisé</div>
+                      <div style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", borderRadius: 50, padding: "2px 7px", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sponsorisé</div>
                     </div>
                     <div style={{ padding: "8px 10px 10px" }}>
                       <p style={{ fontSize: 11, fontWeight: 800, color: "var(--text)", marginBottom: 5, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
@@ -322,7 +322,7 @@ export function NewCampaignForm({
                       {/* Ad overlay */}
                       <div style={{
                         position: "absolute", inset: 0,
-                        background: "rgba(0,0,0,0.82)", backdropFilter: "blur(4px)",
+                        background: "rgba(0,0,0,0.82)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
                         display: "flex", flexDirection: "column",
                       }}>
                         {/* Header */}

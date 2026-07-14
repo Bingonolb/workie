@@ -16,7 +16,7 @@ export async function Navbar() {
     <>
       <nav style={{
         position: "sticky", top: 0, zIndex: 40,
-        background: "var(--nav-bg)", backdropFilter: "blur(16px)",
+        background: "var(--nav-bg)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
         borderBottom: "1px solid var(--nav-border)",
         padding: "0 16px", height: 56,
         display: "flex", alignItems: "center", justifyContent: "space-between",

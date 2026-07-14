@@ -96,6 +96,7 @@ main, .page-main, .page-main-sm, .page-main-md {
 .page-root {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg);
   overflow-x: clip;
@@ -242,6 +243,7 @@ main, .page-main, .page-main-sm, .page-main-md {
     right: 0;
     width: 100%;
     border-radius: 20px 20px 0 0;
+    max-height: 80vh;
     max-height: 80dvh;
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
@@ -268,6 +270,7 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 .biz-sidebar {
   width: 240px;
+  min-height: 100vh;
   min-height: 100dvh;
   border-right: 1px solid var(--border);
   background: var(--surface);
