@@ -123,7 +123,7 @@ export function SwipeView({
 
   const advance = useCallback((dir: "left" | "right") => {
     if (!current || gone) return;
-    if (!isLoggedIn && swipeCountRef.current >= 1) { requireLogin(); return; }
+    if (!isLoggedIn && swipeCountRef.current >= 1) { requireLogin(); setDrag(0); return; }
     if (!isLoggedIn) { swipeCountRef.current += 1; }
     markActed(current.id);
     setGone(dir);
@@ -166,7 +166,7 @@ export function SwipeView({
   const handlePenalty = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isLoggedIn) { requireLogin(); return; }
-    if (!current) return;
+    if (!isAdmin || !current) return;
     markActed(current.id);
     addPenalty(current.id);
     showToast("💀 -100 pts", "#ef4444");
@@ -340,7 +340,7 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {isAdmin && !isBusiness && (
+        {(!isLoggedIn || isAdmin) && !isBusiness && (
           <button onClick={handlePenalty} title="Pénaliser -100 pts" style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
             width: 52, height: 52, borderRadius: "50%",
@@ -426,7 +426,7 @@ export function SwipeView({
       {/* Legend — hidden on mobile */}
       <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
-          {isAdmin && <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
+          {(!isLoggedIn || isAdmin) && !isBusiness && <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
           <span>✕ passer</span>
           <span>ℹ détail</span>
           <span>🔥 sauvegarder</span>

@@ -248,10 +248,10 @@ export async function approveClaim(
     }
 
     if (existing) {
-      await adminClient.from("profiles").upsert({
-        id: existing.id,
+      // Update only — profile already exists, don't touch username
+      await adminClient.from("profiles").update({
         claimed_company_id: companyId,
-      }, { onConflict: "id" });
+      }).eq("id", existing.id);
     } else {
       const { data: invited, error: inviteErr } = await adminClient.auth.admin.inviteUserByEmail(
         claim.work_email,
@@ -262,11 +262,9 @@ export async function approveClaim(
       );
       if (inviteErr) return { error: `Erreur d'invitation : ${inviteErr.message}` };
       if (invited?.user) {
-        await adminClient.from("profiles").upsert({
-          id: invited.user.id,
-          claimed_company_id: companyId,
-          full_name: `${claim.first_name} ${claim.last_name}`,
-        }, { onConflict: "id" });
+        // New user — the auth callback will create the profile via upsert.
+        // We store company_id in user_metadata so the callback picks it up.
+        // No manual upsert needed here to avoid missing username constraint.
       }
     }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useState, useRef } from "react";
+import { useTransition, useState, useRef, useEffect } from "react";
 import { adminUpdateCompany, adminDeleteCompany } from "@/lib/actions/admin";
 import { SECTOR_COLORS, EMPLOYEE_RANGES } from "@/lib/types";
 import type { Company } from "@/lib/types";
@@ -25,12 +25,22 @@ export function AdminCompanyForm({ company }: { company: Company }) {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverUrlValue, setCoverUrlValue] = useState(company.cover_url ?? "");
   const fileRef = useRef<HTMLInputElement>(null);
+  const blobRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => { if (blobRef.current) URL.revokeObjectURL(blobRef.current); };
+  }, []);
+
+  const revokeBlobPreview = () => {
+    if (blobRef.current) { URL.revokeObjectURL(blobRef.current); blobRef.current = null; }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (coverPreview) URL.revokeObjectURL(coverPreview);
+    revokeBlobPreview();
     const url = URL.createObjectURL(file);
+    blobRef.current = url;
     setCoverPreview(url);
   };
 
@@ -116,7 +126,7 @@ export function AdminCompanyForm({ company }: { company: Company }) {
           <input
             name="cover_url"
             value={coverUrlValue}
-            onChange={e => { setCoverUrlValue(e.target.value); setCoverPreview(null); }}
+            onChange={e => { setCoverUrlValue(e.target.value); revokeBlobPreview(); setCoverPreview(null); }}
             placeholder="https://images.unsplash.com/..."
             style={inp}
           />
@@ -132,7 +142,7 @@ export function AdminCompanyForm({ company }: { company: Company }) {
               <input ref={fileRef} name="cover_file" type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
             </label>
             {(coverPreview || coverUrlValue) && (
-              <button type="button" onClick={() => { setCoverPreview(null); setCoverUrlValue(""); if (fileRef.current) fileRef.current.value = ""; }} style={{
+              <button type="button" onClick={() => { revokeBlobPreview(); setCoverPreview(null); setCoverUrlValue(""); if (fileRef.current) fileRef.current.value = ""; }} style={{
                 fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600,
               }}>
                 ✕ Supprimer la bannière

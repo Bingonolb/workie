@@ -65,7 +65,168 @@ export interface Profile {
   created_at: string;
 }
 
-export type Database = any; // eslint-disable-line @typescript-eslint/no-explicit-any
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  __InternalSupabase: { PostgrestVersion: "14.5" }
+  public: {
+    Tables: {
+      ad_campaigns: {
+        Row: {
+          admin_note: string | null; body_text: string | null; click_count: number
+          company_id: string; cpm_chf: number; created_at: string | null
+          cta_label: string; cta_url: string; daily_budget_chf: number
+          end_date: string | null; format: string; headline: string; id: string
+          image_url: string; impression_count: number; spent_chf: number
+          start_date: string; status: string; target_cantons: string[]
+          target_sectors: string[]; total_budget_chf: number; updated_at: string | null
+        }
+        Insert: {
+          admin_note?: string | null; body_text?: string | null; click_count?: number
+          company_id: string; cpm_chf: number; created_at?: string | null
+          cta_label?: string; cta_url: string; daily_budget_chf: number
+          end_date?: string | null; format: string; headline: string; id?: string
+          image_url: string; impression_count?: number; spent_chf?: number
+          start_date: string; status?: string; target_cantons?: string[]
+          target_sectors?: string[]; total_budget_chf: number; updated_at?: string | null
+        }
+        Update: Partial<Database["public"]["Tables"]["ad_campaigns"]["Insert"]>
+        Relationships: [{ foreignKeyName: "ad_campaigns_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+      ad_clicks: {
+        Row: { campaign_id: string; clicked_at: string | null; id: string; user_id: string | null; viewer_canton: string | null }
+        Insert: { campaign_id: string; clicked_at?: string | null; id?: string; user_id?: string | null; viewer_canton?: string | null }
+        Update: Partial<Database["public"]["Tables"]["ad_clicks"]["Insert"]>
+        Relationships: [{ foreignKeyName: "ad_clicks_campaign_id_fkey"; columns: ["campaign_id"]; isOneToOne: false; referencedRelation: "ad_campaigns"; referencedColumns: ["id"] }]
+      }
+      ad_impressions: {
+        Row: { campaign_id: string; id: string; user_id: string | null; viewed_at: string | null; viewer_canton: string | null; viewer_city: string | null }
+        Insert: { campaign_id: string; id?: string; user_id?: string | null; viewed_at?: string | null; viewer_canton?: string | null; viewer_city?: string | null }
+        Update: Partial<Database["public"]["Tables"]["ad_impressions"]["Insert"]>
+        Relationships: [{ foreignKeyName: "ad_impressions_campaign_id_fkey"; columns: ["campaign_id"]; isOneToOne: false; referencedRelation: "ad_campaigns"; referencedColumns: ["id"] }]
+      }
+      companies: {
+        Row: {
+          avg_rating: number | null; avg_salary_chf: number | null; canton: string | null
+          city: string; claimed_by: string | null; cover_url: string | null
+          created_at: string | null; description: string | null; employee_range: string | null
+          founded_year: number | null; id: string; instagram_url: string | null
+          is_subscribed: boolean | null; is_verified: boolean | null; linkedin_url: string | null
+          logo_url: string | null; name: string; review_count: number | null; score: number
+          sector: string; stripe_customer_id: string | null; stripe_subscription_id: string | null
+          subscription_ends_at: string | null; subsector: string | null; tags: string[] | null
+          twitter_url: string | null; website_url: string | null; zefix_uid: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["companies"]["Row"]> & { city: string; name: string; sector: string }
+        Update: Partial<Database["public"]["Tables"]["companies"]["Row"]>
+        Relationships: []
+      }
+      company_claims: {
+        Row: {
+          company_id: string | null; company_name: string; company_website: string | null
+          created_at: string | null; employee_range: string | null; first_name: string; id: string
+          job_level: string; job_title: string; last_name: string; message: string | null
+          reviewed_at: string | null; reviewed_by: string | null; status: string | null
+          user_id: string | null; work_email: string; zefix_url: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["company_claims"]["Row"]> & { company_name: string; first_name: string; job_level: string; job_title: string; last_name: string; work_email: string }
+        Update: Partial<Database["public"]["Tables"]["company_claims"]["Row"]>
+        Relationships: [{ foreignKeyName: "company_claims_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+      company_replies: {
+        Row: { company_id: string; content: string; created_at: string | null; id: string; review_id: string; updated_at: string | null }
+        Insert: { company_id: string; content: string; created_at?: string | null; id?: string; review_id: string; updated_at?: string | null }
+        Update: Partial<Database["public"]["Tables"]["company_replies"]["Insert"]>
+        Relationships: [
+          { foreignKeyName: "company_replies_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] },
+          { foreignKeyName: "company_replies_review_id_fkey"; columns: ["review_id"]; isOneToOne: true; referencedRelation: "reviews"; referencedColumns: ["id"] }
+        ]
+      }
+      company_views: {
+        Row: { company_id: string; id: string; user_id: string | null; viewed_at: string | null }
+        Insert: { company_id: string; id?: string; user_id?: string | null; viewed_at?: string | null }
+        Update: Partial<Database["public"]["Tables"]["company_views"]["Insert"]>
+        Relationships: [{ foreignKeyName: "company_views_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+      favorites: {
+        Row: { company_id: string; created_at: string | null; user_id: string }
+        Insert: { company_id: string; created_at?: string | null; user_id: string }
+        Update: Partial<Database["public"]["Tables"]["favorites"]["Insert"]>
+        Relationships: [{ foreignKeyName: "favorites_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+      job_offers: {
+        Row: {
+          apply_url: string | null; company_id: string; contract_type: string | null
+          created_at: string | null; description: string | null; experience_level: string | null
+          expires_at: string | null; id: string; is_active: boolean | null; location: string | null
+          requirements: string | null; salary_range: string | null; title: string; work_mode: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["job_offers"]["Row"]> & { company_id: string; title: string }
+        Update: Partial<Database["public"]["Tables"]["job_offers"]["Row"]>
+        Relationships: [{ foreignKeyName: "job_offers_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null; bio: string | null; canton: string | null; city: string | null
+          claimed_company_id: string | null; country: string | null; created_at: string
+          full_name: string | null; id: string; identity_verified: boolean
+          identity_verified_at: string | null; role: string; stripe_verification_session_id: string | null
+          updated_at: string; username: string
+        }
+        Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & { id: string; username: string }
+        Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>
+        Relationships: [{ foreignKeyName: "profiles_claimed_company_id_fkey"; columns: ["claimed_company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+      review_votes: {
+        Row: { review_id: string; user_id: string }
+        Insert: { review_id: string; user_id: string }
+        Update: { review_id?: string; user_id?: string }
+        Relationships: [{ foreignKeyName: "review_votes_review_id_fkey"; columns: ["review_id"]; isOneToOne: false; referencedRelation: "reviews"; referencedColumns: ["id"] }]
+      }
+      reviews: {
+        Row: {
+          company_id: string; cons: string | null; content: string; created_at: string | null
+          duration_range: string | null; employment_type: string | null; end_year: number | null
+          helpful_count: number | null; id: string; is_anonymous: boolean | null
+          is_current: boolean | null; job_title: string | null; knew_before: string | null
+          pros: string | null; rating_career: number | null; rating_culture: number | null
+          rating_management: number | null; rating_overall: number; rating_worklife: number | null
+          salary_chf: number | null; start_year: number | null; title: string | null
+          user_id: string | null; work_mode: string | null; would_recommend: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["reviews"]["Row"]> & { company_id: string; content: string; rating_overall: number }
+        Update: Partial<Database["public"]["Tables"]["reviews"]["Row"]>
+        Relationships: [{ foreignKeyName: "reviews_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+      score_events: {
+        Row: { company_id: string; created_at: string | null; event_type: string; id: string; points: number; user_id: string }
+        Insert: { company_id: string; created_at?: string | null; event_type: string; id?: string; points: number; user_id: string }
+        Update: Partial<Database["public"]["Tables"]["score_events"]["Insert"]>
+        Relationships: [{ foreignKeyName: "score_events_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+    }
+    Views: { [_ in never]: never }
+    Functions: {
+      increment_ad_click: { Args: { p_campaign_id: string }; Returns: undefined }
+      increment_ad_impression: { Args: { p_campaign_id: string }; Returns: undefined }
+      increment_helpful: { Args: { review_id: string }; Returns: undefined }
+      list_distinct_brands: { Args: Record<string, never>; Returns: { brand: string }[] }
+      show_limit: { Args: Record<string, never>; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
+    }
+    Enums: { [_ in never]: never }
+    CompositeTypes: { [_ in never]: never }
+  }
+}
+
+export type Tables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"]
+export type TablesInsert<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Insert"]
 
 export const SECTOR_COLORS: Record<string, string> = {
   "Tech": "#8b5cf6",

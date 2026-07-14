@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getUser, createClient, createAdminClient } from "@/lib/supabase/server";
+import { getUser, createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Navbar } from "@/components/Navbar";
 import { AdminCompanyList } from "./AdminCompanyList";
 import { Shield, Plus, Star, MessageSquare, Users, Inbox } from "lucide-react";

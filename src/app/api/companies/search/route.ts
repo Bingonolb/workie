@@ -21,5 +21,7 @@ export async function GET(request: Request) {
     return true;
   }).slice(0, 8);
 
-  return NextResponse.json({ companies: results });
+  return NextResponse.json({ companies: results }, {
+    headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
+  });
 }

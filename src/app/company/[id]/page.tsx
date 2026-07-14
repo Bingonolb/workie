@@ -101,7 +101,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
     Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
   ]);
-  const repliesMap = Object.fromEntries((repliesResult.data ?? []).map(r => [r.review_id, r]));
+  const repliesMap = Object.fromEntries(
+    (repliesResult.data ?? []).map(r => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
+  );
   const jobs = jobsResult.data ?? [];
 
   if (!company) notFound();
@@ -435,8 +437,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   <span style={{ fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {jobs.map((job: { id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null; experience_level: string | null; salary_range: string | null; apply_url: string | null; description?: string | null; created_at: string }) => (
-                    <JobOfferCard key={job.id} job={job} companyName={company.name} />
+                  {jobs.map((job) => (
+                    <JobOfferCard key={job.id} job={{ ...job, created_at: job.created_at ?? "" }} companyName={company.name} />
                   ))}
                 </div>
               </div>

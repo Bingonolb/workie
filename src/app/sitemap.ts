@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const companyUrls: MetadataRoute.Sitemap = (companies ?? []).map(c => ({
     url: `${BASE}/company/${c.id}`,
-    lastModified: new Date(c.created_at),
+    lastModified: c.created_at ? new Date(c.created_at) : new Date(),
     changeFrequency: "weekly",
     priority: 0.8,
   }));

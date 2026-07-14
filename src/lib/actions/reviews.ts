@@ -34,6 +34,17 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Tu dois être connecté pour poster un avis." };
 
+  // Require confirmed email — prevents throwaway accounts
+  if (!user.email_confirmed_at) {
+    return { error: "Confirme ton adresse email avant de publier un avis." };
+  }
+
+  // Require account to be at least 24h old — reduces review bombing by fresh accounts
+  const accountAgeMs = Date.now() - new Date(user.created_at).getTime();
+  if (accountAgeMs < 24 * 60 * 60 * 1000) {
+    return { error: "Ton compte doit avoir au moins 24h pour publier un avis." };
+  }
+
   // Business accounts cannot post reviews
   const { data: userProfile } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
   if (userProfile?.claimed_company_id) return { error: "Les comptes entreprise ne peuvent pas publier d'avis." };

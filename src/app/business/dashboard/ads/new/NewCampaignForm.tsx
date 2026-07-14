@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useCallback } from "react";
+import { useState, useActionState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock } from "lucide-react";
 import { createCampaign } from "@/lib/actions/ads";
@@ -110,6 +110,11 @@ export function NewCampaignForm({
 
   const [imagePreview, setImagePreview] = useState<string>(prefill?.imageUrl ?? "");
   const [imageUrl, setImageUrl] = useState(prefill?.imageUrl ?? "");
+  const blobRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => { if (blobRef.current) URL.revokeObjectURL(blobRef.current); };
+  }, []);
   const [headline, setHeadline] = useState(prefill?.headline ?? "");
   const [bodyText, setBodyText] = useState("");
   const [ctaLabel, setCtaLabel] = useState(prefill?.ctaLabel ?? "En savoir plus");
@@ -224,7 +229,16 @@ export function NewCampaignForm({
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>PNG, JPG, WebP · Max 10 MB</p>
                 </div>
                 <input type="file" name="image_file" accept="image/*" style={{ display: "none" }}
-                  onChange={e => { const f = e.target.files?.[0]; if (f) { setImageUrl(""); setImagePreview(URL.createObjectURL(f)); } }} />
+                  onChange={e => {
+                    const f = e.target.files?.[0];
+                    if (f) {
+                      if (blobRef.current) URL.revokeObjectURL(blobRef.current);
+                      const url = URL.createObjectURL(f);
+                      blobRef.current = url;
+                      setImageUrl("");
+                      setImagePreview(url);
+                    }
+                  }} />
               </label>
 
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

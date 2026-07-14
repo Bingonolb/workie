@@ -96,7 +96,7 @@ function ReviewCard({ review, onReload }: { review: Review; onReload: () => void
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
             <StarRow value={review.rating_overall} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{review.rating_overall?.toFixed(1)}/5</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{Number(review.rating_overall).toFixed(1)}/5</span>
             <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 50, background: `${recColor}22`, color: recColor, fontWeight: 600 }}>
               {review.would_recommend === "oui" ? "👍 Recommande" : review.would_recommend === "non" ? "👎 Ne recommande pas" : "🤔 Ça dépend"}
             </span>

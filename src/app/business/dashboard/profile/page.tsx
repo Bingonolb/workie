@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useActionState } from "react";
+import { useEffect, useRef, useState, useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { getBusinessCompany, updateBusinessProfile } from "@/lib/actions/business";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +30,15 @@ export default function ProfilePage() {
   }
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const logoBlobRef = useRef<string | null>(null);
+  const coverBlobRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (logoBlobRef.current) URL.revokeObjectURL(logoBlobRef.current);
+      if (coverBlobRef.current) URL.revokeObjectURL(coverBlobRef.current);
+    };
+  }, []);
 
   const loadCompany = () => {
     getBusinessCompany()
@@ -89,7 +98,7 @@ export default function ProfilePage() {
                     <Upload size={14} /> Choisir
                     <input type="file" name="logo_file" accept="image/*" style={{ display: "none" }} onChange={e => {
                       const f = e.target.files?.[0];
-                      if (f) { if (logoPreview) URL.revokeObjectURL(logoPreview); setLogoPreview(URL.createObjectURL(f)); }
+                      if (f) { if (logoBlobRef.current) URL.revokeObjectURL(logoBlobRef.current); const u = URL.createObjectURL(f); logoBlobRef.current = u; setLogoPreview(u); }
                     }} />
                   </label>
                   <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>PNG, JPG · max 10MB</p>
@@ -107,7 +116,7 @@ export default function ProfilePage() {
                 <Upload size={14} /> Changer la photo
                 <input type="file" name="cover_file" accept="image/*" style={{ display: "none" }} onChange={e => {
                   const f = e.target.files?.[0];
-                  if (f) { if (coverPreview) URL.revokeObjectURL(coverPreview); setCoverPreview(URL.createObjectURL(f)); }
+                  if (f) { if (coverBlobRef.current) URL.revokeObjectURL(coverBlobRef.current); const u = URL.createObjectURL(f); coverBlobRef.current = u; setCoverPreview(u); }
                 }} />
               </label>
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>PNG, JPG · max 10MB · recommandé 1920×1080</p>

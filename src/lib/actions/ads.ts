@@ -148,12 +148,12 @@ export async function getCampaignDailyStats(campaignId: string): Promise<{ day: 
 
     const impByDay: Record<string, number> = {};
     for (const row of impRes.data ?? []) {
-      const d = row.viewed_at.slice(0, 10);
+      const d = (row.viewed_at ?? "").slice(0, 10);
       impByDay[d] = (impByDay[d] ?? 0) + 1;
     }
     const clkByDay: Record<string, number> = {};
     for (const row of clkRes.data ?? []) {
-      const d = row.clicked_at.slice(0, 10);
+      const d = (row.clicked_at ?? "").slice(0, 10);
       clkByDay[d] = (clkByDay[d] ?? 0) + 1;
     }
 
@@ -258,8 +258,27 @@ export async function adminSetCampaignStatus(
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+// In-process rate limit for ad tracking — prevents budget exhaustion attacks.
+// Key: "ip:campaign:type", Value: last_seen_ms
+// Limit: 1 impression and 1 click per campaign per IP per 10 minutes.
+const adRl = new Map<string, number>();
+const AD_RL_WINDOW = 10 * 60_000;
+
+function adRateLimited(ip: string, campaignId: string, type: "imp" | "clk"): boolean {
+  const key = `${ip}:${campaignId}:${type}`;
+  const now = Date.now();
+  const last = adRl.get(key);
+  if (last && now - last < AD_RL_WINDOW) return true;
+  adRl.set(key, now);
+  return false;
+}
+
 export async function trackAdImpression(campaignId: string): Promise<void> {
   try {
+    const h = await headers();
+    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (adRateLimited(ip, campaignId, "imp")) return;
+
     const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
     await Promise.all([
@@ -276,6 +295,10 @@ export async function trackAdImpression(campaignId: string): Promise<void> {
 
 export async function trackAdClick(campaignId: string): Promise<void> {
   try {
+    const h = await headers();
+    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (adRateLimited(ip, campaignId, "clk")) return;
+
     const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
     await Promise.all([
@@ -292,15 +315,10 @@ export async function trackAdClick(campaignId: string): Promise<void> {
 export async function getCampaignCantonStats(campaignId: string): Promise<{ canton: string; impressions: number; clicks: number }[]> {
   try {
     const { supabase } = await requireBusiness();
+    // Capped at 5000 rows — replace with SQL GROUP BY RPC once volume grows
     const [impRes, clkRes] = await Promise.all([
-      supabase.from("ad_impressions")
-        .select("viewer_canton")
-        .eq("campaign_id", campaignId)
-        .not("viewer_canton", "is", null),
-      supabase.from("ad_clicks")
-        .select("viewer_canton")
-        .eq("campaign_id", campaignId)
-        .not("viewer_canton", "is", null),
+      supabase.from("ad_impressions").select("viewer_canton").eq("campaign_id", campaignId).not("viewer_canton", "is", null).limit(5000),
+      supabase.from("ad_clicks").select("viewer_canton").eq("campaign_id", campaignId).not("viewer_canton", "is", null).limit(5000),
     ]);
 
     const impByC: Record<string, number> = {};

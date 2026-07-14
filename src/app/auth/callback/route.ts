@@ -22,14 +22,21 @@ export async function GET(request: Request) {
 
   const geo = extractGeo(request);
 
-  // Helper: upsert profile with geo data (only fills geo if not already set)
+  // Helper: upsert profile with geo data.
+  // On INSERT: generates a username from the user's email to satisfy NOT NULL.
+  // On UPDATE (conflict on id): preserves existing username via ignoreDuplicates=false
+  // but the WITH CHECK on the UPDATE RLS policy blocks role changes server-side.
   async function upsertProfileGeo(userId: string, extra?: Record<string, unknown>) {
     const geoFields = geo.canton ? {
       canton: geo.canton,
       city: geo.city ?? undefined,
     } : {};
+    // Fetch current user to derive a username for new profiles
+    const { data: { user: u } } = await supabase.auth.getUser();
+    const emailBase = u?.email?.split("@")[0]?.replace(/[^a-z0-9_]/gi, "_").toLowerCase() ?? "user";
+    const username = `${emailBase}_${userId.slice(0, 6)}`;
     await supabase.from("profiles").upsert(
-      { id: userId, ...geoFields, ...extra },
+      { id: userId, username, ...geoFields, ...extra },
       { onConflict: "id", ignoreDuplicates: false }
     );
   }

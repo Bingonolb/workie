@@ -176,15 +176,15 @@ export async function getBusinessAnalytics() {
     const weekAgo = now - 7 * 86400000;
     const monthAgo = now - 30 * 86400000;
 
-    const viewsToday = views.filter(v => new Date(v.viewed_at) >= todayStart).length;
-    const viewsWeek  = views.filter(v => new Date(v.viewed_at).getTime() >= weekAgo).length;
-    const viewsMonth = views.filter(v => new Date(v.viewed_at).getTime() >= monthAgo).length;
-    const viewsTotal = views.length;
+    const viewsToday   = views.filter(v => v.viewed_at && new Date(v.viewed_at) >= todayStart).length;
+    const viewsWeek    = views.filter(v => v.viewed_at && new Date(v.viewed_at).getTime() >= weekAgo).length;
+    const viewsMonth   = views.filter(v => v.viewed_at && new Date(v.viewed_at).getTime() >= monthAgo).length;
+    const viewsTotal   = views.length; // window: last 90 days (matches the DB query above)
 
     // Daily view trend — last 30 days
     const dailyViewMap: Record<string, number> = {};
-    views.filter(v => new Date(v.viewed_at).getTime() >= monthAgo).forEach(v => {
-      const day = v.viewed_at.slice(0, 10);
+    views.filter(v => v.viewed_at && new Date(v.viewed_at).getTime() >= monthAgo).forEach(v => {
+      const day = (v.viewed_at ?? "").slice(0, 10);
       dailyViewMap[day] = (dailyViewMap[day] || 0) + 1;
     });
     // Fill in all 30 days (even zeros)
@@ -243,7 +243,15 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
   try {
     const { supabase, company } = await requireBusiness();
 
-    const fields: Record<string, unknown> = {
+    const fields: {
+      description: string | null;
+      website_url: string | null;
+      linkedin_url: string | null;
+      twitter_url: string | null;
+      instagram_url: string | null;
+      logo_url?: string | null;
+      cover_url?: string;
+    } = {
       description: String(formData.get("description") || "") || null,
       website_url: String(formData.get("website_url") || "") || null,
       linkedin_url: String(formData.get("linkedin_url") || "") || null,
@@ -302,7 +310,7 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
 
     // Upsert reply
     const { error } = await supabase.from("company_replies").upsert(
-      { review_id, company_id: company.id, content },
+      { review_id, company_id: company.id, content, updated_at: new Date().toISOString() },
       { onConflict: "review_id" }
     );
     if (error) return { error: error.message };
@@ -389,6 +397,14 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     const supabase = await createClient();
     const user = await getUser();
 
+    // Require authentication — prevents anonymous bot spam
+    if (!user) return { error: "Tu dois être connecté pour soumettre une demande." };
+
+    // Require confirmed email
+    if (!user.email_confirmed_at) {
+      return { error: "Confirme ton adresse email avant de soumettre une demande." };
+    }
+
     const work_email = String(formData.get("work_email") || "").trim().toLowerCase();
     const rawZefixUrl = String(formData.get("zefix_url") || "").trim();
     const zefix_url = rawZefixUrl
@@ -402,18 +418,18 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     }
 
     const rawCompanyId = String(formData.get("company_id") || "").trim();
+    const companyName  = String(formData.get("company_name") || "").trim();
 
-    // Prevent duplicate claims for the same email + company
-    const { data: existing } = await supabase
-      .from("company_claims")
-      .select("id")
-      .eq("work_email", work_email)
-      .eq("company_id", rawCompanyId)
-      .maybeSingle();
+    // Prevent duplicate claims: match by email+company_id when known, else email+company_name
+    const dupBase = supabase.from("company_claims").select("id").eq("work_email", work_email);
+    const dupQuery = rawCompanyId
+      ? dupBase.eq("company_id", rawCompanyId)
+      : dupBase.ilike("company_name", companyName);
+    const { data: existing } = await dupQuery.maybeSingle();
     if (existing) return { error: "Une demande a déjà été soumise pour cet email et cette entreprise. Notre équipe reviendra vers vous sous 48h ouvrées." };
 
     const { error } = await supabase.from("company_claims").insert({
-      company_name: String(formData.get("company_name") || ""),
+      company_name: companyName,
       company_id: rawCompanyId || null,
       company_website: String(formData.get("company_website") || "") || null,
       employee_range: String(formData.get("employee_range") || "") || null,

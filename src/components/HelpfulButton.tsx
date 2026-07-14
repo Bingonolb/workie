@@ -5,7 +5,7 @@ import { ThumbsUp } from "lucide-react";
 import { voteHelpful } from "@/lib/actions/reviews";
 
 export function HelpfulButton({ reviewId, initialCount }: { reviewId: string; initialCount: number }) {
-  const [count, setCount] = useState(initialCount);
+  const [count, setCount] = useState(Number(initialCount)); // PostgREST returns NUMERIC as string
   const [voted, setVoted] = useState(false);
   const [isPending, startTransition] = useTransition();
 
