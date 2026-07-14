@@ -19,7 +19,8 @@ export function RankingTable({ companies }: { companies: Company[] }) {
   const filtered = companies
     .filter(c => sector === "Tous" || c.sector === sector)
     .filter(c => !q || c.name.toLowerCase().includes(q) || c.city?.toLowerCase().includes(q));
-  const rankMap = new Map(companies.map((c, i) => [c.id, i]));
+  const globalRankMap = new Map(companies.map((c, i) => [c.id, i]));
+  const isFiltered = sector !== "Tous" || q.length > 0;
 
   return (
     <div>
@@ -79,14 +80,15 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
       {/* Rows */}
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {filtered.map((c) => {
-          const globalRank = rankMap.get(c.id) ?? 0;
+        {filtered.map((c, filteredIdx) => {
+          const globalRank = globalRankMap.get(c.id) ?? 0;
+          const displayRank = isFiltered ? filteredIdx : globalRank;
           const sectorColor = SECTOR_COLORS[c.sector] ?? "#8b5cf6";
           const score = Number(c.score ?? 0);
           const avgRating = Number(c.avg_rating ?? 0);
           const reviewCount = Number(c.review_count ?? 0);
           const barPct = maxScore > 0 ? Math.min((score / maxScore) * 100, 100) : 0;
-          const isTop3 = globalRank < 3;
+          const isTop3 = displayRank < 3;
 
           // Estimate rating contribution: avg_rating * 20 * ln(review_count+1)
           const ratingPts = avgRating > 0 && reviewCount > 0
@@ -110,10 +112,10 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                 {/* Rank */}
                 <span style={{
                   fontSize: 14, fontWeight: 900,
-                  color: globalRank === 0 ? "#f97316" : globalRank === 1 ? "#9ca3af" : globalRank === 2 ? "#b45309" : "var(--text-muted)",
+                  color: displayRank === 0 ? "#f97316" : displayRank === 1 ? "#9ca3af" : displayRank === 2 ? "#b45309" : "var(--text-muted)",
                   fontVariantNumeric: "tabular-nums",
                 }}>
-                  {globalRank < 3 ? MEDALS[globalRank] : String(globalRank + 1).padStart(2, "0")}
+                  {displayRank < 3 ? MEDALS[displayRank] : String(displayRank + 1).padStart(2, "0")}
                 </span>
 
                 {/* Company */}

@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { signIn, signInWithGoogle } from "@/lib/actions/auth";
 import { AuthFormWorkie } from "@/components/AuthFormWorkie";
+
+export const metadata: Metadata = {
+  title: "Connexion · Workie",
+  description: "Connecte-toi à Workie pour accéder aux avis d'employés, salaires réels et offres d'emploi des entreprises suisses.",
+};
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next: rawNext } = await searchParams;

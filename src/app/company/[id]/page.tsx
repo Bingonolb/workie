@@ -487,7 +487,7 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
     return `Il y a ${Math.floor(days / 30)} mois`;
   })();
 
-  const rec = (review as any).would_recommend ? RECOMMEND_LABELS[(review as any).would_recommend] : null;
+  const rec = review.would_recommend ? RECOMMEND_LABELS[review.would_recommend] : null;
 
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px" }}>
@@ -516,14 +516,14 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
                 {EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type}
               </span>
             )}
-            {(review as any).duration_range && (
+            {review.duration_range && (
               <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
-                {DURATION_LABELS[(review as any).duration_range] ?? (review as any).duration_range}
+                {DURATION_LABELS[review.duration_range] ?? review.duration_range}
               </span>
             )}
-            {(review as any).work_mode && (
+            {review.work_mode && (
               <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
-                {WORK_MODE_LABELS[(review as any).work_mode] ?? (review as any).work_mode}
+                {WORK_MODE_LABELS[review.work_mode] ?? review.work_mode}
               </span>
             )}
           </div>
@@ -560,10 +560,10 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
       )}
 
       {/* Knew before */}
-      {(review as any).knew_before && (
+      {review.knew_before && (
         <div style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 10, padding: "10px 12px", marginBottom: 12 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 4 }}>💡 Ce que j'aurais voulu savoir avant</p>
-          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>{(review as any).knew_before}</p>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.knew_before}</p>
         </div>
       )}
 

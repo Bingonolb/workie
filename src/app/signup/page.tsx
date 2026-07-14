@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { signUp, signInWithGoogle } from "@/lib/actions/auth";
 import { AuthFormWorkie } from "@/components/AuthFormWorkie";
+
+export const metadata: Metadata = {
+  title: "Créer un compte · Workie",
+  description: "Rejoins Workie gratuitement. Accède aux avis anonymes d'employés, aux salaires réels et donne ton avis sur ton employeur.",
+};
 
 export default function SignupPage() {
   return (
