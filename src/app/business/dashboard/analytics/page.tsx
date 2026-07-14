@@ -121,7 +121,7 @@ export default async function AnalyticsPage() {
           { icon: <Star size={18} color="#f59e0b" fill="#f59e0b" />, label: "Note globale", value: avgOverall !== "–" ? `${avgOverall}/5` : "–" },
           { icon: <Users size={18} color="#8b5cf6" />, label: "Total avis", value: String(count) },
           { icon: <ThumbsUp size={18} color="#10b981" />, label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–" },
-          { icon: <TrendingUp size={18} color="#f97316" />, label: "Salaire moyen", value: avgSalary ? `${Math.round(avgSalary / 1000)}k CHF` : "–" },
+          { icon: <TrendingUp size={18} color="#f97316" />, label: "Salaire moyen", value: Number(avgSalary) > 0 ? `${Math.round(Number(avgSalary) / 1000)}k CHF` : "–" },
         ].map(({ icon, label, value }) => (
           <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>

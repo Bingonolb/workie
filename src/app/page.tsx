@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser, createClient } from "@/lib/supabase/server";
@@ -5,6 +6,16 @@ import { ArrowRight, Star, Shield, Zap, Eye, TrendingUp, MessageCircle, BarChart
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Workie — Avis d'employés & salaires réels en Suisse",
+  description: "Découvrez les avis anonymes d'employés, les salaires réels et les offres d'emploi des entreprises suisses. Comparez, choisissez, évoluer.",
+  openGraph: {
+    title: "Workie — Avis d'employés & salaires réels en Suisse",
+    description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",
+    type: "website",
+  },
+};
 
 export default async function Home() {
   const user = await getUser();

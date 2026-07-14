@@ -34,8 +34,12 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   ]);
 
   const st = STATUS_CONFIG[campaign.status] ?? STATUS_CONFIG.pending;
-  const budgetPct = campaign.total_budget_chf > 0
-    ? Math.min(100, Math.round((campaign.spent_chf / campaign.total_budget_chf) * 100))
+  const totalBudget = Number(campaign.total_budget_chf);
+  const spentBudget = Number(campaign.spent_chf);
+  const impCount = Number(campaign.impression_count);
+  const clkCount = Number(campaign.click_count);
+  const budgetPct = totalBudget > 0
+    ? Math.min(100, Math.round((spentBudget / totalBudget) * 100))
     : 0;
 
   const last7 = stats.slice(-7);
@@ -50,8 +54,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           : Date.now()
         ) - new Date(campaign.start_date).getTime()) / 86400000)
     : 1;
-  const avgDailyImp = Math.round(campaign.impression_count / durationDays);
-  const avgDailyClk = Math.round(campaign.click_count / durationDays);
+  const avgDailyImp = Math.round(impCount / durationDays);
+  const avgDailyClk = Math.round(clkCount / durationDays);
 
   return (
     <div className="biz-page" style={{ maxWidth: 860 }}>
@@ -108,10 +112,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>Performance totale</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 {[
-                  { label: "Impressions", value: campaign.impression_count.toLocaleString("fr-CH"), icon: <Eye size={14} />, color: "#8b5cf6" },
-                  { label: "Clics", value: campaign.click_count.toLocaleString("fr-CH"), icon: <MousePointer size={14} />, color: "#f97316" },
-                  { label: "CTR", value: ctr(campaign.impression_count, campaign.click_count), icon: <TrendingUp size={14} />, color: "#10b981" },
-                  { label: "CPC moyen", value: cpc(campaign.click_count, Number(campaign.spent_chf)), icon: <TrendingUp size={14} />, color: "#6b7280" },
+                  { label: "Impressions", value: impCount.toLocaleString("fr-CH"), icon: <Eye size={14} />, color: "#8b5cf6" },
+                  { label: "Clics", value: clkCount.toLocaleString("fr-CH"), icon: <MousePointer size={14} />, color: "#f97316" },
+                  { label: "CTR", value: ctr(impCount, clkCount), icon: <TrendingUp size={14} />, color: "#10b981" },
+                  { label: "CPC moyen", value: cpc(clkCount, spentBudget), icon: <TrendingUp size={14} />, color: "#6b7280" },
                 ].map(({ label, value, icon, color }) => (
                   <div key={label}>
                     <div style={{ display: "flex", alignItems: "center", gap: 5, color, marginBottom: 3 }}>{icon}<span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span></div>
@@ -147,11 +151,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8 }}>
                 <span style={{ color: "var(--text-muted)" }}>Dépensé</span>
-                <span style={{ fontWeight: 800, color: "var(--text)" }}>CHF {Number(campaign.spent_chf).toFixed(2)}</span>
+                <span style={{ fontWeight: 800, color: "var(--text)" }}>CHF {spentBudget.toFixed(2)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 12 }}>
                 <span style={{ color: "var(--text-muted)" }}>Total alloué</span>
-                <span style={{ fontWeight: 800, color: "var(--text)" }}>CHF {Number(campaign.total_budget_chf).toFixed(2)}</span>
+                <span style={{ fontWeight: 800, color: "var(--text)" }}>CHF {totalBudget.toFixed(2)}</span>
               </div>
               <div style={{ height: 8, borderRadius: 50, background: "var(--surface2)", overflow: "hidden", marginBottom: 6 }}>
                 <div style={{
@@ -165,9 +169,9 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { label: "Budget journalier", value: `CHF ${campaign.daily_budget_chf}/j` },
+                { label: "Budget journalier", value: `CHF ${Number(campaign.daily_budget_chf)}/j` },
                 { label: "CPM", value: `CHF ${Number(campaign.cpm_chf).toFixed(4)}` },
-                { label: "Budget restant", value: `CHF ${Math.max(0, Number(campaign.total_budget_chf) - Number(campaign.spent_chf)).toFixed(2)}` },
+                { label: "Budget restant", value: `CHF ${Math.max(0, totalBudget - spentBudget).toFixed(2)}` },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
                   <span style={{ color: "var(--text-muted)" }}>{label}</span>
