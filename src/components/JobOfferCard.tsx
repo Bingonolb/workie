@@ -77,7 +77,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
           className="job-modal-overlay"
           onClick={e => { if (e.target === e.currentTarget) setOpen(false); }}
           style={{
-            position: "fixed", inset: 0, zIndex: 200,
+            position: "fixed", inset: 0, zIndex: 10002,
             background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)",
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: "20px",

@@ -443,7 +443,7 @@ export function SwipeView({
       {/* Swipe ad overlay */}
       {adOverlay && (
         <div style={{
-          position: "fixed", inset: 0, zIndex: 9999,
+          position: "fixed", inset: 0, zIndex: 10002,
           background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           padding: "24px 20px",
