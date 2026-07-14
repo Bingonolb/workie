@@ -477,6 +477,16 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     });
 
     if (error) return { error: error.message };
+
+    // Create Supabase account for the RH if not already logged in
+    if (!user) {
+      const password = String(formData.get("password") || "").trim();
+      if (password.length >= 8) {
+        await supabase.auth.signUp({ email: work_email, password });
+        // Ignore signUp errors — claim is recorded, admin will send invite anyway
+      }
+    }
+
     return { success: true };
   } catch (e) {
     return { error: (e as Error).message };

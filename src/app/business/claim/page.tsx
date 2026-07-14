@@ -158,6 +158,8 @@ export default function ClaimPage() {
   // Step 2 — engagement
   const [charteOk, setCharteOk] = useState(false);
   const [noInfluenceOk, setNoInfluenceOk] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
 
   const [err, setErr] = useState("");
   const BANNED = ["@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", "@icloud.com"];
@@ -165,7 +167,7 @@ export default function ClaimPage() {
   const emailValid = workEmail.includes("@") && !BANNED.some(d => workEmail.toLowerCase().endsWith(d));
   const canNext0 = !!selectedCompany;
   const canNext1 = firstName.trim() && lastName.trim() && jobTitle.trim() && jobLevel && emailValid;
-  const canSubmit = charteOk && noInfluenceOk;
+  const canSubmit = charteOk && noInfluenceOk && password.length >= 8 && password === confirmPwd;
 
   const goNext = () => {
     setErr("");
@@ -248,6 +250,7 @@ export default function ClaimPage() {
             <input name="work_email" value={workEmail} readOnly />
             <input name="zefix_url" value={zefixUrl} readOnly />
             <input name="message" value={message} readOnly />
+            <input name="password" type="password" value={password} readOnly />
           </form>
 
           {/* ── Step 0 : Recherche entreprise ── */}
@@ -416,6 +419,26 @@ export default function ClaimPage() {
                     <span style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{text}</span>
                   </label>
                 ))}
+              </div>
+
+              {/* Account creation */}
+              <div style={{ borderTop: "1px solid var(--border2)", paddingTop: 20 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Créez votre accès Workie Business</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div>
+                    <label style={lbl}>Email</label>
+                    <input value={workEmail} readOnly style={{ ...inp, opacity: 0.6 }} />
+                  </div>
+                  <div>
+                    <label style={lbl}>Mot de passe * <span style={{ fontWeight: 400, opacity: 0.6 }}>(min. 8 caractères)</span></label>
+                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inp} autoComplete="new-password" />
+                  </div>
+                  <div>
+                    <label style={lbl}>Confirmer le mot de passe *</label>
+                    <input type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="••••••••" style={{ ...inp, borderColor: confirmPwd && confirmPwd !== password ? "#ef4444" : undefined }} autoComplete="new-password" />
+                    {confirmPwd && confirmPwd !== password && <p style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>Les mots de passe ne correspondent pas.</p>}
+                  </div>
+                </div>
               </div>
 
               <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", display: "flex", gap: 10, alignItems: "flex-start" }}>

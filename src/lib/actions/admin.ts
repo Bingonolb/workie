@@ -268,7 +268,7 @@ export async function approveClaim(
       }
     }
 
-    await adminClient.from("companies").update({ is_verified: true, is_subscribed: true }).eq("id", companyId);
+    await adminClient.from("companies").update({ is_verified: true }).eq("id", companyId);
     await adminClient.from("company_claims").update({
       status: "approved",
       company_id: companyId,

@@ -63,7 +63,7 @@ export async function GET(request: Request) {
             full_name: (user.user_metadata?.full_name as string | undefined)
               ?? (`${(user.user_metadata?.first_name as string | undefined) ?? ""} ${(user.user_metadata?.last_name as string | undefined) ?? ""}`.trim() || null),
           });
-          return NextResponse.redirect(`${origin}/business/dashboard`);
+          return NextResponse.redirect(`${origin}/business/checkout`);
         }
         await upsertProfileGeo(user.id);
       }
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
             full_name: (user.user_metadata?.full_name as string | undefined)
               ?? (`${(user.user_metadata?.first_name as string | undefined) ?? ""} ${(user.user_metadata?.last_name as string | undefined) ?? ""}`.trim() || null),
           });
-          return NextResponse.redirect(`${origin}/business/dashboard`);
+          return NextResponse.redirect(`${origin}/business/checkout`);
         }
         await upsertProfileGeo(user.id);
       }
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
           .eq("id", user.id)
           .maybeSingle();
         if (profile?.claimed_company_id) {
-          return NextResponse.redirect(`${origin}/business/dashboard`);
+          return NextResponse.redirect(`${origin}/business/checkout`);
         }
       }
 

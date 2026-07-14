@@ -65,6 +65,8 @@ export default function RegisterPage() {
   // Step 2 — Engagement
   const [charteOk, setCharteOk] = useState(false);
   const [noInfluenceOk, setNoInfluenceOk] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
 
   const [err, setErr] = useState("");
   const BANNED = ["@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", "@icloud.com"];
@@ -72,7 +74,7 @@ export default function RegisterPage() {
   const canNext0 = companyName.trim().length > 1 && !!sector && !!employeeRange;
   const canNext1 = !!(firstName.trim() && lastName.trim() && jobTitle.trim() && jobLevel &&
     workEmail.includes("@") && !BANNED.some(d => workEmail.toLowerCase().endsWith(d)));
-  const canNext2 = charteOk && noInfluenceOk;
+  const canNext2 = charteOk && noInfluenceOk && password.length >= 8 && password === confirmPwd;
 
   const goNext = () => {
     setErr("");
@@ -194,6 +196,7 @@ export default function RegisterPage() {
             <input name="job_title" value={jobTitle} readOnly />
             <input name="job_level" value={jobLevel} readOnly />
             <input name="work_email" value={workEmail} readOnly />
+            <input name="password" type="password" value={password} readOnly />
             <input name="message" value={`[NOUVELLE ENTREPRISE] Secteur: ${sector} · Canton: ${canton} · Ville: ${city}${message ? " · " + message : ""}`} readOnly />
           </form>
 
@@ -324,10 +327,30 @@ export default function RegisterPage() {
                 </label>
               </div>
 
+              {/* Account creation */}
+              <div style={{ borderTop: "1px solid var(--border2)", paddingTop: 20 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Créez votre accès Workie Business</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div>
+                    <label style={lbl}>Email</label>
+                    <input value={workEmail} readOnly style={{ ...inp, opacity: 0.6 }} />
+                  </div>
+                  <div>
+                    <label style={lbl}>Mot de passe * <span style={{ fontWeight: 400, opacity: 0.6 }}>(min. 8 caractères)</span></label>
+                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inp} autoComplete="new-password" />
+                  </div>
+                  <div>
+                    <label style={lbl}>Confirmer le mot de passe *</label>
+                    <input type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="••••••••" style={{ ...inp, borderColor: confirmPwd && confirmPwd !== password ? "#ef4444" : undefined }} autoComplete="new-password" />
+                    {confirmPwd && confirmPwd !== password && <p style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>Les mots de passe ne correspondent pas.</p>}
+                  </div>
+                </div>
+              </div>
+
               <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", display: "flex", gap: 10 }}>
                 <Zap size={15} color="#8b5cf6" style={{ flexShrink: 0, marginTop: 1 }} />
                 <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                  Après validation, notre équipe crée votre fiche sous <strong style={{ color: "var(--text)" }}>48h ouvrées</strong>. Vous accédez au paiement dès l&apos;étape suivante.
+                  Après validation, notre équipe crée votre fiche sous <strong style={{ color: "var(--text)" }}>48h ouvrées</strong>. Vous recevrez un email de confirmation.
                 </p>
               </div>
 

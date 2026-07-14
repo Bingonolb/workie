@@ -7,7 +7,7 @@ import { BottomNav } from "@/components/BottomNav";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/auth/login");
 
   const supabase = await createClient();
   const { data: profile } = await supabase
