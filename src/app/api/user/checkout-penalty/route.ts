@@ -19,7 +19,7 @@ export async function POST(request: Request) {
           name: "Workie — Pass Pénalité 💀",
           description: "Accès à vie au bouton -100 pts pour signaler les entreprises toxiques",
         },
-        unit_amount: 990, // 9.90 CHF
+        unit_amount: 500, // 5.00 CHF
       },
       quantity: 1,
     }],

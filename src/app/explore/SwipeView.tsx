@@ -477,12 +477,12 @@ export function SwipeView({
             <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 10, color: "var(--text)" }}>Pénaliser une entreprise</h2>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 28 }}>
               Le bouton <strong style={{ color: "#ef4444" }}>-100 pts</strong> te permet de signaler une entreprise toxique et d&apos;impacter son classement.<br /><br />
-              Débloque cette fonctionnalité pour <strong style={{ color: "var(--text)" }}>9.90 CHF</strong> — accès à vie.
+              Débloque cette fonctionnalité pour <strong style={{ color: "var(--text)" }}>5 CHF</strong> — accès à vie.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <form action="/api/user/checkout-penalty" method="POST">
                 <button type="submit" style={{ width: "100%", padding: "14px 0", borderRadius: 12, background: "linear-gradient(135deg, #ef4444, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>
-                  Débloquer pour 9.90 CHF
+                  Débloquer pour 5 CHF
                 </button>
               </form>
               <button onClick={() => setShowPenaltyUpgrade(false)} style={{ background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "8px 0" }}>
