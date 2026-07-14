@@ -486,7 +486,7 @@ export function NewCampaignForm({
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
               <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Début</label>
               <div style={{ overflow: "hidden", borderRadius: 12 }}>
-                <input name="start_date" type="date" style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} value={startDate}
+                <input name="start_date" type="date" min={new Date().toISOString().slice(0, 10)} style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} value={startDate}
                   onChange={e => handleStartDateChange(e.target.value)} />
               </div>
             </div>
