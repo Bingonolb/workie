@@ -372,6 +372,15 @@ main, .page-main, .page-main-sm, .page-main-md {
   .page-main-md { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
 }
 
+/* When virtual keyboard is open (any input/textarea focused), hide bottom nav.
+   Prevents the "flying nav" jump caused by viewport shrinking on keyboard open.
+   :has() is supported on Chrome 105+, Safari 16.4+, Firefox 121+. */
+@media (max-width: 768px) {
+  body:has(input:focus, textarea:focus, select:focus) .bottom-nav {
+    display: none;
+  }
+}
+
 /* ─── Business dashboard pages ─────────────────────────────────── */
 
 /* Campaign form card — padding scales with screen width */
