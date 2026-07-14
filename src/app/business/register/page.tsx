@@ -115,67 +115,29 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 8 }}>Activez votre abonnement</h1>
+            <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 8 }}>Et maintenant ?</h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 32 }}>
-              Réglez votre abonnement maintenant et votre compte sera actif dès la validation de votre fiche.
+              Notre équipe valide votre fiche sous 48h ouvrées et vous envoie un lien pour activer votre abonnement.
             </p>
 
-            {/* Pricing card */}
-            <div style={{ background: "var(--surface)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 24, padding: "36px 32px", position: "relative", overflow: "hidden", marginBottom: 16 }}>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 4 }}>Compte Entreprise Vérifié</p>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 4 }}>
-                <span style={{ fontSize: 52, fontWeight: 900, letterSpacing: "-0.04em" }}>99</span>
-                <span style={{ fontSize: 18, fontWeight: 700, color: "var(--text-muted)" }}>CHF/mois</span>
-              </div>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 28 }}>ou <strong style={{ color: "var(--text)" }}>890 CHF/an</strong> — 2 mois offerts</p>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 28 }}>
-                {[
-                  "Fiche entreprise personnalisée (logo, photos, description)",
-                  "Badge « Entreprise vérifiée »",
-                  "Répondre aux avis de vos employés",
-                  "Dashboard analytics complet",
-                  "Publication d'offres d'emploi illimitées",
-                  "Support prioritaire",
-                ].map(f => (
-                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--text)" }}>
-                    <CheckCircle size={15} color="#10b981" style={{ flexShrink: 0 }} /> {f}
-                  </div>
-                ))}
-              </div>
-
-              {hasStripe ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <form action="/api/business/checkout" method="POST">
-                    <input type="hidden" name="price" value="monthly" />
-                    <button type="submit" style={{ width: "100%", padding: "15px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, cursor: "pointer", boxShadow: "0 8px 24px rgba(139,92,246,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                      <Zap size={16} fill="#fff" /> Payer 99 CHF/mois <ArrowRight size={16} />
-                    </button>
-                  </form>
-                  <form action="/api/business/checkout" method="POST">
-                    <input type="hidden" name="price" value="annual" />
-                    <button type="submit" style={{ width: "100%", padding: "12px 0", borderRadius: 12, background: "var(--surface2)", color: "var(--text)", border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
-                      Payer 890 CHF/an (−2 mois)
-                    </button>
-                  </form>
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 20, padding: "28px 24px", marginBottom: 16 }}>
+              {[
+                { icon: "1", text: "Votre demande est en cours de vérification par notre équipe." },
+                { icon: "2", text: `Un email sera envoyé à ${workEmail} dès validation.` },
+                { icon: "3", text: "Vous activerez votre abonnement (99 CHF/mois ou 890 CHF/an) via le lien reçu." },
+              ].map(({ icon, text }) => (
+                <div key={icon} style={{ display: "flex", gap: 14, marginBottom: 18, alignItems: "flex-start" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 800, fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
+                  <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginTop: 4 }}>{text}</p>
                 </div>
-              ) : (
-                <div>
-                  <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 14, display: "flex", gap: 10 }}>
-                    <span style={{ fontSize: 15, flexShrink: 0 }}>⚙️</span>
-                    <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                      Le paiement en ligne arrive bientôt. Contactez-nous pour activer votre compte immédiatement.
-                    </p>
-                  </div>
-                  <a href={`mailto:hello@workie.ch?subject=Activation compte entreprise — ${encodeURIComponent(companyName)}&body=Bonjour,%0A%0AJe viens de soumettre la demande de création de fiche pour ${encodeURIComponent(companyName)}.%0AEmail professionnel : ${encodeURIComponent(workEmail)}%0A%0AMerci de m'indiquer les prochaines étapes pour activer mon abonnement.`}
-                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "15px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
-                    Nous contacter pour activer <ArrowRight size={16} />
-                  </a>
-                </div>
-              )}
+              ))}
+              <a href={`mailto:hello@workie.ch?subject=Demande entreprise — ${encodeURIComponent(companyName)}&body=Bonjour,%0A%0AJe viens de soumettre la demande pour ${encodeURIComponent(companyName)}.%0AEmail professionnel : ${encodeURIComponent(workEmail)}%0A%0AMerci.`}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px 0", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, textDecoration: "none", marginTop: 8 }}>
+                Une question ? Contactez-nous
+              </a>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "var(--text-muted)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "var(--text-muted)", marginTop: 16 }}>
               <Shield size={13} /> Sans engagement · Annulation à tout moment · Données sécurisées
             </div>
           </div>

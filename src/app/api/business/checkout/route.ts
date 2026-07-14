@@ -10,7 +10,10 @@ const PLANS = {
 export async function POST(request: Request) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   const user = await getUser();
-  if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  if (!user) {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+    return NextResponse.redirect(`${baseUrl}/auth/login?next=/business/checkout`, 303);
+  }
 
   const formData = await request.formData();
   const planKey = String(formData.get("price") || "monthly") as "monthly" | "annual";
@@ -23,8 +26,10 @@ export async function POST(request: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
+  const baseUrl2 = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+
   if (!profile?.claimed_company_id) {
-    return NextResponse.json({ error: "Aucune entreprise revendiquée" }, { status: 400 });
+    return NextResponse.redirect(`${baseUrl2}/business/checkout?no_company=1`, 303);
   }
 
   const { data: company } = await supabase
@@ -33,7 +38,7 @@ export async function POST(request: Request) {
     .eq("id", profile.claimed_company_id)
     .maybeSingle();
 
-  if (!company) return NextResponse.json({ error: "Entreprise introuvable" }, { status: 404 });
+  if (!company) return NextResponse.redirect(`${baseUrl2}/business/checkout?no_company=1`, 303);
 
   // Reuse or create Stripe customer
   let customerId = company.stripe_customer_id;

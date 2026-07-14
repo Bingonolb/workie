@@ -18,12 +18,12 @@ const FEATURES = [
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string; canceled?: string }>;
+  searchParams: Promise<{ success?: string; canceled?: string; no_company?: string }>;
 }) {
   const user = await getUser();
-  if (!user) redirect("/login?next=/business/checkout");
+  if (!user) redirect("/auth/login?next=/business/checkout");
 
-  const { success, canceled } = await searchParams;
+  const { success, canceled, no_company } = await searchParams;
 
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -101,6 +101,25 @@ export default async function CheckoutPage({
     );
   }
 
+  // ── No company linked yet (claim pending admin approval)
+  if (no_company) {
+    return (
+      <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+        {logo}
+        <div style={{ width: "100%", maxWidth: 480, textAlign: "center" }}>
+          <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", fontSize: 28 }}>⏳</div>
+          <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 10 }}>Demande en attente de validation</h1>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 28 }}>
+            Notre équipe vérifie votre fiche sous <strong style={{ color: "var(--text)" }}>48h ouvrées</strong>. Vous recevrez un email dès que votre compte sera activé et prêt au paiement.
+          </p>
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
+            Retour à l&apos;accueil
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   // ── Default: pricing page
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
@@ -108,9 +127,6 @@ export default async function CheckoutPage({
 
       <div style={{ width: "100%", maxWidth: 500 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "6px 16px", marginBottom: 20, fontSize: 13, fontWeight: 700, color: "#8b5cf6" } as React.CSSProperties}>
-            <BadgeCheck size={14} /> Offre Fondateurs · Places limitées
-          </div>
           <h1 style={{ fontSize: 32, fontWeight: 900, letterSpacing: "-0.04em", marginBottom: 12 }}>
             Activez votre compte entreprise
           </h1>
