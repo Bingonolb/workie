@@ -75,7 +75,7 @@ export async function Navbar() {
         {/* Right side */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <ThemeToggle />
-          {user && (
+          {user && !isBusiness && (
             <Link href="/notifications" title="Notifications" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: 8, color: "var(--text-muted)", textDecoration: "none" }}>
               <Bell size={18} />
               {unreadCount > 0 && (
