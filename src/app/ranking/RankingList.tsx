@@ -13,7 +13,7 @@ const MEDALS = ["🥇", "🥈", "🥉"];
 export function RankingTable({ companies }: { companies: Company[] }) {
   const [sector, setSector] = useState("Tous");
   const [search, setSearch] = useState("");
-  const maxScore = Math.max(...companies.map(c => c.score), 1);
+  const maxScore = Math.max(...companies.map(c => Number(c.score ?? 0)), 1);
 
   const q = search.trim().toLowerCase();
   const filtered = companies
@@ -82,14 +82,17 @@ export function RankingTable({ companies }: { companies: Company[] }) {
         {filtered.map((c) => {
           const globalRank = rankMap.get(c.id) ?? 0;
           const sectorColor = SECTOR_COLORS[c.sector] ?? "#8b5cf6";
-          const barPct = maxScore > 0 ? Math.min((c.score / maxScore) * 100, 100) : 0;
+          const score = Number(c.score ?? 0);
+          const avgRating = Number(c.avg_rating ?? 0);
+          const reviewCount = Number(c.review_count ?? 0);
+          const barPct = maxScore > 0 ? Math.min((score / maxScore) * 100, 100) : 0;
           const isTop3 = globalRank < 3;
 
           // Estimate rating contribution: avg_rating * 20 * ln(review_count+1)
-          const ratingPts = c.avg_rating > 0 && c.review_count > 0
-            ? Math.round(c.avg_rating * 20 * Math.log(c.review_count + 1))
+          const ratingPts = avgRating > 0 && reviewCount > 0
+            ? Math.round(avgRating * 20 * Math.log(reviewCount + 1))
             : 0;
-          const communityPts = c.score - ratingPts;
+          const communityPts = score - ratingPts;
 
           return (
             <Link key={c.id} href={`/company/${c.id}`} className="ranking-row"
@@ -154,14 +157,14 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
                 {/* Note · Avis */}
                 <div className="ranking-col-note" style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
-                  {c.avg_rating > 0 ? (
+                  {avgRating > 0 ? (
                     <>
                       <Star size={11} fill="#f59e0b" color="#f59e0b" />
                       <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
-                        {Number(c.avg_rating).toFixed(1)}
+                        {avgRating.toFixed(1)}
                       </span>
-                      {c.review_count > 0 && (
-                        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>· {c.review_count}</span>
+                      {reviewCount > 0 && (
+                        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>· {reviewCount}</span>
                       )}
                     </>
                   ) : (
@@ -197,10 +200,10 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                   <TrendingUp size={12} color={isTop3 ? "#f97316" : "var(--text-muted)"} />
                   <span style={{
                     fontSize: 16, fontWeight: 900,
-                    color: isTop3 ? "#f97316" : c.score > 0 ? "var(--text)" : "var(--text-muted)",
+                    color: isTop3 ? "#f97316" : score > 0 ? "var(--text)" : "var(--text-muted)",
                     fontVariantNumeric: "tabular-nums",
                   }}>
-                    {c.score}
+                    {score}
                   </span>
                 </div>
             </Link>

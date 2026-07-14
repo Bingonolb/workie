@@ -124,11 +124,11 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         <div style={{ padding: "14px 16px 16px" }}>
           {/* Stats row */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            {company.avg_rating > 0 && <StarDisplay rating={company.avg_rating} />}
-            {company.review_count > 0 && (
+            {Number(company.avg_rating) > 0 && <StarDisplay rating={Number(company.avg_rating)} />}
+            {Number(company.review_count) > 0 && (
               <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{company.review_count} avis</span>
             )}
-            {company.score > 0 && (
+            {Number(company.score) > 0 && (
               <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
                 <Flame size={12} fill="#f97316" color="#f97316" /> {company.score}
               </span>
@@ -144,8 +144,8 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
             <InfoChip icon={<MapPin size={12} />} label={company.city} />
             <InfoChip icon={<Users size={12} />} label={company.employee_range + " emp."} />
-            {company.avg_salary_chf && (
-              <InfoChip icon={<TrendingUp size={12} />} label={`CHF ${(company.avg_salary_chf / 1000).toFixed(0)}k`} color="#10b981" />
+            {Number(company.avg_salary_chf) > 0 && (
+              <InfoChip icon={<TrendingUp size={12} />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
             )}
           </div>
 

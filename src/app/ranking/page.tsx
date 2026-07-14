@@ -21,9 +21,9 @@ export default async function RankingPage() {
   ]);
   const typedCompanies = companies as Company[];
 
-  const withRating = typedCompanies.filter(c => c.avg_rating > 0);
+  const withRating = typedCompanies.filter(c => Number(c.avg_rating) > 0);
   const avgRating = withRating.length
-    ? withRating.reduce((s, c) => s + c.avg_rating, 0) / withRating.length
+    ? withRating.reduce((s, c) => s + Number(c.avg_rating), 0) / withRating.length
     : 0;
   const totalReviews = reviewCount ?? 0;
 

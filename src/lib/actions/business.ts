@@ -377,6 +377,7 @@ export async function deleteJobOffer(id: string): Promise<{ error?: string }> {
     const { error } = await supabase.from("job_offers").delete().eq("id", id).eq("company_id", company.id);
     if (error) return { error: error.message };
     revalidatePath("/business/dashboard/jobs");
+    revalidatePath("/jobs");
     return {};
   } catch (e) {
     return { error: (e as Error).message };

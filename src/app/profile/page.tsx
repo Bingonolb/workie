@@ -28,7 +28,7 @@ export default async function ProfilePage() {
     year: "numeric",
   });
   const avgRating = reviews.length
-    ? (reviews.reduce((s, r) => s + r.rating_overall, 0) / reviews.length).toFixed(1)
+    ? (reviews.reduce((s, r) => s + Number(r.rating_overall), 0) / reviews.length).toFixed(1)
     : null;
 
   return (

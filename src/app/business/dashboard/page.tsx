@@ -37,7 +37,7 @@ export default async function BusinessDashboardPage() {
   const completedCount = fields.filter(f => f.done).length;
   const completionPct = Math.round((completedCount / fields.length) * 100);
 
-  const shareUrl = `${SITE_URL}/company/${co.id}`;
+  const shareUrl = co.id ? `${SITE_URL}/company/${co.id}` : null;
 
   const kpis = [
     { label: "Note globale", value: avgOverall ?? "–", suffix: "/5", color: "#f59e0b", icon: <Star size={20} color="#f59e0b" fill="#f59e0b" /> },
@@ -276,9 +276,9 @@ export default async function BusinessDashboardPage() {
             Envoyez ce lien à vos équipes pour les inviter à partager leur expérience. Plus d&apos;avis = plus de visibilité.
           </p>
           <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", fontSize: 12, color: "var(--text-muted)", fontFamily: "monospace", wordBreak: "break-all", marginBottom: 14 }}>
-            {shareUrl}
+            {shareUrl ?? "—"}
           </div>
-          <ShareCopyButton url={shareUrl} />
+          {shareUrl && <ShareCopyButton url={shareUrl} />}
           <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 10, lineHeight: 1.5 }}>
             💡 Partagez ce lien par email, Slack, Teams — les avis sont 100% anonymes pour vos employés.
           </p>
