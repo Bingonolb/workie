@@ -223,10 +223,9 @@ export async function approveClaim(
       .maybeSingle();
 
     if (existingOwnerProfile && !force) {
-      // Identify existing owner's email for the admin
-      const listResult = await adminClient.auth.admin.listUsers({ perPage: 1000 });
-      const users = listResult.data?.users ?? [];
-      const ownerEmail = users.find((u: { id: string; email?: string }) => u.id === existingOwnerProfile.id)?.email ?? existingOwnerProfile.id;
+      // Identify existing owner's email — getUserById is O(1), no pagination needed
+      const { data: ownerUser } = await adminClient.auth.admin.getUserById(existingOwnerProfile.id);
+      const ownerEmail = ownerUser?.user?.email ?? existingOwnerProfile.id;
       return {
         alreadyOwned: ownerEmail,
         error: `Cette entreprise est déjà revendiquée par ${ownerEmail}. Confirmez le transfert si vous souhaitez remplacer l'accès.`,
@@ -239,9 +238,14 @@ export async function approveClaim(
       if (revokeErr) return { error: `Impossible de révoquer l'accès précédent : ${revokeErr.message}` };
     }
 
-    // Check if the work_email already has an account
-    const { data: existingUsers } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
-    const existing = existingUsers?.users?.find(u => u.email?.toLowerCase() === claim.work_email.toLowerCase());
+    // Check if the work_email already has an account — paginate to handle >1000 users
+    let existing: { id: string; email?: string } | undefined;
+    for (let page = 1; ; page++) {
+      const { data: pageData } = await adminClient.auth.admin.listUsers({ page, perPage: 1000 });
+      const users = pageData?.users ?? [];
+      existing = users.find((u: { id: string; email?: string }) => u.email?.toLowerCase() === claim.work_email.toLowerCase());
+      if (existing || users.length < 1000) break;
+    }
 
     if (existing) {
       await adminClient.from("profiles").upsert({
@@ -275,6 +279,8 @@ export async function approveClaim(
     }).eq("id", claimId);
 
     revalidatePath("/admin/claims");
+    revalidatePath("/business/dashboard");
+    revalidatePath(`/company/${companyId}`);
     return { success: true };
   } catch (e) {
     return { error: (e as Error).message };

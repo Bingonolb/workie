@@ -356,6 +356,7 @@ export async function toggleJobOffer(id: string, is_active: boolean): Promise<{ 
     const { error } = await supabase.from("job_offers").update({ is_active }).eq("id", id).eq("company_id", company.id);
     if (error) return { error: error.message };
     revalidatePath("/business/dashboard/jobs");
+    revalidatePath("/jobs");
     return {};
   } catch (e) {
     return { error: (e as Error).message };

@@ -46,7 +46,12 @@ export async function addBoost(companyId: string): Promise<void> {
     .eq("event_type", "boost")
     .maybeSingle();
 
-  if (existing) return;
+  if (existing) {
+    await supabase.from("score_events").delete().eq("id", existing.id);
+    revalidatePath("/explore");
+    revalidatePath(`/company/${companyId}`);
+    return;
+  }
 
   await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
   revalidatePath("/explore");
