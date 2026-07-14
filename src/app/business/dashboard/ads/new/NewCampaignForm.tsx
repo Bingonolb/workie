@@ -34,7 +34,7 @@ const STEPS = [
 
 const inp: React.CSSProperties = {
   width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 12, padding: "0 16px", height: 48, fontSize: 15,
+  borderRadius: 12, padding: "0 16px", height: 48, fontSize: 16,
   color: "var(--text)", outline: "none", boxSizing: "border-box", transition: "border-color 0.15s",
 };
 

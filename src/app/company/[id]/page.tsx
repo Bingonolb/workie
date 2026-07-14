@@ -145,7 +145,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     "url": company.website_url ?? undefined,
     "description": company.description ?? undefined,
     "address": { "@type": "PostalAddress", "addressLocality": company.city, "addressCountry": "CH" },
-    ...(company.avg_rating > 0 ? {
+    ...(Number(company.avg_rating) > 0 ? {
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": Number(company.avg_rating).toFixed(1),
@@ -273,7 +273,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Ratings breakdown */}
-            {company.review_count > 0 && (
+            {Number(company.review_count) > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px", marginBottom: 32 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 20 }}>
                   <div style={{ textAlign: "center" }}>

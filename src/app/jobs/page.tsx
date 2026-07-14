@@ -179,7 +179,7 @@ export default async function JobsPage() {
                       {job.salary_range && (
                         <span style={{ fontSize: 13, color: "var(--text-muted)" }}>💰 {job.salary_range}</span>
                       )}
-                      {co.avg_rating > 0 && (
+                      {Number(co.avg_rating) > 0 && (
                         <span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 700 }}>⭐ {Number(co.avg_rating).toFixed(1)} <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>({co.review_count} avis)</span></span>
                       )}
                       <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{timeAgo(job.created_at)}</span>

@@ -88,7 +88,7 @@ function StepBar({ step }: { step: number }) {
         const done = i < step;
         const active = i === step;
         return (
-          <div key={i} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : 0 }}>
+          <div key={s.label} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : 0 }}>
             <div style={{
               display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 50,
               background: done ? "rgba(16,185,129,0.15)" : active ? "rgba(139,92,246,0.15)" : "var(--surface3)",

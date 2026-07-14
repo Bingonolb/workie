@@ -374,7 +374,7 @@ export function SwipeView({
         </button>
 
         <button onClick={() => current && router.push(`/company/${current.id}`)} disabled={!!gone} style={{
-          width: 46, height: 46, borderRadius: "50%",
+          width: 48, height: 48, borderRadius: "50%",
           background: "var(--surface)",
           border: "2px solid rgba(99,102,241,0.45)",
           color: "#818cf8", display: "flex", alignItems: "center", justifyContent: "center",
@@ -575,7 +575,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
       </div>
 
       <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {company.avg_rating > 0 && (
+        {Number(company.avg_rating) > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ display: "flex", gap: 2 }}>
               {[1,2,3,4,5].map(n => (
@@ -589,7 +589,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <Chip icon={<MapPin size={12} />} label={`${company.city}${company.canton ? `, ${company.canton}` : ""}`} />
           <Chip icon={<Users size={12} />} label={`${company.employee_range} emp.`} />
-          {company.avg_salary_chf && <Chip icon={<TrendingUp size={12} />} label={`CHF ${Math.round(company.avg_salary_chf / 1000)}k`} color="#10b981" />}
+          {Number(company.avg_salary_chf) > 0 && <Chip icon={<TrendingUp size={12} />} label={`CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`} color="#10b981" />}
         </div>
         {company.description && (
           <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
