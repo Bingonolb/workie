@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull } from "lucide-react";
+import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { addFlame, addBoost, addPenalty } from "@/lib/actions/scores";
 import { fetchSwipePage } from "@/lib/actions/companies";
@@ -14,6 +14,13 @@ import type { AdCampaign } from "@/lib/actions/ads";
 
 const SWIPE_THRESHOLD = 90;
 const PREFETCH_AHEAD = 25;
+const AD_SESSION_KEY = "workie_swipe_ad_shown";
+
+type AdItem = { __ad: true; campaign: AdCampaign };
+type SwipeItem = Company | AdItem;
+function isAd(item: SwipeItem | undefined): item is AdItem {
+  return !!item && "__ad" in item;
+}
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -45,8 +52,18 @@ export function SwipeView({
 }) {
   const router = useRouter();
 
-  // Shuffle on first render so order varies per session
-  const [companies, setCompanies] = useState<Company[]>(() => shuffle(initialCompanies));
+  // Build the initial deck: shuffle companies, then inject ONE ad card at a random position
+  // (only if not already shown this browser session)
+  const [companies, setCompanies] = useState<SwipeItem[]>(() => {
+    const shuffled: SwipeItem[] = shuffle(initialCompanies);
+    const alreadyShown = typeof window !== "undefined" && sessionStorage.getItem(AD_SESSION_KEY) === "1";
+    if (swipeAds.length > 0 && !alreadyShown) {
+      const pos = 5 + Math.floor(Math.random() * 8); // insert between position 5-12
+      const campaign = swipeAds[Math.floor(Math.random() * swipeAds.length)];
+      shuffled.splice(Math.min(pos, shuffled.length), 0, { __ad: true, campaign });
+    }
+    return shuffled;
+  });
   const [index, setIndex] = useState(0);
   const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
@@ -54,9 +71,6 @@ export function SwipeView({
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [exhausted, setExhausted] = useState(false);
-  const [adOverlay, setAdOverlay] = useState<AdCampaign | null>(null);
-  // Next index at which to show a swipe ad — randomized so the interval feels natural
-  const nextAdAt = useRef(10 + Math.floor(Math.random() * 6)); // first ad between swipe 10-15
   // Track all companies seen/acted on this session to avoid re-showing them in new batches
   const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
 
@@ -74,22 +88,12 @@ export function SwipeView({
   const fetchingRef = useRef(false);
   const nextOffsetRef = useRef(initialCompanies.length);
 
-  // Show swipe ad at a randomized interval (not a fixed cadence users can predict)
+  // Track impression when the ad card becomes the current card
+  const current = companies[index];
   useEffect(() => {
-    if (swipeAds.length === 0 || index < nextAdAt.current) return;
-    const ad = swipeAds[Math.floor(Math.random() * swipeAds.length)];
-    setAdOverlay(ad);
-    // Schedule the next ad 10-17 swipes from now
-    nextAdAt.current = index + 10 + Math.floor(Math.random() * 8);
+    if (isAd(current)) trackAdImpression(current.campaign.id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
-
-  // Bug 4 fix: track impression only after the overlay is actually committed to the DOM,
-  // not at trigger time (avoids counting impressions that never render)
-  useEffect(() => {
-    if (adOverlay) trackAdImpression(adOverlay.id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adOverlay]);
 
   // Prefetch next batch silently, well before the user reaches the end
   useEffect(() => {
@@ -100,14 +104,12 @@ export function SwipeView({
       fetchingRef.current = false;
       if (batch.length === 0) { setExhausted(true); return; }
       nextOffsetRef.current += batch.length;
-      // Filter out companies already acted on this session
       const fresh = shuffle(batch.filter(c => !actedIds.current.has(c.id)));
       if (fresh.length > 0) setCompanies(prev => [...prev, ...fresh]);
       if (batch.length < 50) setExhausted(true);
     }).catch(() => { fetchingRef.current = false; });
   }, [index, companies.length, filters, exhausted]);
 
-  const current = companies[index];
   const next = companies[index + 1];
   currentRef.current = current;
   const totalSeen = index;
@@ -123,16 +125,29 @@ export function SwipeView({
 
   const advance = useCallback((dir: "left" | "right") => {
     if (!current || gone) return;
+
+    // Ad card: swipe freely (no login gate), track click on right swipe
+    if (isAd(current)) {
+      sessionStorage.setItem(AD_SESSION_KEY, "1");
+      if (dir === "right") {
+        trackAdClick(current.campaign.id);
+        window.open(current.campaign.cta_url, "_blank", "noopener,noreferrer");
+      }
+      setGone(dir);
+      setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 280);
+      return;
+    }
+
     if (!isLoggedIn && swipeCountRef.current >= 1) { requireLogin(); setDrag(0); return; }
     if (!isLoggedIn) { swipeCountRef.current += 1; }
     markActed(current.id);
     setGone(dir);
     if (dir === "right" && isLoggedIn) {
-      setFavIds(prev => { const n = new Set(prev); n.add(current.id); return n; });
-      toggleFavorite(current.id);
+      setFavIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
+      toggleFavorite((current as Company).id);
       if (!isBusiness) {
-        setFlameIds(prev => { const n = new Set(prev); n.add(current.id); return n; });
-        addFlame(current.id);
+        setFlameIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
+        addFlame((current as Company).id);
       }
       showToast("🔥 Enregistré !", "#f97316");
     } else if (dir === "right") {
@@ -156,6 +171,7 @@ export function SwipeView({
 
   const handleBoost = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isAd(current)) return;
     if (!isLoggedIn) { requireLogin(); return; }
     if (!current) return;
     markActed(current.id);
@@ -165,10 +181,11 @@ export function SwipeView({
 
   const handlePenalty = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isAd(current)) return;
     if (!isLoggedIn) { requireLogin(); return; }
     if (!isAdmin || !current) return;
-    markActed(current.id);
-    addPenalty(current.id);
+    markActed((current as Company).id);
+    addPenalty((current as Company).id);
     showToast("💀 -100 pts", "#ef4444");
   };
 
@@ -207,7 +224,7 @@ export function SwipeView({
       setIsDragging(false);
       if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
         const c = currentRef.current;
-        if (c) router.push(`/company/${c.id}`);
+        if (c && !isAd(c)) router.push(`/company/${c.id}`);
         setDrag(0);
         return;
       }
@@ -260,13 +277,14 @@ export function SwipeView({
   };
 
   if (!current) {
+    const realCount = companies.filter(c => !isAd(c)).length;
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 500, gap: 16 }}>
         <div style={{ fontSize: 52 }}>🔥</div>
         <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)" }}>Tu as tout exploré !</p>
-        <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{totalSeen} entreprises découvertes</p>
+        <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{realCount} entreprises découvertes</p>
         <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-          <button onClick={() => { setCompanies(shuffle(companies)); setIndex(0); setGone(null); setDrag(0); actedIds.current = new Set(); }} style={{ padding: "12px 24px", borderRadius: 50, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
+          <button onClick={() => { setCompanies(shuffle(companies.filter(c => !isAd(c)))); setIndex(0); setGone(null); setDrag(0); actedIds.current = new Set(); }} style={{ padding: "12px 24px", borderRadius: 50, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
             Recommencer
           </button>
           <a href="/ranking" style={{ padding: "12px 24px", borderRadius: 50, background: "var(--surface)", color: "var(--text)", fontWeight: 700, fontSize: 14, border: "1px solid var(--border2)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -306,7 +324,10 @@ export function SwipeView({
             transform: gone ? "scale(1) translateY(0)" : "scale(0.95) translateY(12px)",
             transition: gone ? "transform 0.28s cubic-bezier(0.34,1.2,0.64,1)" : "none",
           }}>
-            <SwipeCard company={next} flameIds={flameIds} overlayDir={null} overlayOpacity={0} />
+            {isAd(next)
+              ? <AdSwipeCard campaign={next.campaign} overlayDir={null} overlayOpacity={0} />
+              : <SwipeCard company={next} flameIds={flameIds} overlayDir={null} overlayOpacity={0} />
+            }
           </div>
         )}
         <div
@@ -329,18 +350,16 @@ export function SwipeView({
           onMouseUp={onMouseUp}
           onMouseLeave={e => { if (dragStart.current) onMouseUp(e as React.MouseEvent); }}
         >
-          <SwipeCard
-            company={current}
-            flameIds={flameIds}
-            overlayDir={isRight ? "right" : isLeft ? "left" : null}
-            overlayOpacity={overlayOpacity}
-          />
+          {isAd(current)
+            ? <AdSwipeCard campaign={current.campaign} overlayDir={isRight ? "right" : isLeft ? "left" : null} overlayOpacity={overlayOpacity} />
+            : <SwipeCard company={current} flameIds={flameIds} overlayDir={isRight ? "right" : isLeft ? "left" : null} overlayOpacity={overlayOpacity} />
+          }
         </div>
       </div>
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {(!isLoggedIn || isAdmin) && !isBusiness && (
+        {(!isLoggedIn || isAdmin) && !isBusiness && !isAd(current) && (
           <button onClick={handlePenalty} title="Pénaliser -100 pts" style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
             width: 52, height: 52, borderRadius: "50%",
@@ -373,7 +392,7 @@ export function SwipeView({
           <X size={26} strokeWidth={2.5} />
         </button>
 
-        <button onClick={() => current && router.push(`/company/${current.id}`)} disabled={!!gone} style={{
+        <button onClick={() => !isAd(current) && current && router.push(`/company/${current.id}`)} disabled={!!gone || isAd(current)} style={{
           width: 48, height: 48, borderRadius: "50%",
           background: "var(--surface)",
           border: "2px solid rgba(99,102,241,0.45)",
@@ -390,23 +409,23 @@ export function SwipeView({
 
         <button onClick={() => advance("right")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
-          background: flameIds.has(current.id)
+          background: !isAd(current) && flameIds.has(current.id)
             ? "linear-gradient(135deg, #f97316, #ea580c)"
             : "var(--surface)",
-          border: flameIds.has(current.id) ? "2px solid rgba(249,115,22,0.8)" : "2px solid rgba(249,115,22,0.4)",
-          color: flameIds.has(current.id) ? "#fff" : "#f97316",
+          border: !isAd(current) && flameIds.has(current.id) ? "2px solid rgba(249,115,22,0.8)" : "2px solid rgba(249,115,22,0.4)",
+          color: !isAd(current) && flameIds.has(current.id) ? "#fff" : "#f97316",
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
-          boxShadow: flameIds.has(current.id) ? "0 6px 28px rgba(249,115,22,0.5)" : "0 6px 24px rgba(249,115,22,0.15)",
+          boxShadow: !isAd(current) && flameIds.has(current.id) ? "0 6px 28px rgba(249,115,22,0.5)" : "0 6px 24px rgba(249,115,22,0.15)",
           transition: "all 0.18s",
         }}
           onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
-          <Flame size={26} fill={flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
+          <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
         </button>
 
-        {!isBusiness && <button onClick={handleBoost} title="Booster +100 pts" style={{
+        {!isBusiness && !isAd(current) && <button onClick={handleBoost} title="Booster +100 pts" style={{
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
           width: 52, height: 52, borderRadius: "50%",
           background: "var(--surface)",
@@ -438,75 +457,7 @@ export function SwipeView({
         </p>
       </div>
 
-      {showGuestModal && !isLoggedIn && <GuestModal reviewCount={companies.length} open />}
-
-      {/* Swipe ad overlay */}
-      {adOverlay && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 10002,
-          background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)",
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-          padding: "24px 20px",
-        }}>
-          <div style={{
-            width: "min(400px, 94vw)", background: "var(--surface)",
-            borderRadius: 24, overflow: "hidden",
-            boxShadow: "0 32px 80px rgba(0,0,0,0.6)",
-          }}>
-            {/* Sponsored label */}
-            <div style={{ background: "var(--surface2)", padding: "8px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                Sponsorisé
-              </span>
-              <button onClick={() => setAdOverlay(null)}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: 18, padding: "0 4px" }}>
-                ✕
-              </button>
-            </div>
-            {/* Image */}
-            <div style={{ position: "relative", paddingTop: "56%", overflow: "hidden" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={adOverlay.image_url} alt={adOverlay.headline}
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-            </div>
-            {/* Content */}
-            <div style={{ padding: "20px 20px 24px" }}>
-              <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", lineHeight: 1.2, marginBottom: 8 }}>
-                {adOverlay.headline}
-              </p>
-              {adOverlay.body_text && (
-                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 16 }}>
-                  {adOverlay.body_text}
-                </p>
-              )}
-              <div style={{ display: "flex", gap: 10 }}>
-                <a
-                  href={adOverlay.cta_url}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                  onClick={() => { trackAdClick(adOverlay.id); setAdOverlay(null); }}
-                  style={{
-                    flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-                    gap: 6, padding: "13px", borderRadius: 12,
-                    background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-                    color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none",
-                  }}
-                >
-                  {adOverlay.cta_label}
-                </a>
-                <button onClick={() => setAdOverlay(null)}
-                  style={{
-                    padding: "13px 16px", borderRadius: 12, border: "1px solid var(--border2)",
-                    background: "transparent", color: "var(--text-muted)", fontSize: 13,
-                    fontWeight: 600, cursor: "pointer",
-                  }}>
-                  Ignorer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {showGuestModal && !isLoggedIn && <GuestModal reviewCount={companies.filter(c => !isAd(c)).length} open />}
 
       <style>{`
         @keyframes toastSlide {
@@ -603,6 +554,70 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
             ))}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
+  campaign: AdCampaign;
+  overlayDir: "left" | "right" | null;
+  overlayOpacity: number;
+}) {
+  return (
+    <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid rgba(139,92,246,0.3)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none", display: "flex", flexDirection: "column" }}>
+      {/* Image zone — same 55% as SwipeCard */}
+      <div style={{ height: "55%", position: "relative", overflow: "hidden", flexShrink: 0 }}>
+        {campaign.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={campaign.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
+        ) : (
+          <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #8b5cf6, #f97316)" }} />
+        )}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.7))" }} />
+
+        {/* Swipe overlays — identical to SwipeCard */}
+        {overlayDir === "right" && (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(139,92,246,${overlayOpacity * 0.35})` }}>
+            <div style={{ border: `4px solid rgba(139,92,246,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(-12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
+              <span style={{ fontSize: 28, fontWeight: 900, color: `rgba(139,92,246,${overlayOpacity})` }}>↗ VOIR</span>
+            </div>
+          </div>
+        )}
+        {overlayDir === "left" && (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(239,68,68,${overlayOpacity * 0.35})` }}>
+            <div style={{ border: `4px solid rgba(239,68,68,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
+              <span style={{ fontSize: 28, fontWeight: 900, color: `rgba(239,68,68,${overlayOpacity})` }}>✕ PASSER</span>
+            </div>
+          </div>
+        )}
+
+        {/* Sponsored badge */}
+        <div style={{ position: "absolute", top: 16, left: 16, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", borderRadius: 50, padding: "4px 12px", display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Sponsorisé</span>
+        </div>
+
+        {/* Headline over image */}
+        <div style={{ position: "absolute", bottom: 16, left: 20, right: 20 }}>
+          <p style={{ fontSize: 24, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
+            {campaign.headline}
+          </p>
+        </div>
+      </div>
+
+      {/* Content zone */}
+      <div style={{ flex: 1, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12, justifyContent: "space-between" }}>
+        {campaign.body_text && (
+          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+            {campaign.body_text}
+          </p>
+        )}
+        {/* CTA — visual only (swipe right opens the link) */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 16px", borderRadius: 12, background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(249,115,22,0.12))", border: "1px solid rgba(139,92,246,0.25)" }}>
+          <ExternalLink size={14} color="#8b5cf6" />
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#8b5cf6", flex: 1 }}>{campaign.cta_label}</span>
+          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Swipe →</span>
+        </div>
       </div>
     </div>
   );
