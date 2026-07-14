@@ -76,7 +76,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
       </aside>
 
       {/* Main */}
-      <main style={{ flex: 1, overflowX: "hidden", minWidth: 0 }}>
+      <main style={{ flex: 1, overflowX: "clip", minWidth: 0 }}>
         {/* Mobile-only header — logo + company avatar + theme toggle */}
         <div className="biz-mobile-header">
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>

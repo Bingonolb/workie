@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Apply theme before paint to avoid flash */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('workie-theme');if(t==='light')document.documentElement.classList.add('light');else document.documentElement.classList.remove('light');}catch(e){}})()` }} />
       </head>
-      <body style={{ background: "var(--bg)", overflowX: "hidden", width: "100%", position: "relative" }}>
+      <body style={{ background: "var(--bg)", overflowX: "clip", width: "100%", position: "relative" }}>
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
