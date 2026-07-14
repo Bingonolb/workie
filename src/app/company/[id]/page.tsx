@@ -119,7 +119,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   // Sub-ratings averages — each computed independently to avoid null-as-zero bias
   const subAvg = (field: "rating_culture" | "rating_management" | "rating_worklife" | "rating_career") => {
     const subset = reviews.filter(r => r[field]);
-    return subset.length ? subset.reduce((s, r) => s + (r[field] as number), 0) / subset.length : null;
+    return subset.length ? subset.reduce((s, r) => s + Number(r[field]), 0) / subset.length : null;
   };
   const avgCulture = subAvg("rating_culture");
   const avgMgmt = subAvg("rating_management");
@@ -262,7 +262,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               {[
                 { icon: <MapPin size={18} color="#8b5cf6" />, value: `${company.city}${company.canton ? `, ${company.canton}` : ""}`, label: "Localisation" },
                 { icon: <Users size={18} color="#f97316" />, value: company.employee_range, label: "Employés" },
-                { icon: <TrendingUp size={18} color="#10b981" />, value: company.avg_salary_chf ? `CHF ${Math.round(company.avg_salary_chf / 1000)}k` : "N/A", label: "Salaire moyen" },
+                { icon: <TrendingUp size={18} color="#10b981" />, value: Number(company.avg_salary_chf) > 0 ? `CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k` : "N/A", label: "Salaire moyen" },
               ].map(({ icon, value, label }) => (
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
                   <div style={{ marginBottom: 8 }}>{icon}</div>
@@ -278,7 +278,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 20 }}>
                   <div style={{ textAlign: "center" }}>
                     <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
-                    <Stars rating={company.avg_rating} size={18} />
+                    <Stars rating={Number(company.avg_rating)} size={18} />
                     <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>{company.review_count} avis</p>
                   </div>
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -503,7 +503,7 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <Stars rating={review.rating_overall} size={13} />
+            <Stars rating={Number(review.rating_overall)} size={13} />
             <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{Number(review.rating_overall).toFixed(1)}</span>
             {rec && (
               <span style={{ fontSize: 11, fontWeight: 700, color: rec.color, marginLeft: 4 }}>{rec.label}</span>
@@ -538,8 +538,8 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
           {review.is_current && (
             <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>● Employé actuel</span>
           )}
-          {review.salary_chf && (
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>CHF {Math.round(review.salary_chf / 1000)}k / an</span>
+          {Number(review.salary_chf) > 0 && (
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>CHF {Math.round(Number(review.salary_chf) / 1000)}k / an</span>
           )}
         </div>
       </div>
