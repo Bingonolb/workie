@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
+import { notifyFavoriteUsers } from "@/lib/actions/notifications";
+import { headers } from "next/headers";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -228,13 +230,48 @@ export async function getBusinessJobs() {
     const { supabase, company } = await requireBusiness();
     const { data } = await supabase
       .from("job_offers")
-      .select("*")
+      .select("*, apply_click_count, view_count")
       .eq("company_id", company.id)
       .order("created_at", { ascending: false });
     return { jobs: data ?? [], company };
   } catch (e) {
     return { jobs: [], error: (e as Error).message };
   }
+}
+
+export async function getJobCantonStats(jobId: string): Promise<{ canton: string; count: number }[]> {
+  try {
+    const { supabase, company } = await requireBusiness();
+    const { data } = await supabase
+      .from("job_apply_clicks")
+      .select("viewer_canton")
+      .eq("job_id", jobId)
+      .eq("company_id", company.id);
+    if (!data) return [];
+    const map: Record<string, number> = {};
+    for (const row of data) {
+      const canton = row.viewer_canton ?? "–";
+      map[canton] = (map[canton] ?? 0) + 1;
+    }
+    return Object.entries(map)
+      .map(([canton, count]) => ({ canton, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+  } catch {
+    return [];
+  }
+}
+
+export async function trackJobApplyClick(jobId: string, companyId: string): Promise<void> {
+  try {
+    const hdrs = await headers();
+    const canton = hdrs.get("x-vercel-ip-country-region") ?? null;
+    const supabase = await createClient();
+    await Promise.all([
+      supabase.from("job_apply_clicks").insert({ job_id: jobId, company_id: companyId, viewer_canton: canton }),
+      supabase.rpc("increment_job_apply_click", { job_id: jobId }),
+    ]);
+  } catch { /* silent */ }
 }
 
 // ── Mutations ─────────────────────────────────────────────────────────────────
@@ -336,7 +373,7 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
       ? /^https?:\/\//i.test(rawApplyUrl) ? rawApplyUrl : `https://${rawApplyUrl}`
       : null;
 
-    const { error } = await supabase.from("job_offers").insert({
+    const { data: inserted, error } = await supabase.from("job_offers").insert({
       company_id: company.id,
       title,
       description:       String(formData.get("description") || "") || null,
@@ -348,8 +385,12 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
       salary_range:      String(formData.get("salary_range") || "") || null,
       apply_url,
       is_active: true,
-    });
+    }).select("id").single();
     if (error) return { error: error.message };
+
+    // Fan-out: notify users who favorited this company
+    notifyFavoriteUsers(company.id, company.name, title, inserted.id);
+
     revalidatePath("/business/dashboard/jobs");
     revalidatePath("/jobs");
     return { success: true };

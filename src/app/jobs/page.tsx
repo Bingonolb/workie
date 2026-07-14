@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
-import { MapPin, Briefcase, ArrowRight, BadgeCheck, ExternalLink } from "lucide-react";
+import { MapPin, Briefcase, ArrowRight, BadgeCheck } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
+import { JobApplyButton } from "@/components/JobApplyButton";
 
 export const metadata: Metadata = {
   title: "Offres d'emploi en Suisse · Workie",
@@ -232,10 +233,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                   {/* CTA */}
                   <div className="job-card-cta" style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
                     {job.apply_url ? (
-                      <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
-                        style={{ display: "flex", alignItems: "center", gap: 6, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
-                        Postuler <ExternalLink size={13} />
-                      </a>
+                      <JobApplyButton jobId={job.id} companyId={co.id} applyUrl={job.apply_url} />
                     ) : (
                       <Link href={`/company/${co.id}`}
                         style={{ display: "flex", alignItems: "center", gap: 6, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>

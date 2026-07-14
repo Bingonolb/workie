@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { getUser, getIsAdmin, getBusinessCompanyId } from "@/lib/supabase/server";
 import { signOut } from "@/lib/actions/auth";
-import { LogOut, Shield, LayoutDashboard } from "lucide-react";
+import { LogOut, Shield, LayoutDashboard, Bell } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
+import { getUnreadCount } from "@/lib/actions/notifications";
 
 export async function Navbar() {
   const [user, isAdmin, bizCompanyId] = await Promise.all([getUser(), getIsAdmin(), getBusinessCompanyId()]);
+  const unreadCount = user ? await getUnreadCount() : 0;
   const isBusiness = !!bizCompanyId;
 
   return (
@@ -73,6 +75,16 @@ export async function Navbar() {
         {/* Right side */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <ThemeToggle />
+          {user && (
+            <Link href="/notifications" title="Notifications" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: 8, color: "var(--text-muted)", textDecoration: "none" }}>
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <span style={{ position: "absolute", top: 2, right: 2, minWidth: 16, height: 16, borderRadius: 50, background: "#8b5cf6", color: "#fff", fontSize: 9, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
           {user ? (
             <form action={signOut}>
               <button type="submit" title="Se déconnecter" style={{

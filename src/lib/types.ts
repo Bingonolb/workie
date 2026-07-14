@@ -160,16 +160,28 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["favorites"]["Insert"]>
         Relationships: [{ foreignKeyName: "favorites_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
       }
+      job_apply_clicks: {
+        Row: { clicked_at: string | null; company_id: string; id: string; job_id: string; viewer_canton: string | null }
+        Insert: { clicked_at?: string | null; company_id: string; id?: string; job_id: string; viewer_canton?: string | null }
+        Update: Partial<Database["public"]["Tables"]["job_apply_clicks"]["Insert"]>
+        Relationships: [{ foreignKeyName: "job_apply_clicks_job_id_fkey"; columns: ["job_id"]; isOneToOne: false; referencedRelation: "job_offers"; referencedColumns: ["id"] }]
+      }
       job_offers: {
         Row: {
-          apply_url: string | null; company_id: string; contract_type: string | null
+          apply_click_count: number | null; apply_url: string | null; company_id: string; contract_type: string | null
           created_at: string | null; description: string | null; experience_level: string | null
           expires_at: string | null; id: string; is_active: boolean | null; location: string | null
-          requirements: string | null; salary_range: string | null; title: string; work_mode: string | null
+          requirements: string | null; salary_range: string | null; title: string; view_count: number | null; work_mode: string | null
         }
         Insert: Partial<Database["public"]["Tables"]["job_offers"]["Row"]> & { company_id: string; title: string }
         Update: Partial<Database["public"]["Tables"]["job_offers"]["Row"]>
         Relationships: [{ foreignKeyName: "job_offers_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
+      }
+      notifications: {
+        Row: { body: string | null; created_at: string | null; data: Json | null; id: string; read: boolean | null; title: string; type: string; user_id: string }
+        Insert: { body?: string | null; created_at?: string | null; data?: Json | null; id?: string; read?: boolean | null; title: string; type: string; user_id: string }
+        Update: Partial<Database["public"]["Tables"]["notifications"]["Insert"]>
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -216,6 +228,7 @@ export type Database = {
       increment_ad_click: { Args: { p_campaign_id: string }; Returns: undefined }
       increment_ad_impression: { Args: { p_campaign_id: string }; Returns: undefined }
       increment_helpful: { Args: { review_id: string }; Returns: undefined }
+      increment_job_apply_click: { Args: { job_id: string }; Returns: undefined }
       list_distinct_brands: { Args: Record<string, never>; Returns: { brand: string }[] }
       show_limit: { Args: Record<string, never>; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

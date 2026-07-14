@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useActionState } from "react";
-import { getBusinessJobs, createJobOffer, toggleJobOffer, deleteJobOffer } from "@/lib/actions/business";
-import { Plus, Briefcase, MapPin, Trash2, Eye, EyeOff, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useState, useActionState, useTransition } from "react";
+import { getBusinessJobs, createJobOffer, toggleJobOffer, deleteJobOffer, getJobCantonStats } from "@/lib/actions/business";
+import { Plus, Briefcase, MapPin, Trash2, Eye, EyeOff, ExternalLink, ChevronDown, ChevronUp, MousePointer, BarChart2 } from "lucide-react";
 
 const CONTRACT_TYPES = ["CDI", "CDD", "Stage", "Alternance", "Freelance"];
 const WORK_MODES = ["Présentiel", "Hybride", "Remote"];
@@ -21,6 +21,8 @@ type Job = {
   apply_url: string | null;
   is_active: boolean;
   created_at: string;
+  apply_click_count: number;
+  view_count: number;
 };
 
 const inp: React.CSSProperties = {
@@ -173,6 +175,24 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
 function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; onDelete: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [cantonStats, setCantonStats] = useState<{ canton: string; count: number }[]>([]);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [, startTransition] = useTransition();
+
+  const handleStatsToggle = () => {
+    if (!statsOpen && cantonStats.length === 0) {
+      setStatsLoading(true);
+      startTransition(async () => {
+        const res = await getJobCantonStats(job.id);
+        setCantonStats(res);
+        setStatsLoading(false);
+      });
+    }
+    setStatsOpen(o => !o);
+  };
+
+  const clicks = Number(job.apply_click_count ?? 0);
 
   return (
     <div style={{ background: "var(--surface2)", border: `1px solid ${job.is_active ? "var(--border)" : "var(--border)"}`, borderRadius: 16, overflow: "hidden", opacity: job.is_active ? 1 : 0.65 }}>
@@ -203,6 +223,14 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
               Publiée le {new Date(job.created_at).toLocaleDateString("fr-CH")}
             </span>
           </div>
+        </div>
+
+        {/* Quick stats chips */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <button onClick={handleStatsToggle} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: clicks > 0 ? "#8b5cf6" : "var(--text-muted)", background: clicks > 0 ? "rgba(139,92,246,0.08)" : "var(--surface)", border: `1px solid ${clicks > 0 ? "rgba(139,92,246,0.25)" : "var(--border2)"}`, borderRadius: 8, padding: "5px 10px", cursor: "pointer" }}>
+            <MousePointer size={12} /> {clicks} candidature{clicks !== 1 ? "s" : ""}
+            <BarChart2 size={11} style={{ marginLeft: 2, opacity: 0.6 }} />
+          </button>
         </div>
 
         <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
@@ -236,6 +264,52 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
           )}
         </div>
       </div>
+
+      {/* Stats panel */}
+      {statsOpen && (
+        <div style={{ padding: "16px 20px", borderTop: "1px solid var(--border)", background: "rgba(139,92,246,0.02)" }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>
+            Statistiques de l&apos;offre
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 12, marginBottom: cantonStats.length > 0 ? 16 : 0 }}>
+            {[
+              { label: "Clics Postuler", value: clicks, color: "#8b5cf6" },
+            ].map(({ label, value, color }) => (
+              <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 14px" }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{label}</p>
+                <p style={{ fontSize: 24, fontWeight: 900, color, letterSpacing: "-0.02em" }}>{value}</p>
+              </div>
+            ))}
+          </div>
+          {statsLoading ? (
+            <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Chargement des régions…</p>
+          ) : cantonStats.length > 0 ? (
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Régions des candidats</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                {cantonStats.map(({ canton, count }) => {
+                  const pct = Math.round((count / clicks) * 100);
+                  return (
+                    <div key={canton}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                        <span style={{ fontWeight: 700, color: "var(--text)" }}>{canton}</span>
+                        <span style={{ color: "var(--text-muted)" }}>{count} clic{count > 1 ? "s" : ""} · {pct}%</span>
+                      </div>
+                      <div style={{ height: 5, background: "var(--surface2)", borderRadius: 50, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 50 }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : clicks === 0 ? (
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Aucun clic enregistré pour l&apos;instant.</p>
+          ) : (
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Données de région non disponibles.</p>
+          )}
+        </div>
+      )}
 
       {/* Expanded detail */}
       {expanded && (
