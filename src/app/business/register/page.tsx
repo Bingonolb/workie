@@ -87,7 +87,7 @@ export default function RegisterPage() {
 
   // Success = form submitted, now on step 3 (checkout)
   // We go to step 3 (pricing) first, submission happens at step 2
-  const hasStripe = false; // TODO: set to !!process.env.NEXT_PUBLIC_STRIPE_KEY when available
+  const hasStripe = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
   if (state?.success) {
     // After submission, show the checkout step
