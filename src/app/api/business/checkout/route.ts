@@ -2,14 +2,13 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getUser, createClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 const PLANS = {
   monthly: { amount: 9900, interval: "month" as const, label: "Workie Business · Mensuel" },
   annual:  { amount: 89000, interval: "year"  as const, label: "Workie Business · Annuel"  },
 };
 
 export async function POST(request: Request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   const user = await getUser();
   if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
