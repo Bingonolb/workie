@@ -157,16 +157,13 @@ export default function BusinessPage() {
           <h2 style={{ fontSize: "clamp(22px, 4vw, 36px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 48 }}>Simple. Sans surprise.</h2>
 
           <div style={{ background: "var(--surface)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 24, padding: "40px 36px", position: "relative", overflow: "hidden" }}>
-            <div style={{ position: "absolute", top: 16, right: 16, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 50, letterSpacing: "0.05em" }}>
-              OFFRE FONDATEURS
-            </div>
             <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 8 }}>Compte Entreprise Vérifié</p>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 6, marginBottom: 6 }}>
               <span style={{ fontSize: 56, fontWeight: 900, letterSpacing: "-0.04em", color: "var(--text)" }}>99</span>
               <span style={{ fontSize: 18, fontWeight: 700, color: "var(--text-muted)" }}>CHF/mois</span>
             </div>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 36 }}>
-              ou <strong style={{ color: "var(--text)" }}>890 CHF/an</strong> — 2 mois offerts · Prix garanti à vie pour les fondateurs
+              ou <strong style={{ color: "var(--text)" }}>890 CHF/an</strong> — 2 mois offerts
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 36, textAlign: "left" }}>
