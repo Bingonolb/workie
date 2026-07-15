@@ -18,12 +18,12 @@ const FEATURES = [
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string; canceled?: string; no_company?: string }>;
+  searchParams: Promise<{ success?: string; canceled?: string; no_company?: string; error?: string }>;
 }) {
   const user = await getUser();
   if (!user) redirect("/auth/login?next=/business/checkout");
 
-  const { success, canceled, no_company } = await searchParams;
+  const { success, canceled, no_company, error } = await searchParams;
 
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -62,20 +62,48 @@ export default async function CheckoutPage({
   );
 
   // ── Success banner (payment went through, webhook may still be processing)
+  // Page auto-refreshes every 3s until is_subscribed is true (set by webhook)
   if (success) {
     return (
       <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+        {/* Auto-refresh until webhook fires */}
+        <meta httpEquiv="refresh" content="3" />
         {logo}
         <div style={{ width: "100%", maxWidth: 480, textAlign: "center" }}>
           <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}>
             <PartyPopper size={32} color="#10b981" />
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.04em", marginBottom: 12 }}>Bienvenue sur Workie Business !</h1>
-          <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 36 }}>
-            Votre abonnement est en cours d&apos;activation. Votre dashboard sera disponible dans quelques instants.
+          <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 12 }}>
+            Votre abonnement est en cours d&apos;activation…
+          </p>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 36 }}>
+            Cette page se rafraîchit automatiquement. Vous serez redirigé vers votre dashboard dès confirmation.
           </p>
           <Link href="/business/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 28px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
             Accéder au dashboard <ArrowRight size={16} />
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Stripe error
+  if (error) {
+    return (
+      <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+        {logo}
+        <div style={{ width: "100%", maxWidth: 480, textAlign: "center" }}>
+          <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+            <XCircle size={28} color="#ef4444" />
+          </div>
+          <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 10 }}>Erreur de paiement</h1>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
+            Une erreur est survenue lors de la création de la session de paiement. Réessaie ou contacte{" "}
+            <a href="mailto:hello@workie.ch" style={{ color: "#8b5cf6" }}>hello@workie.ch</a>.
+          </p>
+          <Link href="/business/checkout" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+            Réessayer <ArrowRight size={15} />
           </Link>
         </div>
       </main>
