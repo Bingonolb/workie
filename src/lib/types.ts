@@ -230,6 +230,7 @@ export type Database = {
       increment_helpful: { Args: { review_id: string }; Returns: undefined }
       increment_job_apply_click: { Args: { job_id: string }; Returns: undefined }
       increment_penalty_credits: { Args: { uid: string; amount: number }; Returns: undefined }
+      spend_penalty_credit: { Args: { uid: string }; Returns: boolean }
       list_distinct_brands: { Args: Record<string, never>; Returns: { brand: string }[] }
       show_limit: { Args: Record<string, never>; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

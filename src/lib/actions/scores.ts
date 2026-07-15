@@ -80,17 +80,18 @@ export async function addPenalty(companyId: string): Promise<void> {
     .maybeSingle();
 
   if (existing) {
-    // Toggle off — refund 1 credit (admins don't use credits)
+    // Toggle off — refund 1 credit atomically
     await admin.from("score_events").delete().eq("id", existing.id);
     if (!isAdmin) {
       await supabase.from("profiles").update({ penalty_credits: credits + 1 }).eq("id", user.id);
     }
   } else {
-    // Apply — spend 1 credit
-    await admin.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
+    // Spend 1 credit atomically — returns false if credits were 0 (race condition guard)
     if (!isAdmin) {
-      await supabase.from("profiles").update({ penalty_credits: credits - 1 }).eq("id", user.id);
+      const { data: ok } = await supabase.rpc("spend_penalty_credit", { uid: user.id });
+      if (!ok) return; // someone else consumed the last credit first
     }
+    await admin.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
   }
 
   revalidatePath("/explore");
