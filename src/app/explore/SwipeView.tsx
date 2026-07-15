@@ -485,18 +485,39 @@ export function SwipeView({
       {/* Penalty pass upgrade modal */}
       {showPenaltyUpgrade && (
         <>
-          <div onClick={() => setShowPenaltyUpgrade(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", zIndex: 10010 }} />
-          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(420px, 92vw)", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 24, padding: "36px 32px", textAlign: "center" }}>
-            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24 }}>💀</div>
-            <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 10, color: "var(--text)" }}>Pénaliser une entreprise</h2>
-            <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 28 }}>
-              Le bouton <strong style={{ color: "#ef4444" }}>-100 pts</strong> te permet de signaler une entreprise toxique et d&apos;impacter son classement.<br /><br />
-              Débloque cette fonctionnalité pour <strong style={{ color: "var(--text)" }}>5 CHF</strong> — accès à vie.
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div onClick={() => setShowPenaltyUpgrade(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 10010 }} />
+          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(420px, 92vw)", background: "var(--surface)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 24, overflow: "hidden" }}>
+            {/* Header band */}
+            <div style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(249,115,22,0.08))", borderBottom: "1px solid rgba(239,68,68,0.15)", padding: "28px 28px 24px", textAlign: "center" }}>
+              <div style={{ width: 60, height: 60, borderRadius: 18, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 26 }}>💀</div>
+              <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: 6 }}>
+                Bouton <span style={{ color: "#ef4444" }}>-100 pts</span> — accès à vie
+              </h2>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                Signalez les entreprises toxiques et impactez leur classement sur Workie.
+              </p>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: "22px 28px 28px" }}>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 22px", display: "flex", flexDirection: "column", gap: 10 }}>
+                {[
+                  "Accès permanent à toutes les entreprises",
+                  "Impact direct sur leur score de réputation",
+                  "Paiement unique — aucun abonnement",
+                  "Paiement sécurisé via Stripe",
+                ].map(item => (
+                  <li key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--text)" }}>
+                    <span style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(16,185,129,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 11, color: "#10b981", fontWeight: 900 }}>✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
               {penaltyCheckoutError && (
-                <p style={{ fontSize: 12, color: "#ef4444", textAlign: "center", marginBottom: 4 }}>{penaltyCheckoutError}</p>
+                <p style={{ fontSize: 12, color: "#ef4444", textAlign: "center", marginBottom: 12, background: "rgba(239,68,68,0.06)", padding: "8px 12px", borderRadius: 8 }}>{penaltyCheckoutError}</p>
               )}
+
               <button
                 disabled={penaltyCheckoutLoading}
                 onClick={async () => {
@@ -516,11 +537,11 @@ export function SwipeView({
                     setPenaltyCheckoutLoading(false);
                   }
                 }}
-                style={{ width: "100%", padding: "14px 0", borderRadius: 12, background: penaltyCheckoutLoading ? "var(--surface2)" : "linear-gradient(135deg, #ef4444, #f97316)", color: penaltyCheckoutLoading ? "var(--text-muted)" : "#fff", border: "none", fontWeight: 700, fontSize: 15, cursor: penaltyCheckoutLoading ? "not-allowed" : "pointer" }}>
-                {penaltyCheckoutLoading ? "Chargement…" : "Débloquer pour 5 CHF"}
+                style={{ width: "100%", padding: "15px 0", borderRadius: 12, background: penaltyCheckoutLoading ? "var(--surface2)" : "linear-gradient(135deg, #ef4444, #f97316)", color: penaltyCheckoutLoading ? "var(--text-muted)" : "#fff", border: "none", fontWeight: 800, fontSize: 15, cursor: penaltyCheckoutLoading ? "not-allowed" : "pointer", letterSpacing: "-0.01em" }}>
+                {penaltyCheckoutLoading ? "Redirection vers Stripe…" : "Débloquer · 5 CHF"}
               </button>
-              <button onClick={() => setShowPenaltyUpgrade(false)} style={{ background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "8px 0" }}>
-                Plus tard
+              <button onClick={() => setShowPenaltyUpgrade(false)} style={{ display: "block", width: "100%", background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "10px 0 0", textAlign: "center" }}>
+                Pas maintenant
               </button>
             </div>
           </div>

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard } from "lucide-react";
+import { Lock } from "lucide-react";
 
-export function PayCampaignButton({ campaignId }: { campaignId: string }) {
+export function PayCampaignButton({ campaignId, totalBudget }: { campaignId: string; totalBudget: number }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <button
         onClick={async () => {
           setLoading(true);
@@ -21,21 +21,32 @@ export function PayCampaignButton({ campaignId }: { campaignId: string }) {
             });
             const data = await res.json();
             if (data.url) { window.location.href = data.url; }
-            else { setError(data.error ?? "Erreur"); setLoading(false); }
-          } catch { setError("Erreur réseau"); setLoading(false); }
+            else { setError(data.error ?? "Erreur inattendue. Réessaie."); setLoading(false); }
+          } catch { setError("Erreur réseau. Réessaie."); setLoading(false); }
         }}
         disabled={loading}
         style={{
-          display: "inline-flex", alignItems: "center", gap: 6,
-          fontSize: 12, fontWeight: 700, color: "#fff", textDecoration: "none",
-          padding: "5px 14px", borderRadius: 8,
-          background: loading ? "rgba(239,68,68,0.5)" : "#ef4444",
+          display: "inline-flex", alignItems: "center", gap: 7,
+          fontSize: 13, fontWeight: 700, color: "#fff",
+          padding: "8px 18px", borderRadius: 10,
+          background: loading
+            ? "rgba(139,92,246,0.4)"
+            : "linear-gradient(135deg, #8b5cf6, #f97316)",
           border: "none", cursor: loading ? "not-allowed" : "pointer",
+          boxShadow: loading ? "none" : "0 2px 12px rgba(139,92,246,0.3)",
+          whiteSpace: "nowrap",
         }}
       >
-        <CreditCard size={12} /> {loading ? "Redirection…" : "Payer maintenant"}
+        <Lock size={13} />
+        {loading
+          ? "Redirection vers Stripe…"
+          : `Payer CHF ${totalBudget.toFixed(2)} · Lancer`}
       </button>
-      {error && <span style={{ fontSize: 11, color: "#ef4444" }}>{error}</span>}
+      {error && (
+        <span style={{ fontSize: 11, color: "#ef4444", background: "rgba(239,68,68,0.07)", padding: "4px 8px", borderRadius: 6 }}>
+          {error}
+        </span>
+      )}
     </div>
   );
 }

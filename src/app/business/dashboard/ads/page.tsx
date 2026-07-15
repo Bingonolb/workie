@@ -247,7 +247,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                     {/* Action bar */}
                     <div style={{ borderTop: "1px solid var(--border)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.01)", position: "relative", zIndex: 1 }}>
                       {c.status === "payment_pending" ? (
-                        <PayCampaignButton campaignId={c.id} />
+                        <PayCampaignButton campaignId={c.id} totalBudget={Number(c.total_budget_chf)} />
                       ) : (
                         <Link href={`/business/dashboard/ads/${c.id}`} style={{
                           fontSize: 12, fontWeight: 700, color: "#8b5cf6", textDecoration: "none",
