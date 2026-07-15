@@ -80,7 +80,6 @@ export async function POST(request: Request) {
     return NextResponse.redirect(session.url, 303);
   } catch (e) {
     console.error("[business/checkout]", e);
-    const msg = e instanceof Error ? encodeURIComponent(e.message.slice(0, 200)) : "unknown";
-    return NextResponse.redirect(`${baseUrl}/business/checkout?error=stripe&msg=${msg}`, 303);
+    return NextResponse.redirect(`${baseUrl}/business/checkout?error=stripe`, 303);
   }
 }
