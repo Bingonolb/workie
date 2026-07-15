@@ -74,6 +74,8 @@ export function SwipeView({
   const [penaltyIds, setPenaltyIds] = useState<Set<string>>(new Set());
   const [boostIds, setBoostIds] = useState<Set<string>>(new Set());
   const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
+  // true if user started the session with credits > 0 (i.e. has previously purchased)
+  const hadCreditsOnMount = useRef(initialPenaltyCredits > 0);
   const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
@@ -539,13 +541,13 @@ export function SwipeView({
             <div style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(249,115,22,0.08))", borderBottom: "1px solid rgba(239,68,68,0.15)", padding: "28px 28px 24px", textAlign: "center" }}>
               <div style={{ width: 60, height: 60, borderRadius: 18, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 26 }}>💀</div>
               <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: 6 }}>
-                {penaltyCredits === 0 && !isAdmin
-                  ? <>Plus de crédits <span style={{ color: "#ef4444" }}>-100 pts</span></>
+                {penaltyCredits === 0 && hadCreditsOnMount.current && !isAdmin
+                  ? <>Crédits épuisés <span style={{ color: "#ef4444" }}>-100 pts</span></>
                   : <>Bouton <span style={{ color: "#ef4444" }}>-100 pts</span> — pack 10 utilisations</>}
               </h2>
               <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                {penaltyCredits === 0 && !isAdmin
-                  ? "Vous avez utilisé toutes vos pénalités. Rechargez pour continuer à signaler les entreprises toxiques."
+                {penaltyCredits === 0 && hadCreditsOnMount.current && !isAdmin
+                  ? "Vous avez utilisé tous vos crédits. Rechargez pour continuer à signaler les entreprises toxiques."
                   : "Signalez les entreprises toxiques et impactez leur classement sur Workie."}
               </p>
             </div>
