@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 // In-memory rate limiter (Edge runtime — warm within a Vercel region)
@@ -70,15 +70,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Inject pathname on the REQUEST so server components can read it via headers()
-  // (headers() reads incoming request headers, NOT outgoing response headers)
-  const modifiedHeaders = new Headers(request.headers);
-  modifiedHeaders.set("x-pathname", pathname);
-  const pathedRequest = new NextRequest(request.url, {
-    method: request.method,
-    headers: modifiedHeaders,
-  });
-  return updateSession(pathedRequest);
+  return updateSession(request);
 }
 
 export const config = {
