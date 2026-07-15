@@ -64,16 +64,11 @@ export default function ClaimsPage() {
           load();
         }
       } else {
-        const force = action === "force-approve";
-        const res = await approveClaim(id, force);
-        if (res.alreadyOwned) {
-          setMsg({ id, text: res.error ?? "", ok: false, alreadyOwned: res.alreadyOwned });
-          // Don't auto-clear — user must confirm or cancel the transfer
-          return;
-        } else if (res.error) {
+        const res = await approveClaim(id);
+        if (res.error) {
           setMsg({ id, text: res.error, ok: false });
         } else {
-          setMsg({ id, text: "Approuvée — email envoyé", ok: true });
+          setMsg({ id, text: "Badge vérifié ✓", ok: true });
           load();
         }
       }

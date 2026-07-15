@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useActionState, useEffect, useRef } from "react";
+import { useState, useActionState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, BadgeCheck, Building2, CheckCircle, Search, Mail, User, Briefcase, Link2, ExternalLink, MessageSquare } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -140,8 +141,13 @@ function CompanySearch({ onSelect }: { onSelect: (c: CompanyResult) => void }) {
 }
 
 export default function ClaimPage() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [state, action, pending] = useActionState(submitClaim, undefined);
+
+  useEffect(() => {
+    if (state?.success) router.push("/business/checkout");
+  }, [state?.success]);
 
   // Step 0 — company
   const [selectedCompany, setSelectedCompany] = useState<CompanyResult | null>(null);
@@ -184,21 +190,11 @@ export default function ClaimPage() {
 
   if (state?.success) {
     return (
-      <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px", textAlign: "center" }}>
-        <div style={{ maxWidth: 480 }}>
-          <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(16,185,129,0.12)", border: "2px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}>
-            <CheckCircle size={36} color="#10b981" />
-          </div>
-          <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 16 }}>Demande envoyée !</h1>
-          <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 12 }}>
-            Nous avons bien reçu votre demande pour <strong style={{ color: "var(--text)" }}>{selectedCompany?.name}</strong>.
-          </p>
-          <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 40 }}>
-            Notre équipe vérifie chaque demande manuellement. Vous recevrez un accès à <strong style={{ color: "var(--text)" }}>{workEmail}</strong> sous <strong style={{ color: "var(--text)" }}>48h ouvrées</strong>.
-          </p>
-          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 28px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-            Retour à l'accueil <ArrowRight size={16} />
-          </Link>
+      <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <CheckCircle size={48} color="#10b981" style={{ margin: "0 auto 16px" }} />
+          <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)" }}>Compte créé !</p>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 6 }}>Redirection vers le paiement…</p>
         </div>
       </main>
     );

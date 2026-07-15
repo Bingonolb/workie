@@ -158,8 +158,7 @@ export async function getClaims() {
 
 export async function approveClaim(
   claimId: string,
-  force = false,
-): Promise<{ error?: string; success?: boolean; alreadyOwned?: string }> {
+): Promise<{ error?: string; success?: boolean }> {
   try {
     const { user: adminUser, supabase } = await requireAdmin();
     const adminClient = createAdminClient();
@@ -173,101 +172,12 @@ export async function approveClaim(
     if (claimErr || !claim) return { error: "Demande introuvable." };
     if (claim.status === "approved") return { error: "Déjà approuvée." };
 
-    // Find matching company — by company_id if set, otherwise by name
-    let companyId: string | null = claim.company_id ?? null;
-    if (!companyId) {
-      const { data: co } = await supabase
-        .from("companies")
-        .select("id")
-        .ilike("name", claim.company_name)
-        .maybeSingle();
-      companyId = co?.id ?? null;
-    }
-    if (!companyId) {
-      // Auto-create the company from claim data (new company claim)
-      const rawMsg = claim.message ?? "";
-      const sectorMatch = rawMsg.match(/Secteur:\s*([^·\n]+)/);
-      const cantonMatch = rawMsg.match(/Canton:\s*([^·\n]+)/);
-      const cityMatch   = rawMsg.match(/Ville:\s*([^·\n]+)/);
+    // Company is already created and linked at claim submit time.
+    // Admin approval = grant the verified badge only.
+    const companyId: string | null = claim.company_id ?? null;
+    if (!companyId) return { error: "Aucune entreprise associée à cette demande." };
 
-      const website = claim.company_website
-        ? (/^https?:\/\//i.test(claim.company_website) ? claim.company_website : `https://${claim.company_website}`)
-        : null;
-
-      const { data: newCo, error: createErr } = await adminClient
-        .from("companies")
-        .insert({
-          name: claim.company_name,
-          sector: sectorMatch?.[1]?.trim() || "Conseil",
-          city:   cityMatch?.[1]?.trim()   || "Suisse",
-          canton: cantonMatch?.[1]?.trim() || null,
-          website_url:    website,
-          employee_range: claim.employee_range || "11-50",
-          avg_rating: 0, review_count: 0, score: 0,
-          is_verified: false,
-        })
-        .select("id")
-        .maybeSingle();
-
-      if (createErr || !newCo) {
-        return { error: `Impossible de créer l'entreprise automatiquement : ${createErr?.message ?? "Erreur inconnue"}` };
-      }
-      companyId = newCo.id;
-    }
-
-    // Check for existing owner
-    const { data: existingOwnerProfile } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("claimed_company_id", companyId)
-      .maybeSingle();
-
-    if (existingOwnerProfile && !force) {
-      // Identify existing owner's email — getUserById is O(1), no pagination needed
-      const { data: ownerUser } = await adminClient.auth.admin.getUserById(existingOwnerProfile.id);
-      const ownerEmail = ownerUser?.user?.email ?? existingOwnerProfile.id;
-      return {
-        alreadyOwned: ownerEmail,
-        error: `Cette entreprise est déjà revendiquée par ${ownerEmail}. Confirmez le transfert si vous souhaitez remplacer l'accès.`,
-      };
-    }
-
-    // If forcing a transfer, revoke previous owner's access first
-    if (existingOwnerProfile && force) {
-      const { error: revokeErr } = await adminClient.from("profiles").update({ claimed_company_id: null }).eq("id", existingOwnerProfile.id);
-      if (revokeErr) return { error: `Impossible de révoquer l'accès précédent : ${revokeErr.message}` };
-    }
-
-    // Check if the work_email already has an account — paginate to handle >1000 users
-    let existing: { id: string; email?: string } | undefined;
-    for (let page = 1; ; page++) {
-      const { data: pageData } = await adminClient.auth.admin.listUsers({ page, perPage: 1000 });
-      const users = pageData?.users ?? [];
-      existing = users.find((u: { id: string; email?: string }) => u.email?.toLowerCase() === claim.work_email.toLowerCase());
-      if (existing || users.length < 1000) break;
-    }
-
-    if (existing) {
-      // Update only — profile already exists, don't touch username
-      await adminClient.from("profiles").update({
-        claimed_company_id: companyId,
-      }).eq("id", existing.id);
-    } else {
-      const { data: invited, error: inviteErr } = await adminClient.auth.admin.inviteUserByEmail(
-        claim.work_email,
-        {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/business/dashboard`,
-          data: { company_id: companyId, first_name: claim.first_name, last_name: claim.last_name },
-        }
-      );
-      if (inviteErr) return { error: `Erreur d'invitation : ${inviteErr.message}` };
-      if (invited?.user) {
-        // New user — the auth callback will create the profile via upsert.
-        // We store company_id in user_metadata so the callback picks it up.
-        // No manual upsert needed here to avoid missing username constraint.
-      }
-    }
-
+    // Mark company as verified (blue badge) — profile/account already created at claim submit
     await adminClient.from("companies").update({ is_verified: true }).eq("id", companyId);
     await adminClient.from("company_claims").update({
       status: "approved",
@@ -289,11 +199,21 @@ export async function rejectClaim(claimId: string): Promise<{ error?: string; su
   try {
     const { user: adminUser } = await requireAdmin();
     const adminClient = createAdminClient();
+
+    // Fetch claim to revoke profile access if fraudulent
+    const { data: claim } = await adminClient.from("company_claims").select("company_id, user_id").eq("id", claimId).maybeSingle();
+
     await adminClient.from("company_claims").update({
       status: "rejected",
       reviewed_at: new Date().toISOString(),
       reviewed_by: adminUser.id,
     }).eq("id", claimId);
+
+    // Revoke profile link so user loses access
+    if (claim?.user_id) {
+      await adminClient.from("profiles").update({ claimed_company_id: null }).eq("id", claim.user_id);
+    }
+
     revalidatePath("/admin/claims");
     return { success: true };
   } catch (e) {

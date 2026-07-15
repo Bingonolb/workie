@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useState, useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Building2, CheckCircle, Plus, Shield, Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -43,8 +44,13 @@ const lbl: React.CSSProperties = {
 };
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [state, action, pending] = useActionState(submitClaim, undefined);
+
+  useEffect(() => {
+    if (state?.success) router.push("/business/checkout");
+  }, [state?.success]);
 
   // Step 0 — Entreprise
   const [companyName, setCompanyName] = useState("");
@@ -87,62 +93,14 @@ export default function RegisterPage() {
     setStep(s => s + 1);
   };
 
-  // Success = form submitted, now on step 3 (checkout)
-  // We go to step 3 (pricing) first, submission happens at step 2
-  const hasStripe = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-
   if (state?.success) {
-    // After submission, show the checkout step
+    // useEffect above handles the redirect — show a brief loading screen
     return (
-      <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
-        <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px", borderBottom: "1px solid var(--border)" }}>
-          <Link href="/" style={{ textDecoration: "none" }}>
-            <span style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
-            <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 6, textTransform: "uppercase" as const, opacity: 0.9 }}>Business</span>
-          </Link>
-          <ThemeToggle />
-        </nav>
-
-        <div style={{ flex: 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "48px 24px 80px" }}>
-          <div style={{ width: "100%", maxWidth: 540 }}>
-
-            {/* Success banner */}
-            <div style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 16, padding: "18px 20px", display: "flex", alignItems: "center", gap: 14, marginBottom: 36 }}>
-              <CheckCircle size={28} color="#10b981" style={{ flexShrink: 0 }} />
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", marginBottom: 3 }}>Demande enregistrée !</p>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                  Fiche <strong style={{ color: "var(--text)" }}>{companyName}</strong> · Vérification sous 48h ouvrées à <strong style={{ color: "var(--text)" }}>{workEmail}</strong>
-                </p>
-              </div>
-            </div>
-
-            <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 8 }}>Et maintenant ?</h1>
-            <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 32 }}>
-              Notre équipe valide votre fiche sous 48h ouvrées et vous envoie un lien pour activer votre abonnement.
-            </p>
-
-            <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 20, padding: "28px 24px", marginBottom: 16 }}>
-              {[
-                { icon: "1", text: "Votre demande est en cours de vérification par notre équipe." },
-                { icon: "2", text: `Un email sera envoyé à ${workEmail} dès validation.` },
-                { icon: "3", text: "Vous activerez votre abonnement (99 CHF/mois ou 890 CHF/an) via le lien reçu." },
-              ].map(({ icon, text }) => (
-                <div key={icon} style={{ display: "flex", gap: 14, marginBottom: 18, alignItems: "flex-start" }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 800, fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
-                  <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginTop: 4 }}>{text}</p>
-                </div>
-              ))}
-              <a href={`mailto:hello@workie.ch?subject=Demande entreprise — ${encodeURIComponent(companyName)}&body=Bonjour,%0A%0AJe viens de soumettre la demande pour ${encodeURIComponent(companyName)}.%0AEmail professionnel : ${encodeURIComponent(workEmail)}%0A%0AMerci.`}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px 0", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, textDecoration: "none", marginTop: 8 }}>
-                Une question ? Contactez-nous
-              </a>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "var(--text-muted)", marginTop: 16 }}>
-              <Shield size={13} /> Sans engagement · Annulation à tout moment · Données sécurisées
-            </div>
-          </div>
+      <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <CheckCircle size={48} color="#10b981" style={{ margin: "0 auto 16px" }} />
+          <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)" }}>Compte créé !</p>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 6 }}>Redirection vers le paiement…</p>
         </div>
       </main>
     );
@@ -197,6 +155,9 @@ export default function RegisterPage() {
             <input name="job_level" value={jobLevel} readOnly />
             <input name="work_email" value={workEmail} readOnly />
             <input name="password" type="password" value={password} readOnly />
+            <input name="sector" value={sector} readOnly />
+            <input name="city" value={city} readOnly />
+            <input name="canton" value={canton} readOnly />
             <input name="message" value={`[NOUVELLE ENTREPRISE] Secteur: ${sector} · Canton: ${canton} · Ville: ${city}${message ? " · " + message : ""}`} readOnly />
           </form>
 

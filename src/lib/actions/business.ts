@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyFavoriteUsers } from "@/lib/actions/notifications";
 import { headers } from "next/headers";
 
@@ -436,56 +437,119 @@ export async function deleteJobOffer(id: string): Promise<{ error?: string }> {
 export async function submitClaim(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
   try {
     const supabase = await createClient();
-    const user = await getUser();
+    const adminClient = createAdminClient();
+    const existingUser = await getUser();
 
     const work_email = String(formData.get("work_email") || "").trim().toLowerCase();
+    const password   = String(formData.get("password") || "").trim();
     const rawZefixUrl = String(formData.get("zefix_url") || "").trim();
     const zefix_url = rawZefixUrl
       ? /^https?:\/\//i.test(rawZefixUrl) ? rawZefixUrl : `https://${rawZefixUrl}`
       : null;
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(work_email)) return { error: "Adresse email invalide." };
     const banned = ["@gmail.com", "@hotmail.com", "@yahoo.com", "@outlook.com", "@icloud.com"];
     if (banned.some(d => work_email.endsWith(d))) {
       return { error: "Utilise ton email professionnel (domaine de l'entreprise)." };
     }
+    if (!existingUser && password.length < 8) {
+      return { error: "Le mot de passe doit contenir au moins 8 caractères." };
+    }
 
     const rawCompanyId = String(formData.get("company_id") || "").trim();
     const companyName  = String(formData.get("company_name") || "").trim();
 
-    // Prevent duplicate claims: match by email+company_id when known, else email+company_name
-    const dupBase = supabase.from("company_claims").select("id").eq("work_email", work_email);
-    const dupQuery = rawCompanyId
-      ? dupBase.eq("company_id", rawCompanyId)
-      : dupBase.ilike("company_name", companyName);
-    const { data: existing } = await dupQuery.maybeSingle();
-    if (existing) return { error: "Une demande a déjà été soumise pour cet email et cette entreprise. Notre équipe reviendra vers vous sous 48h ouvrées." };
+    // ── 1. Find or create the company ──────────────────────────────────────────
+    let companyId: string | null = rawCompanyId || null;
 
-    const { error } = await supabase.from("company_claims").insert({
+    if (!companyId) {
+      // Register flow — create a new company
+      const rawWebsite = String(formData.get("company_website") || "").trim();
+      const website = rawWebsite
+        ? /^https?:\/\//i.test(rawWebsite) ? rawWebsite : `https://${rawWebsite}`
+        : null;
+      const { data: newCo, error: coErr } = await adminClient
+        .from("companies")
+        .insert({
+          name: companyName,
+          sector: String(formData.get("sector") || "Conseil"),
+          city:   String(formData.get("city") || "Suisse"),
+          canton: String(formData.get("canton") || "") || null,
+          website_url: website,
+          employee_range: String(formData.get("employee_range") || "11-50"),
+          avg_rating: 0, review_count: 0, score: 0,
+          is_verified: false,
+        })
+        .select("id")
+        .maybeSingle();
+      if (coErr || !newCo) return { error: `Erreur lors de la création de la fiche : ${coErr?.message ?? "inconnue"}` };
+      companyId = newCo.id;
+    } else {
+      // Claim flow — check company isn't already owned
+      const { data: owner } = await adminClient
+        .from("profiles")
+        .select("id")
+        .eq("claimed_company_id", companyId)
+        .maybeSingle();
+      if (owner) return { error: "Cette entreprise est déjà gérée par un autre utilisateur sur Workie. Contactez-nous si vous pensez qu'il y a une erreur." };
+    }
+
+    // ── 2. Create / retrieve the Supabase user ─────────────────────────────────
+    let userId: string;
+
+    if (existingUser) {
+      userId = existingUser.id;
+    } else {
+      // Check if email already has an account
+      const { data: listData } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+      const found = listData?.users.find(u => u.email?.toLowerCase() === work_email);
+
+      if (found) {
+        return { error: "Un compte Workie existe déjà avec cet email. Connectez-vous d'abord via « Déjà un compte »." };
+      }
+
+      const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
+        email: work_email,
+        password,
+        email_confirm: true,
+      });
+      if (createErr || !created.user) return { error: `Impossible de créer votre compte : ${createErr?.message ?? "erreur inconnue"}` };
+      userId = created.user.id;
+
+      // Sign in so the session cookie is set for this browser
+      await supabase.auth.signInWithPassword({ email: work_email, password });
+    }
+
+    // ── 3. Link profile to company ─────────────────────────────────────────────
+    const emailBase = work_email.split("@")[0].replace(/[^a-z0-9_]/gi, "_").toLowerCase();
+    const username  = `${emailBase}_${userId.slice(0, 6)}`;
+    await adminClient.from("profiles").upsert(
+      {
+        id: userId,
+        username,
+        claimed_company_id: companyId,
+        full_name: `${String(formData.get("first_name") || "")} ${String(formData.get("last_name") || "")}`.trim() || null,
+      },
+      { onConflict: "id", ignoreDuplicates: false }
+    );
+
+    // ── 4. Insert claim record for admin audit ─────────────────────────────────
+    await adminClient.from("company_claims").insert({
       company_name: companyName,
-      company_id: rawCompanyId || null,
+      company_id:   companyId,
       company_website: String(formData.get("company_website") || "") || null,
-      employee_range: String(formData.get("employee_range") || "") || null,
+      employee_range:  String(formData.get("employee_range") || "") || null,
       first_name: String(formData.get("first_name") || ""),
-      last_name: String(formData.get("last_name") || ""),
-      job_title: String(formData.get("job_title") || ""),
-      job_level: String(formData.get("job_level") || ""),
+      last_name:  String(formData.get("last_name") || ""),
+      job_title:  String(formData.get("job_title") || ""),
+      job_level:  String(formData.get("job_level") || ""),
       work_email,
       zefix_url,
       message: String(formData.get("message") || "") || null,
-      user_id: user?.id ?? null,
+      user_id: userId,
+      status: "pending",
     });
-
-    if (error) return { error: error.message };
-
-    // Create Supabase account for the RH if not already logged in
-    if (!user) {
-      const password = String(formData.get("password") || "").trim();
-      if (password.length >= 8) {
-        await supabase.auth.signUp({ email: work_email, password });
-        // Ignore signUp errors — claim is recorded, admin will send invite anyway
-      }
-    }
 
     return { success: true };
   } catch (e) {
