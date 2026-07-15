@@ -126,7 +126,8 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
   const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
   if (rpcErr) {
     // Rollback the vote insert to keep counts consistent
-    await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
+    const { error: rollbackErr } = await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
+    if (rollbackErr) console.error("[voteHelpful] rollback failed — vote row stuck without count increment:", rollbackErr.message);
     return { error: rpcErr.message };
   }
 

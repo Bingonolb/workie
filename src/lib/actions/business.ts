@@ -389,8 +389,10 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
     }).select("id").single();
     if (error) return { error: error.message };
 
-    // Fan-out: notify users who favorited this company
-    notifyFavoriteUsers(company.id, company.name, title, inserted.id);
+    // Fan-out: notify users who favorited this company (fire-and-forget with error logging)
+    notifyFavoriteUsers(company.id, company.name, title, inserted.id).catch((e: unknown) =>
+      console.error("[createJobOffer] notifyFavoriteUsers failed:", e)
+    );
 
     revalidatePath("/business/dashboard/jobs");
     revalidatePath("/jobs");

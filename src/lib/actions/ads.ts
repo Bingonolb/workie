@@ -131,7 +131,7 @@ export async function getActiveAds(opts?: {
     }
 
     return pool.slice(0, opts?.limit ?? 10);
-  } catch { return []; }
+  } catch (e) { console.error("[getActiveAds] error:", e); return []; }
 }
 
 export async function getCampaignDailyStats(campaignId: string): Promise<{ day: string; impressions: number; clicks: number }[]> {
@@ -168,7 +168,7 @@ export async function getCampaignDailyStats(campaignId: string): Promise<{ day: 
       days.push({ day: d, impressions: impByDay[d] ?? 0, clicks: clkByDay[d] ?? 0 });
     }
     return days;
-  } catch { return []; }
+  } catch (e) { console.error("[getCampaignDailyStats] error:", e); return []; }
 }
 
 // ── Mutations ──────────────────────────────────────────────────────────────────
@@ -300,7 +300,7 @@ export async function trackAdImpression(campaignId: string): Promise<void> {
       }),
       supabase.rpc("increment_ad_impression", { p_campaign_id: campaignId }),
     ]);
-  } catch { /* silent */ }
+  } catch (e) { console.error("[trackAdImpression] error:", e); }
 }
 
 export async function trackAdClick(campaignId: string): Promise<void> {
@@ -319,7 +319,7 @@ export async function trackAdClick(campaignId: string): Promise<void> {
       }),
       supabase.rpc("increment_ad_click", { p_campaign_id: campaignId }),
     ]);
-  } catch { /* silent */ }
+  } catch (e) { console.error("[trackAdClick] error:", e); }
 }
 
 export async function getCampaignCantonStats(campaignId: string): Promise<{ canton: string; impressions: number; clicks: number }[]> {

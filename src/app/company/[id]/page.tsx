@@ -93,20 +93,23 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const [company, reviews, user, favIds, repliesResult, jobsResult, bizCompanyId] = await Promise.all([
+  // createClient runs in parallel with the other fetches — not sequential
+  const [company, reviews, user, favIds, supabase, bizCompanyId] = await Promise.all([
     getCompany(id).catch(() => null),
     getReviews(id).catch(() => [] as Review[]),
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
-    Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
-    Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
+    createClient(),
     getBusinessCompanyId().catch(() => null),
   ]);
+  const [repliesResult, jobsResult] = await Promise.all([
+    Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
+    Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
+  ]);
   const repliesMap = Object.fromEntries(
-    (repliesResult.data ?? []).map(r => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
+    (repliesResult.data ?? []).map((r: { review_id: string; content: string; created_at: string | null }) => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
   );
-  const jobs = jobsResult.data ?? [];
+  const jobs: { id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null; experience_level: string | null; salary_range: string | null; apply_url: string | null; description: string | null; created_at: string | null }[] = jobsResult.data ?? [];
 
   if (!company) notFound();
 

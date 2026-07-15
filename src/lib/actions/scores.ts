@@ -25,9 +25,11 @@ export async function addFlame(companyId: string): Promise<void> {
     .maybeSingle();
 
   if (existing) {
-    await supabase.from("score_events").delete().eq("id", existing.id);
+    const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
+    if (error) { console.error("[addFlame] delete error:", error.message); return; }
   } else {
-    await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "flame", points: 1 });
+    const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "flame", points: 1 });
+    if (error) { console.error("[addFlame] insert error:", error.message); return; }
   }
   revalidatePath("/explore");
   revalidatePath(`/company/${companyId}`);
@@ -48,13 +50,15 @@ export async function addBoost(companyId: string): Promise<void> {
     .maybeSingle();
 
   if (existing) {
-    await supabase.from("score_events").delete().eq("id", existing.id);
+    const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
+    if (error) { console.error("[addBoost] delete error:", error.message); return; }
     revalidatePath("/explore");
     revalidatePath(`/company/${companyId}`);
     return;
   }
 
-  await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
+  const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
+  if (error) { console.error("[addBoost] insert error:", error.message); return; }
   revalidatePath("/explore");
   revalidatePath(`/company/${companyId}`);
 }
