@@ -26,40 +26,9 @@ export default async function BusinessDashboardLayout({ children }: { children: 
 
   if (!company) redirect("/business");
 
-  // Admins always bypass the subscription check.
-  // Non-subscribed businesses can still access ads (ads have their own payment flow).
-  // All other dashboard sections require an active subscription.
-  const isAdmin = profile.role === "admin";
-  const canAccessDashboard = company.is_subscribed || isAdmin;
-
-  return (
-    <_Layout
-      user={user}
-      company={company}
-      isAdmin={isAdmin}
-      canAccessDashboard={canAccessDashboard}
-    >
-      {children}
-    </_Layout>
-  );
-}
-
-// Layout shell — exported so ads layout can reuse it without re-fetching
-export function _Layout({
-  user,
-  company,
-  isAdmin,
-  canAccessDashboard,
-  children,
-}: {
-  user: { email?: string | null };
-  company: { id: string; name: string; is_verified: boolean | null; is_subscribed: boolean | null; logo_url: string | null };
-  isAdmin: boolean;
-  canAccessDashboard: boolean;
-  children: React.ReactNode;
-}) {
-  void canAccessDashboard; // used by individual pages if needed
-  void isAdmin;
+  // Subscription check is done per-page, not here.
+  // Ads have their own payment flow and must be accessible to all business accounts.
+  // Only authentication + claimed_company_id are required at layout level.
 
   return (
     <>
@@ -67,7 +36,6 @@ export function _Layout({
 
       {/* Sidebar */}
       <aside className="biz-sidebar">
-        {/* Logo */}
         <div className="biz-sidebar-header" style={{ padding: "20px 20px 16px", borderBottom: "1px solid var(--border)" }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
             <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
@@ -75,7 +43,6 @@ export function _Layout({
           </Link>
         </div>
 
-        {/* Company card */}
         <div className="biz-sidebar-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {company.logo_url
@@ -97,10 +64,8 @@ export function _Layout({
           </div>
         </div>
 
-        {/* Nav */}
         <DashboardNav companyId={company.id} />
 
-        {/* Bottom — hidden on mobile */}
         <div className="biz-sidebar-header" style={{ padding: "16px 20px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{user.email?.split("@")[0]}</p>
           <ThemeToggle />
@@ -109,7 +74,6 @@ export function _Layout({
 
       {/* Main */}
       <main style={{ flex: 1, overflowX: "clip", minWidth: 0 }}>
-        {/* Mobile-only header */}
         <div className="biz-mobile-header">
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
             <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
@@ -127,7 +91,6 @@ export function _Layout({
       </main>
 
     </div>
-    {/* Bottom tab bar — mobile only */}
     <BottomNav isBusiness={true} />
     </>
   );
