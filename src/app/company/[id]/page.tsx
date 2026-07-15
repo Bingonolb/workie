@@ -7,7 +7,7 @@ import { getCompany } from "@/lib/actions/companies";
 import { getReviews } from "@/lib/actions/reviews";
 import { createClient } from "@/lib/supabase/server";
 import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
-import { getUser } from "@/lib/supabase/server";
+import { getUser, getBusinessCompanyId } from "@/lib/supabase/server";
 import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle } from "lucide-react";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { ParallaxCover } from "@/components/ParallaxCover";
@@ -94,13 +94,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const [company, reviews, user, favIds, repliesResult, jobsResult] = await Promise.all([
+  const [company, reviews, user, favIds, repliesResult, jobsResult, bizCompanyId] = await Promise.all([
     getCompany(id).catch(() => null),
     getReviews(id).catch(() => [] as Review[]),
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
     Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
     Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
+    getBusinessCompanyId().catch(() => null),
   ]);
   const repliesMap = Object.fromEntries(
     (repliesResult.data ?? []).map(r => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
@@ -109,12 +110,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
   if (!company) notFound();
 
-  // Business users can browse but not fav/review
-  let isBusiness = false;
-  if (user) {
-    const { data: profile } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
-    isBusiness = !!profile?.claimed_company_id;
-  }
+  const isBusiness = !!bizCompanyId;
 
   const isFav = favIds.includes(company.id);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";

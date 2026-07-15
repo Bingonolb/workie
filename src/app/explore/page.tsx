@@ -96,14 +96,14 @@ export default async function ExplorePage({
   ]);
   const isBusiness = !!bizCompanyId;
 
-  // Fetch penalty credits for logged-in non-business users
-  let penaltyCredits = 0;
-  if (user && !isBusiness && !isAdmin) {
+  // Guests are locked to page 1 — enforced server-side, not just in UI
+  const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
+
+  // Helper: resolve penalty credits (with optional Stripe verification on redirect)
+  const resolvePenaltyCredits = async (): Promise<number> => {
+    if (!user || isBusiness || isAdmin) return 0;
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
-
-    // If returning from Stripe payment, verify directly and add credits immediately
-    // (webhook may arrive seconds after redirect — don't make the user wait)
     if (penaltySuccess && process.env.STRIPE_SECRET_KEY) {
       try {
         const Stripe = (await import("stripe")).default;
@@ -117,27 +117,23 @@ export default async function ExplorePage({
         );
         if (paid) {
           await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 10 });
-          penaltyCredits = 10;
+          return 10;
         }
       } catch { /* fall through to DB check */ }
     }
-
-    if (penaltyCredits === 0) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("penalty_credits")
-        .eq("id", user.id)
-        .maybeSingle();
-      penaltyCredits = Number(profile?.penalty_credits ?? 0);
-    }
-  }
-
-  // Guests are locked to page 1 — enforced server-side, not just in UI
-  const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
-
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("penalty_credits")
+      .eq("id", user.id)
+      .maybeSingle();
+    return Number(profile?.penalty_credits ?? 0);
+  };
 
   if (isSwipe) {
-    const companies = await getAllCompaniesForSwipe(filters);
+    const [companies, penaltyCredits] = await Promise.all([
+      getAllCompaniesForSwipe(filters),
+      resolvePenaltyCredits(),
+    ]);
     return (
       <div className="page-root">
         <Navbar />

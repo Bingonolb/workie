@@ -112,6 +112,7 @@ export function SwipeView({
   const current = companies[index];
   useEffect(() => {
     if (isAd(current)) trackAdImpression(current.campaign.id);
+    else if (current) router.prefetch(`/company/${current.id}`);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
