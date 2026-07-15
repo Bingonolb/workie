@@ -390,7 +390,7 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {isLoggedIn && !isBusiness && !isAd(current) && (
+        {isLoggedIn && !isAd(current) && (
           <button onClick={handlePenalty} title={isAdmin || hasPenaltyPass ? "Pénaliser -100 pts" : "Débloquer le -100 pts"} style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
             width: 52, height: 52, borderRadius: "50%",
