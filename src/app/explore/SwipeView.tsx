@@ -241,6 +241,9 @@ export function SwipeView({
       dragStart.current = null;
       setIsDragging(false);
       if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
+        // If tap landed on a button, let the button handle it
+        const target = e.target as HTMLElement;
+        if (target.closest("button")) { setDrag(0); return; }
         const c = currentRef.current;
         if (c && isAd(c)) {
           trackAdClick(c.campaign.id);
@@ -258,8 +261,10 @@ export function SwipeView({
 
     // Android Chrome fires a synthetic click ~300ms after touchend.
     // We block it on the card to prevent double-navigation on tap.
+    // Exception: let button clicks through so skull/boost/info/flame work.
     const onClickCapture = (e: MouseEvent) => {
-      // Only block if the touch already handled navigation (dragStart is null = gesture completed)
+      const target = e.target as HTMLElement;
+      if (target.closest("button")) return;
       if (!dragStart.current) e.stopPropagation();
     };
 
