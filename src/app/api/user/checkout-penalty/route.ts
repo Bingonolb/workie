@@ -30,8 +30,8 @@ export async function POST() {
       }],
       client_reference_id: user.id,
       metadata: { type: "penalty_pass", user_id: user.id },
-      success_url: `${baseUrl}/explore?mode=swipe&penalty_success=1`,
-      cancel_url:  `${baseUrl}/explore?mode=swipe`,
+      success_url: `${baseUrl}/explore?view=swipe&penalty_success=1`,
+      cancel_url:  `${baseUrl}/explore?view=swipe`,
     });
 
     if (!session.url) return NextResponse.json({ error: "Stripe n'a pas retourné d'URL" }, { status: 500 });
