@@ -493,7 +493,7 @@ export function SwipeView({
           <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
         </button>
 
-        {!isBusiness && !isAd(current) && (() => {
+        {isLoggedIn && !isBusiness && !isAd(current) && (() => {
           const boosted = boostIds.has((current as Company).id);
           return (
             <button onClick={handleBoost} title={boosted ? "Retirer le boost" : "Booster +100 pts"} style={{
@@ -673,7 +673,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ display: "flex", gap: 2 }}>
               {[1,2,3,4,5].map(n => (
-                <Star key={n} size={16} fill={n <= Math.round(company.avg_rating) ? "#f59e0b" : "transparent"} color={n <= Math.round(company.avg_rating) ? "#f59e0b" : "var(--border2)"} strokeWidth={1.5} />
+                <Star key={n} size={16} fill={n <= Math.round(Number(company.avg_rating)) ? "#f59e0b" : "transparent"} color={n <= Math.round(Number(company.avg_rating)) ? "#f59e0b" : "var(--border2)"} strokeWidth={1.5} />
               ))}
             </span>
             <span style={{ fontSize: 14, fontWeight: 700, color: "#f59e0b" }}>{Number(company.avg_rating).toFixed(1)}</span>

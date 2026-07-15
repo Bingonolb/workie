@@ -4,6 +4,8 @@ import { Navbar } from "@/components/Navbar";
 import { TrendingUp, Users } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
 
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "Salaires en Suisse par secteur · Workie",
   description: "Salaires réels et anonymes des employés suisses par secteur, poste et type de contrat. Données issues d'avis vérifiés sur Workie.",

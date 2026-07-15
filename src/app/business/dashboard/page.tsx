@@ -8,7 +8,10 @@ import { ShareCopyButton } from "@/components/ShareCopyButton";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
 export default async function BusinessDashboardPage() {
-  const data = await getBusinessAnalytics();
+  const [data, supabase] = await Promise.all([
+    getBusinessAnalytics(),
+    createClient(),
+  ]);
 
   if ("error" in data && data.error) {
     return <div style={{ padding: 40, color: "var(--text-muted)" }}>{data.error}</div>;
@@ -17,7 +20,6 @@ export default async function BusinessDashboardPage() {
   const { count, avgOverall, avgManagement, avgWorklife, avgCulture, avgCareer, recommendRate, avgSalary, trend, dist, company } = data as Awaited<ReturnType<typeof getBusinessAnalytics>> & { company: Record<string, unknown> };
 
   // New reviews in last 7 days
-  const supabase = await createClient();
   const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
   const { count: newReviews } = await supabase
     .from("reviews")

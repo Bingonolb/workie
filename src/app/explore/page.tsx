@@ -106,9 +106,15 @@ export default async function ExplorePage({
     const supabase = await createClient();
     if (penaltySuccess && process.env.STRIPE_SECRET_KEY) {
       try {
+        // Read current credits first — if > 0, webhook already ran, don't double-add
+        const { data: cur } = await supabase.from("profiles").select("penalty_credits").eq("id", user.id).maybeSingle();
+        const curCredits = Number(cur?.penalty_credits ?? 0);
+        if (curCredits > 0) return curCredits;
+
         const Stripe = (await import("stripe")).default;
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-        const sessions = await stripe.checkout.sessions.list({ limit: 10 });
+        // Increased limit to 50 to reduce risk of missing the session on busy accounts
+        const sessions = await stripe.checkout.sessions.list({ limit: 50 });
         const paid = sessions.data.find(
           s => s.status === "complete" &&
                s.mode === "payment" &&
@@ -117,7 +123,9 @@ export default async function ExplorePage({
         );
         if (paid) {
           await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 10 });
-          return 10;
+          // Return actual DB balance after increment (not hardcoded 10)
+          const { data: updated } = await supabase.from("profiles").select("penalty_credits").eq("id", user.id).maybeSingle();
+          return Number(updated?.penalty_credits ?? 10);
         }
       } catch { /* fall through to DB check */ }
     }

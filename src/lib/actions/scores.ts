@@ -80,10 +80,10 @@ export async function addPenalty(companyId: string): Promise<void> {
     .maybeSingle();
 
   if (existing) {
-    // Toggle off — refund 1 credit atomically
+    // Toggle off — refund 1 credit atomically via RPC (avoids read+write race)
     await admin.from("score_events").delete().eq("id", existing.id);
     if (!isAdmin) {
-      await supabase.from("profiles").update({ penalty_credits: credits + 1 }).eq("id", user.id);
+      await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 1 });
     }
   } else {
     // Spend 1 credit atomically — returns false if credits were 0 (race condition guard)
