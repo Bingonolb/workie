@@ -101,12 +101,36 @@ export default async function ExplorePage({
   if (user && !isBusiness && !isAdmin) {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("has_penalty_pass")
-      .eq("id", user.id)
-      .maybeSingle();
-    hasPenaltyPass = profile?.has_penalty_pass ?? false;
+
+    // If returning from Stripe payment, verify directly and activate immediately
+    // (webhook may arrive seconds after the redirect — don't make the user wait)
+    if (penaltySuccess && process.env.STRIPE_SECRET_KEY) {
+      try {
+        const Stripe = (await import("stripe")).default;
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        const sessions = await stripe.checkout.sessions.list({ limit: 10 });
+        const paid = sessions.data.find(
+          s => s.status === "complete" &&
+               s.mode === "payment" &&
+               s.metadata?.type === "penalty_pass" &&
+               (s.metadata?.user_id === user.id || s.client_reference_id === user.id)
+        );
+        if (paid) {
+          // Activate immediately — webhook will be a no-op when it arrives
+          await supabase.from("profiles").update({ has_penalty_pass: true }).eq("id", user.id);
+          hasPenaltyPass = true;
+        }
+      } catch { /* fall through to DB check */ }
+    }
+
+    if (!hasPenaltyPass) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("has_penalty_pass")
+        .eq("id", user.id)
+        .maybeSingle();
+      hasPenaltyPass = profile?.has_penalty_pass ?? false;
+    }
   }
 
   // Guests are locked to page 1 — enforced server-side, not just in UI
