@@ -23,14 +23,25 @@ export async function signUp(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { username } },
+    options: {
+      data: { username },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
   });
 
   if (error) {
+    if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("already been registered")) {
+      return { error: "Un compte existe déjà avec cet email. Connecte-toi." };
+    }
     return { error: error.message };
+  }
+
+  // Email confirmation required (session is null)
+  if (!data.session) {
+    redirect(`/signup/confirm?email=${encodeURIComponent(email)}`);
   }
 
   redirect(next);
