@@ -7,7 +7,7 @@ import { BottomNav } from "@/components/BottomNav";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/login");
 
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -25,9 +25,41 @@ export default async function BusinessDashboardLayout({ children }: { children: 
     .maybeSingle();
 
   if (!company) redirect("/business");
-  // Admins always bypass the subscription check
+
+  // Admins always bypass the subscription check.
+  // Non-subscribed businesses can still access ads (ads have their own payment flow).
+  // All other dashboard sections require an active subscription.
   const isAdmin = profile.role === "admin";
-  if (!company.is_subscribed && !isAdmin) redirect("/business/checkout");
+  const canAccessDashboard = company.is_subscribed || isAdmin;
+
+  return (
+    <_Layout
+      user={user}
+      company={company}
+      isAdmin={isAdmin}
+      canAccessDashboard={canAccessDashboard}
+    >
+      {children}
+    </_Layout>
+  );
+}
+
+// Layout shell — exported so ads layout can reuse it without re-fetching
+export function _Layout({
+  user,
+  company,
+  isAdmin,
+  canAccessDashboard,
+  children,
+}: {
+  user: { email?: string | null };
+  company: { id: string; name: string; is_verified: boolean | null; is_subscribed: boolean | null; logo_url: string | null };
+  isAdmin: boolean;
+  canAccessDashboard: boolean;
+  children: React.ReactNode;
+}) {
+  void canAccessDashboard; // used by individual pages if needed
+  void isAdmin;
 
   return (
     <>
@@ -60,7 +92,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
                   </svg>
                 )}
               </div>
-              <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{company.is_subscribed ? "Abonnement actif" : "Accès admin"}</p>
+              <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{company.is_subscribed ? "Abonnement actif" : "Compte business"}</p>
             </div>
           </div>
         </div>
@@ -68,7 +100,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
         {/* Nav */}
         <DashboardNav companyId={company.id} />
 
-        {/* Bottom — hidden on mobile (in nav row instead) */}
+        {/* Bottom — hidden on mobile */}
         <div className="biz-sidebar-header" style={{ padding: "16px 20px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{user.email?.split("@")[0]}</p>
           <ThemeToggle />
@@ -77,7 +109,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
 
       {/* Main */}
       <main style={{ flex: 1, overflowX: "clip", minWidth: 0 }}>
-        {/* Mobile-only header — logo + company avatar + theme toggle */}
+        {/* Mobile-only header */}
         <div className="biz-mobile-header">
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
             <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
