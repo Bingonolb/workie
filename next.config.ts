@@ -27,7 +27,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       // Supabase realtime + Sentry + Stripe
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://api.stripe.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://api.stripe.com",
       // Stripe checkout iframe
       "frame-src https://js.stripe.com https://checkout.stripe.com",
       "object-src 'none'",
@@ -70,8 +70,8 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: "workie",
-  project: "workie-nextjs",
+  org: "workiech",
+  project: "javascript-nextjs",
   silent: true,
   widenClientFileUpload: true,
   sourcemaps: { deleteSourcemapsAfterUpload: true },
