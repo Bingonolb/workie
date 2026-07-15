@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { getTopCompanies } from "@/lib/actions/scores";
 import { createClient } from "@/lib/supabase/server";
 import { TrendingUp, Users, Star } from "lucide-react";
@@ -85,6 +86,7 @@ export default async function RankingPage() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -9,6 +9,7 @@ export const viewport: Viewport = {
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import { CookieBanner } from "@/components/CookieBanner";
 
 export const metadata: Metadata = {
   title: "Workie — Les entreprises, sans filtre.",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body style={{ background: "var(--bg)", overflowX: "clip", width: "100%", position: "relative" }}>
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>
+          <CookieBanner />
         </ThemeProvider>
       </body>
     </html>

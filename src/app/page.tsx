@@ -228,6 +228,8 @@ export default async function Home() {
             { href: "/ranking", label: "Classement" },
             { href: "/salaires", label: "Salaires" },
             { href: "/business", label: "Entreprises" },
+            { href: "/cgu", label: "CGU" },
+            { href: "/confidentialite", label: "Confidentialité" },
           ].map(({ href, label }) => (
             <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500 }}>{label}</Link>
           ))}

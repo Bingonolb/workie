@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { TrendingUp, Users } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
 
@@ -249,6 +250,7 @@ export default async function SalairesPage() {
           </>
         )}
       </main>
+      <Footer />
     </div>
   );
 }
