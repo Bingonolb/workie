@@ -96,14 +96,14 @@ export default async function ExplorePage({
   ]);
   const isBusiness = !!bizCompanyId;
 
-  // Fetch penalty pass status for logged-in non-business users
-  let hasPenaltyPass = false;
+  // Fetch penalty credits for logged-in non-business users
+  let penaltyCredits = 0;
   if (user && !isBusiness && !isAdmin) {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
 
-    // If returning from Stripe payment, verify directly and activate immediately
-    // (webhook may arrive seconds after the redirect — don't make the user wait)
+    // If returning from Stripe payment, verify directly and add credits immediately
+    // (webhook may arrive seconds after redirect — don't make the user wait)
     if (penaltySuccess && process.env.STRIPE_SECRET_KEY) {
       try {
         const Stripe = (await import("stripe")).default;
@@ -116,20 +116,19 @@ export default async function ExplorePage({
                (s.metadata?.user_id === user.id || s.client_reference_id === user.id)
         );
         if (paid) {
-          // Activate immediately — webhook will be a no-op when it arrives
-          await supabase.from("profiles").update({ has_penalty_pass: true }).eq("id", user.id);
-          hasPenaltyPass = true;
+          await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 10 });
+          penaltyCredits = 10;
         }
       } catch { /* fall through to DB check */ }
     }
 
-    if (!hasPenaltyPass) {
+    if (penaltyCredits === 0) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("has_penalty_pass")
+        .select("penalty_credits")
         .eq("id", user.id)
         .maybeSingle();
-      hasPenaltyPass = profile?.has_penalty_pass ?? false;
+      penaltyCredits = Number(profile?.penalty_credits ?? 0);
     }
   }
 
@@ -160,7 +159,7 @@ export default async function ExplorePage({
             isLoggedIn={!!user}
             isAdmin={isAdmin}
             isBusiness={isBusiness}
-            hasPenaltyPass={hasPenaltyPass}
+            penaltyCredits={penaltyCredits}
             penaltySuccess={penaltySuccess}
             filters={filters}
             swipeAds={swipeAds}

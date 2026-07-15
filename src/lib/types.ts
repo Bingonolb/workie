@@ -188,7 +188,7 @@ export type Database = {
           avatar_url: string | null; bio: string | null; canton: string | null; city: string | null
           claimed_company_id: string | null; country: string | null; created_at: string
           full_name: string | null; has_penalty_pass: boolean; id: string; identity_verified: boolean
-          identity_verified_at: string | null; role: string; stripe_verification_session_id: string | null
+          identity_verified_at: string | null; penalty_credits: number; role: string; stripe_verification_session_id: string | null
           updated_at: string; username: string
         }
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & { id: string; username: string }
@@ -229,6 +229,7 @@ export type Database = {
       increment_ad_impression: { Args: { p_campaign_id: string }; Returns: undefined }
       increment_helpful: { Args: { review_id: string }; Returns: undefined }
       increment_job_apply_click: { Args: { job_id: string }; Returns: undefined }
+      increment_penalty_credits: { Args: { uid: string; amount: number }; Returns: undefined }
       list_distinct_brands: { Args: Record<string, never>; Returns: { brand: string }[] }
       show_limit: { Args: Record<string, never>; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

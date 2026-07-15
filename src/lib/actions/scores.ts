@@ -64,11 +64,11 @@ export async function addPenalty(companyId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // Allow admins and users who purchased a penalty pass
-  const { data: profile } = await supabase.from("profiles").select("role, has_penalty_pass").eq("id", user.id).maybeSingle();
-  if (profile?.role !== "admin" && !profile?.has_penalty_pass) return;
+  const { data: profile } = await supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle();
+  const isAdmin = profile?.role === "admin";
+  const credits = Number(profile?.penalty_credits ?? 0);
+  if (!isAdmin && credits <= 0) return;
 
-  // Use admin client to bypass RLS for this admin-only operation
   const admin = createAdminClient();
 
   const { data: existing } = await admin
@@ -80,13 +80,19 @@ export async function addPenalty(companyId: string): Promise<void> {
     .maybeSingle();
 
   if (existing) {
+    // Toggle off — refund 1 credit (admins don't use credits)
     await admin.from("score_events").delete().eq("id", existing.id);
-    revalidatePath("/explore");
-    revalidatePath(`/company/${companyId}`);
-    return;
+    if (!isAdmin) {
+      await supabase.from("profiles").update({ penalty_credits: credits + 1 }).eq("id", user.id);
+    }
+  } else {
+    // Apply — spend 1 credit
+    await admin.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
+    if (!isAdmin) {
+      await supabase.from("profiles").update({ penalty_credits: credits - 1 }).eq("id", user.id);
+    }
   }
 
-  await admin.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
   revalidatePath("/explore");
   revalidatePath(`/company/${companyId}`);
 }

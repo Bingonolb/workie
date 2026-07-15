@@ -21,10 +21,10 @@ export async function POST() {
         price_data: {
           currency: "chf",
           product_data: {
-            name: "Workie — Pass Pénalité",
-            description: "Accès à vie au bouton -100 pts pour signaler les entreprises toxiques",
+            name: "Workie — Pack Pénalité 10 utilisations",
+            description: "10 utilisations du bouton -100 pts pour signaler les entreprises toxiques",
           },
-          unit_amount: 500, // 5.00 CHF
+          unit_amount: 1000, // 10.00 CHF
         },
         quantity: 1,
       }],

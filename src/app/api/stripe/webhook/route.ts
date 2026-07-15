@@ -28,8 +28,12 @@ export async function POST(req: NextRequest) {
         if (session.mode === "payment" && session.metadata?.type === "penalty_pass") {
           const userId = session.metadata.user_id ?? session.client_reference_id;
           if (userId) {
-            const { error } = await supabase.from("profiles").update({ has_penalty_pass: true }).eq("id", userId);
-            if (error) console.error("[webhook] penalty_pass update failed:", error.message);
+            const { error } = await supabase.rpc("increment_penalty_credits", { uid: userId, amount: 10 });
+            if (error) {
+              // Fallback: plain update adding 10
+              const { data: p } = await supabase.from("profiles").select("penalty_credits").eq("id", userId).maybeSingle();
+              await supabase.from("profiles").update({ penalty_credits: Number(p?.penalty_credits ?? 0) + 10 }).eq("id", userId);
+            }
           }
           break;
         }

@@ -38,7 +38,7 @@ export function SwipeView({
   isLoggedIn,
   isAdmin = false,
   isBusiness = false,
-  hasPenaltyPass = false,
+  penaltyCredits: initialPenaltyCredits = 0,
   penaltySuccess = false,
   filters,
   swipeAds = [],
@@ -49,7 +49,7 @@ export function SwipeView({
   isLoggedIn: boolean;
   isAdmin?: boolean;
   isBusiness?: boolean;
-  hasPenaltyPass?: boolean;
+  penaltyCredits?: number;
   penaltySuccess?: boolean;
   filters?: { sector?: string; canton?: string; search?: string };
   swipeAds?: AdCampaign[];
@@ -71,6 +71,9 @@ export function SwipeView({
   const [index, setIndex] = useState(0);
   const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
+  const [penaltyIds, setPenaltyIds] = useState<Set<string>>(new Set());
+  const [boostIds, setBoostIds] = useState<Set<string>>(new Set());
+  const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
   const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
@@ -191,9 +194,12 @@ export function SwipeView({
     if (isAd(current)) return;
     if (!isLoggedIn) { requireLogin(); return; }
     if (!current) return;
-    markActed(current.id);
-    addBoost(current.id);
-    showToast("⚡ +100 pts !", "#8b5cf6");
+    const id = (current as Company).id;
+    const toggled = boostIds.has(id);
+    setBoostIds(prev => { const n = new Set(prev); toggled ? n.delete(id) : n.add(id); return n; });
+    markActed(id);
+    addBoost(id);
+    showToast(toggled ? "⚡ Boost retiré" : "⚡ +100 pts !", "#8b5cf6");
   };
 
   const handlePenalty = (e: React.MouseEvent) => {
@@ -201,10 +207,14 @@ export function SwipeView({
     if (isAd(current)) return;
     if (!isLoggedIn) { requireLogin(); return; }
     if (!current) return;
-    if (!isAdmin && !hasPenaltyPass) { setShowPenaltyUpgrade(true); return; }
-    markActed((current as Company).id);
-    addPenalty((current as Company).id);
-    showToast("💀 -100 pts", "#ef4444");
+    if (!isAdmin && penaltyCredits <= 0) { setShowPenaltyUpgrade(true); return; }
+    const id = (current as Company).id;
+    const toggled = penaltyIds.has(id);
+    setPenaltyIds(prev => { const n = new Set(prev); toggled ? n.delete(id) : n.add(id); return n; });
+    if (!isAdmin) setPenaltyCredits(c => toggled ? c + 1 : c - 1);
+    markActed(id);
+    addPenalty(id);
+    showToast(toggled ? "💀 Pénalité retirée" : "💀 -100 pts", "#ef4444");
   };
 
   // Native touch handlers — React touch events are passive by default on iOS,
@@ -395,28 +405,35 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {isLoggedIn && !isBusiness && !isAd(current) && (
-          <button onClick={handlePenalty} title={isAdmin || hasPenaltyPass ? "Pénaliser -100 pts" : "Débloquer le -100 pts"} style={{
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
-            width: 52, height: 52, borderRadius: "50%",
-            background: "var(--surface)",
-            border: `2px solid ${isAdmin || hasPenaltyPass ? "rgba(239,68,68,0.5)" : "rgba(107,114,128,0.3)"}`,
-            color: isAdmin || hasPenaltyPass ? "#ef4444" : "var(--text-muted)",
-            cursor: "pointer",
-            boxShadow: isAdmin || hasPenaltyPass ? "0 4px 20px rgba(239,68,68,0.15)" : "none",
-            transition: "all 0.18s",
-            position: "relative",
-          }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-          >
-            <Skull size={15} />
-            <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
-            {!isAdmin && !hasPenaltyPass && (
-              <span style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, borderRadius: "50%", background: "var(--surface2)", border: "1px solid var(--border2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9 }}>🔒</span>
-            )}
-          </button>
-        )}
+        {isLoggedIn && !isBusiness && !isAd(current) && (() => {
+          const unlocked = isAdmin || penaltyCredits > 0;
+          const applied = !isAd(current) && penaltyIds.has((current as Company).id);
+          return (
+            <button onClick={handlePenalty} title={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} style={{
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+              width: 52, height: 52, borderRadius: "50%",
+              background: applied ? "rgba(239,68,68,0.12)" : "var(--surface)",
+              border: `2px solid ${unlocked ? (applied ? "rgba(239,68,68,0.9)" : "rgba(239,68,68,0.5)") : "rgba(107,114,128,0.3)"}`,
+              color: unlocked ? "#ef4444" : "var(--text-muted)",
+              cursor: "pointer",
+              boxShadow: unlocked ? "0 4px 20px rgba(239,68,68,0.15)" : "none",
+              transition: "all 0.18s",
+              position: "relative",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+            >
+              <Skull size={15} />
+              <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
+              {!isAdmin && penaltyCredits > 0 && (
+                <span style={{ position: "absolute", top: -5, right: -5, minWidth: 16, height: 16, borderRadius: 8, background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 900, padding: "0 3px" }}>{penaltyCredits}</span>
+              )}
+              {!unlocked && (
+                <span style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, borderRadius: "50%", background: "var(--surface2)", border: "1px solid var(--border2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9 }}>🔒</span>
+              )}
+            </button>
+          );
+        })()}
 
         <button onClick={() => advance("left")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
@@ -466,21 +483,26 @@ export function SwipeView({
           <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
         </button>
 
-        {!isBusiness && !isAd(current) && <button onClick={handleBoost} title="Booster +100 pts" style={{
-          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
-          width: 52, height: 52, borderRadius: "50%",
-          background: "var(--surface)",
-          border: "2px solid rgba(139,92,246,0.5)",
-          color: "#8b5cf6", cursor: "pointer",
-          boxShadow: "0 4px 20px rgba(139,92,246,0.15)",
-          transition: "all 0.18s",
-        }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        >
-          <Zap size={15} fill="#8b5cf6" />
-          <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>+100</span>
-        </button>}
+        {!isBusiness && !isAd(current) && (() => {
+          const boosted = boostIds.has((current as Company).id);
+          return (
+            <button onClick={handleBoost} title={boosted ? "Retirer le boost" : "Booster +100 pts"} style={{
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
+              width: 52, height: 52, borderRadius: "50%",
+              background: boosted ? "rgba(139,92,246,0.12)" : "var(--surface)",
+              border: `2px solid ${boosted ? "rgba(139,92,246,0.9)" : "rgba(139,92,246,0.5)"}`,
+              color: "#8b5cf6", cursor: "pointer",
+              boxShadow: "0 4px 20px rgba(139,92,246,0.15)",
+              transition: "all 0.18s",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+            >
+              <Zap size={15} fill="#8b5cf6" />
+              <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>+100</span>
+            </button>
+          );
+        })()}
       </div>
 
       {/* Legend — hidden on mobile */}
@@ -509,7 +531,7 @@ export function SwipeView({
             <div style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(249,115,22,0.08))", borderBottom: "1px solid rgba(239,68,68,0.15)", padding: "28px 28px 24px", textAlign: "center" }}>
               <div style={{ width: 60, height: 60, borderRadius: 18, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 26 }}>💀</div>
               <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: 6 }}>
-                Bouton <span style={{ color: "#ef4444" }}>-100 pts</span> — accès à vie
+                Bouton <span style={{ color: "#ef4444" }}>-100 pts</span> — pack 10 utilisations
               </h2>
               <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
                 Signalez les entreprises toxiques et impactez leur classement sur Workie.
@@ -520,9 +542,9 @@ export function SwipeView({
             <div style={{ padding: "22px 28px 28px" }}>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 22px", display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  "Accès permanent à toutes les entreprises",
+                  "10 utilisations — 1 CHF par entreprise",
                   "Impact direct sur leur score de réputation",
-                  "Paiement unique — aucun abonnement",
+                  "1 pénalité max par entreprise (annulable)",
                   "Paiement sécurisé via Stripe",
                 ].map(item => (
                   <li key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--text)" }}>
@@ -556,7 +578,7 @@ export function SwipeView({
                   }
                 }}
                 style={{ width: "100%", padding: "15px 0", borderRadius: 12, background: penaltyCheckoutLoading ? "var(--surface2)" : "linear-gradient(135deg, #ef4444, #f97316)", color: penaltyCheckoutLoading ? "var(--text-muted)" : "#fff", border: "none", fontWeight: 800, fontSize: 15, cursor: penaltyCheckoutLoading ? "not-allowed" : "pointer", letterSpacing: "-0.01em" }}>
-                {penaltyCheckoutLoading ? "Redirection vers Stripe…" : "Débloquer · 5 CHF"}
+                {penaltyCheckoutLoading ? "Redirection vers Stripe…" : "10 utilisations · 10 CHF"}
               </button>
               <button onClick={() => setShowPenaltyUpgrade(false)} style={{ display: "block", width: "100%", background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "10px 0 0", textAlign: "center" }}>
                 Pas maintenant
