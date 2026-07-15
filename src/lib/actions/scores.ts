@@ -64,9 +64,9 @@ export async function addPenalty(companyId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // Restrict to admins only
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (profile?.role !== "admin") return;
+  // Allow admins and users who purchased a penalty pass
+  const { data: profile } = await supabase.from("profiles").select("role, has_penalty_pass").eq("id", user.id).maybeSingle();
+  if (profile?.role !== "admin" && !profile?.has_penalty_pass) return;
 
   // Use admin client to bypass RLS for this admin-only operation
   const admin = createAdminClient();
