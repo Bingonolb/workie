@@ -36,10 +36,12 @@ export type AdCampaign = {
   cpm_chf: number;
   start_date: string;
   end_date: string | null;
-  status: "pending" | "active" | "paused" | "completed" | "rejected";
+  status: "payment_pending" | "pending" | "active" | "paused" | "completed" | "rejected";
   admin_note: string | null;
   impression_count: number;
   click_count: number;
+  stripe_session_id: string | null;
+  paid_at: string | null;
   created_at: string;
 };
 
@@ -70,7 +72,7 @@ export async function getBusinessCampaigns(): Promise<{ campaigns?: AdCampaign[]
       .eq("company_id", companyId)
       .order("created_at", { ascending: false });
     if (error) return { error: error.message };
-    return { campaigns: (data ?? []) as AdCampaign[] };
+    return { campaigns: (data ?? []) as unknown as AdCampaign[] };
   } catch (e) { return { error: (e as Error).message }; }
 }
 
@@ -114,7 +116,7 @@ export async function getActiveAds(opts?: {
     if (opts?.format) q = q.eq("format", opts.format);
     const { data } = await q.limit(50); // fetch pool, then filter + shuffle
 
-    const pool = ((data ?? []) as AdCampaign[]).filter(ad => {
+    const pool = ((data ?? []) as unknown as AdCampaign[]).filter(ad => {
       if (ad.end_date && ad.end_date < today) return false;
       if (Number(ad.spent_chf) >= Number(ad.total_budget_chf)) return false;
       if (opts?.canton && ad.target_cantons.length > 0 && !ad.target_cantons.includes(opts.canton)) return false;
@@ -171,7 +173,7 @@ export async function getCampaignDailyStats(campaignId: string): Promise<{ day: 
 export async function createCampaign(
   _: unknown,
   formData: FormData,
-): Promise<{ error?: string; success?: boolean }> {
+): Promise<{ error?: string; campaignId?: string }> {
   try {
     const { supabase, companyId } = await requireBusiness();
 
@@ -214,7 +216,7 @@ export async function createCampaign(
     }
     if (!image_url) return { error: "Une image est requise (upload ou URL)." };
 
-    const { error } = await supabase.from("ad_campaigns").insert({
+    const { data: inserted, error } = await supabase.from("ad_campaigns").insert({
       company_id: companyId,
       format,
       image_url,
@@ -229,12 +231,12 @@ export async function createCampaign(
       cpm_chf,
       start_date,
       end_date,
-      status: "pending",
-    });
+      status: "payment_pending",
+    }).select("id").single();
 
     if (error) return { error: error.message };
     revalidatePath("/business/dashboard/ads");
-    return { success: true };
+    return { campaignId: inserted.id };
   } catch (e) { return { error: (e as Error).message }; }
 }
 

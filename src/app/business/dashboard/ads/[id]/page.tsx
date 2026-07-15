@@ -5,11 +5,12 @@ import { getBusinessCampaigns, getCampaignDailyStats, getCampaignCantonStats } f
 import { AdStatsChart } from "../AdStatsChart";
 
 const STATUS_CONFIG = {
-  pending:   { label: "En attente",  color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  icon: <Clock size={14} /> },
-  active:    { label: "Active",      color: "#10b981", bg: "rgba(16,185,129,0.12)",   icon: <CheckCircle size={14} /> },
-  paused:    { label: "Pausée",      color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",   icon: <PauseCircle size={14} /> },
-  completed: { label: "Terminée",    color: "#6b7280", bg: "rgba(107,114,128,0.12)",  icon: <CheckCircle size={14} /> },
-  rejected:  { label: "Rejetée",     color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={14} /> },
+  payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={14} /> },
+  pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.12)",   icon: <Clock size={14} /> },
+  active:          { label: "Active",          color: "#10b981", bg: "rgba(16,185,129,0.12)",   icon: <CheckCircle size={14} /> },
+  paused:          { label: "Pausée",          color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",   icon: <PauseCircle size={14} /> },
+  completed:       { label: "Terminée",        color: "#6b7280", bg: "rgba(107,114,128,0.12)",  icon: <CheckCircle size={14} /> },
+  rejected:        { label: "Rejetée",         color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={14} /> },
 } as const;
 
 function ctr(imp: number, clk: number) {

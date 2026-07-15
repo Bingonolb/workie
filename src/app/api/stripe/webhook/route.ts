@@ -34,6 +34,21 @@ export async function POST(req: NextRequest) {
           break;
         }
 
+        // Ad campaign payment — activate for admin review
+        if (session.mode === "payment" && session.metadata?.type === "ad_campaign") {
+          const campaignId = session.metadata.campaign_id ?? session.client_reference_id;
+          if (campaignId) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { error } = await (supabase.from("ad_campaigns") as any).update({
+              status: "pending",
+              stripe_session_id: session.id,
+              paid_at: new Date().toISOString(),
+            }).eq("id", campaignId).eq("status", "payment_pending");
+            if (error) console.error("[webhook] ad_campaign payment update failed:", error.message);
+          }
+          break;
+        }
+
         // Business subscription
         const companyId = session.client_reference_id;
         if (!companyId || session.mode !== "subscription") break;

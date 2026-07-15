@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock } from "lucide-react";
 import { createCampaign } from "@/lib/actions/ads";
 import { calculateCPM, estimateDailyImpressions, estimateDailyReach } from "@/lib/ads/pricing";
+import { useRouter } from "next/navigation";
 
 const CANTONS = [
   { code: "GE", name: "Genève" }, { code: "VD", name: "Vaud" }, { code: "ZH", name: "Zürich" },
@@ -71,7 +72,26 @@ export function NewCampaignForm({
   companyLogo?: string | null;
   prefill?: Prefill;
 }) {
+  const router = useRouter();
   const [state, action, pending] = useActionState(createCampaign, undefined);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+
+  useEffect(() => {
+    if (!state?.campaignId) return;
+    setCheckoutLoading(true);
+    fetch("/api/business/ads/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ campaign_id: state.campaignId }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.url) { window.location.href = data.url; }
+        else { setCheckoutError(data.error ?? "Erreur Stripe"); setCheckoutLoading(false); }
+      })
+      .catch(() => { setCheckoutError("Erreur réseau"); setCheckoutLoading(false); });
+  }, [state?.campaignId]);
 
   const [format, setFormat] = useState<"square" | "swipe">(prefill?.format ?? "square");
   const [selectedCantons, setSelectedCantons] = useState<string[]>([]);
@@ -129,20 +149,28 @@ export function NewCampaignForm({
   const toggleSector = useCallback((s: string) =>
     setSelectedSectors(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]), []);
 
-  if (state?.success) {
+  if (state?.campaignId) {
     return (
       <div className="biz-page" style={{ maxWidth: 560, textAlign: "center", padding: "80px 24px" }}>
-        <div style={{ width: 80, height: 80, borderRadius: 24, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, margin: "0 auto 28px" }}>🎉</div>
-        <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 14 }}>Campagne soumise !</h1>
-        <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.75, maxWidth: 400, margin: "0 auto 36px" }}>
-          Notre équipe va examiner votre annonce sous <strong style={{ color: "var(--text)" }}>24h ouvrées</strong>. Vous recevrez les coordonnées bancaires par email pour finaliser le paiement.
-        </p>
-        <Link href="/business/dashboard/ads" style={{
-          display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 28px", borderRadius: 14,
-          background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none",
-        }}>
-          Voir mes campagnes
-        </Link>
+        {checkoutError ? (
+          <>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 24px" }}>⚠️</div>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>Erreur de paiement</h1>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>{checkoutError}</p>
+            <Link href="/business/dashboard/ads" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
+              Retour aux campagnes
+            </Link>
+          </>
+        ) : (
+          <>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(249,115,22,0.15))", border: "1px solid rgba(139,92,246,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 28px" }}>💳</div>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>Campagne créée !</h1>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 8 }}>
+              Redirection vers le paiement sécurisé…
+            </p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Propulsé par Stripe · Aucune donnée bancaire stockée sur Workie</p>
+          </>
+        )}
       </div>
     );
   }

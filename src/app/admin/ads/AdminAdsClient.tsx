@@ -17,11 +17,12 @@ function daysRemaining(endDate: string | null): { label: string; urgent: boolean
 type Campaign = AdCampaign & { company_name: string; company_logo: string | null };
 
 const STATUS_CONFIG = {
-  pending:   { label: "En attente",  color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
-  active:    { label: "Active",      color: "#10b981", bg: "rgba(16,185,129,0.12)" },
-  paused:    { label: "Pausée",      color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
-  completed: { label: "Terminée",    color: "#6b7280", bg: "rgba(107,114,128,0.12)" },
-  rejected:  { label: "Rejetée",     color: "#ef4444", bg: "rgba(239,68,68,0.12)" },
+  payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.12)" },
+  pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
+  active:          { label: "Active",          color: "#10b981", bg: "rgba(16,185,129,0.12)" },
+  paused:          { label: "Pausée",          color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
+  completed:       { label: "Terminée",        color: "#6b7280", bg: "rgba(107,114,128,0.12)" },
+  rejected:        { label: "Rejetée",         color: "#ef4444", bg: "rgba(239,68,68,0.12)" },
 } as const;
 
 const FORMAT_LABEL: Record<string, string> = { square: "Carré", swipe: "Swipe" };

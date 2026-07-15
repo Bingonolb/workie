@@ -1,14 +1,16 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft } from "lucide-react";
+import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft, CreditCard } from "lucide-react";
 import { getBusinessCampaigns } from "@/lib/actions/ads";
+import { PayCampaignButton } from "./PayCampaignButton";
 
 const STATUS_CONFIG = {
-  pending:   { label: "En attente",  color: "#f59e0b", bg: "rgba(245,158,11,0.1)",   icon: <Clock size={12} />,       dot: "#f59e0b" },
-  active:    { label: "Active",      color: "#10b981", bg: "rgba(16,185,129,0.1)",    icon: <CheckCircle size={12} />, dot: "#10b981" },
-  paused:    { label: "Pausée",      color: "#8b5cf6", bg: "rgba(139,92,246,0.1)",    icon: <PauseCircle size={12} />, dot: "#8b5cf6" },
-  completed: { label: "Terminée",    color: "#6b7280", bg: "rgba(107,114,128,0.1)",   icon: <CheckCircle size={12} />, dot: "#6b7280" },
-  rejected:  { label: "Rejetée",     color: "#ef4444", bg: "rgba(239,68,68,0.1)",     icon: <XCircle size={12} />,     dot: "#ef4444" },
+  payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.1)",    icon: <CreditCard size={12} />, dot: "#ef4444" },
+  pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.1)",   icon: <Clock size={12} />,      dot: "#f59e0b" },
+  active:          { label: "Active",          color: "#10b981", bg: "rgba(16,185,129,0.1)",    icon: <CheckCircle size={12} />,dot: "#10b981" },
+  paused:          { label: "Pausée",          color: "#8b5cf6", bg: "rgba(139,92,246,0.1)",    icon: <PauseCircle size={12} />,dot: "#8b5cf6" },
+  completed:       { label: "Terminée",        color: "#6b7280", bg: "rgba(107,114,128,0.1)",   icon: <CheckCircle size={12} />,dot: "#6b7280" },
+  rejected:        { label: "Rejetée",         color: "#ef4444", bg: "rgba(239,68,68,0.1)",     icon: <XCircle size={12} />,    dot: "#ef4444" },
 } as const;
 
 function daysRemaining(endDate: string | null): { label: string; urgent: boolean } {
@@ -32,9 +34,12 @@ function budgetPct(spent: number, total: number) {
 export default async function AdsPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const [{ campaigns = [], error }, sp] = await Promise.all([getBusinessCampaigns(), searchParams]);
   const activeTab = sp.tab ?? "all";
+  const paymentSuccess = sp.payment === "success";
+  const paymentCanceled = sp.payment === "canceled";
 
   const counts = {
     all: campaigns.length,
+    payment_pending: campaigns.filter(c => c.status === "payment_pending").length,
     active: campaigns.filter(c => c.status === "active").length,
     pending: campaigns.filter(c => c.status === "pending").length,
     paused: campaigns.filter(c => c.status === "paused").length,
@@ -73,6 +78,16 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
           </Link>
         </div>
 
+        {paymentSuccess && (
+          <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "14px 18px", color: "#10b981", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+            <CheckCircle size={16} /> Paiement reçu ! Votre campagne est en cours de vérification par notre équipe (24h ouvrées).
+          </div>
+        )}
+        {paymentCanceled && (
+          <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 18px", color: "#ef4444", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+            <XCircle size={16} /> Paiement annulé. La campagne existe mais n&apos;est pas activée. Vous pouvez compléter le paiement depuis la liste.
+          </div>
+        )}
         {error && (
           <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px", color: "#ef4444", fontSize: 14, marginBottom: 20 }}>
             {error}
@@ -128,8 +143,9 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
               {([
                 ["all", "Toutes", counts.all],
+                ["payment_pending", "À payer", counts.payment_pending],
+                ["pending", "En révision", counts.pending],
                 ["active", "Actives", counts.active],
-                ["pending", "En attente", counts.pending],
                 ["paused", "Pausées", counts.paused],
                 ["completed", "Terminées", counts.completed],
                 ["rejected", "Rejetées", counts.rejected],
@@ -230,12 +246,16 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
 
                     {/* Action bar */}
                     <div style={{ borderTop: "1px solid var(--border)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.01)", position: "relative", zIndex: 1 }}>
-                      <Link href={`/business/dashboard/ads/${c.id}`} style={{
-                        fontSize: 12, fontWeight: 700, color: "#8b5cf6", textDecoration: "none",
-                        padding: "5px 12px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)", background: "rgba(139,92,246,0.06)",
-                      }}>
-                        Voir les stats
-                      </Link>
+                      {c.status === "payment_pending" ? (
+                        <PayCampaignButton campaignId={c.id} />
+                      ) : (
+                        <Link href={`/business/dashboard/ads/${c.id}`} style={{
+                          fontSize: 12, fontWeight: 700, color: "#8b5cf6", textDecoration: "none",
+                          padding: "5px 12px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)", background: "rgba(139,92,246,0.06)",
+                        }}>
+                          Voir les stats
+                        </Link>
+                      )}
                       <Link
                         href={`/business/dashboard/ads/new?dup=${c.id}&headline=${encodeURIComponent(c.headline)}&format=${c.format}&cta_label=${encodeURIComponent(c.cta_label)}&cta_url=${encodeURIComponent(c.cta_url)}&daily=${c.daily_budget_chf}&image=${encodeURIComponent(c.image_url)}`}
                         style={{
