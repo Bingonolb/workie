@@ -139,14 +139,6 @@ export default function ClaimsPage() {
               }}>
 
                 {/* Already-owned warning banner */}
-                {claim.existing_owner && status === "pending" && (
-                  <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 10, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
-                    <AlertTriangle size={16} color="#f59e0b" style={{ flexShrink: 0 }} />
-                    <p style={{ fontSize: 12, color: "#f59e0b", fontWeight: 600 }}>
-                      ⚠️ Cette entreprise est déjà revendiquée par <strong>{claim.existing_owner}</strong>. Approuver transférera l'accès.
-                    </p>
-                  </div>
-                )}
 
                 {/* Header */}
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
