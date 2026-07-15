@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
           is_subscribed: true,
           stripe_subscription_id: sub.id,
           subscription_ends_at: endsAt,
+          subscription_cancel_at_period_end: false,
         }).eq("id", companyId);
         if (subErr) console.error("[webhook] subscription activate failed:", subErr.message);
         break;
@@ -81,6 +82,7 @@ export async function POST(req: NextRequest) {
           is_subscribed: active,
           stripe_subscription_id: sub.id,
           subscription_ends_at: endsAt,
+          subscription_cancel_at_period_end: sub.cancel_at_period_end ?? false,
         }).eq("id", companyId);
         if (error) console.error("[webhook] subscription.updated failed:", error.message);
         break;

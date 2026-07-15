@@ -120,7 +120,7 @@ export type Database = {
           is_subscribed: boolean | null; is_verified: boolean | null; linkedin_url: string | null
           logo_url: string | null; name: string; review_count: number | null; score: number
           sector: string; stripe_customer_id: string | null; stripe_subscription_id: string | null
-          subscription_ends_at: string | null; subsector: string | null; tags: string[] | null
+          subscription_cancel_at_period_end: boolean; subscription_ends_at: string | null; subsector: string | null; tags: string[] | null
           twitter_url: string | null; website_url: string | null; zefix_uid: string | null
         }
         Insert: Partial<Database["public"]["Tables"]["companies"]["Row"]> & { city: string; name: string; sector: string }
