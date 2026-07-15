@@ -311,7 +311,7 @@ export default function RegisterPage() {
               <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", display: "flex", gap: 10 }}>
                 <Zap size={15} color="#8b5cf6" style={{ flexShrink: 0, marginTop: 1 }} />
                 <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                  Après validation, notre équipe crée votre fiche sous <strong style={{ color: "var(--text)" }}>48h ouvrées</strong>. Vous recevrez un email de confirmation.
+                  Votre compte est créé immédiatement. Vous serez redirigé vers le paiement sécurisé, puis accéderez à votre dashboard sans attente.
                 </p>
               </div>
 

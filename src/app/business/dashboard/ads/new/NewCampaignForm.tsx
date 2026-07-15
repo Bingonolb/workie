@@ -583,7 +583,7 @@ export function NewCampaignForm({
           </Link>
         </div>
         <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 14, textAlign: "center", lineHeight: 1.6 }}>
-          Paiement par virement bancaire · Les coordonnées vous seront envoyées par email après validation admin
+          Paiement sécurisé par Stripe · Vous serez redirigé vers le paiement après soumission
         </p>
       </form>
     </div>

@@ -307,9 +307,9 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
             {[
               { step: "1", text: "Créez votre campagne avec visuel et ciblage" },
-              { step: "2", text: "Notre équipe valide sous 24h ouvrées" },
-              { step: "3", text: "Votre pub apparaît sur Workie selon votre budget" },
-              { step: "4", text: "Paiement par virement après validation" },
+              { step: "2", text: "Paiement sécurisé du budget total via Stripe" },
+              { step: "3", text: "Notre équipe valide la campagne sous 24h ouvrées" },
+              { step: "4", text: "Votre pub apparaît sur Workie selon votre budget" },
             ].map(({ step, text }) => (
               <div key={step} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(139,92,246,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 900, color: "#8b5cf6", flexShrink: 0, marginTop: 1 }}>{step}</div>

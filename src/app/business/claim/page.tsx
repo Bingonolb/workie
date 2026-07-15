@@ -440,7 +440,7 @@ export default function ClaimPage() {
               <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", display: "flex", gap: 10, alignItems: "flex-start" }}>
                 <BadgeCheck size={16} color="#8b5cf6" style={{ flexShrink: 0, marginTop: 1 }} />
                 <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                  Notre équipe vérifie votre identité sous <strong style={{ color: "var(--text)" }}>48h ouvrées</strong>. Vous recevrez ensuite un lien pour accéder à votre espace entreprise.
+                  Votre compte est créé immédiatement. Vous serez redirigé vers le paiement sécurisé, puis accéderez à votre dashboard. Le badge bleu est accordé sous 48h ouvrées.
                 </p>
               </div>
 

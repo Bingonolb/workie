@@ -67,7 +67,7 @@ export default function BusinessPage() {
         </p>
 
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 48, opacity: 0.7 }}>
-          Les 50 premières entreprises bénéficient du tarif fondateur · 99 CHF/mois à vie
+          Accès immédiat après paiement · Les 50 premières entreprises gardent 99 CHF/mois à vie
         </p>
 
         {/* Two-path choice */}
@@ -193,10 +193,11 @@ export default function BusinessPage() {
           <h2 style={{ textAlign: "center", fontSize: "clamp(22px, 4vw, 32px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 48 }}>Questions fréquentes</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {[
-              { q: "Comment prouver que je représente l'entreprise ?", a: "Lors de la demande, vous fournissez votre poste, votre email professionnel (domaine de l'entreprise) et signez notre charte. Notre équipe vérifie chaque demande manuellement sous 48h." },
+              { q: "Comment accéder au dashboard après inscription ?", a: "Remplissez le formulaire, créez votre compte, puis payez directement en ligne. Votre dashboard est accessible immédiatement après le paiement — aucune attente." },
+              { q: "À quoi sert la vérification manuelle ?", a: "Elle concerne uniquement le badge bleu « Entreprise vérifiée ». Notre équipe valide votre identité sous 48h ouvrées. Vos outils sont actifs dès le paiement, badge ou pas." },
               { q: "Que se passe-t-il si je résilie ?", a: "Votre fiche publique reste visible, vos réponses aux avis restent affichées. Le badge vérifié et l'accès aux outils sont désactivés. Aucun avis n'est supprimé." },
               { q: "Puis-je supprimer un avis qui me semble injuste ?", a: "Non. C'est notre engagement fondamental envers les employés. Vous pouvez en revanche y répondre publiquement, ce qui est souvent bien plus efficace." },
-              { q: "Le prix est-il vraiment garanti ?", a: "Oui. Les 50 premières entreprises qui s'abonnent gardent le tarif 99 CHF/mois à vie, même quand nous augmentons les prix pour les nouveaux clients." },
+              { q: "Le tarif fondateur est-il vraiment garanti ?", a: "Oui. Les 50 premières entreprises qui s'abonnent conservent 99 CHF/mois à vie, même si nous augmentons nos prix pour les nouveaux clients." },
             ].map(({ q, a }) => (
               <div key={q} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px 28px" }}>
                 <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>{q}</p>
@@ -226,7 +227,7 @@ export default function BusinessPage() {
         </div>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 16 }}>
           <Shield size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />
-          Vérification manuelle · Données sécurisées · Sans engagement
+          Accès immédiat · Paiement sécurisé par Stripe · Sans engagement
         </p>
       </section>
 

@@ -138,7 +138,7 @@ export default async function CheckoutPage({
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", fontSize: 28 }}>⏳</div>
           <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 10 }}>Demande en attente de validation</h1>
           <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 28 }}>
-            Notre équipe vérifie votre fiche sous <strong style={{ color: "var(--text)" }}>48h ouvrées</strong>. Vous recevrez un email dès que votre compte sera activé et prêt au paiement.
+Une erreur inattendue s&apos;est produite. Contactez-nous à <a href="mailto:hello@workie.ch" style={{ color: "#f59e0b" }}>hello@workie.ch</a> pour activer votre accès manuellement.
           </p>
           <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
             Retour à l&apos;accueil
