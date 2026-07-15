@@ -7,7 +7,7 @@ import { BottomNav } from "@/components/BottomNav";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/auth/login");
 
   const supabase = await createClient();
   const { data: profile } = await supabase
@@ -25,10 +25,9 @@ export default async function BusinessDashboardLayout({ children }: { children: 
     .maybeSingle();
 
   if (!company) redirect("/business");
-
-  // Subscription check is done per-page, not here.
-  // Ads have their own payment flow and must be accessible to all business accounts.
-  // Only authentication + claimed_company_id are required at layout level.
+  // Admins always bypass the subscription check
+  const isAdmin = profile.role === "admin";
+  if (!company.is_subscribed && !isAdmin) redirect("/business/checkout");
 
   return (
     <>
@@ -36,6 +35,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
 
       {/* Sidebar */}
       <aside className="biz-sidebar">
+        {/* Logo */}
         <div className="biz-sidebar-header" style={{ padding: "20px 20px 16px", borderBottom: "1px solid var(--border)" }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
             <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
@@ -43,6 +43,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
           </Link>
         </div>
 
+        {/* Company card */}
         <div className="biz-sidebar-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {company.logo_url
@@ -59,13 +60,15 @@ export default async function BusinessDashboardLayout({ children }: { children: 
                   </svg>
                 )}
               </div>
-              <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{company.is_subscribed ? "Abonnement actif" : "Compte business"}</p>
+              <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{company.is_subscribed ? "Abonnement actif" : "Accès admin"}</p>
             </div>
           </div>
         </div>
 
+        {/* Nav */}
         <DashboardNav companyId={company.id} />
 
+        {/* Bottom — hidden on mobile (in nav row instead) */}
         <div className="biz-sidebar-header" style={{ padding: "16px 20px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{user.email?.split("@")[0]}</p>
           <ThemeToggle />
@@ -74,6 +77,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
 
       {/* Main */}
       <main style={{ flex: 1, overflowX: "clip", minWidth: 0 }}>
+        {/* Mobile-only header — logo + company avatar + theme toggle */}
         <div className="biz-mobile-header">
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
             <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
@@ -91,6 +95,7 @@ export default async function BusinessDashboardLayout({ children }: { children: 
       </main>
 
     </div>
+    {/* Bottom tab bar — mobile only */}
     <BottomNav isBusiness={true} />
     </>
   );
