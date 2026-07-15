@@ -4,6 +4,7 @@ import { getUser, createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardNav } from "./DashboardNav";
 import { BottomNav } from "@/components/BottomNav";
+import { headers } from "next/headers";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
@@ -25,9 +26,14 @@ export default async function BusinessDashboardLayout({ children }: { children: 
     .maybeSingle();
 
   if (!company) redirect("/business");
-  // Admins always bypass the subscription check
   const isAdmin = profile.role === "admin";
-  if (!company.is_subscribed && !isAdmin) redirect("/business/checkout");
+  if (!company.is_subscribed && !isAdmin) {
+    const h = await headers();
+    const pathname = h.get("x-pathname") ?? "";
+    if (!pathname.startsWith("/business/dashboard/ads")) {
+      redirect("/business/checkout");
+    }
+  }
 
   return (
     <>

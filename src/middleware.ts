@@ -70,7 +70,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return updateSession(request);
+  const response = await updateSession(request);
+  // Expose pathname to server layouts (used to bypass subscription gate on /ads)
+  response.headers.set("x-pathname", pathname);
+  return response;
 }
 
 export const config = {
