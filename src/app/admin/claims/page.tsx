@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { getClaims, approveClaim, rejectClaim } from "@/lib/actions/admin";
-import { CheckCircle, XCircle, Clock, Building2, Mail, User, Briefcase, ArrowLeft, AlertTriangle, ArrowRightLeft, Link2, ExternalLink } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Building2, Mail, User, Briefcase, ArrowLeft, Link2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 type Claim = {
@@ -30,7 +30,7 @@ const STATUS_COLORS: Record<string, { bg: string; color: string; label: string }
   rejected: { bg: "rgba(239,68,68,0.1)",   color: "#ef4444", label: "Refusée" },
 };
 
-type MsgState = { id: string; text: string; ok: boolean; alreadyOwned?: string } | null;
+type MsgState = { id: string; text: string; ok: boolean } | null;
 
 export default function ClaimsPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -53,7 +53,7 @@ export default function ClaimsPage() {
 
   useEffect(() => { load(); }, []);
 
-  const handle = (id: string, action: "approve" | "reject" | "force-approve") => {
+  const handle = (id: string, action: "approve" | "reject") => {
     startTransition(async () => {
       if (action === "reject") {
         const res = await rejectClaim(id);
@@ -131,8 +131,7 @@ export default function ClaimsPage() {
             const status = claim.status ?? "pending";
             const sc = STATUS_COLORS[status] ?? STATUS_COLORS.pending;
             const isThisMsg = msg?.id === claim.id;
-            const isAlreadyOwned = isThisMsg && !!msg?.alreadyOwned;
-
+          
             return (
               <div key={claim.id} style={{
                 background: "var(--surface)", border: `1px solid ${claim.existing_owner && status === "pending" ? "rgba(245,158,11,0.4)" : "var(--border)"}`,
@@ -201,54 +200,32 @@ export default function ClaimsPage() {
                 )}
 
                 {/* Feedback */}
-                {isThisMsg && !isAlreadyOwned && (
+                {isThisMsg && (
                   <p style={{ fontSize: 13, fontWeight: 600, color: msg.ok ? "#10b981" : "#ef4444" }}>
                     {msg.ok ? "✓ " : "✗ "}{msg.text}
                   </p>
                 )}
 
-                {/* Already-owned conflict resolution */}
-                {isAlreadyOwned && (
-                  <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 16px" }}>
-                    <p style={{ fontSize: 13, color: "#ef4444", fontWeight: 600, marginBottom: 12 }}>
-                      ⚠️ {msg?.text}
-                    </p>
-                    <div style={{ display: "flex", gap: 10 }}>
-                      <button
-                        onClick={() => { setMsg(null); handle(claim.id, "force-approve"); }}
-                        disabled={isPending}
-                        style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 9, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                        <ArrowRightLeft size={15} /> Confirmer le transfert
-                      </button>
-                      <button
-                        onClick={() => setMsg(null)}
-                        style={{ padding: "9px 16px", borderRadius: 9, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-                        Annuler
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 {/* Actions */}
-                {status === "pending" && !isAlreadyOwned && (
+                {status === "pending" && (
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
                       onClick={() => handle(claim.id, "approve")}
                       disabled={isPending}
                       style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 20px", borderRadius: 9, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1 }}>
-                      <CheckCircle size={16} /> Approuver & inviter
+                      <CheckCircle size={16} /> Vérifier (badge bleu)
                     </button>
                     <button
                       onClick={() => handle(claim.id, "reject")}
                       disabled={isPending}
                       style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 20px", borderRadius: 9, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1 }}>
-                      <XCircle size={16} /> Refuser
+                      <XCircle size={16} /> Rejeter & révoquer
                     </button>
                   </div>
                 )}
 
                 {status === "approved" && (
-                  <p style={{ fontSize: 12, color: "#10b981" }}>✓ Email d&apos;accès envoyé à {claim.work_email}</p>
+                  <p style={{ fontSize: 12, color: "#10b981" }}>✓ Badge vérifié accordé à {claim.work_email}</p>
                 )}
               </div>
             );

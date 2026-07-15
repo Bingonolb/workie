@@ -58,9 +58,10 @@ const CANTONS = [
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: Promise<{ sector?: string; canton?: string; q?: string; view?: string; page?: string; sort?: string }>;
+  searchParams: Promise<{ sector?: string; canton?: string; q?: string; view?: string; page?: string; sort?: string; penalty_success?: string }>;
 }) {
   const raw = await searchParams;
+  const penaltySuccess = raw.penalty_success === "1";
   // Sanitize all URL params
   const VALID_SORTS = ["recent", "score", "rating", "reviews", "name"] as const;
   const VALID_VIEWS = ["grid", "swipe"] as const;
@@ -136,6 +137,7 @@ export default async function ExplorePage({
             isAdmin={isAdmin}
             isBusiness={isBusiness}
             hasPenaltyPass={hasPenaltyPass}
+            penaltySuccess={penaltySuccess}
             filters={filters}
             swipeAds={swipeAds}
           />

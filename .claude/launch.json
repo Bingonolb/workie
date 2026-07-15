@@ -2,8 +2,8 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "workie",
-      "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
+      "name": "workie-dev",
+      "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
     }

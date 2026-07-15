@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     }],
     client_reference_id: company.id,
     subscription_data: { metadata: { company_id: company.id, user_id: user.id } },
-    success_url: `${baseUrl}/business/dashboard?checkout=success`,
+    success_url: `${baseUrl}/business/checkout?success=1`,
     cancel_url:  `${baseUrl}/business/checkout?canceled=1`,
     allow_promotion_codes: true,
   });

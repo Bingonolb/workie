@@ -39,6 +39,7 @@ export function SwipeView({
   isAdmin = false,
   isBusiness = false,
   hasPenaltyPass = false,
+  penaltySuccess = false,
   filters,
   swipeAds = [],
 }: {
@@ -49,6 +50,7 @@ export function SwipeView({
   isAdmin?: boolean;
   isBusiness?: boolean;
   hasPenaltyPass?: boolean;
+  penaltySuccess?: boolean;
   filters?: { sector?: string; canton?: string; search?: string };
   swipeAds?: AdCampaign[];
 }) {
@@ -73,6 +75,18 @@ export function SwipeView({
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showPenaltyUpgrade, setShowPenaltyUpgrade] = useState(false);
+  const [penaltyCheckoutLoading, setPenaltyCheckoutLoading] = useState(false);
+  const [penaltyCheckoutError, setPenaltyCheckoutError] = useState("");
+
+  useEffect(() => {
+    if (penaltySuccess) {
+      setToast({ msg: "💀 Pass Pénalité activé ! Vous pouvez maintenant pénaliser les entreprises.", color: "#10b981" });
+      // Clean the URL without reloading
+      const url = new URL(window.location.href);
+      url.searchParams.delete("penalty_success");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
   const [exhausted, setExhausted] = useState(false);
   // Track all companies seen/acted on this session to avoid re-showing them in new batches
   const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
@@ -480,11 +494,31 @@ export function SwipeView({
               Débloque cette fonctionnalité pour <strong style={{ color: "var(--text)" }}>5 CHF</strong> — accès à vie.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <form action="/api/user/checkout-penalty" method="POST">
-                <button type="submit" style={{ width: "100%", padding: "14px 0", borderRadius: 12, background: "linear-gradient(135deg, #ef4444, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>
-                  Débloquer pour 5 CHF
-                </button>
-              </form>
+              {penaltyCheckoutError && (
+                <p style={{ fontSize: 12, color: "#ef4444", textAlign: "center", marginBottom: 4 }}>{penaltyCheckoutError}</p>
+              )}
+              <button
+                disabled={penaltyCheckoutLoading}
+                onClick={async () => {
+                  setPenaltyCheckoutError("");
+                  setPenaltyCheckoutLoading(true);
+                  try {
+                    const res = await fetch("/api/user/checkout-penalty", { method: "POST" });
+                    const data = await res.json();
+                    if (!res.ok || !data.url) {
+                      setPenaltyCheckoutError(data.error ?? "Erreur lors de la création du paiement.");
+                      return;
+                    }
+                    window.location.href = data.url;
+                  } catch {
+                    setPenaltyCheckoutError("Erreur réseau. Réessaie.");
+                  } finally {
+                    setPenaltyCheckoutLoading(false);
+                  }
+                }}
+                style={{ width: "100%", padding: "14px 0", borderRadius: 12, background: penaltyCheckoutLoading ? "var(--surface2)" : "linear-gradient(135deg, #ef4444, #f97316)", color: penaltyCheckoutLoading ? "var(--text-muted)" : "#fff", border: "none", fontWeight: 700, fontSize: 15, cursor: penaltyCheckoutLoading ? "not-allowed" : "pointer" }}>
+                {penaltyCheckoutLoading ? "Chargement…" : "Débloquer pour 5 CHF"}
+              </button>
               <button onClick={() => setShowPenaltyUpgrade(false)} style={{ background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "8px 0" }}>
                 Plus tard
               </button>
