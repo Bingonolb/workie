@@ -498,15 +498,20 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     // ── 2. Create / retrieve the Supabase user ─────────────────────────────────
     let userId: string;
 
-    if (existingUser) {
+    // Check if email already has an account (needed in both branches)
+    const { data: listData } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+    const found = listData?.users.find(u => u.email?.toLowerCase() === work_email);
+
+    if (existingUser && existingUser.email?.toLowerCase() === work_email) {
+      // Same email already logged in — reuse this account
       userId = existingUser.id;
     } else {
-      // Check if email already has an account
-      const { data: listData } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
-      const found = listData?.users.find(u => u.email?.toLowerCase() === work_email);
-
+      // Different email or not logged in — always create a new independent account
       if (found) {
         return { error: "Un compte Workie existe déjà avec cet email. Connectez-vous d'abord via « Déjà un compte »." };
+      }
+      if (password.length < 8) {
+        return { error: "Le mot de passe doit contenir au moins 8 caractères." };
       }
 
       const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
@@ -517,13 +522,19 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
       if (createErr || !created.user) return { error: `Impossible de créer votre compte : ${createErr?.message ?? "erreur inconnue"}` };
       userId = created.user.id;
 
-      // Sign in so the session cookie is set for this browser
+      // Sign in as the NEW user — replaces any existing session in this browser
       await supabase.auth.signInWithPassword({ email: work_email, password });
     }
 
     // ── 3. Link profile to company ─────────────────────────────────────────────
+    // Only set username if profile doesn't already exist (never overwrite existing username)
+    const { data: existingProfile } = await adminClient
+      .from("profiles")
+      .select("id, username")
+      .eq("id", userId)
+      .maybeSingle();
     const emailBase = work_email.split("@")[0].replace(/[^a-z0-9_]/gi, "_").toLowerCase();
-    const username  = `${emailBase}_${userId.slice(0, 6)}`;
+    const username  = existingProfile?.username ?? `${emailBase}_${userId.slice(0, 6)}`;
     await adminClient.from("profiles").upsert(
       {
         id: userId,

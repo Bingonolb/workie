@@ -31,14 +31,30 @@ export async function GET(request: Request) {
       canton: geo.canton,
       city: geo.city ?? undefined,
     } : {};
-    // Fetch current user to derive a username for new profiles
-    const { data: { user: u } } = await supabase.auth.getUser();
-    const emailBase = u?.email?.split("@")[0]?.replace(/[^a-z0-9_]/gi, "_").toLowerCase() ?? "user";
-    const username = `${emailBase}_${userId.slice(0, 6)}`;
-    await supabase.from("profiles").upsert(
-      { id: userId, username, ...geoFields, ...extra },
-      { onConflict: "id", ignoreDuplicates: false }
-    );
+
+    // Check if the profile already exists to avoid overwriting username/role
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("id, username")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (existing) {
+      // Profile exists — only update geo + extra (never touch username)
+      const updates = { ...geoFields, ...extra };
+      if (Object.keys(updates).length > 0) {
+        await supabase.from("profiles").update(updates).eq("id", userId);
+      }
+    } else {
+      // New profile — generate username from email
+      const { data: { user: u } } = await supabase.auth.getUser();
+      const emailBase = u?.email?.split("@")[0]?.replace(/[^a-z0-9_]/gi, "_").toLowerCase() ?? "user";
+      const username = `${emailBase}_${userId.slice(0, 6)}`;
+      await supabase.from("profiles").upsert(
+        { id: userId, username, ...geoFields, ...extra },
+        { onConflict: "id", ignoreDuplicates: true }
+      );
+    }
   }
 
   // Handle Supabase invite / magic-link (token_hash flow)
