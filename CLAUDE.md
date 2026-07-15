@@ -72,6 +72,16 @@ All `position: fixed` modals must be ≥ 10002 or they are hidden behind the bot
 3. Daily stats are computed in JS from raw impression/click rows (not from the DB views, which are unused).
 4. `getActiveAds()` filters by `status = 'active'`, date range, and remaining budget. Fisher-Yates shuffle for fair rotation.
 
+## Business access rules
+
+| Condition | Access |
+|---|---|
+| `claimed_company_id` set + authenticated | Dashboard layout, Ads (own payment flow) |
+| `is_subscribed = true` OR `role = admin` | Analytics, review replies, job offers, full dashboard |
+| `role = admin` | Admin panel, bypass all subscription checks |
+
+**Rule**: Never put `redirect("/business/checkout")` in a layout — it blocks sub-sections with their own payment logic. Each page checks its own requirements. The layout only checks authentication + `claimed_company_id`.
+
 ## Auth
 
 - `next` redirect param validated with `/^\/(?![/\\])/` to prevent open redirect.
