@@ -242,7 +242,12 @@ export function SwipeView({
       setIsDragging(false);
       if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
         const c = currentRef.current;
-        if (c && !isAd(c)) router.push(`/company/${c.id}`);
+        if (c && isAd(c)) {
+          trackAdClick(c.campaign.id);
+          window.open(c.campaign.cta_url, "_blank", "noopener,noreferrer");
+        } else if (c && !isAd(c)) {
+          router.push(`/company/${c.id}`);
+        }
         setDrag(0);
         return;
       }
@@ -288,7 +293,15 @@ export function SwipeView({
     const dy = e.clientY - dragStart.current.y;
     dragStart.current = null;
     setIsDragging(false);
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) { setDrag(0); return; }
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+      const c = currentRef.current;
+      if (c && isAd(c)) {
+        trackAdClick(c.campaign.id);
+        window.open(c.campaign.cta_url, "_blank", "noopener,noreferrer");
+      }
+      setDrag(0);
+      return;
+    }
     if (dx > SWIPE_THRESHOLD) advance("right");
     else if (dx < -SWIPE_THRESHOLD) advance("left");
     else setDrag(0);
@@ -654,7 +667,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
   overlayOpacity: number;
 }) {
   return (
-    <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid rgba(139,92,246,0.3)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none", display: "flex", flexDirection: "column" }}>
+    <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "2px solid rgba(139,92,246,0.5)", boxShadow: "0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(139,92,246,0.15)", userSelect: "none", display: "flex", flexDirection: "column", cursor: "pointer" }}>
       {/* Image zone — same 55% as SwipeCard */}
       <div style={{ height: "55%", position: "relative", overflow: "hidden", flexShrink: 0 }}>
         {campaign.image_url ? (
@@ -663,9 +676,9 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
         ) : (
           <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #8b5cf6, #f97316)" }} />
         )}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.7))" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.0) 20%, rgba(0,0,0,0.75))" }} />
 
-        {/* Swipe overlays — identical to SwipeCard */}
+        {/* Swipe overlays */}
         {overlayDir === "right" && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(139,92,246,${overlayOpacity * 0.35})` }}>
             <div style={{ border: `4px solid rgba(139,92,246,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(-12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
@@ -681,31 +694,31 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
           </div>
         )}
 
-        {/* Sponsored badge */}
-        <div style={{ position: "absolute", top: 16, left: 16, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", borderRadius: 50, padding: "4px 12px", display: "flex", alignItems: "center", gap: 5 }}>
-          <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Sponsorisé</span>
+        {/* Sponsored badge — gradient, more visible */}
+        <div style={{ position: "absolute", top: 14, left: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", borderRadius: 50, padding: "4px 12px", display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", textTransform: "uppercase", letterSpacing: "0.12em" }}>⚡ Sponsorisé</span>
         </div>
 
         {/* Headline over image */}
-        <div style={{ position: "absolute", bottom: 16, left: 20, right: 20 }}>
-          <p style={{ fontSize: 24, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
+        <div style={{ position: "absolute", bottom: 14, left: 18, right: 18 }}>
+          <p style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.025em", lineHeight: 1.1, textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
             {campaign.headline}
           </p>
         </div>
       </div>
 
       {/* Content zone */}
-      <div style={{ flex: 1, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12, justifyContent: "space-between" }}>
+      <div style={{ flex: 1, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10, justifyContent: "space-between" }}>
         {campaign.body_text && (
           <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {campaign.body_text}
           </p>
         )}
-        {/* CTA — visual only (swipe right opens the link) */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 16px", borderRadius: 12, background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(249,115,22,0.12))", border: "1px solid rgba(139,92,246,0.25)" }}>
-          <ExternalLink size={14} color="#8b5cf6" />
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#8b5cf6", flex: 1 }}>{campaign.cta_label}</span>
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Swipe →</span>
+        {/* CTA button */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", boxShadow: "0 4px 16px rgba(139,92,246,0.35)" }}>
+          <ExternalLink size={15} color="#fff" />
+          <span style={{ fontSize: 14, fontWeight: 800, color: "#fff", flex: 1, letterSpacing: "-0.01em" }}>{campaign.cta_label}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>Ouvrir →</span>
         </div>
       </div>
     </div>

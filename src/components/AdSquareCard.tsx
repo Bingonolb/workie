@@ -21,7 +21,7 @@ function incrementFreqCap(campaignId: string) {
 }
 
 export function AdSquareCard({ ad }: { ad: AdCampaign }) {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLAnchorElement>(null);
   // null = not yet determined (avoids SSR/client hydration mismatch)
   // true = show, false = hide (freq cap hit)
   const [visible, setVisible] = useState<boolean | null>(null);
@@ -55,15 +55,24 @@ export function AdSquareCard({ ad }: { ad: AdCampaign }) {
   if (!visible) return null;
 
   return (
-    <div ref={cardRef} style={{
-      background: "var(--surface)",
-      border: "1px solid rgba(139,92,246,0.25)",
-      borderRadius: 20,
-      overflow: "hidden",
-      position: "relative",
-      display: "flex",
-      flexDirection: "column",
-    }}>
+    <a
+      ref={cardRef}
+      href={ad.cta_url}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      onClick={() => trackAdClick(ad.id)}
+      style={{
+        background: "var(--surface)",
+        border: "1px solid rgba(139,92,246,0.25)",
+        borderRadius: 20,
+        overflow: "hidden",
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        textDecoration: "none",
+        cursor: "pointer",
+      }}
+    >
       {/* Sponsored label */}
       <div style={{
         position: "absolute", top: 12, left: 12, zIndex: 2,
@@ -105,23 +114,19 @@ export function AdSquareCard({ ad }: { ad: AdCampaign }) {
             {ad.body_text}
           </p>
         )}
-        <a
-          href={ad.cta_url}
-          target="_blank"
-          rel="noopener noreferrer sponsored"
-          onClick={() => trackAdClick(ad.id)}
+        <div
           style={{
             marginTop: 4,
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "9px 16px", borderRadius: 10,
             background: "linear-gradient(135deg, #8b5cf6, #f97316)",
             color: "#fff", fontWeight: 700, fontSize: 13,
-            textDecoration: "none", alignSelf: "flex-start",
+            alignSelf: "flex-start",
           }}
         >
           {ad.cta_label} <ExternalLink size={12} />
-        </a>
+        </div>
       </div>
-    </div>
+    </a>
   );
 }
