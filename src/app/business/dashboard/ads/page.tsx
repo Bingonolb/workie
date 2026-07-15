@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft, CreditCard } from "lucide-react";
 import { getBusinessCampaigns } from "@/lib/actions/ads";
 import { PayCampaignButton } from "./PayCampaignButton";
+import { AdImage } from "./AdImage";
 
 const STATUS_CONFIG = {
   payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.1)",    icon: <CreditCard size={12} />, dot: "#ef4444" },
@@ -185,8 +186,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
 
                       {/* Thumbnail */}
                       <div style={{ width: 90, flexShrink: 0, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={c.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        <AdImage src={c.image_url} />
                         <div style={{ position: "absolute", bottom: 6, left: 6, fontSize: 9, fontWeight: 800, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, textTransform: "uppercase", letterSpacing: "0.04em" }}>
                           {c.format === "square" ? "⬛" : "📱"} {c.format}
                         </div>
