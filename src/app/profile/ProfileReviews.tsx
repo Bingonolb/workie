@@ -117,9 +117,9 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
 
               {/* Salary */}
               <div className="profile-reviews-col-salary" style={{ textAlign: "right" }}>
-                {r.salary_chf ? (
+                {Number(r.salary_chf) > 0 ? (
                   <span style={{ fontSize: 13, fontWeight: 700, color: "#10b981", fontVariantNumeric: "tabular-nums" }}>
-                    {Math.round(r.salary_chf / 1000)}k
+                    {Math.round(Number(r.salary_chf) / 1000)}k
                   </span>
                 ) : <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>}
               </div>

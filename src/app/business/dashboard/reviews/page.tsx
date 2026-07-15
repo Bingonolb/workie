@@ -142,7 +142,7 @@ function ReviewCard({ review, onReload }: { review: Review; onReload: () => void
               { l: "Vie pro/perso", v: review.rating_worklife },
               { l: "Culture", v: review.rating_culture },
               { l: "Évolution", v: review.rating_career },
-            ].filter(x => x.v).map(({ l, v }) => (
+            ].filter(x => Number(x.v) > 0).map(({ l, v }) => (
               <div key={l} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{l}</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{Number(v).toFixed(1)}</span>

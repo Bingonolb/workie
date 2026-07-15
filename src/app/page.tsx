@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Workie — Avis d'employés & salaires réels en Suisse",
-  description: "Découvrez les avis anonymes d'employés, les salaires réels et les offres d'emploi des entreprises suisses. Comparez, choisissez, évoluer.",
+  description: "Découvrez les avis anonymes d'employés, les salaires réels et les offres d'emploi des entreprises suisses. Comparez, choisissez, évoluez.",
   openGraph: {
     title: "Workie — Avis d'employés & salaires réels en Suisse",
     description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",

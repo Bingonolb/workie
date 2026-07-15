@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function isBusiness(supabase: any, userId: string): Promise<boolean> {
@@ -67,7 +68,10 @@ export async function addPenalty(companyId: string): Promise<void> {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") return;
 
-  const { data: existing } = await supabase
+  // Use admin client to bypass RLS for this admin-only operation
+  const admin = createAdminClient();
+
+  const { data: existing } = await admin
     .from("score_events")
     .select("id")
     .eq("company_id", companyId)
@@ -76,13 +80,13 @@ export async function addPenalty(companyId: string): Promise<void> {
     .maybeSingle();
 
   if (existing) {
-    await supabase.from("score_events").delete().eq("id", existing.id);
+    await admin.from("score_events").delete().eq("id", existing.id);
     revalidatePath("/explore");
     revalidatePath(`/company/${companyId}`);
     return;
   }
 
-  await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
+  await admin.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
   revalidatePath("/explore");
   revalidatePath(`/company/${companyId}`);
 }

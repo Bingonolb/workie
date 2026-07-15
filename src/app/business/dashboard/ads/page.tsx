@@ -203,7 +203,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                               </span>
                             </div>
                             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0 }}>
-                              CHF {c.daily_budget_chf}/j · CPM CHF {Number(c.cpm_chf).toFixed(2)}
+                              CHF {Number(c.daily_budget_chf).toFixed(2)}/j · CPM CHF {Number(c.cpm_chf).toFixed(2)}
                               {c.target_cantons.length > 0 && ` · 📍 ${c.target_cantons.slice(0, 3).join(", ")}${c.target_cantons.length > 3 ? ` +${c.target_cantons.length - 3}` : ""}`}
                             </p>
                           </div>

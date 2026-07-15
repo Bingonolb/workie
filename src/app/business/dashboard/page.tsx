@@ -43,7 +43,7 @@ export default async function BusinessDashboardPage() {
     { label: "Note globale", value: avgOverall ?? "–", suffix: "/5", color: "#f59e0b", icon: <Star size={20} color="#f59e0b" fill="#f59e0b" /> },
     { label: "Total avis", value: count, suffix: "", color: "#8b5cf6", icon: <MessageCircle size={20} color="#8b5cf6" /> },
     { label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–", suffix: "", color: "#10b981", icon: <TrendingUp size={20} color="#10b981" /> },
-    { label: "Salaire moyen", value: avgSalary ? `${(Number(avgSalary) / 1000).toFixed(0)}k` : "–", suffix: " CHF", color: "#f97316", icon: <Users size={20} color="#f97316" /> },
+    { label: "Salaire moyen", value: Number(avgSalary) > 0 ? `${(Number(avgSalary) / 1000).toFixed(0)}k` : "–", suffix: " CHF", color: "#f97316", icon: <Users size={20} color="#f97316" /> },
   ];
 
   const categoryRatings = [
@@ -88,7 +88,7 @@ export default async function BusinessDashboardPage() {
       )}
 
       {/* No reviews banner */}
-      {count === 0 && (
+      {Number(count) === 0 && (
         <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "20px 24px", marginBottom: 32, display: "flex", gap: 14, alignItems: "flex-start" }}>
           <AlertCircle size={20} color="#8b5cf6" style={{ flexShrink: 0, marginTop: 2 }} />
           <div>

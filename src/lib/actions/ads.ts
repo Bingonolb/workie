@@ -136,7 +136,10 @@ export async function getActiveAds(opts?: {
 
 export async function getCampaignDailyStats(campaignId: string): Promise<{ day: string; impressions: number; clicks: number }[]> {
   try {
-    const { supabase } = await requireBusiness();
+    const { supabase, companyId } = await requireBusiness();
+    // Verify campaign belongs to the authenticated user's company
+    const { data: campaign } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("company_id", companyId).maybeSingle();
+    if (!campaign) return [];
     const [impRes, clkRes] = await Promise.all([
       supabase.from("ad_impressions")
         .select("viewed_at")
@@ -248,6 +251,11 @@ export async function adminSetCampaignStatus(
   try {
     await requireAdmin();
     const admin = createAdminClient();
+    // Block activating an unpaid campaign
+    if (status === "active") {
+      const { data: camp } = await admin.from("ad_campaigns").select("status").eq("id", campaignId).maybeSingle();
+      if (camp?.status === "payment_pending") return { error: "Cette campagne n'a pas encore été payée." };
+    }
     const { error } = await admin
       .from("ad_campaigns")
       .update({ status, admin_note: note ?? null })
@@ -316,7 +324,10 @@ export async function trackAdClick(campaignId: string): Promise<void> {
 
 export async function getCampaignCantonStats(campaignId: string): Promise<{ canton: string; impressions: number; clicks: number }[]> {
   try {
-    const { supabase } = await requireBusiness();
+    const { supabase, companyId } = await requireBusiness();
+    // Verify campaign belongs to the authenticated user's company
+    const { data: campaign } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("company_id", companyId).maybeSingle();
+    if (!campaign) return [];
     // Capped at 5000 rows — replace with SQL GROUP BY RPC once volume grows
     const [impRes, clkRes] = await Promise.all([
       supabase.from("ad_impressions").select("viewer_canton").eq("campaign_id", campaignId).not("viewer_canton", "is", null).limit(5000),

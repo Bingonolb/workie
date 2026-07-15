@@ -17,9 +17,12 @@ export function HelpfulButton({ reviewId, initialCount }: { reviewId: string; in
     startTransition(async () => {
       try {
         const result = await voteHelpful(reviewId);
-        if (result?.error || result?.alreadyVoted) {
+        if (result?.alreadyVoted) {
           setCount(prev);
-          setVoted(result?.alreadyVoted ?? false);
+          setVoted(true);
+        } else if (result?.error) {
+          setCount(prev);
+          setVoted(false);
         }
       } catch {
         setCount(prev);

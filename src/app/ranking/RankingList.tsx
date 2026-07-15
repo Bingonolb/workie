@@ -94,7 +94,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           const ratingPts = avgRating > 0 && reviewCount > 0
             ? Math.round(avgRating * 20 * Math.log(reviewCount + 1))
             : 0;
-          const communityPts = score - ratingPts;
+          const communityPts = Math.max(0, score - ratingPts);
 
           return (
             <Link key={c.id} href={`/company/${c.id}`} className="ranking-row"

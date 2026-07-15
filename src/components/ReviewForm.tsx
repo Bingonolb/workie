@@ -234,7 +234,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <div style={{ position: "relative" }}>
                 <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-muted)", pointerEvents: "none" }}>CHF</span>
                 <input type="number" value={salary} onChange={e => setSalary(e.target.value)}
-                  placeholder="95000" style={{ ...inp, paddingLeft: 46 }} />
+                  placeholder="95000" min={10000} max={500000} style={{ ...inp, paddingLeft: 46 }} />
               </div>
               <p className="inp-hint">Jamais attribué à ton nom — aide la communauté à connaître les vrais salaires.</p>
             </div>

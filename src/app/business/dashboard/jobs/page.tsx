@@ -288,7 +288,7 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Régions des candidats</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {cantonStats.map(({ canton, count }) => {
-                  const pct = Math.round((count / clicks) * 100);
+                  const pct = clicks > 0 ? Math.round((count / clicks) * 100) : 0;
                   return (
                     <div key={canton}>
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>

@@ -55,7 +55,7 @@ export default function ProfilePage() {
   }, [state?.success]);
 
   if (loading) return <div style={{ padding: 40, color: "var(--text-muted)" }}>Chargement...</div>;
-  if (!company) return <div style={{ padding: 40, color: "#ef4444" }}>Erreur de chargement</div>;
+  if (!company) return <div style={{ padding: 40, color: "var(--text-muted)" }}>Aucune entreprise liée à ce compte.</div>;
 
   return (
     <div className="biz-page" style={{ maxWidth: 760 }}>

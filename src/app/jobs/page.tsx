@@ -142,12 +142,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
         )}
 
         {/* Job list */}
-        {filteredJobs.length === 0 && filterSector || filteredJobs.length === 0 && filterContract ? (
-          <div style={{ textAlign: "center", padding: "60px 24px" }}>
-            <p style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucune offre pour ce filtre</p>
-            <Link href="/jobs" style={{ fontSize: 14, color: "#8b5cf6", textDecoration: "none", fontWeight: 600 }}>Voir toutes les offres</Link>
-          </div>
-        ) : allJobs.length === 0 ? (
+        {allJobs.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px" }}>
             <Briefcase size={56} style={{ opacity: 0.15, margin: "0 auto 24px", display: "block" }} />
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune offre pour le moment</h2>
@@ -157,6 +152,11 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
             <Link href="/business" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
               Vous êtes RH ? Publier une offre <ArrowRight size={16} />
             </Link>
+          </div>
+        ) : filteredJobs.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 24px" }}>
+            <p style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucune offre pour ce filtre</p>
+            <Link href="/jobs" style={{ fontSize: 14, color: "#8b5cf6", textDecoration: "none", fontWeight: 600 }}>Voir toutes les offres</Link>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

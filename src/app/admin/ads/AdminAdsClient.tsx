@@ -124,7 +124,7 @@ export function AdminAdsClient() {
                   {c.body_text && <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 4 }}>{c.body_text}</p>}
 
                   <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>
-                    <span>CHF {c.daily_budget_chf}/j · Total CHF {c.total_budget_chf}</span>
+                    <span>CHF {Number(c.daily_budget_chf).toFixed(2)}/j · Total CHF {Number(c.total_budget_chf).toFixed(2)}</span>
                     <span>CPM CHF {Number(c.cpm_chf).toFixed(2)}</span>
                     {c.target_cantons.length > 0 && <span>📍 {c.target_cantons.join(", ")}</span>}
                     {c.target_sectors.length > 0 && <span>🏭 {c.target_sectors.join(", ")}</span>}

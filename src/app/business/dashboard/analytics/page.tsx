@@ -46,8 +46,8 @@ export default async function AnalyticsPage() {
     favoritesCount: number;
   };
 
-  const maxDist = Math.max(...(dist?.map((d: { count: number }) => d.count) ?? [1]), 1);
-  const maxViewDay = Math.max(...(viewTrend?.map(v => v.count) ?? [1]), 1);
+  const maxDist = Math.max(...(dist?.map((d: { count: number }) => Number(d.count)) ?? [1]), 1);
+  const maxViewDay = Math.max(...(viewTrend?.map(v => Number(v.count)) ?? [1]), 1);
   const totalSeniority = Object.values(seniority ?? {}).reduce((a, b) => a + b, 0);
   const totalFunctions = Object.values(functions ?? {}).reduce((a, b) => a + b, 0);
 
@@ -92,13 +92,14 @@ export default async function AnalyticsPage() {
             <div style={{ minWidth: 560, padding: "0 4px" }}>
               <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 72 }}>
                 {viewTrend.map(({ day, count: cnt }) => {
-                  const h = maxViewDay > 0 ? Math.max(2, (cnt / maxViewDay) * 72) : 2;
+                  const n = Number(cnt);
+                  const h = maxViewDay > 0 ? Math.max(2, (n / maxViewDay) * 72) : 2;
                   const isToday = day === new Date().toISOString().slice(0, 10);
                   return (
                     <div key={day} style={{ flex: 1, minWidth: 12, height: h, borderRadius: "3px 3px 0 0",
-                      background: isToday ? "#10b981" : cnt > 0 ? "#8b5cf6" : "var(--border)",
-                      opacity: isToday ? 1 : cnt > 0 ? 0.75 : 0.3,
-                    }} title={`${day} : ${cnt} vue${cnt !== 1 ? "s" : ""}`} />
+                      background: isToday ? "#10b981" : n > 0 ? "#8b5cf6" : "var(--border)",
+                      opacity: isToday ? 1 : n > 0 ? 0.75 : 0.3,
+                    }} title={`${day} : ${n} vue${n !== 1 ? "s" : ""}`} />
                   );
                 })}
               </div>
@@ -133,7 +134,7 @@ export default async function AnalyticsPage() {
         ))}
       </div>
 
-      {count === 0 ? (
+      {Number(count) === 0 ? (
         <div style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.12)", borderRadius: 16, padding: "32px 24px", textAlign: "center", marginBottom: 28 }}>
           <BarChart2 size={40} style={{ opacity: 0.2, margin: "0 auto 16px" }} />
           <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Les données de réputation arrivent avec les premiers avis</p>
@@ -178,9 +179,9 @@ export default async function AnalyticsPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[5, 4, 3, 2, 1].map(star => {
                   const item = dist?.find((d: { star: number }) => d.star === star);
-                  const cnt = item?.count ?? 0;
+                  const cnt = Number(item?.count ?? 0);
                   const pct = maxDist > 0 ? (cnt / maxDist) * 100 : 0;
-                  const totalPct = count > 0 ? Math.round((cnt / count) * 100) : 0;
+                  const totalPct = Number(count) > 0 ? Math.round((cnt / Number(count)) * 100) : 0;
                   return (
                     <div key={star} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-muted)", width: 20, textAlign: "right" }}>{star}★</span>
