@@ -197,7 +197,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
                           <div style={{ minWidth: 0 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                              <h2 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 280 }}>{c.headline}</h2>
+                              <h2 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "min(280px, 100%)" }}>{c.headline}</h2>
                               <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 50, background: st.bg, color: st.color, flexShrink: 0 }}>
                                 {st.icon} {st.label}
                               </span>
@@ -209,7 +209,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                           </div>
 
                           {/* Stats */}
-                          <div style={{ display: "flex", gap: 16, flexShrink: 0 }}>
+                          <div className="ads-card-stats" style={{ display: "flex", gap: 16, flexShrink: 0 }}>
                             <div style={{ textAlign: "right" }}>
                               <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(c.impression_count).toLocaleString("fr-CH")}</p>
                               <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><Eye size={10} /> vues</p>

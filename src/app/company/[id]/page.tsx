@@ -249,7 +249,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           {/* Left column */}
           <div>
             {/* Key stats */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 32 }}>
+            <div className="company-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 32 }}>
               {[
                 { icon: <MapPin size={18} color="#8b5cf6" />, value: `${company.city}${company.canton ? `, ${company.canton}` : ""}`, label: "Localisation" },
                 { icon: <Users size={18} color="#f97316" />, value: company.employee_range, label: "Employés" },
@@ -502,7 +502,7 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
           </div>
           {review.title && <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>}
         </div>
-        <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{ textAlign: "right", flexShrink: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
           <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{age}</p>
           {review.job_title && (
             <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-sub)", background: "var(--surface2)", borderRadius: 6, padding: "2px 8px" }}>

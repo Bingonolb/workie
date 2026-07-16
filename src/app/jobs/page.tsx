@@ -97,7 +97,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
         </div>
       </section>
 
-      <main style={{ maxWidth: 860, margin: "0 auto", padding: "36px 20px 80px" }}>
+      <main style={{ maxWidth: 860, margin: "0 auto", padding: "36px 20px calc(72px + env(safe-area-inset-bottom))" }}>
 
         {/* Stats + filters */}
         {allJobs.length > 0 && (

@@ -216,7 +216,7 @@ export default async function ExplorePage({
           </div>
         ) : (
           <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
+            <div className="explore-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
               {(() => {
                 // Inject ads after positions 3 and 9 (0-indexed) — never at position 0
                 const AD_SLOTS = [3, 9];

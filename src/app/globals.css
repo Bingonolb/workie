@@ -143,7 +143,14 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* Company cards grid — force 1 col on small mobile */
 @media (max-width: 480px) {
-  [style*="minmax(300px"] { grid-template-columns: 1fr !important; }
+  .explore-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Ads campaign card — hide per-card stats on small mobile (KPI row at top shows aggregates) */
+@media (max-width: 480px) {
+  .ads-card-stats {
+    display: none !important;
+  }
 }
 
 /* Two-column layout → stacked */

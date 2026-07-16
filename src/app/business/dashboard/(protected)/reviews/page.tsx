@@ -72,10 +72,10 @@ function ReplyForm({ reviewId, existing, onSuccess }: { reviewId: string; existi
         style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "var(--text)", resize: "vertical", boxSizing: "border-box" }}
       />
       <div style={{ display: "flex", gap: 8 }}>
-        <button type="submit" disabled={pending || text.trim().length < 10} style={{ padding: "9px 20px", borderRadius: 8, background: text.trim().length >= 10 ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface2)", color: text.trim().length >= 10 ? "#fff" : "var(--text-muted)", border: "none", fontWeight: 700, fontSize: 13, cursor: text.trim().length >= 10 ? "pointer" : "not-allowed", opacity: pending ? 0.6 : 1 }}>
+        <button type="submit" disabled={pending || text.trim().length < 10} style={{ padding: "12px 20px", borderRadius: 8, background: text.trim().length >= 10 ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface2)", color: text.trim().length >= 10 ? "#fff" : "var(--text-muted)", border: "none", fontWeight: 700, fontSize: 13, cursor: text.trim().length >= 10 ? "pointer" : "not-allowed", opacity: pending ? 0.6 : 1 }}>
           {pending ? "Publication..." : "Publier la réponse"}
         </button>
-        <button type="button" onClick={() => { setOpen(false); setText(existing ?? ""); }} style={{ padding: "9px 16px", borderRadius: 8, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+        <button type="button" onClick={() => { setOpen(false); setText(existing ?? ""); }} style={{ padding: "12px 16px", borderRadius: 8, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
           Annuler
         </button>
       </div>
