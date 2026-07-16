@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 
 // ── Rate limiting ────────────────────────────────────────────────────────────
 //
@@ -13,11 +15,11 @@ import { updateSession } from "@/lib/supabase/middleware";
 // Cache of Ratelimit instances keyed by "limit:windowSec"
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rlCache = new Map<string, any>();
-let redisInstance: unknown = null;
+let redisInstance: Redis | null = null;
 let upstashReady: boolean | null = null; // null = not yet attempted
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getUpstashLimiter(limit: number, windowSec: number): Promise<any | null> {
+function getUpstashLimiter(limit: number, windowSec: number): any | null {
   if (upstashReady === false) return null;
   const url   = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -27,11 +29,9 @@ async function getUpstashLimiter(limit: number, windowSec: number): Promise<any 
   if (rlCache.has(cacheKey)) return rlCache.get(cacheKey);
 
   try {
-    const { Redis }     = await import("@upstash/redis");
-    const { Ratelimit } = await import("@upstash/ratelimit");
     if (!redisInstance) redisInstance = new Redis({ url, token });
     const limiter = new Ratelimit({
-      redis: redisInstance as InstanceType<typeof Redis>,
+      redis: redisInstance,
       limiter: Ratelimit.slidingWindow(limit, `${windowSec} s`),
       prefix: "wk_rl",
     });
@@ -70,7 +70,7 @@ function maybePrune() {
 
 // Main rate-limit check: tries Upstash first, falls back to in-memory
 async function rateLimited(ip: string, bucket: string, limit: number): Promise<boolean> {
-  const limiter = await getUpstashLimiter(limit, 60);
+  const limiter = getUpstashLimiter(limit, 60);
   if (limiter) {
     const { success } = await limiter.limit(`${ip}:${bucket}`);
     return !success;
