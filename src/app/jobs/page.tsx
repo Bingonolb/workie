@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   title: "Offres d'emploi en Suisse · Workie",
   description: "Toutes les offres d'emploi des entreprises vérifiées sur Workie. Salaires, culture, avis — choisissez en connaissance de cause.",
   alternates: { canonical: "https://www.workie.ch/jobs" },
+  openGraph: {
+    title: "Offres d'emploi en Suisse · Workie",
+    description: "Les jobs des meilleurs employeurs suisses — avec avis anonymes et salaires réels.",
+    url: "https://www.workie.ch/jobs",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "Jobs en Suisse · Workie" },
 };
 
 const CONTRACT_COLORS: Record<string, { bg: string; color: string }> = {

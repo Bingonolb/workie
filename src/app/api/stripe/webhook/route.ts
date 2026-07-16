@@ -28,11 +28,18 @@ export async function POST(req: NextRequest) {
         if (session.mode === "payment" && session.metadata?.type === "penalty_pass") {
           const userId = session.metadata.user_id ?? session.client_reference_id;
           if (userId) {
-            const { error } = await supabase.rpc("increment_penalty_credits", { uid: userId, amount: 10 });
-            if (error) {
-              // Fallback: plain update adding 10
-              const { data: p } = await supabase.from("profiles").select("penalty_credits").eq("id", userId).maybeSingle();
-              await supabase.from("profiles").update({ penalty_credits: Number(p?.penalty_credits ?? 0) + 10 }).eq("id", userId);
+            // Idempotency guard: if the page fallback already credited this session, skip
+            const { data: prof } = await supabase.from("profiles")
+              .select("stripe_verification_session_id")
+              .eq("id", userId).maybeSingle();
+            if (prof?.stripe_verification_session_id !== session.id) {
+              const { error } = await supabase.rpc("increment_penalty_credits", { uid: userId, amount: 10 });
+              if (error) {
+                const { data: p } = await supabase.from("profiles").select("penalty_credits").eq("id", userId).maybeSingle();
+                await supabase.from("profiles").update({ penalty_credits: Number(p?.penalty_credits ?? 0) + 10 }).eq("id", userId);
+              }
+              // Mark session as credited so the page fallback won't double-add
+              await supabase.from("profiles").update({ stripe_verification_session_id: session.id }).eq("id", userId);
             }
           }
           break;

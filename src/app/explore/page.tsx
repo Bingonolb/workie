@@ -7,6 +7,13 @@ import { Navbar } from "@/components/Navbar";
 export const metadata: Metadata = {
   title: "Explorer les entreprises suisses · Workie",
   description: "Découvre les avis anonymes et salaires des entreprises en Suisse. Tech, Pharma, Finance, Conseil et plus.",
+  openGraph: {
+    title: "Explorer les entreprises suisses · Workie",
+    description: "1700+ entreprises suisses — avis anonymes, salaires réels, classement communautaire.",
+    url: "https://www.workie.ch/explore",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "Explorer les entreprises suisses · Workie" },
 };
 import { CompanyCard } from "@/components/CompanyCard";
 import { getCompanies, getAllCompaniesForSwipe } from "@/lib/actions/companies";
@@ -106,14 +113,8 @@ export default async function ExplorePage({
     const supabase = await createClient();
     if (penaltySuccess && process.env.STRIPE_SECRET_KEY) {
       try {
-        // Read current credits first — if > 0, webhook already ran, don't double-add
-        const { data: cur } = await supabase.from("profiles").select("penalty_credits").eq("id", user.id).maybeSingle();
-        const curCredits = Number(cur?.penalty_credits ?? 0);
-        if (curCredits > 0) return curCredits;
-
         const Stripe = (await import("stripe")).default;
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-        // Increased limit to 50 to reduce risk of missing the session on busy accounts
         const sessions = await stripe.checkout.sessions.list({ limit: 50 });
         const paid = sessions.data.find(
           s => s.status === "complete" &&
@@ -122,8 +123,21 @@ export default async function ExplorePage({
                (s.metadata?.user_id === user.id || s.client_reference_id === user.id)
         );
         if (paid) {
+          // Idempotency: mark this session as credited in the profile to avoid double-add
+          // with the webhook. Use upsert on a dedicated column; if already set, skip.
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("penalty_credits, stripe_verification_session_id")
+            .eq("id", user.id)
+            .maybeSingle();
+          // stripe_verification_session_id reused as last_penalty_session_id
+          if (prof?.stripe_verification_session_id === paid.id) {
+            // Webhook already ran and stored this session id — credits already added
+            return Number(prof.penalty_credits ?? 0);
+          }
+          // Webhook hasn't run yet — add credits and record the session id as a guard
           await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 10 });
-          // Return actual DB balance after increment (not hardcoded 10)
+          await supabase.from("profiles").update({ stripe_verification_session_id: paid.id }).eq("id", user.id);
           const { data: updated } = await supabase.from("profiles").select("penalty_credits").eq("id", user.id).maybeSingle();
           return Number(updated?.penalty_credits ?? 10);
         }

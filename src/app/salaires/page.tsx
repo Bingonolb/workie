@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   title: "Salaires en Suisse par secteur · Workie",
   description: "Salaires réels et anonymes des employés suisses par secteur, poste et type de contrat. Données issues d'avis vérifiés sur Workie.",
   alternates: { canonical: "https://www.workie.ch/salaires" },
+  openGraph: {
+    title: "Salaires en Suisse par secteur · Workie",
+    description: "Salaires bruts anonymes par secteur — Tech, Finance, Pharma et plus. Données réelles d'employés suisses.",
+    url: "https://www.workie.ch/salaires",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "Salaires en Suisse · Workie" },
 };
 
 type SectorStat = {

@@ -18,11 +18,17 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     await requireAdmin();
     const admin = createAdminClient();
 
+    const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+    const MAX_IMG = 10 * 1024 * 1024;
+
     // Handle cover file upload (takes priority over URL field)
     let cover_url: string | null = String(formData.get("cover_url") || "") || null;
     const coverFile = formData.get("cover_file");
     if (coverFile instanceof File && coverFile.size > 0) {
-      const ext = coverFile.name.split(".").pop() || "jpg";
+      if (!ALLOWED_IMG.includes(coverFile.type)) return { error: "Format non supporté (JPG, PNG, WebP, GIF)." };
+      if (coverFile.size > MAX_IMG) return { error: "Image trop lourde (max 10 MB)." };
+      const ext = EXT_MAP[coverFile.type] ?? "jpg";
       const path = `covers/${id}/${randomUUID()}.${ext}`;
       const { error: upErr } = await admin.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
       if (!upErr) {

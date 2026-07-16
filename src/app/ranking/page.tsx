@@ -12,6 +12,13 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses · Workie",
   description: "Le vrai classement des entreprises en Suisse — calculé sur les avis anonymes, les salaires et les votes de la communauté.",
+  openGraph: {
+    title: "Classement des meilleurs employeurs suisses · Workie",
+    description: "200 entreprises classées par note, salaire et votes anonymes d'employés.",
+    url: "https://www.workie.ch/ranking",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image", title: "Classement des employeurs suisses · Workie" },
 };
 
 export default async function RankingPage() {

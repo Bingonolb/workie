@@ -298,10 +298,16 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
       instagram_url: String(formData.get("instagram_url") || "") || null,
     };
 
+    const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+    const MAX_IMG = 10 * 1024 * 1024;
+
     // Logo upload
     const logoFile = formData.get("logo_file");
     if (logoFile instanceof File && logoFile.size > 0) {
-      const ext = logoFile.name.split(".").pop() || "jpg";
+      if (!ALLOWED_IMG.includes(logoFile.type)) return { error: "Format logo non supporté (JPG, PNG, WebP, GIF)." };
+      if (logoFile.size > MAX_IMG) return { error: "Logo trop lourd (max 10 MB)." };
+      const ext = EXT_MAP[logoFile.type] ?? "jpg";
       const path = `logos/${company.id}.${ext}`;
       const { error: upErr } = await supabase.storage.from("covers").upload(path, logoFile, { contentType: logoFile.type, upsert: true });
       if (!upErr) {
@@ -315,7 +321,9 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
     // Cover upload
     const coverFile = formData.get("cover_file");
     if (coverFile instanceof File && coverFile.size > 0) {
-      const ext = coverFile.name.split(".").pop() || "jpg";
+      if (!ALLOWED_IMG.includes(coverFile.type)) return { error: "Format cover non supporté (JPG, PNG, WebP, GIF)." };
+      if (coverFile.size > MAX_IMG) return { error: "Cover trop lourde (max 10 MB)." };
+      const ext = EXT_MAP[coverFile.type] ?? "jpg";
       const path = `covers/${company.id}/business.${ext}`;
       const { error: upErr } = await supabase.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
       if (!upErr) {
