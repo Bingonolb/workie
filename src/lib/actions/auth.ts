@@ -74,7 +74,7 @@ export async function forgotPassword(
   if (!email) return { error: "Email requis." };
 
   const supabase = await createClient();
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${base}/auth/callback?next=/reset-password`,
   });
@@ -108,7 +108,7 @@ export async function signInWithGoogle(formData: FormData) {
   const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";
 
   const supabase = await createClient();
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
