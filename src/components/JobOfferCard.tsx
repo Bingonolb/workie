@@ -32,7 +32,11 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   return (
@@ -132,11 +136,11 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             {job.description ? (
               <div style={{ marginBottom: 24 }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>Description du poste</p>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{job.description}</p>
+                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{job.description}</p>
               </div>
             ) : (
               <div style={{ marginBottom: 24 }}>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>
+                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7 }}>
                   Clique sur "Postuler" pour voir tous les détails et envoyer ta candidature directement à l'entreprise.
                 </p>
               </div>

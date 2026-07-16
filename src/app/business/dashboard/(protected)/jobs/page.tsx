@@ -73,8 +73,8 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 20, padding: "32px", marginBottom: 28 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
+    <div className="biz-create-job-form" style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 20, padding: "32px", marginBottom: 28 }}>
+      <div className="biz-form-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
         <div>
           <p style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 2 }}>Nouvelle offre d&apos;emploi</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Remplissez les informations — plus c&apos;est complet, plus vous attirez les bons profils.</p>
@@ -197,18 +197,18 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
   return (
     <div style={{ background: "var(--surface2)", border: `1px solid ${job.is_active ? "var(--border)" : "var(--border)"}`, borderRadius: 16, overflow: "hidden", opacity: job.is_active ? 1 : 0.65 }}>
       {/* Header */}
-      <div style={{ padding: "18px 20px", display: "flex", alignItems: "flex-start", gap: 16 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="biz-job-card-header">
+        <div className="biz-job-card-info" style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)" }}>{job.title}</p>
-            <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 50, fontWeight: 700,
+            <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 50, fontWeight: 700,
               background: job.is_active ? "rgba(16,185,129,0.1)" : "var(--surface3, var(--border))",
               color: job.is_active ? "#10b981" : "var(--text-muted)" }}>
               {job.is_active ? "Active" : "Désactivée"}
             </span>
-            {job.contract_type && <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", fontWeight: 600 }}>{job.contract_type}</span>}
-            {job.work_mode && <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 50, background: "rgba(16,185,129,0.08)", color: "#10b981", fontWeight: 600 }}>{job.work_mode}</span>}
-            {job.experience_level && <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 50, background: "rgba(249,115,22,0.08)", color: "#f97316", fontWeight: 600 }}>{job.experience_level}</span>}
+            {job.contract_type && <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", fontWeight: 600 }}>{job.contract_type}</span>}
+            {job.work_mode && <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 50, background: "rgba(16,185,129,0.08)", color: "#10b981", fontWeight: 600 }}>{job.work_mode}</span>}
+            {job.experience_level && <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 50, background: "rgba(249,115,22,0.08)", color: "#f97316", fontWeight: 600 }}>{job.experience_level}</span>}
           </div>
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
             {job.location && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, color: "var(--text-muted)" }}><MapPin size={13} /> {job.location}</span>}
@@ -226,14 +226,14 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
         </div>
 
         {/* Quick stats chips */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <div className="biz-job-card-stats" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <button onClick={handleStatsToggle} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: clicks > 0 ? "#8b5cf6" : "var(--text-muted)", background: clicks > 0 ? "rgba(139,92,246,0.08)" : "var(--surface)", border: `1px solid ${clicks > 0 ? "rgba(139,92,246,0.25)" : "var(--border2)"}`, borderRadius: 8, padding: "5px 10px", cursor: "pointer" }}>
             <MousePointer size={12} /> {clicks} candidature{clicks !== 1 ? "s" : ""}
             <BarChart2 size={11} style={{ marginLeft: 2, opacity: 0.6 }} />
           </button>
         </div>
 
-        <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
+        <div className="biz-job-card-actions" style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
           <button onClick={() => setExpanded(e => !e)} title="Détails"
             className="biz-action-btn"
             style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>

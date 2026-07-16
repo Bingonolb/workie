@@ -439,6 +439,12 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* ─── Job offer modal → bottom sheet on mobile ──────────────────── */
 
+/* Always contain scroll within the modal */
+.job-modal {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media (max-width: 640px) {
   .job-modal-overlay {
     align-items: flex-end !important;
@@ -451,6 +457,48 @@ main, .page-main, .page-main-sm, .page-main-md {
     width: 100% !important;
     max-width: 100% !important;
   }
+  /* Bigger text in modal on mobile */
+  .job-modal h2 { font-size: 20px !important; }
+  .job-modal p { font-size: 14px !important; }
+}
+
+/* ─── Business dashboard — job card responsive layout ─────────── */
+
+.biz-job-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+@media (max-width: 640px) {
+  .biz-job-card-header {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    padding: 14px 14px !important;
+  }
+  .biz-job-card-info {
+    flex-basis: 100% !important;
+  }
+  .biz-job-card-info p:first-child { font-size: 15px !important; }
+  .biz-job-card-stats {
+    flex: 1 !important;
+  }
+  .biz-job-card-actions {
+    flex-shrink: 0 !important;
+  }
+  /* Create job form — tighter padding on mobile */
+  .biz-create-job-form {
+    padding: 18px !important;
+    border-radius: 16px !important;
+  }
+  .biz-create-job-form .biz-form-header {
+    margin-bottom: 20px !important;
+  }
+  /* Increase label sizes in biz forms */
+  .biz-job-badge { font-size: 12px !important; padding: 3px 10px !important; }
+  /* Job card meta text */
+  .biz-job-meta { font-size: 13px !important; }
 }
 
 /* ─── Image loading placeholders ───────────────────────────────── */
