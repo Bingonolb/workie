@@ -1,48 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
-import { Redis } from "@upstash/redis";
-import { Ratelimit } from "@upstash/ratelimit";
-
-// ── Rate limiting ────────────────────────────────────────────────────────────
-//
-// Two-tier strategy:
-//  1. Global (Upstash Redis) — single counter shared across all Vercel instances.
-//     Activate by adding UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN to
-//     Vercel env vars (free Upstash tier handles this easily).
-//  2. Per-instance fallback (in-memory Map) — used when Upstash is not configured.
-//     Effective limit in production = limit × number of warm instances.
-
-// Cache of Ratelimit instances keyed by "limit:windowSec"
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const rlCache = new Map<string, any>();
-let redisInstance: Redis | null = null;
-let upstashReady: boolean | null = null; // null = not yet attempted
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getUpstashLimiter(limit: number, windowSec: number): any | null {
-  if (upstashReady === false) return null;
-  const url   = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) { upstashReady = false; return null; }
-
-  const cacheKey = `${limit}:${windowSec}`;
-  if (rlCache.has(cacheKey)) return rlCache.get(cacheKey);
-
-  try {
-    if (!redisInstance) redisInstance = new Redis({ url, token });
-    const limiter = new Ratelimit({
-      redis: redisInstance,
-      limiter: Ratelimit.slidingWindow(limit, `${windowSec} s`),
-      prefix: "wk_rl",
-    });
-    rlCache.set(cacheKey, limiter);
-    upstashReady = true;
-    return limiter;
-  } catch {
-    upstashReady = false;
-    return null;
-  }
-}
 
 // In-memory fallback (per Vercel instance)
 const rlMap = new Map<string, [number, number]>();
@@ -68,13 +25,8 @@ function maybePrune() {
   }
 }
 
-// Main rate-limit check: tries Upstash first, falls back to in-memory
-async function rateLimited(ip: string, bucket: string, limit: number): Promise<boolean> {
-  const limiter = getUpstashLimiter(limit, 60);
-  if (limiter) {
-    const { success } = await limiter.limit(`${ip}:${bucket}`);
-    return !success;
-  }
+// Per-instance in-memory rate limiting
+function rateLimited(ip: string, bucket: string, limit: number): boolean {
   return inMemoryLimited(ip, bucket, limit);
 }
 
@@ -90,7 +42,7 @@ export async function middleware(request: NextRequest) {
 
   // Search: 30 req/min
   if (pathname === "/api/companies/search") {
-    if (await rateLimited(ip, "search", 30)) {
+    if (rateLimited(ip, "search", 30)) {
       return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
   }
@@ -101,21 +53,21 @@ export async function middleware(request: NextRequest) {
     pathname === "/api/business/ads/checkout" ||
     pathname === "/api/user/checkout-penalty"
   )) {
-    if (await rateLimited(ip, "checkout", 5)) {
+    if (rateLimited(ip, "checkout", 5)) {
       return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
   }
 
   // Server Actions: 120/min
   if (isServerAction) {
-    if (await rateLimited(ip, "actions", 120)) {
+    if (rateLimited(ip, "actions", 120)) {
       return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
   }
 
   // Auth pages — brute force protection: 15 req/min
   if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
-    if (await rateLimited(ip, "auth", 15)) {
+    if (rateLimited(ip, "auth", 15)) {
       return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
     }
   }
