@@ -677,7 +677,7 @@ select:focus {
   background: var(--surface2);
   color: var(--text-muted);
   transition: all 0.15s;
-  min-height: 38px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
 }
