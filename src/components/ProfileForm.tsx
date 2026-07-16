@@ -114,8 +114,7 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
         </div>
       </div>
 
-      <style>{`@media (max-width: 480px) { .profile-2col { grid-template-columns: 1fr !important; } }`}</style>
-      <div className="profile-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+<div className="profile-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div style={{ gridColumn: "1 / -1" }}>
           <label style={lbl}>Nom complet</label>
           <input name="full_name" defaultValue={profile?.full_name ?? ""} placeholder="Alex Martin" style={inp}

@@ -666,6 +666,10 @@ select:focus {
   line-height: 1.5;
 }
 
+@media (max-width: 480px) {
+  .profile-2col { grid-template-columns: 1fr !important; }
+}
+
 /* Pill picker — consistent touch targets */
 .pill-btn {
   padding: 8px 14px;
@@ -677,7 +681,7 @@ select:focus {
   background: var(--surface2);
   color: var(--text-muted);
   transition: all 0.15s;
-  min-height: 44px;
+  min-height: 48px;
   display: inline-flex;
   align-items: center;
 }
