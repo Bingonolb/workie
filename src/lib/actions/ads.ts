@@ -209,7 +209,12 @@ export async function createCampaign(
     let image_url = String(formData.get("image_url") || "").trim();
     const imageFile = formData.get("image_file");
     if (imageFile instanceof File && imageFile.size > 0) {
-      const ext = imageFile.name.split(".").pop() || "jpg";
+      const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+      if (!ALLOWED_TYPES.includes(imageFile.type)) return { error: "Format non supporté. Utilisez JPG, PNG, WebP ou GIF." };
+      if (imageFile.size > MAX_BYTES) return { error: "Image trop lourde (max 10 MB)." };
+      const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+      const ext = EXT_MAP[imageFile.type] ?? "jpg";
       const path = `ads/${companyId}/${randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("covers").upload(path, imageFile, { contentType: imageFile.type, upsert: false });
       if (!upErr) {

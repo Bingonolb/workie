@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { TrendingUp, Users } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
 
-export const revalidate = 3600;
+export const revalidate = 300; // 5 min — revalidatePath("/salaires") appelé aussi après chaque avis
 
 export const metadata: Metadata = {
   title: "Salaires en Suisse par secteur · Workie",

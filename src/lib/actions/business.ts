@@ -114,8 +114,9 @@ export async function getBusinessAnalytics() {
       return vals.length > 0 ? (vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(1) : "–";
     };
 
-    const recommendRate = count > 0
-      ? Math.round((r.filter(x => x.would_recommend === "oui").length / count) * 100)
+    const withRecommend = r.filter(x => x.would_recommend);
+    const recommendRate = withRecommend.length > 0
+      ? Math.round((withRecommend.filter(x => x.would_recommend === "oui").length / withRecommend.length) * 100)
       : null;
 
     const salaries = r.filter(x => x.salary_chf && Number(x.salary_chf) > 0).map(x => Number(x.salary_chf));

@@ -104,6 +104,8 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
 
   revalidatePath(`/company/${company_id}`);
   revalidatePath("/profile");
+  revalidatePath("/salaires");
+  revalidatePath("/ranking");
   return { success: true };
 }
 
@@ -125,10 +127,12 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
 
   const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
   if (rpcErr) {
-    // Rollback the vote insert to keep counts consistent
-    const { error: rollbackErr } = await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
-    if (rollbackErr) console.error("[voteHelpful] rollback failed — vote row stuck without count increment:", rollbackErr.message);
-    return { error: rpcErr.message };
+    // Rollback the vote insert to keep counts consistent.
+    // If rollback also fails, delete by both columns so the unique constraint
+    // doesn't permanently block the user from voting.
+    await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
+    console.error("[voteHelpful] increment_helpful RPC failed:", rpcErr.message);
+    return { error: "Erreur serveur, veuillez réessayer." };
   }
 
   // Revalidate the company page so the helpful count is fresh for next visitors
