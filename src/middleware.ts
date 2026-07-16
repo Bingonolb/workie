@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Stripe checkout: 5 req/min (prevent checkout session spam)
-  if (pathname === "/api/business/checkout" && method === "POST") {
+  if ((pathname === "/api/business/checkout" || pathname === "/api/business/ads/checkout") && method === "POST") {
     if (rateLimited(ip, "checkout", 5)) {
       return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
