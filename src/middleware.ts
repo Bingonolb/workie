@@ -1,71 +1,121 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-// In-memory rate limiter (Edge runtime — warm within a Vercel region)
-// Key: "ip:bucket", Value: [count, window_start_ms]
-const rl = new Map<string, [number, number]>();
-const RL_WINDOW = 60_000; // 1 minute
+// ── Rate limiting ────────────────────────────────────────────────────────────
+//
+// Two-tier strategy:
+//  1. Global (Upstash Redis) — single counter shared across all Vercel instances.
+//     Activate by adding UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN to
+//     Vercel env vars (free Upstash tier handles this easily).
+//  2. Per-instance fallback (in-memory Map) — used when Upstash is not configured.
+//     Effective limit in production = limit × number of warm instances.
 
-function rateLimited(ip: string, bucket: string, limit: number): boolean {
+// Cache of Ratelimit instances keyed by "limit:windowSec"
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const rlCache = new Map<string, any>();
+let redisInstance: unknown = null;
+let upstashReady: boolean | null = null; // null = not yet attempted
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getUpstashLimiter(limit: number, windowSec: number): Promise<any | null> {
+  if (upstashReady === false) return null;
+  const url   = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) { upstashReady = false; return null; }
+
+  const cacheKey = `${limit}:${windowSec}`;
+  if (rlCache.has(cacheKey)) return rlCache.get(cacheKey);
+
+  try {
+    const { Redis }     = await import("@upstash/redis");
+    const { Ratelimit } = await import("@upstash/ratelimit");
+    if (!redisInstance) redisInstance = new Redis({ url, token });
+    const limiter = new Ratelimit({
+      redis: redisInstance as InstanceType<typeof Redis>,
+      limiter: Ratelimit.slidingWindow(limit, `${windowSec} s`),
+      prefix: "wk_rl",
+    });
+    rlCache.set(cacheKey, limiter);
+    upstashReady = true;
+    return limiter;
+  } catch {
+    upstashReady = false;
+    return null;
+  }
+}
+
+// In-memory fallback (per Vercel instance)
+const rlMap = new Map<string, [number, number]>();
+const RL_WINDOW_MS = 60_000;
+
+function inMemoryLimited(ip: string, bucket: string, limit: number): boolean {
   const key = `${ip}:${bucket}`;
   const now = Date.now();
-  const entry = rl.get(key);
-  if (!entry || now - entry[1] > RL_WINDOW) {
-    rl.set(key, [1, now]);
-    return false;
-  }
+  const entry = rlMap.get(key);
+  if (!entry || now - entry[1] > RL_WINDOW_MS) { rlMap.set(key, [1, now]); return false; }
   if (entry[0] >= limit) return true;
   entry[0]++;
   return false;
 }
 
-// Periodically prune stale entries to avoid unbounded memory growth
 let lastPrune = Date.now();
 function maybePrune() {
   const now = Date.now();
-  if (now - lastPrune < 300_000) return; // prune every 5 min
+  if (now - lastPrune < 300_000) return;
   lastPrune = now;
-  for (const [key, [, start]] of rl) {
-    if (now - start > RL_WINDOW * 2) rl.delete(key);
+  for (const [key, [, start]] of rlMap) {
+    if (now - start > RL_WINDOW_MS * 2) rlMap.delete(key);
   }
 }
+
+// Main rate-limit check: tries Upstash first, falls back to in-memory
+async function rateLimited(ip: string, bucket: string, limit: number): Promise<boolean> {
+  const limiter = await getUpstashLimiter(limit, 60);
+  if (limiter) {
+    const { success } = await limiter.limit(`${ip}:${bucket}`);
+    return !success;
+  }
+  return inMemoryLimited(ip, bucket, limit);
+}
+
+// ── Middleware ───────────────────────────────────────────────────────────────
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const isServerAction = request.method === "POST" && !!request.headers.get("next-action");
+  const isServerAction = method === "POST" && !!request.headers.get("next-action");
 
   maybePrune();
 
-  // ── API routes ──────────────────────────────────────────────────────────────
-
   // Search: 30 req/min
   if (pathname === "/api/companies/search") {
-    if (rateLimited(ip, "search", 30)) {
+    if (await rateLimited(ip, "search", 30)) {
       return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
   }
 
-  // Stripe checkout: 5 req/min (prevent checkout session spam)
-  if ((pathname === "/api/business/checkout" || pathname === "/api/business/ads/checkout") && method === "POST") {
-    if (rateLimited(ip, "checkout", 5)) {
+  // All Stripe checkout endpoints: 5 req/min
+  if (method === "POST" && (
+    pathname === "/api/business/checkout" ||
+    pathname === "/api/business/ads/checkout" ||
+    pathname === "/api/user/checkout-penalty"
+  )) {
+    if (await rateLimited(ip, "checkout", 5)) {
       return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
   }
 
-  // ── Server Actions (POST with Next-Action header) ───────────────────────────
-  // General SA guard: 120/min — bots hit this well before legit users
+  // Server Actions: 120/min
   if (isServerAction) {
-    if (rateLimited(ip, "actions", 120)) {
+    if (await rateLimited(ip, "actions", 120)) {
       return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
   }
 
-  // ── Auth pages — brute force protection ────────────────────────────────────
-  // /login, /signup, /forgot-password, /reset-password: 15 req/min
+  // Auth pages — brute force protection: 15 req/min
   if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
-    if (rateLimited(ip, "auth", 15)) {
+    if (await rateLimited(ip, "auth", 15)) {
       return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
     }
   }
