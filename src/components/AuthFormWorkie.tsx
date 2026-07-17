@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 type ActionResult = { error?: string } | undefined;
 
@@ -22,6 +22,9 @@ export function AuthFormWorkie({
   next?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
+  const [email, setEmail] = useState("");
+  const [emailConfirm, setEmailConfirm] = useState("");
+  const emailMismatch = mode === "signup" && emailConfirm.length > 0 && email !== emailConfirm;
 
   const CANTONS = [
     "Argovie","Appenzell Rhodes-Extérieures","Appenzell Rhodes-Intérieures",
@@ -82,12 +85,28 @@ export function AuthFormWorkie({
         )}
         <div>
           <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email {mode === "signup" ? "*" : ""}</label>
-          <input type="email" name="email" required placeholder="toi@email.com" style={inp} autoComplete="email" />
+          <input
+            type="email" name="email" required placeholder="toi@email.com"
+            style={inp} autoComplete="email"
+            value={mode === "signup" ? email : undefined}
+            onChange={mode === "signup" ? e => setEmail(e.target.value) : undefined}
+          />
         </div>
         {mode === "signup" && (
           <div>
             <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Confirme ton email *</label>
-            <input type="email" name="email_confirm" required placeholder="toi@email.com" style={inp} autoComplete="off" />
+            <input
+              type="email" name="email_confirm" required placeholder="toi@email.com"
+              style={{ ...inp, border: `1px solid ${emailMismatch ? "#ef4444" : "var(--border2)"}` }}
+              autoComplete="off"
+              value={emailConfirm}
+              onChange={e => setEmailConfirm(e.target.value)}
+            />
+            {emailMismatch && (
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#ef4444" }}>
+                Les adresses email ne correspondent pas.
+              </p>
+            )}
           </div>
         )}
         <div>
@@ -101,10 +120,11 @@ export function AuthFormWorkie({
           </p>
         )}
 
-        <button type="submit" disabled={pending} style={{
+        <button type="submit" disabled={pending || emailMismatch} style={{
           width: "100%", background: "linear-gradient(135deg, #8b5cf6, #f97316)",
           color: "#fff", fontWeight: 700, fontSize: 15, border: "none",
-          borderRadius: 10, padding: "13px 0", cursor: "pointer", opacity: pending ? 0.6 : 1,
+          borderRadius: 10, padding: "13px 0", cursor: (pending || emailMismatch) ? "not-allowed" : "pointer",
+          opacity: (pending || emailMismatch) ? 0.5 : 1,
           marginTop: 4,
         }}>
           {pending ? "..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
