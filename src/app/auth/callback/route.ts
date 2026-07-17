@@ -27,11 +27,12 @@ export async function GET(request: Request) {
   // On INSERT: generates a username from the user's email to satisfy NOT NULL.
   // On UPDATE (conflict on id): preserves existing username via ignoreDuplicates=false
   // but the WITH CHECK on the UPDATE RLS policy blocks role changes server-side.
-  async function upsertProfileGeo(userId: string, extra?: Record<string, unknown>) {
-    const geoFields = geo.canton ? {
-      canton: geo.canton,
-      city: geo.city ?? undefined,
-    } : {};
+  // Returns true if this is a brand-new profile (used to decide onboarding redirect)
+  async function upsertProfileGeo(userId: string, extra?: Record<string, unknown>): Promise<boolean> {
+    const geoFields = geo.city ? { city: geo.city } : {};
+
+    const { data: { user: u } } = await supabase.auth.getUser();
+    const metaCanton = u?.user_metadata?.canton as string | undefined;
 
     // Check if the profile already exists to avoid overwriting username/role
     const { data: existing } = await supabase
@@ -41,23 +42,25 @@ export async function GET(request: Request) {
       .maybeSingle();
 
     if (existing) {
-      // Profile exists — only update geo + extra (never touch username)
-      const updates = { ...geoFields, ...extra };
+      // Profile exists — update city from geo, canton from metadata if present, + extra
+      const cantonUpdate = metaCanton ? { canton: metaCanton } : {};
+      const updates = { ...geoFields, ...cantonUpdate, ...(extra as object) };
       if (Object.keys(updates).length > 0) {
-        await supabase.from("profiles").update(updates).eq("id", userId);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await supabase.from("profiles").update(updates as any).eq("id", userId);
       }
+      return false;
     } else {
-      // New profile — generate username from email, use canton from user_metadata if set
-      const { data: { user: u } } = await supabase.auth.getUser();
+      // New profile — use canton from user_metadata, fallback to geo
       const emailBase = u?.email?.split("@")[0]?.replace(/[^a-z0-9]/gi, "").toLowerCase() ?? "user";
       const username = (u?.user_metadata?.username as string | undefined) ?? `${emailBase}_${userId.slice(0, 6)}`;
       const fullName = (u?.user_metadata?.full_name as string | undefined) ?? null;
-      const metaCanton = u?.user_metadata?.canton as string | undefined;
-      const cantonField = metaCanton ? { canton: metaCanton } : geoFields;
+      const cantonField = metaCanton ? { canton: metaCanton } : {};
       await supabase.from("profiles").upsert(
-        { id: userId, username, full_name: fullName, ...cantonField, ...extra },
+        { id: userId, username, full_name: fullName, ...cantonField, ...geoFields, ...extra },
         { onConflict: "id", ignoreDuplicates: true }
       );
+      return true;
     }
   }
 
@@ -85,11 +88,11 @@ export async function GET(request: Request) {
           });
           return NextResponse.redirect(`${origin}/business/checkout`);
         }
-        await upsertProfileGeo(user.id);
+        const isNew = await upsertProfileGeo(user.id);
+        if (next) return NextResponse.redirect(`${origin}${next}`);
+        if (isNew) return NextResponse.redirect(`${origin}/onboarding`);
       }
       if (next) return NextResponse.redirect(`${origin}${next}`);
-      // New signup confirmation → onboarding
-      if (type === "signup") return NextResponse.redirect(`${origin}/onboarding`);
       return NextResponse.redirect(`${origin}/explore`);
     }
     return NextResponse.redirect(`${origin}/login?error=invite`);
@@ -112,20 +115,10 @@ export async function GET(request: Request) {
           });
           return NextResponse.redirect(`${origin}/business/checkout`);
         }
-        await upsertProfileGeo(user.id);
-      }
-
-      if (next) return NextResponse.redirect(`${origin}${next}`);
-
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("claimed_company_id")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (profile?.claimed_company_id) {
-          return NextResponse.redirect(`${origin}/business/checkout`);
-        }
+        const isNew = await upsertProfileGeo(user.id);
+        if (next) return NextResponse.redirect(`${origin}${next}`);
+        if (isNew) return NextResponse.redirect(`${origin}/onboarding`);
+        return NextResponse.redirect(`${origin}/explore`);
       }
 
       return NextResponse.redirect(`${origin}/explore`);
