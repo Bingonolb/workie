@@ -3,9 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 
 function extractGeo(request: Request) {
   const h = request.headers;
+  const rawCity = h.get("x-vercel-ip-city");
   return {
     canton: h.get("x-vercel-ip-country-region") ?? null, // e.g. "GE", "VD"
-    city:   h.get("x-vercel-ip-city") ?? null,
+    city:   rawCity ? decodeURIComponent(rawCity) : null, // Vercel URL-encodes accented chars
     country: h.get("x-vercel-ip-country") ?? null,
   };
 }
