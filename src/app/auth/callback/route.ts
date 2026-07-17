@@ -90,7 +90,8 @@ export async function GET(request: Request) {
           });
           return NextResponse.redirect(`${origin}/business/checkout`);
         }
-        await upsertProfileGeo(user.id);
+        const isNew = await upsertProfileGeo(user.id);
+        if (isNew) return NextResponse.redirect(`${origin}/explore?welcome=1`);
       }
       if (next) return NextResponse.redirect(`${origin}${next}`);
       return NextResponse.redirect(`${origin}/explore`);
@@ -115,8 +116,9 @@ export async function GET(request: Request) {
           });
           return NextResponse.redirect(`${origin}/business/checkout`);
         }
-        await upsertProfileGeo(user.id);
+        const isNew = await upsertProfileGeo(user.id);
         if (next) return NextResponse.redirect(`${origin}${next}`);
+        if (isNew) return NextResponse.redirect(`${origin}/explore?welcome=1`);
         return NextResponse.redirect(`${origin}/explore`);
       }
 

@@ -7,9 +7,11 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 import "./globals.css";
+import { Suspense } from "react";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { CookieBanner } from "@/components/CookieBanner";
+import { WelcomeModal } from "@/components/WelcomeModal";
 
 export const metadata: Metadata = {
   title: "Workie — Les entreprises, sans filtre.",
@@ -27,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>
           <CookieBanner />
+          <Suspense><WelcomeModal /></Suspense>
         </ThemeProvider>
       </body>
     </html>
