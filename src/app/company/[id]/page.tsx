@@ -266,6 +266,14 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         <div className="company-grid two-col" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
           {/* Left column */}
           <div>
+            {/* À propos — mobile only (before stats) */}
+            {company.description && (
+              <div className="about-mobile" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", marginBottom: 32, display: "none" }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>
+                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
+              </div>
+            )}
+
             {/* Key stats */}
             <div className="company-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 32 }}>
               {[
@@ -280,14 +288,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 </div>
               ))}
             </div>
-
-            {/* À propos — mobile only (after stats, before ratings) */}
-            {company.description && (
-              <div className="about-mobile" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", marginBottom: 32, display: "none" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
-              </div>
-            )}
 
             {/* Ratings breakdown */}
             {Number(company.review_count) > 0 && (
