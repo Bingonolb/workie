@@ -28,15 +28,30 @@ function maybePrune() {
 }
 
 // ── Zero-network session detection ────────────────────────────────────────────
+// @supabase/ssr v0.12+ stores cookies as "base64-<base64url_encoded_json>".
+// Older reads expect raw JSON — we handle both formats.
 const PROJECT_REF = "xtbdxfzbbuedlktpqpna";
+const BASE64_COOKIE_PREFIX = "base64-";
+
+function decodeSupabaseCookie(value: string): string {
+  if (!value.startsWith(BASE64_COOKIE_PREFIX)) return value;
+  const b64 = value.slice(BASE64_COOKIE_PREFIX.length)
+    .replace(/-/g, "+").replace(/_/g, "/");
+  const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+  // atob is available in Edge runtime (Web API)
+  return atob(padded);
+}
 
 function hasSession(request: NextRequest): boolean {
+  // Chunked cookies (.0, .1, …): presence of .0 means a session exists
   const chunked = request.cookies.get(`sb-${PROJECT_REF}-auth-token.0`);
   if (chunked !== undefined) return true;
+
   const single = request.cookies.get(`sb-${PROJECT_REF}-auth-token`);
   if (!single?.value) return false;
   try {
-    const session = JSON.parse(single.value) as { refresh_token?: string };
+    const raw = decodeSupabaseCookie(single.value);
+    const session = JSON.parse(raw) as { refresh_token?: string };
     return !!session.refresh_token;
   } catch {
     return false;
