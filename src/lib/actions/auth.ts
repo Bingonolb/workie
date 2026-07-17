@@ -144,6 +144,41 @@ export async function signOut() {
   redirect("/login");
 }
 
+export async function deleteAccount(): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non authentifié." };
+
+  // Business accounts cannot self-delete (admin must handle)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("claimed_company_id")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile?.claimed_company_id) {
+    return { error: "Les comptes entreprise ne peuvent pas être supprimés automatiquement. Contactez le support." };
+  }
+
+  // Delete user data via admin client (bypasses RLS)
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const admin = createAdminClient();
+
+  // Delete in dependency order
+  await admin.from("review_votes").delete().eq("user_id", user.id);
+  await admin.from("reviews").delete().eq("user_id", user.id);
+  await admin.from("favorites").delete().eq("user_id", user.id);
+  await admin.from("notifications").delete().eq("user_id", user.id);
+  await admin.from("profiles").delete().eq("id", user.id);
+
+  // Delete the auth user
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) return { error: error.message };
+
+  // Sign out locally and redirect
+  await supabase.auth.signOut();
+  redirect("/");
+}
+
 export async function signInWithGoogle(formData: FormData) {
   const rawNext = String(formData.get("next") || "");
   const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";

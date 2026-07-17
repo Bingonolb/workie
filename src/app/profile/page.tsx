@@ -10,6 +10,7 @@ import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import type { Profile } from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { signOut } from "@/lib/actions/auth";
+import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import Link from "next/link";
 
 export default async function ProfilePage() {
@@ -172,6 +173,7 @@ export default async function ProfilePage() {
                     Se déconnecter
                   </button>
                 </form>
+                <DeleteAccountButton />
               </div>
             </div>
 
