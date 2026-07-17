@@ -102,6 +102,19 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     createClient(),
     getBusinessCompanyId().catch(() => null),
   ]);
+
+  // Similar companies — fetched after company resolves (needs sector)
+  const similarCompaniesData = company ? await (async () => {
+    const sb = await createClient();
+    const { data } = await sb
+      .from("companies")
+      .select("id, name, city, avg_rating, review_count, cover_url, is_verified, sector")
+      .eq("sector", company.sector)
+      .neq("id", id)
+      .order("score", { ascending: false })
+      .limit(4);
+    return data ?? [];
+  })().catch(() => []) : [];
   const [repliesResult, jobsResult] = await Promise.all([
     Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
     Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
@@ -484,6 +497,48 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             )}
           </div>
         </div>
+
+        {/* Similar companies */}
+        {similarCompaniesData.length > 0 && (
+          <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 20 }}>
+              Autres entreprises · {company.sector}
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
+              {similarCompaniesData.map((c: { id: string; name: string; city: string; avg_rating: number | string | null; review_count: number | string | null; cover_url: string | null; is_verified: boolean | null; sector: string }) => (
+                <Link key={c.id} href={`/company/${c.id}`} style={{ textDecoration: "none" }}>
+                  <div className="company-card" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
+                    <div style={{ height: 80, background: c.cover_url ? "none" : "linear-gradient(135deg, #8b5cf6, #3b82f6)", position: "relative" }}>
+                      {c.cover_url && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      )}
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6))" }} />
+                    </div>
+                    <div style={{ padding: "12px 14px" }}>
+                      <p style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                        {c.name}
+                        {c.is_verified && (
+                          <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }}>
+                            <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
+                            <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
+                          </svg>
+                        )}
+                      </p>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-muted)" }}>
+                        {Number(c.avg_rating) > 0 && (
+                          <span style={{ color: "#f59e0b", fontWeight: 700 }}>★ {Number(c.avg_rating).toFixed(1)}</span>
+                        )}
+                        <span>{c.city}</span>
+                        {Number(c.review_count) > 0 && <span>· {c.review_count} avis</span>}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

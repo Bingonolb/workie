@@ -18,14 +18,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = await createClient();
     const { data: companies } = await supabase
       .from("companies")
-      .select("id")
+      .select("id, review_count")
       .order("score", { ascending: false })
       .limit(5000);
 
     const companyRoutes: MetadataRoute.Sitemap = (companies ?? []).map(c => ({
       url: `${base}/company/${c.id}`,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
+      changeFrequency: (Number(c.review_count) > 0 ? "daily" : "weekly") as "daily" | "weekly",
+      priority: Number(c.review_count) > 0 ? 0.8 : 0.5,
     }));
 
     return [...staticRoutes, ...companyRoutes];
