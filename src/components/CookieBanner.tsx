@@ -28,8 +28,11 @@ export function CookieBanner() {
 
   return (
     <div style={{
-      position: "fixed", bottom: 80, left: "50%", transform: "translateX(-50%)",
-      width: "min(560px, calc(100vw - 32px))",
+      position: "fixed",
+      bottom: "calc(env(safe-area-inset-bottom) + 74px)",
+      left: 16, right: 16,
+      maxWidth: 560,
+      margin: "0 auto",
       background: "var(--surface)", border: "1px solid var(--border)",
       borderRadius: 16, padding: "16px 20px",
       boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
