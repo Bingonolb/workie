@@ -325,8 +325,24 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             </h2>
 
             {reviews.length === 0 ? (
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "40px", textAlign: "center", marginBottom: 32 }}>
-                <p style={{ fontSize: 15, color: "var(--text-muted)" }}>Pas encore d&apos;avis. Sois le premier !</p>
+              <div style={{
+                background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))",
+                border: "1px solid rgba(139,92,246,0.15)",
+                borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
+              }}>
+                <p style={{ fontSize: 32, marginBottom: 12 }}>🌟</p>
+                <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
+                <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
+                  Tu as travaillé ici ? Ton avis anonyme aide des centaines de candidats à faire le bon choix.
+                </p>
+                <span style={{
+                  display: "inline-block",
+                  background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                  color: "#fff", fontWeight: 700, borderRadius: 12,
+                  padding: "10px 24px", fontSize: 14,
+                }}>
+                  Laisser le premier avis ↓
+                </span>
               </div>
             ) : (
               <div style={{ position: "relative", marginBottom: 32 }}>

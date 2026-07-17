@@ -710,3 +710,13 @@ select:focus {
   margin-left: 6px;
   vertical-align: middle;
 }
+
+/* Company card — hover lift effect */
+.company-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.company-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  border-color: rgba(139,92,246,0.25) !important;
+}

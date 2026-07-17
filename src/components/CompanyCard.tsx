@@ -57,7 +57,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 
   return (
     <Link href={`/company/${company.id}`} style={{ textDecoration: "none", display: "block" }}>
-      <div style={{
+      <div className="company-card" style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
         borderRadius: 20,
@@ -135,11 +135,15 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
             )}
           </div>
 
-          {company.description && (
+          {company.description ? (
             <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.55, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
               {company.description}
             </p>
-          )}
+          ) : Number(company.review_count) === 0 ? (
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12, fontStyle: "italic", opacity: 0.7 }}>
+              ✨ Sois le premier à laisser un avis
+            </p>
+          ) : null}
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
             <InfoChip icon={<MapPin size={12} />} label={company.city} />
