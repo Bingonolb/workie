@@ -28,7 +28,7 @@ function welcomeHtml(username: string): string {
   <tr>
     <td style="background:linear-gradient(135deg,#8b5cf6 0%,#f97316 100%);padding:48px 40px 40px;text-align:center;">
       <h1 style="margin:0;font-size:36px;font-weight:900;letter-spacing:-0.03em;color:#ffffff;">workie</h1>
-      <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.8);letter-spacing:0.05em;text-transform:uppercase;">Avis d'employés &amp; salaires réels en Suisse</p>
+      <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.85);font-style:italic;letter-spacing:0.01em;">Les entreprises suisses, sans filtre.</p>
     </td>
   </tr>
 
