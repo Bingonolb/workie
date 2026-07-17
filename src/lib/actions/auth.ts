@@ -6,6 +6,32 @@ import { sendWelcomeEmail } from "@/lib/email";
 
 type ActionState = { error?: string } | undefined;
 
+// Disposable email domains blocked to prevent bot accounts
+const BLOCKED_DOMAINS = new Set([
+  "mailinator.com","guerrillamail.com","guerrillamail.net","guerrillamail.org",
+  "guerrillamail.de","guerrillamail.biz","guerrillamail.info","grr.la",
+  "tempmail.com","temp-mail.org","temp-mail.io","throwam.com","throwaway.email",
+  "yopmail.com","yopmail.fr","cool.fr.nf","jetable.fr.nf","nospam.ze.tc",
+  "nomail.xl.cx","mega.zik.dj","speed.1s.fr","courriel.fr.nf","moncourrier.fr.nf",
+  "dispostable.com","mailnull.com","spamgourmet.com","trashmail.com","trashmail.me",
+  "trashmail.at","trashmail.io","trashmail.net","trashmail.org","discard.email",
+  "fakeinbox.com","maildrop.cc","sharklasers.com","guerrillamailblock.com",
+  "spam4.me","spamfree24.org","spamfree.eu","mailnesia.com","mailnull.com",
+  "spamspot.com","spamthisplease.com","spamhereplease.com","trashdevil.com",
+  "deadaddress.com","filzmail.com","getairmail.com","junk1.tk","spamfree24.de",
+  "spamfree24.eu","spamfree24.info","spamfree24.net","spamfree24.org",
+  "objectmail.com","obobbo.com","odaymail.com","oneoffemail.com","onewaymail.com",
+  "10minutemail.com","10minutemail.net","20minutemail.com","emailondeck.com",
+  "burnermail.io","mohmal.com","tempinbox.com","inoutmail.de","inoutmail.eu",
+  "mytrashmail.com","nospamfor.us","nomail.pw","owlpic.com","supergreatmail.com",
+]);
+
+function isDisposableEmail(email: string): boolean {
+  const domain = email.split("@")[1]?.toLowerCase();
+  if (!domain) return false;
+  return BLOCKED_DOMAINS.has(domain);
+}
+
 export async function signUp(
   _prevState: ActionState,
   formData: FormData
@@ -21,6 +47,9 @@ export async function signUp(
   }
   if (password.length < 6) {
     return { error: "Le mot de passe doit faire au moins 6 caractères." };
+  }
+  if (isDisposableEmail(email)) {
+    return { error: "Les adresses email temporaires ne sont pas acceptées." };
   }
 
   const supabase = await createClient();
