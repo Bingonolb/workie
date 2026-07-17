@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
 
 // ── In-memory rate limiting (per Vercel instance) ─────────────────────────────
 const rlMap = new Map<string, [number, number]>();
@@ -27,6 +26,57 @@ function maybePrune() {
     if (now - start > RL_WINDOW_MS * 2) rlMap.delete(k);
   }
 }
+
+// ── Zero-network session detection ────────────────────────────────────────────
+// Reads the Supabase auth cookie directly and decodes the JWT locally.
+// No SDK, no network call, no timeout risk.
+// Pages still call getUser() (network-verified) for actual security.
+const PROJECT_REF = "xtbdxfzbbuedlktpqpna";
+
+function getSessionUserId(request: NextRequest): string | null {
+  // @supabase/ssr chunks large cookies: sb-{ref}-auth-token.0, .1, ...
+  let raw = "";
+  const first = request.cookies.get(`sb-${PROJECT_REF}-auth-token.0`)?.value;
+  if (first !== undefined) {
+    raw = first;
+    for (let i = 1; i < 10; i++) {
+      const chunk = request.cookies.get(`sb-${PROJECT_REF}-auth-token.${i}`)?.value;
+      if (!chunk) break;
+      raw += chunk;
+    }
+  } else {
+    raw = request.cookies.get(`sb-${PROJECT_REF}-auth-token`)?.value ?? "";
+  }
+
+  if (!raw) return null;
+
+  try {
+    const session = JSON.parse(raw) as { access_token?: string };
+    const jwt = session.access_token;
+    if (!jwt) return null;
+
+    // Decode JWT payload without any crypto (routing only — pages verify via getUser)
+    const b64 = jwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(b64)) as { sub?: string; exp?: number };
+
+    // Reject expired tokens
+    if (!payload.exp || payload.exp < Date.now() / 1000) return null;
+
+    return payload.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
+const PUBLIC_PATHS = [
+  "/login", "/signup", "/auth",
+  "/forgot-password", "/reset-password",
+  "/explore", "/company", "/ranking", "/salaires", "/jobs",
+  "/business", "/api",
+  "/cgu", "/confidentialite",
+  "/robots.txt", "/sitemap.xml", "/_next", "/favicon",
+  "/onboarding",
+];
 
 export async function middleware(request: NextRequest) {
   try {
@@ -65,8 +115,24 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
     }
 
-    // Session routing — reads cookie only, zero network call
-    return await updateSession(request);
+    // Auth routing — zero network, reads cookie only
+    const userId = getSessionUserId(request);
+    const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p)) || pathname === "/";
+
+    if (!userId && !isPublic) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname + request.nextUrl.search);
+      return NextResponse.redirect(url);
+    }
+
+    if (userId && (pathname === "/login" || pathname === "/signup")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/explore";
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next();
   } catch {
     return NextResponse.next();
   }
