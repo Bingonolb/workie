@@ -28,6 +28,7 @@ import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
+import { LogoImg } from "@/components/LogoImg";
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
@@ -198,12 +199,10 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
               {/* Logo overlay */}
               {company.logo_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <LogoImg
                   className="company-hero-logo"
                   src={company.logo_url}
                   alt={`${company.name} logo`}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   style={{ width: 76, height: 76, borderRadius: 14, objectFit: "contain", background: "#fff", border: "3px solid rgba(255,255,255,0.15)", flexShrink: 0, boxShadow: "0 4px 24px rgba(0,0,0,0.4)" }}
                 />
               )}
