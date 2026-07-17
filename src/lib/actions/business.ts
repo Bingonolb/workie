@@ -351,8 +351,8 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
     const content = String(formData.get("content") || "").trim();
     if (!content || content.length < 10) return { error: "Réponse trop courte (min 10 caractères)." };
 
-    // Verify the review belongs to this company
-    const { data: review } = await supabase.from("reviews").select("id").eq("id", review_id).eq("company_id", company.id).maybeSingle();
+    // Verify the review belongs to this company and get its author
+    const { data: review } = await supabase.from("reviews").select("id, user_id").eq("id", review_id).eq("company_id", company.id).maybeSingle();
     if (!review) return { error: "Avis introuvable ou accès refusé." };
 
     // Upsert reply
@@ -361,6 +361,20 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
       { onConflict: "review_id" }
     );
     if (error) return { error: error.message };
+
+    // Notify the review author (fire-and-forget — never blocks the response)
+    if (review.user_id) {
+      const { createAdminClient } = await import("@/lib/supabase/admin");
+      const admin = createAdminClient();
+      void admin.from("notifications").insert({
+        user_id: review.user_id,
+        type: "review_reply",
+        title: `${company.name} a répondu à ton avis`,
+        body: content.slice(0, 120) + (content.length > 120 ? "…" : ""),
+        data: { company_id: company.id, review_id, company_name: company.name },
+        read: false,
+      });
+    }
 
     revalidatePath("/business/dashboard/reviews");
     revalidatePath(`/company/${company.id}`);

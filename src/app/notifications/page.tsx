@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { Bell, Briefcase, CheckCheck, ArrowLeft } from "lucide-react";
+import { Bell, Briefcase, CheckCheck, ArrowLeft, MessageCircle } from "lucide-react";
 import { getNotifications, markAllRead, markRead, type Notification } from "@/lib/actions/notifications";
 
 function timeAgo(date: string) {
@@ -20,6 +20,11 @@ const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: st
     icon: <Briefcase size={16} />,
     color: "#8b5cf6",
     bg: "rgba(139,92,246,0.12)",
+  },
+  review_reply: {
+    icon: <MessageCircle size={16} />,
+    color: "#10b981",
+    bg: "rgba(16,185,129,0.12)",
   },
 };
 
@@ -97,7 +102,11 @@ export default function NotificationsPage() {
           {notifications.map(n => {
             const cfg = TYPE_CONFIG[n.type] ?? { icon: <Bell size={16} />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" };
             const data = n.data as Record<string, string>;
-            const href = n.type === "new_job_offer" && data.company_id ? `/company/${data.company_id}` : "/jobs";
+            const href = n.type === "review_reply" && data.company_id
+              ? `/company/${data.company_id}#avis`
+              : n.type === "new_job_offer" && data.company_id
+              ? `/company/${data.company_id}`
+              : "/jobs";
 
             return (
               <Link
