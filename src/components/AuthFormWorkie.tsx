@@ -61,12 +61,18 @@ export function AuthFormWorkie({
         <input type="hidden" name="next" value={next} />
         {mode === "signup" && (
           <>
-            <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Pseudo</label>
-              <input name="username" required placeholder="alex_workie" style={inp} />
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Prénom *</label>
+                <input name="first_name" required placeholder="Alice" style={inp} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Nom *</label>
+                <input name="last_name" required placeholder="Dupont" style={inp} />
+              </div>
             </div>
             <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton</label>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
               <select name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
                 <option value="">Sélectionne ton canton</option>
                 {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
@@ -75,9 +81,15 @@ export function AuthFormWorkie({
           </>
         )}
         <div>
-          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email</label>
-          <input type="email" name="email" required placeholder="toi@email.com" style={inp} />
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email {mode === "signup" ? "*" : ""}</label>
+          <input type="email" name="email" required placeholder="toi@email.com" style={inp} autoComplete="email" />
         </div>
+        {mode === "signup" && (
+          <div>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Confirme ton email *</label>
+            <input type="email" name="email_confirm" required placeholder="toi@email.com" style={inp} autoComplete="off" />
+          </div>
+        )}
         <div>
           <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Mot de passe</label>
           <input type="password" name="password" required minLength={6} placeholder="••••••••" style={inp} />

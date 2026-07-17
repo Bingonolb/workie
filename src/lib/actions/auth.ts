@@ -35,13 +35,18 @@ export async function signUp(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const email = String(formData.get("email") || "");
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const emailConfirm = String(formData.get("email_confirm") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
-  const username = String(formData.get("username") || "").trim();
+  const firstName = String(formData.get("first_name") || "").trim();
+  const lastName = String(formData.get("last_name") || "").trim();
   const canton = String(formData.get("canton") || "").trim();
 
-  if (!email || !password || !username) {
+  if (!email || !password || !firstName || !lastName) {
     return { error: "Tous les champs sont requis." };
+  }
+  if (email !== emailConfirm) {
+    return { error: "Les deux adresses email ne correspondent pas." };
   }
   if (!canton) {
     return { error: "Sélectionne ton canton." };
@@ -53,12 +58,16 @@ export async function signUp(
     return { error: "Les adresses email temporaires ne sont pas acceptées." };
   }
 
+  // Generate a username from first + last name
+  const username = `${firstName.replace(/[^a-z0-9]/gi, "").toLowerCase()}_${lastName.replace(/[^a-z0-9]/gi, "").toLowerCase()}`.slice(0, 30);
+  const fullName = `${firstName} ${lastName}`;
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { username, canton },
+      data: { username, full_name: fullName, first_name: firstName, last_name: lastName, canton },
       // No `next` param — callback will redirect to /onboarding for type=signup
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback`,
     },

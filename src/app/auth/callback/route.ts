@@ -49,12 +49,13 @@ export async function GET(request: Request) {
     } else {
       // New profile — generate username from email, use canton from user_metadata if set
       const { data: { user: u } } = await supabase.auth.getUser();
-      const emailBase = u?.email?.split("@")[0]?.replace(/[^a-z0-9_]/gi, "_").toLowerCase() ?? "user";
+      const emailBase = u?.email?.split("@")[0]?.replace(/[^a-z0-9]/gi, "").toLowerCase() ?? "user";
       const username = (u?.user_metadata?.username as string | undefined) ?? `${emailBase}_${userId.slice(0, 6)}`;
+      const fullName = (u?.user_metadata?.full_name as string | undefined) ?? null;
       const metaCanton = u?.user_metadata?.canton as string | undefined;
       const cantonField = metaCanton ? { canton: metaCanton } : geoFields;
       await supabase.from("profiles").upsert(
-        { id: userId, username, ...cantonField, ...extra },
+        { id: userId, username, full_name: fullName, ...cantonField, ...extra },
         { onConflict: "id", ignoreDuplicates: true }
       );
     }
