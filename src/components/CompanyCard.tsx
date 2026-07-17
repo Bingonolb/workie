@@ -39,6 +39,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 }) {
   const [fav, setFav] = useState(isFav);
   const [pending, startTransition] = useTransition();
+  const [logoError, setLogoError] = useState(false);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
   const handleFav = (e: React.MouseEvent) => {
@@ -103,20 +104,31 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
             </button>
           )}
 
-          {/* Company name over cover */}
-          <div style={{ position: "absolute", bottom: 10, left: 14, right: 50 }}>
-            <p className="card-company-name" style={{ fontSize: 14, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
-              {company.name}
-              {company.is_verified && (
-                <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 16, height: 16, flexShrink: 0 }} aria-label="Entreprise vérifiée">
-                  <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
-                  <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
-                </svg>
-              )}
-            </p>
-            {company.subsector && (
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{company.subsector}</p>
+          {/* Company name + logo over cover */}
+          <div style={{ position: "absolute", bottom: 10, left: 14, right: 50, display: "flex", alignItems: "flex-end", gap: 10 }}>
+            {company.logo_url && !logoError && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={company.logo_url}
+                alt=""
+                onError={() => setLogoError(true)}
+                style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0 }}
+              />
             )}
+            <div style={{ minWidth: 0 }}>
+              <p className="card-company-name" style={{ fontSize: 14, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
+                {company.name}
+                {company.is_verified && (
+                  <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 16, height: 16, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                    <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
+                    <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
+                  </svg>
+                )}
+              </p>
+              {company.subsector && (
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{company.subsector}</p>
+              )}
+            </div>
           </div>
         </div>
 

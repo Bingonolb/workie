@@ -203,6 +203,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   className="company-hero-logo"
                   src={company.logo_url}
                   alt={`${company.name} logo`}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   style={{ width: 76, height: 76, borderRadius: 14, objectFit: "contain", background: "#fff", border: "3px solid rgba(255,255,255,0.15)", flexShrink: 0, boxShadow: "0 4px 24px rgba(0,0,0,0.4)" }}
                 />
               )}
