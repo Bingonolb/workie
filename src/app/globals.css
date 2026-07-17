@@ -56,7 +56,7 @@ body {
   --gold: #f59e0b;
   --green: #10b981;
   --red: #ef4444;
-  --nav-bg: rgba(13,13,19,0.85);
+  --nav-bg: rgb(13,13,19);
   --nav-border: rgba(255,255,255,0.06);
   --scrollbar-thumb: #242433;
 }
@@ -71,7 +71,7 @@ html.light {
   --text: #18182e;
   --text-muted: #6060a0;
   --text-sub: #5050a0;
-  --nav-bg: rgba(255,255,255,0.88);
+  --nav-bg: rgb(242,242,247);
   --nav-border: rgba(0,0,0,0.08);
   --scrollbar-thumb: #dcdce8;
 }
@@ -296,8 +296,6 @@ main, .page-main, .page-main-sm, .page-main-md {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--nav-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
   z-index: 40;
@@ -347,8 +345,6 @@ main, .page-main, .page-main-sm, .page-main-md {
     height: calc(58px + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
     background: var(--nav-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--nav-border);
     z-index: 10001;
     align-items: center;
