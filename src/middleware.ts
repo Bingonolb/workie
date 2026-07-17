@@ -83,49 +83,49 @@ async function rateLimited(ip: string, bucket: string, limit: number): Promise<b
 // ── Middleware ───────────────────────────────────────────────────────────────
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const method = request.method;
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const isServerAction = method === "POST" && !!request.headers.get("next-action");
-
-  maybePrune();
-
-  // Search: 30 req/min
-  if (pathname === "/api/companies/search") {
-    if (await rateLimited(ip, "search", 30)) {
-      return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
-    }
-  }
-
-  // All Stripe checkout endpoints: 5 req/min
-  if (method === "POST" && (
-    pathname === "/api/business/checkout" ||
-    pathname === "/api/business/ads/checkout" ||
-    pathname === "/api/user/checkout-penalty"
-  )) {
-    if (await rateLimited(ip, "checkout", 5)) {
-      return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
-    }
-  }
-
-  // Server Actions: 120/min
-  if (isServerAction) {
-    if (await rateLimited(ip, "actions", 120)) {
-      return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
-    }
-  }
-
-  // Auth pages — brute force protection: 15 req/min
-  if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
-    if (await rateLimited(ip, "auth", 15)) {
-      return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
-    }
-  }
-
   try {
+    const { pathname } = request.nextUrl;
+    const method = request.method;
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const isServerAction = method === "POST" && !!request.headers.get("next-action");
+
+    maybePrune();
+
+    // Search: 30 req/min
+    if (pathname === "/api/companies/search") {
+      if (await rateLimited(ip, "search", 30)) {
+        return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      }
+    }
+
+    // All Stripe checkout endpoints: 5 req/min
+    if (method === "POST" && (
+      pathname === "/api/business/checkout" ||
+      pathname === "/api/business/ads/checkout" ||
+      pathname === "/api/user/checkout-penalty"
+    )) {
+      if (await rateLimited(ip, "checkout", 5)) {
+        return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      }
+    }
+
+    // Server Actions: 120/min
+    if (isServerAction) {
+      if (await rateLimited(ip, "actions", 120)) {
+        return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      }
+    }
+
+    // Auth pages — brute force protection: 15 req/min
+    if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
+      if (await rateLimited(ip, "auth", 15)) {
+        return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
+      }
+    }
+
     return await updateSession(request);
   } catch {
-    // Supabase unreachable from edge — fail open rather than taking the site down
+    // Any uncaught error (Redis, Supabase, network) → fail open, never crash the site
     return NextResponse.next();
   }
 }
