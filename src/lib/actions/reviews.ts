@@ -109,6 +109,31 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   revalidatePath("/profile");
   revalidatePath("/salaires");
   revalidatePath("/ranking");
+
+  // Notify the business owner (fire-and-forget)
+  void (async () => {
+    try {
+      const { createAdminClient } = await import("@/lib/supabase/admin");
+      const admin = createAdminClient();
+      // Find the business user linked to this company (company must be subscribed)
+      const { data: co } = await admin.from("companies").select("is_subscribed").eq("id", company_id).maybeSingle();
+      if (!co?.is_subscribed) return;
+      const { data: profile } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("claimed_company_id", company_id)
+        .maybeSingle();
+      if (!profile?.id) return;
+      const { data: authUser } = await admin.auth.admin.getUserById(profile.id);
+      const email = authUser?.user?.email;
+      const companyName = (await admin.from("companies").select("name").eq("id", company_id).maybeSingle())?.data?.name ?? "";
+      if (email && companyName) {
+        const { sendNewReviewEmail } = await import("@/lib/email");
+        await sendNewReviewEmail(email, companyName, company_id, rating_overall);
+      }
+    } catch { /* silent */ }
+  })();
+
   return { success: true };
 }
 

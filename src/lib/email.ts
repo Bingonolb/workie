@@ -310,6 +310,66 @@ export async function sendClaimApprovedEmail(email: string, firstName: string, c
   } catch { /* non-blocking */ }
 }
 
+export async function sendNewReviewEmail(email: string, companyName: string, companyId: string, rating: number): Promise<void> {
+  if (!resend) return;
+  const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
+  const safeCompany = escapeHtml(companyName);
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Nouvel avis — Workie</title></head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+  <tr>
+    <td style="background:linear-gradient(135deg,#8b5cf6 0%,#f97316 100%);padding:32px 40px;text-align:center;">
+      <h1 style="margin:0;font-size:28px;font-weight:900;letter-spacing:-0.03em;color:#ffffff;">workie</h1>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:40px 40px 32px;">
+      <p style="margin:0 0 8px;font-size:28px;">⭐</p>
+      <h2 style="margin:0 0 12px;font-size:22px;font-weight:800;color:#111827;">Nouvel avis reçu !</h2>
+      <p style="margin:0 0 20px;font-size:15px;color:#6b7280;line-height:1.7;">
+        <strong style="color:#111827;">${safeCompany}</strong> vient de recevoir un nouvel avis anonyme sur Workie.
+      </p>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:20px 24px;margin-bottom:28px;text-align:center;">
+        <p style="margin:0 0 4px;font-size:24px;color:#f59e0b;letter-spacing:2px;">${escapeHtml(stars)}</p>
+        <p style="margin:0;font-size:15px;font-weight:700;color:#111827;">${rating}/5</p>
+      </div>
+      <p style="margin:0 0 24px;font-size:14px;color:#6b7280;line-height:1.6;">
+        Consultez l'avis complet depuis votre espace Workie Business et répondez-y pour montrer à la communauté que vous êtes à l'écoute.
+      </p>
+      <table cellpadding="0" cellspacing="0"><tr><td>
+        <a href="${BASE}/business/dashboard/reviews" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#f97316);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
+          Voir l'avis →
+        </a>
+      </td></tr></table>
+      <p style="margin:20px 0 0;font-size:13px;color:#9ca3af;">
+        Ou <a href="${BASE}/company/${escapeHtml(companyId)}" style="color:#8b5cf6;text-decoration:none;">voir la fiche publique</a>
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:20px 40px;border-top:1px solid #f3f4f6;text-align:center;">
+      <p style="margin:0;font-size:12px;color:#d1d5db;">© ${new Date().getFullYear()} Workie · <a href="${BASE}/confidentialite" style="color:#d1d5db;text-decoration:none;">Confidentialité</a></p>
+    </td>
+  </tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: `⭐ Nouvel avis ${rating}/5 pour ${companyName}`,
+      html,
+    });
+  } catch { /* non-blocking */ }
+}
+
 export async function sendWelcomeEmail(email: string, username: string): Promise<void> {
   if (!resend) return; // fail silently if RESEND_API_KEY not set
   try {
