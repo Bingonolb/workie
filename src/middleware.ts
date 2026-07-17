@@ -122,7 +122,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return updateSession(request);
+  try {
+    return await updateSession(request);
+  } catch {
+    // Supabase unreachable from edge — fail open rather than taking the site down
+    return NextResponse.next();
+  }
 }
 
 export const config = {
