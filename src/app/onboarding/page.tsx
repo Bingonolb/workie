@@ -64,7 +64,7 @@ function FakeNav({ accent }: { accent: string }) {
       padding: "0 24px", height: 56, background: "rgba(10,10,18,0.95)",
       borderBottom: "1px solid rgba(255,255,255,0.06)", position: "relative", zIndex: 2,
     }}>
-      <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: `linear-gradient(135deg, ${accent}, #f97316)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
+      <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", color: accent }}>workie</span>
       <div style={{ display: "flex", gap: 6 }}>
         {["Explorer", "Classement", "Salaires", "Favoris", "Profil"].map(t => (
           <div key={t} style={{ padding: "6px 12px", borderRadius: 20, background: t === "Explorer" ? `${accent}22` : "transparent", fontSize: 13, color: t === "Explorer" ? accent : "rgba(255,255,255,0.4)", fontWeight: t === "Explorer" ? 700 : 400 }}>{t}</div>
