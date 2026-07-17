@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Search, Flame, Star, Heart, ChevronRight, ArrowRight } from "lucide-react";
 
 const STEPS = [
@@ -119,11 +120,24 @@ function ReviewVisual() {
   );
 }
 
+async function markOnboardingSeen() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    await supabase.from("profiles").update({ has_seen_onboarding: true }).eq("id", user.id);
+  }
+}
+
 export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const router = useRouter();
   const current = STEPS[step];
   const isLast = step === STEPS.length - 1;
+
+  async function finish() {
+    await markOnboardingSeen();
+    router.push("/explore");
+  }
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 20px" }}>
@@ -170,7 +184,7 @@ export default function OnboardingPage() {
         {/* Buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <button
-            onClick={() => isLast ? router.push("/explore") : setStep(s => s + 1)}
+            onClick={() => isLast ? finish() : setStep(s => s + 1)}
             style={{
               width: "100%", background: `linear-gradient(135deg, ${current.color}, #f97316)`,
               color: "#fff", fontWeight: 700, fontSize: 16, border: "none",
@@ -184,7 +198,7 @@ export default function OnboardingPage() {
 
           {!isLast && (
             <button
-              onClick={() => router.push("/explore")}
+              onClick={() => finish()}
               style={{ width: "100%", background: "transparent", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, border: "none", padding: "8px 0", cursor: "pointer" }}
             >
               Passer l'intro

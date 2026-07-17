@@ -187,7 +187,7 @@ export type Database = {
         Row: {
           avatar_url: string | null; bio: string | null; canton: string | null; city: string | null
           claimed_company_id: string | null; country: string | null; created_at: string
-          full_name: string | null; has_penalty_pass: boolean; id: string; identity_verified: boolean
+          full_name: string | null; has_penalty_pass: boolean; has_seen_onboarding: boolean; id: string; identity_verified: boolean
           identity_verified_at: string | null; penalty_credits: number; role: string; stripe_verification_session_id: string | null
           updated_at: string; username: string
         }
