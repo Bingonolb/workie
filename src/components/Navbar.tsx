@@ -98,9 +98,6 @@ export async function Navbar() {
             </form>
           ) : (
             <>
-              <Link href="/login" className="nav-login-link" style={{ fontSize: 13, fontWeight: 500, color: "var(--text-muted)", textDecoration: "none", padding: "6px 10px" }}>
-                Connexion
-              </Link>
               <Link href="/signup" style={{
                 fontSize: 13, fontWeight: 700, textDecoration: "none",
                 background: "linear-gradient(135deg, #8b5cf6, #f97316)",
