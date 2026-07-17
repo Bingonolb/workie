@@ -125,31 +125,16 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
         <div style={{ gridColumn: "1 / -1" }}>
           <label style={lbl}>Ville</label>
           <select name="city" defaultValue={profile?.city ?? ""} style={{ ...inp, appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36 }}>
-            <option value="">— Choisir une ville —</option>
+            <option value="">— Choisir un canton —</option>
             {[
-              "Aarau","Arbon","Arlesheim","Arth","Arth-Goldau","Arth-Schwyz",
-              "Baden","Basel","Bellinzona","Bern","Biel/Bienne","Brig-Glis","Brugg","Bulle",
-              "Carouge","Chur","Crans-Montana",
-              "Davos","Delémont","Dietikon","Dübendorf",
-              "Emmen","Frauenfeld","Frenkendorf","Fribourg",
-              "Genève","Gossau","Grenchen",
-              "Herisau","Horgen","Horw","Huningue",
-              "Illnau-Effretikon","Ittigen",
-              "Kloten","Kreuzlingen","Kriens","Küsnacht","Küssnacht","Küsnacht am Rigi",
-              "La Chaux-de-Fonds","Langenthal","Lausanne","Lancy","Lenzburg","Liestal","Locarno","Lugano","Luzern",
-              "Männedorf","Martigny","Meyrin","Monthey","Morges","Muri bei Bern","Münsingen",
-              "Naters","Nyon",
-              "Oberwil","Oftringen","Olten","Onex",
-              "Plan-les-Ouates","Pratteln",
-              "Rapperswil-Jona","Regensdorf","Reinach","Rheinfelden","Riehen","Romanshorn","Rorschach","Rüti",
-              "Schaffhausen","Schlieren","Sierre","Sion","Solothurn","Spiez","Spreitenbach","St. Gallen","Steffisburg",
-              "Thalwil","Thun","Thônex","Turbenthal",
-              "Uster",
-              "Vernier","Visp","Volketswil",
-              "Weinfelden","Wettingen","Wil","Winterthur","Wohlen","Wollerau","Worb","Wünnewil-Flamatt",
-              "Yverdon-les-Bains",
-              "Zollikon","Zug","Zürich",
-            ].map(c => <option key={c} value={c}>{c}</option>)}
+              ["ZH","Zürich"],["BE","Bern"],["LU","Lucerne"],["UR","Uri"],["SZ","Schwyz"],
+              ["OW","Obwalden"],["NW","Nidwalden"],["GL","Glaris"],["ZG","Zoug"],
+              ["FR","Fribourg"],["SO","Soleure"],["BS","Bâle-Ville"],["BL","Bâle-Campagne"],
+              ["SH","Schaffhouse"],["AR","Appenzell Rh.-Ext."],["AI","Appenzell Rh.-Int."],
+              ["SG","Saint-Gall"],["GR","Grisons"],["AG","Argovie"],["TG","Thurgovie"],
+              ["TI","Tessin"],["VD","Vaud"],["VS","Valais"],["NE","Neuchâtel"],
+              ["GE","Genève"],["JU","Jura"],
+            ].map(([code, name]) => <option key={code} value={name}>{name} ({code})</option>)}
           </select>
         </div>
       </div>
