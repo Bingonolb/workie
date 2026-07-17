@@ -32,8 +32,11 @@ export async function getCompanies(filters?: {
   } else if (sort === "score") {
     query = query.order("score", { ascending: false }).order("avg_rating", { ascending: false }).order("name", { ascending: true });
   } else {
-    // "recent" — default: newest companies first
-    query = query.order("created_at", { ascending: false }).order("name", { ascending: true });
+    // default: profils les plus complets en premier, puis score communautaire
+    query = query
+      .order("profile_score", { ascending: false, nullsFirst: false })
+      .order("score", { ascending: false, nullsFirst: false })
+      .order("name", { ascending: true });
   }
 
   // Minimum 10 employees — exclude "1-10" range
@@ -74,6 +77,7 @@ export async function fetchSwipePage(
   let q = supabase
     .from("companies")
     .select("*")
+    .order("profile_score", { ascending: false, nullsFirst: false })
     .order("score", { ascending: false, nullsFirst: false })
     .order("avg_rating", { ascending: false, nullsFirst: false })
     .order("name", { ascending: true })

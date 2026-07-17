@@ -22,6 +22,7 @@ export interface Company {
   is_verified: boolean;
   is_subscribed: boolean;
   score: number;
+  profile_score: number | null;
   created_at: string;
 }
 
@@ -118,7 +119,7 @@ export type Database = {
           created_at: string | null; description: string | null; employee_range: string | null
           founded_year: number | null; id: string; instagram_url: string | null
           is_subscribed: boolean | null; is_verified: boolean | null; linkedin_url: string | null
-          logo_url: string | null; name: string; review_count: number | null; score: number
+          logo_url: string | null; name: string; profile_score: number | null; review_count: number | null; score: number
           sector: string; stripe_customer_id: string | null; stripe_subscription_id: string | null
           subscription_cancel_at_period_end: boolean; subscription_ends_at: string | null; subsector: string | null; tags: string[] | null
           twitter_url: string | null; website_url: string | null; zefix_uid: string | null
