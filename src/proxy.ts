@@ -3,7 +3,6 @@ import { updateSession } from "@/lib/supabase/middleware";
 
 // ── Global rate limiting via Upstash Redis (fixed-window INCR/EXPIRE) ────────
 // Falls back to per-instance in-memory when env vars are absent.
-// Uses only @upstash/redis (no @upstash/ratelimit) to stay within Edge bundle limits.
 
 let redis: { incr: (k: string) => Promise<number>; expire: (k: string, s: number) => Promise<number> } | null = null;
 
@@ -12,7 +11,6 @@ function getRedis() {
   const url   = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return null;
-  // Minimal fetch-based Redis client — no external package needed in Edge
   redis = {
     async incr(key: string) {
       const res = await fetch(`${url}/incr/${encodeURIComponent(key)}`, {
@@ -34,7 +32,6 @@ function getRedis() {
   return redis;
 }
 
-// Fixed-window: one bucket per (ip, bucket, windowSlot)
 async function globalLimited(ip: string, bucket: string, limit: number, windowSec: number): Promise<boolean> {
   const r = getRedis();
   if (!r) return false;
@@ -45,11 +42,10 @@ async function globalLimited(ip: string, bucket: string, limit: number, windowSe
     if (count === 1) await r.expire(key, windowSec * 2);
     return count > limit;
   } catch {
-    return false; // fail open — don't block on Redis error
+    return false;
   }
 }
 
-// ── In-memory fallback (per Vercel instance) ─────────────────────────────────
 const rlMap = new Map<string, [number, number]>();
 const RL_WINDOW_MS = 60_000;
 
@@ -80,9 +76,9 @@ async function rateLimited(ip: string, bucket: string, limit: number): Promise<b
   return inMemoryLimited(ip, bucket, limit);
 }
 
-// ── Middleware ───────────────────────────────────────────────────────────────
+// ── Proxy (Next.js 16 convention, replaces middleware.ts) ────────────────────
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
     const method = request.method;
@@ -91,14 +87,12 @@ export async function middleware(request: NextRequest) {
 
     maybePrune();
 
-    // Search: 30 req/min
     if (pathname === "/api/companies/search") {
       if (await rateLimited(ip, "search", 30)) {
         return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
       }
     }
 
-    // All Stripe checkout endpoints: 5 req/min
     if (method === "POST" && (
       pathname === "/api/business/checkout" ||
       pathname === "/api/business/ads/checkout" ||
@@ -109,14 +103,12 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // Server Actions: 120/min
     if (isServerAction) {
       if (await rateLimited(ip, "actions", 120)) {
         return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
       }
     }
 
-    // Auth pages — brute force protection: 15 req/min
     if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
       if (await rateLimited(ip, "auth", 15)) {
         return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
@@ -125,7 +117,6 @@ export async function middleware(request: NextRequest) {
 
     return await updateSession(request);
   } catch {
-    // Any uncaught error (Redis, Supabase, network) → fail open, never crash the site
     return NextResponse.next();
   }
 }
