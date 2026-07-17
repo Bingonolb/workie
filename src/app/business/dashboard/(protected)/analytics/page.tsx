@@ -1,6 +1,7 @@
 import { getBusinessAnalytics } from "@/lib/actions/business";
-import { Star, ThumbsUp, Eye, BarChart2, ArrowLeft, Heart, MessageSquare, TrendingUp, Users } from "lucide-react";
+import { Star, ThumbsUp, BarChart2, ArrowLeft, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
+import { AnalyticsViewsClient } from "./AnalyticsViewsClient";
 
 function Bar({ pct, color, label, value }: { pct: number; color: string; label: string; value: string }) {
   return (
@@ -47,7 +48,6 @@ export default async function AnalyticsPage() {
   };
 
   const maxDist = Math.max(...(dist?.map((d: { count: number }) => Number(d.count)) ?? [1]), 1);
-  const maxViewDay = Math.max(...(viewTrend?.map(v => Number(v.count)) ?? [1]), 1);
   const totalSeniority = Object.values(seniority ?? {}).reduce((a, b) => a + b, 0);
   const totalFunctions = Object.values(functions ?? {}).reduce((a, b) => a + b, 0);
 
@@ -61,56 +61,21 @@ export default async function AnalyticsPage() {
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Vue complète de la performance et de la réputation de votre fiche.</p>
       </div>
 
-      {/* ── Section 1 : Engagement (toujours visible) ── */}
-      <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
-        <Eye size={13} /> Engagement de la fiche
+      {/* ── Section 1 : Engagement (client — sélecteur de période) ── */}
+      <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>
+        Engagement de la fiche
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 20 }}>
-        {[
-          { label: "Vues aujourd'hui", value: viewsToday, color: "#10b981", icon: <Eye size={16} /> },
-          { label: "Vues 7 jours", value: viewsWeek, color: "#8b5cf6", icon: <Eye size={16} /> },
-          { label: "Vues 30 jours", value: viewsMonth, color: "#f97316", icon: <Eye size={16} /> },
-          { label: "Vues totales (90j)", value: viewsTotal, color: "#06b6d4", icon: <Eye size={16} /> },
-          { label: "En favoris", value: favoritesCount, color: "#ec4899", icon: <Heart size={16} /> },
-          { label: "Avis reçus", value: count, color: "#f59e0b", icon: <MessageSquare size={16} /> },
-        ].map(({ label, value, color, icon }) => (
-          <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, color }}>
-              {icon}
-              <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600 }}>{label}</span>
-            </div>
-            <p style={{ fontSize: 28, fontWeight: 900, color, letterSpacing: "-0.03em" }}>{((value ?? 0) as number).toLocaleString("fr-CH")}</p>
-          </div>
-        ))}
+      <div style={{ marginBottom: 28 }}>
+        <AnalyticsViewsClient
+          viewsToday={viewsToday}
+          viewsWeek={viewsWeek}
+          viewsMonth={viewsMonth}
+          viewsTotal={viewsTotal}
+          viewTrend={viewTrend}
+          favoritesCount={favoritesCount}
+          reviewCount={count}
+        />
       </div>
-
-      {/* Daily view trend */}
-      {viewTrend && viewTrend.length > 0 && (
-        <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px", marginBottom: 28 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Vues par jour — 30 derniers jours</p>
-          <div className="scroll-x" style={{ margin: "0 -4px" }}>
-            <div style={{ minWidth: 560, padding: "0 4px" }}>
-              <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 72 }}>
-                {viewTrend.map(({ day, count: cnt }) => {
-                  const n = Number(cnt);
-                  const h = maxViewDay > 0 ? Math.max(2, (n / maxViewDay) * 72) : 2;
-                  const isToday = day === new Date().toISOString().slice(0, 10);
-                  return (
-                    <div key={day} style={{ flex: 1, minWidth: 12, height: h, borderRadius: "3px 3px 0 0",
-                      background: isToday ? "#10b981" : n > 0 ? "#8b5cf6" : "var(--border)",
-                      opacity: isToday ? 1 : n > 0 ? 0.75 : 0.3,
-                    }} title={`${day} : ${n} vue${n !== 1 ? "s" : ""}`} />
-                  );
-                })}
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 10, color: "var(--text-muted)" }}>
-                <span>{viewTrend[0]?.day.slice(5).replace("-", "/")}</span>
-                <span style={{ color: "#10b981", fontWeight: 700 }}>Aujourd'hui</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Section 2 : Réputation ── */}
       <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
