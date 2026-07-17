@@ -33,38 +33,21 @@ function maybePrune() {
 // Pages still call getUser() (network-verified) for actual security.
 const PROJECT_REF = "xtbdxfzbbuedlktpqpna";
 
-function getSessionUserId(request: NextRequest): string | null {
+function hasSession(request: NextRequest): boolean {
   // @supabase/ssr chunks large cookies: sb-{ref}-auth-token.0, .1, ...
-  let raw = "";
-  const first = request.cookies.get(`sb-${PROJECT_REF}-auth-token.0`)?.value;
-  if (first !== undefined) {
-    raw = first;
-    for (let i = 1; i < 10; i++) {
-      const chunk = request.cookies.get(`sb-${PROJECT_REF}-auth-token.${i}`)?.value;
-      if (!chunk) break;
-      raw += chunk;
-    }
-  } else {
-    raw = request.cookies.get(`sb-${PROJECT_REF}-auth-token`)?.value ?? "";
-  }
-
-  if (!raw) return null;
-
+  // We only check presence — NOT expiry. When the access token expires, Supabase
+  // uses the refresh token to get a new one. That refresh happens in the page via
+  // getUser(), not here. Checking expiry here would log users out every hour.
+  const chunked = request.cookies.get(`sb-${PROJECT_REF}-auth-token.0`);
+  if (chunked !== undefined) return true;
+  const single = request.cookies.get(`sb-${PROJECT_REF}-auth-token`);
+  if (!single?.value) return false;
   try {
-    const session = JSON.parse(raw) as { access_token?: string };
-    const jwt = session.access_token;
-    if (!jwt) return null;
-
-    // Decode JWT payload without any crypto (routing only — pages verify via getUser)
-    const b64 = jwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    const payload = JSON.parse(atob(b64)) as { sub?: string; exp?: number };
-
-    // Reject expired tokens
-    if (!payload.exp || payload.exp < Date.now() / 1000) return null;
-
-    return payload.sub ?? null;
+    // Must have a refresh_token to be a real session (not a stale empty cookie)
+    const session = JSON.parse(single.value) as { refresh_token?: string };
+    return !!session.refresh_token;
   } catch {
-    return null;
+    return false;
   }
 }
 
@@ -116,17 +99,17 @@ export async function middleware(request: NextRequest) {
     }
 
     // Auth routing — zero network, reads cookie only
-    const userId = getSessionUserId(request);
+    const loggedIn = hasSession(request);
     const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p)) || pathname === "/";
 
-    if (!userId && !isPublic) {
+    if (!loggedIn && !isPublic) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("next", pathname + request.nextUrl.search);
       return NextResponse.redirect(url);
     }
 
-    if (userId && (pathname === "/login" || pathname === "/signup")) {
+    if (loggedIn && (pathname === "/login" || pathname === "/signup")) {
       const url = request.nextUrl.clone();
       url.pathname = "/explore";
       return NextResponse.redirect(url);
