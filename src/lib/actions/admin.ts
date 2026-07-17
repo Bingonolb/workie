@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendClaimApprovedEmail } from "@/lib/email";
 
 async function requireAdmin() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -195,6 +196,17 @@ export async function approveClaim(
     revalidatePath("/admin/claims");
     revalidatePath("/business/dashboard");
     revalidatePath(`/company/${companyId}`);
+
+    // Notify the company owner by email
+    const { data: claimData } = await adminClient
+      .from("company_claims")
+      .select("work_email, first_name, company_name")
+      .eq("id", claimId)
+      .maybeSingle();
+    if (claimData) {
+      await sendClaimApprovedEmail(claimData.work_email, claimData.first_name, claimData.company_name);
+    }
+
     return { success: true };
   } catch (e) {
     return { error: (e as Error).message };

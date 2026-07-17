@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendClaimReceivedEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -76,6 +77,19 @@ export async function POST(req: NextRequest) {
           subscription_cancel_at_period_end: false,
         }).eq("id", companyId);
         if (subErr) console.error("[webhook] subscription activate failed:", subErr.message);
+
+        // Send confirmation email to the company owner
+        const { data: claim } = await supabase
+          .from("company_claims")
+          .select("work_email, first_name, company_name")
+          .eq("company_id", companyId)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (claim) {
+          await sendClaimReceivedEmail(claim.work_email, claim.first_name, claim.company_name);
+        }
         break;
       }
 
