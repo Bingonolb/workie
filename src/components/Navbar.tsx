@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getUser, getIsAdmin, getBusinessCompanyId } from "@/lib/supabase/server";
-import { signOut } from "@/lib/actions/auth";
-import { LogOut, Shield, LayoutDashboard, Bell } from "lucide-react";
+
+import { Shield, LayoutDashboard, Bell } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
@@ -85,18 +85,7 @@ export async function Navbar() {
               )}
             </Link>
           )}
-          {user ? (
-            <form action={signOut}>
-              <button type="submit" title="Se déconnecter" style={{
-                display: "flex", alignItems: "center", gap: 6,
-                background: "none", border: "none", cursor: "pointer",
-                color: "var(--text-muted)", fontSize: 13, fontWeight: 500, padding: "6px 8px", borderRadius: 8,
-              }}>
-                <LogOut size={15} />
-                <span className="nav-logout-label">Se déconnecter</span>
-              </button>
-            </form>
-          ) : (
+          {!user && (
             <>
               <Link href="/signup" style={{
                 fontSize: 13, fontWeight: 700, textDecoration: "none",

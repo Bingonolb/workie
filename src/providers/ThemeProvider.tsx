@@ -10,13 +10,29 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("workie-theme") as Theme | null;
-    if (saved === "light") {
-      setTheme("light");
-      document.documentElement.classList.add("light");
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const apply = (t: Theme) => {
+      setTheme(t);
+      if (t === "light") document.documentElement.classList.add("light");
+      else document.documentElement.classList.remove("light");
+    };
+
+    if (saved === "light" || saved === "dark") {
+      apply(saved);
     } else {
-      setTheme("dark");
-      document.documentElement.classList.remove("light");
+      // No saved preference → follow system
+      apply(systemDark.matches ? "dark" : "light");
     }
+
+    // Live-update when system theme changes (only if no manual preference saved)
+    const onSystemChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem("workie-theme")) {
+        apply(e.matches ? "dark" : "light");
+      }
+    };
+    systemDark.addEventListener("change", onSystemChange);
+    return () => systemDark.removeEventListener("change", onSystemChange);
   }, []);
 
   const toggle = () => {

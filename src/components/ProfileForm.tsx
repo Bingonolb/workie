@@ -122,26 +122,35 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
             onBlur={e => (e.target.style.borderColor = "var(--border)")}
           />
         </div>
-        <div>
-          <label style={lbl}>Ville</label>
-          <input name="city" defaultValue={profile?.city ?? ""} placeholder="Zurich" style={inp}
-            onFocus={e => (e.target.style.borderColor = "#8b5cf6")}
-            onBlur={e => (e.target.style.borderColor = "var(--border)")}
-          />
-        </div>
-        <div>
-          <label style={lbl}>Pays</label>
-          <input name="country" defaultValue={profile?.country ?? ""} placeholder="Suisse" style={inp}
-            onFocus={e => (e.target.style.borderColor = "#8b5cf6")}
-            onBlur={e => (e.target.style.borderColor = "var(--border)")}
-          />
-        </div>
         <div style={{ gridColumn: "1 / -1" }}>
-          <label style={lbl}>Bio</label>
-          <textarea name="bio" rows={3} defaultValue={profile?.bio ?? ""} placeholder="Ex-Google, maintenant indie hacker à Lausanne..." style={{ ...inp, resize: "none" }}
-            onFocus={e => (e.target.style.borderColor = "#8b5cf6")}
-            onBlur={e => (e.target.style.borderColor = "var(--border)")}
-          />
+          <label style={lbl}>Ville</label>
+          <select name="city" defaultValue={profile?.city ?? ""} style={{ ...inp, appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36 }}>
+            <option value="">— Choisir une ville —</option>
+            {[
+              "Aarau","Arbon","Arlesheim","Arth","Arth-Goldau","Arth-Schwyz",
+              "Baden","Basel","Bellinzona","Bern","Biel/Bienne","Brig-Glis","Brugg","Bulle",
+              "Carouge","Chur","Crans-Montana",
+              "Davos","Delémont","Dietikon","Dübendorf",
+              "Emmen","Frauenfeld","Frenkendorf","Fribourg",
+              "Genève","Gossau","Grenchen",
+              "Herisau","Horgen","Horw","Huningue",
+              "Illnau-Effretikon","Ittigen",
+              "Kloten","Kreuzlingen","Kriens","Küsnacht","Küssnacht","Küsnacht am Rigi",
+              "La Chaux-de-Fonds","Langenthal","Lausanne","Lancy","Lenzburg","Liestal","Locarno","Lugano","Luzern",
+              "Männedorf","Martigny","Meyrin","Monthey","Morges","Muri bei Bern","Münsingen",
+              "Naters","Nyon",
+              "Oberwil","Oftringen","Olten","Onex",
+              "Plan-les-Ouates","Pratteln",
+              "Rapperswil-Jona","Regensdorf","Reinach","Rheinfelden","Riehen","Romanshorn","Rorschach","Rüti",
+              "Schaffhausen","Schlieren","Sierre","Sion","Solothurn","Spiez","Spreitenbach","St. Gallen","Steffisburg",
+              "Thalwil","Thun","Thônex","Turbenthal",
+              "Uster",
+              "Vernier","Visp","Volketswil",
+              "Weinfelden","Wettingen","Wil","Winterthur","Wohlen","Wollerau","Worb","Wünnewil-Flamatt",
+              "Yverdon-les-Bains",
+              "Zollikon","Zug","Zürich",
+            ].map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
         </div>
       </div>
 

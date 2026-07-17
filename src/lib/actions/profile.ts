@@ -11,8 +11,6 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
 
   const full_name = String(formData.get("full_name") || "");
   const city = String(formData.get("city") || "");
-  const country = String(formData.get("country") || "");
-  const bio = String(formData.get("bio") || "");
   const avatarFile = formData.get("avatar");
 
   let avatar_url: string | undefined;
@@ -33,8 +31,6 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
     .update({
       full_name: full_name || null,
       city: city || null,
-      country: country || null,
-      bio: bio || null,
       ...(avatar_url ? { avatar_url } : {}),
     })
     .eq("id", user.id);
