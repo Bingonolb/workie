@@ -100,7 +100,10 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
     employment_type, duration_range, work_mode, would_recommend, knew_before,
   });
 
-  if (error) return { error: error.message };
+  if (error) {
+    if (error.code === "23505") return { error: "Tu as déjà posté un avis pour cette entreprise." };
+    return { error: error.message };
+  }
 
   revalidatePath(`/company/${company_id}`);
   revalidatePath("/profile");

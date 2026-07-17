@@ -122,11 +122,16 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   const [salary, setSalary] = useState("");
 
   // Step 1 — Notes
-  const [ratingOverall, setRatingOverall] = useState(0);
   const [ratingMgmt, setRatingMgmt] = useState(0);
   const [ratingWl, setRatingWl] = useState(0);
   const [ratingCulture, setRatingCulture] = useState(0);
   const [ratingCareer, setRatingCareer] = useState(0);
+
+  // Auto-calculate overall from sub-ratings (only non-zero ones)
+  const subRatings = [ratingMgmt, ratingWl, ratingCulture, ratingCareer].filter(r => r > 0);
+  const ratingOverall = subRatings.length > 0
+    ? Math.round(subRatings.reduce((a, b) => a + b, 0) / subRatings.length)
+    : 0;
   const [wouldRecommend, setWouldRecommend] = useState("");
 
   // Step 2 — Avis
@@ -246,13 +251,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
         {/* ── Step 1 : Notes ── */}
         {step === 1 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            <div style={{ background: "var(--surface2)", borderRadius: 14, padding: "20px 24px" }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 16 }}>Note globale *</p>
-              <StarPicker name="rating_overall" label="Ta note générale" required value={ratingOverall} onChange={setRatingOverall} />
-            </div>
-
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-muted)" }}>Notes par catégorie <span style={{ fontWeight: 400 }}>(optionnel)</span></p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 0 }}>Notes par catégorie *</p>
               <StarPicker name="rating_management" label="👔 Management direct" value={ratingMgmt} onChange={setRatingMgmt} />
               <div style={{ height: 1, background: "var(--border)" }} />
               <StarPicker name="rating_worklife" label="⚖️ Équilibre vie pro / perso" value={ratingWl} onChange={setRatingWl} />
@@ -261,6 +261,19 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <div style={{ height: 1, background: "var(--border)" }} />
               <StarPicker name="rating_career" label="🚀 Perspectives d'évolution" value={ratingCareer} onChange={setRatingCareer} />
             </div>
+
+            {/* Auto-computed overall */}
+            {ratingOverall > 0 && (
+              <div style={{ background: "var(--surface2)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>Note globale calculée</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {[1,2,3,4,5].map(n => (
+                    <span key={n} style={{ fontSize: 20, color: n <= ratingOverall ? "#f59e0b" : "var(--border2)" }}>★</span>
+                  ))}
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginLeft: 4 }}>{ratingOverall}/5</span>
+                </div>
+              </div>
+            )}
 
             <div>
               <label style={lbl}>Recommanderais-tu cette entreprise ? *</label>

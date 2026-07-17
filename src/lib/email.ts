@@ -7,7 +7,12 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 const FROM = "Workie <onboarding@workie.ch>";
 const BASE = "https://www.workie.ch";
 
-function welcomeHtml(username: string): string {
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function welcomeHtml(rawUsername: string): string {
+  const username = escapeHtml(rawUsername);
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -148,7 +153,9 @@ function welcomeHtml(username: string): string {
 </html>`;
 }
 
-function claimReceivedHtml(firstName: string, companyName: string): string {
+function claimReceivedHtml(rawFirstName: string, rawCompanyName: string): string {
+  const firstName = escapeHtml(rawFirstName);
+  const companyName = escapeHtml(rawCompanyName);
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Demande reçue — Workie Business</title></head>
@@ -212,7 +219,9 @@ function claimReceivedHtml(firstName: string, companyName: string): string {
 </html>`;
 }
 
-function claimApprovedHtml(firstName: string, companyName: string): string {
+function claimApprovedHtml(rawFirstName: string, rawCompanyName: string): string {
+  const firstName = escapeHtml(rawFirstName);
+  const companyName = escapeHtml(rawCompanyName);
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Entreprise vérifiée — Workie Business</title></head>
