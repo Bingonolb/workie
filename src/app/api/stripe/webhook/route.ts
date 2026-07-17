@@ -4,8 +4,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimReceivedEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error("[webhook] Stripe env vars missing");
+    return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
+  }
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
 

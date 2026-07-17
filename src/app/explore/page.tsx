@@ -115,10 +115,12 @@ export default async function ExplorePage({
       try {
         const Stripe = (await import("stripe")).default;
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-        const sessions = await stripe.checkout.sessions.list({ limit: 50 });
+        const sessions = await stripe.checkout.sessions.list({
+          limit: 100,
+          status: "complete",
+        });
         const paid = sessions.data.find(
-          s => s.status === "complete" &&
-               s.mode === "payment" &&
+          s => s.mode === "payment" &&
                s.metadata?.type === "penalty_pass" &&
                (s.metadata?.user_id === user.id || s.client_reference_id === user.id)
         );

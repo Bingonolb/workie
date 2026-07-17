@@ -242,7 +242,7 @@ export async function createCampaign(
       status: "payment_pending",
     }).select("id").single();
 
-    if (error) return { error: error.message };
+    if (error || !inserted) return { error: error?.message ?? "Erreur lors de la création de la campagne" };
     revalidatePath("/business/dashboard/ads");
     return { campaignId: inserted.id };
   } catch (e) { return { error: (e as Error).message }; }

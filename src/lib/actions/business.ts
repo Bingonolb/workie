@@ -410,7 +410,7 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
       apply_url,
       is_active: true,
     }).select("id").single();
-    if (error) return { error: error.message };
+    if (error || !inserted) return { error: error?.message ?? "Erreur lors de la création de l'offre" };
 
     // Fan-out: notify users who favorited this company (fire-and-forget with error logging)
     notifyFavoriteUsers(company.id, company.name, title, inserted.id).catch((e: unknown) =>
@@ -560,7 +560,7 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
       .maybeSingle();
     const emailBase = work_email.split("@")[0].replace(/[^a-z0-9_]/gi, "_").toLowerCase();
     const username  = existingProfile?.username ?? `${emailBase}_${userId.slice(0, 6)}`;
-    await adminClient.from("profiles").upsert(
+    const { error: upsertErr } = await adminClient.from("profiles").upsert(
       {
         id: userId,
         username,
@@ -569,6 +569,7 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
       },
       { onConflict: "id", ignoreDuplicates: false }
     );
+    if (upsertErr) return { error: `Erreur lors de la création du profil : ${upsertErr.message}` };
 
     // ── 4. Insert claim record for admin audit ─────────────────────────────────
     await adminClient.from("company_claims").insert({
