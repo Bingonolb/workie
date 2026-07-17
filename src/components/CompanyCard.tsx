@@ -7,19 +7,33 @@ import { toggleFavorite } from "@/lib/actions/favorites";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 
-const GRADIENT_FALLBACKS = [
-  "linear-gradient(135deg, #8b5cf6, #3b82f6)",
-  "linear-gradient(135deg, #f97316, #ec4899)",
-  "linear-gradient(135deg, #10b981, #3b82f6)",
-  "linear-gradient(135deg, #ec4899, #8b5cf6)",
-  "linear-gradient(135deg, #f59e0b, #ef4444)",
-  "linear-gradient(135deg, #06b6d4, #8b5cf6)",
-];
+const SECTOR_GRADIENTS: Record<string, string> = {
+  "Tech":                  "linear-gradient(135deg, #6d28d9 0%, #1e40af 100%)",
+  "Finance":               "linear-gradient(135deg, #1d4ed8 0%, #0f172a 100%)",
+  "Assurances":            "linear-gradient(135deg, #0284c7 0%, #1e3a5f 100%)",
+  "Pharma":                "linear-gradient(135deg, #059669 0%, #0c2d20 100%)",
+  "Santé":                 "linear-gradient(135deg, #10b981 0%, #064e3b 100%)",
+  "Conseil":               "linear-gradient(135deg, #d97706 0%, #7c2d12 100%)",
+  "Industrie":             "linear-gradient(135deg, #475569 0%, #0f172a 100%)",
+  "Automobile":            "linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%)",
+  "Horlogerie":            "linear-gradient(135deg, #ea580c 0%, #431407 100%)",
+  "Commerce":              "linear-gradient(135deg, #9333ea 0%, #3b0764 100%)",
+  "Alimentation":          "linear-gradient(135deg, #65a30d 0%, #1a2e05 100%)",
+  "Agriculture":           "linear-gradient(135deg, #4d7c0f 0%, #1a2e05 100%)",
+  "Éducation & Recherche": "linear-gradient(135deg, #0891b2 0%, #0c4a6e 100%)",
+  "Sports & Fashion":      "linear-gradient(135deg, #db2777 0%, #500724 100%)",
+  "Transport":             "linear-gradient(135deg, #0d9488 0%, #134e4a 100%)",
+  "Énergie":               "linear-gradient(135deg, #ca8a04 0%, #451a03 100%)",
+};
 
-function getGradient(name: string) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return GRADIENT_FALLBACKS[Math.abs(hash) % GRADIENT_FALLBACKS.length];
+function getCoverGradient(sector: string, sectorColor: string): string {
+  return SECTOR_GRADIENTS[sector] ?? `linear-gradient(135deg, ${sectorColor} 0%, #0f172a 100%)`;
+}
+
+function getInitials(name: string): string {
+  const words = name.trim().replace(/[^a-zA-ZÀ-ÿ\s]/g, " ").trim().split(/\s+/);
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
 }
 
 function StarDisplay({ rating }: { rating: number }) {
@@ -48,11 +62,8 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
     const prev = fav;
     setFav(f => !f);
     startTransition(async () => {
-      try {
-        await toggleFavorite(company.id);
-      } catch {
-        setFav(prev);
-      }
+      try { await toggleFavorite(company.id); }
+      catch { setFav(prev); }
     });
   };
 
@@ -66,113 +77,161 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div className="card-cover img-placeholder" style={{ height: 150, position: "relative", overflow: "hidden" }}>
+        <div className="card-cover img-placeholder" style={{ height: 148, position: "relative", overflow: "hidden" }}>
           {company.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           ) : (
-            <div style={{ width: "100%", height: "100%", background: getGradient(company.name) }} />
+            <div style={{ width: "100%", height: "100%", background: getCoverGradient(company.sector, sectorColor) }} />
           )}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.75))" }} />
+
+          {/* Gradient overlay */}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 35%, rgba(0,0,0,0.6) 75%, rgba(0,0,0,0.82) 100%)" }} />
 
           {/* Sector badge */}
           <div style={{
-            position: "absolute", top: 12, left: 12,
-            background: `${sectorColor}22`, border: `1px solid ${sectorColor}44`,
-            borderRadius: 50, padding: "4px 10px", fontSize: 11, fontWeight: 600,
-            color: sectorColor,
+            position: "absolute", top: 11, left: 11,
+            background: "rgba(0,0,0,0.45)",
+            backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
+            borderRadius: 50, padding: "3px 9px", fontSize: 10, fontWeight: 700,
+            color: "#fff", letterSpacing: "0.04em", textTransform: "uppercase",
+            border: "1px solid rgba(255,255,255,0.12)",
           }}>
             {company.sector}
           </div>
 
-          {/* Flame / Favorite — hidden for business users */}
+          {/* Score badge on cover */}
+          {Number(company.score) > 0 && (
+            <div style={{
+              position: "absolute", top: 11, right: isBusiness ? 11 : 62,
+              background: "rgba(0,0,0,0.45)",
+              backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
+              borderRadius: 50, padding: "3px 8px",
+              display: "flex", alignItems: "center", gap: 4,
+              border: "1px solid rgba(249,115,22,0.35)",
+            }}>
+              <Flame size={11} fill="#f97316" color="#f97316" />
+              <span style={{ fontSize: 11, fontWeight: 800, color: "#f97316" }}>{company.score}</span>
+            </div>
+          )}
+
+          {/* Flame / Favorite */}
           {!isBusiness && (
             <button
               onClick={handleFav}
               disabled={pending}
               style={{
-                position: "absolute", top: 10, right: 10,
-                width: 44, height: 44, borderRadius: "50%",
-                background: fav ? "rgba(249,115,22,0.9)" : "rgba(13,13,19,0.7)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                position: "absolute", top: 8, right: 8,
+                width: 40, height: 40, borderRadius: "50%",
+                background: fav ? "rgba(249,115,22,0.88)" : "rgba(13,13,19,0.55)",
+                border: fav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.12)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.2s",
+                cursor: "pointer", transition: "all 0.18s",
               }}
             >
-              <Flame size={16} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.6)"} />
+              <Flame size={15} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.7)"} />
             </button>
           )}
 
-          {/* Company name + logo over cover */}
-          <div style={{ position: "absolute", bottom: 10, left: 14, right: 50, display: "flex", alignItems: "flex-end", gap: 10 }}>
-            {company.logo_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={company.logo_url}
-                alt=""
-                onLoad={() => setLogoVisible(true)}
-                onError={() => setLogoVisible(false)}
-                style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0, display: logoVisible ? "block" : "none" }}
-              />
-            )}
+          {/* Bottom: logo/initials + company name */}
+          <div style={{ position: "absolute", bottom: 12, left: 12, right: isBusiness ? 12 : 60, display: "flex", alignItems: "flex-end", gap: 9 }}>
+            {/* Logo or initials */}
+            <div style={{ flexShrink: 0, position: "relative", width: 38, height: 38 }}>
+              {/* Initials always rendered as fallback */}
+              <div style={{
+                width: 38, height: 38, borderRadius: 9,
+                background: `${sectorColor}33`,
+                border: `1.5px solid ${sectorColor}66`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 13, fontWeight: 900, color: "#fff",
+                letterSpacing: "-0.02em",
+              }}>
+                {getInitials(company.name)}
+              </div>
+              {/* Logo overlaid on top if available */}
+              {company.logo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={company.logo_url}
+                  alt=""
+                  onLoad={() => setLogoVisible(true)}
+                  onError={() => setLogoVisible(false)}
+                  style={{
+                    position: "absolute", inset: 0,
+                    width: 38, height: 38, borderRadius: 9,
+                    objectFit: "contain", background: "#fff",
+                    border: "1.5px solid rgba(255,255,255,0.25)",
+                    display: logoVisible ? "block" : "none",
+                  }}
+                />
+              )}
+            </div>
+
             <div style={{ minWidth: 0 }}>
-              <p className="card-company-name" style={{ fontSize: 14, fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
+              <p className="card-company-name" style={{
+                fontSize: 14, fontWeight: 800, color: "#fff",
+                letterSpacing: "-0.02em", lineHeight: 1.2,
+                display: "-webkit-box", WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical", overflow: "hidden",
+              } as React.CSSProperties}>
                 {company.name}
                 {company.is_verified && (
-                  <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 16, height: 16, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                  <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 15, height: 15, flexShrink: 0 }} aria-label="Entreprise vérifiée">
                     <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                     <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
                   </svg>
                 )}
               </p>
               {company.subsector && (
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{company.subsector}</p>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>{company.subsector}</p>
               )}
             </div>
           </div>
         </div>
 
         {/* Body */}
-        <div style={{ padding: "14px 16px 16px" }}>
-          {/* Stats row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            {Number(company.avg_rating) > 0 && <StarDisplay rating={Number(company.avg_rating)} />}
-            {Number(company.review_count) > 0 && (
-              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{company.review_count} avis</span>
-            )}
-            {Number(company.score) > 0 && (
-              <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
-                <Flame size={12} fill="#f97316" color="#f97316" /> {company.score}
-              </span>
-            )}
-          </div>
+        <div style={{ padding: "12px 14px 14px" }}>
+          {/* Rating row */}
+          {(Number(company.avg_rating) > 0 || Number(company.review_count) > 0) && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              {Number(company.avg_rating) > 0 && <StarDisplay rating={Number(company.avg_rating)} />}
+              {Number(company.review_count) > 0 && (
+                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                  {company.review_count} avis
+                </span>
+              )}
+            </div>
+          )}
 
-          {company.description ? (
-            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.55, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
+          {/* Description */}
+          {company.description && (
+            <p style={{
+              fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.55,
+              marginBottom: 11,
+              display: "-webkit-box", WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical", overflow: "hidden",
+            } as React.CSSProperties}>
               {company.description}
             </p>
-          ) : Number(company.review_count) === 0 ? (
-            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12, fontStyle: "italic", opacity: 0.7 }}>
-              ✨ Sois le premier à laisser un avis
-            </p>
-          ) : null}
+          )}
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
-            <InfoChip icon={<MapPin size={12} />} label={company.city} />
-            <InfoChip icon={<Users size={12} />} label={company.employee_range + " emp."} />
+          {/* Location + size + salary */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: company.tags?.length > 0 ? 10 : 0 }}>
+            <InfoChip icon={<MapPin size={11} />} label={company.city} />
+            <InfoChip icon={<Users size={11} />} label={company.employee_range} />
             {Number(company.avg_salary_chf) > 0 && (
-              <InfoChip icon={<TrendingUp size={12} />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
+              <InfoChip icon={<TrendingUp size={11} />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
             )}
           </div>
 
           {/* Tags */}
           {company.tags?.length > 0 && (
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
               {company.tags.slice(0, 3).map(tag => (
                 <span key={tag} style={{
-                  fontSize: 11, padding: "3px 8px", borderRadius: 50,
+                  fontSize: 10, padding: "2px 7px", borderRadius: 50,
                   background: "var(--surface3)", color: "var(--text-muted)",
+                  fontWeight: 600,
                 }}>#{tag}</span>
               ))}
             </div>
@@ -186,8 +245,8 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 function InfoChip({ icon, label, color }: { icon: React.ReactNode; label: string; color?: string }) {
   return (
     <span style={{
-      display: "inline-flex", alignItems: "center", gap: 4,
-      fontSize: 12, color: color ?? "var(--text-muted)",
+      display: "inline-flex", alignItems: "center", gap: 3,
+      fontSize: 11.5, color: color ?? "var(--text-muted)",
     }}>
       {icon} {label}
     </span>
