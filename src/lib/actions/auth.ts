@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { sendWelcomeEmail } from "@/lib/email";
 
 type ActionState = { error?: string } | undefined;
 
@@ -68,9 +67,6 @@ export async function signUp(
     }
     return { error: error.message };
   }
-
-  // Send welcome email (non-blocking)
-  void sendWelcomeEmail(email, username);
 
   // Email confirmation required (session is null)
   if (!data.session) {

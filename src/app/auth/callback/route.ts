@@ -85,6 +85,8 @@ export async function GET(request: Request) {
         await upsertProfileGeo(user.id);
       }
       if (next) return NextResponse.redirect(`${origin}${next}`);
+      // New signup confirmation → onboarding
+      if (type === "signup") return NextResponse.redirect(`${origin}/onboarding`);
       return NextResponse.redirect(`${origin}/explore`);
     }
     return NextResponse.redirect(`${origin}/login?error=invite`);
