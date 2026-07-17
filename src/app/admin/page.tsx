@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/api/auth/signout?next=/login");
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") redirect("/explore");

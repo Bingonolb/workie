@@ -21,7 +21,7 @@ export default async function CheckoutPage({
   searchParams: Promise<{ success?: string; canceled?: string; no_company?: string; error?: string }>;
 }) {
   const user = await getUser();
-  if (!user) redirect("/auth/login?next=/business/checkout");
+  if (!user) redirect("/api/auth/signout?next=/login");
 
   const { success, canceled, no_company, error } = await searchParams;
 

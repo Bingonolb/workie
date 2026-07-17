@@ -9,7 +9,7 @@ import type { Company } from "@/lib/types";
 export default async function AdminEditCompanyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/api/auth/signout?next=/login");
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") redirect("/explore");

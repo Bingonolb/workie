@@ -3,7 +3,7 @@ import { getUser, createClient } from "@/lib/supabase/server";
 
 export default async function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/api/auth/signout?next=/login");
 
   const supabase = await createClient();
   const { data: profile } = await supabase

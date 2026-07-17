@@ -15,7 +15,7 @@ import Link from "next/link";
 
 export default async function ProfilePage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/api/auth/signout?next=/login");
 
   const [{ data: profileRaw }, reviews, favIds] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),

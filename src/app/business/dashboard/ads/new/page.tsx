@@ -8,7 +8,7 @@ export default async function NewCampaignPage({
   searchParams: Promise<Record<string, string>>;
 }) {
   const [user, supabase, sp] = await Promise.all([getUser(), createClient(), searchParams]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/api/auth/signout?next=/login");
 
   const { data: profile } = await supabase
     .from("profiles")

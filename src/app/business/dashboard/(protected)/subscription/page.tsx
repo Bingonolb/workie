@@ -11,7 +11,7 @@ export default async function SubscriptionPage({
   searchParams: Promise<{ canceled?: string; reactivated?: string; error?: string }>;
 }) {
   const user = await getUser();
-  if (!user) redirect("/auth/login?next=/business/dashboard/subscription");
+  if (!user) redirect("/api/auth/signout?next=/login");
 
   const supabase = await createClient();
   const { data: profile } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();

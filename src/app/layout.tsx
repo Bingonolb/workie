@@ -12,6 +12,7 @@ import { QueryProvider } from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { CookieBanner } from "@/components/CookieBanner";
 import { WelcomeModal } from "@/components/WelcomeModal";
+import { SessionKeepAlive } from "@/components/SessionKeepAlive";
 
 export const metadata: Metadata = {
   title: "Workie — Les entreprises, sans filtre.",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body style={{ background: "var(--bg)", overflowX: "clip", width: "100%", position: "relative" }}>
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>
+          <SessionKeepAlive />
           <CookieBanner />
           <Suspense><WelcomeModal /></Suspense>
         </ThemeProvider>

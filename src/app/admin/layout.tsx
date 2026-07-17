@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 // Individual pages may still fetch their own data but don't need to repeat the auth check.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const [user, isAdmin] = await Promise.all([getUser(), getIsAdmin()]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/api/auth/signout?next=/login");
   if (!isAdmin) redirect("/explore");
   return <>{children}</>;
 }
