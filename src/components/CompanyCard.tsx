@@ -39,7 +39,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 }) {
   const [fav, setFav] = useState(isFav);
   const [pending, startTransition] = useTransition();
-  const [logoError, setLogoError] = useState(false);
+  const [logoVisible, setLogoVisible] = useState(false);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
   const handleFav = (e: React.MouseEvent) => {
@@ -106,13 +106,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 
           {/* Company name + logo over cover */}
           <div style={{ position: "absolute", bottom: 10, left: 14, right: 50, display: "flex", alignItems: "flex-end", gap: 10 }}>
-            {company.logo_url && !logoError && (
+            {company.logo_url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={company.logo_url}
                 alt=""
-                onError={() => setLogoError(true)}
-                style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0 }}
+                onLoad={() => setLogoVisible(true)}
+                onError={() => setLogoVisible(false)}
+                style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0, display: logoVisible ? "block" : "none" }}
               />
             )}
             <div style={{ minWidth: 0 }}>
