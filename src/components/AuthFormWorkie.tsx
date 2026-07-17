@@ -23,6 +23,14 @@ export function AuthFormWorkie({
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
 
+  const CANTONS = [
+    "Argovie","Appenzell Rhodes-Extérieures","Appenzell Rhodes-Intérieures",
+    "Bâle-Campagne","Bâle-Ville","Berne","Fribourg","Genève","Glaris",
+    "Grisons","Jura","Lucerne","Neuchâtel","Nidwald","Obwald","Saint-Gall",
+    "Schaffhouse","Schwyz","Soleure","Tessin","Thurgovie","Uri","Valais",
+    "Vaud","Zoug","Zurich",
+  ];
+
   return (
     <div>
       {/* Google button */}
@@ -52,10 +60,19 @@ export function AuthFormWorkie({
       <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <input type="hidden" name="next" value={next} />
         {mode === "signup" && (
-          <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Pseudo</label>
-            <input name="username" required placeholder="alex_workie" style={inp} />
-          </div>
+          <>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Pseudo</label>
+              <input name="username" required placeholder="alex_workie" style={inp} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton</label>
+              <select name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
+                <option value="">Sélectionne ton canton</option>
+                {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </>
         )}
         <div>
           <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email</label>

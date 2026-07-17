@@ -47,12 +47,14 @@ export async function GET(request: Request) {
         await supabase.from("profiles").update(updates).eq("id", userId);
       }
     } else {
-      // New profile — generate username from email
+      // New profile — generate username from email, use canton from user_metadata if set
       const { data: { user: u } } = await supabase.auth.getUser();
       const emailBase = u?.email?.split("@")[0]?.replace(/[^a-z0-9_]/gi, "_").toLowerCase() ?? "user";
-      const username = `${emailBase}_${userId.slice(0, 6)}`;
+      const username = (u?.user_metadata?.username as string | undefined) ?? `${emailBase}_${userId.slice(0, 6)}`;
+      const metaCanton = u?.user_metadata?.canton as string | undefined;
+      const cantonField = metaCanton ? { canton: metaCanton } : geoFields;
       await supabase.from("profiles").upsert(
-        { id: userId, username, ...geoFields, ...extra },
+        { id: userId, username, ...cantonField, ...extra },
         { onConflict: "id", ignoreDuplicates: true }
       );
     }

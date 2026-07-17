@@ -38,11 +38,13 @@ export async function signUp(
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
   const username = String(formData.get("username") || "").trim();
-  const rawNext = String(formData.get("next") || "");
-  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";
+  const canton = String(formData.get("canton") || "").trim();
 
   if (!email || !password || !username) {
     return { error: "Tous les champs sont requis." };
+  }
+  if (!canton) {
+    return { error: "Sélectionne ton canton." };
   }
   if (password.length < 6) {
     return { error: "Le mot de passe doit faire au moins 6 caractères." };
@@ -56,8 +58,9 @@ export async function signUp(
     email,
     password,
     options: {
-      data: { username },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback?next=${encodeURIComponent(next)}`,
+      data: { username, canton },
+      // No `next` param — callback will redirect to /onboarding for type=signup
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback`,
     },
   });
 
@@ -73,7 +76,7 @@ export async function signUp(
     redirect(`/signup/confirm?email=${encodeURIComponent(email)}`);
   }
 
-  redirect(next);
+  redirect("/explore");
 }
 
 export async function signIn(
