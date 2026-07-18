@@ -189,7 +189,7 @@ export function ExploreFilters({
                 }
               }}
               onBlur={() => { setTimeout(() => setShowSuggestions(false), 150); }}
-              placeholder="Rechercher une entreprise..."
+              placeholder="Rechercher"
               autoComplete="off"
               style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
@@ -441,7 +441,7 @@ export function ExploreFilters({
                     setMobileSearchOpen(false);
                   }
                 }}
-                placeholder="Rechercher une entreprise..."
+                placeholder="Rechercher"
                 autoComplete="off"
                 style={{
                   width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
