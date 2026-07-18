@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getTopCompanies } from "@/lib/actions/scores";
-import { createClient, getUser, getBusinessCompanyId } from "@/lib/supabase/server";
-import { getUserFavoriteIds } from "@/lib/actions/favorites";
+import { createClient } from "@/lib/supabase/server";
 import { TrendingUp, Users, Star } from "lucide-react";
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
@@ -24,14 +23,10 @@ export const metadata: Metadata = {
 
 export default async function RankingPage() {
   const supabase = await createClient();
-  const [companies, { count: reviewCount }, user, claimedId, favIds] = await Promise.all([
+  const [companies, { count: reviewCount }] = await Promise.all([
     getTopCompanies(200).catch(() => [] as Company[]),
     Promise.resolve(supabase.from("reviews").select("*", { count: "exact", head: true })).catch(() => ({ count: 0 })),
-    getUser(),
-    getBusinessCompanyId(),
-    getUserFavoriteIds().catch(() => [] as string[]),
   ]);
-  const isBusiness = !!claimedId;
   const typedCompanies = companies as Company[];
 
   const withRating = typedCompanies.filter(c => Number(c.avg_rating) > 0);
@@ -94,7 +89,7 @@ export default async function RankingPage() {
               <p style={{ fontSize: 13 }}>Explore les entreprises et dépose des avis pour alimenter le classement.</p>
             </div>
           ) : (
-            <RankingTable companies={typedCompanies} isLoggedIn={!!user} isBusiness={isBusiness} favIds={favIds} />
+            <RankingTable companies={typedCompanies} />
           )}
         </div>
       </main>
