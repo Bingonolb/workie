@@ -304,6 +304,23 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               ))}
             </div>
 
+            {/* Community score — toujours visible */}
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 18px", marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>Score communautaire</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)" }}>La communauté évalue cette entreprise</p>
+              </div>
+              <CompanyVoteButtons
+                companyId={company.id}
+                isLoggedIn={!!user}
+                isAdmin={isAdmin}
+                isBusiness={isBusiness}
+                penaltyCredits={penaltyCredits}
+                initialBoosted={initialBoosted}
+                initialPenalized={initialPenalized}
+              />
+            </div>
+
             {/* Ratings breakdown */}
             {Number(company.review_count) > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px", marginBottom: 32 }}>
@@ -345,22 +362,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   </div>
                 )}
 
-                {/* Community score votes */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 16, borderTop: "1px solid var(--border)", marginTop: recPct !== null || dominantMode ? 0 : 16 }}>
-                  <div>
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>Score communautaire</p>
-                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>La communauté évalue cette entreprise</p>
-                  </div>
-                  <CompanyVoteButtons
-                    companyId={company.id}
-                    isLoggedIn={!!user}
-                    isAdmin={isAdmin}
-                    isBusiness={isBusiness}
-                    penaltyCredits={penaltyCredits}
-                    initialBoosted={initialBoosted}
-                    initialPenalized={initialPenalized}
-                  />
-                </div>
               </div>
             )}
 
