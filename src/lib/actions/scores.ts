@@ -32,6 +32,7 @@ export async function addFlame(companyId: string): Promise<void> {
     if (error) { console.error("[addFlame] insert error:", error.message); return; }
   }
   revalidatePath("/explore");
+  revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
 }
 
@@ -53,6 +54,7 @@ export async function addBoost(companyId: string): Promise<void> {
     const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
     if (error) { console.error("[addBoost] delete error:", error.message); return; }
     revalidatePath("/explore");
+    revalidatePath("/ranking");
     revalidatePath(`/company/${companyId}`);
     return;
   }
@@ -60,6 +62,7 @@ export async function addBoost(companyId: string): Promise<void> {
   const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
   if (error) { console.error("[addBoost] insert error:", error.message); return; }
   revalidatePath("/explore");
+  revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
 }
 
@@ -99,6 +102,7 @@ export async function addPenalty(companyId: string): Promise<void> {
   }
 
   revalidatePath("/explore");
+  revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
 }
 
