@@ -9,7 +9,9 @@ export function ParallaxCover({ src, gradient }: { src?: string | null; gradient
     const node = el.current;
     if (!node) return;
     const onScroll = () => {
-      node.style.transform = `scale(1.15) translateY(${window.scrollY * 0.25}px)`;
+      // Clamp to 0 — scrollY is negative during iOS overscroll/pull-to-refresh
+      const y = Math.max(0, window.scrollY);
+      node.style.transform = `scale(1.15) translateY(${y * 0.25}px)`;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);

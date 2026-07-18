@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Briefcase, CheckCheck, ArrowLeft, MessageCircle, Trash2, MoreHorizontal } from "lucide-react";
 import { getNotifications, markAllRead, markRead, deleteNotification, type Notification } from "@/lib/actions/notifications";
@@ -30,7 +30,7 @@ function NotificationItem({
 }: {
   n: Notification;
   onRead: (id: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<void>;
 }) {
   const cfg = TYPE_CONFIG[n.type] ?? { icon: <Bell size={16} />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" };
   const data = n.data as Record<string, string>;
@@ -58,9 +58,10 @@ function NotificationItem({
     return () => document.removeEventListener("mousedown", handler);
   }, [menuOpen]);
 
-  const triggerDelete = () => {
+  const triggerDelete = async () => {
     setExiting(true);
-    setTimeout(() => onDelete(n.id), 280);
+    // Animation (280ms) and DB delete run in parallel — state only removed after both
+    await onDelete(n.id);
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -228,7 +229,6 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [, startTransition] = useTransition();
 
   useEffect(() => {
     getNotifications().then(r => {
@@ -238,27 +238,25 @@ export default function NotificationsPage() {
     });
   }, []);
 
-  const handleMarkAllRead = () => {
-    startTransition(async () => {
-      await markAllRead();
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      setUnread(0);
-    });
+  const handleMarkAllRead = async () => {
+    await markAllRead();
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnread(0);
   };
 
-  const handleRead = (id: string) => {
-    startTransition(async () => {
-      await markRead(id);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-      setUnread(prev => Math.max(0, prev - 1));
-    });
+  const handleRead = async (id: string) => {
+    await markRead(id);
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    setUnread(prev => Math.max(0, prev - 1));
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string): Promise<void> => {
     const notif = notifications.find(n => n.id === id);
+    // Await DB delete — animation runs concurrently (setExiting already called)
+    // This prevents pull-to-refresh from restoring a not-yet-deleted notification
+    await deleteNotification(id);
     setNotifications(prev => prev.filter(n => n.id !== id));
     if (notif && !notif.read) setUnread(prev => Math.max(0, prev - 1));
-    startTransition(() => deleteNotification(id));
   };
 
   return (

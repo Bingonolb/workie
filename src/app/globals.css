@@ -168,7 +168,7 @@ main, .page-main, .page-main-sm, .page-main-md {
 /* ─── Hero cover ────────────────────────────────────────────────── */
 
 .hero-cover { position: relative; height: 340px; overflow: hidden; }
-@media (max-width: 768px) { .hero-cover { height: 220px; } }
+@media (max-width: 768px) { .hero-cover { height: 260px; } }
 
 @media (max-width: 768px) {
   .hero-title   { font-size: 22px !important; }
@@ -432,7 +432,20 @@ main, .page-main, .page-main-sm, .page-main-md {
   }
   .company-hero-title { font-size: 22px !important; letter-spacing: "-0.02em" !important; }
   .company-hero-logo { width: 52px !important; height: 52px !important; border-radius: 10px !important; }
-  .company-hero-actions { justify-content: flex-start !important; }
+  .company-hero-actions {
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+  /* Compact all action buttons so they fit in one row */
+  .company-hero-actions button,
+  .company-hero-actions > form > button,
+  .company-hero-actions > div > button {
+    font-size: 12px !important;
+    padding: 7px 11px !important;
+    min-height: 38px !important;
+    gap: 5px !important;
+  }
   .company-hero-bottom { bottom: 16px !important; }
   /* Review pros/cons → stack */
   .review-pros-cons { grid-template-columns: 1fr !important; }
