@@ -12,6 +12,7 @@ export function CompanyVoteButtons({
   penaltyCredits: initialCredits,
   initialBoosted,
   initialPenalized,
+  variant = "banner",
 }: {
   companyId: string;
   isLoggedIn: boolean;
@@ -20,6 +21,7 @@ export function CompanyVoteButtons({
   penaltyCredits: number;
   initialBoosted: boolean;
   initialPenalized: boolean;
+  variant?: "banner" | "card";
 }) {
   const [boosted, setBoosted] = useState(initialBoosted);
   const [penalized, setPenalized] = useState(initialPenalized);
@@ -63,6 +65,30 @@ export function CompanyVoteButtons({
 
   const penaltyUnlocked = isAdmin || credits > 0;
 
+  const boostStyle = variant === "card" ? {
+    background: boosted ? "rgba(139,92,246,0.12)" : "var(--surface2)",
+    border: boosted ? "1px solid rgba(139,92,246,0.4)" : "1px solid var(--border)",
+    color: boosted ? "#8b5cf6" : "var(--text)",
+    backdropFilter: "none", WebkitBackdropFilter: "none",
+  } : {
+    background: boosted ? "rgba(139,92,246,0.2)" : "rgba(255,255,255,0.08)",
+    border: boosted ? "1px solid rgba(139,92,246,0.6)" : "1px solid rgba(255,255,255,0.15)",
+    color: boosted ? "#a78bfa" : "rgba(255,255,255,0.8)",
+    backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+  };
+
+  const penaltyStyle = variant === "card" ? {
+    background: penalized ? "rgba(239,68,68,0.1)" : "var(--surface2)",
+    border: penalized ? "1px solid rgba(239,68,68,0.4)" : "1px solid var(--border)",
+    color: penalized ? "#ef4444" : penaltyUnlocked ? "var(--text)" : "var(--text-muted)",
+    backdropFilter: "none", WebkitBackdropFilter: "none",
+  } : {
+    background: penalized ? "rgba(239,68,68,0.18)" : "rgba(255,255,255,0.08)",
+    border: penalized ? "1px solid rgba(239,68,68,0.55)" : "1px solid rgba(255,255,255,0.15)",
+    color: penalized ? "#f87171" : penaltyUnlocked ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.45)",
+    backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+  };
+
   return (
     <>
       {/* Toast */}
@@ -86,16 +112,13 @@ export function CompanyVoteButtons({
         style={{
           display: "flex", alignItems: "center", gap: 7,
           padding: "10px 16px", borderRadius: 12, cursor: "pointer",
-          background: boosted ? "rgba(139,92,246,0.2)" : "rgba(255,255,255,0.08)",
-          border: boosted ? "1px solid rgba(139,92,246,0.6)" : "1px solid rgba(255,255,255,0.15)",
-          color: boosted ? "#a78bfa" : "rgba(255,255,255,0.8)",
           fontWeight: 700, fontSize: 13,
-          backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
           minHeight: 44, transition: "all 0.18s",
           position: "relative",
+          ...boostStyle,
         }}
       >
-        <Zap size={14} fill={boosted ? "#a78bfa" : "none"} />
+        <Zap size={14} fill={boosted ? (variant === "card" ? "#8b5cf6" : "#a78bfa") : "none"} />
         +100 pts
       </button>
 
@@ -106,13 +129,10 @@ export function CompanyVoteButtons({
         style={{
           display: "flex", alignItems: "center", gap: 7,
           padding: "10px 16px", borderRadius: 12, cursor: "pointer",
-          background: penalized ? "rgba(239,68,68,0.18)" : "rgba(255,255,255,0.08)",
-          border: penalized ? "1px solid rgba(239,68,68,0.55)" : "1px solid rgba(255,255,255,0.15)",
-          color: penalized ? "#f87171" : penaltyUnlocked ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.45)",
           fontWeight: 700, fontSize: 13,
-          backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
           minHeight: 44, transition: "all 0.18s",
           position: "relative",
+          ...penaltyStyle,
         }}
       >
         <Skull size={14} />
