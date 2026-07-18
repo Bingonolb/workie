@@ -39,9 +39,9 @@ export async function Navbar() {
           )}
         </Link>
 
-        {/* Mobile quick-access — Explorer + Profile menu, shown only on mobile */}
-        {user && !isBusiness && (
-          <MobileTopActions signOutUrl="/api/auth/signout?next=/login" />
+        {/* Mobile quick-access — Explorer + Profile menu, business only, shown only on mobile */}
+        {user && isBusiness && (
+          <MobileTopActions profileUrl="/business/dashboard/profile" signOutUrl="/api/auth/signout?next=/login" />
         )}
 
         {/* Desktop nav links — hidden on mobile (bottom nav takes over) */}

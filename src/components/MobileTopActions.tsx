@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Compass, User, LogOut, Settings } from "lucide-react";
 
-export function MobileTopActions({ signOutUrl }: { signOutUrl: string }) {
+export function MobileTopActions({ profileUrl, signOutUrl }: { profileUrl: string; signOutUrl: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -62,7 +62,7 @@ export function MobileTopActions({ signOutUrl }: { signOutUrl: string }) {
             zIndex: 10050,
           }}>
             <Link
-              href="/profile"
+              href={profileUrl}
               onClick={() => setOpen(false)}
               style={{
                 display: "flex", alignItems: "center", gap: 10,
