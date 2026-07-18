@@ -5,6 +5,7 @@ import { Shield, LayoutDashboard, Bell } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
+import { MobileTopActions } from "./MobileTopActions";
 import { getUnreadCount } from "@/lib/actions/notifications";
 
 export async function Navbar() {
@@ -37,6 +38,11 @@ export async function Navbar() {
             </span>
           )}
         </Link>
+
+        {/* Mobile quick-access — Explorer + Profile menu, shown only on mobile */}
+        {user && !isBusiness && (
+          <MobileTopActions signOutUrl="/api/auth/signout?next=/login" />
+        )}
 
         {/* Desktop nav links — hidden on mobile (bottom nav takes over) */}
         {user && (

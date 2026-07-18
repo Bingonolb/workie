@@ -335,6 +335,7 @@ main, .page-main, .page-main-sm, .page-main-md {
 /* ─── Bottom navigation (mobile only) ──────────────────────────── */
 
 .bottom-nav { display: none; }
+.mobile-top-actions { display: none; }
 
 @media (max-width: 768px) {
   /* Show bottom nav */
@@ -371,6 +372,9 @@ main, .page-main, .page-main-sm, .page-main-md {
 
   /* Hide desktop nav links on mobile */
   .nav-links-desktop { display: none !important; }
+
+  /* Show mobile quick-access buttons on mobile only */
+  .mobile-top-actions { display: flex !important; }
 
   /* Push page content above bottom nav */
   .page-main    { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
