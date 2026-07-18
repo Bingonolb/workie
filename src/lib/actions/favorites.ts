@@ -16,10 +16,11 @@ export async function toggleFavorite(companyId: string): Promise<void> {
   if (existing) {
     await supabase.from("favorites").delete().eq("user_id", user.id).eq("company_id", companyId);
   } else {
-    const { error } = await supabase.from("favorites").insert({ user_id: user.id, company_id: companyId });
+    const [{ error }] = await Promise.all([
+      supabase.from("favorites").insert({ user_id: user.id, company_id: companyId }),
+      addFlame(companyId),
+    ]);
     if (error && error.code !== "23505") throw error;
-    // Mirror swipe behaviour: saving also counts as a flame vote (+1pt score)
-    await addFlame(companyId);
   }
   revalidatePath("/profile");
   revalidatePath("/favorites");

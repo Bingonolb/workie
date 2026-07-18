@@ -6,9 +6,9 @@ import { ReviewForm } from "@/components/ReviewForm";
 import { getCompany } from "@/lib/actions/companies";
 import { getReviews } from "@/lib/actions/reviews";
 import { createClient } from "@/lib/supabase/server";
-import { getUserFavoriteIds, toggleFavorite } from "@/lib/actions/favorites";
+import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import { getUser, getBusinessCompanyId } from "@/lib/supabase/server";
-import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, Flame, CheckCircle } from "lucide-react";
+import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle } from "lucide-react";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { ParallaxCover } from "@/components/ParallaxCover";
 import { ShareButton } from "@/components/ShareButton";
@@ -28,6 +28,7 @@ import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
+import { SaveButton } from "@/components/SaveButton";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
 
@@ -242,18 +243,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0 }}>
               <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
               {user && !isBusiness ? (
-                <form action={toggleFavorite.bind(null, company.id)}>
-                  <button type="submit" style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    padding: "10px 20px", borderRadius: 12,
-                    background: isFav ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.1)",
-                    border: isFav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.15)",
-                    color: isFav ? "#f97316" : "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
-                    backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", minHeight: 44,
-                  }}>
-                    <Flame size={16} fill={isFav ? "#f97316" : "none"} /> {isFav ? "Sauvegardé" : "Sauvegarder"}
-                  </button>
-                </form>
+                <SaveButton companyId={company.id} initialFav={isFav} />
               ) : (!isBusiness && <GuestSaveButton />)}
             </div>
           </div>
