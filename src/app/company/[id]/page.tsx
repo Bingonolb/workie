@@ -240,17 +240,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Actions */}
-            <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0 }}>
               <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
-              <CompanyVoteButtons
-                companyId={company.id}
-                isLoggedIn={!!user}
-                isAdmin={isAdmin}
-                isBusiness={isBusiness}
-                penaltyCredits={penaltyCredits}
-                initialBoosted={initialBoosted}
-                initialPenalized={initialPenalized}
-              />
               {user && !isBusiness ? (
                 <form action={toggleFavorite.bind(null, company.id)}>
                   <button type="submit" style={{
@@ -349,6 +340,23 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                     )}
                   </div>
                 )}
+
+                {/* Community score votes */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 16, borderTop: "1px solid var(--border)", marginTop: recPct !== null || dominantMode ? 0 : 16 }}>
+                  <div>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>Score communautaire</p>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>La communauté évalue cette entreprise</p>
+                  </div>
+                  <CompanyVoteButtons
+                    companyId={company.id}
+                    isLoggedIn={!!user}
+                    isAdmin={isAdmin}
+                    isBusiness={isBusiness}
+                    penaltyCredits={penaltyCredits}
+                    initialBoosted={initialBoosted}
+                    initialPenalized={initialPenalized}
+                  />
+                </div>
               </div>
             )}
 
