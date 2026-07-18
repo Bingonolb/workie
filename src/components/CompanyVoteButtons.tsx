@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Zap, Skull } from "lucide-react";
 import { addBoost, addPenalty } from "@/lib/actions/scores";
 
@@ -12,6 +13,7 @@ export function CompanyVoteButtons({
   penaltyCredits: initialCredits,
   initialBoosted,
   initialPenalized,
+  initialScore,
   variant = "banner",
 }: {
   companyId: string;
@@ -21,17 +23,20 @@ export function CompanyVoteButtons({
   penaltyCredits: number;
   initialBoosted: boolean;
   initialPenalized: boolean;
+  initialScore?: number;
   variant?: "banner" | "card";
 }) {
   const [boosted, setBoosted] = useState(initialBoosted);
   const [penalized, setPenalized] = useState(initialPenalized);
   const [credits, setCredits] = useState(initialCredits);
+  const [score, setScore] = useState(initialScore ?? null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showGuest, setShowGuest] = useState(false);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const hadCreditsOnMount = useRef(initialCredits > 0);
+  const router = useRouter();
 
   if (isBusiness) return null;
 
@@ -44,8 +49,10 @@ export function CompanyVoteButtons({
     if (!isLoggedIn) { setShowGuest(true); return; }
     const next = !boosted;
     setBoosted(next);
+    if (score !== null) setScore(s => (s ?? 0) + (next ? 100 : -100));
     showToast(next ? "⚡ +100 pts ajoutés !" : "⚡ Boost retiré", "#8b5cf6");
     await addBoost(companyId);
+    router.refresh();
   };
 
   const handlePenalty = async () => {
@@ -54,6 +61,7 @@ export function CompanyVoteButtons({
     if (!unlocked) { setShowUpgrade(true); return; }
     const next = !penalized;
     setPenalized(next);
+    if (score !== null) setScore(s => (s ?? 0) + (next ? -100 : 100));
     if (!isAdmin) {
       const newCredits = next ? credits - 1 : credits + 1;
       setCredits(newCredits);
@@ -61,6 +69,7 @@ export function CompanyVoteButtons({
     }
     showToast(next ? "💀 -100 pts appliqués" : "💀 Pénalité retirée", "#ef4444");
     await addPenalty(companyId);
+    router.refresh();
   };
 
   const penaltyUnlocked = isAdmin || credits > 0;
@@ -91,6 +100,23 @@ export function CompanyVoteButtons({
 
   return (
     <>
+      {/* Score display */}
+      {score !== null && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          padding: variant === "card" ? "10px 14px" : "10px 14px",
+          borderRadius: 12, alignSelf: "center",
+          background: variant === "card" ? "var(--surface2)" : "rgba(255,255,255,0.08)",
+          border: variant === "card" ? "1px solid var(--border)" : "1px solid rgba(255,255,255,0.15)",
+          fontWeight: 800, fontSize: 15,
+          color: variant === "card" ? "var(--text)" : "#fff",
+          fontVariantNumeric: "tabular-nums", flexShrink: 0,
+        }}>
+          <span style={{ fontSize: 13, color: variant === "card" ? "var(--text-muted)" : "rgba(255,255,255,0.6)" }}>Score</span>
+          <span>{score}</span>
+        </div>
+      )}
+
       {/* Toast */}
       {toast && (
         <div style={{

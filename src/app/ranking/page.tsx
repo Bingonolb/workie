@@ -7,7 +7,7 @@ import { TrendingUp, Users, Star } from "lucide-react";
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses · Workie",

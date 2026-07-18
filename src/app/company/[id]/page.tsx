@@ -300,6 +300,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   penaltyCredits={penaltyCredits}
                   initialBoosted={initialBoosted}
                   initialPenalized={initialPenalized}
+                  initialScore={Number(company.score ?? 0)}
                   variant="card"
                 />
               </div>
