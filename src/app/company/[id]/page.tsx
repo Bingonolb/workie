@@ -190,7 +190,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       <Navbar />
 
       {/* Hero cover */}
-      <div className="hero-cover img-placeholder">
+      <div className="hero-cover">
         {/* Image or gradient bg */}
         {company.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -208,14 +208,18 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         <div className="company-hero-bottom" style={{ position: "absolute", bottom: 24, left: 0, right: 0 }}>
           <div className="company-hero-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "0 28px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
-              {/* Logo overlay */}
-              {company.logo_url && (
+              {/* Logo overlay — image si dispo, initiales sinon */}
+              {company.logo_url ? (
                 <LogoImg
                   className="company-hero-logo"
                   src={company.logo_url}
                   alt={`${company.name} logo`}
                   style={{ width: 76, height: 76, borderRadius: 14, objectFit: "contain", background: "#fff", border: "3px solid rgba(255,255,255,0.15)", flexShrink: 0, boxShadow: "0 4px 24px rgba(0,0,0,0.4)" }}
                 />
+              ) : (
+                <div className="company-hero-logo" style={{ width: 76, height: 76, borderRadius: 14, background: `linear-gradient(135deg, ${sectorColor}, #f97316)`, border: "3px solid rgba(255,255,255,0.15)", flexShrink: 0, boxShadow: "0 4px 24px rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em" }}>
+                  {(() => { const w = company.name.trim().split(/\s+/); return w.length === 1 ? w[0].slice(0, 2).toUpperCase() : (w[0][0] + w[1][0]).toUpperCase(); })()}
+                </div>
               )}
               <div>
               <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 10, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
