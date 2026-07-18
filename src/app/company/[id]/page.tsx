@@ -299,6 +299,22 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               ))}
             </div>
 
+            {/* Vote buttons — toujours visibles pour les users employees */}
+            {!isBusiness && (
+              <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
+                <CompanyVoteButtons
+                  companyId={company.id}
+                  isLoggedIn={!!user}
+                  isAdmin={isAdmin}
+                  isBusiness={isBusiness}
+                  penaltyCredits={penaltyCredits}
+                  initialBoosted={initialBoosted}
+                  initialPenalized={initialPenalized}
+                  variant="card"
+                />
+              </div>
+            )}
+
             {/* Ratings breakdown */}
             {Number(company.review_count) > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px", marginBottom: 32 }}>
@@ -340,38 +356,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   </div>
                 )}
 
-                {/* Vote buttons — intégrés dans le bloc ratings */}
-                {!isBusiness && (
-                  <div style={{ display: "flex", gap: 8, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
-                    <CompanyVoteButtons
-                      companyId={company.id}
-                      isLoggedIn={!!user}
-                      isAdmin={isAdmin}
-                      isBusiness={isBusiness}
-                      penaltyCredits={penaltyCredits}
-                      initialBoosted={initialBoosted}
-                      initialPenalized={initialPenalized}
-                      variant="card"
-                    />
-                  </div>
-                )}
-
-              </div>
-            )}
-
-            {/* Vote buttons — si pas d'avis (le bloc ratings n'existe pas) */}
-            {Number(company.review_count) === 0 && !isBusiness && (
-              <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-                <CompanyVoteButtons
-                  companyId={company.id}
-                  isLoggedIn={!!user}
-                  isAdmin={isAdmin}
-                  isBusiness={isBusiness}
-                  penaltyCredits={penaltyCredits}
-                  initialBoosted={initialBoosted}
-                  initialPenalized={initialPenalized}
-                  variant="card"
-                />
               </div>
             )}
 
