@@ -29,6 +29,7 @@ import type { Review } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { LogoImg } from "@/components/LogoImg";
+import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
@@ -116,9 +117,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       .limit(4);
     return data ?? [];
   })().catch(() => []) : [];
-  const [repliesResult, jobsResult] = await Promise.all([
+  const [repliesResult, jobsResult, voteData, profileData] = await Promise.all([
     Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
     Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
+    user ? Promise.resolve(supabase.from("score_events").select("event_type").eq("company_id", id).eq("user_id", user.id).in("event_type", ["boost", "penalty"])).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
+    user ? Promise.resolve(supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle()).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
   ]);
   const repliesMap = Object.fromEntries(
     (repliesResult.data ?? []).map((r: { review_id: string; content: string; created_at: string | null }) => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
@@ -128,6 +131,14 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   if (!company) notFound();
 
   const isBusiness = !!bizCompanyId;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const profileRow = (profileData as any)?.data;
+  const isAdmin = profileRow?.role === "admin";
+  const penaltyCredits = Number(profileRow?.penalty_credits ?? 0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const voteEvents: { event_type: string }[] = (voteData as any)?.data ?? [];
+  const initialBoosted = voteEvents.some(e => e.event_type === "boost");
+  const initialPenalized = voteEvents.some(e => e.event_type === "penalty");
 
   const isFav = favIds.includes(company.id);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
@@ -231,6 +242,15 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {/* Actions */}
             <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
               <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
+              <CompanyVoteButtons
+                companyId={company.id}
+                isLoggedIn={!!user}
+                isAdmin={isAdmin}
+                isBusiness={isBusiness}
+                penaltyCredits={penaltyCredits}
+                initialBoosted={initialBoosted}
+                initialPenalized={initialPenalized}
+              />
               {user && !isBusiness ? (
                 <form action={toggleFavorite.bind(null, company.id)}>
                   <button type="submit" style={{
