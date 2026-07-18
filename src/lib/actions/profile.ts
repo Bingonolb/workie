@@ -15,7 +15,9 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
 
   let avatar_url: string | undefined;
   if (avatarFile instanceof File && avatarFile.size > 0) {
-    const ext = avatarFile.name.split(".").pop() || "jpg";
+    const ALLOWED: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+    const ext = ALLOWED[avatarFile.type];
+    if (!ext) return { error: "Format d'image non supporté (jpg, png, webp, gif uniquement)." };
     const path = `${user.id}/${randomUUID()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("avatars")
