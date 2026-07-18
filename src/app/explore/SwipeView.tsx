@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
-import { addFlame, addBoost, addPenalty } from "@/lib/actions/scores";
+import { addBoost, addPenalty } from "@/lib/actions/scores";
 import { fetchSwipePage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
@@ -167,10 +167,10 @@ export function SwipeView({
     setGone(dir);
     if (dir === "right" && isLoggedIn) {
       setFavIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
+      // toggleFavorite now internally calls addFlame when saving — no separate addFlame call needed
       toggleFavorite((current as Company).id);
       if (!isBusiness) {
         setFlameIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
-        addFlame((current as Company).id);
       }
       showToast("🔥 Enregistré !", "#f97316");
     } else if (dir === "right") {
