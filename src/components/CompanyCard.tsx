@@ -52,6 +52,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
   isBusiness?: boolean;
 }) {
   const [fav, setFav] = useState(isFav);
+  const [score, setScore] = useState(Number(company.score));
   const [pending, startTransition] = useTransition();
   const [logoVisible, setLogoVisible] = useState(false);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
@@ -60,10 +61,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
     e.preventDefault();
     if (!isLoggedIn) { window.location.href = "/login"; return; }
     const prev = fav;
-    setFav(f => !f);
+    const prevScore = score;
+    const next = !fav;
+    setFav(next);
+    if (next) setScore(s => s + 1);
+    else setScore(s => Math.max(0, s - 1));
     startTransition(async () => {
       try { await toggleFavorite(company.id); }
-      catch { setFav(prev); }
+      catch { setFav(prev); setScore(prevScore); }
     });
   };
 
@@ -101,7 +106,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           </div>
 
           {/* Score badge on cover */}
-          {Number(company.score) > 0 && (
+          {score > 0 && (
             <div style={{
               position: "absolute", top: 11, right: isBusiness ? 11 : 62,
               background: "rgba(0,0,0,0.45)",
@@ -111,7 +116,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
               border: "1px solid rgba(249,115,22,0.35)",
             }}>
               <Flame size={11} fill="#f97316" color="#f97316" />
-              <span style={{ fontSize: 11, fontWeight: 800, color: "#f97316" }}>{company.score}</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: "#f97316" }}>{score}</span>
             </div>
           )}
 
