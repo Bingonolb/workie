@@ -67,13 +67,16 @@ export async function markRead(id: string): Promise<void> {
   } catch { /* silent */ }
 }
 
-export async function deleteNotification(id: string): Promise<void> {
+export async function deleteNotification(id: string): Promise<boolean> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from("notifications").delete().eq("id", id).eq("user_id", user.id);
-  } catch { /* silent */ }
+    if (!user) return false;
+    const { error } = await supabase.from("notifications").delete().eq("id", id).eq("user_id", user.id);
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 // Internal: fan-out notifications to all users who favorited a company

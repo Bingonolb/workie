@@ -20,9 +20,6 @@ const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: st
   review_reply:  { icon: <MessageCircle size={16} />, color: "#10b981", bg: "rgba(16,185,129,0.12)" },
 };
 
-const SWIPE_REVEAL = 72;   // px to reveal delete zone
-const SWIPE_DELETE = 220;  // px to auto-delete
-
 function NotificationItem({
   n,
   onRead,
@@ -40,15 +37,10 @@ function NotificationItem({
     ? `/company/${data.company_id}`
     : "/jobs";
 
-  // Swipe state
-  const [dx, setDx] = useState(0);
-  const [snapping, setSnapping] = useState(false);
-  const [exiting, setExiting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const touchStart = useRef<number | null>(null);
+  const [exiting, setExiting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu on outside click
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e: MouseEvent) => {
@@ -59,168 +51,104 @@ function NotificationItem({
   }, [menuOpen]);
 
   const triggerDelete = async () => {
+    setMenuOpen(false);
     setExiting(true);
-    // Animation (280ms) and DB delete run in parallel — state only removed after both
     await onDelete(n.id);
   };
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = e.touches[0].clientX;
-    setSnapping(false);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (touchStart.current === null) return;
-    const delta = e.touches[0].clientX - touchStart.current;
-    if (delta > 0) { setDx(0); return; } // only left swipe
-    setDx(Math.max(delta, -SWIPE_DELETE - 20));
-  };
-
-  const onTouchEnd = () => {
-    touchStart.current = null;
-    setSnapping(true);
-    if (dx < -SWIPE_DELETE) {
-      triggerDelete();
-    } else if (dx < -SWIPE_REVEAL) {
-      setDx(-SWIPE_REVEAL); // hold open to show button
-    } else {
-      setDx(0);
-    }
-  };
-
-  const revealed = dx <= -SWIPE_REVEAL;
-
   return (
-    <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", opacity: exiting ? 0 : 1, transform: exiting ? "translateX(-40px)" : "none", transition: exiting ? "all 0.28s ease" : "none" }}>
-
-      {/* Delete zone behind the card */}
-      <div style={{
-        position: "absolute", inset: 0, right: 0,
-        background: "rgba(239,68,68,0.12)",
-        border: "1px solid rgba(239,68,68,0.25)",
-        borderRadius: 14,
-        display: "flex", alignItems: "center", justifyContent: "flex-end",
-        paddingRight: 20,
-      }}>
-        <button
-          onClick={triggerDelete}
-          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", color: "#ef4444", padding: 8 }}
-        >
-          <Trash2 size={18} />
-          <span style={{ fontSize: 10, fontWeight: 700 }}>Supprimer</span>
-        </button>
-      </div>
-
-      {/* Card — slides on swipe */}
-      <div
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
+    <div style={{
+      opacity: exiting ? 0 : 1,
+      transform: exiting ? "scale(0.97) translateY(-4px)" : "none",
+      transition: exiting ? "all 0.22s ease" : "none",
+      maxHeight: exiting ? 0 : 200,
+      overflow: "hidden",
+    }}>
+      <Link
+        href={href}
+        onClick={(e) => {
+          if (menuOpen) { e.preventDefault(); return; }
+          if (!n.read) onRead(n.id);
+        }}
         style={{
-          transform: `translateX(${dx}px)`,
-          transition: snapping && !exiting ? "transform 0.22s cubic-bezier(0.25,1,0.5,1)" : "none",
-          position: "relative", zIndex: 1,
+          display: "flex", alignItems: "flex-start", gap: 14,
+          padding: "14px 16px", borderRadius: 14, textDecoration: "none",
+          background: n.read ? "var(--surface)" : "var(--surface2)",
+          border: `1px solid ${n.read ? "var(--border)" : "rgba(139,92,246,0.25)"}`,
         }}
       >
-        <Link
-          href={href}
-          onClick={(e) => {
-            if (Math.abs(dx) > 4) { e.preventDefault(); return; }
-            if (!n.read) onRead(n.id);
-          }}
-          style={{
-            display: "flex", alignItems: "flex-start", gap: 14,
-            padding: "14px 16px", borderRadius: 14, textDecoration: "none",
-            background: n.read ? "var(--surface)" : "var(--surface2)",
-            border: `1px solid ${n.read ? "var(--border)" : "rgba(139,92,246,0.25)"}`,
-            transition: "border-color 0.15s",
-          }}
-        >
-          {/* Icon */}
-          <div style={{ width: 38, height: 38, borderRadius: 10, background: cfg.bg, display: "flex", alignItems: "center", justifyContent: "center", color: cfg.color, flexShrink: 0 }}>
-            {cfg.icon}
-          </div>
+        {/* Icon */}
+        <div style={{ width: 38, height: 38, borderRadius: 10, background: cfg.bg, display: "flex", alignItems: "center", justifyContent: "center", color: cfg.color, flexShrink: 0 }}>
+          {cfg.icon}
+        </div>
 
-          {/* Content */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: 14, fontWeight: n.read ? 600 : 800, color: "var(--text)", marginBottom: 2, lineHeight: 1.3 }}>
-              {n.title}
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 14, fontWeight: n.read ? 600 : 800, color: "var(--text)", marginBottom: 2, lineHeight: 1.3 }}>
+            {n.title}
+          </p>
+          {n.body && (
+            <p style={{ fontSize: 13, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {n.body}
             </p>
-            {n.body && (
-              <p style={{ fontSize: 13, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {n.body}
-              </p>
-            )}
-            <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-              {timeAgo(n.created_at)}
-            </p>
-          </div>
+          )}
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+            {timeAgo(n.created_at)}
+          </p>
+        </div>
 
-          {/* Right side: unread dot + 3-dot menu */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
-            {!n.read && (
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#8b5cf6", marginTop: 2 }} />
-            )}
+        {/* Right side */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+          {!n.read && (
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#8b5cf6", marginTop: 2 }} />
+          )}
 
-            {/* 3-dot menu */}
-            <div ref={menuRef} style={{ position: "relative" }}>
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
-                className="notif-menu-btn"
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  width: 28, height: 28, borderRadius: 7,
-                  background: menuOpen ? "var(--surface3)" : "transparent",
-                  border: "none", cursor: "pointer",
-                  color: "var(--text-muted)",
-                }}
-              >
-                <MoreHorizontal size={15} />
-              </button>
+          {/* 3-dot menu */}
+          <div ref={menuRef} style={{ position: "relative" }}>
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
+              className="notif-menu-btn"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: 28, height: 28, borderRadius: 7,
+                background: menuOpen ? "var(--surface3)" : "transparent",
+                border: "none", cursor: "pointer",
+                color: "var(--text-muted)",
+              }}
+            >
+              <MoreHorizontal size={15} />
+            </button>
 
-              {menuOpen && (
-                <div style={{
-                  position: "absolute", top: "calc(100% + 4px)", right: 0,
-                  width: 148,
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 10,
-                  boxShadow: "0 6px 24px rgba(0,0,0,0.14)",
-                  zIndex: 10,
-                  overflow: "hidden",
-                }}>
-                  {!n.read && (
-                    <button
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onRead(n.id); }}
-                      style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "10px 14px", background: "none", border: "none", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text)", cursor: "pointer", textAlign: "left" }}
-                    >
-                      <CheckCheck size={14} color="var(--text-muted)" /> Marquer comme lu
-                    </button>
-                  )}
+            {menuOpen && (
+              <div style={{
+                position: "absolute", top: "calc(100% + 4px)", right: 0,
+                width: 160,
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 10,
+                boxShadow: "0 6px 24px rgba(0,0,0,0.14)",
+                zIndex: 10,
+                overflow: "hidden",
+              }}>
+                {!n.read && (
                   <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); triggerDelete(); }}
-                    style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "10px 14px", background: "none", border: "none", fontSize: 13, fontWeight: 600, color: "#ef4444", cursor: "pointer", textAlign: "left" }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onRead(n.id); }}
+                    style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "10px 14px", background: "none", border: "none", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text)", cursor: "pointer", textAlign: "left" }}
                   >
-                    <Trash2 size={14} /> Supprimer
+                    <CheckCheck size={14} color="var(--text-muted)" /> Marquer comme lu
                   </button>
-                </div>
-              )}
-            </div>
+                )}
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); triggerDelete(); }}
+                  style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "10px 14px", background: "none", border: "none", fontSize: 13, fontWeight: 600, color: "#ef4444", cursor: "pointer", textAlign: "left" }}
+                >
+                  <Trash2 size={14} /> Supprimer
+                </button>
+              </div>
+            )}
           </div>
-        </Link>
-      </div>
-
-      {/* Swipe hint on revealed */}
-      {revealed && (
-        <div
-          onClick={triggerDelete}
-          style={{
-            position: "absolute", right: 0, top: 0, bottom: 0, width: SWIPE_REVEAL,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 2, cursor: "pointer",
-          }}
-        />
-      )}
+        </div>
+      </Link>
     </div>
   );
 }
@@ -252,9 +180,8 @@ export default function NotificationsPage() {
 
   const handleDelete = async (id: string): Promise<void> => {
     const notif = notifications.find(n => n.id === id);
-    // Await DB delete — animation runs concurrently (setExiting already called)
-    // This prevents pull-to-refresh from restoring a not-yet-deleted notification
-    await deleteNotification(id);
+    const ok = await deleteNotification(id);
+    if (!ok) return; // DB failed — don't touch state, notif stays
     setNotifications(prev => prev.filter(n => n.id !== id));
     if (notif && !notif.read) setUnread(prev => Math.max(0, prev - 1));
   };
