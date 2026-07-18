@@ -105,23 +105,6 @@ export function CompanyVoteButtons({
         </div>
       )}
 
-      {/* +100 button */}
-      <button
-        onClick={handleBoost}
-        title={boosted ? "Retirer le boost" : "+100 pts — booster cette entreprise"}
-        style={{
-          display: "flex", alignItems: "center", gap: 7,
-          padding: "10px 16px", borderRadius: 12, cursor: "pointer",
-          fontWeight: 700, fontSize: 13,
-          minHeight: 44, transition: "all 0.18s",
-          position: "relative",
-          ...boostStyle,
-        }}
-      >
-        <Zap size={14} fill={boosted ? (variant === "card" ? "#8b5cf6" : "#a78bfa") : "none"} />
-        +100 pts
-      </button>
-
       {/* -100 button */}
       <button
         onClick={handlePenalty}
@@ -155,6 +138,23 @@ export function CompanyVoteButtons({
             fontSize: 9,
           }}>🔒</span>
         )}
+      </button>
+
+      {/* +100 button */}
+      <button
+        onClick={handleBoost}
+        title={boosted ? "Retirer le boost" : "+100 pts — booster cette entreprise"}
+        style={{
+          display: "flex", alignItems: "center", gap: 7,
+          padding: "10px 16px", borderRadius: 12, cursor: "pointer",
+          fontWeight: 700, fontSize: 13,
+          minHeight: 44, transition: "all 0.18s",
+          position: "relative",
+          ...boostStyle,
+        }}
+      >
+        <Zap size={14} fill={boosted ? (variant === "card" ? "#8b5cf6" : "#a78bfa") : "none"} />
+        +100 pts
       </button>
 
       {/* Guest modal */}
