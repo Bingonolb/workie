@@ -67,6 +67,15 @@ export async function markRead(id: string): Promise<void> {
   } catch { /* silent */ }
 }
 
+export async function deleteNotification(id: string): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("notifications").delete().eq("id", id).eq("user_id", user.id);
+  } catch { /* silent */ }
+}
+
 // Internal: fan-out notifications to all users who favorited a company
 // Called from createJobOffer after insert
 export async function notifyFavoriteUsers(
