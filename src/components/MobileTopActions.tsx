@@ -18,7 +18,7 @@ export function MobileTopActions({ profileUrl, signOutUrl }: { profileUrl: strin
   }, [open]);
 
   return (
-    <div className="mobile-top-actions" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
       {/* Explorer */}
       <Link
         href="/explore"

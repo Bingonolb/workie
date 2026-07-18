@@ -4,6 +4,7 @@ import { getUser, createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardNav } from "./DashboardNav";
 import { BottomNav } from "@/components/BottomNav";
+import { MobileTopActions } from "@/components/MobileTopActions";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
@@ -74,17 +75,14 @@ export default async function BusinessDashboardLayout({ children }: { children: 
 
       {/* Main */}
       <main style={{ flex: 1, overflowX: "clip", minWidth: 0 }}>
-        {/* Mobile-only header — logo + company avatar + theme toggle */}
+        {/* Mobile-only header — logo + quick actions + theme toggle */}
         <div className="biz-mobile-header">
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+          <Link href="/business/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
             <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 5, textTransform: "uppercase" as const }}>Business</span>
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {company.logo_url
-              ? <img src={company.logo_url} alt={company.name} style={{ width: 28, height: 28, borderRadius: 7, objectFit: "cover", border: "1px solid var(--border)" }} />
-              : <div style={{ width: 28, height: 28, borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: "#fff" }}>{(company.name || "?")[0]}</div>
-            }
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <MobileTopActions profileUrl="/business/dashboard/profile" signOutUrl="/api/auth/signout?next=/login" />
             <ThemeToggle />
           </div>
         </div>
