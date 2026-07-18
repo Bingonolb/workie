@@ -423,6 +423,16 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* ─── Company page hero ─────────────────────────────────────────── */
 
+.company-hero-logo {
+  width: 76px;
+  height: 76px;
+  border-radius: 14px;
+  border: 3px solid rgba(255,255,255,0.15);
+  flex-shrink: 0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+
 @media (max-width: 640px) {
   .company-hero-inner {
     padding: 0 14px !important;

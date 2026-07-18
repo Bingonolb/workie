@@ -28,7 +28,7 @@ import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
-import { LogoImg } from "@/components/LogoImg";
+import { CompanyHeroLogo } from "@/components/LogoImg";
 import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
@@ -210,13 +210,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
               {/* Logo overlay — wrapper porte le fond blanc, img fade-in après load */}
               {company.logo_url && (
-                <div className="company-hero-logo" style={{ width: 76, height: 76, borderRadius: 14, background: "#fff", border: "3px solid rgba(255,255,255,0.15)", flexShrink: 0, boxShadow: "0 4px 24px rgba(0,0,0,0.4)", overflow: "hidden" }}>
-                  <LogoImg
-                    src={company.logo_url}
-                    alt={`${company.name} logo`}
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                  />
-                </div>
+                <CompanyHeroLogo
+                  src={company.logo_url}
+                  alt={`${company.name} logo`}
+                  className="company-hero-logo"
+                />
               )}
               <div>
               <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 10, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
