@@ -84,8 +84,9 @@ function detectFunction(title: string): string {
 }
 
 // Inner function — no auth, cacheable per company ID
+// Uses admin client so cookies() is never called inside unstable_cache scope
 async function fetchAnalyticsForCompany(companyId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
   const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString();
