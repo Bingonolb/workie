@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"; // needed for auth/cookies
 
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -15,15 +15,13 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title: "Explorer les entreprises suisses · Workie" },
 };
-import { CompanyCard } from "@/components/CompanyCard";
-import { getCompanies, getAllCompaniesForSwipe } from "@/lib/actions/companies";
+import { getAllCompaniesForGrid, getAllCompaniesForSwipe } from "@/lib/actions/companies";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import { getUserFlameIds } from "@/lib/actions/scores";
 import { getUser } from "@/lib/supabase/server";
 import { ExploreFilters } from "./ExploreFilters";
+import { ExploreClient } from "./ExploreClient";
 import { SwipeView } from "./SwipeView";
-import { Pagination } from "./Pagination";
-import { AdSquareCard } from "@/components/AdSquareCard";
 import { getActiveAds } from "@/lib/actions/ads";
 import type { Company } from "@/lib/types";
 
@@ -189,70 +187,24 @@ export default async function ExplorePage({
     );
   }
 
-  const result = await getCompanies({ ...filters, page, sort: params.sort });
-  const { companies, total, pageCount } = result;
-  // Bugs 2+3 fix: ads only on page 1 (no fetch wasted on page 2+, done above),
-  // and only when ≥4 results so slot at index 3 is always reachable
-  const adsForGrid = page === 1 && companies.length >= 4 ? squareAds : [];
+  const allCompanies = await getAllCompaniesForGrid(!user);
 
   return (
     <div className="page-root">
       <Navbar />
       <main className="page-main">
-        <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>
-            Explorer les entreprises
-          </h1>
-          <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
-            <span style={{ color: "var(--text)", fontWeight: 700 }}>{total}</span> entreprises · avis 100% authentiques
-          </p>
-        </div>
-
-        <ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params}  />
-
-        {!user && companies.length > 0 && total > companies.length && (
-          <div style={{
-            background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
-            border: "1px solid rgba(139,92,246,0.2)",
-            borderRadius: 16, padding: "16px 20px", marginBottom: 20,
-            display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
-          }}>
-            <span style={{ fontSize: 20 }}>🔒</span>
-            <p style={{ fontSize: 14, color: "var(--text-muted)", flex: 1 }}>
-              <strong style={{ color: "var(--text)" }}>{total - companies.length} entreprises supplémentaires</strong> disponibles.{" "}
-              <a href="/signup" style={{ color: "#8b5cf6", fontWeight: 700, textDecoration: "none" }}>Créer un compte gratuit</a> pour tout voir.
-            </p>
-          </div>
-        )}
-
-        {companies.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
-            <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Aucune entreprise trouvée</p>
-            <p style={{ fontSize: 14 }}>Essaie d&apos;autres filtres.</p>
-          </div>
-        ) : (
-          <>
-            <div className="explore-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-              {(() => {
-                // Inject ads after positions 3 and 9 (0-indexed) — never at position 0
-                const AD_SLOTS = [3, 9];
-                const items: React.ReactNode[] = [];
-                let adCursor = 0;
-                (companies as Company[]).forEach((c, i) => {
-                  if (adCursor < adsForGrid.length && AD_SLOTS[adCursor] === i) {
-                    const ad = adsForGrid[adCursor++];
-                    items.push(<AdSquareCard key={`ad-${ad.id}`} ad={ad} />);
-                  }
-                  items.push(<CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={!!user} isBusiness={isBusiness} />);
-                });
-                return items;
-              })()}
-            </div>
-            {pageCount > 1 && !!user && (
-              <Pagination page={page} pageCount={pageCount} total={total} params={params} />
-            )}
-          </>
-        )}
+        <ExploreClient
+          allCompanies={allCompanies as Company[]}
+          favIds={favIds}
+          isLoggedIn={!!user}
+          isBusiness={isBusiness}
+          isGuest={!user}
+          initialSector={params.sector}
+          initialCanton={params.canton}
+          initialSort={params.sort}
+          initialSearch={params.q}
+          squareAds={squareAds}
+        />
       </main>
     </div>
   );

@@ -13,10 +13,16 @@ export function ExploreFilters({
   sectors,
   cantons,
   current,
+  onFilter,
+  onSearch,
+  onClear,
 }: {
   sectors: string[];
   cantons: { code: string; name: string }[];
   current: { sector?: string; canton?: string; q?: string; view?: string; sort?: string };
+  onFilter?: (key: string, value: string | undefined) => void;
+  onSearch?: (q: string) => void;
+  onClear?: () => void;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -114,6 +120,7 @@ export function ExploreFilters({
   }, []);
 
   const push = (key: string, value: string | undefined) => {
+    if (onFilter) { onFilter(key, value); return; }
     const p = new URLSearchParams(searchParams.toString());
     if (value) p.set(key, value); else p.delete(key);
     p.delete("page");
@@ -122,6 +129,7 @@ export function ExploreFilters({
 
   const submitSearch = (q: string) => {
     setShowSuggestions(false);
+    if (onSearch) { onSearch(q); return; }
     const p = new URLSearchParams(searchParams.toString());
     if (q.trim()) p.set("q", q.trim()); else p.delete("q");
     p.delete("page");
@@ -132,6 +140,7 @@ export function ExploreFilters({
     setInput("");
     setSuggestions([]);
     setShowSuggestions(false);
+    if (onSearch) { onSearch(""); return; }
     const p = new URLSearchParams(searchParams.toString());
     p.delete("q");
     p.delete("page");
@@ -144,6 +153,7 @@ export function ExploreFilters({
     setSuggestions([]);
     setMobileSearchOpen(false);
     setShowPanel(false);
+    if (onClear) { onClear(); return; }
     startTransition(() => router.push(pathname + (view !== "grid" ? `?view=${view}` : "")));
   };
 

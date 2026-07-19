@@ -100,23 +100,6 @@ export function CompanyVoteButtons({
 
   return (
     <>
-      {/* Score display */}
-      {score !== null && (
-        <div style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: variant === "card" ? "10px 14px" : "10px 14px",
-          borderRadius: 12, alignSelf: "center",
-          background: variant === "card" ? "var(--surface2)" : "rgba(255,255,255,0.08)",
-          border: variant === "card" ? "1px solid var(--border)" : "1px solid rgba(255,255,255,0.15)",
-          fontWeight: 800, fontSize: 15,
-          color: variant === "card" ? "var(--text)" : "#fff",
-          fontVariantNumeric: "tabular-nums", flexShrink: 0,
-        }}>
-          <span style={{ fontSize: 13, color: variant === "card" ? "var(--text-muted)" : "rgba(255,255,255,0.6)" }}>Score</span>
-          <span>{score}</span>
-        </div>
-      )}
-
       {/* Toast */}
       {toast && (
         <div style={{

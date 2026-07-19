@@ -95,6 +95,22 @@ export async function fetchSwipePage(
 }
 
 
+const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,logo_url,score,is_verified,tags,description,profile_score";
+
+export async function getAllCompaniesForGrid(isGuest = false): Promise<Company[]> {
+  const supabase = await createClient();
+  const query = supabase
+    .from("companies")
+    .select(GRID_COLS)
+    .neq("employee_range", "1-10")
+    .order("profile_score", { ascending: false, nullsFirst: false })
+    .order("score", { ascending: false, nullsFirst: false })
+    .order("name", { ascending: true })
+    .limit(isGuest ? 50 : 2000);
+  const { data } = await query;
+  return (data ?? []) as Company[];
+}
+
 export async function getCompany(id: string) {
   const supabase = await createClient();
   const { data } = await supabase.from("companies").select("*").eq("id", id).maybeSingle();
