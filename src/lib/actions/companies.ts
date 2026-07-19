@@ -106,7 +106,7 @@ export async function getAllCompaniesForGrid(): Promise<Company[]> {
     .order("profile_score", { ascending: false, nullsFirst: false })
     .order("score", { ascending: false, nullsFirst: false })
     .order("name", { ascending: true })
-    .limit(300);
+    .limit(1500);
   return (data ?? []) as Company[];
 }
 
