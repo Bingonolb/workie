@@ -218,20 +218,99 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── Section Publicité ── */}
+      <section style={{ padding: "64px 24px", borderTop: "1px solid var(--border)" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 48, alignItems: "center", flexWrap: "wrap" }} className="landing-ads-grid">
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 50, padding: "4px 12px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
+                📣 Faire de la publicité
+              </div>
+              <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 12 }}>
+                Touchez des milliers de candidats actifs en Suisse.
+              </h2>
+              <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.75, marginBottom: 20, maxWidth: 520 }}>
+                Que vous ayez une entreprise ou un projet personnel, vous pouvez diffuser une annonce sur Workie sans abonnement.
+                Vous définissez votre budget, votre ciblage, et vous ne payez que ce que vous consommez.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+                {[
+                  "À partir de CHF 5/jour",
+                  "Paiement unique via Stripe",
+                  "Ciblage par canton & secteur",
+                  "Stats en temps réel",
+                  "Sans abonnement",
+                ].map(f => (
+                  <span key={f} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 50, background: "var(--surface)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
+                    ✓ {f}
+                  </span>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+                  Créer une campagne →
+                </Link>
+                <Link href="/business" style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, textDecoration: "none" }}>
+                  Vous êtes une entreprise ? →
+                </Link>
+              </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, minWidth: 200 }}>
+              {[
+                { label: "Format Carré", desc: "Dans la grille Explore", price: "dès CHF 4/CPM", emoji: "⬛" },
+                { label: "Format Swipe", desc: "Plein écran, tous les 10 swipes", price: "dès CHF 6/CPM", emoji: "📱" },
+              ].map(({ label, desc, price, emoji }) => (
+                <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 24 }}>{emoji}</span>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{label}</p>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{desc}</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#8b5cf6", marginTop: 2 }}>{price}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Footer ── */}
-      <footer className="landing-footer" style={{ borderTop: "1px solid var(--border)", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-        <span style={{ fontSize: 13, color: "var(--text-muted)" }}>© 2026 Workie · 🇨🇭</span>
-        <div className="landing-footer-links" style={{ display: "flex", gap: 20 }}>
-          {[
-            { href: "/explore", label: "Explorer" },
-            { href: "/ranking", label: "Classement" },
-            { href: "/salaires", label: "Salaires" },
-            { href: "/business", label: "Entreprises" },
-            { href: "/cgu", label: "CGU" },
-            { href: "/confidentialite", label: "Confidentialité" },
-          ].map(({ href, label }) => (
-            <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500 }}>{label}</Link>
-          ))}
+      <footer style={{ borderTop: "1px solid var(--border)", padding: "36px 24px 24px" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 32, marginBottom: 32 }}>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", display: "block", marginBottom: 8 }}>workie</span>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>La plateforme de transparence du marché du travail suisse.</p>
+            </div>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Explorer</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }, { href: "/jobs", label: "Offres d'emploi" }].map(({ href, label }) => (
+                  <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Entreprises</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[{ href: "/business", label: "Workie Business" }, { href: "/business/claim", label: "Revendiquer ma fiche" }, { href: "/profile/ads", label: "Faire de la publicité" }].map(({ href, label }) => (
+                  <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Légal</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[{ href: "/cgu", label: "CGU" }, { href: "/confidentialite", label: "Confidentialité" }].map(({ href, label }) => (
+                  <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>© 2026 Workie · 🇨🇭 Suisse</span>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Fait avec ♥ pour le marché du travail suisse</span>
+          </div>
         </div>
       </footer>
 

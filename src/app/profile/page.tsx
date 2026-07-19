@@ -89,11 +89,12 @@ export default async function ProfilePage() {
         </div>
 
         {/* ── KPI strip ── */}
-        <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
+        <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
           {([
             { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b", href: null },
             { emoji: "🔥", value: String(favIds.length), label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
             { emoji: "📊", value: String(reviews.length), label: "Avis publiés", color: "#10b981", href: null },
+            { emoji: "📣", value: "Pub", label: "Faire de la publicité", color: "#8b5cf6", href: "/profile/ads" },
           ] as { emoji: string; value: string; label: string; color: string; href: string | null }[]).map(({ emoji, value, label, color, href }) => {
             const inner = (
               <>
