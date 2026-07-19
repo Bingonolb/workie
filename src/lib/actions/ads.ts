@@ -118,6 +118,8 @@ export async function getActiveAds(opts?: {
 
     const pool = ((data ?? []) as unknown as AdCampaign[]).filter(ad => {
       if (ad.end_date && ad.end_date < today) return false;
+      // status='active' already excludes exhausted campaigns (set by increment_ad_impression RPC)
+      // This is a safety fallback only — spent/total are available server-side for this check
       if (Number(ad.spent_chf) >= Number(ad.total_budget_chf)) return false;
       if (opts?.canton && ad.target_cantons.length > 0 && !ad.target_cantons.includes(opts.canton)) return false;
       if (opts?.sector && ad.target_sectors.length > 0 && !ad.target_sectors.includes(opts.sector)) return false;
@@ -130,7 +132,8 @@ export async function getActiveAds(opts?: {
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
 
-    return pool.slice(0, opts?.limit ?? 10);
+    // Strip financial fields before sending to client
+    return pool.slice(0, opts?.limit ?? 10).map(({ spent_chf: _s, total_budget_chf: _t, daily_budget_chf: _d, cpm_chf: _c, ...rest }) => rest as AdCampaign);
   } catch (e) { console.error("[getActiveAds] error:", e); return []; }
 }
 

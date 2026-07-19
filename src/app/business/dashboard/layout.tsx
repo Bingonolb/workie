@@ -1,28 +1,21 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getUser, createClient } from "@/lib/supabase/server";
+import { getUser, getBusinessCompanyId, createClient } from "@/lib/supabase/server";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DashboardNav } from "./DashboardNav";
 import { BottomNav } from "@/components/BottomNav";
 import { MobileTopActions } from "@/components/MobileTopActions";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
-  const user = await getUser();
+  const [user, bizCompanyId] = await Promise.all([getUser(), getBusinessCompanyId()]);
   if (!user) redirect("/api/auth/signout?next=/login");
+  if (!bizCompanyId) redirect("/business");
 
   const supabase = await createClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, claimed_company_id")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (!profile?.claimed_company_id) redirect("/business");
-
   const { data: company } = await supabase
     .from("companies")
     .select("id, name, is_verified, is_subscribed, logo_url")
-    .eq("id", profile.claimed_company_id)
+    .eq("id", bizCompanyId)
     .maybeSingle();
 
   if (!company) redirect("/business");

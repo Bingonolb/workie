@@ -5,7 +5,8 @@ const PUBLIC_PATHS = [
   "/login", "/signup", "/auth",
   "/forgot-password", "/reset-password",
   "/explore", "/company", "/ranking", "/salaires", "/jobs",
-  "/business", "/api",
+  "/business/login", "/business/register", "/business/claim", "/business/checkout",
+  "/api",
   "/cgu", "/confidentialite",
   "/robots.txt", "/sitemap.xml", "/_next", "/favicon",
   "/onboarding",
@@ -37,7 +38,7 @@ export async function updateSession(request: NextRequest) {
   const user = session?.user;
 
   const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p)) || path === "/";
+  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p)) || path === "/" || path === "/business";
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

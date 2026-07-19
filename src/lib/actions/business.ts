@@ -87,17 +87,27 @@ export async function getBusinessAnalytics() {
   try {
     const { supabase, company } = await requireBusiness();
 
-    const [reviewsRes, viewsRes, favsRes] = await Promise.all([
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString();
+
+    const [reviewsRes, viewsRes, totalViewsRes, favsRes] = await Promise.all([
       supabase
         .from("reviews")
         .select("rating_overall, rating_culture, rating_management, rating_worklife, rating_career, would_recommend, salary_chf, employment_type, work_mode, pros, cons, created_at, job_title, is_current")
         .eq("company_id", company.id)
         .order("created_at", { ascending: true }),
+      // 30d only — enough for trend chart + week/today stats; avoids loading months of rows
       supabase
         .from("company_views")
         .select("viewed_at")
         .eq("company_id", company.id)
-        .gte("viewed_at", new Date(Date.now() - 90 * 86400000).toISOString()),
+        .gte("viewed_at", thirtyDaysAgo),
+      // 90d total via COUNT — no row data transferred
+      supabase
+        .from("company_views")
+        .select("*", { count: "exact", head: true })
+        .eq("company_id", company.id)
+        .gte("viewed_at", ninetyDaysAgo),
       supabase
         .from("favorites")
         .select("created_at", { count: "exact" })
@@ -174,20 +184,19 @@ export async function getBusinessAnalytics() {
 
     // ── Page view stats ──────────────────────────────────────────────────────
     const favoritesCount = favsRes.count ?? 0;
-    const views = viewsRes.data ?? [];
+    const views = viewsRes.data ?? []; // last 30 days
     const now = Date.now();
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const weekAgo = now - 7 * 86400000;
-    const monthAgo = now - 30 * 86400000;
 
-    const viewsToday   = views.filter(v => v.viewed_at && new Date(v.viewed_at) >= todayStart).length;
-    const viewsWeek    = views.filter(v => v.viewed_at && new Date(v.viewed_at).getTime() >= weekAgo).length;
-    const viewsMonth   = views.filter(v => v.viewed_at && new Date(v.viewed_at).getTime() >= monthAgo).length;
-    const viewsTotal   = views.length; // window: last 90 days (matches the DB query above)
+    const viewsToday = views.filter(v => v.viewed_at && new Date(v.viewed_at) >= todayStart).length;
+    const viewsWeek  = views.filter(v => v.viewed_at && new Date(v.viewed_at).getTime() >= weekAgo).length;
+    const viewsMonth = views.length; // all 30d rows
+    const viewsTotal = totalViewsRes.count ?? 0; // 90d count from HEAD query
 
-    // Daily view trend — last 30 days
+    // Daily view trend — last 30 days (all rows already cover exactly 30d)
     const dailyViewMap: Record<string, number> = {};
-    views.filter(v => v.viewed_at && new Date(v.viewed_at).getTime() >= monthAgo).forEach(v => {
+    views.forEach(v => {
       const day = (v.viewed_at ?? "").slice(0, 10);
       dailyViewMap[day] = (dailyViewMap[day] || 0) + 1;
     });
@@ -282,6 +291,15 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
   try {
     const { supabase, company } = await requireBusiness();
 
+    const safeUrl = (raw: string | null) => {
+      if (!raw) return null;
+      try {
+        const u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+        if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+        return u.href;
+      } catch { return null; }
+    };
+
     const fields: {
       description: string | null;
       website_url: string | null;
@@ -292,10 +310,10 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
       cover_url?: string;
     } = {
       description: String(formData.get("description") || "") || null,
-      website_url: String(formData.get("website_url") || "") || null,
-      linkedin_url: String(formData.get("linkedin_url") || "") || null,
-      twitter_url: String(formData.get("twitter_url") || "") || null,
-      instagram_url: String(formData.get("instagram_url") || "") || null,
+      website_url: safeUrl(String(formData.get("website_url") || "") || null),
+      linkedin_url: safeUrl(String(formData.get("linkedin_url") || "") || null),
+      twitter_url: safeUrl(String(formData.get("twitter_url") || "") || null),
+      instagram_url: safeUrl(String(formData.get("instagram_url") || "") || null),
     };
 
     const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -315,7 +333,8 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
         fields.logo_url = pub.publicUrl;
       }
     } else {
-      fields.logo_url = String(formData.get("logo_url") || "") || null;
+      // Keep existing logo from DB — never trust a hidden input from the client
+      fields.logo_url = company.logo_url ?? null;
     }
 
     // Cover upload
@@ -523,28 +542,29 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     // ── 2. Create / retrieve the Supabase user ─────────────────────────────────
     let userId: string;
 
-    // Check if email already has an account (needed in both branches)
-    const { data: listData } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
-    const found = listData?.users.find(u => u.email?.toLowerCase() === work_email);
-
     if (existingUser && existingUser.email?.toLowerCase() === work_email) {
       // Same email already logged in — reuse this account
       userId = existingUser.id;
     } else {
-      // Different email or not logged in — always create a new independent account
-      if (found) {
-        return { error: "Un compte Workie existe déjà avec cet email. Connectez-vous d'abord via « Déjà un compte »." };
-      }
       if (password.length < 8) {
         return { error: "Le mot de passe doit contenir au moins 8 caractères." };
       }
 
+      // Attempt creation — the admin API returns a clear error if email already exists
+      // (avoids listUsers which is capped at 1000 users)
       const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
         email: work_email,
         password,
         email_confirm: true,
       });
-      if (createErr || !created.user) return { error: `Impossible de créer votre compte : ${createErr?.message ?? "erreur inconnue"}` };
+      if (createErr) {
+        const msg = createErr.message.toLowerCase();
+        if (msg.includes("already") || msg.includes("registered") || (createErr as { status?: number }).status === 422) {
+          return { error: "Un compte Workie existe déjà avec cet email. Connectez-vous d'abord via « Déjà un compte »." };
+        }
+        return { error: `Impossible de créer votre compte : ${createErr.message}` };
+      }
+      if (!created.user) return { error: "Impossible de créer votre compte : erreur inconnue" };
       userId = created.user.id;
 
       // Sign in as the NEW user — replaces any existing session in this browser
