@@ -66,7 +66,7 @@ export default async function ProfilePage() {
             overflow: "hidden",
           }}>
             {profile?.avatar_url
-              ? <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> // eslint-disable-line @next/next/no-img-element
+              ? <img src={profile.avatar_url} alt="" loading="eager" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> // eslint-disable-line @next/next/no-img-element
               : <span style={{ fontSize: 32, fontWeight: 900, color: "#fff" }}>{initial}</span>
             }
           </div>

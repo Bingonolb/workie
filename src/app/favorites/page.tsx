@@ -14,10 +14,11 @@ export const metadata: Metadata = {
 };
 
 export default async function FavoritesPage() {
-  const user = await getUser();
+  const [user, companies] = await Promise.all([
+    getUser(),
+    getFavorites().catch(() => []),
+  ]);
   if (!user) redirect("/api/auth/signout?next=/login");
-
-  const companies = await getFavorites().catch(() => []);
   const favIds = companies.map(c => c.id);
 
   return (

@@ -1,6 +1,5 @@
 import { getBusinessAnalytics } from "@/lib/actions/business";
-import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/supabase/server";
+import { createClient, getBusinessCompanyId } from "@/lib/supabase/server";
 import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { ShareCopyButton } from "@/components/ShareCopyButton";
@@ -8,9 +7,15 @@ import { ShareCopyButton } from "@/components/ShareCopyButton";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
 export default async function BusinessDashboardPage() {
-  const [data, supabase] = await Promise.all([
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  // getBusinessCompanyId is cache()-wrapped — free second call within the same request
+  const [supabase, bizCompanyId] = await Promise.all([createClient(), getBusinessCompanyId()]);
+
+  const [data, newReviewsResult] = await Promise.all([
     getBusinessAnalytics(),
-    createClient(),
+    bizCompanyId
+      ? supabase.from("reviews").select("*", { count: "exact", head: true }).eq("company_id", bizCompanyId).gte("created_at", weekAgo)
+      : Promise.resolve({ count: 0 }),
   ]);
 
   if ("error" in data && data.error) {
@@ -19,13 +24,7 @@ export default async function BusinessDashboardPage() {
 
   const { count, avgOverall, avgManagement, avgWorklife, avgCulture, avgCareer, recommendRate, avgSalary, trend, dist, company } = data as Awaited<ReturnType<typeof getBusinessAnalytics>> & { company: Record<string, unknown> };
 
-  // New reviews in last 7 days
-  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-  const { count: newReviews } = await supabase
-    .from("reviews")
-    .select("*", { count: "exact", head: true })
-    .eq("company_id", String(company?.id ?? ""))
-    .gte("created_at", weekAgo);
+  const newReviews = newReviewsResult.count;
 
   // Profile completeness
   const co = company as Record<string, unknown>;

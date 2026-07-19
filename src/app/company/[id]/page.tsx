@@ -106,23 +106,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     getBusinessCompanyId().catch(() => null),
   ]);
 
-  // Similar companies — fetched after company resolves (needs sector)
-  const similarCompaniesData = company ? await (async () => {
-    const sb = await createClient();
-    const { data } = await sb
-      .from("companies")
-      .select("id, name, city, avg_rating, review_count, cover_url, is_verified, sector")
-      .eq("sector", company.sector)
-      .neq("id", id)
-      .order("score", { ascending: false })
-      .limit(4);
-    return data ?? [];
-  })().catch(() => []) : [];
-  const [repliesResult, jobsResult, voteData, profileData] = await Promise.all([
+  const [repliesResult, jobsResult, voteData, profileData, similarCompaniesData] = await Promise.all([
     Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
     Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
     user ? Promise.resolve(supabase.from("score_events").select("event_type").eq("company_id", id).eq("user_id", user.id).in("event_type", ["boost", "penalty"])).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     user ? Promise.resolve(supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle()).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
+    company ? Promise.resolve(supabase.from("companies").select("id, name, city, avg_rating, review_count, cover_url, is_verified, sector").eq("sector", company.sector).neq("id", id).order("score", { ascending: false }).limit(4)).then(r => r.data ?? []).catch(() => []) : Promise.resolve([]),
   ]);
   const repliesMap = Object.fromEntries(
     (repliesResult.data ?? []).map((r: { review_id: string; content: string; created_at: string | null }) => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
@@ -529,7 +518,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                     <div style={{ height: 80, background: c.cover_url ? "none" : "linear-gradient(135deg, #8b5cf6, #3b82f6)", position: "relative" }}>
                       {c.cover_url && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={c.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={c.cover_url} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       )}
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6))" }} />
                     </div>

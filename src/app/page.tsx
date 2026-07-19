@@ -18,14 +18,13 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const user = await getUser();
-  if (user) redirect("/explore");
-
   const supabase = await createClient();
-  const [{ count: companyCount }, { count: reviewCount }] = await Promise.all([
+  const [user, { count: companyCount }, { count: reviewCount }] = await Promise.all([
+    getUser().catch(() => null),
     supabase.from("companies").select("*", { count: "exact", head: true }),
     supabase.from("reviews").select("*", { count: "exact", head: true }),
   ]);
+  if (user) redirect("/explore");
   const nCompanies = companyCount ?? 0;
   const nReviews = reviewCount ?? 0;
 

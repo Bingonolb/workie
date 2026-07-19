@@ -173,9 +173,9 @@ export default function NotificationsPage() {
   };
 
   const handleRead = async (id: string) => {
-    await markRead(id);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     setUnread(prev => Math.max(0, prev - 1));
+    markRead(id);
   };
 
   const handleDelete = async (id: string): Promise<void> => {
