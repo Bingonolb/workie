@@ -150,15 +150,7 @@ export default async function ExplorePage({
     return (
       <div className="page-root">
         <Navbar />
-        <main style={{ maxWidth: 600, margin: "0 auto", padding: "24px 16px 100px" }}>
-          <div style={{ marginBottom: 24 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 4 }}>
-              Explorer
-            </h1>
-            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
-              Chargement au fil des swipes
-            </p>
-          </div>
+        <main style={{ maxWidth: 600, margin: "0 auto", padding: "8px 16px 100px" }}>
           <Suspense fallback={null}><ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params}  /></Suspense>
           <SwipeView
             key={`${params.sector ?? ""}-${params.canton ?? ""}-${params.q ?? ""}`}

@@ -44,6 +44,8 @@ const nextConfig: NextConfig = {
       // 20MB was excessive; max realistic: cover image (5MB) + logo (2MB)
       bodySizeLimit: "8mb",
     },
+    // Cache dynamic pages 5s client-side — eliminates nav lag, stale window short enough for score freshness
+    staleTimes: { dynamic: 5, static: 300 },
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

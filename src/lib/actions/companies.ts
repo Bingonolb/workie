@@ -97,17 +97,27 @@ export async function fetchSwipePage(
 
 const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,logo_url,score,is_verified,tags,description,profile_score";
 
+// Supabase PostgREST caps at 1000 rows by default — fetch in batches to bypass the limit
 export async function getAllCompaniesForGrid(): Promise<Company[]> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("companies")
-    .select(GRID_COLS)
-    .neq("employee_range", "1-10")
-    .order("profile_score", { ascending: false, nullsFirst: false })
-    .order("score", { ascending: false, nullsFirst: false })
-    .order("name", { ascending: true })
-    .limit(5000);
-  return (data ?? []) as Company[];
+  const PAGE = 1000;
+  const results: Company[] = [];
+  let offset = 0;
+  while (true) {
+    const { data } = await supabase
+      .from("companies")
+      .select(GRID_COLS)
+      .neq("employee_range", "1-10")
+      .order("profile_score", { ascending: false, nullsFirst: false })
+      .order("score", { ascending: false, nullsFirst: false })
+      .order("name", { ascending: true })
+      .range(offset, offset + PAGE - 1);
+    const rows = (data ?? []) as Company[];
+    results.push(...rows);
+    if (rows.length < PAGE) break;
+    offset += PAGE;
+  }
+  return results;
 }
 
 export async function getCompany(id: string) {

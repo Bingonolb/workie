@@ -80,7 +80,7 @@ export function ExploreClient({
   const [canton, setCanton] = useState(initialCanton ?? "");
   const [sort, setSort] = useState(initialSort ?? "recent");
   const [search, setSearch] = useState(initialSearch ?? "");
-  const [page, setPage] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const filtered = useMemo(() => {
     let result = allCompanies;
@@ -97,12 +97,12 @@ export function ExploreClient({
   }, [allCompanies, sector, canton, search, sort]);
 
   const total = filtered.length;
-  const pageCount = Math.ceil(total / PAGE_SIZE);
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const adsForGrid = page === 1 && paginated.length >= 4 ? squareAds : [];
+  const paginated = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < total;
+  const adsForGrid = visibleCount <= PAGE_SIZE && paginated.length >= 4 ? squareAds : [];
 
   const handleFilter = useCallback((key: string, value: string | undefined) => {
-    setPage(1);
+    setVisibleCount(PAGE_SIZE);
     if (key === "sector") setSector(value ?? "");
     else if (key === "canton") setCanton(value ?? "");
     else if (key === "sort") setSort(value ?? "recent");
@@ -110,7 +110,7 @@ export function ExploreClient({
 
   const handleSearch = useCallback((q: string) => {
     setSearch(q);
-    setPage(1);
+    setVisibleCount(PAGE_SIZE);
   }, []);
 
   const handleClear = useCallback(() => {
@@ -118,7 +118,7 @@ export function ExploreClient({
     setCanton("");
     setSort("recent");
     setSearch("");
-    setPage(1);
+    setVisibleCount(PAGE_SIZE);
   }, []);
 
   const current = { sector: sector || undefined, canton: canton || undefined, q: search || undefined, sort: sort !== "recent" ? sort : undefined, view: "grid" as const };
@@ -181,31 +181,25 @@ export function ExploreClient({
             })()}
           </div>
 
-          {pageCount > 1 && (
-            <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 32, flexWrap: "wrap" }}>
-              {page > 1 && (
-                <button onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                  style={{ padding: "8px 18px", borderRadius: 10, border: "1px solid var(--border2)", background: "var(--surface)", color: "var(--text)", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
-                  ← Précédent
-                </button>
-              )}
-              {Array.from({ length: Math.min(pageCount, 7) }, (_, i) => {
-                const p = i + 1;
-                return (
-                  <button key={p} onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    style={{ padding: "8px 14px", borderRadius: 10, border: page === p ? "1.5px solid #8b5cf6" : "1px solid var(--border2)", background: page === p ? "rgba(139,92,246,0.12)" : "var(--surface)", color: page === p ? "#8b5cf6" : "var(--text)", cursor: "pointer", fontSize: 13, fontWeight: page === p ? 700 : 400 }}>
-                    {p}
-                  </button>
-                );
-              })}
-              {page < pageCount && (
-                <button onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                  style={{ padding: "8px 18px", borderRadius: 10, border: "1px solid var(--border2)", background: "var(--surface)", color: "var(--text)", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
-                  Suivant →
-                </button>
-              )}
-            </div>
-          )}
+          <div style={{ textAlign: "center", marginTop: 40 }}>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: hasMore ? 16 : 0 }}>
+              <span style={{ color: "var(--text)", fontWeight: 700 }}>{paginated.length}</span> sur <span style={{ fontWeight: 700 }}>{total}</span> entreprises
+            </p>
+            {hasMore && (
+              <button
+                onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                style={{
+                  padding: "12px 32px", borderRadius: 50, border: "1.5px solid rgba(139,92,246,0.4)",
+                  background: "rgba(139,92,246,0.08)", color: "#8b5cf6", cursor: "pointer",
+                  fontSize: 14, fontWeight: 700, transition: "all 0.15s",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(139,92,246,0.16)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#8b5cf6"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(139,92,246,0.08)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(139,92,246,0.4)"; }}
+              >
+                Voir {Math.min(PAGE_SIZE, total - visibleCount)} de plus
+              </button>
+            )}
+          </div>
         </>
       )}
     </>
