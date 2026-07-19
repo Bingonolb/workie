@@ -34,23 +34,20 @@ export default async function AnalyticsPage() {
     return <div className="biz-page" style={{ color: "#ef4444" }}>{data.error}</div>;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const d = data as any;
   const {
     count, avgOverall, avgManagement, avgWorklife, avgCulture, avgCareer,
     recommendRate, avgSalary, trend, dist, workModes, empTypes,
-    seniority, functions, currentVsFormer,
+    currentVsFormer,
     viewsToday, viewsWeek, viewsMonth, viewsTotal, viewTrend, favoritesCount,
-  } = data as Awaited<ReturnType<typeof getBusinessAnalytics>> & {
-    seniority: Record<string, number>;
-    functions: Record<string, number>;
-    currentVsFormer: { current: number; former: number };
-    viewsToday: number; viewsWeek: number; viewsMonth: number; viewsTotal: number;
-    viewTrend: { day: string; count: number }[];
-    favoritesCount: number;
-  };
+  } = d;
+  const seniority = d.seniority as Record<string, number>;
+  const functions = d.functions as Record<string, number>;
 
-  const maxDist = Math.max(...(dist?.map((d: { count: number }) => Number(d.count)) ?? [1]), 1);
-  const totalSeniority = Object.values(seniority ?? {}).reduce((a, b) => a + b, 0);
-  const totalFunctions = Object.values(functions ?? {}).reduce((a, b) => a + b, 0);
+  const maxDist = Math.max(...((dist as { count: number }[])?.map((d) => Number(d.count)) ?? [1]), 1);
+  const totalSeniority = Object.values((seniority ?? {}) as Record<string, number>).reduce((a, b) => a + b, 0);
+  const totalFunctions = Object.values((functions ?? {}) as Record<string, number>).reduce((a, b) => a + b, 0);
 
   return (
     <div className="biz-page" style={{ maxWidth: 1000 }}>

@@ -21,7 +21,8 @@ export default async function BusinessDashboardPage() {
     return <div style={{ padding: 40, color: "var(--text-muted)" }}>{data.error}</div>;
   }
 
-  const { count, avgOverall, recommendRate, avgSalary, company } = data as Awaited<ReturnType<typeof getBusinessAnalytics>> & { company: Record<string, unknown> };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count, avgOverall, recommendRate, avgSalary, company } = data as any;
   const newReviews = newReviewsResult.count;
 
   const co = company as Record<string, unknown>;

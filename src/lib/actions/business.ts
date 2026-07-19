@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -83,36 +83,35 @@ function detectFunction(title: string): string {
   return "Autre";
 }
 
-export async function getBusinessAnalytics() {
-  try {
-    const { supabase, company } = await requireBusiness();
+// Inner function — no auth, cacheable per company ID
+async function fetchAnalyticsForCompany(companyId: string) {
+  const supabase = await createClient();
 
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString();
 
     const [reviewsRes, viewsRes, totalViewsRes, favsRes] = await Promise.all([
       supabase
         .from("reviews")
         .select("rating_overall, rating_culture, rating_management, rating_worklife, rating_career, would_recommend, salary_chf, employment_type, work_mode, pros, cons, created_at, job_title, is_current")
-        .eq("company_id", company.id)
+        .eq("company_id", companyId)
         .order("created_at", { ascending: true })
         .limit(5000),
       // 30d only — enough for trend chart + week/today stats; avoids loading months of rows
       supabase
         .from("company_views")
         .select("viewed_at")
-        .eq("company_id", company.id)
+        .eq("company_id", companyId)
         .gte("viewed_at", thirtyDaysAgo),
-      // 90d total via COUNT — no row data transferred
       supabase
         .from("company_views")
         .select("*", { count: "exact", head: true })
-        .eq("company_id", company.id)
+        .eq("company_id", companyId)
         .gte("viewed_at", ninetyDaysAgo),
       supabase
         .from("favorites")
         .select("created_at", { count: "exact" })
-        .eq("company_id", company.id),
+        .eq("company_id", companyId),
     ]);
 
     const { data: reviews } = reviewsRes;
@@ -230,8 +229,20 @@ export async function getBusinessAnalytics() {
       viewsTotal,
       viewTrend,
       favoritesCount,
-      company,
     };
+}
+
+const getCachedAnalytics = unstable_cache(
+  fetchAnalyticsForCompany,
+  ["business-analytics"],
+  { revalidate: 30, tags: ["business-analytics"] }
+);
+
+export async function getBusinessAnalytics() {
+  try {
+    const { company } = await requireBusiness();
+    const data = await getCachedAnalytics(company.id);
+    return { ...data, company };
   } catch (e) {
     return { error: (e as Error).message };
   }

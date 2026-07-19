@@ -45,7 +45,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "8mb",
     },
     // Cache dynamic pages 5s client-side — eliminates nav lag, stale window short enough for score freshness
-    staleTimes: { dynamic: 5, static: 300 },
+    staleTimes: { dynamic: 30, static: 300 },
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
