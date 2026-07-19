@@ -247,7 +247,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
                       >
                         <Copy size={11} /> Dupliquer
                       </Link>
-                      <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ marginLeft: "auto", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
                         <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{c.start_date}{c.end_date ? ` → ${c.end_date}` : ""}</span>
                         {(() => {
                           const { label, urgent } = daysRemaining(c.end_date);
