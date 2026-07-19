@@ -593,38 +593,30 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
           </div>
           {review.title && <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>}
         </div>
-        <div style={{ textAlign: "right", flexShrink: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{age}</p>
-          {review.job_title && (
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-sub)", background: "var(--surface2)", borderRadius: 6, padding: "2px 8px" }}>
-              {review.job_title}
-            </span>
-          )}
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
-            {review.employment_type && (
-              <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
-                {EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type}
-              </span>
-            )}
-            {review.duration_range && (
-              <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
-                {DURATION_LABELS[review.duration_range] ?? review.duration_range}
-              </span>
-            )}
-            {review.work_mode && (
-              <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface3)", borderRadius: 6, padding: "2px 8px" }}>
-                {WORK_MODE_LABELS[review.work_mode] ?? review.work_mode}
-              </span>
-            )}
-          </div>
-          {review.is_current && (
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>● Employé actuel</span>
-          )}
-          {Number(review.salary_chf) > 0 && (
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>CHF {Math.round(Number(review.salary_chf) / 1000)}k / an</span>
-          )}
-        </div>
+        <p style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{age}</p>
       </div>
+
+      {/* Metadata line */}
+      {(() => {
+        const meta: { label: string; color?: string; bold?: boolean }[] = [];
+        if (review.job_title) meta.push({ label: review.job_title, bold: true, color: "var(--text-sub)" });
+        if (review.employment_type) meta.push({ label: EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type });
+        if (review.duration_range) meta.push({ label: DURATION_LABELS[review.duration_range] ?? review.duration_range });
+        if (review.work_mode) meta.push({ label: WORK_MODE_LABELS[review.work_mode] ?? review.work_mode });
+        if (Number(review.salary_chf) > 0) meta.push({ label: `CHF ${Math.round(Number(review.salary_chf) / 1000)}k / an`, color: "#10b981", bold: true });
+        if (review.is_current) meta.push({ label: "Employé actuel", color: "#10b981", bold: true });
+        if (meta.length === 0) return null;
+        return (
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", marginBottom: 12, rowGap: 2 }}>
+            {meta.map((m, i) => (
+              <span key={i} style={{ display: "flex", alignItems: "center" }}>
+                <span style={{ fontSize: 12, color: m.color ?? "var(--text-muted)", fontWeight: m.bold ? 600 : 400 }}>{m.label}</span>
+                {i < meta.length - 1 && <span style={{ color: "var(--border2)", margin: "0 7px", userSelect: "none" }}>·</span>}
+              </span>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Content */}
       <p style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.7, marginBottom: 12 }}>
