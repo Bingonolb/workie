@@ -139,38 +139,14 @@ export async function getActiveAds(opts?: {
 
 export async function getCampaignDailyStats(campaignId: string): Promise<{ day: string; impressions: number; clicks: number }[]> {
   try {
-    const { supabase, companyId } = await requireBusiness();
-    // Verify campaign belongs to the authenticated user's company
-    const { data: campaign } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("company_id", companyId).maybeSingle();
-    if (!campaign) return [];
-    const [impRes, clkRes] = await Promise.all([
-      supabase.from("ad_impressions")
-        .select("viewed_at")
-        .eq("campaign_id", campaignId)
-        .gte("viewed_at", new Date(Date.now() - 30 * 86400000).toISOString()),
-      supabase.from("ad_clicks")
-        .select("clicked_at")
-        .eq("campaign_id", campaignId)
-        .gte("clicked_at", new Date(Date.now() - 30 * 86400000).toISOString()),
-    ]);
-
-    const impByDay: Record<string, number> = {};
-    for (const row of impRes.data ?? []) {
-      const d = (row.viewed_at ?? "").slice(0, 10);
-      impByDay[d] = (impByDay[d] ?? 0) + 1;
-    }
-    const clkByDay: Record<string, number> = {};
-    for (const row of clkRes.data ?? []) {
-      const d = (row.clicked_at ?? "").slice(0, 10);
-      clkByDay[d] = (clkByDay[d] ?? 0) + 1;
-    }
-
-    const days: { day: string; impressions: number; clicks: number }[] = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
-      days.push({ day: d, impressions: impByDay[d] ?? 0, clicks: clkByDay[d] ?? 0 });
-    }
-    return days;
+    const { supabase } = await requireBusiness();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase as any).rpc("get_campaign_daily_stats", { p_campaign_id: campaignId });
+    return (data ?? []).map((r: { day: string; impressions: number; clicks: number }) => ({
+      day: r.day,
+      impressions: Number(r.impressions),
+      clicks: Number(r.clicks),
+    }));
   } catch (e) { console.error("[getCampaignDailyStats] error:", e); return []; }
 }
 
@@ -299,15 +275,19 @@ export async function trackAdImpression(campaignId: string): Promise<void> {
 
     const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
-    await Promise.all([
-      supabase.from("ad_impressions").insert({
-        campaign_id: campaignId,
-        user_id: user?.id ?? null,
-        viewer_canton: geo.canton,
-        viewer_city: geo.city,
-      }),
-      supabase.rpc("increment_ad_impression", { p_campaign_id: campaignId }),
-    ]);
+    const { error: insErr } = await supabase.from("ad_impressions").insert({
+      campaign_id: campaignId,
+      user_id: user?.id ?? null,
+      viewer_canton: geo.canton,
+      viewer_city: geo.city,
+    });
+    // 23505 = unique_violation (DB-level rate limit for logged-in users)
+    if (insErr && (insErr as { code?: string }).code !== "23505") {
+      console.error("[trackAdImpression] insert error:", insErr.message);
+    }
+    if (!insErr) {
+      await supabase.rpc("increment_ad_impression", { p_campaign_id: campaignId });
+    }
   } catch (e) { console.error("[trackAdImpression] error:", e); }
 }
 
@@ -332,30 +312,13 @@ export async function trackAdClick(campaignId: string): Promise<void> {
 
 export async function getCampaignCantonStats(campaignId: string): Promise<{ canton: string; impressions: number; clicks: number }[]> {
   try {
-    const { supabase, companyId } = await requireBusiness();
-    // Verify campaign belongs to the authenticated user's company
-    const { data: campaign } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("company_id", companyId).maybeSingle();
-    if (!campaign) return [];
-    // Capped at 5000 rows — replace with SQL GROUP BY RPC once volume grows
-    const [impRes, clkRes] = await Promise.all([
-      supabase.from("ad_impressions").select("viewer_canton").eq("campaign_id", campaignId).not("viewer_canton", "is", null).limit(5000),
-      supabase.from("ad_clicks").select("viewer_canton").eq("campaign_id", campaignId).not("viewer_canton", "is", null).limit(5000),
-    ]);
-
-    const impByC: Record<string, number> = {};
-    for (const r of impRes.data ?? []) {
-      const c = r.viewer_canton as string;
-      impByC[c] = (impByC[c] ?? 0) + 1;
-    }
-    const clkByC: Record<string, number> = {};
-    for (const r of clkRes.data ?? []) {
-      const c = r.viewer_canton as string;
-      clkByC[c] = (clkByC[c] ?? 0) + 1;
-    }
-
-    return Object.entries(impByC)
-      .map(([canton, impressions]) => ({ canton, impressions, clicks: clkByC[canton] ?? 0 }))
-      .sort((a, b) => b.impressions - a.impressions)
-      .slice(0, 10);
+    const { supabase } = await requireBusiness();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase as any).rpc("get_campaign_canton_stats", { p_campaign_id: campaignId });
+    return (data ?? []).map((r: { canton: string; impressions: number; clicks: number }) => ({
+      canton: r.canton,
+      impressions: Number(r.impressions),
+      clicks: Number(r.clicks),
+    }));
   } catch { return []; }
 }

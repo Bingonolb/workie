@@ -123,12 +123,22 @@ export default async function ExplorePage({
             .maybeSingle();
           // stripe_verification_session_id reused as last_penalty_session_id
           if (prof?.stripe_verification_session_id === paid.id) {
-            // Webhook already ran and stored this session id — credits already added
+            // Already credited (webhook or previous page load)
             return Number(prof.penalty_credits ?? 0);
           }
-          // Webhook hasn't run yet — add credits and record the session id as a guard
+          // Atomic claim: only one concurrent request will match IS NULL and win
+          const { data: claimed } = await supabase
+            .from("profiles")
+            .update({ stripe_verification_session_id: paid.id })
+            .eq("id", user.id)
+            .is("stripe_verification_session_id", null)
+            .select("id");
+          if (!claimed || claimed.length === 0) {
+            // Another request already claimed this session — skip crediting
+            const { data: fresh } = await supabase.from("profiles").select("penalty_credits").eq("id", user.id).maybeSingle();
+            return Number(fresh?.penalty_credits ?? 0);
+          }
           await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 10 });
-          await supabase.from("profiles").update({ stripe_verification_session_id: paid.id }).eq("id", user.id);
           const { data: updated } = await supabase.from("profiles").select("penalty_credits").eq("id", user.id).maybeSingle();
           return Number(updated?.penalty_credits ?? 10);
         }

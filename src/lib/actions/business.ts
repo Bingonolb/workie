@@ -95,7 +95,8 @@ export async function getBusinessAnalytics() {
         .from("reviews")
         .select("rating_overall, rating_culture, rating_management, rating_worklife, rating_career, would_recommend, salary_chf, employment_type, work_mode, pros, cons, created_at, job_title, is_current")
         .eq("company_id", company.id)
-        .order("created_at", { ascending: true }),
+        .order("created_at", { ascending: true })
+        .limit(5000),
       // 30d only — enough for trend chart + week/today stats; avoids loading months of rows
       supabase
         .from("company_views")
@@ -568,7 +569,12 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
       userId = created.user.id;
 
       // Sign in as the NEW user — replaces any existing session in this browser
-      await supabase.auth.signInWithPassword({ email: work_email, password });
+      const { error: signInErr } = await supabase.auth.signInWithPassword({ email: work_email, password });
+      if (signInErr) {
+        // Non-fatal: account was created, claim will be reviewed by admin.
+        // User can log in manually via /business/login.
+        console.error("[submitClaim] auto sign-in failed:", signInErr.message);
+      }
     }
 
     // ── 3. Link profile to company ─────────────────────────────────────────────

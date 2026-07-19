@@ -176,7 +176,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   return (
     <div className="page-root">
       <ViewTracker companyId={company.id} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       <Navbar />
 
       {/* Hero cover */}

@@ -47,18 +47,29 @@ export function CompanyVoteButtons({
 
   const handleBoost = async () => {
     if (!isLoggedIn) { setShowGuest(true); return; }
+    const prev = boosted;
+    const prevScore = score;
     const next = !boosted;
     setBoosted(next);
     if (score !== null) setScore(s => (s ?? 0) + (next ? 100 : -100));
     showToast(next ? "⚡ +100 pts ajoutés !" : "⚡ Boost retiré", "#8b5cf6");
-    await addBoost(companyId);
-    router.refresh();
+    try {
+      await addBoost(companyId);
+      router.refresh();
+    } catch {
+      setBoosted(prev);
+      setScore(prevScore);
+      showToast("Erreur réseau — réessaie", "#ef4444");
+    }
   };
 
   const handlePenalty = async () => {
     if (!isLoggedIn) { setShowGuest(true); return; }
     const unlocked = isAdmin || credits > 0;
     if (!unlocked) { setShowUpgrade(true); return; }
+    const prev = penalized;
+    const prevScore = score;
+    const prevCredits = credits;
     const next = !penalized;
     setPenalized(next);
     if (score !== null) setScore(s => (s ?? 0) + (next ? -100 : 100));
@@ -68,8 +79,15 @@ export function CompanyVoteButtons({
       if (newCredits === 0 && next) setTimeout(() => setShowUpgrade(true), 1800);
     }
     showToast(next ? "💀 -100 pts appliqués" : "💀 Pénalité retirée", "#ef4444");
-    await addPenalty(companyId);
-    router.refresh();
+    try {
+      await addPenalty(companyId);
+      router.refresh();
+    } catch {
+      setPenalized(prev);
+      setScore(prevScore);
+      setCredits(prevCredits);
+      showToast("Erreur réseau — réessaie", "#ef4444");
+    }
   };
 
   const penaltyUnlocked = isAdmin || credits > 0;
