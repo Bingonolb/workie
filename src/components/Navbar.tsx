@@ -8,8 +8,12 @@ import { BottomNav } from "./BottomNav";
 import { getUnreadCount } from "@/lib/actions/notifications";
 
 export async function Navbar() {
-  const [user, isAdmin, bizCompanyId] = await Promise.all([getUser(), getIsAdmin(), getBusinessCompanyId()]);
-  const unreadCount = user ? await getUnreadCount() : 0;
+  const [user, isAdmin, bizCompanyId, unreadCount] = await Promise.all([
+    getUser(),
+    getIsAdmin(),
+    getBusinessCompanyId(),
+    getUnreadCount().catch(() => 0),
+  ]);
   const isBusiness = !!bizCompanyId;
 
   return (

@@ -81,28 +81,19 @@ export default async function ExplorePage({
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
-  // Compute page before the Promise.all so we skip the squareAds fetch on page 2+
-  // (guests are always page 1, so provisionalPage is reliable for the ad-fetch decision)
-  const provisionalPage = Math.max(1, parseInt(raw.page ?? "1") || 1);
-
-  const [user, favIds, flameIds, isAdmin, bizCompanyId, squareAds, swipeAds] = await Promise.all([
+  const [user, favIds, flameIds, isAdmin, bizCompanyId, squareAds, swipeAds, allCompaniesForGrid] = await Promise.all([
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
-    getUserFlameIds().catch(() => [] as string[]),
+    isSwipe ? getUserFlameIds().catch(() => [] as string[]) : Promise.resolve([] as string[]),
     import("@/lib/supabase/server").then(m => m.getIsAdmin()).catch(() => false),
     import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
-    // Bug 2 fix: skip DB fetch entirely on page 2+ — don't fetch then discard
-    !isSwipe && provisionalPage === 1
-      ? getActiveAds({ format: "square", canton: params.canton, sector: params.sector }).catch(() => [])
-      : Promise.resolve([]),
+    !isSwipe ? getActiveAds({ format: "square" }).catch(() => []) : Promise.resolve([]),
     isSwipe
       ? getActiveAds({ format: "swipe", canton: params.canton, sector: params.sector }).catch(() => [])
       : Promise.resolve([]),
+    !isSwipe ? getAllCompaniesForGrid().catch(() => [] as Company[]) : Promise.resolve([] as Company[]),
   ]);
   const isBusiness = !!bizCompanyId;
-
-  // Guests are locked to page 1 — enforced server-side, not just in UI
-  const page = user ? Math.max(1, parseInt(params.page ?? "1") || 1) : 1;
 
   // Helper: resolve penalty credits (with optional Stripe verification on redirect)
   const resolvePenaltyCredits = async (): Promise<number> => {
@@ -187,14 +178,12 @@ export default async function ExplorePage({
     );
   }
 
-  const allCompanies = await getAllCompaniesForGrid(!user);
-
   return (
     <div className="page-root">
       <Navbar />
       <main className="page-main">
         <ExploreClient
-          allCompanies={allCompanies as Company[]}
+          allCompanies={allCompaniesForGrid}
           favIds={favIds}
           isLoggedIn={!!user}
           isBusiness={isBusiness}

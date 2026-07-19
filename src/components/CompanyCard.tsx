@@ -85,7 +85,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         <div className="card-cover img-placeholder" style={{ height: 148, position: "relative", overflow: "hidden" }}>
           {company.cover_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <img src={company.cover_url} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           ) : (
             <div style={{ width: "100%", height: "100%", background: getCoverGradient(company.sector, sectorColor) }} />
           )}
@@ -159,6 +159,8 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
                 <img
                   src={company.logo_url}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   onLoad={() => setLogoVisible(true)}
                   onError={() => setLogoVisible(false)}
                   style={{
