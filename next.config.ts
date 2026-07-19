@@ -44,12 +44,6 @@ const nextConfig: NextConfig = {
       // 20MB was excessive; max realistic: cover image (5MB) + logo (2MB)
       bodySizeLimit: "8mb",
     },
-    // Cache dynamic page renders client-side for 30s — eliminates the ½s lag on nav
-    // After 30s the next navigation re-fetches in background while showing stale instantly
-    staleTimes: {
-      dynamic: 30,
-      static: 300,
-    },
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

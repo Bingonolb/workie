@@ -369,23 +369,28 @@ export function ExploreFilters({
           )}
         </div>
 
-        {/* View toggle */}
+        {/* View toggle — always navigates via URL (never intercepted by onFilter) */}
         <div style={{ display: "flex", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, padding: 3, gap: 3, flexShrink: 0 }}>
           {([
             { v: "grid", icon: <LayoutGrid size={16} />, label: "Grille" },
             { v: "swipe", icon: <Layers size={16} />, label: "Swipe" },
-          ] as const).map(({ v, icon, label }) => (
-            <button key={v} onClick={() => push("view", v === "grid" ? undefined : v)} title={label}
-              style={{
-                width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-                borderRadius: 9, border: "none",
-                background: view === v ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "transparent",
-                color: view === v ? "#fff" : "var(--text-muted)",
-                cursor: "pointer", transition: "all 0.15s",
-              }}>
-              {icon}
-            </button>
-          ))}
+          ] as const).map(({ v, icon, label }) => {
+            const p = new URLSearchParams(searchParams.toString());
+            if (v === "grid") p.delete("view"); else p.set("view", v);
+            p.delete("page");
+            return (
+              <button key={v} onClick={() => startTransition(() => router.push(`${pathname}?${p.toString()}`))} title={label}
+                style={{
+                  width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
+                  borderRadius: 9, border: "none",
+                  background: view === v ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "transparent",
+                  color: view === v ? "#fff" : "var(--text-muted)",
+                  cursor: "pointer", transition: "all 0.15s",
+                }}>
+                {icon}
+              </button>
+            );
+          })}
         </div>
       </div>
 
