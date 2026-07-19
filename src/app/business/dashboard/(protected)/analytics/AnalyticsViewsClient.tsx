@@ -21,6 +21,7 @@ export function AnalyticsViewsClient({
   viewTrend: ViewTrendItem[]; favoritesCount: number; reviewCount: number;
 }) {
   const [period, setPeriod] = useState<Period>("7j");
+  const [activeDay, setActiveDay] = useState<string | null>(null);
 
   const viewsByPeriod: Record<Period, number> = {
     today: viewsToday,
@@ -93,24 +94,44 @@ export function AnalyticsViewsClient({
 
       {/* Bar chart */}
       {chartData.length > 1 && (
-        <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px" }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>
-            Vues par jour — {totalPeriodLabel}
-          </p>
+        <div
+          style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px" }}
+          onMouseLeave={() => setActiveDay(null)}
+        >
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 20 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>
+              Vues par jour — {totalPeriodLabel}
+            </p>
+            {activeDay && (() => {
+              const item = chartData.find(d => d.day === activeDay);
+              const n = item ? Number(item.count) : 0;
+              const label = activeDay.slice(5).replace("-", "/");
+              return (
+                <span style={{ fontSize: 13, fontWeight: 700, color: activeDay === todayStr ? "#10b981" : "#8b5cf6" }}>
+                  {label} · {n} vue{n !== 1 ? "s" : ""}
+                </span>
+              );
+            })()}
+          </div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: period === "30j" ? 3 : 6, height: 72 }}>
             {chartData.map(({ day, count: cnt }) => {
               const n = Number(cnt);
               const h = maxDay > 0 ? Math.max(2, (n / maxDay) * 72) : 2;
               const isToday = day === todayStr;
+              const isActive = day === activeDay;
               return (
                 <div
                   key={day}
-                  title={`${day.slice(5).replace("-", "/")} · ${n} vue${n !== 1 ? "s" : ""}`}
+                  onClick={() => setActiveDay(day === activeDay ? null : day)}
+                  onMouseEnter={() => setActiveDay(day)}
                   style={{
                     flex: 1, minWidth: 8, height: h, borderRadius: "3px 3px 0 0",
                     background: isToday ? "#10b981" : n > 0 ? "#8b5cf6" : "var(--border)",
-                    opacity: isToday ? 1 : n > 0 ? 0.75 : 0.3,
-                    cursor: "default",
+                    opacity: activeDay && !isActive ? 0.35 : isToday ? 1 : n > 0 ? 0.75 : 0.3,
+                    cursor: "pointer",
+                    transition: "opacity 0.1s",
+                    outline: isActive ? `2px solid ${isToday ? "#10b981" : "#8b5cf6"}` : "none",
+                    outlineOffset: 2,
                   }}
                 />
               );
