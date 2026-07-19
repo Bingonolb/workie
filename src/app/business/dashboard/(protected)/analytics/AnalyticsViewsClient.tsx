@@ -36,10 +36,12 @@ export function AnalyticsViewsClient({
     ? viewTrend.slice(-1)
     : period === "7j"
     ? viewTrend.slice(-7)
-    : viewTrend; // 30j or 90j — only 30 days of daily data available
+    : viewTrend;
 
-  const maxDay = Math.max(...chartData.map(v => v.count), 1);
+  const maxDay = Math.max(...chartData.map(v => Number(v.count)), 1);
   const totalPeriodLabel = PERIODS.find(p => p.id === period)?.label ?? "";
+
+  const activeItem = activeDay ? chartData.find(d => d.day === activeDay) : null;
 
   return (
     <div>
@@ -48,14 +50,14 @@ export function AnalyticsViewsClient({
         {PERIODS.map(p => (
           <button
             key={p.id}
-            onClick={() => setPeriod(p.id)}
+            onClick={() => { setPeriod(p.id); setActiveDay(null); }}
             style={{
               padding: "7px 18px", borderRadius: 20, border: "1px solid",
               borderColor: period === p.id ? "#8b5cf6" : "var(--border2)",
               background: period === p.id ? "rgba(139,92,246,0.12)" : "transparent",
               color: period === p.id ? "#8b5cf6" : "var(--text-muted)",
               fontWeight: period === p.id ? 700 : 400,
-              fontSize: 13, cursor: "pointer", transition: "all 0.15s",
+              fontSize: 13, cursor: "pointer",
             }}
           >
             {p.label}
@@ -74,7 +76,6 @@ export function AnalyticsViewsClient({
             {viewsByPeriod[period].toLocaleString("fr-CH")}
           </p>
         </div>
-
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "20px 18px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
             <Heart size={15} color="#ec4899" />
@@ -82,7 +83,6 @@ export function AnalyticsViewsClient({
           </div>
           <p style={{ fontSize: 38, fontWeight: 900, color: "#ec4899", letterSpacing: "-0.03em", lineHeight: 1 }}>{favoritesCount}</p>
         </div>
-
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "20px 18px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
             <MessageSquare size={15} color="#f59e0b" />
@@ -92,26 +92,23 @@ export function AnalyticsViewsClient({
         </div>
       </div>
 
-      {/* Bar chart */}
+      {/* Bar chart — vues par jour */}
       {chartData.length > 1 && (
         <div
           style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px" }}
-          onMouseLeave={() => setActiveDay(null)}
+          onPointerLeave={() => setActiveDay(null)}
         >
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 20, minHeight: 20 }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>
               Vues par jour — {totalPeriodLabel}
             </p>
-            {activeDay && (() => {
-              const item = chartData.find(d => d.day === activeDay);
-              const n = item ? Number(item.count) : 0;
-              const label = activeDay.slice(5).replace("-", "/");
-              return (
-                <span style={{ fontSize: 13, fontWeight: 700, color: activeDay === todayStr ? "#10b981" : "#8b5cf6" }}>
-                  {label} · {n} vue{n !== 1 ? "s" : ""}
-                </span>
-              );
-            })()}
+            {activeItem ? (
+              <span style={{ fontSize: 13, fontWeight: 700, color: activeDay === todayStr ? "#10b981" : "#8b5cf6" }}>
+                {activeDay!.slice(5).replace("-", "/")} · {Number(activeItem.count)} vue{Number(activeItem.count) !== 1 ? "s" : ""}
+              </span>
+            ) : (
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>touche une barre</span>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: period === "30j" ? 3 : 6, height: 72 }}>
             {chartData.map(({ day, count: cnt }) => {
@@ -119,17 +116,17 @@ export function AnalyticsViewsClient({
               const h = maxDay > 0 ? Math.max(2, (n / maxDay) * 72) : 2;
               const isToday = day === todayStr;
               const isActive = day === activeDay;
+              const dimmed = activeDay !== null && !isActive;
               return (
                 <div
                   key={day}
+                  onPointerEnter={() => setActiveDay(day)}
                   onClick={() => setActiveDay(day === activeDay ? null : day)}
-                  onMouseEnter={() => setActiveDay(day)}
                   style={{
                     flex: 1, minWidth: 8, height: h, borderRadius: "3px 3px 0 0",
                     background: isToday ? "#10b981" : n > 0 ? "#8b5cf6" : "var(--border)",
-                    opacity: activeDay && !isActive ? 0.35 : isToday ? 1 : n > 0 ? 0.75 : 0.3,
+                    opacity: dimmed ? 0.3 : isToday ? 1 : n > 0 ? 0.8 : 0.3,
                     cursor: "pointer",
-                    transition: "opacity 0.1s",
                     outline: isActive ? `2px solid ${isToday ? "#10b981" : "#8b5cf6"}` : "none",
                     outlineOffset: 2,
                   }}
@@ -144,7 +141,7 @@ export function AnalyticsViewsClient({
         </div>
       )}
 
-      {/* Today: no chart, just the number */}
+      {/* Today: no chart */}
       {period === "today" && (
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px", textAlign: "center" }}>
           <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 4 }}>

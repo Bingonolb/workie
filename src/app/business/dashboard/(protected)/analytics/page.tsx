@@ -2,6 +2,7 @@ import { getBusinessAnalytics } from "@/lib/actions/business";
 import { Star, ThumbsUp, BarChart2, ArrowLeft, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 import { AnalyticsViewsClient } from "./AnalyticsViewsClient";
+import { AnalyticsTrendChart } from "./AnalyticsTrendChart";
 
 function Bar({ pct, color, label, value }: { pct: number; color: string; label: string; value: string }) {
   return (
@@ -238,36 +239,7 @@ export default async function AnalyticsPage() {
 
           {/* Évolution mensuelle */}
           {trend && trend.length > 1 && (
-            <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 24 }}>Évolution mensuelle de la note</p>
-              <div className="scroll-x" style={{ margin: "0 -4px" }}>
-              <div style={{ minWidth: 480, display: "flex", gap: 8, padding: "0 4px" }}>
-                {(() => {
-                  const MONTHS_SHORT = ["jan","fév","mar","avr","mai","jun","jul","aoû","sep","oct","nov","déc"];
-                  const BAR_H = 88;
-                  return trend.map(({ month, avg: a }, idx) => {
-                    const [y, mo] = month.split("-");
-                    const isJan = mo === "01";
-                    const showYear = idx === 0 || isJan;
-                    const label = showYear
-                      ? `${MONTHS_SHORT[parseInt(mo) - 1]} '${y.slice(2)}`
-                      : MONTHS_SHORT[parseInt(mo) - 1];
-                    const h = a != null ? Math.max(4, (a / 5) * BAR_H) : 4;
-                    const color = a == null ? "var(--border)" : a >= 4 ? "#10b981" : a >= 3 ? "#f59e0b" : "#ef4444";
-                    return (
-                      <div key={month} style={{ flex: 1, minWidth: 32, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                        <span style={{ fontSize: 10, color, fontWeight: 700, lineHeight: "13px", minHeight: 13 }}>{a ?? "–"}</span>
-                        <div style={{ width: "100%", height: BAR_H, display: "flex", alignItems: "flex-end" }}>
-                          <div title={a != null ? `${label}: ${a}/5` : `${label}: aucun avis`} style={{ width: "100%", height: h, background: color, borderRadius: "4px 4px 0 0", opacity: 0.85 }} />
-                        </div>
-                        <span style={{ fontSize: 9, color: showYear ? "var(--text-sub)" : "var(--text-muted)", fontWeight: showYear ? 700 : 400, whiteSpace: "nowrap", marginTop: 2 }}>{label}</span>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-              </div>
-            </div>
+            <AnalyticsTrendChart trend={trend} />
           )}
         </>
       )}
