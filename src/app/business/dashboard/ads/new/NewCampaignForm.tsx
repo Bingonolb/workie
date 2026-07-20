@@ -417,9 +417,16 @@ export function NewCampaignForm({
           <div style={{ marginBottom: 22 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</label>
-              <span style={{ fontSize: 11, background: "rgba(255,255,255,0.06)", padding: "2px 9px", borderRadius: 50, color: "var(--text-muted)" }}>
-                {selectedCantons.length === 0 ? "Toute la Suisse" : `${selectedCantons.length} sélectionné${selectedCantons.length > 1 ? "s" : ""}`}
-              </span>
+              <button type="button" onClick={() => setSelectedCantons(c => c.length === CANTONS.length ? [] : CANTONS.map(x => x.code))} style={{
+                fontSize: 11, padding: "2px 9px", borderRadius: 50, cursor: "pointer", fontWeight: 700,
+                border: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "1px solid rgba(249,115,22,0.4)" : "1px solid rgba(255,255,255,0.1)",
+                background: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "rgba(249,115,22,0.1)" : "rgba(255,255,255,0.06)",
+                color: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "#f97316" : "var(--text-muted)",
+              }}>
+                {selectedCantons.length === 0 || selectedCantons.length === CANTONS.length
+                  ? "✓ Toute la Suisse"
+                  : `${selectedCantons.length} sélectionné${selectedCantons.length > 1 ? "s" : ""}`}
+              </button>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
               {CANTONS.map(c => {
@@ -439,9 +446,16 @@ export function NewCampaignForm({
           <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Secteurs</label>
-              <span style={{ fontSize: 11, background: "rgba(255,255,255,0.06)", padding: "2px 9px", borderRadius: 50, color: "var(--text-muted)" }}>
-                {selectedSectors.length === 0 ? "Tous les secteurs" : `${selectedSectors.length} sélectionné${selectedSectors.length > 1 ? "s" : ""}`}
-              </span>
+              <button type="button" onClick={() => setSelectedSectors(s => s.length === SECTORS.length ? [] : [...SECTORS])} style={{
+                fontSize: 11, padding: "2px 9px", borderRadius: 50, cursor: "pointer", fontWeight: 700,
+                border: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "1px solid rgba(139,92,246,0.4)" : "1px solid rgba(255,255,255,0.1)",
+                background: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "rgba(139,92,246,0.1)" : "rgba(255,255,255,0.06)",
+                color: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "#8b5cf6" : "var(--text-muted)",
+              }}>
+                {selectedSectors.length === 0 || selectedSectors.length === SECTORS.length
+                  ? "✓ Tous les secteurs"
+                  : `${selectedSectors.length} sélectionné${selectedSectors.length > 1 ? "s" : ""}`}
+              </button>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
               {SECTORS.map(s => {
