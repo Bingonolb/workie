@@ -160,7 +160,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
               }}>
                 {getInitials(company.name)}
               </div>
-              {/* Logo overlaid on top if available */}
+              {/* Logo overlaid on top if available — opacity:0 prevents "?" broken-image flash */}
               {company.logo_url && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -168,11 +168,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
                   alt=""
                   width={38}
                   height={38}
+                  loading="lazy"
+                  onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = "1"; }}
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   style={{
                     position: "absolute", inset: 0,
                     borderRadius: 9, objectFit: "contain", background: "#fff",
                     border: "1.5px solid rgba(255,255,255,0.25)",
+                    opacity: 0, transition: "opacity 0.1s",
                   }}
                 />
               )}

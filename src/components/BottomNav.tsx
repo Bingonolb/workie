@@ -23,6 +23,13 @@ export function BottomNav({ isBusiness }: { isBusiness: boolean }) {
   const pathname = usePathname();
   const links = isBusiness ? BIZ_LINKS : USER_LINKS;
 
+  const handleClick = (href: string, active: boolean) => (e: React.MouseEvent) => {
+    if (active) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <nav className="bottom-nav">
       {links.map(({ href, Icon, label, exact }) => {
@@ -30,7 +37,12 @@ export function BottomNav({ isBusiness }: { isBusiness: boolean }) {
           ? pathname === href
           : pathname === href || pathname.startsWith(href + "/");
         return (
-          <Link key={href} href={href} className={`bottom-nav-item${active ? " active" : ""}`}>
+          <Link
+            key={href}
+            href={href}
+            className={`bottom-nav-item${active ? " active" : ""}`}
+            onClick={handleClick(href, active)}
+          >
             <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
             <span>{label}</span>
           </Link>
