@@ -5,6 +5,7 @@ import { getUserCampaignById, getUserCampaignDailyStats, getUserCampaignCantonSt
 import { Navbar } from "@/components/Navbar";
 import { AdStatsChart } from "@/app/business/dashboard/ads/AdStatsChart";
 import { CancelCampaignButton } from "@/components/CancelCampaignButton";
+import Image from "next/image";
 import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, Clock, CheckCircle, XCircle, PauseCircle } from "lucide-react";
 
 const STATUS_CONFIG = {
@@ -63,8 +64,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
           <div style={{ display: "flex", gap: 20, padding: "22px 24px", flexWrap: "wrap" }}>
             <div style={{ width: 100, height: 100, borderRadius: 14, overflow: "hidden", flexShrink: 0, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {campaign.image_url
-                // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={campaign.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ? <Image src={campaign.image_url} alt="" width={100} height={100} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
                 : <span style={{ fontSize: 36 }}>📣</span>
               }
             </div>

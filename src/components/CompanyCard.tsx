@@ -56,7 +56,6 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
   const [fav, setFav] = useState(isFav);
   const [score, setScore] = useState(Number(company.score));
   const [pending, startTransition] = useTransition();
-  const [logoVisible, setLogoVisible] = useState(false);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
   const handleFav = (e: React.MouseEvent) => {
@@ -163,18 +162,17 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
               </div>
               {/* Logo overlaid on top if available */}
               {company.logo_url && (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={company.logo_url}
                   alt=""
                   width={38}
                   height={38}
-                  onLoad={() => setLogoVisible(true)}
-                  onError={() => setLogoVisible(false)}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   style={{
                     position: "absolute", inset: 0,
                     borderRadius: 9, objectFit: "contain", background: "#fff",
                     border: "1.5px solid rgba(255,255,255,0.25)",
-                    display: logoVisible ? "block" : "none",
                   }}
                 />
               )}

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Flame, Star, TrendingUp, Zap, Search } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
@@ -125,7 +124,8 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                     flexShrink: 0, background: `linear-gradient(135deg, ${sectorColor}44, ${sectorColor}22)`,
                   }}>
                     {c.cover_url && (
-                      <Image src={c.cover_url} alt="" width={36} height={36} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={c.cover_url} alt="" style={{ objectFit: "cover", width: "100%", height: "100%" }} />
                     )}
                   </div>
                   <div style={{ minWidth: 0 }}>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { getUserCampaigns } from "@/lib/actions/ads";
 import { Navbar } from "@/components/Navbar";
+import Image from "next/image";
 import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft, Megaphone, CreditCard } from "lucide-react";
 import type { AdCampaign } from "@/lib/actions/ads";
 import { PayUserCampaignButton } from "./PayUserCampaignButton";
@@ -185,8 +186,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
                     <div style={{ display: "flex", position: "relative", zIndex: 1 }}>
                       {/* Thumbnail */}
                       <div style={{ width: 80, flexShrink: 0, background: "var(--surface2)", position: "relative", overflow: "hidden" }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={c.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0 }} />
+                        <Image src={c.image_url} alt="" fill sizes="80px" style={{ objectFit: "cover" }} />
                         <div style={{ position: "absolute", bottom: 6, left: 6, fontSize: 9, fontWeight: 800, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, textTransform: "uppercase" }}>
                           {c.format === "square" ? "⬛" : "📱"}
                         </div>
