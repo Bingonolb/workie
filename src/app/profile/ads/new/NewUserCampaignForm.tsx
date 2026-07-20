@@ -211,52 +211,147 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
         </div>
 
-        {/* CREATIVE */}
+        {/* CREATIVE — avec aperçu en temps réel */}
         <div style={card}>
-          <SectionHeader icon={<ImageIcon size={18} />} title="Visuel & contenu" subtitle="Minimum 1200×800px recommandé." />
+          <SectionHeader icon={<ImageIcon size={18} />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
 
-          {/* Upload */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              gap: 10, padding: "28px 20px", borderRadius: 16,
-              border: imagePreview ? "1.5px solid rgba(139,92,246,0.4)" : "2px dashed var(--border2)",
-              cursor: "pointer", background: imagePreview ? "rgba(139,92,246,0.04)" : "var(--surface2)",
-            }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Upload size={18} color={imagePreview ? "#8b5cf6" : "var(--text-muted)"} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+            {/* Gauche : upload + URL */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <label style={{
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                gap: 10, padding: "28px 20px", borderRadius: 16, flex: 1,
+                border: imagePreview ? "1.5px solid rgba(139,92,246,0.4)" : "2px dashed var(--border2)",
+                cursor: "pointer", background: imagePreview ? "rgba(139,92,246,0.04)" : "var(--surface2)",
+              }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Upload size={18} color={imagePreview ? "#8b5cf6" : "var(--text-muted)"} />
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: imagePreview ? "#8b5cf6" : "var(--text)", marginBottom: 3 }}>
+                    {imagePreview ? "✓ Image chargée — changer" : "Uploader une image HD"}
+                  </p>
+                  <p style={{ fontSize: 11, color: "var(--text-muted)" }}>PNG, JPG, WebP · Max 10 MB</p>
+                </div>
+                <input type="file" name="image_file" accept="image/*" style={{ display: "none" }}
+                  onChange={e => {
+                    const f = e.target.files?.[0];
+                    if (f) {
+                      if (blobRef.current) URL.revokeObjectURL(blobRef.current);
+                      const url = URL.createObjectURL(f);
+                      blobRef.current = url;
+                      setImageUrl("");
+                      setImagePreview(url);
+                    }
+                  }} />
+              </label>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+                <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>OU URL</span>
+                <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
               </div>
-              <div style={{ textAlign: "center" }}>
-                <p style={{ fontSize: 14, fontWeight: 700, color: imagePreview ? "#8b5cf6" : "var(--text)", marginBottom: 3 }}>
-                  {imagePreview ? "✓ Image chargée — changer" : "Uploader une image HD"}
-                </p>
-                <p style={{ fontSize: 11, color: "var(--text-muted)" }}>PNG, JPG, WebP · Max 10 MB</p>
+
+              <div style={{ position: "relative" }}>
+                <ExternalLink size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
+                <input style={{ ...inp, paddingLeft: 40 }} placeholder="https://votre-cdn.com/image-hd.jpg" value={imageUrl}
+                  onChange={e => { setImageUrl(e.target.value); setImagePreview(e.target.value || ""); }} />
               </div>
-              <input type="file" name="image_file" accept="image/*" style={{ display: "none" }}
-                onChange={e => {
-                  const f = e.target.files?.[0];
-                  if (f) {
-                    if (blobRef.current) URL.revokeObjectURL(blobRef.current);
-                    const url = URL.createObjectURL(f);
-                    blobRef.current = url;
-                    setImageUrl("");
-                    setImagePreview(url);
-                  }
-                }} />
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "10px 0" }}>
-              <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-              <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>OU URL</span>
-              <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
             </div>
-            <div style={{ position: "relative" }}>
-              <ExternalLink size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
-              <input style={{ ...inp, paddingLeft: 40 }} placeholder="https://votre-cdn.com/image-hd.jpg" value={imageUrl}
-                onChange={e => { setImageUrl(e.target.value); setImagePreview(e.target.value || ""); }} />
+
+            {/* Droite : aperçu en temps réel */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Aperçu · Format {format === "square" ? "carré" : "swipe"}
+              </p>
+
+              {format === "square" ? (
+                <div style={{ background: "var(--surface2)", borderRadius: 14, padding: 10, border: "1px solid var(--border)" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 6 }}>
+                    {["LVMH", "Nestlé"].map(n => (
+                      <div key={n} style={{ background: "var(--surface)", borderRadius: 10, padding: "8px 10px", height: 52, display: "flex", alignItems: "flex-end", border: "1px solid var(--border)" }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", opacity: 0.4 }}>{n}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ borderRadius: 12, overflow: "hidden", border: "1.5px solid rgba(139,92,246,0.35)", background: "var(--surface)", marginBottom: 6 }}>
+                    <div style={{ position: "relative", paddingTop: "52%", overflow: "hidden", background: "var(--surface2)" }}>
+                      {imagePreview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imagePreview} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
+                      ) : (
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <ImageIcon size={24} color="var(--text-muted)" style={{ opacity: 0.3 }} />
+                        </div>
+                      )}
+                      <div style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", borderRadius: 50, padding: "2px 7px", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sponsorisé</div>
+                    </div>
+                    <div style={{ padding: "8px 10px 10px" }}>
+                      <p style={{ fontSize: 11, fontWeight: 800, color: "var(--text)", marginBottom: 5, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
+                      {bodyText && <p style={{ fontSize: 9, color: "var(--text-muted)", marginBottom: 6, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{bodyText}</p>}
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 9, fontWeight: 800, color: "#fff" }}>
+                        {ctaLabel || "En savoir plus"} →
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                    {["UBS", "Rolex"].map(n => (
+                      <div key={n} style={{ background: "var(--surface)", borderRadius: 10, padding: "8px 10px", height: 52, display: "flex", alignItems: "flex-end", border: "1px solid var(--border)" }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", opacity: 0.4 }}>{n}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 9, color: "var(--text-muted)", textAlign: "center", marginTop: 8 }}>Votre annonce dans la grille d&apos;exploration</p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div style={{
+                    width: 160, background: "#0a0a0a", borderRadius: 28, padding: "8px 6px",
+                    border: "2px solid rgba(255,255,255,0.12)",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.04)",
+                    position: "relative",
+                  }}>
+                    <div style={{ width: 50, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.15)", margin: "0 auto 6px" }} />
+                    <div style={{ borderRadius: 20, overflow: "hidden", background: "rgba(255,255,255,0.05)", position: "relative" }}>
+                      <div style={{ height: 250, display: "flex", alignItems: "flex-end", padding: 10 }}>
+                        <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>Entreprise suivante…</p>
+                      </div>
+                      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", display: "flex", flexDirection: "column" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", background: "rgba(255,255,255,0.05)" }}>
+                          <span style={{ fontSize: 7, fontWeight: 800, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Sponsorisé</span>
+                          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1 }}>✕</span>
+                        </div>
+                        <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+                          {imagePreview ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={imagePreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
+                          ) : (
+                            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <ImageIcon size={24} color="rgba(255,255,255,0.15)" />
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ padding: "10px 10px 12px" }}>
+                          <p style={{ fontSize: 10, fontWeight: 900, color: "#fff", marginBottom: 4, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
+                          {bodyText && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.65)", marginBottom: 8, lineHeight: 1.4 }}>{bodyText.slice(0, 60)}{bodyText.length > 60 ? "…" : ""}</p>}
+                          <div style={{ display: "flex", gap: 5 }}>
+                            <div style={{ flex: 1, padding: "5px 8px", borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 8, fontWeight: 800, color: "#fff", textAlign: "center" }}>
+                              {ctaLabel || "En savoir plus"}
+                            </div>
+                            <div style={{ padding: "5px 8px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.2)", fontSize: 8, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Ignorer</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ width: 44, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)", margin: "6px auto 0" }} />
+                  </div>
+                  <p style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 10, textAlign: "center" }}>S&apos;affiche tous les 10 swipes</p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Text fields */}
+          {/* Champs texte */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Titre *</label>
@@ -272,10 +367,12 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Description <span style={{ fontWeight: 400, textTransform: "none" }}>· optionnel</span>
+              Description <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>· optionnel</span>
             </label>
-            <input name="body_text" style={inp} placeholder="Une courte accroche…" maxLength={120}
+            <textarea name="body_text" rows={2} style={{ ...inp, height: "auto", padding: "12px 16px", resize: "none", lineHeight: 1.5 }}
+              placeholder="Une courte accroche pour votre annonce… (max 120 car.)" maxLength={120}
               value={bodyText} onChange={e => setBodyText(e.target.value)} />
+            <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, textAlign: "right" }}>{bodyText.length}/120</p>
           </div>
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>URL de destination *</label>
@@ -286,7 +383,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
         </div>
 
-        {/* TARGETING */}
+        {/* CIBLAGE */}
         <div style={card}>
           <SectionHeader icon={<Target size={18} />} title="Ciblage" subtitle="Plus vous ciblez précisément, plus le CPM augmente — mais meilleure est la qualité de l'audience." />
           <div style={{ marginBottom: 22 }}>
@@ -366,21 +463,28 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {dailyBudget} × {durationDays} jours</div>
           </div>
 
+          {/* Dates — overflow:hidden évite le débordement iOS */}
           <div style={{ display: "flex", gap: 10 }}>
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
               <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Début</label>
-              <input name="start_date" type="date" min={today} style={{ ...inp, height: 40, fontSize: 13 }} value={startDate}
-                onChange={e => handleStartDateChange(e.target.value)} />
+              <div style={{ overflow: "hidden", borderRadius: 12 }}>
+                <input name="start_date" type="date" min={today} style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} value={startDate}
+                  onChange={e => handleStartDateChange(e.target.value)} />
+              </div>
             </div>
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
-              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Fin · auto</label>
-              <input name="end_date" type="date" style={{ ...inp, height: 40, fontSize: 13 }} value={endDate}
-                onChange={e => handleEndDateChange(e.target.value)} />
+              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, fontSize: 10 }}>· auto</span>
+              </label>
+              <div style={{ overflow: "hidden", borderRadius: 12 }}>
+                <input name="end_date" type="date" style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} value={endDate}
+                  onChange={e => handleEndDateChange(e.target.value)} />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ESTIMATE */}
+        {/* ESTIMATION */}
         <div style={{ ...card, background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))", border: "1px solid rgba(139,92,246,0.2)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
             <Info size={16} color="#8b5cf6" />
