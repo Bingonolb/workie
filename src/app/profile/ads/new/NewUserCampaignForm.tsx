@@ -3,6 +3,7 @@
 import { useState, useActionState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock } from "lucide-react";
+// ExternalLink used for CTA URL field only
 import { createUserCampaign } from "@/lib/actions/ads";
 import { calculateCPM, estimateDailyImpressions, estimateDailyReach } from "@/lib/ads/pricing";
 
@@ -245,18 +246,6 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                     }
                   }} />
               </label>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-                <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>OU URL</span>
-                <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-              </div>
-
-              <div style={{ position: "relative" }}>
-                <ExternalLink size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
-                <input style={{ ...inp, paddingLeft: 40 }} placeholder="https://votre-cdn.com/image-hd.jpg" value={imageUrl}
-                  onChange={e => { setImageUrl(e.target.value); setImagePreview(e.target.value || ""); }} />
-              </div>
             </div>
 
             {/* Droite : aperçu en temps réel */}

@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, Clock, CheckCircle, XCircle, PauseCircle } from "lucide-react";
-import { getBusinessCampaigns, getCampaignDailyStats, getCampaignCantonStats } from "@/lib/actions/ads";
+import { getBusinessCampaignById, getCampaignDailyStats, getCampaignCantonStats, pauseBusinessCampaign } from "@/lib/actions/ads";
 import { AdStatsChart } from "../AdStatsChart";
+import { CancelCampaignButton } from "@/components/CancelCampaignButton";
 
 const STATUS_CONFIG = {
   payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={14} /> },
@@ -25,14 +26,12 @@ function cpc(clk: number, spent: number) {
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { campaigns = [] } = await getBusinessCampaigns();
-  const campaign = campaigns.find(c => c.id === id);
-  if (!campaign) notFound();
-
-  const [stats, cantonStats] = await Promise.all([
+  const [campaign, stats, cantonStats] = await Promise.all([
+    getBusinessCampaignById(id),
     getCampaignDailyStats(id),
     getCampaignCantonStats(id),
   ]);
+  if (!campaign) notFound();
 
   const st = STATUS_CONFIG[campaign.status] ?? STATUS_CONFIG.pending;
   const totalBudget = Number(campaign.total_budget_chf);
@@ -83,6 +82,9 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>
                   {campaign.format === "square" ? "⬛ Carré" : "📱 Swipe"}
                 </span>
+                {(campaign.status === "active" || campaign.status === "pending") && (
+                  <CancelCampaignButton campaignId={campaign.id} onCancel={pauseBusinessCampaign} redirectAfter="/business/dashboard/ads" />
+                )}
               </div>
               {campaign.body_text && <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>{campaign.body_text}</p>}
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 13, color: "var(--text-muted)" }}>

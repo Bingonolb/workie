@@ -273,6 +273,62 @@ export async function getCampaignDailyStats(campaignId: string): Promise<{ day: 
   } catch (e) { console.error("[getCampaignDailyStats] error:", e); return []; }
 }
 
+export async function getUserCampaignById(id: string): Promise<AdCampaign | null> {
+  try {
+    const { supabase, user } = await requireUser();
+    const { data } = await supabase
+      .from("ad_campaigns")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    return (data as unknown as AdCampaign) ?? null;
+  } catch { return null; }
+}
+
+export async function getBusinessCampaignById(id: string): Promise<AdCampaign | null> {
+  try {
+    const { supabase, companyId } = await requireBusiness();
+    const { data } = await supabase
+      .from("ad_campaigns")
+      .select("*")
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .maybeSingle();
+    return (data as unknown as AdCampaign) ?? null;
+  } catch { return null; }
+}
+
+export async function pauseUserCampaign(id: string): Promise<{ error?: string }> {
+  try {
+    const { supabase, user } = await requireUser();
+    const { error } = await supabase
+      .from("ad_campaigns")
+      .update({ status: "paused" })
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .in("status", ["active", "pending"]);
+    if (error) return { error: error.message };
+    revalidatePath("/profile/ads");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+export async function pauseBusinessCampaign(id: string): Promise<{ error?: string }> {
+  try {
+    const { supabase, companyId } = await requireBusiness();
+    const { error } = await supabase
+      .from("ad_campaigns")
+      .update({ status: "paused" })
+      .eq("id", id)
+      .eq("company_id", companyId)
+      .in("status", ["active", "pending"]);
+    if (error) return { error: error.message };
+    revalidatePath("/business/dashboard/ads");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 // ── Mutations ──────────────────────────────────────────────────────────────────
 
 export async function createCampaign(

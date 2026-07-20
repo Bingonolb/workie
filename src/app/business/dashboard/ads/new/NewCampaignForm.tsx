@@ -268,18 +268,6 @@ export function NewCampaignForm({
                     }
                   }} />
               </label>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
-                <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600 }}>OU URL</span>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
-              </div>
-
-              <div style={{ position: "relative" }}>
-                <ExternalLink size={14} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
-                <input style={{ ...inp, paddingLeft: 40 }} placeholder="https://votre-cdn.com/image-hd.jpg" value={imageUrl}
-                  onChange={e => { setImageUrl(e.target.value); setImagePreview(e.target.value ? e.target.value : ""); }} />
-              </div>
             </div>
 
             {/* Right: realistic format preview */}

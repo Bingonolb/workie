@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser, createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { getUser } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ArrowRight, Star, Shield, Zap, Eye, TrendingUp, MessageCircle, BarChart3, BadgeCheck } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const dynamic = "force-dynamic";
+
+const getLandingCounts = unstable_cache(
+  async () => {
+    const admin = createAdminClient();
+    const [{ count: companyCount }, { count: reviewCount }] = await Promise.all([
+      admin.from("companies").select("*", { count: "exact", head: true }),
+      admin.from("reviews").select("*", { count: "exact", head: true }),
+    ]);
+    return { companies: companyCount ?? 0, reviews: reviewCount ?? 0 };
+  },
+  ["landing-counts"],
+  { revalidate: 300, tags: ["landing-counts"] }
+);
 
 export const metadata: Metadata = {
   title: "Workie — Avis d'employés & salaires réels en Suisse",
@@ -18,15 +33,13 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const supabase = await createClient();
-  const [user, { count: companyCount }, { count: reviewCount }] = await Promise.all([
+  const [user, counts] = await Promise.all([
     getUser().catch(() => null),
-    supabase.from("companies").select("*", { count: "exact", head: true }),
-    supabase.from("reviews").select("*", { count: "exact", head: true }),
+    getLandingCounts(),
   ]);
   if (user) redirect("/explore");
-  const nCompanies = companyCount ?? 0;
-  const nReviews = reviewCount ?? 0;
+  const nCompanies = counts.companies;
+  const nReviews = counts.reviews;
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
