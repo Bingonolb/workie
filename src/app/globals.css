@@ -314,6 +314,23 @@ main, .page-main, .page-main-sm, .page-main-md {
   .landing-biz-grid-aside { display: none; }
 }
 
+.landing-ads-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: center;
+}
+.landing-ads-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 200px;
+}
+@media (max-width: 700px) {
+  .landing-ads-grid { grid-template-columns: 1fr; gap: 20px; }
+  .landing-ads-aside { display: none; }
+}
+
 /* ─── Misc ──────────────────────────────────────────────────────── */
 
 /* Pros/cons grid → stack */

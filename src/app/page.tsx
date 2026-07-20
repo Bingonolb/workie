@@ -221,7 +221,7 @@ export default async function Home() {
       {/* ── Section Publicité ── */}
       <section style={{ padding: "64px 24px", borderTop: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 860, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 48, alignItems: "center", flexWrap: "wrap" }} className="landing-ads-grid">
+          <div className="landing-ads-grid">
             <div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 50, padding: "4px 12px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
                 📣 Faire de la publicité
@@ -255,7 +255,7 @@ export default async function Home() {
                 </Link>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, minWidth: 200 }}>
+            <div className="landing-ads-aside" style={{ flexDirection: "column", gap: 10, minWidth: 200 }}>
               {[
                 { label: "Format Carré", desc: "Dans la grille Explore", price: "dès CHF 4/CPM", emoji: "⬛" },
                 { label: "Format Swipe", desc: "Plein écran, tous les 10 swipes", price: "dès CHF 6/CPM", emoji: "📱" },
