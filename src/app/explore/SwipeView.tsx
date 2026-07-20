@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { addBoost, addPenalty } from "@/lib/actions/scores";
@@ -116,6 +115,17 @@ export function SwipeView({
   useEffect(() => {
     if (isAd(current)) trackAdImpression(current.campaign.id);
     else if (current) router.prefetch(`/company/${current.id}`);
+
+    // Preload next card's cover image so it's ready before the swipe
+    const nextItem = companies[index + 1];
+    if (nextItem && !isAd(nextItem) && (nextItem as Company).cover_url) {
+      const img = new window.Image();
+      img.src = (nextItem as Company).cover_url!;
+    }
+    if (nextItem && isAd(nextItem) && nextItem.campaign.image_url) {
+      const img = new window.Image();
+      img.src = nextItem.campaign.image_url;
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
@@ -624,12 +634,11 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
 
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
-      <div className="img-placeholder" style={{ height: "55%", position: "relative", overflow: "hidden" }}>
-        {company.cover_url ? (
-          <Image src={company.cover_url} alt="" fill sizes="100vw" style={{ objectFit: "cover", pointerEvents: "none" }} priority />
-        ) : (
-          <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg, ${sectorColor}, #f97316)` }} />
-        )}
+      <div style={{ height: "55%", position: "relative", overflow: "hidden",
+        background: company.cover_url
+          ? `url(${company.cover_url}) center / cover no-repeat`
+          : `linear-gradient(135deg, ${sectorColor}, #f97316)`,
+      }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.8))" }} />
 
         {overlayDir === "right" && (
@@ -710,12 +719,11 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "2px solid rgba(139,92,246,0.5)", boxShadow: "0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(139,92,246,0.15)", userSelect: "none", display: "flex", flexDirection: "column", cursor: "pointer" }}>
       {/* Image zone — same 55% as SwipeCard */}
-      <div style={{ height: "55%", position: "relative", overflow: "hidden", flexShrink: 0 }}>
-        {campaign.image_url ? (
-          <Image src={campaign.image_url} alt="" fill sizes="100vw" style={{ objectFit: "cover", pointerEvents: "none" }} priority />
-        ) : (
-          <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #8b5cf6, #f97316)" }} />
-        )}
+      <div style={{ height: "55%", position: "relative", overflow: "hidden", flexShrink: 0,
+        background: campaign.image_url
+          ? `url(${campaign.image_url}) center / cover no-repeat`
+          : "linear-gradient(135deg, #8b5cf6, #f97316)",
+      }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.0) 20%, rgba(0,0,0,0.75))" }} />
 
         {/* Swipe overlays */}
