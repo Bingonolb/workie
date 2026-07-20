@@ -175,7 +175,7 @@ export function ExploreClient({
                   const ad = adsForGrid[adCursor++];
                   items.push(<AdSquareCard key={`ad-${ad.id}`} ad={ad} />);
                 }
-                items.push(<CompanyCard key={c.id} company={c} isFav={initialFavIds.includes(c.id)} isLoggedIn={isLoggedIn} isBusiness={isBusiness} />);
+                items.push(<CompanyCard key={c.id} company={c} isFav={initialFavIds.includes(c.id)} isLoggedIn={isLoggedIn} isBusiness={isBusiness} priority={items.length < 6} />);
               });
               return items;
             })()}

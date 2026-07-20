@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { addBoost, addPenalty } from "@/lib/actions/scores";
@@ -625,8 +626,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
     <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
       <div className="img-placeholder" style={{ height: "55%", position: "relative", overflow: "hidden" }}>
         {company.cover_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={company.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
+          <Image src={company.cover_url} alt="" fill sizes="100vw" style={{ objectFit: "cover", pointerEvents: "none" }} priority />
         ) : (
           <div style={{ width: "100%", height: "100%", background: `linear-gradient(135deg, ${sectorColor}, #f97316)` }} />
         )}
@@ -712,8 +712,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
       {/* Image zone — same 55% as SwipeCard */}
       <div style={{ height: "55%", position: "relative", overflow: "hidden", flexShrink: 0 }}>
         {campaign.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={campaign.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }} />
+          <Image src={campaign.image_url} alt="" fill sizes="100vw" style={{ objectFit: "cover", pointerEvents: "none" }} priority />
         ) : (
           <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #8b5cf6, #f97316)" }} />
         )}

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { ReviewForm } from "@/components/ReviewForm";
 import { getCompany } from "@/lib/actions/companies";
@@ -183,11 +184,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       <div className="hero-cover">
         {/* Image or gradient bg */}
         {company.cover_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={company.cover_url}
             alt=""
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
+            fill
+            sizes="100vw"
+            style={{ objectFit: "cover", objectPosition: "center" }}
+            priority
           />
         ) : (
           <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${sectorColor}, #f97316)` }} />
@@ -517,8 +520,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   <div className="company-card" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
                     <div style={{ height: 80, background: c.cover_url ? "none" : "linear-gradient(135deg, #8b5cf6, #3b82f6)", position: "relative" }}>
                       {c.cover_url && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={c.cover_url} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <Image src={c.cover_url} alt="" fill sizes="200px" style={{ objectFit: "cover" }} />
                       )}
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6))" }} />
                     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { Flame, Star, Users, MapPin, TrendingUp } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
@@ -45,11 +46,12 @@ function StarDisplay({ rating }: { rating: number }) {
   );
 }
 
-export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusiness = false }: {
+export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusiness = false, priority = false }: {
   company: Company;
   isFav?: boolean;
   isLoggedIn?: boolean;
   isBusiness?: boolean;
+  priority?: boolean;
 }) {
   const [fav, setFav] = useState(isFav);
   const [score, setScore] = useState(Number(company.score));
@@ -84,8 +86,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         {/* Cover */}
         <div className="card-cover img-placeholder" style={{ height: 148, position: "relative", overflow: "hidden" }}>
           {company.cover_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={company.cover_url} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <Image
+              src={company.cover_url}
+              alt=""
+              fill
+              sizes="(max-width: 640px) calc(50vw - 24px), 280px"
+              style={{ objectFit: "cover" }}
+              priority={priority}
+            />
           ) : (
             <div style={{ width: "100%", height: "100%", background: getCoverGradient(company.sector, sectorColor) }} />
           )}
@@ -155,18 +163,16 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
               </div>
               {/* Logo overlaid on top if available */}
               {company.logo_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={company.logo_url}
                   alt=""
-                  loading="lazy"
-                  decoding="async"
+                  width={38}
+                  height={38}
                   onLoad={() => setLogoVisible(true)}
                   onError={() => setLogoVisible(false)}
                   style={{
                     position: "absolute", inset: 0,
-                    width: 38, height: 38, borderRadius: 9,
-                    objectFit: "contain", background: "#fff",
+                    borderRadius: 9, objectFit: "contain", background: "#fff",
                     border: "1.5px solid rgba(255,255,255,0.25)",
                     display: logoVisible ? "block" : "none",
                   }}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { AdCampaign } from "@/lib/actions/ads";
@@ -86,14 +87,13 @@ export function AdSquareCard({ ad }: { ad: AdCampaign }) {
 
       {/* Image */}
       <div style={{ position: "relative", paddingTop: "60%", overflow: "hidden", flexShrink: 0 }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={ad.image_url}
           alt={ad.headline}
-          style={{
-            position: "absolute", inset: 0, width: "100%", height: "100%",
-            objectFit: "cover",
-          }}
+          fill
+          sizes="(max-width: 640px) calc(50vw - 24px), 280px"
+          style={{ objectFit: "cover" }}
+          priority
         />
         <div style={{
           position: "absolute", inset: 0,
