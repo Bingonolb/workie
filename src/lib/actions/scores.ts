@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -118,6 +118,33 @@ export async function getTopCompanies(limit = 200) {
     .limit(limit);
   return data ?? [];
 }
+
+export const getCachedTopCompanies = unstable_cache(
+  async (limit: number) => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("companies")
+      .select("id, name, sector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified, tags")
+      .neq("employee_range", "1-10")
+      .order("score", { ascending: false })
+      .order("avg_rating", { ascending: false })
+      .order("review_count", { ascending: false })
+      .limit(limit);
+    return data ?? [];
+  },
+  ["top-companies"],
+  { revalidate: 60, tags: ["top-companies"] }
+);
+
+export const getCachedReviewCount = unstable_cache(
+  async () => {
+    const admin = createAdminClient();
+    const { count } = await admin.from("reviews").select("*", { count: "exact", head: true });
+    return count ?? 0;
+  },
+  ["review-count"],
+  { revalidate: 300, tags: ["reviews"] }
+);
 
 export async function getUserFlameIds(): Promise<string[]> {
   const supabase = await createClient();

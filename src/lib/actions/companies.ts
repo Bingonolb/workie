@@ -132,3 +132,13 @@ export async function getCompany(id: string) {
   const { data } = await supabase.from("companies").select("*").eq("id", id).maybeSingle();
   return data as Company | null;
 }
+
+export const getCachedCompany = unstable_cache(
+  async (id: string) => {
+    const admin = createAdminClient();
+    const { data } = await admin.from("companies").select("*").eq("id", id).maybeSingle();
+    return data as Company | null;
+  },
+  ["company"],
+  { revalidate: 60, tags: ["companies"] }
+);

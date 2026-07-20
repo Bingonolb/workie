@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Review } from "@/lib/types";
 
 export async function getUserReviews(): Promise<(Review & { company_name: string })[]> {
@@ -26,6 +27,21 @@ export async function getReviews(companyId: string, limit = 100) {
     .limit(limit);
   return (data ?? []) as Review[];
 }
+
+export const getCachedReviews = unstable_cache(
+  async (companyId: string) => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("reviews")
+      .select("*")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    return (data ?? []) as Review[];
+  },
+  ["reviews"],
+  { revalidate: 60, tags: ["reviews"] }
+);
 
 type ReviewState = { error?: string; success?: boolean } | undefined;
 

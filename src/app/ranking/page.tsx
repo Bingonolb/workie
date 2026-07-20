@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { getTopCompanies } from "@/lib/actions/scores";
-import { createClient } from "@/lib/supabase/server";
+import { getCachedTopCompanies, getCachedReviewCount } from "@/lib/actions/scores";
 import { TrendingUp, Users, Star } from "lucide-react";
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
-
-export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses · Workie",
@@ -22,10 +19,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RankingPage() {
-  const supabase = await createClient();
-  const [companies, { count: reviewCount }] = await Promise.all([
-    getTopCompanies(200).catch(() => [] as Company[]),
-    Promise.resolve(supabase.from("reviews").select("*", { count: "exact", head: true })).catch(() => ({ count: 0 })),
+  const [companies, reviewCount] = await Promise.all([
+    getCachedTopCompanies(200).catch(() => [] as Company[]),
+    getCachedReviewCount().catch(() => 0),
   ]);
   const typedCompanies = companies as Company[];
 
@@ -33,7 +29,7 @@ export default async function RankingPage() {
   const avgRating = withRating.length
     ? withRating.reduce((s, c) => s + Number(c.avg_rating), 0) / withRating.length
     : 0;
-  const totalReviews = reviewCount ?? 0;
+  const totalReviews = reviewCount;
 
   return (
     <div className="page-root">

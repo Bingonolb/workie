@@ -4,14 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { ReviewForm } from "@/components/ReviewForm";
-import { getCompany } from "@/lib/actions/companies";
-import { getReviews } from "@/lib/actions/reviews";
+import { getCachedCompany } from "@/lib/actions/companies";
+import { getCachedReviews } from "@/lib/actions/reviews";
 import { createClient } from "@/lib/supabase/server";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import { getUser, getBusinessCompanyId } from "@/lib/supabase/server";
 import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle } from "lucide-react";
 import { HelpfulButton } from "@/components/HelpfulButton";
-import { ParallaxCover } from "@/components/ParallaxCover";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
@@ -64,7 +63,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const company = await getCompany(id);
+  const company = await getCachedCompany(id);
   if (!company) return { title: "Entreprise introuvable · Workie" };
   const desc = company.description
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
@@ -99,8 +98,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   // createClient runs in parallel with the other fetches — not sequential
   const [company, reviews, user, favIds, supabase, bizCompanyId] = await Promise.all([
-    getCompany(id).catch(() => null),
-    getReviews(id).catch(() => [] as Review[]),
+    getCachedCompany(id).catch(() => null),
+    getCachedReviews(id).catch(() => [] as Review[]),
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
     createClient(),
@@ -180,21 +179,18 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       <Navbar />
 
+      {/* Preload hero cover — browser fetches directly from CDN before paint */}
+      {company.cover_url && <link rel="preload" as="image" href={company.cover_url} />}
+
       {/* Hero cover */}
       <div className="hero-cover">
-        {/* Image or gradient bg */}
-        {company.cover_url ? (
-          <Image
-            src={company.cover_url}
-            alt=""
-            fill
-            sizes="100vw"
-            style={{ objectFit: "cover", objectPosition: "center" }}
-            priority
-          />
-        ) : (
-          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${sectorColor}, #f97316)` }} />
-        )}
+        {/* CSS background = direct CDN, no Vercel proxy hop */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: company.cover_url
+            ? `url(${company.cover_url}) center / cover no-repeat`
+            : `linear-gradient(135deg, ${sectorColor}, #f97316)`,
+        }} />
         {/* Top gradient — darkens so navbar stays readable */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.65) 0%, rgba(13,13,19,0.0) 40%, rgba(13,13,19,0.0) 50%, rgba(13,13,19,0.92) 100%)" }} />
 
