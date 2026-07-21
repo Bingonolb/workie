@@ -11,8 +11,9 @@ type RankData = {
   avg_rating: number;
   review_count: number;
   cover_url: string | null;
-  rank: number;
+  rank: number | null;
   total: number;
+  ranked_count: number;
 } | null;
 
 export function MyRankBanner() {
@@ -69,17 +70,33 @@ export function MyRankBanner() {
 
         {/* Rank badge */}
         <div style={{ textAlign: "center", flexShrink: 0 }}>
-          <p style={{
-            fontSize: 38, fontWeight: 900, letterSpacing: "-0.04em",
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            lineHeight: 1, fontVariantNumeric: "tabular-nums",
-          }}>
-            #{data.rank.toLocaleString("fr-CH")}
-          </p>
-          <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginTop: 3 }}>
-            sur {data.total.toLocaleString("fr-CH")} entreprises
-          </p>
+          {data.rank !== null ? (
+            <>
+              <p style={{
+                fontSize: 38, fontWeight: 900, letterSpacing: "-0.04em",
+                background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                lineHeight: 1, fontVariantNumeric: "tabular-nums",
+              }}>
+                #{data.rank.toLocaleString("fr-CH")}
+              </p>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginTop: 3 }}>
+                sur {data.total.toLocaleString("fr-CH")} entreprises
+              </p>
+            </>
+          ) : (
+            <>
+              <p style={{
+                fontSize: 15, fontWeight: 800, color: "var(--text-muted)",
+                lineHeight: 1.3, maxWidth: 140,
+              }}>
+                Non classée
+              </p>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginTop: 4 }}>
+                Obtenez des avis pour apparaître dans le classement
+              </p>
+            </>
+          )}
         </div>
       </div>
     </Link>
