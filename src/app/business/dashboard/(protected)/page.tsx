@@ -3,6 +3,7 @@ import { createClient, getBusinessCompanyId } from "@/lib/supabase/server";
 import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2, CheckCircle, Clock, BarChart2 } from "lucide-react";
 import Link from "next/link";
 import { ShareCopyButton } from "@/components/ShareCopyButton";
+import { MyRankBanner } from "@/app/ranking/MyRankBanner";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -97,6 +98,9 @@ export default async function BusinessDashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Rank banner */}
+      <MyRankBanner />
 
       {/* Analytics CTA — remplace les graphiques dupliqués */}
       <Link href="/business/dashboard/analytics" style={{
