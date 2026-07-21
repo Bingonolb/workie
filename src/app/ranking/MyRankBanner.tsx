@@ -26,79 +26,83 @@ export function MyRankBanner() {
       .catch(() => setData(null));
   }, []);
 
-  // undefined = loading (don't render anything yet), null = not a business account
   if (!data) return null;
 
   return (
-    <Link href={`/company/${data.id}`} style={{ textDecoration: "none", display: "block", marginBottom: 24 }}>
-      <div style={{
-        background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
-        border: "1.5px solid rgba(139,92,246,0.35)",
-        borderRadius: 18,
-        padding: "18px 20px",
-        display: "flex",
-        alignItems: "center",
-        gap: 16,
-        flexWrap: "wrap",
-      }}>
+    <>
+      <style>{`
+        .my-rank-banner {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06));
+          border: 1.5px solid rgba(139,92,246,0.35);
+          border-radius: 18px;
+          padding: 16px 18px;
+          margin-bottom: 24px;
+          text-decoration: none;
+        }
+        .my-rank-banner:hover { border-color: rgba(139,92,246,0.55); }
+        .my-rank-info { flex: 1; min-width: 0; }
+        .my-rank-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8b5cf6; margin-bottom: 2px; }
+        .my-rank-name { font-size: 14px; font-weight: 800; color: var(--text); letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .my-rank-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        .my-rank-badge { flex-shrink: 0; text-align: right; }
+        .my-rank-number {
+          font-size: 36px; font-weight: 900; letter-spacing: -0.04em;
+          background: linear-gradient(135deg, #8b5cf6, #f97316);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          line-height: 1; font-variant-numeric: tabular-nums;
+        }
+        .my-rank-sub { font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+        .my-rank-unclassed { font-size: 13px; font-weight: 800; color: var(--text-muted); line-height: 1.3; }
+        .my-rank-unclassed-sub { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 3px; max-width: 120px; text-align: right; line-height: 1.4; }
+        @media (max-width: 400px) {
+          .my-rank-banner { padding: 12px 14px; gap: 10px; }
+          .my-rank-number { font-size: 28px; }
+          .my-rank-logo { width: 38px !important; height: 38px !important; }
+        }
+      `}</style>
+
+      <Link href={`/company/${data.id}`} className="my-rank-banner">
         {/* Logo */}
-        <div style={{
-          width: 48, height: 48, borderRadius: 12, overflow: "hidden", flexShrink: 0,
+        <div className="my-rank-logo" style={{
+          width: 44, height: 44, borderRadius: 11, overflow: "hidden", flexShrink: 0,
           background: "linear-gradient(135deg, rgba(139,92,246,0.25), rgba(249,115,22,0.15))",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           {data.cover_url
             // eslint-disable-next-line @next/next/no-img-element
             ? <img src={data.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            : <Trophy size={22} color="#8b5cf6" />}
+            : <Trophy size={20} color="#8b5cf6" />}
         </div>
 
-        {/* Label + name */}
-        <div style={{ flex: 1, minWidth: 140 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8b5cf6", marginBottom: 3 }}>
-            Votre position dans le classement
-          </p>
-          <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em" }}>
-            {data.name}
-          </p>
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
+        {/* Info */}
+        <div className="my-rank-info">
+          <p className="my-rank-label">Votre position</p>
+          <p className="my-rank-name">{data.name}</p>
+          <p className="my-rank-meta">
             {data.avg_rating > 0
               ? `★ ${data.avg_rating.toFixed(1)} · ${data.review_count} avis · Score ${data.score}`
               : `Score ${data.score}`}
           </p>
         </div>
 
-        {/* Rank badge */}
-        <div style={{ textAlign: "center", flexShrink: 0 }}>
+        {/* Badge */}
+        <div className="my-rank-badge">
           {data.rank !== null ? (
             <>
-              <p style={{
-                fontSize: 38, fontWeight: 900, letterSpacing: "-0.04em",
-                background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                lineHeight: 1, fontVariantNumeric: "tabular-nums",
-              }}>
-                #{data.rank.toLocaleString("fr-CH")}
-              </p>
-              <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginTop: 3 }}>
-                sur {data.total.toLocaleString("fr-CH")} entreprises
-              </p>
+              <p className="my-rank-number">#{data.rank.toLocaleString("fr-CH")}</p>
+              <p className="my-rank-sub">sur {data.total.toLocaleString("fr-CH")} entreprises</p>
             </>
           ) : (
             <>
-              <p style={{
-                fontSize: 15, fontWeight: 800, color: "var(--text-muted)",
-                lineHeight: 1.3, maxWidth: 140,
-              }}>
-                Non classée
-              </p>
-              <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginTop: 4 }}>
-                Obtenez des avis pour apparaître dans le classement
-              </p>
+              <p className="my-rank-unclassed">Non classée</p>
+              <p className="my-rank-unclassed-sub">Obtenez des avis pour entrer dans le classement</p>
             </>
           )}
         </div>
-      </div>
-    </Link>
+      </Link>
+    </>
   );
 }
