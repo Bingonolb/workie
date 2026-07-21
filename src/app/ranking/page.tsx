@@ -1,15 +1,11 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getCachedTopCompanies, getCachedReviewCount } from "@/lib/actions/scores";
-import { TrendingUp, Users, Star, Trophy } from "lucide-react";
+import { TrendingUp, Users, Star } from "lucide-react";
 import { RankingTable } from "./RankingList";
+import { MyRankBanner } from "./MyRankBanner";
 import type { Company } from "@/lib/types";
-import { getBusinessCompanyId } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses · Workie",
@@ -23,55 +19,10 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Classement des employeurs suisses · Workie" },
 };
 
-type MyRankData = {
-  name: string;
-  id: string;
-  score: number;
-  avg_rating: number;
-  review_count: number;
-  cover_url: string | null;
-  rank: number;
-  total: number;
-} | null;
-
-async function getMyBusinessRank(): Promise<MyRankData> {
-  const companyId = await getBusinessCompanyId();
-  if (!companyId) return null;
-
-  const supabase = createAdminClient();
-
-  const { data: company } = await supabase
-    .from("companies")
-    .select("id, name, score, avg_rating, review_count, cover_url, is_subscribed")
-    .eq("id", companyId)
-    .maybeSingle();
-
-  if (!company || !company.is_subscribed) return null;
-
-  const myScore = Number(company.score ?? 0);
-
-  const [{ count: above }, { count: total }] = await Promise.all([
-    supabase.from("companies").select("*", { count: "exact", head: true }).gt("score", myScore),
-    supabase.from("companies").select("*", { count: "exact", head: true }).gt("score", 0),
-  ]);
-
-  return {
-    id: company.id,
-    name: company.name,
-    score: myScore,
-    avg_rating: Number(company.avg_rating ?? 0),
-    review_count: Number(company.review_count ?? 0),
-    cover_url: company.cover_url ?? null,
-    rank: (above ?? 0) + 1,
-    total: total ?? 0,
-  };
-}
-
 export default async function RankingPage() {
-  const [companies, reviewCount, myRank] = await Promise.all([
+  const [companies, reviewCount] = await Promise.all([
     getCachedTopCompanies(200).catch(() => [] as Company[]),
     getCachedReviewCount().catch(() => 0),
-    getMyBusinessRank().catch(() => null),
   ]);
   const typedCompanies = companies as Company[];
 
@@ -121,62 +72,8 @@ export default async function RankingPage() {
           ))}
         </div>
 
-        {/* My business rank banner — visible only to subscribed business accounts */}
-        {myRank && (
-          <Link href={`/company/${myRank.id}`} style={{ textDecoration: "none", display: "block", marginBottom: 24 }}>
-            <div style={{
-              background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
-              border: "1.5px solid rgba(139,92,246,0.35)",
-              borderRadius: 18,
-              padding: "18px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              flexWrap: "wrap" as const,
-            }}>
-              {/* Logo */}
-              <div style={{
-                width: 48, height: 48, borderRadius: 12, overflow: "hidden", flexShrink: 0,
-                background: "linear-gradient(135deg, #8b5cf644, #f9731622)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                {myRank.cover_url
-                  ? <img src={myRank.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <Trophy size={22} color="#8b5cf6" />}
-              </div>
-
-              {/* Label + name */}
-              <div style={{ flex: 1, minWidth: 160 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "#8b5cf6", marginBottom: 3 }}>
-                  Votre position dans le classement
-                </p>
-                <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em" }}>
-                  {myRank.name}
-                </p>
-                {myRank.avg_rating > 0 && (
-                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
-                    ★ {myRank.avg_rating.toFixed(1)} · {myRank.review_count} avis · Score {myRank.score}
-                  </p>
-                )}
-              </div>
-
-              {/* Rank badge */}
-              <div style={{ textAlign: "center" as const, flexShrink: 0 }}>
-                <p style={{
-                  fontSize: 38, fontWeight: 900, letterSpacing: "-0.04em",
-                  background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                  lineHeight: 1, fontVariantNumeric: "tabular-nums",
-                }}>
-                  #{myRank.rank}
-                </p>
-                <p style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginTop: 3 }}>
-                  sur {myRank.total.toLocaleString("fr-CH")} entreprises
-                </p>
-              </div>
-            </div>
-          </Link>
-        )}
+        {/* Business rank banner — client-side fetch, invisible to non-business users */}
+        <MyRankBanner />
 
         {/* Table */}
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
