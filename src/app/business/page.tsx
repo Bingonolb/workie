@@ -52,7 +52,7 @@ export default function BusinessPage() {
         <div style={{ position: "absolute", bottom: "5%", right: "15%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(249,115,22,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
 
         <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "6px 16px", marginBottom: 36, fontSize: 13, fontWeight: 700, color: "#8b5cf6" } as React.CSSProperties}>
-          <BadgeCheck size={14} /> Espace Entreprise · Offre Fondateurs
+          <BadgeCheck size={14} /> Espace Entreprise
         </div>
 
         <h1 style={{ fontSize: "clamp(32px, 7vw, 60px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-0.04em", marginBottom: 24, maxWidth: 700, margin: "0 auto 24px" }}>
@@ -67,7 +67,7 @@ export default function BusinessPage() {
         </p>
 
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 48, opacity: 0.7 }}>
-          Accès immédiat après paiement · Les 50 premières entreprises gardent 99 CHF/mois à vie
+          Accès immédiat après paiement · Sans engagement
         </p>
 
         {/* Two-path choice */}
@@ -197,7 +197,6 @@ export default function BusinessPage() {
               { q: "À quoi sert la vérification manuelle ?", a: "Elle concerne uniquement le badge bleu « Entreprise vérifiée ». Notre équipe valide votre identité sous 48h ouvrées. Vos outils sont actifs dès le paiement, badge ou pas." },
               { q: "Que se passe-t-il si je résilie ?", a: "Votre fiche publique reste visible, vos réponses aux avis restent affichées. Le badge vérifié et l'accès aux outils sont désactivés. Aucun avis n'est supprimé." },
               { q: "Puis-je supprimer un avis qui me semble injuste ?", a: "Non. C'est notre engagement fondamental envers les employés. Vous pouvez en revanche y répondre publiquement, ce qui est souvent bien plus efficace." },
-              { q: "Le tarif fondateur est-il vraiment garanti ?", a: "Oui. Les 50 premières entreprises qui s'abonnent conservent 99 CHF/mois à vie, même si nous augmentons nos prix pour les nouveaux clients." },
             ].map(({ q, a }) => (
               <div key={q} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px 28px" }}>
                 <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>{q}</p>
@@ -211,7 +210,7 @@ export default function BusinessPage() {
       {/* CTA final */}
       <section style={{ padding: "64px 24px", textAlign: "center", background: "var(--surface2)", borderTop: "1px solid var(--border)" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "6px 16px", marginBottom: 28, fontSize: 13, fontWeight: 700, color: "#8b5cf6" } as React.CSSProperties}>
-          <Zap size={13} fill="#8b5cf6" /> Il reste des places fondateurs
+          <Zap size={13} fill="#8b5cf6" /> Workie Business
         </div>
         <h2 style={{ fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 16 }}>
           Votre réputation vous attend.
