@@ -33,18 +33,27 @@ export default function BusinessPage() {
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
 
       {/* Navbar */}
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
-        <Link href="/" style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", textDecoration: "none" }}>
-          workie
+      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
+        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+          <span style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
+          <span className="biz-nav-label">Business</span>
         </Link>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <ThemeToggle />
-          <Link href="/login" style={{ padding: "9px 16px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>Connexion</Link>
-          <Link href="/business/claim" style={{ padding: "9px 18px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff" }}>
-            Revendiquer ma fiche
+          <Link href="/business/login" className="biz-nav-login">Connexion</Link>
+          <Link href="/business/claim" style={{ padding: "8px 16px", borderRadius: 8, fontWeight: 700, fontSize: 13, textDecoration: "none", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", whiteSpace: "nowrap" as const }}>
+            <span className="biz-nav-cta-long">Commencer</span>
           </Link>
         </div>
       </nav>
+      <style>{`
+        .biz-nav-label { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; color: #8b5cf6; margin-left: 5px; text-transform: uppercase; opacity: 0.9; }
+        .biz-nav-login { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border2); font-weight: 600; font-size: 13px; color: var(--text-muted); text-decoration: none; white-space: nowrap; }
+        @media (max-width: 480px) {
+          .biz-nav-login { display: none; }
+          .biz-nav-label { display: none; }
+        }
+      `}</style>
 
       {/* Hero */}
       <section style={{ padding: "80px 24px 64px", textAlign: "center", position: "relative", overflow: "hidden" }}>
@@ -71,39 +80,43 @@ export default function BusinessPage() {
         </p>
 
         {/* Two-path choice */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, maxWidth: 680, margin: "0 auto", textAlign: "left" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12, maxWidth: 640, margin: "0 auto", textAlign: "left" }}>
           {/* Path A — existing company */}
-          <Link href="/business/claim" style={{ display: "flex", flexDirection: "column", gap: 0, padding: "28px 28px 24px", borderRadius: 20, background: "var(--surface)", border: "2px solid rgba(139,92,246,0.3)", textDecoration: "none", transition: "all 0.2s", boxShadow: "0 4px 24px rgba(139,92,246,0.1)" }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(139,92,246,0.12)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-              <BadgeCheck size={22} color="#8b5cf6" />
+          <Link href="/business/claim" style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: "20px 20px", borderRadius: 16, background: "var(--surface)", border: "2px solid rgba(139,92,246,0.3)", textDecoration: "none", boxShadow: "0 4px 20px rgba(139,92,246,0.08)" }}>
+            <div style={{ width: 40, height: 40, borderRadius: 11, background: "rgba(139,92,246,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <BadgeCheck size={20} color="#8b5cf6" />
             </div>
-            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8b5cf6", marginBottom: 8 }}>Fiche existante</p>
-            <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8, letterSpacing: "-0.02em" }}>Revendiquer ma fiche</p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 20, flex: 1 }}>
-              Mon entreprise est déjà présente sur Workie, des employés ont déjà laissé des avis. Je veux reprendre la main sur ma fiche.
-            </p>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, color: "#8b5cf6" }}>
-              Commencer <ArrowRight size={15} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "#8b5cf6", marginBottom: 4 }}>Ma fiche existe déjà</p>
+              <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 4, letterSpacing: "-0.02em" }}>Revendiquer ma fiche</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.55 }}>
+                Des employés ont déjà laissé des avis. Je reprends la main.
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 700, color: "#8b5cf6", marginTop: 10 }}>
+                Commencer <ArrowRight size={13} />
+              </div>
             </div>
           </Link>
 
           {/* Path B — new company */}
-          <Link href="/business/register" style={{ display: "flex", flexDirection: "column", gap: 0, padding: "28px 28px 24px", borderRadius: 20, background: "var(--surface)", border: "2px solid rgba(16,185,129,0.3)", textDecoration: "none", transition: "all 0.2s", boxShadow: "0 4px 24px rgba(16,185,129,0.08)" }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-              <Users size={22} color="#10b981" />
+          <Link href="/business/register" style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: "20px 20px", borderRadius: 16, background: "var(--surface)", border: "2px solid rgba(16,185,129,0.3)", textDecoration: "none", boxShadow: "0 4px 20px rgba(16,185,129,0.06)" }}>
+            <div style={{ width: 40, height: 40, borderRadius: 11, background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Users size={20} color="#10b981" />
             </div>
-            <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#10b981", marginBottom: 8 }}>Nouvelle fiche</p>
-            <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8, letterSpacing: "-0.02em" }}>Créer ma page entreprise</p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 20, flex: 1 }}>
-              Mon entreprise n&apos;est pas encore sur Workie. Je veux créer ma fiche, la personnaliser et publier mes offres dès aujourd&apos;hui.
-            </p>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, color: "#10b981" }}>
-              Créer ma fiche <ArrowRight size={15} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "#10b981", marginBottom: 4 }}>Pas encore sur Workie</p>
+              <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 4, letterSpacing: "-0.02em" }}>Créer ma page entreprise</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.55 }}>
+                Je crée ma fiche, je la personnalise et publie mes offres.
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 700, color: "#10b981", marginTop: 10 }}>
+                Créer ma fiche <ArrowRight size={13} />
+              </div>
             </div>
           </Link>
         </div>
 
-        <p style={{ marginTop: 24, fontSize: 12, color: "var(--text-muted)", opacity: 0.7 }}>
+        <p style={{ marginTop: 20, fontSize: 12, color: "var(--text-muted)", opacity: 0.7 }}>
           Déjà un compte ? <Link href="/business/login" style={{ color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>Se connecter →</Link>
         </p>
       </section>
@@ -176,10 +189,10 @@ export default function BusinessPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Link href="/business/register" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "15px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 24px rgba(139,92,246,0.3)" }}>
-                Créer ma fiche entreprise <ArrowRight size={16} />
+                Créer ma fiche <ArrowRight size={16} />
               </Link>
               <Link href="/business/claim" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 0", borderRadius: 12, background: "var(--surface2)", color: "var(--text-muted)", border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-                Ma fiche existe déjà — la revendiquer
+                Ma fiche existe déjà → la revendiquer
               </Link>
             </div>
             <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 14 }}>Sans engagement · Annulation possible à tout moment</p>
@@ -216,12 +229,12 @@ export default function BusinessPage() {
           Votre réputation vous attend.
         </h2>
         <p style={{ fontSize: 15, color: "var(--text-muted)", marginBottom: 40 }}>Chaque jour sans réponse, c&apos;est un candidat qui part chez un concurrent.</p>
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/business/register" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 32px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
-            Créer ma fiche <ArrowRight size={17} />
+        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/business/register" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
+            Créer ma fiche <ArrowRight size={15} />
           </Link>
-          <Link href="/business/claim" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "15px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            Revendiquer une fiche existante
+          <Link href="/business/claim" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 22px", borderRadius: 12, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
+            Revendiquer une fiche
           </Link>
         </div>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 16 }}>

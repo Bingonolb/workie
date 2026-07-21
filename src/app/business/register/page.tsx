@@ -108,18 +108,25 @@ export default function RegisterPage() {
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 28px", borderBottom: "1px solid var(--border)" }}>
-        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
-          <span style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
-          <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 6, textTransform: "uppercase" as const, opacity: 0.9 }}>Business</span>
+      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
+        <Link href="/business" style={{ textDecoration: "none", display: "flex", alignItems: "baseline", gap: 0 }}>
+          <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
+          <span className="biz-reg-label">Business</span>
         </Link>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <ThemeToggle />
-          <Link href="/business/claim" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500 }}>
-            Fiche existante ? <span style={{ color: "#8b5cf6", fontWeight: 700 }}>La revendiquer →</span>
+          <Link href="/business/claim" className="biz-reg-claim">
+            <span className="biz-reg-claim-long">Fiche existante ?&nbsp;</span>
+            <span style={{ color: "#8b5cf6", fontWeight: 700 }}>Revendiquer →</span>
           </Link>
         </div>
       </nav>
+      <style>{`
+        .biz-reg-label { font-size: 11px; font-weight: 800; letter-spacing: 0.05em; color: #8b5cf6; margin-left: 5px; text-transform: uppercase; opacity: 0.9; }
+        .biz-reg-claim { font-size: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; padding: 6px 10px; border-radius: 7px; border: 1px solid var(--border2); white-space: nowrap; display: flex; align-items: center; }
+        @media (max-width: 480px) { .biz-reg-label { display: none; } .biz-reg-claim-long { display: none; } }
+        @media (max-width: 360px) { .biz-reg-claim { display: none; } }
+      `}</style>
 
       <div style={{ flex: 1, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "48px 24px 80px" }}>
         <div style={{ width: "100%", maxWidth: 580 }}>
