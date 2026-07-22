@@ -19,8 +19,11 @@ export function SaveButton({ companyId, initialFav }: { companyId: string; initi
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={pending}
+      aria-pressed={fav}
+      aria-label={fav ? "Retirer des favoris" : "Ajouter aux favoris"}
       style={{
         display: "flex", alignItems: "center", gap: 8,
         padding: "10px 20px", borderRadius: 12,
@@ -31,7 +34,7 @@ export function SaveButton({ companyId, initialFav }: { companyId: string; initi
         transition: "all 0.18s",
       }}
     >
-      <Flame size={16} fill={fav ? "#f97316" : "none"} /> {fav ? "Sauvegardé" : "Sauvegarder"}
+      <Flame size={16} fill={fav ? "#f97316" : "none"} aria-hidden="true" /> {fav ? "Sauvegardé" : "Sauvegarder"}
     </button>
   );
 }

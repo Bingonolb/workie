@@ -9,6 +9,7 @@ export function GuestSaveButton() {
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
         style={{
           display: "flex", alignItems: "center", gap: 8,
