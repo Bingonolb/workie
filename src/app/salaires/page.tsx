@@ -226,7 +226,7 @@ export default async function SalairesPage() {
 
         {totalCount === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px" }}>
-            <TrendingUp size={56} style={{ opacity: 0.15, margin: "0 auto 24px", display: "block" }} />
+            <TrendingUp size={56} aria-hidden="true" style={{ opacity: 0.15, margin: "0 auto 24px", display: "block" }} />
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Données bientôt disponibles</h2>
             <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 380, margin: "0 auto", lineHeight: 1.7 }}>
               Les statistiques de salaires apparaîtront dès que suffisamment d&apos;employés auront partagé leur expérience.
@@ -276,7 +276,7 @@ export default async function SalairesPage() {
             {sectorStats.length > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px", marginBottom: 28 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <TrendingUp size={18} color="#8b5cf6" />
+                  <TrendingUp size={18} color="#8b5cf6" aria-hidden="true" />
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaires par secteur</h2>
                 </div>
                 <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>Médiane · la barre montre la fourchette P25–P75 (50% des salaires du secteur)</p>
@@ -324,7 +324,7 @@ export default async function SalairesPage() {
             {jobStats.length > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px", marginBottom: 28 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <Users size={18} color="#f97316" />
+                  <Users size={18} color="#f97316" aria-hidden="true" />
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaires moyens par poste</h2>
                 </div>
                 <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>Moyenne · la barre montre la fourchette P25–P75</p>
@@ -363,7 +363,7 @@ export default async function SalairesPage() {
             {contractStats.length > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px", marginBottom: 28 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-                  <Briefcase size={18} color="#10b981" />
+                  <Briefcase size={18} color="#10b981" aria-hidden="true" />
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaire par type de contrat</h2>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

@@ -24,12 +24,12 @@ export const metadata: Metadata = {
 };
 
 const FEATURES = [
-  { icon: <MessageCircle size={22} color="#8b5cf6" />, bg: "rgba(139,92,246,0.1)", title: "Répondre aux avis", desc: "Donnez votre version des faits. Montrez que vous écoutez. Les candidats lisent vos réponses." },
-  { icon: <BarChart3 size={22} color="#f97316" />, bg: "rgba(249,115,22,0.1)", title: "Analytics & insights", desc: "Évolution de votre réputation, points forts/faibles remontés, tendances salariales internes." },
-  { icon: <TrendingUp size={22} color="#10b981" />, bg: "rgba(16,185,129,0.1)", title: "Suivi de réputation", desc: "Tableau de bord temps réel. Soyez alerté dès qu'un avis important est publié." },
-  { icon: <Users size={22} color="#06b6d4" />, bg: "rgba(6,182,212,0.1)", title: "Offres d'emploi", desc: "Publiez vos offres directement sur votre fiche. Touchez des candidats déjà intéressés par vous." },
-  { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" />, bg: "rgba(245,158,11,0.1)", title: "Gestion de la fiche", desc: "Photos, description, logo, réseaux sociaux — contrôlez ce que les candidats voient en premier." },
-  { icon: <BadgeCheck size={22} color="#8b5cf6" />, bg: "rgba(139,92,246,0.1)", title: "Badge vérifié", desc: "Un signal fort pour les candidats : vous assumez votre réputation et jouez la transparence." },
+  { icon: <MessageCircle size={22} color="#8b5cf6" aria-hidden="true" />, bg: "rgba(139,92,246,0.1)", title: "Répondre aux avis", desc: "Donnez votre version des faits. Montrez que vous écoutez. Les candidats lisent vos réponses." },
+  { icon: <BarChart3 size={22} color="#f97316" aria-hidden="true" />, bg: "rgba(249,115,22,0.1)", title: "Analytics & insights", desc: "Évolution de votre réputation, points forts/faibles remontés, tendances salariales internes." },
+  { icon: <TrendingUp size={22} color="#10b981" aria-hidden="true" />, bg: "rgba(16,185,129,0.1)", title: "Suivi de réputation", desc: "Tableau de bord temps réel. Soyez alerté dès qu'un avis important est publié." },
+  { icon: <Users size={22} color="#06b6d4" aria-hidden="true" />, bg: "rgba(6,182,212,0.1)", title: "Offres d'emploi", desc: "Publiez vos offres directement sur votre fiche. Touchez des candidats déjà intéressés par vous." },
+  { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" aria-hidden="true" />, bg: "rgba(245,158,11,0.1)", title: "Gestion de la fiche", desc: "Photos, description, logo, réseaux sociaux — contrôlez ce que les candidats voient en premier." },
+  { icon: <BadgeCheck size={22} color="#8b5cf6" aria-hidden="true" />, bg: "rgba(139,92,246,0.1)", title: "Badge vérifié", desc: "Un signal fort pour les candidats : vous assumez votre réputation et jouez la transparence." },
 ];
 
 const RULES = [
@@ -76,7 +76,7 @@ export default function BusinessPage() {
         <div style={{ position: "absolute", bottom: "5%", right: "15%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(249,115,22,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
 
         <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "6px 16px", marginBottom: 36, fontSize: 13, fontWeight: 700, color: "#8b5cf6" } as React.CSSProperties}>
-          <BadgeCheck size={14} /> Espace Entreprise
+          <BadgeCheck size={14} aria-hidden="true" /> Espace Entreprise
         </div>
 
         <h1 style={{ fontSize: "clamp(32px, 7vw, 60px)", fontWeight: 900, lineHeight: 1.05, letterSpacing: "-0.04em", marginBottom: 24, maxWidth: 700, margin: "0 auto 24px" }}>
@@ -99,7 +99,7 @@ export default function BusinessPage() {
           {/* Path A — existing company */}
           <Link href="/business/claim" style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: "20px 20px", borderRadius: 16, background: "var(--surface)", border: "2px solid rgba(139,92,246,0.3)", textDecoration: "none", boxShadow: "0 4px 20px rgba(139,92,246,0.08)" }}>
             <div style={{ width: 40, height: 40, borderRadius: 11, background: "rgba(139,92,246,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <BadgeCheck size={20} color="#8b5cf6" />
+              <BadgeCheck size={20} color="#8b5cf6" aria-hidden="true" />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "#8b5cf6", marginBottom: 4 }}>Ma fiche existe déjà</p>
@@ -108,7 +108,7 @@ export default function BusinessPage() {
                 Des employés ont déjà laissé des avis. Je reprends la main.
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 700, color: "#8b5cf6", marginTop: 10 }}>
-                Commencer <ArrowRight size={13} />
+                Commencer <ArrowRight size={13} aria-hidden="true" />
               </div>
             </div>
           </Link>
@@ -116,7 +116,7 @@ export default function BusinessPage() {
           {/* Path B — new company */}
           <Link href="/business/register" style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: "20px 20px", borderRadius: 16, background: "var(--surface)", border: "2px solid rgba(16,185,129,0.3)", textDecoration: "none", boxShadow: "0 4px 20px rgba(16,185,129,0.06)" }}>
             <div style={{ width: 40, height: 40, borderRadius: 11, background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Users size={20} color="#10b981" />
+              <Users size={20} color="#10b981" aria-hidden="true" />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "#10b981", marginBottom: 4 }}>Pas encore sur Workie</p>
@@ -125,7 +125,7 @@ export default function BusinessPage() {
                 Je crée ma fiche, je la personnalise et publie mes offres.
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 700, color: "#10b981", marginTop: 10 }}>
-                Créer ma fiche <ArrowRight size={13} />
+                Créer ma fiche <ArrowRight size={13} aria-hidden="true" />
               </div>
             </div>
           </Link>
@@ -204,7 +204,7 @@ export default function BusinessPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Link href="/business/register" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "15px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 8px 24px rgba(139,92,246,0.3)" }}>
-                Créer ma fiche <ArrowRight size={16} />
+                Créer ma fiche <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <Link href="/business/claim" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 0", borderRadius: 12, background: "var(--surface2)", color: "var(--text-muted)", border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
                 Ma fiche existe déjà → la revendiquer
@@ -238,7 +238,7 @@ export default function BusinessPage() {
       {/* CTA final */}
       <section style={{ padding: "64px 24px", textAlign: "center", background: "var(--surface2)", borderTop: "1px solid var(--border)" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "6px 16px", marginBottom: 28, fontSize: 13, fontWeight: 700, color: "#8b5cf6" } as React.CSSProperties}>
-          <Zap size={13} fill="#8b5cf6" /> Workie Business
+          <Zap size={13} fill="#8b5cf6" aria-hidden="true" /> Workie Business
         </div>
         <h2 style={{ fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 16 }}>
           Votre réputation vous attend.
@@ -246,14 +246,14 @@ export default function BusinessPage() {
         <p style={{ fontSize: 15, color: "var(--text-muted)", marginBottom: 40 }}>Chaque jour sans réponse, c&apos;est un candidat qui part chez un concurrent.</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/business/register" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
-            Créer ma fiche <ArrowRight size={15} />
+            Créer ma fiche <ArrowRight size={15} aria-hidden="true" />
           </Link>
           <Link href="/business/claim" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 22px", borderRadius: 12, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
             Revendiquer une fiche
           </Link>
         </div>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 16 }}>
-          <Shield size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />
+          <Shield size={13} aria-hidden="true" style={{ verticalAlign: "middle", marginRight: 4 }} />
           Accès immédiat · Paiement sécurisé par Stripe · Sans engagement
         </p>
       </section>
