@@ -22,7 +22,7 @@ import { getUser } from "@/lib/supabase/server";
 import { ExploreFilters } from "./ExploreFilters";
 import { ExploreClient } from "./ExploreClient";
 import { SwipeView } from "./SwipeView";
-import { getActiveAds } from "@/lib/actions/ads";
+import { getActiveAds, getViewerCanton } from "@/lib/actions/ads";
 import type { Company } from "@/lib/types";
 
 const SECTORS = [
@@ -81,15 +81,18 @@ export default async function ExplorePage({
   const isSwipe = params.view === "swipe";
   const filters = { sector: params.sector, canton: params.canton, search: params.q, sort: params.sort };
 
+  // Resolve viewer canton FIRST (profile → IP fallback) for ad targeting
+  const viewerCanton = await getViewerCanton().catch(() => null);
+
   const [user, favIds, flameIds, isAdmin, bizCompanyId, squareAds, swipeAds, allCompaniesForGrid] = await Promise.all([
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
     isSwipe ? getUserFlameIds().catch(() => [] as string[]) : Promise.resolve([] as string[]),
     import("@/lib/supabase/server").then(m => m.getIsAdmin()).catch(() => false),
     import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
-    !isSwipe ? getActiveAds({ format: "square" }).catch(() => []) : Promise.resolve([]),
+    !isSwipe ? getActiveAds({ format: "square", canton: viewerCanton ?? undefined }).catch(() => []) : Promise.resolve([]),
     isSwipe
-      ? getActiveAds({ format: "swipe", canton: params.canton, sector: params.sector }).catch(() => [])
+      ? getActiveAds({ format: "swipe", canton: viewerCanton ?? undefined, sector: params.sector }).catch(() => [])
       : Promise.resolve([]),
     !isSwipe ? getAllCompaniesForGrid().catch(() => [] as Company[]) : Promise.resolve([] as Company[]),
   ]);
