@@ -32,6 +32,7 @@ export default function ResetPasswordPage() {
               required
               minLength={6}
               placeholder="••••••••"
+              autoComplete="new-password"
               style={{
                 width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
                 borderRadius: 10, padding: "12px 14px", fontSize: 14, color: "var(--text)",

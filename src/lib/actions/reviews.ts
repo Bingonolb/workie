@@ -192,6 +192,7 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
   // Revalidate the company page so the helpful count is fresh for next visitors
   const { data: rev } = await supabase.from("reviews").select("company_id").eq("id", reviewId).maybeSingle();
   if (rev?.company_id) revalidatePath(`/company/${rev.company_id}`);
+  revalidateTag("reviews", {});
 
   return {};
 }

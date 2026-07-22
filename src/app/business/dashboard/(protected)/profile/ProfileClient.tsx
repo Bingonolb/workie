@@ -115,8 +115,8 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
 
         {/* Description */}
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
-          <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 20 }}>Description</p>
-          <textarea name="description" rows={5} defaultValue={String(company.description ?? "")}
+          <label htmlFor="biz-description" style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", display: "block", marginBottom: 20 }}>Description</label>
+          <textarea id="biz-description" name="description" rows={5} defaultValue={String(company.description ?? "")}
             placeholder="Décrivez votre entreprise, votre culture, vos valeurs..."
             style={{ ...inp, resize: "vertical" }} />
           <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>Cette description apparaît en haut de votre fiche publique.</p>
@@ -133,8 +133,8 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
               { name: "instagram_url", label: "📸 Instagram", placeholder: "https://instagram.com/..." },
             ].map(({ name, label, placeholder }) => (
               <div key={name}>
-                <label style={lbl}>{label}</label>
-                <input name={name} type="url" defaultValue={String((company as Record<string, unknown>)[name] ?? "")} placeholder={placeholder} style={inp} />
+                <label htmlFor={`biz-${name}`} style={lbl}>{label}</label>
+                <input id={`biz-${name}`} name={name} type="url" defaultValue={String((company as Record<string, unknown>)[name] ?? "")} placeholder={placeholder} style={inp} />
               </div>
             ))}
           </div>

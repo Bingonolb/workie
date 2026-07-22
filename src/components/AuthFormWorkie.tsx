@@ -111,7 +111,7 @@ export function AuthFormWorkie({
         )}
         <div>
           <label htmlFor="password" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Mot de passe</label>
-          <input id="password" type="password" name="password" required minLength={6} placeholder="••••••••" style={inp} />
+          <input id="password" type="password" name="password" required minLength={6} placeholder="••••••••" autoComplete={mode === "signup" ? "new-password" : "current-password"} style={inp} />
         </div>
 
         {state?.error && (
