@@ -101,7 +101,7 @@ export default async function Home() {
 
         {/* Badge */}
         <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(249,115,22,0.12))", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "6px 16px", marginBottom: 40, fontSize: 13, fontWeight: 600 } as React.CSSProperties}>
-          <Zap size={13} color="#8b5cf6" fill="#8b5cf6" />
+          <Zap size={13} color="#8b5cf6" fill="#8b5cf6" aria-hidden="true" />
           <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             Avis 100% anonymes · Salaires réels · 🇨🇭
           </span>
@@ -120,10 +120,10 @@ export default async function Home() {
 
         <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 48, width: "100%", maxWidth: 480 }}>
           <Link href="/signup" style={{ display: "flex", alignItems: "center", gap: 10, padding: "15px 32px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.3)" }}>
-            Commencer gratuitement <ArrowRight size={18} />
+            Commencer gratuitement <ArrowRight size={18} aria-hidden="true" />
           </Link>
           <Link href="/explore" style={{ display: "flex", alignItems: "center", gap: 8, padding: "15px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
-            <Eye size={18} /> Voir sans compte
+            <Eye size={18} aria-hidden="true" /> Voir sans compte
           </Link>
         </div>
 
@@ -175,10 +175,10 @@ export default async function Home() {
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
             {[
-              { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" />, bg: "rgba(245,158,11,0.1)", title: "Avis authentiques", desc: "Chaque avis est soumis à une charte de bonne foi. Aucun contenu sponsorisé, aucune intervention des entreprises." },
-              { icon: <Shield size={22} color="#10b981" />, bg: "rgba(16,185,129,0.1)", title: "Anonymat garanti", desc: "Ton identité n'est jamais exposée. Tu partages librement, sans conséquences professionnelles." },
-              { icon: <TrendingUp size={22} color="#8b5cf6" />, bg: "rgba(139,92,246,0.1)", title: "Salaires réels", desc: "Des chiffres concrets, partagés anonymement par des employés en poste. Sache exactement ce que vaut ton profil." },
-              { icon: <MessageCircle size={22} color="#f97316" />, bg: "rgba(249,115,22,0.1)", title: "Simple et direct", desc: "Une expérience pensée pour aller à l'essentiel — chercher, comparer, décider." },
+              { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" aria-hidden="true" />, bg: "rgba(245,158,11,0.1)", title: "Avis authentiques", desc: "Chaque avis est soumis à une charte de bonne foi. Aucun contenu sponsorisé, aucune intervention des entreprises." },
+              { icon: <Shield size={22} color="#10b981" aria-hidden="true" />, bg: "rgba(16,185,129,0.1)", title: "Anonymat garanti", desc: "Ton identité n'est jamais exposée. Tu partages librement, sans conséquences professionnelles." },
+              { icon: <TrendingUp size={22} color="#8b5cf6" aria-hidden="true" />, bg: "rgba(139,92,246,0.1)", title: "Salaires réels", desc: "Des chiffres concrets, partagés anonymement par des employés en poste. Sache exactement ce que vaut ton profil." },
+              { icon: <MessageCircle size={22} color="#f97316" aria-hidden="true" />, bg: "rgba(249,115,22,0.1)", title: "Simple et direct", desc: "Une expérience pensée pour aller à l'essentiel — chercher, comparer, décider." },
             ].map(({ icon, bg, title, desc }) => (
               <div key={title} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 20, padding: "28px 24px" }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
@@ -204,7 +204,7 @@ export default async function Home() {
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 36px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
-              Créer mon compte gratuit <ArrowRight size={18} />
+              Créer mon compte gratuit <ArrowRight size={18} aria-hidden="true" />
             </Link>
             <Link href="/ranking" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
               Voir le classement
@@ -223,7 +223,7 @@ export default async function Home() {
           }}>
             <div>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "4px 12px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#8b5cf6" }}>
-                <BadgeCheck size={13} /> Pour les entreprises
+                <BadgeCheck size={13} aria-hidden="true" /> Pour les entreprises
               </div>
               <h2 style={{ fontSize: "clamp(20px, 4vw, 30px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 12 }}>
                 Votre entreprise est sur Workie.
@@ -240,7 +240,7 @@ export default async function Home() {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                 <Link href="/business" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)", color: "#8b5cf6", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-                  Revendiquer ma fiche <ArrowRight size={16} />
+                  Revendiquer ma fiche <ArrowRight size={16} aria-hidden="true" />
                 </Link>
                 <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>
                   À partir de <strong style={{ color: "var(--text)" }}>99 CHF/mois</strong>
@@ -250,8 +250,8 @@ export default async function Home() {
             <div className="landing-biz-grid-aside" style={{ textAlign: "center", flexShrink: 0 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
-                  { icon: <BarChart3 size={20} color="#8b5cf6" />, label: "Analytics avancés" },
-                  { icon: <MessageCircle size={20} color="#f97316" />, label: "Répondre aux avis" },
+                  { icon: <BarChart3 size={20} color="#8b5cf6" aria-hidden="true" />, label: "Analytics avancés" },
+                  { icon: <MessageCircle size={20} color="#f97316" aria-hidden="true" />, label: "Répondre aux avis" },
                   { icon: <svg viewBox="0 0 22 22" style={{ width: 20, height: 20 }}><circle cx="11" cy="11" r="11" fill="#1D9BF0" /><path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" /></svg>, label: "Badge vérifié" },
                 ].map(({ icon, label }) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, minWidth: 180 }}>
