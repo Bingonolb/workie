@@ -27,7 +27,7 @@ export function CookieBanner() {
   if (!visible) return null;
 
   return (
-    <div style={{
+    <div role="dialog" aria-label="Consentement aux cookies" aria-live="polite" style={{
       position: "fixed",
       bottom: "calc(env(safe-area-inset-bottom) + 74px)",
       left: 16, right: 16,
