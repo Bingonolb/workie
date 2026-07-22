@@ -503,14 +503,14 @@ export async function trackAdClick(campaignId: string): Promise<void> {
 
     const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
-    await Promise.all([
-      supabase.from("ad_clicks").insert({
-        campaign_id: campaignId,
-        user_id: user?.id ?? null,
-        viewer_canton: geo.canton,
-      }),
-      supabase.rpc("increment_ad_click", { p_campaign_id: campaignId }),
-    ]);
+    const { error: clkErr } = await supabase.from("ad_clicks").insert({
+      campaign_id: campaignId,
+      user_id: user?.id ?? null,
+      viewer_canton: geo.canton,
+    });
+    if (!clkErr) {
+      await supabase.rpc("increment_ad_click", { p_campaign_id: campaignId });
+    }
   } catch (e) { console.error("[trackAdClick] error:", e); }
 }
 
