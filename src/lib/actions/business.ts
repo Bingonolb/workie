@@ -8,6 +8,15 @@ import { headers } from "next/headers";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+function safeUrl(raw: string | null): string | null {
+  if (!raw) return null;
+  try {
+    const u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    return u.href;
+  } catch { return null; }
+}
+
 async function requireBusiness() {
   // Both getUser() and getBusinessCompanyData() are cache()-wrapped —
   // they share the same result as the layout/page in the same request.
@@ -294,15 +303,6 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
   try {
     const { supabase, company } = await requireBusiness();
 
-    const safeUrl = (raw: string | null) => {
-      if (!raw) return null;
-      try {
-        const u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
-        if (u.protocol !== "https:" && u.protocol !== "http:") return null;
-        return u.href;
-      } catch { return null; }
-    };
-
     const fields: {
       description: string | null;
       website_url: string | null;
@@ -418,10 +418,7 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
     const description = String(formData.get("description") || "").slice(0, 5000) || null;
     const requirements = String(formData.get("requirements") || "").slice(0, 5000) || null;
 
-    const rawApplyUrl = String(formData.get("apply_url") || "").trim();
-    const apply_url = rawApplyUrl
-      ? /^https?:\/\//i.test(rawApplyUrl) ? rawApplyUrl : `https://${rawApplyUrl}`
-      : null;
+    const apply_url = safeUrl(String(formData.get("apply_url") || "").trim() || null);
 
     const { data: inserted, error } = await supabase.from("job_offers").insert({
       company_id: company.id,
@@ -459,10 +456,7 @@ export async function updateJobOffer(id: string, formData: FormData): Promise<{ 
     if (!title) return { error: "Le titre du poste est obligatoire." };
     if (title.length > 150) return { error: "Le titre ne peut pas dépasser 150 caractères." };
 
-    const rawApplyUrl = String(formData.get("apply_url") || "").trim();
-    const apply_url = rawApplyUrl
-      ? /^https?:\/\//i.test(rawApplyUrl) ? rawApplyUrl : `https://${rawApplyUrl}`
-      : null;
+    const apply_url = safeUrl(String(formData.get("apply_url") || "").trim() || null);
 
     const { error } = await supabase.from("job_offers").update({
       title,
@@ -527,10 +521,7 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
 
     const work_email = String(formData.get("work_email") || "").trim().toLowerCase();
     const password   = String(formData.get("password") || "").trim();
-    const rawZefixUrl = String(formData.get("zefix_url") || "").trim();
-    const zefix_url = rawZefixUrl
-      ? /^https?:\/\//i.test(rawZefixUrl) ? rawZefixUrl : `https://${rawZefixUrl}`
-      : null;
+    const zefix_url = safeUrl(String(formData.get("zefix_url") || "").trim() || null);
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(work_email)) return { error: "Adresse email invalide." };

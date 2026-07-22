@@ -1,17 +1,22 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+function escapeLike(s: string) {
+  return s.replace(/[%_\\]/g, "\\$&");
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = (searchParams.get("q") ?? "").trim().slice(0, 100);
   if (q.length < 1) return NextResponse.json({ companies: [] });
 
   const supabase = await createClient();
+  const safe = escapeLike(q);
 
   // Fetch starts-with results first (most relevant), then contains-only results
   const [{ data: startsWith }, { data: contains }] = await Promise.all([
-    supabase.from("companies").select("id, name, city, sector").ilike("name", `${q}%`).order("name").limit(6),
-    supabase.from("companies").select("id, name, city, sector").ilike("name", `%${q}%`).not("name", "ilike", `${q}%`).order("name").limit(4),
+    supabase.from("companies").select("id, name, city, sector").ilike("name", `${safe}%`).order("name").limit(6),
+    supabase.from("companies").select("id, name, city, sector").ilike("name", `%${safe}%`).not("name", "ilike", `${safe}%`).order("name").limit(4),
   ]);
 
   const seen = new Set<string>();
