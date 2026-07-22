@@ -175,6 +175,12 @@ export function ExploreFilters({
             <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none", zIndex: 1 }} />
             <input
               ref={inputRef}
+              role="combobox"
+              aria-label="Rechercher une entreprise"
+              aria-autocomplete="list"
+              aria-expanded={showSuggestions && suggestions.length > 0}
+              aria-controls="search-suggestions"
+              aria-activedescendant={activeIdx >= 0 ? `suggestion-${activeIdx}` : undefined}
               value={input}
               onChange={e => { setInput(e.target.value); setActiveIdx(-1); }}
               onFocus={openMobileSearch}
@@ -219,7 +225,7 @@ export function ExploreFilters({
 
           {/* Desktop dropdown — hidden on mobile via CSS */}
           {showSuggestions && (loading || suggestions.length > 0) && (
-            <div className="search-dropdown-desktop" style={{
+            <div id="search-suggestions" role="listbox" aria-label="Suggestions d'entreprises" className="search-dropdown-desktop" style={{
               position: "absolute", top: "100%", left: 0, right: 0,
               background: "var(--surface)", border: "1px solid var(--border2)",
               borderTop: "none", borderRadius: "0 0 12px 12px",
@@ -233,6 +239,9 @@ export function ExploreFilters({
                 return (
                   <button
                     key={s.id}
+                    id={`suggestion-${i}`}
+                    role="option"
+                    aria-selected={isActive}
                     type="button"
                     onMouseDown={e => {
                       e.preventDefault();
