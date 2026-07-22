@@ -178,12 +178,20 @@ export default function ClaimsPage() {
                   </div>
                 </div>
 
-                {claim.zefix_url && (
-                  <a href={claim.zefix_url} target="_blank" rel="noopener noreferrer"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "6px 12px", textDecoration: "none", width: "fit-content" }}>
-                    <Link2 size={13} /> Fiche Zefix <ExternalLink size={11} />
-                  </a>
-                )}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {claim.company_id && (
+                    <Link href={`/company/${claim.company_id}`} target="_blank"
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#f97316", background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 8, padding: "6px 12px", textDecoration: "none" }}>
+                      <ExternalLink size={13} /> Voir la page Workie
+                    </Link>
+                  )}
+                  {claim.zefix_url && (
+                    <a href={claim.zefix_url} target="_blank" rel="noopener noreferrer"
+                      style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "6px 12px", textDecoration: "none" }}>
+                      <Link2 size={13} /> Fiche Zefix <ExternalLink size={11} />
+                    </a>
+                  )}
+                </div>
 
                 {claim.message && (
                   <div style={{ background: "var(--surface2)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, borderLeft: "3px solid var(--border2)" }}>

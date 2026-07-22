@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2, User } from "lucide-react";
+import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2, User, ExternalLink } from "lucide-react";
 import { getReports, updateReportStatus, type Report, type ReportStatus } from "@/lib/actions/reports";
 
 const TYPE_CONFIG = {
@@ -176,15 +176,21 @@ export default function AdminReportsPage() {
                   </div>
                 )}
 
-                {/* Target ID link */}
-                <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: report.status === "pending" ? 14 : 0 }}>
-                  ID cible :{" "}
-                  {report.target_type === "company" ? (
-                    <Link href={`/company/${report.target_id}`} target="_blank" style={{ color: "#8b5cf6", fontFamily: "monospace" }}>{report.target_id}</Link>
-                  ) : (
-                    <span style={{ fontFamily: "monospace" }}>{report.target_id}</span>
+                {/* Target ID + navigate link */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: report.status === "pending" ? 14 : 0, flexWrap: "wrap" }}>
+                  <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0 }}>
+                    ID cible : <span style={{ fontFamily: "monospace" }}>{report.target_id}</span>
+                  </p>
+                  {report.target_url && (
+                    <Link href={report.target_url} target="_blank" style={{
+                      display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600,
+                      color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)",
+                      borderRadius: 8, padding: "5px 12px", textDecoration: "none",
+                    }}>
+                      <ExternalLink size={12} /> Voir le contenu
+                    </Link>
                   )}
-                </p>
+                </div>
 
                 {/* Feedback */}
                 {isThis && (

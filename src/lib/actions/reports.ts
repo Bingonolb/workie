@@ -17,6 +17,7 @@ export interface Report {
   category: string;
   explanation: string | null;
   status: ReportStatus;
+  target_url: string | null;
 }
 
 export async function submitReport(payload: {
@@ -63,7 +64,34 @@ export async function getReports(): Promise<{ reports?: Report[]; error?: string
     .order("created_at", { ascending: false });
 
   if (error) return { error: error.message };
-  return { reports: data as Report[] };
+
+  const rows = data as Omit<Report, "target_url">[];
+
+  // Resolve company_id for review-type reports so admin can navigate to them
+  const reviewIds = rows.filter(r => r.target_type === "review").map(r => r.target_id);
+  let reviewCompanyMap: Record<string, string> = {};
+  if (reviewIds.length > 0) {
+    const { data: reviews } = await admin
+      .from("reviews")
+      .select("id, company_id")
+      .in("id", reviewIds);
+    if (reviews) {
+      for (const rv of reviews as { id: string; company_id: string }[]) {
+        reviewCompanyMap[rv.id] = rv.company_id;
+      }
+    }
+  }
+
+  const reports: Report[] = rows.map(r => {
+    let target_url: string | null = null;
+    if (r.target_type === "company") target_url = `/company/${r.target_id}`;
+    else if (r.target_type === "profile") target_url = `/profile/${r.target_id}`;
+    else if (r.target_type === "review" && reviewCompanyMap[r.target_id])
+      target_url = `/company/${reviewCompanyMap[r.target_id]}`;
+    return { ...r, target_url };
+  });
+
+  return { reports };
 }
 
 export async function updateReportStatus(
