@@ -10,13 +10,13 @@ import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { GuestModal } from "@/components/GuestModal";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
-import type { AdCampaign } from "@/lib/actions/ads";
+import type { PublicAdCampaign } from "@/lib/actions/ads";
 
 const SWIPE_THRESHOLD = 90;
 const PREFETCH_AHEAD = 25;
 const AD_SESSION_KEY = "workie_swipe_ad_shown";
 
-type AdItem = { __ad: true; campaign: AdCampaign };
+type AdItem = { __ad: true; campaign: PublicAdCampaign };
 type SwipeItem = Company | AdItem;
 function isAd(item: SwipeItem | undefined): item is AdItem {
   return !!item && "__ad" in item;
@@ -52,7 +52,7 @@ export function SwipeView({
   penaltyCredits?: number;
   penaltySuccess?: boolean;
   filters?: { sector?: string; canton?: string; search?: string };
-  swipeAds?: AdCampaign[];
+  swipeAds?: PublicAdCampaign[];
 }) {
   const router = useRouter();
 
@@ -712,7 +712,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
 }
 
 function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
-  campaign: AdCampaign;
+  campaign: PublicAdCampaign;
   overlayDir: "left" | "right" | null;
   overlayOpacity: number;
 }) {

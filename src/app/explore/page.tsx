@@ -121,20 +121,19 @@ export default async function ExplorePage({
           // with the webhook. Use upsert on a dedicated column; if already set, skip.
           const { data: prof } = await supabase
             .from("profiles")
-            .select("penalty_credits, stripe_verification_session_id")
+            .select("penalty_credits, last_penalty_session_id")
             .eq("id", user.id)
             .maybeSingle();
-          // stripe_verification_session_id reused as last_penalty_session_id
-          if (prof?.stripe_verification_session_id === paid.id) {
+          if (prof?.last_penalty_session_id === paid.id) {
             // Already credited (webhook or previous page load)
             return Number(prof.penalty_credits ?? 0);
           }
           // Atomic claim: only one concurrent request will match IS NULL and win
           const { data: claimed } = await supabase
             .from("profiles")
-            .update({ stripe_verification_session_id: paid.id })
+            .update({ last_penalty_session_id: paid.id })
             .eq("id", user.id)
-            .is("stripe_verification_session_id", null)
+            .is("last_penalty_session_id", null)
             .select("id");
           if (!claimed || claimed.length === 0) {
             // Another request already claimed this session — skip crediting

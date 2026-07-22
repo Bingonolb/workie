@@ -5,7 +5,7 @@ import { CompanyCard } from "@/components/CompanyCard";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
 import type { Company } from "@/lib/types";
-import type { AdCampaign } from "@/lib/actions/ads";
+import type { PublicAdCampaign } from "@/lib/actions/ads";
 
 const PAGE_SIZE = 12;
 
@@ -74,7 +74,7 @@ export function ExploreClient({
   initialCanton?: string;
   initialSort?: string;
   initialSearch?: string;
-  squareAds: AdCampaign[];
+  squareAds: PublicAdCampaign[];
 }) {
   const [sector, setSector] = useState(initialSector ?? "");
   const [canton, setCanton] = useState(initialCanton ?? "");

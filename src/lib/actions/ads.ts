@@ -47,10 +47,14 @@ export type AdCampaign = {
   admin_note: string | null;
   impression_count: number;
   click_count: number;
+
   stripe_session_id: string | null;
   paid_at: string | null;
   created_at: string;
 };
+
+/** Fields returned by getActiveAds() — financial fields are stripped server-side */
+export type PublicAdCampaign = Omit<AdCampaign, "spent_chf" | "total_budget_chf" | "daily_budget_chf" | "cpm_chf">;
 
 async function requireBusiness() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -231,7 +235,7 @@ export async function getActiveAds(opts?: {
   canton?: string;
   sector?: string;
   limit?: number;
-}): Promise<AdCampaign[]> {
+}): Promise<PublicAdCampaign[]> {
   try {
     const supabase = await createClient();
     const today = new Date().toISOString().slice(0, 10);
@@ -262,7 +266,7 @@ export async function getActiveAds(opts?: {
     }
 
     // Strip financial fields before sending to client
-    return pool.slice(0, opts?.limit ?? 10).map(({ spent_chf: _s, total_budget_chf: _t, daily_budget_chf: _d, cpm_chf: _c, ...rest }) => rest as AdCampaign);
+    return pool.slice(0, opts?.limit ?? 10).map(({ spent_chf: _s, total_budget_chf: _t, daily_budget_chf: _d, cpm_chf: _c, ...rest }) => rest as PublicAdCampaign);
   } catch (e) { console.error("[getActiveAds] error:", e); return []; }
 }
 
@@ -449,6 +453,12 @@ function adRateLimited(ip: string, campaignId: string, type: "imp" | "clk"): boo
   const last = adRl.get(key);
   if (last && now - last < AD_RL_WINDOW) return true;
   adRl.set(key, now);
+  // Prune stale entries to prevent unbounded memory growth on warm instances
+  if (adRl.size > 5000) {
+    for (const [k, ts] of adRl) {
+      if (now - ts > AD_RL_WINDOW) adRl.delete(k);
+    }
+  }
   return false;
 }
 

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
-import type { AdCampaign } from "@/lib/actions/ads";
+import type { PublicAdCampaign } from "@/lib/actions/ads";
 
 // Max times a given ad can appear per session before hiding itself entirely
 const FREQ_CAP = 2;
@@ -21,7 +21,7 @@ function incrementFreqCap(campaignId: string) {
   } catch { /* */ }
 }
 
-export function AdSquareCard({ ad }: { ad: AdCampaign }) {
+export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
   // null = not yet determined (avoids SSR/client hydration mismatch)
   // true = show, false = hide (freq cap hit)

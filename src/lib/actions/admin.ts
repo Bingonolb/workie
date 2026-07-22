@@ -170,8 +170,8 @@ export async function approveClaim(
     const { user: adminUser, supabase } = await requireAdmin();
     const adminClient = createAdminClient();
 
-    // Fetch the claim
-    const { data: claim, error: claimErr } = await supabase
+    // Fetch the claim via adminClient (company_claims RLS restricts to own rows)
+    const { data: claim, error: claimErr } = await adminClient
       .from("company_claims")
       .select("*")
       .eq("id", claimId)
@@ -179,19 +179,23 @@ export async function approveClaim(
     if (claimErr || !claim) return { error: "Demande introuvable." };
     if (claim.status === "approved") return { error: "Déjà approuvée." };
 
-    // Company is already created and linked at claim submit time.
-    // Admin approval = grant the verified badge only.
     const companyId: string | null = claim.company_id ?? null;
     if (!companyId) return { error: "Aucune entreprise associée à cette demande." };
 
-    // Mark company as verified (blue badge) — profile/account already created at claim submit
-    await adminClient.from("companies").update({ is_verified: true }).eq("id", companyId);
-    await adminClient.from("company_claims").update({
+    // Mark company as verified (blue badge)
+    const { error: verifyErr } = await adminClient
+      .from("companies")
+      .update({ is_verified: true })
+      .eq("id", companyId);
+    if (verifyErr) return { error: `Erreur badge entreprise : ${verifyErr.message}` };
+
+    const { error: claimUpdateErr } = await adminClient.from("company_claims").update({
       status: "approved",
       company_id: companyId,
       reviewed_at: new Date().toISOString(),
       reviewed_by: adminUser.id,
     }).eq("id", claimId);
+    if (claimUpdateErr) return { error: `Erreur mise à jour demande : ${claimUpdateErr.message}` };
 
     revalidatePath("/admin/claims");
     revalidatePath("/business/dashboard");
