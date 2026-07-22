@@ -26,9 +26,9 @@ const SECTORS = [
 ];
 
 const inp: React.CSSProperties = {
-  width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
+  width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: 12, padding: "0 16px", height: 48, fontSize: 16,
-  color: "var(--text)", outline: "none", boxSizing: "border-box",
+  color: "var(--text)", outline: "none", boxSizing: "border-box", transition: "border-color 0.15s",
 };
 
 function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) {
@@ -45,13 +45,6 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
   );
 }
 
-const card: React.CSSProperties = {
-  background: "var(--surface)",
-  border: "1px solid var(--border)",
-  borderRadius: 20,
-  padding: "28px 24px",
-  marginBottom: 16,
-};
 
 export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCtaLabel, prefillCtaUrl, prefillDaily, prefillImage }: {
   prefillHeadline?: string;
@@ -182,14 +175,15 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         <input type="hidden" name="image_url" value={imageUrl} />
 
         {/* FORMAT */}
-        <div style={card}>
+        <div className="biz-form-card">
           <SectionHeader icon={<Zap size={18} />} title="Format d'annonce" subtitle="Choisissez comment votre pub apparaîtra aux utilisateurs" />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             {(["square", "swipe"] as const).map(f => (
               <button key={f} type="button" onClick={() => setFormat(f)} style={{
                 padding: "22px 20px", borderRadius: 16, cursor: "pointer", textAlign: "left",
-                border: format === f ? "2px solid #8b5cf6" : "1.5px solid var(--border2)",
-                background: format === f ? "rgba(139,92,246,0.08)" : "var(--surface2)",
+                border: format === f ? "2px solid #8b5cf6" : "1.5px solid rgba(255,255,255,0.07)",
+                background: format === f ? "rgba(139,92,246,0.1)" : "rgba(255,255,255,0.02)",
+                transition: "all 0.2s",
                 position: "relative",
               }}>
                 {format === f && (
@@ -215,17 +209,18 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         </div>
 
         {/* CREATIVE — avec aperçu en temps réel */}
-        <div style={card}>
+        <div className="biz-form-card">
           <SectionHeader icon={<ImageIcon size={18} />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* Gauche : upload + URL */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <label style={{
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                 gap: 10, padding: "28px 20px", borderRadius: 16, flex: 1,
-                border: imagePreview ? "1.5px solid rgba(139,92,246,0.4)" : "2px dashed var(--border2)",
-                cursor: "pointer", background: imagePreview ? "rgba(139,92,246,0.04)" : "var(--surface2)",
+                border: imagePreview ? "1.5px solid rgba(139,92,246,0.4)" : "2px dashed rgba(255,255,255,0.12)",
+                cursor: "pointer", background: imagePreview ? "rgba(139,92,246,0.05)" : "rgba(255,255,255,0.02)",
+                transition: "all 0.2s",
               }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Upload size={18} color={imagePreview ? "#8b5cf6" : "var(--text-muted)"} />
@@ -257,16 +252,16 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               </p>
 
               {format === "square" ? (
-                <div style={{ background: "var(--surface2)", borderRadius: 14, padding: 10, border: "1px solid var(--border)" }}>
+                <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 14, padding: 10, border: "1px solid rgba(255,255,255,0.07)" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 6 }}>
                     {["LVMH", "Nestlé"].map(n => (
-                      <div key={n} style={{ background: "var(--surface)", borderRadius: 10, padding: "8px 10px", height: 52, display: "flex", alignItems: "flex-end", border: "1px solid var(--border)" }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", opacity: 0.4 }}>{n}</span>
+                      <div key={n} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 10, padding: "8px 10px", height: 52, display: "flex", alignItems: "flex-end" }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)" }}>{n}</span>
                       </div>
                     ))}
                   </div>
                   <div style={{ borderRadius: 12, overflow: "hidden", border: "1.5px solid rgba(139,92,246,0.35)", background: "var(--surface)", marginBottom: 6 }}>
-                    <div style={{ position: "relative", paddingTop: "52%", overflow: "hidden", background: "var(--surface2)" }}>
+                    <div style={{ position: "relative", paddingTop: "52%", overflow: "hidden", background: "rgba(255,255,255,0.05)" }}>
                       {imagePreview ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imagePreview} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
@@ -287,8 +282,8 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                     {["UBS", "Rolex"].map(n => (
-                      <div key={n} style={{ background: "var(--surface)", borderRadius: 10, padding: "8px 10px", height: 52, display: "flex", alignItems: "flex-end", border: "1px solid var(--border)" }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", opacity: 0.4 }}>{n}</span>
+                      <div key={n} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 10, padding: "8px 10px", height: 52, display: "flex", alignItems: "flex-end" }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)" }}>{n}</span>
                       </div>
                     ))}
                   </div>
@@ -297,14 +292,14 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <div style={{
-                    width: 160, background: "#0a0a0a", borderRadius: 28, padding: "8px 6px",
+                    width: 180, background: "#0a0a0a", borderRadius: 28, padding: "8px 6px",
                     border: "2px solid rgba(255,255,255,0.12)",
                     boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.04)",
                     position: "relative",
                   }}>
                     <div style={{ width: 50, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.15)", margin: "0 auto 6px" }} />
                     <div style={{ borderRadius: 20, overflow: "hidden", background: "rgba(255,255,255,0.05)", position: "relative" }}>
-                      <div style={{ height: 250, display: "flex", alignItems: "flex-end", padding: 10 }}>
+                      <div style={{ height: 280, background: "rgba(255,255,255,0.03)", display: "flex", alignItems: "flex-end", padding: 10 }}>
                         <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>Entreprise suivante…</p>
                       </div>
                       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", display: "flex", flexDirection: "column" }}>
@@ -343,7 +338,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
 
           {/* Champs texte */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Titre *</label>
               <input name="headline" required style={inp} placeholder="Rejoignez notre équipe !" maxLength={60}
@@ -375,15 +370,15 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         </div>
 
         {/* CIBLAGE */}
-        <div style={card}>
+        <div className="biz-form-card">
           <SectionHeader icon={<Target size={18} />} title="Ciblage" subtitle="Plus vous ciblez précisément, plus le CPM augmente — mais meilleure est la qualité de l'audience." />
           <div style={{ marginBottom: 22 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</label>
               <button type="button" onClick={() => setSelectedCantons(c => c.length === CANTONS.length ? [] : CANTONS.map(x => x.code))} style={{
                 fontSize: 11, padding: "2px 9px", borderRadius: 50, cursor: "pointer", fontWeight: 700,
-                border: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "1px solid rgba(249,115,22,0.4)" : "1px solid var(--border)",
-                background: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "rgba(249,115,22,0.1)" : "var(--surface2)",
+                border: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "1px solid rgba(249,115,22,0.4)" : "1px solid rgba(255,255,255,0.1)",
+                background: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "rgba(249,115,22,0.1)" : "rgba(255,255,255,0.06)",
                 color: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "#f97316" : "var(--text-muted)",
               }}>
                 {selectedCantons.length === 0 || selectedCantons.length === CANTONS.length
@@ -397,9 +392,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 return (
                   <button key={c.code} type="button" onClick={() => toggleCanton(c.code)} title={c.name} style={{
                     padding: "6px 13px", borderRadius: 50, fontSize: 12, fontWeight: 700, cursor: "pointer",
-                    border: sel ? "1.5px solid #f97316" : "1px solid var(--border2)",
-                    background: sel ? "rgba(249,115,22,0.12)" : "transparent",
-                    color: sel ? "#f97316" : "var(--text-muted)",
+                    border: sel ? "1.5px solid #f97316" : "1px solid rgba(255,255,255,0.1)",
+                    background: sel ? "rgba(249,115,22,0.14)" : "transparent",
+                    color: sel ? "#f97316" : "var(--text-muted)", transition: "all 0.12s",
                   }}>{c.code}</button>
                 );
               })}
@@ -410,8 +405,8 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Secteurs</label>
               <button type="button" onClick={() => setSelectedSectors(s => s.length === SECTORS.length ? [] : [...SECTORS])} style={{
                 fontSize: 11, padding: "2px 9px", borderRadius: 50, cursor: "pointer", fontWeight: 700,
-                border: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "1px solid rgba(139,92,246,0.4)" : "1px solid var(--border)",
-                background: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "rgba(139,92,246,0.1)" : "var(--surface2)",
+                border: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "1px solid rgba(139,92,246,0.4)" : "1px solid rgba(255,255,255,0.1)",
+                background: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "rgba(139,92,246,0.1)" : "rgba(255,255,255,0.06)",
                 color: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "#8b5cf6" : "var(--text-muted)",
               }}>
                 {selectedSectors.length === 0 || selectedSectors.length === SECTORS.length
@@ -425,9 +420,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 return (
                   <button key={s} type="button" onClick={() => toggleSector(s)} style={{
                     padding: "6px 14px", borderRadius: 50, fontSize: 12, fontWeight: 700, cursor: "pointer",
-                    border: sel ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
-                    background: sel ? "rgba(139,92,246,0.12)" : "transparent",
-                    color: sel ? "#8b5cf6" : "var(--text-muted)",
+                    border: sel ? "1.5px solid #8b5cf6" : "1px solid rgba(255,255,255,0.1)",
+                    background: sel ? "rgba(139,92,246,0.14)" : "transparent",
+                    color: sel ? "#8b5cf6" : "var(--text-muted)", transition: "all 0.12s",
                   }}>{s}</button>
                 );
               })}
@@ -436,10 +431,10 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         </div>
 
         {/* BUDGET */}
-        <div style={card}>
+        <div className="biz-form-card">
           <SectionHeader icon={<DollarSign size={18} />} title="Budget" subtitle="Ajustez le budget journalier et la durée — le total se calcule automatiquement." />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
+          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 4 }}>Par jour</label>
               <div style={{ fontSize: 26, fontWeight: 900, color: "#8b5cf6", letterSpacing: "-0.02em", marginBottom: 10 }}>CHF {dailyBudget}</div>
@@ -462,7 +457,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             </div>
           </div>
 
-          <div style={{ padding: "14px 16px", borderRadius: 14, background: "var(--surface2)", border: "1px solid var(--border)", marginBottom: 20, textAlign: "center" }}>
+          <div style={{ padding: "14px 16px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 24, textAlign: "center" }}>
             <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Budget total</div>
             <div style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>CHF {totalBudget.toLocaleString("fr-CH")}</div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {dailyBudget} × {durationDays} jours</div>
@@ -490,7 +485,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         </div>
 
         {/* ESTIMATION */}
-        <div style={{ ...card, background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))", border: "1px solid rgba(139,92,246,0.2)" }}>
+        <div className="biz-form-card" style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(249,115,22,0.05) 100%)", border: "1px solid rgba(139,92,246,0.25)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Info size={16} color="#8b5cf6" />
@@ -520,7 +515,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               { label: "Portée / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes", icon: <MousePointer size={14} />, color: "#f97316" },
               { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} />, color: "#10b981" },
             ].map(({ label, value, sub, icon, color }) => (
-              <div key={label} style={{ textAlign: "center", padding: "14px 8px", borderLeft: "1px solid var(--border)" }}>
+              <div key={label} style={{ textAlign: "center", padding: "14px 8px", borderLeft: "1px solid rgba(255,255,255,0.07)" }}>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 6, color }}>{icon}</div>
                 <p style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
                 <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 3 }}>{value}</p>
@@ -529,8 +524,8 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             ))}
           </div>
 
-          <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 14, lineHeight: 1.5, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-            Estimations basées sur la distribution géographique OFS 2022 et la capacité journalière de la plateforme. Le CPM intègre une prime de précision (+40% max) pour les audiences très ciblées.
+          <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 14, lineHeight: 1.5, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 12 }}>
+            Estimations basées sur la distribution géographique OFS 2022 et la capacité journalière de la plateforme. Le CPM intègre une prime de précision (+40% max) pour les audiences très ciblées — cohérent avec les standards Facebook/LinkedIn Ads.
           </p>
         </div>
 
@@ -543,9 +538,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <button type="submit" disabled={pending} style={{
             flex: 1, padding: "16px", borderRadius: 14,
-            background: pending ? "var(--surface2)" : "linear-gradient(135deg, #8b5cf6, #f97316)",
-            color: pending ? "var(--text-muted)" : "#fff", fontWeight: 800, fontSize: 15, border: "none",
-            cursor: pending ? "not-allowed" : "pointer", opacity: pending ? 0.7 : 1,
+            background: pending ? "rgba(255,255,255,0.08)" : "linear-gradient(135deg, #8b5cf6, #f97316)",
+            color: "#fff", fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", border: "none",
+            cursor: pending ? "not-allowed" : "pointer", opacity: pending ? 0.7 : 1, transition: "opacity 0.2s",
           }}>
             {pending ? "Envoi en cours…" : `Soumettre · CHF ${totalBudget.toLocaleString("fr-CH")}`}
           </button>
