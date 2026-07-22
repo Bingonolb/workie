@@ -183,9 +183,7 @@ export default function AdminReportsPage() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       {report.reporter_name && (
                         <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 1 }}>
-                          <Link href={`/profile/${report.reporter_id}`} target="_blank" style={{ color: "#8b5cf6", textDecoration: "none" }}>
-                            {report.reporter_name}
-                          </Link>
+                          {report.reporter_name}
                         </p>
                       )}
                       {report.reporter_email && (
