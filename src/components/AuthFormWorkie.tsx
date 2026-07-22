@@ -66,17 +66,17 @@ export function AuthFormWorkie({
           <>
             <div style={{ display: "flex", gap: 10 }}>
               <div style={{ flex: 1 }}>
-                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Prénom *</label>
-                <input name="first_name" required placeholder="Alice" style={inp} />
+                <label htmlFor="first_name" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Prénom *</label>
+                <input id="first_name" name="first_name" required placeholder="Alice" style={inp} />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Nom *</label>
-                <input name="last_name" required placeholder="Dupont" style={inp} />
+                <label htmlFor="last_name" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Nom *</label>
+                <input id="last_name" name="last_name" required placeholder="Dupont" style={inp} />
               </div>
             </div>
             <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
-              <select name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
+              <label htmlFor="canton" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
+              <select id="canton" name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
                 <option value="">Sélectionne ton canton</option>
                 {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -84,9 +84,9 @@ export function AuthFormWorkie({
           </>
         )}
         <div>
-          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email {mode === "signup" ? "*" : ""}</label>
+          <label htmlFor="email" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email {mode === "signup" ? "*" : ""}</label>
           <input
-            type="email" name="email" required placeholder="toi@email.com"
+            id="email" type="email" name="email" required placeholder="toi@email.com"
             style={inp} autoComplete="email"
             value={mode === "signup" ? email : undefined}
             onChange={mode === "signup" ? e => setEmail(e.target.value) : undefined}
@@ -94,28 +94,28 @@ export function AuthFormWorkie({
         </div>
         {mode === "signup" && (
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Confirme ton email *</label>
+            <label htmlFor="email_confirm" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Confirme ton email *</label>
             <input
-              type="email" name="email_confirm" required placeholder="toi@email.com"
+              id="email_confirm" type="email" name="email_confirm" required placeholder="toi@email.com"
               style={{ ...inp, border: `1px solid ${emailMismatch ? "#ef4444" : "var(--border2)"}` }}
               autoComplete="off"
               value={emailConfirm}
               onChange={e => setEmailConfirm(e.target.value)}
             />
             {emailMismatch && (
-              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#ef4444" }}>
+              <p role="alert" style={{ margin: "6px 0 0", fontSize: 12, color: "#ef4444" }}>
                 Les adresses email ne correspondent pas.
               </p>
             )}
           </div>
         )}
         <div>
-          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Mot de passe</label>
-          <input type="password" name="password" required minLength={6} placeholder="••••••••" style={inp} />
+          <label htmlFor="password" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Mot de passe</label>
+          <input id="password" type="password" name="password" required minLength={6} placeholder="••••••••" style={inp} />
         </div>
 
         {state?.error && (
-          <p style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.1)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)" }}>
+          <p role="alert" style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.1)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)" }}>
             {state.error}
           </p>
         )}

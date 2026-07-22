@@ -5,6 +5,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   minimumScale: 1,
   viewportFit: "cover",
+  colorScheme: "dark light",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)",  color: "#0d0d0f" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+  ],
 };
 import "./globals.css";
 import { Suspense } from "react";

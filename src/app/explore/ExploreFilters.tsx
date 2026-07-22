@@ -262,6 +262,8 @@ export function ExploreFilters({
         <div style={{ position: "relative", flexShrink: 0 }}>
           <button
             id="filter-btn"
+            aria-expanded={showPanel}
+            aria-controls="filter-panel"
             onClick={() => setShowPanel(v => !v)}
             style={{
               display: "flex", alignItems: "center", gap: 7,
@@ -285,7 +287,7 @@ export function ExploreFilters({
           {showPanel && (
             <>
               <div className="filter-panel-overlay" onClick={() => setShowPanel(false)} />
-              <div ref={panelRef} className="filter-panel">
+              <div ref={panelRef} id="filter-panel" className="filter-panel">
                 {/* Sectors */}
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Secteur</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
