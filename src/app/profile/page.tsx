@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
@@ -12,6 +13,11 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { signOut } from "@/lib/actions/auth";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Mon profil · Workie",
+  robots: { index: false, follow: false },
+};
 
 export default async function ProfilePage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);

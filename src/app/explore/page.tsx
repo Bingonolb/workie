@@ -7,13 +7,21 @@ import { Navbar } from "@/components/Navbar";
 export const metadata: Metadata = {
   title: "Explorer les entreprises suisses · Workie",
   description: "Découvre les avis anonymes et salaires des entreprises en Suisse. Tech, Pharma, Finance, Conseil et plus.",
+  alternates: { canonical: "https://www.workie.ch/explore" },
   openGraph: {
     title: "Explorer les entreprises suisses · Workie",
     description: "1700+ entreprises suisses — avis anonymes, salaires réels, classement communautaire.",
     url: "https://www.workie.ch/explore",
+    siteName: "Workie",
     type: "website",
+    locale: "fr_CH",
+    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Explorer les entreprises suisses · Workie" }],
   },
-  twitter: { card: "summary_large_image", title: "Explorer les entreprises suisses · Workie" },
+  twitter: {
+    card: "summary_large_image",
+    title: "Explorer les entreprises suisses · Workie",
+    images: ["https://www.workie.ch/og-default.png"],
+  },
 };
 import { getAllCompaniesForGrid, getAllCompaniesForSwipe } from "@/lib/actions/companies";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";

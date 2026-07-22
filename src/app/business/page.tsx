@@ -6,6 +6,21 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export const metadata: Metadata = {
   title: "Espace Entreprise · Workie",
   description: "Revendiquez votre fiche Workie. Répondez aux avis, gérez votre image employeur et accédez aux insights de vos équipes. À partir de 99 CHF/mois.",
+  alternates: { canonical: "https://www.workie.ch/business" },
+  openGraph: {
+    title: "Espace Entreprise · Workie — Gérez votre image employeur",
+    description: "Revendiquez votre fiche Workie. Répondez aux avis, gérez votre image employeur et accédez aux insights. À partir de 99 CHF/mois.",
+    url: "https://www.workie.ch/business",
+    siteName: "Workie",
+    type: "website",
+    locale: "fr_CH",
+    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Workie Espace Entreprise" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Espace Entreprise · Workie",
+    images: ["https://www.workie.ch/og-default.png"],
+  },
 };
 
 const FEATURES = [

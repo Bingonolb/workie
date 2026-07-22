@@ -11,6 +11,7 @@ import { Flame } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Mes favoris · Workie",
+  robots: { index: false, follow: false },
 };
 
 export default async function FavoritesPage() {

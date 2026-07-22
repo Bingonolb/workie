@@ -37,6 +37,26 @@ export async function submitReport(payload: {
   if (payload.explanation.length > 2000) return { error: "L'explication ne peut pas dépasser 2000 caractères." };
 
   const supabase = await createClient();
+
+  // Rate limit: max 5 reports per user in the last 24 hours
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count } = await supabase
+    .from("reports")
+    .select("id", { count: "exact", head: true })
+    .eq("reporter_id", user.id)
+    .gte("created_at", since);
+  if ((count ?? 0) >= 5) return { error: "Vous avez atteint la limite de 5 signalements par 24h." };
+
+  // Deduplicate: prevent re-reporting the same content
+  const { data: duplicate } = await supabase
+    .from("reports")
+    .select("id")
+    .eq("reporter_id", user.id)
+    .eq("target_type", payload.targetType)
+    .eq("target_id", payload.targetId)
+    .maybeSingle();
+  if (duplicate) return { error: "Vous avez déjà signalé ce contenu." };
+
   const { error } = await supabase.from("reports").insert({
     reporter_id: user.id,
     target_type: payload.targetType,

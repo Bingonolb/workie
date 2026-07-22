@@ -5,6 +5,8 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Politique de confidentialité · Workie",
   description: "Comment Workie collecte, utilise et protège vos données personnelles.",
+  alternates: { canonical: "https://www.workie.ch/confidentialite" },
+  robots: { index: true, follow: false },
 };
 
 export default function ConfidentialitePage() {

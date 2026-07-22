@@ -5,6 +5,8 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Conditions générales d'utilisation · Workie",
   description: "Conditions générales d'utilisation de la plateforme Workie.",
+  alternates: { canonical: "https://www.workie.ch/cgu" },
+  robots: { index: true, follow: false },
 };
 
 export default function CGUPage() {

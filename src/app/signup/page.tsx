@@ -6,6 +6,7 @@ import { AuthFormWorkie } from "@/components/AuthFormWorkie";
 export const metadata: Metadata = {
   title: "Créer un compte · Workie",
   description: "Rejoins Workie gratuitement. Accède aux avis anonymes d'employés, aux salaires réels et donne ton avis sur ton employeur.",
+  robots: { index: false, follow: false },
 };
 
 export default function SignupPage() {
