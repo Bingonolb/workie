@@ -42,8 +42,9 @@ export function BottomNav({ isBusiness }: { isBusiness: boolean }) {
             href={href}
             className={`bottom-nav-item${active ? " active" : ""}`}
             onClick={handleClick(href, active)}
+            aria-current={active ? "page" : undefined}
           >
-            <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
+            <Icon size={22} strokeWidth={active ? 2.5 : 1.8} aria-hidden="true" />
             <span>{label}</span>
           </Link>
         );

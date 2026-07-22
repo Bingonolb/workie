@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import { Compass, Flame, User, Trophy, TrendingUp } from "lucide-react";
 
 const LINKS = [
-  { href: "/explore", icon: <Compass size={16} />, label: "Explorer" },
-  { href: "/ranking", icon: <Trophy size={16} />, label: "Classement" },
-  { href: "/salaires", icon: <TrendingUp size={16} />, label: "Salaires" },
-  { href: "/favorites", icon: <Flame size={16} />, label: "Favoris" },
-  { href: "/profile", icon: <User size={16} />, label: "Profil" },
+  { href: "/explore", icon: <Compass size={16} aria-hidden="true" />, label: "Explorer" },
+  { href: "/ranking", icon: <Trophy size={16} aria-hidden="true" />, label: "Classement" },
+  { href: "/salaires", icon: <TrendingUp size={16} aria-hidden="true" />, label: "Salaires" },
+  { href: "/favorites", icon: <Flame size={16} aria-hidden="true" />, label: "Favoris" },
+  { href: "/profile", icon: <User size={16} aria-hidden="true" />, label: "Profil" },
 ] as const;
 
 export function NavLinks() {
@@ -19,7 +19,7 @@ export function NavLinks() {
       {LINKS.map(({ href, icon, label }) => {
         const active = pathname === href || (href !== "/explore" && pathname.startsWith(href));
         return (
-          <Link key={href} href={href} title={label} style={{
+          <Link key={href} href={href} title={label} aria-current={active ? "page" : undefined} style={{
             display: "flex", alignItems: "center", gap: 5,
             padding: "8px 10px", borderRadius: 8,
             fontSize: 13, fontWeight: active ? 700 : 500,

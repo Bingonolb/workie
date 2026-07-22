@@ -80,8 +80,8 @@ export async function Navbar() {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <ThemeToggle />
           {user && !isBusiness && (
-            <Link href="/notifications" title="Notifications" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: 8, color: "var(--text-muted)", textDecoration: "none" }}>
-              <Bell size={18} />
+            <Link href="/notifications" title="Notifications" aria-label={unreadCount > 0 ? `Notifications (${unreadCount > 9 ? "9+" : unreadCount} non lues)` : "Notifications"} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: 8, color: "var(--text-muted)", textDecoration: "none" }}>
+              <Bell size={18} aria-hidden="true" />
               {unreadCount > 0 && (
                 <span style={{ position: "absolute", top: 2, right: 2, minWidth: 16, height: 16, borderRadius: 50, background: "#8b5cf6", color: "#fff", fontSize: 9, fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
                   {unreadCount > 9 ? "9+" : unreadCount}
