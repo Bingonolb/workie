@@ -34,9 +34,9 @@ export function PayUserCampaignButton({ campaignId, total }: { campaignId: strin
         background: loading ? "rgba(139,92,246,0.5)" : "linear-gradient(135deg, #8b5cf6, #f97316)",
         cursor: loading ? "not-allowed" : "pointer",
       }}>
-        <CreditCard size={12} /> {loading ? "…" : `Payer CHF ${Number(total).toFixed(2)}`}
+        <CreditCard size={12} aria-hidden="true" /> {loading ? "…" : `Payer CHF ${Number(total).toFixed(2)}`}
       </button>
-      {error && <p style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>{error}</p>}
+      {error && <p role="alert" style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>{error}</p>}
     </div>
   );
 }

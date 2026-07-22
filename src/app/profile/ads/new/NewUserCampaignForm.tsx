@@ -159,7 +159,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   return (
     <div style={{ maxWidth: 820 }}>
       <Link href="/profile/ads" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 24 }}>
-        <ArrowLeft size={14} /> Mes publicités
+        <ArrowLeft size={14} aria-hidden="true" /> Mes publicités
       </Link>
 
       <div style={{ marginBottom: 32 }}>
@@ -177,7 +177,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* FORMAT */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Zap size={18} />} title="Format d'annonce" subtitle="Choisissez comment votre pub apparaîtra aux utilisateurs" />
+          <SectionHeader icon={<Zap size={18} aria-hidden="true" />} title="Format d'annonce" subtitle="Choisissez comment votre pub apparaîtra aux utilisateurs" />
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             {(["square", "swipe"] as const).map(f => (
               <button key={f} type="button" onClick={() => setFormat(f)} style={{
@@ -211,7 +211,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* CREATIVE — avec aperçu en temps réel */}
         <div className="biz-form-card">
-          <SectionHeader icon={<ImageIcon size={18} />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
+          <SectionHeader icon={<ImageIcon size={18} aria-hidden="true" />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
 
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* Gauche : upload + URL */}
@@ -224,7 +224,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 transition: "all 0.2s",
               }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Upload size={18} color={imagePreview ? "#8b5cf6" : "var(--text-muted)"} />
+                  <Upload size={18} color={imagePreview ? "#8b5cf6" : "var(--text-muted)"} aria-hidden="true" />
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: imagePreview ? "#8b5cf6" : "var(--text)", marginBottom: 3 }}>
@@ -268,7 +268,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                         <img src={imagePreview} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
                       ) : (
                         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <ImageIcon size={24} color="var(--text-muted)" style={{ opacity: 0.3 }} />
+                          <ImageIcon size={24} color="var(--text-muted)" aria-hidden="true" style={{ opacity: 0.3 }} />
                         </div>
                       )}
                       <div style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", borderRadius: 50, padding: "2px 7px", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sponsorisé</div>
@@ -314,7 +314,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                             <img src={imagePreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
                           ) : (
                             <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <ImageIcon size={24} color="rgba(255,255,255,0.15)" />
+                              <ImageIcon size={24} color="rgba(255,255,255,0.15)" aria-hidden="true" />
                             </div>
                           )}
                         </div>
@@ -364,7 +364,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>URL de destination *</label>
             <div style={{ position: "relative" }}>
-              <ExternalLink size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
+              <ExternalLink size={15} aria-hidden="true" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
               <input name="cta_url" required style={{ ...inp, paddingLeft: 42 }} placeholder="https://votre-site.ch" defaultValue={prefillCtaUrl ?? ""} />
             </div>
           </div>
@@ -372,7 +372,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* CIBLAGE */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Target size={18} />} title="Ciblage" subtitle="Choisissez votre audience — plus elle est ciblée, plus les profils qui voient votre annonce sont pertinents." />
+          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage" subtitle="Choisissez votre audience — plus elle est ciblée, plus les profils qui voient votre annonce sont pertinents." />
           <div style={{ marginBottom: 22 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</label>
@@ -433,7 +433,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* BUDGET */}
         <div className="biz-form-card">
-          <SectionHeader icon={<DollarSign size={18} />} title="Budget" subtitle="Ajustez le budget journalier et la durée — le total se calcule automatiquement." />
+          <SectionHeader icon={<DollarSign size={18} aria-hidden="true" />} title="Budget" subtitle="Ajustez le budget journalier et la durée — le total se calcule automatiquement." />
 
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
             <div>
@@ -489,11 +489,11 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         <div className="biz-form-card" style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(249,115,22,0.05) 100%)", border: "1px solid rgba(139,92,246,0.25)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Info size={16} color="#8b5cf6" />
+              <Info size={16} color="#8b5cf6" aria-hidden="true" />
               <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Estimation de performance</p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 50, background: reach < 0.15 ? "rgba(249,115,22,0.12)" : "rgba(16,185,129,0.10)", border: `1px solid ${reach < 0.15 ? "rgba(249,115,22,0.3)" : "rgba(16,185,129,0.25)"}` }}>
-              <Target size={11} color={reach < 0.15 ? "#f97316" : "#10b981"} />
+              <Target size={11} color={reach < 0.15 ? "#f97316" : "#10b981"} aria-hidden="true" />
               <span style={{ fontSize: 11, fontWeight: 800, color: reach < 0.15 ? "#f97316" : "#10b981" }}>
                 {(reach * 100).toFixed(1)}% de l&apos;audience Workie ciblée
               </span>
@@ -511,10 +511,10 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 1 }}>
             {[
-              { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "/ 1 000 vues", icon: <DollarSign size={14} />, color: "#8b5cf6" },
-              { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions", icon: <Eye size={14} />, color: "#6366f1" },
-              { label: "Portée / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes", icon: <MousePointer size={14} />, color: "#f97316" },
-              { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} />, color: "#10b981" },
+              { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "/ 1 000 vues", icon: <DollarSign size={14} aria-hidden="true" />, color: "#8b5cf6" },
+              { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions", icon: <Eye size={14} aria-hidden="true" />, color: "#6366f1" },
+              { label: "Portée / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes", icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
+              { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} aria-hidden="true" />, color: "#10b981" },
             ].map(({ label, value, sub, icon, color }) => (
               <div key={label} style={{ textAlign: "center", padding: "14px 8px", borderLeft: "1px solid rgba(255,255,255,0.07)" }}>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 6, color }}>{icon}</div>
