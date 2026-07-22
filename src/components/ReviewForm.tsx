@@ -71,6 +71,7 @@ function PillPicker({ options, value, onChange }: {
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
       {options.map(o => (
         <button key={o.value} type="button" onClick={() => onChange(o.value)}
+          aria-pressed={value === o.value}
           className={`pill-btn${value === o.value ? " active" : ""}`}>
           {o.label}
         </button>

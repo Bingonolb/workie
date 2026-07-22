@@ -109,7 +109,7 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
 
               {/* Rating */}
               <div style={{ display: "flex", alignItems: "center", gap: 4, justifyContent: "flex-end" }}>
-                <Star size={11} fill="#f59e0b" color="#f59e0b" />
+                <Star size={11} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
                 <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
                   {Number(r.rating_overall).toFixed(1)}
                 </span>

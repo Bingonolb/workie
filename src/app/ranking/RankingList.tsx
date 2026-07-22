@@ -31,6 +31,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
+            aria-label="Chercher une entreprise ou une ville"
             placeholder="Chercher une entreprise ou une ville..."
             style={{
               width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
@@ -47,7 +48,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           const color = s === "Tous" ? "#8b5cf6" : (SECTOR_COLORS[s] ?? "#8b5cf6");
           const active = sector === s;
           return (
-            <button key={s} onClick={() => setSector(s)} style={{
+            <button key={s} type="button" onClick={() => setSector(s)} aria-pressed={active} style={{
               padding: "5px 14px", borderRadius: 6, fontSize: 12, fontWeight: 600,
               border: active ? `1px solid ${color}` : "1px solid var(--border)",
               background: active ? `${color}18` : "transparent",
@@ -160,7 +161,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                 <div className="ranking-col-note" style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
                   {avgRating > 0 ? (
                     <>
-                      <Star size={11} fill="#f59e0b" color="#f59e0b" />
+                      <Star size={11} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
                       <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
                         {avgRating.toFixed(1)}
                       </span>
@@ -190,8 +191,8 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                     }}>
                       {communityPts > 0 ? `+${communityPts}` : communityPts}
                       {communityPts > 0
-                        ? <Zap size={9} style={{ marginLeft: 2, verticalAlign: "middle" }} color="#8b5cf6" />
-                        : <Flame size={9} style={{ marginLeft: 2, verticalAlign: "middle" }} color="#ef4444" />}
+                        ? <Zap size={9} style={{ marginLeft: 2, verticalAlign: "middle" }} color="#8b5cf6" aria-hidden="true" />
+                        : <Flame size={9} style={{ marginLeft: 2, verticalAlign: "middle" }} color="#ef4444" aria-hidden="true" />}
                     </span>
                   )}
                 </div>

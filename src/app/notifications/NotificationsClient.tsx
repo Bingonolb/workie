@@ -16,8 +16,8 @@ function timeAgo(date: string) {
 }
 
 const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  new_job_offer: { icon: <Briefcase size={16} />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
-  review_reply:  { icon: <MessageCircle size={16} />, color: "#10b981", bg: "rgba(16,185,129,0.12)" },
+  new_job_offer: { icon: <Briefcase size={16} aria-hidden="true" />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
+  review_reply:  { icon: <MessageCircle size={16} aria-hidden="true" />, color: "#10b981", bg: "rgba(16,185,129,0.12)" },
 };
 
 function NotificationItem({ n, onRead, onDelete }: {
@@ -25,7 +25,7 @@ function NotificationItem({ n, onRead, onDelete }: {
   onRead: (id: string) => void;
   onDelete: (id: string) => Promise<void>;
 }) {
-  const cfg = TYPE_CONFIG[n.type] ?? { icon: <Bell size={16} />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" };
+  const cfg = TYPE_CONFIG[n.type] ?? { icon: <Bell size={16} aria-hidden="true" />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" };
   const data = n.data as Record<string, string>;
   const href = n.type === "review_reply" && data.company_id
     ? `/company/${data.company_id}#avis`
@@ -86,7 +86,10 @@ function NotificationItem({ n, onRead, onDelete }: {
           )}
           <div ref={menuRef} style={{ position: "relative" }}>
             <button
+              type="button"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
+              aria-label="Options de la notification"
+              aria-expanded={menuOpen}
               className="notif-menu-btn"
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -95,7 +98,7 @@ function NotificationItem({ n, onRead, onDelete }: {
                 border: "none", cursor: "pointer", color: "var(--text-muted)",
               }}
             >
-              <MoreHorizontal size={15} />
+              <MoreHorizontal size={15} aria-hidden="true" />
             </button>
 
             {menuOpen && (
@@ -114,17 +117,19 @@ function NotificationItem({ n, onRead, onDelete }: {
                 }}>
                   {!n.read && (
                     <button
+                      type="button"
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onRead(n.id); }}
                       style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "10px 14px", background: "none", border: "none", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text)", cursor: "pointer", textAlign: "left" }}
                     >
-                      <CheckCheck size={14} color="var(--text-muted)" /> Marquer comme lu
+                      <CheckCheck size={14} color="var(--text-muted)" aria-hidden="true" /> Marquer comme lu
                     </button>
                   )}
                   <button
+                    type="button"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); triggerDelete(); }}
                     style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "10px 14px", background: "none", border: "none", fontSize: 13, fontWeight: 600, color: "#ef4444", cursor: "pointer", textAlign: "left" }}
                   >
-                    <Trash2 size={14} /> Supprimer
+                    <Trash2 size={14} aria-hidden="true" /> Supprimer
                   </button>
                 </div>
               </>
@@ -178,14 +183,14 @@ export function NotificationsClient({ initialNotifications, initialUnread }: {
         )}
         {unread > 0 && (
           <button type="button" onClick={handleMarkAllRead} style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "6px 10px", borderRadius: 8 }}>
-            <CheckCheck size={14} /> Tout lire
+            <CheckCheck size={14} aria-hidden="true" /> Tout lire
           </button>
         )}
       </div>
 
       {notifications.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
-          <Bell size={44} style={{ opacity: 0.15, margin: "0 auto 20px", display: "block" }} />
+          <Bell size={44} aria-hidden="true" style={{ opacity: 0.15, margin: "0 auto 20px", display: "block" }} />
           <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Aucune notification</p>
           <p style={{ fontSize: 13, lineHeight: 1.6 }}>
             Sauvegarde des entreprises pour recevoir leurs nouvelles offres d&apos;emploi.
