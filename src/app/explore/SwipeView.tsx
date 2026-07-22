@@ -355,7 +355,7 @@ export function SwipeView({
             Recommencer
           </button>
           <a href="/ranking" style={{ padding: "12px 24px", borderRadius: 50, background: "var(--surface)", color: "var(--text)", fontWeight: 700, fontSize: 14, border: "1px solid var(--border2)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
-            <Flame size={14} fill="#f97316" color="#f97316" /> Classement
+            <Flame size={14} fill="#f97316" color="#f97316" aria-hidden="true" /> Classement
           </a>
         </div>
       </div>
@@ -444,7 +444,7 @@ export function SwipeView({
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
             >
-              <Skull size={15} />
+              <Skull size={15} aria-hidden="true" />
               <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
               {!isAdmin && penaltyCredits > 0 && (
                 <span style={{ position: "absolute", top: -5, right: -5, minWidth: 16, height: 16, borderRadius: 8, background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 900, padding: "0 3px" }}>{penaltyCredits}</span>
@@ -456,7 +456,8 @@ export function SwipeView({
           );
         })()}
 
-        <button type="button" onClick={() => advance("left")} disabled={!!gone} style={{
+        <button type="button" onClick={() => advance("left")} disabled={!!gone} aria-label="Passer cette entreprise"
+          style={{
           width: 64, height: 64, borderRadius: "50%",
           background: "var(--surface)",
           border: "2px solid rgba(239,68,68,0.4)",
@@ -468,10 +469,11 @@ export function SwipeView({
           onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
-          <X size={26} strokeWidth={2.5} />
+          <X size={26} strokeWidth={2.5} aria-hidden="true" />
         </button>
 
-        <button type="button" onClick={() => !isAd(current) && current && router.push(`/company/${current.id}`)} disabled={!!gone || isAd(current)} style={{
+        <button type="button" onClick={() => !isAd(current) && current && router.push(`/company/${current.id}`)} disabled={!!gone || isAd(current)} aria-label="Voir la fiche entreprise"
+          style={{
           width: 48, height: 48, borderRadius: "50%",
           background: "var(--surface)",
           border: "2px solid rgba(99,102,241,0.45)",
@@ -483,10 +485,11 @@ export function SwipeView({
           onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
-          <Info size={18} strokeWidth={2} />
+          <Info size={18} strokeWidth={2} aria-hidden="true" />
         </button>
 
-        <button type="button" onClick={() => advance("right")} disabled={!!gone} style={{
+        <button type="button" onClick={() => advance("right")} disabled={!!gone} aria-label="Sauvegarder cette entreprise"
+          style={{
           width: 64, height: 64, borderRadius: "50%",
           background: !isAd(current) && flameIds.has(current.id)
             ? "linear-gradient(135deg, #f97316, #ea580c)"
@@ -501,7 +504,7 @@ export function SwipeView({
           onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
-          <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} />
+          <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} aria-hidden="true" />
         </button>
 
         {isLoggedIn && !isBusiness && !isAd(current) && (() => {
@@ -519,7 +522,7 @@ export function SwipeView({
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
             >
-              <Zap size={15} fill="#8b5cf6" />
+              <Zap size={15} fill="#8b5cf6" aria-hidden="true" />
               <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>+100</span>
             </button>
           );
@@ -680,19 +683,19 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
       <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
         {Number(company.avg_rating) > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ display: "flex", gap: 2 }}>
+            <span style={{ display: "flex", gap: 2 }} aria-hidden="true">
               {[1,2,3,4,5].map(n => (
                 <Star key={n} size={16} fill={n <= Math.round(Number(company.avg_rating)) ? "#f59e0b" : "transparent"} color={n <= Math.round(Number(company.avg_rating)) ? "#f59e0b" : "var(--border2)"} strokeWidth={1.5} />
               ))}
             </span>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#f59e0b" }}>{Number(company.avg_rating).toFixed(1)}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "#f59e0b" }} aria-label={`${Number(company.avg_rating).toFixed(1)} étoiles sur 5`}>{Number(company.avg_rating).toFixed(1)}</span>
             <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{company.review_count} avis</span>
           </div>
         )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          <Chip icon={<MapPin size={12} />} label={`${company.city}${company.canton ? `, ${company.canton}` : ""}`} />
-          <Chip icon={<Users size={12} />} label={`${company.employee_range} emp.`} />
-          {Number(company.avg_salary_chf) > 0 && <Chip icon={<TrendingUp size={12} />} label={`CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`} color="#10b981" />}
+          <Chip icon={<MapPin size={12} aria-hidden="true" />} label={`${company.city}${company.canton ? `, ${company.canton}` : ""}`} />
+          <Chip icon={<Users size={12} aria-hidden="true" />} label={`${company.employee_range} emp.`} />
+          {Number(company.avg_salary_chf) > 0 && <Chip icon={<TrendingUp size={12} aria-hidden="true" />} label={`CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`} color="#10b981" />}
         </div>
         {company.description && (
           <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
@@ -764,7 +767,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
         )}
         {/* CTA button */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", boxShadow: "0 4px 16px rgba(139,92,246,0.35)" }}>
-          <ExternalLink size={15} color="#fff" />
+          <ExternalLink size={15} color="#fff" aria-hidden="true" />
           <span style={{ fontSize: 14, fontWeight: 800, color: "#fff", flex: 1, letterSpacing: "-0.01em" }}>{campaign.cta_label}</span>
           <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>Ouvrir →</span>
         </div>
