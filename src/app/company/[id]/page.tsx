@@ -157,28 +157,58 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   }, {});
   const dominantMode = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": company.name,
-    "url": company.website_url ?? undefined,
-    "description": company.description ?? undefined,
-    "address": { "@type": "PostalAddress", "addressLocality": company.city, "addressCountry": "CH" },
-    ...(Number(company.avg_rating) > 0 ? {
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": Number(company.avg_rating).toFixed(1),
-        "bestRating": "5",
-        "worstRating": "1",
-        "ratingCount": Number(company.review_count),
-      }
-    } : {}),
-  };
+  // Top reviews for rich snippet (max 3, must have title + content)
+  const topReviews = reviews
+    .filter(r => r.content && r.content.length >= 50 && Number(r.rating_overall) > 0)
+    .slice(0, 3);
+
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": company.name,
+      "url": company.website_url ?? undefined,
+      "logo": company.logo_url ?? undefined,
+      "description": company.description ?? undefined,
+      "address": { "@type": "PostalAddress", "addressLocality": company.city, "addressCountry": "CH" },
+      ...(Number(company.avg_rating) > 0 && Number(company.review_count) > 0 ? {
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": Number(company.avg_rating).toFixed(1),
+          "bestRating": "5",
+          "worstRating": "1",
+          "ratingCount": Number(company.review_count),
+        }
+      } : {}),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Workie", "item": BASE_URL },
+        { "@type": "ListItem", "position": 2, "name": "Explorer", "item": `${BASE_URL}/explore` },
+        { "@type": "ListItem", "position": 3, "name": company.sector, "item": `${BASE_URL}/explore?sector=${encodeURIComponent(company.sector)}` },
+        { "@type": "ListItem", "position": 4, "name": company.name, "item": `${BASE_URL}/company/${company.id}` },
+      ],
+    },
+    ...topReviews.map(r => ({
+      "@context": "https://schema.org",
+      "@type": "Review",
+      "itemReviewed": { "@type": "Organization", "name": company.name },
+      "reviewRating": { "@type": "Rating", "ratingValue": Number(r.rating_overall), "bestRating": 5, "worstRating": 1 },
+      "name": r.title ?? `Avis sur ${company.name}`,
+      "reviewBody": r.content.slice(0, 500),
+      "datePublished": r.created_at?.slice(0, 10) ?? undefined,
+      "author": { "@type": "Person", "name": "Employé anonyme" },
+      "publisher": { "@type": "Organization", "name": "Workie", "url": BASE_URL },
+    })),
+  ];
 
   return (
     <div className="page-root">
       <ViewTracker companyId={company.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
+
       <Navbar />
 
       {/* Preload hero cover — browser fetches directly from CDN before paint */}

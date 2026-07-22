@@ -28,8 +28,19 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Workie — Avis d'employés & salaires réels en Suisse",
     description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",
+    url: "https://www.workie.ch",
+    siteName: "Workie",
     type: "website",
+    locale: "fr_CH",
+    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Workie — Avis & Salaires en Suisse" }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Workie — Avis d'employés & salaires réels en Suisse",
+    description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",
+    images: ["https://www.workie.ch/og-default.png"],
+  },
+  alternates: { canonical: "https://www.workie.ch" },
 };
 
 export default async function Home() {

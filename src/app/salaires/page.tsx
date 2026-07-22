@@ -15,9 +15,12 @@ export const metadata: Metadata = {
     title: "Salaires en Suisse par secteur · Workie",
     description: "Salaires bruts anonymes par secteur — Tech, Finance, Pharma et plus. Données réelles d'employés suisses.",
     url: "https://www.workie.ch/salaires",
+    siteName: "Workie",
     type: "website",
+    locale: "fr_CH",
+    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Salaires en Suisse · Workie" }],
   },
-  twitter: { card: "summary_large_image", title: "Salaires en Suisse · Workie" },
+  twitter: { card: "summary_large_image", title: "Salaires en Suisse · Workie", images: ["https://www.workie.ch/og-default.png"] },
 };
 
 type SectorStat = {
@@ -159,8 +162,46 @@ export default async function SalairesPage() {
   const maxSectorMedian = Math.max(...sectorStats.map(s => s.median), 1);
   const maxJobAvg = Math.max(...jobStats.map(j => j.avg), 1);
 
+  // JSON-LD: Dataset for salary data + FAQ
+  const salairesJsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "Salaires en Suisse par secteur — Workie",
+      "description": `Données anonymes sur ${totalCount} salaires déclarés par des employés suisses, agrégés par secteur et type de poste.`,
+      "url": "https://www.workie.ch/salaires",
+      "creator": { "@type": "Organization", "name": "Workie", "url": "https://www.workie.ch" },
+      "keywords": ["salaires suisse", "salaires par secteur", "salaire moyen suisse", "salaire tech suisse", "salaire pharma suisse"],
+      "temporalCoverage": "2024/..",
+      "spatialCoverage": { "@type": "Place", "name": "Suisse" },
+      "variableMeasured": sectorStats.slice(0, 5).map(s => ({
+        "@type": "PropertyValue",
+        "name": `Salaire médian ${s.sector}`,
+        "value": s.median,
+        "unitCode": "CHF",
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Quel est le salaire moyen en Suisse ?",
+          "acceptedAnswer": { "@type": "Answer", "text": overallAvg > 0 ? `D'après les données anonymes de Workie, le salaire annuel brut moyen en Suisse est de CHF ${overallAvg.toLocaleString("fr-CH")} (médiane : CHF ${overallMedian.toLocaleString("fr-CH")}) sur la base de ${totalCount} déclarations.` : "Les données sont en cours de collecte." }
+        },
+        ...sectorStats.slice(0, 3).map(s => ({
+          "@type": "Question",
+          "name": `Quel est le salaire moyen dans le secteur ${s.sector} en Suisse ?`,
+          "acceptedAnswer": { "@type": "Answer", "text": `Dans le secteur ${s.sector}, le salaire médian est de CHF ${s.median.toLocaleString("fr-CH")} par an (moyenne : CHF ${s.avg.toLocaleString("fr-CH")}), sur la base de ${s.count} salaires déclarés anonymement sur Workie.` }
+        })),
+      ],
+    },
+  ];
+
   return (
     <div className="page-root">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(salairesJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       <Navbar />
 
       {/* Hero */}

@@ -9,14 +9,18 @@ import type { Company } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses · Workie",
-  description: "Le vrai classement des entreprises en Suisse — calculé sur les avis anonymes, les salaires et les votes de la communauté.",
+  description: "Le vrai classement des entreprises en Suisse — calculé sur les avis anonymes, les salaires et les votes de la communauté Workie.",
+  alternates: { canonical: "https://www.workie.ch/ranking" },
   openGraph: {
     title: "Classement des meilleurs employeurs suisses · Workie",
     description: "200 entreprises classées par note, salaire et votes anonymes d'employés.",
     url: "https://www.workie.ch/ranking",
+    siteName: "Workie",
     type: "website",
+    locale: "fr_CH",
+    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Classement des employeurs suisses · Workie" }],
   },
-  twitter: { card: "summary_large_image", title: "Classement des employeurs suisses · Workie" },
+  twitter: { card: "summary_large_image", title: "Classement des employeurs suisses · Workie", images: ["https://www.workie.ch/og-default.png"] },
 };
 
 export default async function RankingPage() {
@@ -32,8 +36,25 @@ export default async function RankingPage() {
     : 0;
   const totalReviews = reviewCount;
 
+  const rankingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Classement des meilleurs employeurs suisses",
+    "description": "Top 200 entreprises suisses classées par avis anonymes, notes et votes d'employés sur Workie.",
+    "url": "https://www.workie.ch/ranking",
+    "numberOfItems": typedCompanies.length,
+    "itemListElement": typedCompanies.slice(0, 10).map((c, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": c.name,
+      "url": `https://www.workie.ch/company/${c.id}`,
+      ...(Number(c.avg_rating) > 0 ? { "description": `Note : ${Number(c.avg_rating).toFixed(1)}/5 · ${c.city}, ${c.canton}` } : {}),
+    })),
+  };
+
   return (
     <div className="page-root">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(rankingJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       <Navbar />
       <main className="page-main-md">
 
