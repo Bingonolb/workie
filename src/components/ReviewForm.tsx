@@ -45,9 +45,12 @@ function StarPicker({ name, label, required, value, onChange }: {
         <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-sub)" }}>{label}{required && " *"}</span>
         {active > 0 && <span style={{ fontSize: 12, color: "#f59e0b", fontWeight: 600 }}>{RATING_LABELS[active]}</span>}
       </div>
-      <div style={{ display: "flex", gap: 6 }}>
+      <div role="radiogroup" aria-label={label} style={{ display: "flex", gap: 6 }}>
         {[1, 2, 3, 4, 5].map(n => (
           <button key={n} type="button"
+            role="radio"
+            aria-checked={n === value}
+            aria-label={`${n} étoile${n > 1 ? "s" : ""}${RATING_LABELS[n] ? ` — ${RATING_LABELS[n]}` : ""}`}
             onMouseEnter={() => setHover(n)} onMouseLeave={() => setHover(0)} onClick={() => onChange(n)}
             style={{ background: "none", border: "none", cursor: "pointer", padding: 2, fontSize: 28,
               filter: n <= active ? "none" : "grayscale(1) opacity(0.25)",
