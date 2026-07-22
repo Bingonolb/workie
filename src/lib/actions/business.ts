@@ -446,6 +446,39 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
   }
 }
 
+export async function updateJobOffer(id: string, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const { supabase, company } = await requireBusiness();
+
+    const title = String(formData.get("title") || "").trim();
+    if (!title) return { error: "Le titre du poste est obligatoire." };
+
+    const rawApplyUrl = String(formData.get("apply_url") || "").trim();
+    const apply_url = rawApplyUrl
+      ? /^https?:\/\//i.test(rawApplyUrl) ? rawApplyUrl : `https://${rawApplyUrl}`
+      : null;
+
+    const { error } = await supabase.from("job_offers").update({
+      title,
+      description:      String(formData.get("description") || "") || null,
+      requirements:     String(formData.get("requirements") || "") || null,
+      location:         String(formData.get("location") || "") || null,
+      work_mode:        String(formData.get("work_mode") || "") || null,
+      contract_type:    String(formData.get("contract_type") || "") || null,
+      experience_level: String(formData.get("experience_level") || "") || null,
+      salary_range:     String(formData.get("salary_range") || "") || null,
+      apply_url,
+    }).eq("id", id).eq("company_id", company.id);
+
+    if (error) return { error: error.message };
+    revalidatePath("/business/dashboard/jobs");
+    revalidatePath("/jobs");
+    return { success: true };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
 export async function toggleJobOffer(id: string, is_active: boolean): Promise<{ error?: string }> {
   try {
     const { supabase, company } = await requireBusiness();

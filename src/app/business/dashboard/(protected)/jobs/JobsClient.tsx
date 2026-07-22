@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useActionState, useTransition } from "react";
-import { getBusinessJobs, createJobOffer, toggleJobOffer, deleteJobOffer, getJobCantonStats } from "@/lib/actions/business";
-import { Plus, Briefcase, MapPin, Trash2, Eye, EyeOff, ExternalLink, ChevronDown, ChevronUp, MousePointer, BarChart2 } from "lucide-react";
+import { getBusinessJobs, createJobOffer, updateJobOffer, toggleJobOffer, deleteJobOffer, getJobCantonStats } from "@/lib/actions/business";
+import { Plus, Briefcase, MapPin, Trash2, Eye, EyeOff, ExternalLink, ChevronDown, ChevronUp, MousePointer, BarChart2, Pencil, X } from "lucide-react";
 
 const CONTRACT_TYPES = ["CDI", "CDD", "Stage", "Alternance", "Freelance"];
 const WORK_MODES = ["Présentiel", "Hybride", "Remote"];
@@ -172,8 +172,106 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
-function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; onDelete: () => void }) {
+function EditJobForm({ job, onSaved, onCancel }: { job: Job; onSaved: () => void; onCancel: () => void }) {
+  const [contractType, setContractType] = useState(job.contract_type ?? "CDI");
+  const [workMode, setWorkMode] = useState(job.work_mode ?? "");
+  const [experienceLevel, setExperienceLevel] = useState(job.experience_level ?? "");
+  const [error, setError] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    fd.set("contract_type", contractType);
+    fd.set("work_mode", workMode);
+    fd.set("experience_level", experienceLevel);
+    setError("");
+    startTransition(async () => {
+      const res = await updateJobOffer(job.id, fd);
+      if (res.error) { setError(res.error); return; }
+      onSaved();
+    });
+  }
+
+  return (
+    <div style={{ background: "var(--surface2)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 20, padding: "28px 32px", marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Modifier l&apos;offre</p>
+        <button type="button" onClick={onCancel} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>
+          <X size={18} />
+        </button>
+      </div>
+
+      {error && (
+        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#ef4444", marginBottom: 18 }}>
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        <div>
+          <label style={lbl}>Intitulé du poste *</label>
+          <input name="title" required defaultValue={job.title} style={{ ...inp, fontWeight: 600 }} />
+        </div>
+
+        <div className="biz-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+          <div>
+            <label style={lbl}>Type de contrat *</label>
+            <PillGroup options={CONTRACT_TYPES} value={contractType} onChange={setContractType} color="#8b5cf6" />
+          </div>
+          <div>
+            <label style={lbl}>Mode de travail</label>
+            <PillGroup options={WORK_MODES} value={workMode} onChange={setWorkMode} color="#10b981" />
+          </div>
+        </div>
+
+        <div className="biz-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+          <div>
+            <label style={lbl}>Localisation</label>
+            <input name="location" defaultValue={job.location ?? ""} placeholder="Ex : Genève, Zurich, Remote Suisse…" style={inp} />
+          </div>
+          <div>
+            <label style={lbl}>Fourchette salariale</label>
+            <input name="salary_range" defaultValue={job.salary_range ?? ""} placeholder="Ex : 90–110k CHF/an" style={inp} />
+          </div>
+        </div>
+
+        <div>
+          <label style={lbl}>Niveau d&apos;expérience</label>
+          <PillGroup options={EXPERIENCE_LEVELS} value={experienceLevel} onChange={setExperienceLevel} color="#f97316" />
+        </div>
+
+        <div>
+          <label style={lbl}>Description du poste</label>
+          <textarea name="description" rows={5} defaultValue={job.description ?? ""} style={{ ...inp, resize: "vertical", lineHeight: 1.65 }} />
+        </div>
+
+        <div>
+          <label style={lbl}>Prérequis & compétences</label>
+          <textarea name="requirements" rows={4} defaultValue={job.requirements ?? ""} style={{ ...inp, resize: "vertical", lineHeight: 1.65 }} />
+        </div>
+
+        <div style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "16px 20px" }}>
+          <label style={{ ...lbl, color: "#8b5cf6", marginBottom: 8 }}>🔗 Lien pour postuler</label>
+          <input name="apply_url" type="url" defaultValue={job.apply_url ?? ""} placeholder="https://…" style={inp} />
+        </div>
+
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button type="button" onClick={onCancel} style={{ padding: "10px 22px", borderRadius: 10, background: "var(--surface)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
+            Annuler
+          </button>
+          <button type="submit" disabled={pending} style={{ padding: "10px 24px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 14, cursor: "pointer", opacity: pending ? 0.6 : 1 }}>
+            {pending ? "Enregistrement…" : "Enregistrer les modifications"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function JobCard({ job, onToggle, onDelete, onEdited }: { job: Job; onToggle: () => void; onDelete: () => void; onEdited: () => void }) {
   const [expanded, setExpanded] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [cantonStats, setCantonStats] = useState<{ canton: string; count: number }[]>([]);
@@ -193,6 +291,10 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
   };
 
   const clicks = Number(job.apply_click_count ?? 0);
+
+  if (editing) {
+    return <EditJobForm job={job} onSaved={() => { setEditing(false); onEdited(); }} onCancel={() => setEditing(false)} />;
+  }
 
   return (
     <div style={{ background: "var(--surface2)", border: `1px solid ${job.is_active ? "var(--border)" : "var(--border)"}`, borderRadius: 16, overflow: "hidden", opacity: job.is_active ? 1 : 0.65 }}>
@@ -238,6 +340,11 @@ function JobCard({ job, onToggle, onDelete }: { job: Job; onToggle: () => void; 
             className="biz-action-btn"
             style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+          <button onClick={() => { setEditing(true); setExpanded(false); }} title="Modifier"
+            className="biz-action-btn"
+            style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", cursor: "pointer", color: "#8b5cf6", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Pencil size={15} />
           </button>
           <button onClick={onToggle} title={job.is_active ? "Désactiver" : "Activer"}
             className="biz-action-btn"
@@ -422,6 +529,7 @@ export function JobsClient({ initialJobs }: { initialJobs: Job[] }) {
               job={job}
               onToggle={() => handleToggle(job.id, job.is_active)}
               onDelete={() => handleDelete(job.id)}
+              onEdited={load}
             />
           ))}
         </div>
