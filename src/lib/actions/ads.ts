@@ -19,24 +19,8 @@ async function getViewerGeo(): Promise<{ canton: string | null; city: string | n
   } catch { return { canton: null, city: null }; }
 }
 
-/**
- * Determines the viewer's canton for ad targeting:
- * 1. Profile canton (set at signup) — most reliable
- * 2. Vercel IP geo header — fallback for non-logged-in users
- */
+/** Returns the viewer's canton via IP geolocation (Vercel header). */
 export async function getViewerCanton(): Promise<string | null> {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("canton")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (profile?.canton) return profile.canton as string;
-    }
-  } catch { /* ignore */ }
   const geo = await getViewerGeo();
   return geo.canton;
 }
