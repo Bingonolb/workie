@@ -11,6 +11,8 @@ export interface Report {
   id: string;
   created_at: string;
   reporter_id: string | null;
+  reporter_email: string | null;
+  reporter_name: string | null;
   target_type: ReportTargetType;
   target_id: string;
   target_label: string | null;
@@ -65,11 +67,39 @@ export async function getReports(): Promise<{ reports?: Report[]; error?: string
 
   if (error) return { error: error.message };
 
-  const rows = data as Omit<Report, "target_url">[];
+  const rows = data as Omit<Report, "target_url" | "reporter_email" | "reporter_name">[];
+
+  // Batch-resolve reporter info (email from auth, name from profiles)
+  const reporterIds = [...new Set(rows.map(r => r.reporter_id).filter(Boolean))] as string[];
+  const reporterEmailMap: Record<string, string> = {};
+  const reporterNameMap: Record<string, string> = {};
+
+  await Promise.all([
+    // Emails via auth admin API
+    ...reporterIds.map(async id => {
+      try {
+        const { data: u } = await admin.auth.admin.getUserById(id);
+        if (u?.user?.email) reporterEmailMap[id] = u.user.email;
+      } catch { /* ignore */ }
+    }),
+    // Names via profiles table
+    (async () => {
+      if (reporterIds.length === 0) return;
+      const { data: profiles } = await admin
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", reporterIds);
+      if (profiles) {
+        for (const p of profiles as { id: string; full_name: string | null }[]) {
+          if (p.full_name) reporterNameMap[p.id] = p.full_name;
+        }
+      }
+    })(),
+  ]);
 
   // Resolve company_id for review-type reports so admin can navigate to them
   const reviewIds = rows.filter(r => r.target_type === "review").map(r => r.target_id);
-  let reviewCompanyMap: Record<string, string> = {};
+  const reviewCompanyMap: Record<string, string> = {};
   if (reviewIds.length > 0) {
     const { data: reviews } = await admin
       .from("reviews")
@@ -88,7 +118,12 @@ export async function getReports(): Promise<{ reports?: Report[]; error?: string
     else if (r.target_type === "profile") target_url = `/profile/${r.target_id}`;
     else if (r.target_type === "review" && reviewCompanyMap[r.target_id])
       target_url = `/company/${reviewCompanyMap[r.target_id]}`;
-    return { ...r, target_url };
+    return {
+      ...r,
+      target_url,
+      reporter_email: r.reporter_id ? (reporterEmailMap[r.reporter_id] ?? null) : null,
+      reporter_name:  r.reporter_id ? (reporterNameMap[r.reporter_id] ?? null) : null,
+    };
   });
 
   return { reports };
@@ -116,5 +151,43 @@ export async function updateReportStatus(
     .eq("id", id);
 
   if (error) return { error: error.message };
+  return {};
+}
+
+export async function deleteReportedContent(
+  reportId: string,
+  targetType: ReportTargetType,
+  targetId: string,
+): Promise<{ error?: string }> {
+  const user = await getUser();
+  if (!user) return { error: "Non autorisé" };
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile?.role !== "admin") return { error: "Accès refusé" };
+
+  const admin = createAdminClient();
+
+  if (targetType === "review") {
+    const { error } = await admin.from("reviews").delete().eq("id", targetId);
+    if (error) return { error: error.message };
+  } else if (targetType === "company") {
+    // Mark company as hidden rather than hard-delete (too destructive)
+    const { error } = await admin.from("companies").update({ is_verified: false }).eq("id", targetId);
+    if (error) return { error: error.message };
+  } else if (targetType === "profile") {
+    const { error } = await admin.auth.admin.deleteUser(targetId);
+    if (error) return { error: error.message };
+  } else {
+    return { error: "Type de cible non supporté." };
+  }
+
+  // Mark the report as reviewed after deleting content
+  await admin.from("reports").update({ status: "reviewed" }).eq("id", reportId);
+
   return {};
 }

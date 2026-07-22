@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2, User, ExternalLink } from "lucide-react";
-import { getReports, updateReportStatus, type Report, type ReportStatus } from "@/lib/actions/reports";
+import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2, User, ExternalLink, Trash2, Mail } from "lucide-react";
+import { getReports, updateReportStatus, deleteReportedContent, type Report, type ReportStatus } from "@/lib/actions/reports";
 
 const TYPE_CONFIG = {
   review:  { label: "Avis",       icon: <MessageSquare size={13} />, bg: "rgba(139,92,246,0.1)",  color: "#8b5cf6" },
@@ -50,6 +50,20 @@ export default function AdminReportsPage() {
         load();
       }
       setTimeout(() => setFeedback(null), 4000);
+    });
+  };
+
+  const handleDelete = (report: Report) => {
+    if (!confirm(`Supprimer définitivement ce contenu (${report.target_type}) ? Cette action est irréversible.`)) return;
+    startTransition(async () => {
+      const res = await deleteReportedContent(report.id, report.target_type, report.target_id);
+      if (res.error) {
+        setFeedback({ id: report.id, text: res.error, ok: false });
+      } else {
+        setFeedback({ id: report.id, text: "Contenu supprimé — signalement marqué examiné ✓", ok: true });
+        load();
+      }
+      setTimeout(() => setFeedback(null), 5000);
     });
   };
 
@@ -160,6 +174,30 @@ export default function AdminReportsPage() {
                   </div>
                 </div>
 
+                {/* Reporter info */}
+                {(report.reporter_email || report.reporter_name) && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.12)", marginBottom: 10, flexWrap: "wrap" }}>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(139,92,246,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <User size={13} color="#8b5cf6" />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {report.reporter_name && (
+                        <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 1 }}>
+                          <Link href={`/profile/${report.reporter_id}`} target="_blank" style={{ color: "#8b5cf6", textDecoration: "none" }}>
+                            {report.reporter_name}
+                          </Link>
+                        </p>
+                      )}
+                      {report.reporter_email && (
+                        <a href={`mailto:${report.reporter_email}`} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>
+                          <Mail size={11} /> {report.reporter_email}
+                        </a>
+                      )}
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Signalé par</span>
+                  </div>
+                )}
+
                 {/* Target label */}
                 {report.target_label && (
                   <div style={{ padding: "10px 14px", borderRadius: 10, background: "var(--surface2)", border: "1px solid var(--border)", marginBottom: 10, fontSize: 13, color: "var(--text)", lineHeight: 1.5, borderLeft: "3px solid var(--border2)" }}>
@@ -215,6 +253,14 @@ export default function AdminReportsPage() {
                       color: "#6b7280", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1,
                     }}>
                       <XCircle size={15} /> Ignorer
+                    </button>
+                    <button onClick={() => handleDelete(report)} disabled={isPending} style={{
+                      display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 9,
+                      background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
+                      color: "#ef4444", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1,
+                      marginLeft: "auto",
+                    }}>
+                      <Trash2 size={15} /> Supprimer le contenu
                     </button>
                   </div>
                 )}
