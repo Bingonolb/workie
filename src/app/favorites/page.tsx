@@ -36,7 +36,7 @@ export default async function FavoritesPage() {
         {companies.length === 0 ? (
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "64px 32px", textAlign: "center" }}>
             <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(249,115,22,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-              <Flame size={28} color="#f97316" />
+              <Flame size={28} color="#f97316" aria-hidden="true" />
             </div>
             <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Aucun favori pour l&apos;instant</p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>Clique sur 🔥 sur une entreprise pour la sauvegarder ici.</p>

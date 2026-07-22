@@ -52,7 +52,7 @@ export default async function BusinessDashboardPage() {
         <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "16px 20px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(139,92,246,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Star size={18} color="#8b5cf6" fill="#8b5cf6" />
+              <Star size={18} color="#8b5cf6" fill="#8b5cf6" aria-hidden="true" />
             </div>
             <div>
               <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>
@@ -62,7 +62,7 @@ export default async function BusinessDashboardPage() {
             </div>
           </div>
           <Link href="/business/dashboard/reviews" style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}>
-            Répondre <ArrowRight size={14} />
+            Répondre <ArrowRight size={14} aria-hidden="true" />
           </Link>
         </div>
       )}
@@ -70,7 +70,7 @@ export default async function BusinessDashboardPage() {
       {/* No reviews yet */}
       {Number(count) === 0 && (
         <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "20px 24px", marginBottom: 28, display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <AlertCircle size={20} color="#8b5cf6" style={{ flexShrink: 0, marginTop: 2 }} />
+          <AlertCircle size={20} color="#8b5cf6" aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
           <div>
             <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>Aucun avis pour le moment</p>
             <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>Partagez votre lien Workie en interne pour accélérer — les avis sont 100% anonymes.</p>
@@ -81,10 +81,10 @@ export default async function BusinessDashboardPage() {
       {/* KPIs — 4 chiffres clés, vue rapide uniquement */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 28 }}>
         {[
-          { label: "Note globale", value: avgOverall ?? "–", suffix: "/5", color: "#f59e0b", icon: <Star size={20} color="#f59e0b" fill="#f59e0b" /> },
-          { label: "Total avis", value: String(count), suffix: "", color: "#8b5cf6", icon: <MessageCircle size={20} color="#8b5cf6" /> },
-          { label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–", suffix: "", color: "#10b981", icon: <TrendingUp size={20} color="#10b981" /> },
-          { label: "Salaire moyen", value: Number(avgSalary) > 0 ? `${(Number(avgSalary) / 1000).toFixed(0)}k` : "–", suffix: Number(avgSalary) > 0 ? " CHF" : "", color: "#f97316", icon: <Users size={20} color="#f97316" /> },
+          { label: "Note globale", value: avgOverall ?? "–", suffix: "/5", color: "#f59e0b", icon: <Star size={20} color="#f59e0b" fill="#f59e0b" aria-hidden="true" /> },
+          { label: "Total avis", value: String(count), suffix: "", color: "#8b5cf6", icon: <MessageCircle size={20} color="#8b5cf6" aria-hidden="true" /> },
+          { label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–", suffix: "", color: "#10b981", icon: <TrendingUp size={20} color="#10b981" aria-hidden="true" /> },
+          { label: "Salaire moyen", value: Number(avgSalary) > 0 ? `${(Number(avgSalary) / 1000).toFixed(0)}k` : "–", suffix: Number(avgSalary) > 0 ? " CHF" : "", color: "#f97316", icon: <Users size={20} color="#f97316" aria-hidden="true" /> },
         ].map(({ label, value, suffix, color, icon }) => (
           <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
@@ -107,14 +107,14 @@ export default async function BusinessDashboardPage() {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(139,92,246,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <BarChart2 size={22} color="#8b5cf6" />
+            <BarChart2 size={22} color="#8b5cf6" aria-hidden="true" />
           </div>
           <div>
             <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 2 }}>Analytics complètes</p>
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Notes par dimension · distribution · évolution · profils des répondants · vues de la fiche</p>
           </div>
         </div>
-        <ArrowRight size={18} color="#8b5cf6" style={{ flexShrink: 0 }} />
+        <ArrowRight size={18} color="#8b5cf6" aria-hidden="true" style={{ flexShrink: 0 }} />
       </Link>
 
       {/* Pub CTA */}
@@ -133,7 +133,7 @@ export default async function BusinessDashboardPage() {
           </div>
         </div>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 18px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, whiteSpace: "nowrap", flexShrink: 0 }}>
-          Créer une campagne <ArrowRight size={14} />
+          Créer une campagne <ArrowRight size={14} aria-hidden="true" />
         </span>
       </Link>
 
@@ -143,14 +143,14 @@ export default async function BusinessDashboardPage() {
           { href: "/business/dashboard/reviews", label: "Répondre aux avis", desc: "Gérez votre réputation", color: "#8b5cf6", icon: null },
           { href: "/business/dashboard/jobs", label: "Publier une offre", desc: "Attirez des candidats", color: "#f97316", icon: null },
           { href: "/business/dashboard/profile", label: "Compléter la fiche", desc: "Logo, photos, réseaux", color: "#10b981", icon: null },
-          { href: "/ranking", label: "Classement", desc: "Votre position parmi toutes les entreprises", color: "#f59e0b", icon: <Trophy size={18} color="#f59e0b" /> },
+          { href: "/ranking", label: "Classement", desc: "Votre position parmi toutes les entreprises", color: "#f59e0b", icon: <Trophy size={18} color="#f59e0b" aria-hidden="true" /> },
         ].map(({ href, label, desc, color, icon }) => (
           <Link key={href} href={href} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 20px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div>
               <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 3 }}>{label}</p>
               <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{desc}</p>
             </div>
-            {icon ?? <ArrowRight size={18} color={color} />}
+            {icon ?? <ArrowRight size={18} color={color} aria-hidden="true" />}
           </Link>
         ))}
       </div>
@@ -168,21 +168,21 @@ export default async function BusinessDashboardPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {profileFields.map(({ label, done }) => (
               <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {done ? <CheckCircle size={14} color="#10b981" /> : <Clock size={14} color="var(--text-muted)" />}
+                {done ? <CheckCircle size={14} color="#10b981" aria-hidden="true" /> : <Clock size={14} color="var(--text-muted)" aria-hidden="true" />}
                 <span style={{ fontSize: 12, color: done ? "var(--text)" : "var(--text-muted)", fontWeight: done ? 600 : 400 }}>{label}</span>
               </div>
             ))}
           </div>
           {completionPct < 100 && (
             <Link href="/business/dashboard/profile" style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 16, fontSize: 13, fontWeight: 700, color: "#8b5cf6", textDecoration: "none" }}>
-              Compléter ma fiche <ArrowRight size={14} />
+              Compléter ma fiche <ArrowRight size={14} aria-hidden="true" />
             </Link>
           )}
         </div>
 
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "22px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-            <Share2 size={16} color="#8b5cf6" />
+            <Share2 size={16} color="#8b5cf6" aria-hidden="true" />
             <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Partager en interne</p>
           </div>
           <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 16 }}>
