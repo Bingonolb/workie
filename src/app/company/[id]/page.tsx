@@ -110,12 +110,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   // Guard early — no need to run 5 more queries for a non-existent company
   if (!company) notFound();
 
-  const [repliesResult, jobsResult, voteData, profileData, similarCompaniesData] = await Promise.all([
+  const [repliesResult, jobsResult, voteData, profileData, similarCompaniesData, helpfulVotesResult] = await Promise.all([
     Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
     Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
     user ? Promise.resolve(supabase.from("score_events").select("event_type").eq("company_id", id).eq("user_id", user.id).in("event_type", ["boost", "penalty"])).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     user ? Promise.resolve(supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle()).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     Promise.resolve(supabase.from("companies").select("id, name, city, avg_rating, review_count, cover_url, is_verified, sector").eq("sector", company.sector).neq("id", id).order("score", { ascending: false }).limit(4)).then(r => r.data ?? []).catch(() => []),
+    user ? Promise.resolve(supabase.from("review_votes").select("review_id").eq("user_id", user.id)).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
   ]);
   const repliesMap = Object.fromEntries(
     (repliesResult.data ?? []).map((r: { review_id: string; content: string; created_at: string | null }) => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
@@ -123,6 +124,10 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   const jobs: { id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null; experience_level: string | null; salary_range: string | null; apply_url: string | null; description: string | null; created_at: string | null }[] = jobsResult.data ?? [];
 
   const isBusiness = !!bizCompanyId;
+  const votedReviewIds = new Set<string>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ((helpfulVotesResult as any)?.data ?? []).map((v: { review_id: string }) => v.review_id)
+  );
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const profileRow = (profileData as any)?.data;
   const isAdmin = profileRow?.role === "admin";
@@ -405,7 +410,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             ) : (
               <div style={{ position: "relative", marginBottom: 32 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user} companyName={company.name} />)}
+                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user} companyName={company.name} initialVoted={votedReviewIds.has(r.id)} />)}
                 </div>
                 {!user && reviews.length > 1 && (
                   <div style={{
@@ -603,7 +608,7 @@ const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
   ca_depend: { label: "🤔 Ça dépend", color: "#f59e0b" },
 };
 
-function ReviewCard({ review, reply, isLoggedIn = false, companyName = "" }: { review: Review; reply?: { content: string; created_at: string }; isLoggedIn?: boolean; companyName?: string }) {
+function ReviewCard({ review, reply, isLoggedIn = false, companyName = "", initialVoted = false }: { review: Review; reply?: { content: string; created_at: string }; isLoggedIn?: boolean; companyName?: string; initialVoted?: boolean }) {
   const age = (() => {
     const d = new Date(review.created_at);
     const diff = Date.now() - d.getTime();
@@ -702,7 +707,7 @@ function ReviewCard({ review, reply, isLoggedIn = false, companyName = "" }: { r
 
       {/* Footer: helpful + signaler */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 4, gap: 8 }}>
-        <HelpfulButton reviewId={review.id} initialCount={review.helpful_count} />
+        <HelpfulButton reviewId={review.id} initialCount={review.helpful_count} initialVoted={initialVoted} />
         <ReportButton
           targetType="review"
           targetId={review.id}

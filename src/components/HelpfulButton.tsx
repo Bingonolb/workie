@@ -4,9 +4,9 @@ import { useState, useTransition } from "react";
 import { ThumbsUp } from "lucide-react";
 import { voteHelpful } from "@/lib/actions/reviews";
 
-export function HelpfulButton({ reviewId, initialCount }: { reviewId: string; initialCount: number }) {
+export function HelpfulButton({ reviewId, initialCount, initialVoted = false }: { reviewId: string; initialCount: number; initialVoted?: boolean }) {
   const [count, setCount] = useState(Number(initialCount)); // PostgREST returns NUMERIC as string
-  const [voted, setVoted] = useState(false);
+  const [voted, setVoted] = useState(initialVoted);
   const [isPending, startTransition] = useTransition();
 
   const handleClick = () => {
