@@ -40,7 +40,7 @@ function getInitials(name: string): string {
 function StarDisplay({ rating }: { rating: number }) {
   return (
     <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-      <Star size={13} fill="#f59e0b" color="#f59e0b" />
+      <Star size={13} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
       <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{Number(rating).toFixed(1)}</span>
     </span>
   );
@@ -122,7 +122,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
               display: "flex", alignItems: "center", gap: 4,
               border: "1px solid rgba(249,115,22,0.35)",
             }}>
-              <Flame size={11} fill="#f97316" color="#f97316" />
+              <Flame size={11} fill="#f97316" color="#f97316" aria-hidden="true" />
               <span style={{ fontSize: 11, fontWeight: 800, color: "#f97316" }}>{score}</span>
             </div>
           )}
@@ -130,8 +130,11 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           {/* Flame / Favorite */}
           {!isBusiness && (
             <button
+              type="button"
               onClick={handleFav}
               disabled={pending}
+              aria-pressed={fav}
+              aria-label={fav ? `Retirer ${company.name} des favoris` : `Ajouter ${company.name} aux favoris`}
               style={{
                 position: "absolute", top: 8, right: 8,
                 width: 40, height: 40, borderRadius: "50%",
@@ -141,7 +144,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
                 cursor: "pointer", transition: "all 0.18s",
               }}
             >
-              <Flame size={15} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.7)"} />
+              <Flame size={15} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.7)"} aria-hidden="true" />
             </button>
           )}
 
@@ -231,10 +234,10 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 
           {/* Location + size + salary */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: company.tags?.length > 0 ? 10 : 0 }}>
-            <InfoChip icon={<MapPin size={11} />} label={company.city} />
-            <InfoChip icon={<Users size={11} />} label={company.employee_range} />
+            <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
+            <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
             {Number(company.avg_salary_chf) > 0 && (
-              <InfoChip icon={<TrendingUp size={11} />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
+              <InfoChip icon={<TrendingUp size={11} aria-hidden="true" />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
             )}
           </div>
 

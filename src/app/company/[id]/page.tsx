@@ -35,7 +35,7 @@ import { ReportButton } from "@/components/ReportButton";
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
-    <span style={{ display: "inline-flex", gap: 2 }}>
+    <span aria-hidden="true" style={{ display: "inline-flex", gap: 2 }}>
       {[1, 2, 3, 4, 5].map(n => (
         <Star key={n} size={size}
           fill={n <= Math.round(rating) ? "#f59e0b" : "transparent"}
@@ -244,7 +244,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               )}
               <div>
               <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 10, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
-                <ArrowLeft size={14} /> Retour
+                <ArrowLeft size={14} aria-hidden="true" /> Retour
               </Link>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <h1 className="company-hero-title" style={{ fontSize: 30, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em" }}>{company.name}</h1>
@@ -309,9 +309,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {/* Key stats */}
             <div className="company-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 32 }}>
               {[
-                { icon: <MapPin size={18} color="#8b5cf6" />, value: `${company.city}${company.canton ? `, ${company.canton}` : ""}`, label: "Localisation" },
-                { icon: <Users size={18} color="#f97316" />, value: company.employee_range, label: "Employés" },
-                { icon: <TrendingUp size={18} color="#10b981" />, value: Number(company.avg_salary_chf) > 0 ? `CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k` : "N/A", label: "Salaire moyen" },
+                { icon: <MapPin size={18} color="#8b5cf6" aria-hidden="true" />, value: `${company.city}${company.canton ? `, ${company.canton}` : ""}`, label: "Localisation" },
+                { icon: <Users size={18} color="#f97316" aria-hidden="true" />, value: company.employee_range, label: "Employés" },
+                { icon: <TrendingUp size={18} color="#10b981" aria-hidden="true" />, value: Number(company.avg_salary_chf) > 0 ? `CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k` : "N/A", label: "Salaire moyen" },
               ].map(({ icon, value, label }) => (
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
                   <div style={{ marginBottom: 8 }}>{icon}</div>
@@ -467,7 +467,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {company.website_url && (
                     <a href={/^https?:\/\//.test(company.website_url) ? company.website_url : `https://${company.website_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
-                      <Globe size={14} /> Site internet
+                      <Globe size={14} aria-hidden="true" /> Site internet
                     </a>
                   )}
                   {company.linkedin_url && (
@@ -568,7 +568,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                       <p style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
                         {c.name}
                         {c.is_verified && (
-                          <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }}>
+                          <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }} aria-label="Entreprise vérifiée">
                             <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                             <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
                           </svg>
@@ -695,7 +695,7 @@ function ReviewCard({ review, reply, isLoggedIn = false, companyName = "", initi
       {reply && (
         <div style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", marginTop: 4, marginBottom: 8 }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
-            <svg viewBox="0 0 22 22" style={{ width: 13, height: 13 }}><circle cx="11" cy="11" r="11" fill="#1D9BF0" /><path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" /></svg>
+            <svg viewBox="0 0 22 22" style={{ width: 13, height: 13 }} aria-hidden="true"><circle cx="11" cy="11" r="11" fill="#1D9BF0" /><path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" /></svg>
             Réponse officielle de l'employeur
           </p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{reply.content}</p>

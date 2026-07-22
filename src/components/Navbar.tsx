@@ -54,7 +54,7 @@ export async function Navbar() {
                 background: "rgba(139,92,246,0.12)",
                 border: "1px solid rgba(139,92,246,0.25)",
               }}>
-                <LayoutDashboard size={14} /> Dashboard
+                <LayoutDashboard size={14} aria-hidden="true" /> Dashboard
               </Link>
             ) : (
               <>
@@ -68,7 +68,7 @@ export async function Navbar() {
                     background: "rgba(139,92,246,0.12)",
                     border: "1px solid rgba(139,92,246,0.25)",
                   }}>
-                    <Shield size={13} /> Admin
+                    <Shield size={13} aria-hidden="true" /> Admin
                   </Link>
                 )}
               </>
