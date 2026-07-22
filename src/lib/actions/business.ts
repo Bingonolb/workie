@@ -312,7 +312,7 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
       logo_url?: string | null;
       cover_url?: string;
     } = {
-      description: String(formData.get("description") || "") || null,
+      description: String(formData.get("description") || "").slice(0, 3000) || null,
       website_url: safeUrl(String(formData.get("website_url") || "") || null),
       linkedin_url: safeUrl(String(formData.get("linkedin_url") || "") || null),
       twitter_url: safeUrl(String(formData.get("twitter_url") || "") || null),
@@ -372,6 +372,7 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
     if (!review_id) return { error: "Avis introuvable." };
     const content = String(formData.get("content") || "").trim();
     if (!content || content.length < 10) return { error: "Réponse trop courte (min 10 caractères)." };
+    if (content.length > 2000) return { error: "La réponse ne peut pas dépasser 2000 caractères." };
 
     // Verify the review belongs to this company and get its author
     const { data: review } = await supabase.from("reviews").select("id, user_id").eq("id", review_id).eq("company_id", company.id).maybeSingle();
@@ -412,9 +413,12 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
 
     const title = String(formData.get("title") || "").trim();
     if (!title) return { error: "Le titre du poste est obligatoire." };
+    if (title.length > 150) return { error: "Le titre ne peut pas dépasser 150 caractères." };
+
+    const description = String(formData.get("description") || "").slice(0, 5000) || null;
+    const requirements = String(formData.get("requirements") || "").slice(0, 5000) || null;
 
     const rawApplyUrl = String(formData.get("apply_url") || "").trim();
-    // Auto-prefix https:// if missing
     const apply_url = rawApplyUrl
       ? /^https?:\/\//i.test(rawApplyUrl) ? rawApplyUrl : `https://${rawApplyUrl}`
       : null;
@@ -422,8 +426,8 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
     const { data: inserted, error } = await supabase.from("job_offers").insert({
       company_id: company.id,
       title,
-      description:       String(formData.get("description") || "") || null,
-      requirements:      String(formData.get("requirements") || "") || null,
+      description,
+      requirements,
       location:          String(formData.get("location") || "") || null,
       work_mode:         String(formData.get("work_mode") || "") || null,
       contract_type:     String(formData.get("contract_type") || "") || null,
@@ -453,6 +457,7 @@ export async function updateJobOffer(id: string, formData: FormData): Promise<{ 
 
     const title = String(formData.get("title") || "").trim();
     if (!title) return { error: "Le titre du poste est obligatoire." };
+    if (title.length > 150) return { error: "Le titre ne peut pas dépasser 150 caractères." };
 
     const rawApplyUrl = String(formData.get("apply_url") || "").trim();
     const apply_url = rawApplyUrl
@@ -461,8 +466,8 @@ export async function updateJobOffer(id: string, formData: FormData): Promise<{ 
 
     const { error } = await supabase.from("job_offers").update({
       title,
-      description:      String(formData.get("description") || "") || null,
-      requirements:     String(formData.get("requirements") || "") || null,
+      description:      String(formData.get("description") || "").slice(0, 5000) || null,
+      requirements:     String(formData.get("requirements") || "").slice(0, 5000) || null,
       location:         String(formData.get("location") || "") || null,
       work_mode:        String(formData.get("work_mode") || "") || null,
       contract_type:    String(formData.get("contract_type") || "") || null,
@@ -644,7 +649,7 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
       job_level:  String(formData.get("job_level") || ""),
       work_email,
       zefix_url,
-      message: String(formData.get("message") || "") || null,
+      message: String(formData.get("message") || "").slice(0, 1000) || null,
       user_id: userId,
       status: "pending",
     });

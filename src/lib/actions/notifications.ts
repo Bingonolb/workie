@@ -100,7 +100,10 @@ export async function notifyFavoriteUsers(
 
     if (!favs || favs.length === 0) return;
 
-    const rows = favs.map(f => ({
+    // Cap fan-out to avoid serverless timeout on very popular companies
+    const recipients = favs.slice(0, 500);
+
+    const rows = recipients.map(f => ({
       user_id: f.user_id,
       type: "new_job_offer",
       title: `Nouvelle offre chez ${companyName}`,
@@ -109,6 +112,9 @@ export async function notifyFavoriteUsers(
       read: false,
     }));
 
-    await admin.from("notifications").insert(rows);
+    // Insert in batches of 100 to stay within PostgREST payload limits
+    for (let i = 0; i < rows.length; i += 100) {
+      await admin.from("notifications").insert(rows.slice(i, i + 100));
+    }
   } catch { /* silent — never block job creation */ }
 }

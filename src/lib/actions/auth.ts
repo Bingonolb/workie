@@ -166,7 +166,9 @@ export async function deleteAccount(): Promise<{ error?: string }> {
   // Delete in dependency order
   await admin.from("review_votes").delete().eq("user_id", user.id);
   await admin.from("reviews").delete().eq("user_id", user.id);
+  await admin.from("score_events").delete().eq("user_id", user.id);
   await admin.from("favorites").delete().eq("user_id", user.id);
+  await admin.from("reports").delete().eq("reporter_id", user.id);
   await admin.from("notifications").delete().eq("user_id", user.id);
   await admin.from("profiles").delete().eq("id", user.id);
 
