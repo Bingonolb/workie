@@ -105,6 +105,8 @@ export async function Navbar() {
 
       {/* Bottom tab bar — mobile only, logged-in users */}
       {user && <BottomNav isBusiness={isBusiness} />}
+      {/* Skip-link target — receives focus when "Aller au contenu principal" is activated */}
+      <div id="main-content" tabIndex={-1} style={{ outline: "none" }} />
     </>
   );
 }
