@@ -6,12 +6,12 @@ import { AdStatsChart } from "../AdStatsChart";
 import { CancelCampaignButton } from "@/components/CancelCampaignButton";
 
 const STATUS_CONFIG = {
-  payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={14} /> },
-  pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.12)",   icon: <Clock size={14} /> },
-  active:          { label: "Active",          color: "#10b981", bg: "rgba(16,185,129,0.12)",   icon: <CheckCircle size={14} /> },
-  paused:          { label: "Pausée",          color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",   icon: <PauseCircle size={14} /> },
-  completed:       { label: "Terminée",        color: "#6b7280", bg: "rgba(107,114,128,0.12)",  icon: <CheckCircle size={14} /> },
-  rejected:        { label: "Rejetée",         color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={14} /> },
+  payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={14} aria-hidden="true" /> },
+  pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.12)",   icon: <Clock size={14} aria-hidden="true" /> },
+  active:          { label: "Active",          color: "#10b981", bg: "rgba(16,185,129,0.12)",   icon: <CheckCircle size={14} aria-hidden="true" /> },
+  paused:          { label: "Pausée",          color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",   icon: <PauseCircle size={14} aria-hidden="true" /> },
+  completed:       { label: "Terminée",        color: "#6b7280", bg: "rgba(107,114,128,0.12)",  icon: <CheckCircle size={14} aria-hidden="true" /> },
+  rejected:        { label: "Rejetée",         color: "#ef4444", bg: "rgba(239,68,68,0.12)",    icon: <XCircle size={14} aria-hidden="true" /> },
 } as const;
 
 function ctr(imp: number, clk: number) {
@@ -60,7 +60,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   return (
     <div className="biz-page" style={{ maxWidth: 860 }}>
         <Link href="/business/dashboard/ads" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
-          <ArrowLeft size={14} /> Mes publicités
+          <ArrowLeft size={14} aria-hidden="true" /> Mes publicités
         </Link>
 
         {/* Header card */}
@@ -95,7 +95,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               </div>
               <a href={campaign.cta_url} target="_blank" rel="noopener noreferrer"
                 style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 10, fontSize: 13, color: "#8b5cf6", textDecoration: "none" }}>
-                {campaign.cta_label} <ExternalLink size={12} />
+                {campaign.cta_label} <ExternalLink size={12} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -115,10 +115,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>Performance totale</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 {[
-                  { label: "Impressions", value: impCount.toLocaleString("fr-CH"), icon: <Eye size={14} />, color: "#8b5cf6" },
-                  { label: "Clics", value: clkCount.toLocaleString("fr-CH"), icon: <MousePointer size={14} />, color: "#f97316" },
-                  { label: "CTR", value: ctr(impCount, clkCount), icon: <TrendingUp size={14} />, color: "#10b981" },
-                  { label: "CPC moyen", value: cpc(clkCount, spentBudget), icon: <TrendingUp size={14} />, color: "#6b7280" },
+                  { label: "Impressions", value: impCount.toLocaleString("fr-CH"), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
+                  { label: "Clics", value: clkCount.toLocaleString("fr-CH"), icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
+                  { label: "CTR", value: ctr(impCount, clkCount), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
+                  { label: "CPC moyen", value: cpc(clkCount, spentBudget), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#6b7280" },
                 ].map(({ label, value, icon, color }) => (
                   <div key={label}>
                     <div style={{ display: "flex", alignItems: "center", gap: 5, color, marginBottom: 3 }}>{icon}<span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span></div>

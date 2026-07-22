@@ -28,10 +28,10 @@ const SECTORS = [
 
 // Steps for the stepper
 const STEPS = [
-  { id: "format",   label: "Format",   icon: <Zap size={14} /> },
-  { id: "creative", label: "Visuel",   icon: <ImageIcon size={14} /> },
-  { id: "target",   label: "Ciblage",  icon: <Target size={14} /> },
-  { id: "budget",   label: "Budget",   icon: <DollarSign size={14} /> },
+  { id: "format",   label: "Format",   icon: <Zap size={14} aria-hidden="true" /> },
+  { id: "creative", label: "Visuel",   icon: <ImageIcon size={14} aria-hidden="true" /> },
+  { id: "target",   label: "Ciblage",  icon: <Target size={14} aria-hidden="true" /> },
+  { id: "budget",   label: "Budget",   icon: <DollarSign size={14} aria-hidden="true" /> },
 ];
 
 const inp: React.CSSProperties = {
@@ -186,7 +186,7 @@ export function NewCampaignForm({
     <div className="biz-page" style={{ maxWidth: 820 }}>
       {/* Back */}
       <Link href="/business/dashboard/ads" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 24 }}>
-        <ArrowLeft size={14} /> Mes publicités
+        <ArrowLeft size={14} aria-hidden="true" /> Mes publicités
       </Link>
 
       {/* Page title */}
@@ -205,7 +205,7 @@ export function NewCampaignForm({
 
         {/* ── FORMAT ─────────────────────────────────────────────────── */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Zap size={18} />} title="Format d'annonce" subtitle="Choisissez comment votre pub apparaîtra aux utilisateurs" />
+          <SectionHeader icon={<Zap size={18} aria-hidden="true" />} title="Format d'annonce" subtitle="Choisissez comment votre pub apparaîtra aux utilisateurs" />
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             {(["square", "swipe"] as const).map(f => (
               <button key={f} type="button" onClick={() => setFormat(f)} style={{
@@ -238,7 +238,7 @@ export function NewCampaignForm({
 
         {/* ── CREATIVE ───────────────────────────────────────────────── */}
         <div className="biz-form-card">
-          <SectionHeader icon={<ImageIcon size={18} />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
+          <SectionHeader icon={<ImageIcon size={18} aria-hidden="true" />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
 
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* Left: inputs */}
@@ -251,7 +251,7 @@ export function NewCampaignForm({
                 transition: "all 0.2s",
               }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: imagePreview ? "rgba(139,92,246,0.15)" : "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Upload size={18} color={imagePreview ? "#8b5cf6" : "var(--text-muted)"} />
+                  <Upload size={18} color={imagePreview ? "#8b5cf6" : "var(--text-muted)"} aria-hidden="true" />
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: imagePreview ? "#8b5cf6" : "var(--text)", marginBottom: 3 }}>
@@ -298,7 +298,7 @@ export function NewCampaignForm({
                         <img src={imagePreview} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
                       ) : (
                         <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <ImageIcon size={24} color="rgba(255,255,255,0.15)" />
+                          <ImageIcon size={24} color="rgba(255,255,255,0.15)" aria-hidden="true" />
                         </div>
                       )}
                       <div style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", borderRadius: 50, padding: "2px 7px", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sponsorisé</div>
@@ -356,7 +356,7 @@ export function NewCampaignForm({
                             <img src={imagePreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setImagePreview("")} />
                           ) : (
                             <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <ImageIcon size={28} color="rgba(255,255,255,0.15)" />
+                              <ImageIcon size={28} color="rgba(255,255,255,0.15)" aria-hidden="true" />
                             </div>
                           )}
                         </div>
@@ -407,7 +407,7 @@ export function NewCampaignForm({
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>URL de destination *</label>
             <div style={{ position: "relative" }}>
-              <ExternalLink size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
+              <ExternalLink size={15} aria-hidden="true" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
               <input name="cta_url" required style={{ ...inp, paddingLeft: 42 }} placeholder="https://votre-site.ch" defaultValue={prefill?.ctaUrl ?? ""} />
             </div>
           </div>
@@ -542,7 +542,7 @@ export function NewCampaignForm({
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Info size={16} color="#8b5cf6" />
+              <Info size={16} color="#8b5cf6" aria-hidden="true" />
               <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Estimation de performance</p>
             </div>
             {/* Audience reach badge */}
@@ -567,9 +567,9 @@ export function NewCampaignForm({
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 1 }}>
             {[
               { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "/ 1 000 vues", icon: <DollarSign size={14} />, color: "#8b5cf6" },
-              { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions", icon: <Eye size={14} />, color: "#6366f1" },
+              { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions", icon: <Eye size={14} aria-hidden="true" />, color: "#6366f1" },
               { label: "Portée / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes uniques", icon: <MousePointer size={14} />, color: "#f97316" },
-              { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} />, color: "#10b981" },
+              { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} aria-hidden="true" />, color: "#10b981" },
             ].map(({ label, value, sub, icon, color }) => (
               <div key={label} style={{
                 textAlign: "center", padding: "14px 8px",

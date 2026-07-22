@@ -6,12 +6,12 @@ import { PayCampaignButton } from "./PayCampaignButton";
 import { AdImage } from "./AdImage";
 
 const STATUS_CONFIG = {
-  payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.1)",    icon: <CreditCard size={12} />, dot: "#ef4444" },
-  pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.1)",   icon: <Clock size={12} />,      dot: "#f59e0b" },
-  active:          { label: "Active",          color: "#10b981", bg: "rgba(16,185,129,0.1)",    icon: <CheckCircle size={12} />,dot: "#10b981" },
-  paused:          { label: "Pausée",          color: "#8b5cf6", bg: "rgba(139,92,246,0.1)",    icon: <PauseCircle size={12} />,dot: "#8b5cf6" },
-  completed:       { label: "Terminée",        color: "#6b7280", bg: "rgba(107,114,128,0.1)",   icon: <CheckCircle size={12} />,dot: "#6b7280" },
-  rejected:        { label: "Rejetée",         color: "#ef4444", bg: "rgba(239,68,68,0.1)",     icon: <XCircle size={12} />,    dot: "#ef4444" },
+  payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.1)",    icon: <CreditCard size={12} aria-hidden="true" />, dot: "#ef4444" },
+  pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.1)",   icon: <Clock size={12} aria-hidden="true" />,      dot: "#f59e0b" },
+  active:          { label: "Active",          color: "#10b981", bg: "rgba(16,185,129,0.1)",    icon: <CheckCircle size={12} aria-hidden="true" />,dot: "#10b981" },
+  paused:          { label: "Pausée",          color: "#8b5cf6", bg: "rgba(139,92,246,0.1)",    icon: <PauseCircle size={12} aria-hidden="true" />,dot: "#8b5cf6" },
+  completed:       { label: "Terminée",        color: "#6b7280", bg: "rgba(107,114,128,0.1)",   icon: <CheckCircle size={12} aria-hidden="true" />,dot: "#6b7280" },
+  rejected:        { label: "Rejetée",         color: "#ef4444", bg: "rgba(239,68,68,0.1)",     icon: <XCircle size={12} aria-hidden="true" />,    dot: "#ef4444" },
 } as const;
 
 function daysRemaining(endDate: string | null): { label: string; urgent: boolean } {
@@ -58,7 +58,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
 
         {/* ── Header ── */}
         <Link href="/business/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
-          <ArrowLeft size={14} /> Dashboard
+          <ArrowLeft size={14} aria-hidden="true" /> Dashboard
         </Link>
 
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
@@ -75,18 +75,18 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
             color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
             boxShadow: "0 4px 20px rgba(139,92,246,0.35)",
           }}>
-            <Plus size={16} /> Nouvelle pub
+            <Plus size={16} aria-hidden="true" /> Nouvelle pub
           </Link>
         </div>
 
         {paymentSuccess && (
-          <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "14px 18px", color: "#10b981", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
-            <CheckCircle size={16} /> Paiement reçu ! Votre campagne est en cours de vérification par notre équipe (24h ouvrées).
+          <div role="status" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "14px 18px", color: "#10b981", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+            <CheckCircle size={16} aria-hidden="true" /> Paiement reçu ! Votre campagne est en cours de vérification par notre équipe (24h ouvrées).
           </div>
         )}
         {paymentCanceled && (
-          <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 18px", color: "#ef4444", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
-            <XCircle size={16} /> Paiement annulé. La campagne existe mais n&apos;est pas activée. Vous pouvez compléter le paiement depuis la liste.
+          <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 18px", color: "#ef4444", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+            <XCircle size={16} aria-hidden="true" /> Paiement annulé. La campagne existe mais n&apos;est pas activée. Vous pouvez compléter le paiement depuis la liste.
           </div>
         )}
         {error && (
@@ -111,7 +111,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
               background: "linear-gradient(135deg, #8b5cf6, #f97316)",
               color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
             }}>
-              <Plus size={16} /> Créer ma première pub
+              <Plus size={16} aria-hidden="true" /> Créer ma première pub
             </Link>
           </div>
         ) : (
@@ -120,9 +120,9 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
             {campaigns.length > 0 && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 24 }}>
                 {[
-                  { label: "Vues totales", value: totalImpressions.toLocaleString("fr-CH"), icon: <Eye size={14} />, color: "#8b5cf6" },
-                  { label: "Clics totaux", value: totalClicks.toLocaleString("fr-CH"), icon: <MousePointer size={14} />, color: "#f97316" },
-                  { label: "CTR moyen", value: ctr(totalImpressions, totalClicks), icon: <TrendingUp size={14} />, color: "#10b981" },
+                  { label: "Vues totales", value: totalImpressions.toLocaleString("fr-CH"), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
+                  { label: "Clics totaux", value: totalClicks.toLocaleString("fr-CH"), icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
+                  { label: "CTR moyen", value: ctr(totalImpressions, totalClicks), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
                 ].map(({ label, value, icon, color }) => (
                   <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ width: 34, height: 34, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", color, flexShrink: 0 }}>{icon}</div>
@@ -212,15 +212,15 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                           <div className="ads-card-stats" style={{ display: "flex", gap: 16, flexShrink: 0 }}>
                             <div style={{ textAlign: "right" }}>
                               <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(c.impression_count).toLocaleString("fr-CH")}</p>
-                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><Eye size={10} /> vues</p>
+                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><Eye size={10} aria-hidden="true" /> vues</p>
                             </div>
                             <div style={{ textAlign: "right" }}>
                               <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(c.click_count).toLocaleString("fr-CH")}</p>
-                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><MousePointer size={10} /> clics</p>
+                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><MousePointer size={10} aria-hidden="true" /> clics</p>
                             </div>
                             <div style={{ textAlign: "right" }}>
                               <p style={{ fontSize: 16, fontWeight: 900, color: "#10b981", lineHeight: 1 }}>{ctr(Number(c.impression_count), Number(c.click_count))}</p>
-                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><TrendingUp size={10} /> CTR</p>
+                              <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2, display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}><TrendingUp size={10} aria-hidden="true" /> CTR</p>
                             </div>
                           </div>
                         </div>
@@ -264,7 +264,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
                           padding: "5px 12px", borderRadius: 8, border: "1px solid var(--border2)", background: "transparent",
                         }}
                       >
-                        <Copy size={11} /> Dupliquer
+                        <Copy size={11} aria-hidden="true" /> Dupliquer
                       </Link>
                       <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -296,7 +296,7 @@ export default async function AdsPage({ searchParams }: { searchParams: Promise<
               color: "#8b5cf6", fontWeight: 700, fontSize: 14, textDecoration: "none",
               transition: "all 0.2s",
             }}>
-              <Plus size={18} /> Lancer une nouvelle campagne
+              <Plus size={18} aria-hidden="true" /> Lancer une nouvelle campagne
             </Link>
           </>
         )}
