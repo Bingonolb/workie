@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Navbar } from "@/components/Navbar";
+
+export const revalidate = 60; // ISR: rebuild every 60s, or on revalidatePath("/jobs")
 import { MapPin, Briefcase, ArrowRight, BadgeCheck } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
 import { JobApplyButton } from "@/components/JobApplyButton";
@@ -64,7 +66,7 @@ function timeAgo(date: string) {
 
 export default async function JobsPage({ searchParams }: { searchParams: Promise<{ sector?: string; contract?: string }> }) {
   const { sector: filterSector, contract: filterContract } = await searchParams;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data: jobs } = await Promise.resolve(
     supabase.from("job_offers")
       .select("id, title, location, contract_type, work_mode, experience_level, salary_range, description, apply_url, created_at, companies(id, name, city, sector, logo_url, is_verified, avg_rating, review_count)")
