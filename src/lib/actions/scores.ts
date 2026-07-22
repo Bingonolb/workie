@@ -35,6 +35,7 @@ export async function addFlame(companyId: string): Promise<void> {
   revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
   revalidateTag("companies", {});
+  revalidateTag("top-companies", {});
 }
 
 export async function addBoost(companyId: string): Promise<void> {
@@ -66,6 +67,7 @@ export async function addBoost(companyId: string): Promise<void> {
   revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
   revalidateTag("companies", {});
+  revalidateTag("top-companies", {});
 }
 
 export async function addPenalty(companyId: string): Promise<void> {
@@ -107,6 +109,7 @@ export async function addPenalty(companyId: string): Promise<void> {
   revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
   revalidateTag("companies", {});
+  revalidateTag("top-companies", {});
 }
 
 export async function getTopCompanies(limit = 200) {

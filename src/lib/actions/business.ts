@@ -96,10 +96,11 @@ async function fetchAnalyticsForCompany(companyId: string) {
         .eq("company_id", companyId)
         .order("created_at", { ascending: true })
         .limit(5000),
-      // 30d only — enough for trend chart + week/today stats; avoids loading months of rows
-      supabase
+      // 30d only — enough for trend chart + week/today stats + canton breakdown
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (supabase as any)
         .from("company_views")
-        .select("viewed_at")
+        .select("viewed_at, viewer_canton")
         .eq("company_id", companyId)
         .gte("viewed_at", thirtyDaysAgo),
       supabase
@@ -183,7 +184,8 @@ async function fetchAnalyticsForCompany(companyId: string) {
 
     // ── Page view stats ──────────────────────────────────────────────────────
     const favoritesCount = favsRes.count ?? 0;
-    const views = viewsRes.data ?? []; // last 30 days
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const views: any[] = (viewsRes as any).data ?? []; // last 30 days
     const now = Date.now();
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
     const weekAgo = now - 7 * 86400000;
@@ -192,6 +194,13 @@ async function fetchAnalyticsForCompany(companyId: string) {
     const viewsWeek  = views.filter(v => v.viewed_at && new Date(v.viewed_at).getTime() >= weekAgo).length;
     const viewsMonth = views.length; // all 30d rows
     const viewsTotal = totalViewsRes.count ?? 0; // 90d count from HEAD query
+
+    // Canton distribution (last 30d)
+    const cantonDist: Record<string, number> = {};
+    views.forEach(v => {
+      const c = (v as { viewer_canton?: string | null }).viewer_canton;
+      if (c) cantonDist[c] = (cantonDist[c] || 0) + 1;
+    });
 
     // Daily view trend — last 30 days (all rows already cover exactly 30d)
     const dailyViewMap: Record<string, number> = {};
@@ -227,6 +236,7 @@ async function fetchAnalyticsForCompany(companyId: string) {
       viewsMonth,
       viewsTotal,
       viewTrend,
+      cantonDist,
       favoritesCount,
     };
 }

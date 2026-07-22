@@ -130,7 +130,9 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   revalidatePath("/profile");
   revalidatePath("/salaires");
   revalidatePath("/ranking");
-  revalidateTag("companies", {}); // refresh explore grid stats (avg_rating, review_count)
+  revalidateTag("companies", {});
+  revalidateTag("reviews", {});
+  revalidateTag("top-companies", {});
 
   // Notify the business owner (fire-and-forget)
   void (async () => {

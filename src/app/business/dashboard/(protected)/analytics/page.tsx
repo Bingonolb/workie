@@ -44,6 +44,9 @@ export default async function AnalyticsPage() {
   } = d;
   const seniority = d.seniority as Record<string, number>;
   const functions = d.functions as Record<string, number>;
+  const cantonDist = (d.cantonDist ?? {}) as Record<string, number>;
+  const cantonEntries = Object.entries(cantonDist).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const maxCanton = cantonEntries[0]?.[1] ?? 1;
 
   const maxDist = Math.max(...((dist as { count: number }[])?.map((d) => Number(d.count)) ?? [1]), 1);
   const totalSeniority = Object.values((seniority ?? {}) as Record<string, number>).reduce((a, b) => a + b, 0);
@@ -74,6 +77,26 @@ export default async function AnalyticsPage() {
           reviewCount={count}
         />
       </div>
+
+      {/* ── Section 1b : Origine géographique des visiteurs ── */}
+      {cantonEntries.length > 0 && (
+        <div style={{ marginBottom: 28 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>
+            Visiteurs par canton · 30 jours
+          </p>
+          <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
+            {cantonEntries.map(([canton, cnt]) => (
+              <Bar
+                key={canton}
+                label={canton}
+                value={String(cnt)}
+                pct={Math.round((cnt / maxCanton) * 100)}
+                color="#8b5cf6"
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Section 2 : Réputation ── */}
       <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
