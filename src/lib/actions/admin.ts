@@ -64,6 +64,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
     revalidateTag("companies", {});
+    revalidateTag("top-companies", {});
     return {};
   } catch (e) {
     return { error: (e as Error).message };
@@ -108,6 +109,7 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
     revalidateTag("companies", {});
+    revalidateTag("top-companies", {});
     return {};
   } catch (e) {
     return { error: (e as Error).message };
@@ -123,6 +125,7 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
     revalidateTag("companies", {});
+    revalidateTag("top-companies", {});
     return {};
   } catch (e) {
     return { error: (e as Error).message };

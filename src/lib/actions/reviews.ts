@@ -133,6 +133,7 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   revalidateTag("companies", {});
   revalidateTag("reviews", {});
   revalidateTag("top-companies", {});
+  revalidateTag("business-analytics", {});
 
   // Notify the business owner (fire-and-forget)
   void (async () => {

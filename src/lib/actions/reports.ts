@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/supabase/server";
@@ -212,6 +213,12 @@ export async function deleteReportedContent(
 
   // Mark the report as content_deleted (distinct from reviewed/dismissed)
   await admin.from("reports").update({ status: "content_deleted" }).eq("id", reportId);
+
+  // Invalidate all caches that might show the deleted content
+  revalidateTag("companies", {});
+  revalidateTag("reviews", {});
+  revalidateTag("top-companies", {});
+  revalidateTag("business-analytics", {});
 
   return {};
 }
