@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { CompanyCard } from "@/components/CompanyCard";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
@@ -82,6 +82,25 @@ export function ExploreClient({
   const [search, setSearch] = useState(initialSearch ?? "");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  // Session-stable offset: first ad appears at company index 3, 4, or 5.
+  // Stored in sessionStorage so it doesn't shift on re-render, but varies
+  // between sessions — same mechanic as LinkedIn/Reddit feed variance.
+  const adOffset = useRef<number>(-1);
+  if (adOffset.current === -1) {
+    try {
+      const stored = sessionStorage.getItem("w_ad_off");
+      if (stored !== null) {
+        adOffset.current = parseInt(stored, 10);
+      } else {
+        const v = 3 + Math.floor(Math.random() * 3); // 3, 4, or 5
+        sessionStorage.setItem("w_ad_off", String(v));
+        adOffset.current = v;
+      }
+    } catch {
+      adOffset.current = 4;
+    }
+  }
+
   const filtered = useMemo(() => {
     let result = allCompanies;
     if (sector) result = result.filter(c => c.sector === sector);
@@ -99,7 +118,20 @@ export function ExploreClient({
   const total = filtered.length;
   const paginated = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < total;
-  const adsForGrid = paginated.length >= 4 ? squareAds : [];
+
+  // Map<companyIndex → slotNumber> — which companies get an ad inserted before them.
+  // One ad every AD_INTERVAL companies, starting at adOffset.
+  // slotNumber drives cyclic rotation: squareAds[slotNumber % squareAds.length].
+  const AD_INTERVAL = 7;
+  const adSlotMap = useMemo((): Map<number, number> => {
+    if (squareAds.length === 0 || paginated.length < adOffset.current + 1) return new Map();
+    const map = new Map<number, number>();
+    let slotNum = 0;
+    for (let idx = adOffset.current; idx < paginated.length; idx += AD_INTERVAL) {
+      map.set(idx, slotNum++);
+    }
+    return map;
+  }, [squareAds.length, paginated.length, adOffset]);
 
   const handleFilter = useCallback((key: string, value: string | undefined) => {
     setVisibleCount(PAGE_SIZE);
@@ -167,13 +199,16 @@ export function ExploreClient({
         <>
           <div className="explore-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
             {(() => {
-              const AD_SLOTS = [3, 9];
               const items: React.ReactNode[] = [];
-              let adCursor = 0;
               paginated.forEach((c, i) => {
-                if (adCursor < adsForGrid.length && AD_SLOTS[adCursor] === i) {
-                  const ad = adsForGrid[adCursor++];
-                  items.push(<AdSquareCard key={`ad-${ad.id}`} ad={ad} />);
+                const slotNum = adSlotMap.get(i);
+                if (slotNum !== undefined) {
+                  // Cyclic rotation: with 100 ads, each slot shows a different one;
+                  // with 1 ad, it repeats (freq cap in AdSquareCard handles dedup).
+                  const ad = squareAds[slotNum % squareAds.length];
+                  // key uses slotNum (not ad.id) so the same ad can appear in 2 slots
+                  // without React deduplication, while remaining stable across "load more".
+                  items.push(<AdSquareCard key={`ad-slot-${slotNum}`} ad={ad} />);
                 }
                 items.push(<CompanyCard key={c.id} company={c} isFav={initialFavIds.includes(c.id)} isLoggedIn={isLoggedIn} isBusiness={isBusiness} priority={items.length === 0} />);
               });
