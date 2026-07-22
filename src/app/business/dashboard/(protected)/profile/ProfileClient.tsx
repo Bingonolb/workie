@@ -54,13 +54,13 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
       </div>
 
       {state?.success && (
-        <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "12px 16px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10 }}>
-          <CheckCircle size={18} color="#10b981" />
+        <div role="status" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "12px 16px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10 }}>
+          <CheckCircle size={18} color="#10b981" aria-hidden="true" />
           <span style={{ fontSize: 14, fontWeight: 600, color: "#10b981" }}>Fiche mise à jour avec succès</span>
         </div>
       )}
       {state?.error && (
-        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px", marginBottom: 24 }}>
+        <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px", marginBottom: 24 }}>
           <span style={{ fontSize: 14, color: "#ef4444" }}>{state.error}</span>
         </div>
       )}
@@ -84,7 +84,7 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
                 )}
                 <div>
                   <label style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", fontSize: 13, fontWeight: 600, color: "var(--text-muted)", cursor: "pointer" }}>
-                    <Upload size={14} /> Choisir
+                    <Upload size={14} aria-hidden="true" /> Choisir
                     <input type="file" name="logo_file" accept="image/*" style={{ display: "none" }} onChange={e => {
                       const f = e.target.files?.[0];
                       if (f) { if (logoBlobRef.current) URL.revokeObjectURL(logoBlobRef.current); const u = URL.createObjectURL(f); logoBlobRef.current = u; setLogoPreview(u); }
@@ -102,7 +102,7 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
                 <img src={coverPreview ?? String(company.cover_url)} alt="cover" style={{ width: "100%", height: 80, objectFit: "cover", borderRadius: 10, border: "1px solid var(--border)", marginBottom: 8 }} />
               )}
               <label style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", fontSize: 13, fontWeight: 600, color: "var(--text-muted)", cursor: "pointer", width: "fit-content" }}>
-                <Upload size={14} /> Changer la photo
+                <Upload size={14} aria-hidden="true" /> Changer la photo
                 <input type="file" name="cover_file" accept="image/*" style={{ display: "none" }} onChange={e => {
                   const f = e.target.files?.[0];
                   if (f) { if (coverBlobRef.current) URL.revokeObjectURL(coverBlobRef.current); const u = URL.createObjectURL(f); coverBlobRef.current = u; setCoverPreview(u); }
@@ -150,10 +150,11 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
       {/* Se déconnecter — visible surtout sur mobile (sidebar masquée) */}
       <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--border)" }}>
         <button
+          type="button"
           onClick={handleLogout}
           style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 18px", borderRadius: 10, border: "1px solid rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.05)", color: "#ef4444", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
         >
-          <LogOut size={16} /> Se déconnecter
+          <LogOut size={16} aria-hidden="true" /> Se déconnecter
         </button>
       </div>
     </div>
