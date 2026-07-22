@@ -7,8 +7,10 @@ export function ThemeToggle() {
   const { theme, toggle } = useTheme();
   return (
     <button
+      type="button"
       onClick={toggle}
       title={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
+      aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
       style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         width: 34, height: 34, borderRadius: 8,
@@ -18,7 +20,7 @@ export function ThemeToggle() {
         flexShrink: 0,
       }}
     >
-      {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+      {theme === "dark" ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
     </button>
   );
 }

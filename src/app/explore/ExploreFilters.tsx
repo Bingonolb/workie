@@ -381,7 +381,7 @@ export function ExploreFilters({
             if (v === "grid") p.delete("view"); else p.set("view", v);
             p.delete("page");
             return (
-              <button key={v} onClick={() => startTransition(() => router.push(`${pathname}?${p.toString()}`))} title={label}
+              <button type="button" key={v} onClick={() => startTransition(() => router.push(`${pathname}?${p.toString()}`))} title={label} aria-label={label} aria-pressed={view === v}
                 style={{
                   width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
                   borderRadius: 9, border: "none",
