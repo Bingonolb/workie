@@ -259,7 +259,8 @@ export async function getJobCantonStats(jobId: string): Promise<{ canton: string
       .from("job_apply_clicks")
       .select("viewer_canton")
       .eq("job_id", jobId)
-      .eq("company_id", company.id);
+      .eq("company_id", company.id)
+      .limit(5000);
     if (!data) return [];
     const map: Record<string, number> = {};
     for (const row of data) {

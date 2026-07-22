@@ -9,8 +9,8 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };
 
-  const full_name = String(formData.get("full_name") || "");
-  const city = String(formData.get("city") || "");
+  const full_name = String(formData.get("full_name") || "").slice(0, 100);
+  const city = String(formData.get("city") || "").slice(0, 100);
   const avatarFile = formData.get("avatar");
 
   let avatar_url: string | undefined;
@@ -18,6 +18,11 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
     const ALLOWED: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
     const ext = ALLOWED[avatarFile.type];
     if (!ext) return { error: "Format d'image non supporté (jpg, png, webp, gif uniquement)." };
+    // Delete previous avatar files to avoid accumulation in storage
+    const { data: existing } = await supabase.storage.from("avatars").list(user.id);
+    if (existing && existing.length > 0) {
+      await supabase.storage.from("avatars").remove(existing.map(f => `${user.id}/${f.name}`));
+    }
     const path = `${user.id}/${randomUUID()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("avatars")

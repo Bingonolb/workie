@@ -32,6 +32,10 @@ export async function submitReport(payload: {
   const user = await getUser();
   if (!user) return { error: "Vous devez être connecté pour signaler." };
 
+  // Sanitize lengths to prevent oversized payloads
+  if (payload.targetLabel.length > 500) payload = { ...payload, targetLabel: payload.targetLabel.slice(0, 500) };
+  if (payload.explanation.length > 2000) return { error: "L'explication ne peut pas dépasser 2000 caractères." };
+
   const supabase = await createClient();
   const { error } = await supabase.from("reports").insert({
     reporter_id: user.id,

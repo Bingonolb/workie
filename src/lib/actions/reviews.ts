@@ -95,8 +95,13 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   if (rating_overall < 1) return { error: "La note globale est requise." };
   if (!would_recommend) return { error: "Indique si tu recommanderais cette entreprise." };
   if (!pros || pros.length < 10) return { error: "Les points positifs sont requis (min. 10 caractères)." };
+  if (pros.length > 2000) return { error: "Les points positifs ne peuvent pas dépasser 2000 caractères." };
   if (!cons || cons.length < 10) return { error: "Les points négatifs sont requis (min. 10 caractères)." };
+  if (cons.length > 2000) return { error: "Les points négatifs ne peuvent pas dépasser 2000 caractères." };
   if (!content || content.length < 50) return { error: "L'avis doit faire au moins 50 caractères." };
+  if (content.length > 5000) return { error: "L'avis ne peut pas dépasser 5000 caractères." };
+  if (title && title.length > 150) return { error: "Le titre ne peut pas dépasser 150 caractères." };
+  if (job_title && job_title.length > 100) return { error: "Le poste ne peut pas dépasser 100 caractères." };
 
   // Check if user already reviewed this company
   const { data: existing } = await supabase

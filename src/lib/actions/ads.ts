@@ -109,7 +109,10 @@ export async function getUserCampaigns(): Promise<{ campaigns?: AdCampaign[]; er
 
 export async function getUserCampaignDailyStats(campaignId: string): Promise<{ day: string; impressions: number; clicks: number }[]> {
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
+    // Ownership check: ensure this campaign belongs to the calling user
+    const { data: owned } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("user_id", user.id).maybeSingle();
+    if (!owned) return [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await (supabase as any).rpc("get_campaign_daily_stats", { p_campaign_id: campaignId });
     return (data ?? []).map((r: { day: string; impressions: number; clicks: number }) => ({
@@ -122,7 +125,9 @@ export async function getUserCampaignDailyStats(campaignId: string): Promise<{ d
 
 export async function getUserCampaignCantonStats(campaignId: string): Promise<{ canton: string; impressions: number; clicks: number }[]> {
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
+    const { data: owned } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("user_id", user.id).maybeSingle();
+    if (!owned) return [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await (supabase as any).rpc("get_campaign_canton_stats", { p_campaign_id: campaignId });
     return (data ?? []).map((r: { canton: string; impressions: number; clicks: number }) => ({
@@ -239,9 +244,10 @@ export async function getActiveAds(opts?: {
   try {
     const supabase = await createClient();
     const today = new Date().toISOString().slice(0, 10);
+    // Select only what's needed: public fields + spent/total for budget safety check (stripped before returning)
     let q = supabase
       .from("ad_campaigns")
-      .select("*")
+      .select("id, company_id, user_id, format, headline, body_text, image_url, cta_label, cta_url, target_cantons, target_sectors, status, start_date, end_date, impression_count, click_count, created_at, spent_chf, total_budget_chf")
       .eq("status", "active")
       .lte("start_date", today)
       .or(`end_date.is.null,end_date.gte.${today}`)
@@ -272,7 +278,10 @@ export async function getActiveAds(opts?: {
 
 export async function getCampaignDailyStats(campaignId: string): Promise<{ day: string; impressions: number; clicks: number }[]> {
   try {
-    const { supabase } = await requireBusiness();
+    const { supabase, companyId } = await requireBusiness();
+    // Ownership check: ensure this campaign belongs to the calling business
+    const { data: owned } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("company_id", companyId).maybeSingle();
+    if (!owned) return [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await (supabase as any).rpc("get_campaign_daily_stats", { p_campaign_id: campaignId });
     return (data ?? []).map((r: { day: string; impressions: number; clicks: number }) => ({
@@ -507,7 +516,9 @@ export async function trackAdClick(campaignId: string): Promise<void> {
 
 export async function getCampaignCantonStats(campaignId: string): Promise<{ canton: string; impressions: number; clicks: number }[]> {
   try {
-    const { supabase } = await requireBusiness();
+    const { supabase, companyId } = await requireBusiness();
+    const { data: owned } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("company_id", companyId).maybeSingle();
+    if (!owned) return [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await (supabase as any).rpc("get_campaign_canton_stats", { p_campaign_id: campaignId });
     return (data ?? []).map((r: { canton: string; impressions: number; clicks: number }) => ({

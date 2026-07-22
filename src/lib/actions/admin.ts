@@ -225,11 +225,12 @@ export async function rejectClaim(claimId: string): Promise<{ error?: string; su
     // Fetch claim to revoke profile access if fraudulent
     const { data: claim } = await adminClient.from("company_claims").select("company_id, user_id").eq("id", claimId).maybeSingle();
 
-    await adminClient.from("company_claims").update({
+    const { error: rejectErr } = await adminClient.from("company_claims").update({
       status: "rejected",
       reviewed_at: new Date().toISOString(),
       reviewed_by: adminUser.id,
     }).eq("id", claimId);
+    if (rejectErr) return { error: rejectErr.message };
 
     // Revoke profile link so user loses access
     if (claim?.user_id) {

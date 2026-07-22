@@ -201,7 +201,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <div>
               <label style={lbl}>Ton poste *</label>
-              <input value={jobTitle} onChange={e => setJobTitle(e.target.value)}
+              <input value={jobTitle} onChange={e => { setJobTitle(e.target.value); setStep1Err(""); }}
                 placeholder="Ex : Software Engineer, Stage Marketing, CDI Finance..."
                 style={inp} />
             </div>
@@ -226,7 +226,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
 
             <div>
               <label style={lbl}>Durée dans cette entreprise *</label>
-              <PillPicker options={DURATION_RANGES} value={durationRange} onChange={setDurationRange} />
+              <PillPicker options={DURATION_RANGES} value={durationRange} onChange={v => { setDurationRange(v); setStep1Err(""); }} />
             </div>
 
             <div>
@@ -253,13 +253,13 @@ export function ReviewForm({ companyId }: { companyId: string }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 0 }}>Notes par catégorie *</p>
-              <StarPicker name="rating_management" label="👔 Management direct" value={ratingMgmt} onChange={setRatingMgmt} />
+              <StarPicker name="rating_management" label="👔 Management direct" value={ratingMgmt} onChange={v => { setRatingMgmt(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_worklife" label="⚖️ Équilibre vie pro / perso" value={ratingWl} onChange={setRatingWl} />
+              <StarPicker name="rating_worklife" label="⚖️ Équilibre vie pro / perso" value={ratingWl} onChange={v => { setRatingWl(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_culture" label="🌍 Ambiance & culture" value={ratingCulture} onChange={setRatingCulture} />
+              <StarPicker name="rating_culture" label="🌍 Ambiance & culture" value={ratingCulture} onChange={v => { setRatingCulture(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_career" label="🚀 Perspectives d'évolution" value={ratingCareer} onChange={setRatingCareer} />
+              <StarPicker name="rating_career" label="🚀 Perspectives d'évolution" value={ratingCareer} onChange={v => { setRatingCareer(v); setStep2Err(""); }} />
             </div>
 
             {/* Auto-computed overall */}
@@ -279,7 +279,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <label style={lbl}>Recommanderais-tu cette entreprise ? *</label>
               <div style={{ display: "flex", gap: 10 }}>
                 {RECOMMEND.map(r => (
-                  <button key={r.value} type="button" onClick={() => setWouldRecommend(r.value)}
+                  <button key={r.value} type="button" onClick={() => { setWouldRecommend(r.value); setStep2Err(""); }}
                     className={`pill-btn${wouldRecommend === r.value ? " active" : ""}`}
                     style={{ flex: 1, justifyContent: "center", fontSize: 14, padding: "12px 0" }}>
                     {r.label}
