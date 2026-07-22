@@ -134,6 +134,7 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   revalidateTag("reviews", {});
   revalidateTag("top-companies", {});
   revalidateTag("business-analytics", {});
+  revalidateTag("landing-counts", {});
 
   // Notify the business owner (fire-and-forget)
   void (async () => {

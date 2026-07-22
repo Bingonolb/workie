@@ -126,6 +126,7 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
     revalidatePath("/admin/companies");
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
+    revalidateTag("landing-counts", {});
     return {};
   } catch (e) {
     return { error: (e as Error).message };
