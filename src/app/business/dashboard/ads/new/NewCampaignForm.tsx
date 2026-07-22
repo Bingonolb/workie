@@ -4,7 +4,7 @@ import { useState, useActionState, useCallback, useEffect, useRef } from "react"
 import Link from "next/link";
 import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock } from "lucide-react";
 import { createCampaign } from "@/lib/actions/ads";
-import { calculateCPM, estimateDailyImpressions, estimateDailyReach } from "@/lib/ads/pricing";
+import { audienceReach, calculateCPM, estimateDailyImpressions, estimateDailyReach, isBudgetCapped } from "@/lib/ads/pricing";
 import { useRouter } from "next/navigation";
 
 const CANTONS = [
@@ -139,10 +139,12 @@ export function NewCampaignForm({
   const [bodyText, setBodyText] = useState("");
   const [ctaLabel, setCtaLabel] = useState(prefill?.ctaLabel ?? "En savoir plus");
 
+  const reach = audienceReach(selectedCantons, selectedSectors);
   const cpm = calculateCPM(format, selectedCantons, selectedSectors);
-  const dailyImpressions = estimateDailyImpressions(dailyBudget, cpm);
-  const dailyReach = estimateDailyReach(dailyBudget, cpm);
+  const dailyImpressions = estimateDailyImpressions(dailyBudget, cpm, reach);
+  const dailyReach = estimateDailyReach(dailyBudget, cpm, reach);
   const totalImpressions = dailyImpressions * durationDays;
+  const budgetCapped = isBudgetCapped(dailyBudget, cpm, reach);
 
   const toggleCanton = useCallback((code: string) =>
     setSelectedCantons(p => p.includes(code) ? p.filter(c => c !== code) : [...p, code]), []);
@@ -537,10 +539,29 @@ export function NewCampaignForm({
           background: "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(249,115,22,0.05) 100%)",
           border: "1px solid rgba(139,92,246,0.25)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-            <Info size={16} color="#8b5cf6" />
-            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Estimation de performance</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Info size={16} color="#8b5cf6" />
+              <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Estimation de performance</p>
+            </div>
+            {/* Audience reach badge */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 50, background: reach < 0.15 ? "rgba(249,115,22,0.12)" : "rgba(16,185,129,0.10)", border: `1px solid ${reach < 0.15 ? "rgba(249,115,22,0.3)" : "rgba(16,185,129,0.25)"}` }}>
+              <Target size={11} color={reach < 0.15 ? "#f97316" : "#10b981"} />
+              <span style={{ fontSize: 11, fontWeight: 800, color: reach < 0.15 ? "#f97316" : "#10b981" }}>
+                {(reach * 100).toFixed(1)}% de l&apos;audience Workie ciblée
+              </span>
+            </div>
           </div>
+
+          {/* Budget-capped warning */}
+          {budgetCapped && (
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", marginBottom: 16 }}>
+              <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>⚠️</span>
+              <p style={{ fontSize: 12, color: "#f59e0b", lineHeight: 1.5 }}>
+                <strong>Budget supérieur à la capacité de l&apos;audience ciblée.</strong> Les impressions journalières sont plafonnées par la taille du segment. Réduisez le budget journalier ou élargissez votre ciblage pour utiliser tout votre budget.
+              </p>
+            </div>
+          )}
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 1 }}>
             {[
@@ -560,6 +581,11 @@ export function NewCampaignForm({
               </div>
             ))}
           </div>
+
+          {/* Methodology note */}
+          <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 14, lineHeight: 1.5, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 12 }}>
+            Estimations basées sur la distribution géographique OFS 2022 et la capacité journalière de la plateforme. Le CPM intègre une prime de précision (+40% max) pour les audiences très ciblées — cohérent avec les standards Facebook/LinkedIn Ads.
+          </p>
         </div>
 
         {state?.error && (
