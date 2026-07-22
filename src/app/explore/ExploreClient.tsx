@@ -99,7 +99,7 @@ export function ExploreClient({
   const total = filtered.length;
   const paginated = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < total;
-  const adsForGrid = visibleCount <= PAGE_SIZE && paginated.length >= 4 ? squareAds : [];
+  const adsForGrid = paginated.length >= 4 ? squareAds : [];
 
   const handleFilter = useCallback((key: string, value: string | undefined) => {
     setVisibleCount(PAGE_SIZE);
