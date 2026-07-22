@@ -238,7 +238,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 targetType="company"
                 targetId={company.id}
                 targetLabel={company.name}
-                isLoggedIn={!!user && !isBusiness}
+                isLoggedIn={!!user}
                 variant="icon"
               />
             </div>
@@ -374,7 +374,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             ) : (
               <div style={{ position: "relative", marginBottom: 32 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user && !isBusiness} companyName={company.name} />)}
+                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user} companyName={company.name} />)}
                 </div>
                 {!user && reviews.length > 1 && (
                   <div style={{
