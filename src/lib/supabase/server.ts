@@ -45,3 +45,17 @@ export const getBusinessCompanyId = cache(async (): Promise<string | null> => {
   const { data } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
   return data?.claimed_company_id ?? null;
 });
+
+// Cached per-request: full company row for the logged-in business user.
+// Shared across layout → protected layout → page → actions — only 1 DB round trip per request.
+export const getBusinessCompanyData = cache(async () => {
+  const companyId = await getBusinessCompanyId();
+  if (!companyId) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("companies")
+    .select("id, name, is_verified, is_subscribed, logo_url, cover_url, website_url, linkedin_url, description, sector, city, canton, employee_range, score, avg_rating, review_count, stripe_subscription_id, subscription_ends_at, subscription_cancel_at_period_end")
+    .eq("id", companyId)
+    .maybeSingle();
+  return data ?? null;
+});

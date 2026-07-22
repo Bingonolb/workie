@@ -1,8 +1,7 @@
 "use server";
 
 import { revalidatePath, unstable_cache } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { getUser } from "@/lib/supabase/server";
+import { createClient, getUser, getBusinessCompanyData } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyFavoriteUsers } from "@/lib/actions/notifications";
 import { headers } from "next/headers";
@@ -10,24 +9,14 @@ import { headers } from "next/headers";
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 async function requireBusiness() {
-  const [user, supabase] = await Promise.all([getUser(), createClient()]);
+  // Both getUser() and getBusinessCompanyData() are cache()-wrapped —
+  // they share the same result as the layout/page in the same request.
+  const [user, company, supabase] = await Promise.all([getUser(), getBusinessCompanyData(), createClient()]);
   if (!user) throw new Error("Non authentifié");
+  if (!company) throw new Error("Aucune entreprise liée");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, claimed_company_id")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (!profile?.claimed_company_id) throw new Error("Aucune entreprise liée");
-
-  const { data: company } = await supabase
-    .from("companies")
-    .select("*")
-    .eq("id", profile.claimed_company_id)
-    .maybeSingle();
-
-  if (!company) throw new Error("Entreprise introuvable");
+  // profile.role needed for admin checks — fetch only when needed below
+  const profile = { claimed_company_id: company.id, role: "business" };
 
   return { user, supabase, company, profile };
 }
