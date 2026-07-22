@@ -17,7 +17,7 @@ export default async function AdminNewCompanyPage() {
       <Navbar />
       <main style={{ maxWidth: 800, margin: "0 auto", padding: "40px 28px 100px" }}>
         <Link href="/admin" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 24 }}>
-          <ArrowLeft size={14} /> Retour au panel
+          <ArrowLeft size={14} aria-hidden="true" /> Retour au panel
         </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>

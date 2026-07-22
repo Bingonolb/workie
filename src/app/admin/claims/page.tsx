@@ -88,7 +88,7 @@ export default function ClaimsPage() {
 
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
         <Link href="/admin" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 600 }}>
-          <ArrowLeft size={15} /> Admin
+          <ArrowLeft size={15} aria-hidden="true" /> Admin
         </Link>
         <div style={{ width: 1, height: 16, background: "var(--border)" }} />
         <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em" }}>Demandes de revendication</h1>
@@ -162,11 +162,11 @@ export default function ClaimsPage() {
                 {/* Contact info */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)" }}>
-                    <User size={14} />
+                    <User size={14} aria-hidden="true" />
                     <span><strong style={{ color: "var(--text)" }}>{claim.first_name} {claim.last_name}</strong></span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)" }}>
-                    <Briefcase size={14} />
+                    <Briefcase size={14} aria-hidden="true" />
                     <span>{claim.job_title} · {claim.job_level}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
@@ -182,13 +182,13 @@ export default function ClaimsPage() {
                   {claim.company_id && (
                     <Link href={`/company/${claim.company_id}`} target="_blank"
                       style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#f97316", background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 8, padding: "6px 12px", textDecoration: "none" }}>
-                      <ExternalLink size={13} /> Voir la page Workie
+                      <ExternalLink size={13} aria-hidden="true" /> Voir la page Workie
                     </Link>
                   )}
                   {claim.zefix_url && (
                     <a href={claim.zefix_url} target="_blank" rel="noopener noreferrer"
                       style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "6px 12px", textDecoration: "none" }}>
-                      <Link2 size={13} /> Fiche Zefix <ExternalLink size={11} />
+                      <Link2 size={13} aria-hidden="true" /> Fiche Zefix <ExternalLink size={11} aria-hidden="true" />
                     </a>
                   )}
                 </div>
@@ -213,13 +213,13 @@ export default function ClaimsPage() {
                       onClick={() => handle(claim.id, "approve")}
                       disabled={isPending}
                       style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 20px", borderRadius: 9, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1 }}>
-                      <CheckCircle size={16} /> Vérifier (badge bleu)
+                      <CheckCircle size={16} aria-hidden="true" /> Vérifier (badge bleu)
                     </button>
                     <button
                       onClick={() => handle(claim.id, "reject")}
                       disabled={isPending}
                       style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 20px", borderRadius: 9, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1 }}>
-                      <XCircle size={16} /> Rejeter & révoquer
+                      <XCircle size={16} aria-hidden="true" /> Rejeter & révoquer
                     </button>
                   </div>
                 )}

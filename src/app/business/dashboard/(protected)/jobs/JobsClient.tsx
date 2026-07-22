@@ -68,7 +68,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
     return (
       <button type="button" onClick={() => setOpen(true)}
         style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-        <Plus size={18} /> Publier une offre
+        <Plus size={18} aria-hidden="true" /> Publier une offre
       </button>
     );
   }
@@ -314,12 +314,12 @@ function JobCard({ job, onToggle, onDelete, onEdited }: { job: Job; onToggle: ()
             {job.experience_level && <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 50, background: "rgba(249,115,22,0.08)", color: "#f97316", fontWeight: 600 }}>{job.experience_level}</span>}
           </div>
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
-            {job.location && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, color: "var(--text-muted)" }}><MapPin size={13} /> {job.location}</span>}
+            {job.location && <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, color: "var(--text-muted)" }}><MapPin size={13} aria-hidden="true" /> {job.location}</span>}
             {job.salary_range && <span style={{ fontSize: 13, color: "var(--text-muted)" }}>💰 {job.salary_range}</span>}
             {job.apply_url && (
               <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
                 style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>
-                <ExternalLink size={12} /> Lien candidature
+                <ExternalLink size={12} aria-hidden="true" /> Lien candidature
               </a>
             )}
             <span style={{ fontSize: 12, color: "var(--text-muted)" }}>

@@ -82,7 +82,7 @@ export default async function AdminPage() {
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <Link href="/admin/claims" style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-              <Inbox size={15} /> Demandes
+              <Inbox size={15} aria-hidden="true" /> Demandes
               {(pendingClaims ?? 0) > 0 && (
                 <span style={{ position: "absolute", top: -6, right: -6, background: "#ef4444", color: "#fff", fontSize: 10, fontWeight: 800, borderRadius: 50, width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {pendingClaims}
@@ -90,7 +90,7 @@ export default async function AdminPage() {
               )}
             </Link>
             <Link href="/admin/reports" style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-              <Flag size={15} /> Signalements
+              <Flag size={15} aria-hidden="true" /> Signalements
               {(pendingReports ?? 0) > 0 && (
                 <span style={{ position: "absolute", top: -6, right: -6, background: "#ef4444", color: "#fff", fontSize: 10, fontWeight: 800, borderRadius: 50, width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {pendingReports}
@@ -101,7 +101,7 @@ export default async function AdminPage() {
               📣 Publicités
             </Link>
             <Link href="/admin/company/new" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-              <Plus size={15} /> Ajouter une entreprise
+              <Plus size={15} aria-hidden="true" /> Ajouter une entreprise
             </Link>
           </div>
         </div>

@@ -74,7 +74,7 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
               onMouseDown={e => { e.preventDefault(); setInput(""); setShowSuggestions(false); }}
               style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", padding: 0 }}
             >
-              <X size={15} />
+              <X size={15} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -176,15 +176,15 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
                     background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)",
                     color: "#8b5cf6", textDecoration: "none",
                   }}>
-                    <Pencil size={12} /> Modifier
+                    <Pencil size={12} aria-hidden="true" /> Modifier
                   </Link>
-                  <Link href={`/company/${c.id}`} target="_blank" style={{
+                  <Link href={`/company/${c.id}`} target="_blank" aria-label="Voir la page entreprise" style={{
                     display: "flex", alignItems: "center", justifyContent: "center",
                     width: 32, height: 32, borderRadius: 8,
                     background: "var(--surface2)", border: "1px solid var(--border)",
                     color: "var(--text-muted)", textDecoration: "none",
                   }}>
-                    <ExternalLink size={13} />
+                    <ExternalLink size={13} aria-hidden="true" />
                   </Link>
                 </div>
               </div>

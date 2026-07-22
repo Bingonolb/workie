@@ -6,9 +6,9 @@ import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2,
 import { getReports, updateReportStatus, deleteReportedContent, type Report, type ReportStatus } from "@/lib/actions/reports";
 
 const TYPE_CONFIG = {
-  review:  { label: "Avis",       icon: <MessageSquare size={13} />, bg: "rgba(139,92,246,0.1)",  color: "#8b5cf6" },
-  company: { label: "Entreprise", icon: <Building2 size={13} />,     bg: "rgba(249,115,22,0.1)",  color: "#f97316" },
-  profile: { label: "Profil",     icon: <User size={13} />,          bg: "rgba(16,185,129,0.1)",  color: "#10b981" },
+  review:  { label: "Avis",       icon: <MessageSquare size={13} aria-hidden="true" />, bg: "rgba(139,92,246,0.1)",  color: "#8b5cf6" },
+  company: { label: "Entreprise", icon: <Building2 size={13} aria-hidden="true" />,     bg: "rgba(249,115,22,0.1)",  color: "#f97316" },
+  profile: { label: "Profil",     icon: <User size={13} aria-hidden="true" />,          bg: "rgba(16,185,129,0.1)",  color: "#10b981" },
 } as const;
 
 const STATUS_CONFIG = {
@@ -82,7 +82,7 @@ export default function AdminReportsPage() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32, flexWrap: "wrap" }}>
         <Link href="/admin" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 600 }}>
-          <ArrowLeft size={15} /> Admin
+          <ArrowLeft size={15} aria-hidden="true" /> Admin
         </Link>
         <div style={{ width: 1, height: 16, background: "var(--border)" }} />
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -192,7 +192,7 @@ export default function AdminReportsPage() {
                       )}
                       {report.reporter_email && (
                         <a href={`mailto:${report.reporter_email}`} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>
-                          <Mail size={11} /> {report.reporter_email}
+                          <Mail size={11} aria-hidden="true" /> {report.reporter_email}
                         </a>
                       )}
                     </div>
@@ -227,7 +227,7 @@ export default function AdminReportsPage() {
                       color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)",
                       borderRadius: 8, padding: "5px 12px", textDecoration: "none",
                     }}>
-                      <ExternalLink size={12} /> Voir le contenu
+                      <ExternalLink size={12} aria-hidden="true" /> Voir le contenu
                     </Link>
                   )}
                 </div>
@@ -255,14 +255,14 @@ export default function AdminReportsPage() {
                       background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)",
                       color: "#10b981", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1,
                     }}>
-                      <CheckCircle size={15} /> Marquer examiné
+                      <CheckCircle size={15} aria-hidden="true" /> Marquer examiné
                     </button>
                     <button type="button" onClick={() => handle(report.id, "dismissed")} disabled={isPending} style={{
                       display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 9,
                       background: "rgba(107,114,128,0.08)", border: "1px solid rgba(107,114,128,0.2)",
                       color: "#6b7280", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1,
                     }}>
-                      <XCircle size={15} /> Ignorer
+                      <XCircle size={15} aria-hidden="true" /> Ignorer
                     </button>
                     <button type="button" onClick={() => handleDelete(report)} disabled={isPending} style={{
                       display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 9,
@@ -270,7 +270,7 @@ export default function AdminReportsPage() {
                       color: "#ef4444", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1,
                       marginLeft: "auto",
                     }}>
-                      <Trash2 size={15} /> Supprimer le contenu
+                      <Trash2 size={15} aria-hidden="true" /> Supprimer le contenu
                     </button>
                   </div>
                 )}

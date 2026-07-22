@@ -62,7 +62,7 @@ export function AdminAdsClient() {
   return (
     <div className="biz-page" style={{ maxWidth: 1000 }}>
       <Link href="/admin" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 16 }}>
-        <ArrowLeft size={14} /> Admin
+        <ArrowLeft size={14} aria-hidden="true" /> Admin
       </Link>
       <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>Modération des publicités</h1>
       <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>Validez, pausez ou rejetez les campagnes soumises par les entreprises.</p>
@@ -131,7 +131,7 @@ export function AdminAdsClient() {
                   </div>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 6 }}>
                     <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--text-muted)" }}>
-                      <Calendar size={11} /> {c.start_date}{c.end_date ? ` → ${c.end_date}` : ""}
+                      <Calendar size={11} aria-hidden="true" /> {c.start_date}{c.end_date ? ` → ${c.end_date}` : ""}
                     </span>
                     {(() => {
                       const { label, urgent } = daysRemaining(c.end_date);
@@ -150,18 +150,18 @@ export function AdminAdsClient() {
                   <a href={c.cta_url} target="_blank" rel="noopener noreferrer"
                     style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: "#8b5cf6", textDecoration: "none" }}>
                     {c.cta_label} → {c.cta_url.slice(0, 40)}{c.cta_url.length > 40 ? "…" : ""}
-                    <ExternalLink size={11} />
+                    <ExternalLink size={11} aria-hidden="true" />
                   </a>
                 </div>
 
                 <div style={{ display: "flex", gap: 16, flexShrink: 0, alignItems: "flex-start" }}>
                   <div style={{ textAlign: "center" }}>
                     <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)" }}>{Number(c.impression_count).toLocaleString("fr-CH")}</p>
-                    <p style={{ fontSize: 10, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 2 }}><Eye size={10} /> vues</p>
+                    <p style={{ fontSize: 10, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 2 }}><Eye size={10} aria-hidden="true" /> vues</p>
                   </div>
                   <div style={{ textAlign: "center" }}>
                     <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)" }}>{Number(c.click_count).toLocaleString("fr-CH")}</p>
-                    <p style={{ fontSize: 10, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 2 }}><MousePointer size={10} /> clics</p>
+                    <p style={{ fontSize: 10, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 2 }}><MousePointer size={10} aria-hidden="true" /> clics</p>
                   </div>
                 </div>
               </div>
@@ -179,19 +179,19 @@ export function AdminAdsClient() {
                 {c.status !== "active" && (
                   <button disabled={busy === c.id} onClick={() => handleStatus(c.id, "active")}
                     style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 9, background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.3)", color: "#10b981", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: busy === c.id ? 0.6 : 1 }}>
-                    <CheckCircle size={14} /> Activer
+                    <CheckCircle size={14} aria-hidden="true" /> Activer
                   </button>
                 )}
                 {c.status === "active" && (
                   <button disabled={busy === c.id} onClick={() => handleStatus(c.id, "paused")}
                     style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 9, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#8b5cf6", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: busy === c.id ? 0.6 : 1 }}>
-                    <PauseCircle size={14} /> Pauser
+                    <PauseCircle size={14} aria-hidden="true" /> Pauser
                   </button>
                 )}
                 {c.status !== "rejected" && (
                   <button disabled={busy === c.id} onClick={() => handleStatus(c.id, "rejected")}
                     style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 9, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: busy === c.id ? 0.6 : 1 }}>
-                    <XCircle size={14} /> Rejeter
+                    <XCircle size={14} aria-hidden="true" /> Rejeter
                   </button>
                 )}
               </div>

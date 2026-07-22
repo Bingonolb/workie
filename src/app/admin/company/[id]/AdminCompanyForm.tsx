@@ -138,7 +138,7 @@ export function AdminCompanyForm({ company }: { company: Company }) {
               background: "var(--surface2)", border: "1px solid var(--border)",
               fontSize: 12, fontWeight: 600, color: "var(--text-muted)",
             }}>
-              <ImageIcon size={13} /> Choisir une image
+              <ImageIcon size={13} aria-hidden="true" /> Choisir une image
               <input ref={fileRef} name="cover_file" type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
             </label>
             {(coverPreview || coverUrlValue) && (
@@ -220,7 +220,7 @@ export function AdminCompanyForm({ company }: { company: Company }) {
             cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
             fontWeight: 600, fontSize: 13,
           }}>
-            <Trash2 size={15} /> Supprimer
+            <Trash2 size={15} aria-hidden="true" /> Supprimer
           </button>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
