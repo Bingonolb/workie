@@ -494,9 +494,12 @@ export async function toggleJobOffer(id: string, is_active: boolean): Promise<{ 
 
 export async function trackCompanyView(companyId: string): Promise<void> {
   try {
-    const supabase = await createClient();
+    const [supabase, h] = await Promise.all([createClient(), headers()]);
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("company_views").insert({ company_id: companyId, user_id: user?.id ?? null });
+    const viewer_canton = h.get("x-vercel-ip-country-region") ?? null;
+    const viewer_city   = h.get("x-vercel-ip-city") ?? null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from("company_views") as any).insert({ company_id: companyId, user_id: user?.id ?? null, viewer_canton, viewer_city });
   } catch { /* silent */ }
 }
 
