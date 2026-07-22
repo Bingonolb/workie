@@ -74,7 +74,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
   };
 
   return (
-    <Link href={`/company/${company.id}`} style={{ textDecoration: "none", display: "block" }}>
+    <Link href={`/company/${company.id}`} aria-label={`Voir la fiche ${company.name}${Number(company.review_count) > 0 ? ` — ${Number(company.avg_rating).toFixed(1)}/5 (${company.review_count} avis)` : ""}`} style={{ textDecoration: "none", display: "block" }}>
       <div className="company-card" style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
