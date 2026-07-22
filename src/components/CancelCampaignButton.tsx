@@ -47,7 +47,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
           color: "#ef4444", cursor: "pointer",
         }}
       >
-        <PauseCircle size={14} /> Mettre en pause
+        <PauseCircle size={14} aria-hidden="true" /> Mettre en pause
       </button>
 
       {open && (
@@ -66,15 +66,15 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <PauseCircle size={20} color="#ef4444" />
+                  <PauseCircle size={20} color="#ef4444" aria-hidden="true" />
                 </div>
                 <div>
                   <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Mettre en pause ?</p>
                   <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>Cette action est réversible</p>
                 </div>
               </div>
-              <button type="button" onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4 }}>
-                <X size={18} />
+              <button type="button" onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4 }}>
+                <X size={18} aria-hidden="true" />
               </button>
             </div>
 
@@ -84,7 +84,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
             </p>
 
             {error && (
-              <p style={{ fontSize: 13, color: "#ef4444", marginBottom: 16, padding: "10px 14px", background: "rgba(239,68,68,0.07)", borderRadius: 10 }}>
+              <p role="alert" style={{ fontSize: 13, color: "#ef4444", marginBottom: 16, padding: "10px 14px", background: "rgba(239,68,68,0.07)", borderRadius: 10 }}>
                 ⚠ {error}
               </p>
             )}

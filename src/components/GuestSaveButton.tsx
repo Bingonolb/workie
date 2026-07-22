@@ -20,7 +20,7 @@ export function GuestSaveButton() {
           backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", minHeight: 44,
         }}
       >
-        <Flame size={16} fill="none" /> Sauvegarder
+        <Flame size={16} fill="none" aria-hidden="true" /> Sauvegarder
       </button>
       {open && <GuestModal reviewCount={0} open />}
     </>

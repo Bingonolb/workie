@@ -16,7 +16,7 @@ export function JobApplyButton({ jobId, companyId, applyUrl }: { jobId: string; 
       onClick={handleClick}
       style={{ display: "flex", alignItems: "center", gap: 6, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}
     >
-      Postuler <ExternalLink size={13} />
+      Postuler <ExternalLink size={13} aria-hidden="true" />
     </a>
   );
 }
