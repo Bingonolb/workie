@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Review } from "@/lib/types";
@@ -130,6 +130,7 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   revalidatePath("/profile");
   revalidatePath("/salaires");
   revalidatePath("/ranking");
+  revalidateTag("companies", {}); // refresh explore grid stats (avg_rating, review_count)
 
   // Notify the business owner (fire-and-forget)
   void (async () => {

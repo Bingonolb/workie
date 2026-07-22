@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -34,6 +34,7 @@ export async function addFlame(companyId: string): Promise<void> {
   revalidatePath("/explore");
   revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
+  revalidateTag("companies", {});
 }
 
 export async function addBoost(companyId: string): Promise<void> {
@@ -64,6 +65,7 @@ export async function addBoost(companyId: string): Promise<void> {
   revalidatePath("/explore");
   revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
+  revalidateTag("companies", {});
 }
 
 export async function addPenalty(companyId: string): Promise<void> {
@@ -104,6 +106,7 @@ export async function addPenalty(companyId: string): Promise<void> {
   revalidatePath("/explore");
   revalidatePath("/ranking");
   revalidatePath(`/company/${companyId}`);
+  revalidateTag("companies", {});
 }
 
 export async function getTopCompanies(limit = 200) {

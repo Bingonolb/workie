@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "crypto";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
@@ -63,6 +63,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     revalidatePath(`/company/${id}`);
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
+    revalidateTag("companies", {});
     return {};
   } catch (e) {
     return { error: (e as Error).message };
@@ -106,6 +107,7 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
 
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
+    revalidateTag("companies", {});
     return {};
   } catch (e) {
     return { error: (e as Error).message };
@@ -120,6 +122,7 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
     if (error) return { error: error.message };
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
+    revalidateTag("companies", {});
     return {};
   } catch (e) {
     return { error: (e as Error).message };
