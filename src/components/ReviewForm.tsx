@@ -303,40 +303,40 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </div>
 
             <div>
-              <label style={lbl}>Titre <span className="badge-optional">Optionnel</span></label>
-              <input value={title} onChange={e => setTitle(e.target.value)}
+              <label htmlFor="review-title" style={lbl}>Titre <span className="badge-optional">Optionnel</span></label>
+              <input id="review-title" value={title} onChange={e => setTitle(e.target.value)}
                 placeholder="Ex : Bonne boîte mais attention au rythme..." style={inp} />
             </div>
 
             <style>{`@media (max-width: 500px) { .review-pros-cons { grid-template-columns: 1fr !important; } }`}</style>
             <div className="review-pros-cons" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               <div>
-                <label style={lbl}>👍 Points positifs *</label>
-                <textarea value={pros} onChange={e => setPros(e.target.value)} rows={3}
+                <label htmlFor="review-pros" style={lbl}>👍 Points positifs *</label>
+                <textarea id="review-pros" value={pros} onChange={e => setPros(e.target.value)} rows={3}
                   placeholder="Ce que j'ai vraiment apprécié..." style={{ ...inp, resize: "vertical" }} />
               </div>
               <div>
-                <label style={lbl}>👎 Points négatifs *</label>
-                <textarea value={cons} onChange={e => setCons(e.target.value)} rows={3}
+                <label htmlFor="review-cons" style={lbl}>👎 Points négatifs *</label>
+                <textarea id="review-cons" value={cons} onChange={e => setCons(e.target.value)} rows={3}
                   placeholder="Ce qui m'a déçu ou frustré..." style={{ ...inp, resize: "vertical" }} />
               </div>
             </div>
 
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <label style={lbl}>Ton avis complet * <span style={{ fontWeight: 400, opacity: 0.5 }}>(min. 50 caractères)</span></label>
+                <label htmlFor="review-content" style={lbl}>Ton avis complet * <span style={{ fontWeight: 400, opacity: 0.5 }}>(min. 50 caractères)</span></label>
                 <span style={{ fontSize: 11, color: content.length >= 50 ? "#10b981" : "#f97316" }}>
                   {content.length < 50 ? `encore ${50 - content.length} caractères min.` : "✓ Bon à publier"}
                 </span>
               </div>
-              <textarea value={content} onChange={e => setContent(e.target.value)} rows={5}
+              <textarea id="review-content" value={content} onChange={e => setContent(e.target.value)} rows={5}
                 placeholder="Décris ton expérience honnêtement : projets, ambiance, management, ce que tu referais ou pas..."
                 style={{ ...inp, resize: "vertical" }} />
             </div>
 
             <div>
-              <label style={lbl}>💡 Ce que j'aurais voulu savoir avant <span className="badge-optional">Optionnel</span></label>
-              <textarea value={knewBefore} onChange={e => setKnewBefore(e.target.value)} rows={2}
+              <label htmlFor="review-knew-before" style={lbl}>💡 Ce que j'aurais voulu savoir avant <span className="badge-optional">Optionnel</span></label>
+              <textarea id="review-knew-before" value={knewBefore} onChange={e => setKnewBefore(e.target.value)} rows={2}
                 placeholder="Un conseil à quelqu'un qui rejoint cette boîte..."
                 style={{ ...inp, resize: "vertical" }} />
             </div>

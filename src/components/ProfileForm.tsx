@@ -116,15 +116,15 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
 
 <div className="profile-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div style={{ gridColumn: "1 / -1" }}>
-          <label style={lbl}>Nom complet</label>
-          <input name="full_name" defaultValue={profile?.full_name ?? ""} placeholder="Alex Martin" style={inp}
+          <label htmlFor="full_name" style={lbl}>Nom complet</label>
+          <input id="full_name" name="full_name" defaultValue={profile?.full_name ?? ""} placeholder="Alex Martin" style={inp}
             onFocus={e => (e.target.style.borderColor = "#8b5cf6")}
             onBlur={e => (e.target.style.borderColor = "var(--border)")}
           />
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
-          <label style={lbl}>Canton</label>
-          <select name="city" defaultValue={profile?.city ?? ""} style={{ ...inp, appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36 }}>
+          <label htmlFor="city" style={lbl}>Canton</label>
+          <select id="city" name="city" defaultValue={profile?.city ?? ""} style={{ ...inp, appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36 }}>
             <option value="">— Choisir un canton —</option>
             {[
               ["ZH","Zürich"],["BE","Bern"],["LU","Lucerne"],["UR","Uri"],["SZ","Schwyz"],
