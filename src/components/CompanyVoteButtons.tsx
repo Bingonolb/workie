@@ -144,8 +144,11 @@ export function CompanyVoteButtons({
 
       {/* -100 button */}
       <button
+        type="button"
         onClick={handlePenalty}
         title={penaltyUnlocked ? (penalized ? "Retirer la pénalité" : "-100 pts — pénaliser cette entreprise") : "Acheter des crédits pénalité"}
+        aria-label={penaltyUnlocked ? (penalized ? "Retirer la pénalité (-100 pts)" : "Pénaliser cette entreprise (-100 pts)") : "Acheter des crédits pénalité"}
+        aria-pressed={penalized}
         style={{
           display: "flex", alignItems: "center", gap: 7,
           padding: "10px 16px", borderRadius: 12, cursor: "pointer",
@@ -179,8 +182,11 @@ export function CompanyVoteButtons({
 
       {/* +100 button */}
       <button
+        type="button"
         onClick={handleBoost}
         title={boosted ? "Retirer le boost" : "+100 pts — booster cette entreprise"}
+        aria-label={boosted ? "Retirer le boost (+100 pts)" : "Booster cette entreprise (+100 pts)"}
+        aria-pressed={boosted}
         style={{
           display: "flex", alignItems: "center", gap: 7,
           padding: "10px 16px", borderRadius: 12, cursor: "pointer",
