@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient, getUser, getBusinessCompanyData } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyFavoriteUsers } from "@/lib/actions/notifications";
@@ -367,6 +367,7 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
 
     revalidatePath("/business/dashboard/profile");
     revalidatePath(`/company/${company.id}`);
+    revalidateTag("companies", {});
     return { success: true };
   } catch (e) {
     return { error: (e as Error).message };
