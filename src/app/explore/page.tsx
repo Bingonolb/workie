@@ -30,6 +30,7 @@ const SECTORS = [
   "Conseil", "Industrie", "Automobile", "Horlogerie",
   "Commerce", "Alimentation", "Agriculture",
   "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie",
+  "Droit", "Bâtiment", "Beauté", "Administration publique",
 ];
 const CANTONS = [
   { code: "ZH", name: "Zürich" },

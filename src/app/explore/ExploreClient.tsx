@@ -24,6 +24,7 @@ const SECTORS = [
   "Tech", "Finance", "Assurances", "Pharma", "Santé", "Conseil", "Industrie",
   "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture",
   "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie",
+  "Droit", "Bâtiment", "Beauté", "Administration publique",
 ];
 
 function sortCompanies(companies: Company[], sort: string): Company[] {
