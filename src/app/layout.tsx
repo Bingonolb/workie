@@ -42,6 +42,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <head>
+        {/* Preconnect to key third-party origins — saves ~100-300ms per TLS handshake */}
+        <link rel="preconnect" href="https://xtbdxfzbbuedlktpqpna.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://xtbdxfzbbuedlktpqpna.supabase.co" />
+        <link rel="preconnect" href="https://js.stripe.com" crossOrigin="anonymous" />
         {/* Apply theme before paint to avoid flash */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('workie-theme');if(t==='light')document.documentElement.classList.add('light');else document.documentElement.classList.remove('light');}catch(e){}})()` }} />
       </head>
