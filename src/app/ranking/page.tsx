@@ -77,9 +77,9 @@ export default async function RankingPage() {
         {/* KPI strip */}
         <div className="stat-grid-3" style={{ marginBottom: 32 }}>
           {[
-            { icon: <Users size={16} color="#8b5cf6" />, value: typedCompanies.length, label: "Entreprises classées", color: "#8b5cf6" },
-            { icon: <Star size={16} color="#f59e0b" fill="#f59e0b" />, value: totalReviews, label: "Avis publiés", color: "#f59e0b" },
-            { icon: <TrendingUp size={16} color="#10b981" />, value: avgRating > 0 ? Number(avgRating).toFixed(2) : "—", label: "Note moyenne", color: "#10b981" },
+            { icon: <Users size={16} color="#8b5cf6" aria-hidden="true" />, value: typedCompanies.length, label: "Entreprises classées", color: "#8b5cf6" },
+            { icon: <Star size={16} color="#f59e0b" fill="#f59e0b" aria-hidden="true" />, value: totalReviews, label: "Avis publiés", color: "#f59e0b" },
+            { icon: <TrendingUp size={16} color="#10b981" aria-hidden="true" />, value: avgRating > 0 ? Number(avgRating).toFixed(2) : "—", label: "Note moyenne", color: "#10b981" },
           ].map(({ icon, value, label, color }) => (
             <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>

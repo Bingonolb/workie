@@ -122,7 +122,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
       <section style={{ background: "var(--surface2)", borderBottom: "1px solid var(--border)", padding: "52px 24px 40px" }}>
         <div style={{ maxWidth: 860, margin: "0 auto" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "5px 14px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#8b5cf6" } as React.CSSProperties}>
-            <BadgeCheck size={13} /> Entreprises vérifiées uniquement
+            <BadgeCheck size={13} aria-hidden="true" /> Entreprises vérifiées uniquement
           </div>
           <h1 style={{ fontSize: "clamp(28px, 5vw, 44px)", fontWeight: 900, letterSpacing: "-0.04em", color: "var(--text)", marginBottom: 12, lineHeight: 1.1 }}>
             Offres d&apos;emploi<br />
@@ -183,7 +183,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
         {/* Job list */}
         {allJobs.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px" }}>
-            <Briefcase size={56} style={{ opacity: 0.15, margin: "0 auto 24px", display: "block" }} />
+            <Briefcase size={56} aria-hidden="true" style={{ opacity: 0.15, margin: "0 auto 24px", display: "block" }} />
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune offre pour le moment</h2>
             <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 32, lineHeight: 1.7, maxWidth: 400, margin: "0 auto 32px" }}>
               Les offres d&apos;emploi apparaîtront ici dès que des entreprises vérifiées les publieront.
@@ -239,7 +239,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                       )}
                       <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-muted)" }}>{co.name}</span>
                       {co.is_verified && (
-                        <svg viewBox="0 0 22 22" style={{ width: 16, height: 16, flexShrink: 0 }}>
+                        <svg viewBox="0 0 22 22" style={{ width: 16, height: 16, flexShrink: 0 }} aria-label="Entreprise vérifiée">
                           <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                           <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
                         </svg>
@@ -250,7 +250,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                     <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
                       {job.location && (
                         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 13, color: "var(--text-muted)" }}>
-                          <MapPin size={13} /> {job.location}
+                          <MapPin size={13} aria-hidden="true" /> {job.location}
                         </span>
                       )}
                       {job.salary_range && (
@@ -276,7 +276,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                     ) : (
                       <Link href={`/company/${co.id}`}
                         style={{ display: "flex", alignItems: "center", gap: 6, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>
-                        Voir la fiche <ArrowRight size={13} />
+                        Voir la fiche <ArrowRight size={13} aria-hidden="true" />
                       </Link>
                     )}
                     <Link href={`/company/${co.id}`} style={{ fontSize: 11, color: "var(--text-muted)", textDecoration: "none", textAlign: "right" }}>
@@ -298,7 +298,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
             </p>
           </div>
           <Link href="/business" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none", whiteSpace: "nowrap" }}>
-            Espace entreprise <ArrowRight size={16} />
+            Espace entreprise <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </div>
       </main>
