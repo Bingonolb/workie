@@ -61,6 +61,7 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
       href={ad.cta_url}
       target="_blank"
       rel="noopener noreferrer sponsored"
+      aria-label={`Publicité : ${ad.headline}`}
       onClick={() => trackAdClick(ad.id)}
       style={{
         background: "var(--surface)",
