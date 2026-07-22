@@ -35,7 +35,9 @@ export function HelpfulButton({ reviewId, initialCount, initialVoted = false }: 
     <button
       type="button"
       onClick={handleClick}
-      disabled={isPending}
+      disabled={voted || isPending}
+      aria-pressed={voted}
+      aria-label={voted ? `Avis marqué utile (${count})` : `Marquer cet avis comme utile${count > 0 ? ` (${count})` : ""}`}
       style={{
         display: "flex", alignItems: "center", gap: 6,
         padding: "5px 12px", borderRadius: 8,
@@ -48,7 +50,7 @@ export function HelpfulButton({ reviewId, initialCount, initialVoted = false }: 
         transition: "all 0.15s",
       }}
     >
-      <ThumbsUp size={13} fill={voted ? "#8b5cf6" : "none"} />
+      <ThumbsUp size={13} fill={voted ? "#8b5cf6" : "none"} aria-hidden="true" />
       {isPending ? "..." : "Utile"}
       {count > 0 && (
         <span style={{ color: "#8b5cf6", fontWeight: 700 }}>{count}</span>
