@@ -51,14 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ background: "var(--bg)", overflowX: "clip", width: "100%", position: "relative" }}>
         {/* Skip to main content — screen readers and keyboard-only users */}
-        <a href="#main-content" style={{
-          position: "absolute", top: -9999, left: 0, zIndex: 99999,
-          padding: "10px 16px", background: "#8b5cf6", color: "#fff",
-          fontWeight: 700, fontSize: 14, textDecoration: "none", borderRadius: "0 0 8px 0",
-        }}
-          onFocus={e => { (e.target as HTMLAnchorElement).style.top = "0"; }}
-          onBlur={e => { (e.target as HTMLAnchorElement).style.top = "-9999px"; }}
-        >
+        <a href="#main-content" className="skip-to-main">
           Aller au contenu principal
         </a>
         <ThemeProvider>
