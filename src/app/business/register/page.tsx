@@ -98,7 +98,7 @@ export default function RegisterPage() {
     return (
       <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center" }}>
-          <CheckCircle size={48} color="#10b981" style={{ margin: "0 auto 16px" }} />
+          <CheckCircle size={48} color="#10b981" aria-hidden="true" style={{ margin: "0 auto 16px" }} />
           <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)" }}>Compte créé !</p>
           <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 6 }}>Redirection vers le paiement…</p>
         </div>
@@ -133,7 +133,7 @@ export default function RegisterPage() {
 
           <div style={{ marginBottom: 36 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 50, padding: "5px 14px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#10b981" } as React.CSSProperties}>
-              <Plus size={13} /> Nouvelle fiche entreprise
+              <Plus size={13} aria-hidden="true" /> Nouvelle fiche entreprise
             </div>
             <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 8 }}>
               {step === 0 && "Votre entreprise"}
@@ -316,37 +316,37 @@ export default function RegisterPage() {
               </div>
 
               <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", display: "flex", gap: 10 }}>
-                <Zap size={15} color="#8b5cf6" style={{ flexShrink: 0, marginTop: 1 }} />
+                <Zap size={15} color="#8b5cf6" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }} />
                 <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
                   Votre compte est créé immédiatement. Vous serez redirigé vers le paiement sécurisé, puis accéderez à votre dashboard sans attente.
                 </p>
               </div>
 
-              {state?.error && <p style={{ fontSize: 13, color: "#ef4444" }}>{state.error}</p>}
+              {state?.error && <p role="alert" style={{ fontSize: 13, color: "#ef4444" }}>{state.error}</p>}
             </div>
           )}
 
-          {err && <p style={{ fontSize: 13, color: "#ef4444", marginTop: 16 }}>{err}</p>}
+          {err && <p role="alert" style={{ fontSize: 13, color: "#ef4444", marginTop: 16 }}>{err}</p>}
 
           <div style={{ display: "flex", gap: 10, marginTop: 32 }}>
             {step > 0 && (
               <button type="button" onClick={() => { setStep(s => s - 1); setErr(""); }}
                 style={{ display: "flex", alignItems: "center", gap: 6, padding: "13px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
-                <ArrowLeft size={16} /> Retour
+                <ArrowLeft size={16} aria-hidden="true" /> Retour
               </button>
             )}
 
             {step < 2 && (
               <button type="button" onClick={goNext}
                 style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 0", borderRadius: 10, border: "none", cursor: "pointer", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15 }}>
-                Continuer <ArrowRight size={16} />
+                Continuer <ArrowRight size={16} aria-hidden="true" />
               </button>
             )}
 
             {step === 2 && (
               <button type="submit" form="register-form" disabled={!canNext2 || pending}
                 style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 0", borderRadius: 10, border: "none", background: canNext2 ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface2)", color: canNext2 ? "#fff" : "var(--text-muted)", fontWeight: 700, fontSize: 15, cursor: canNext2 ? "pointer" : "not-allowed", opacity: pending ? 0.7 : 1 }}>
-                {pending ? "Envoi..." : <><Zap size={16} /> Valider et choisir mon abonnement</>}
+                {pending ? "Envoi..." : <><Zap size={16} aria-hidden="true" /> Valider et choisir mon abonnement</>}
               </button>
             )}
           </div>

@@ -24,7 +24,7 @@ function StepDots({ step }: { step: number }) {
               fontSize: 11, fontWeight: 800, color: i <= step ? "#fff" : "var(--text-muted)",
               flexShrink: 0, transition: "all 0.3s",
             }}>
-              {i < step ? <CheckCircle size={14} /> : i + 1}
+              {i < step ? <CheckCircle size={14} aria-hidden="true" /> : i + 1}
             </div>
             <span style={{ fontSize: 10, fontWeight: 600, color: i === step ? "#8b5cf6" : "var(--text-muted)", whiteSpace: "nowrap", letterSpacing: "0.03em" }}>{labels[i]}</span>
           </div>
@@ -95,7 +95,7 @@ function CompanySearch({ onSelect }: { onSelect: (c: CompanyResult) => void }) {
   return (
     <div ref={ref} style={{ position: "relative" }}>
       <div className="inp-icon-wrap">
-        <span className="inp-icon"><Search size={16} /></span>
+        <span className="inp-icon"><Search size={16} aria-hidden="true" /></span>
         {loading && <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: "var(--text-muted)" }}>…</span>}
         <input
           ref={inputRef}
@@ -123,7 +123,7 @@ function CompanySearch({ onSelect }: { onSelect: (c: CompanyResult) => void }) {
                 <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</p>
                 <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{c.city} · {c.sector}</p>
               </div>
-              <Building2 size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+              <Building2 size={13} aria-hidden="true" style={{ color: "var(--text-muted)", flexShrink: 0 }} />
             </button>
           ))}
         </div>
@@ -192,7 +192,7 @@ export default function ClaimPage() {
     return (
       <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center" }}>
-          <CheckCircle size={48} color="#10b981" style={{ margin: "0 auto 16px" }} />
+          <CheckCircle size={48} color="#10b981" aria-hidden="true" style={{ margin: "0 auto 16px" }} />
           <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)" }}>Compte créé !</p>
           <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 6 }}>Redirection vers le paiement…</p>
         </div>
@@ -222,7 +222,7 @@ export default function ClaimPage() {
         <div style={{ width: "100%", maxWidth: 560 }}>
           <div style={{ marginBottom: 36 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "5px 14px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#8b5cf6" } as React.CSSProperties}>
-              <BadgeCheck size={13} /> Revendication de fiche entreprise
+              <BadgeCheck size={13} aria-hidden="true" /> Revendication de fiche entreprise
             </div>
             <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 8 }}>
               {step === 0 && "Trouvez votre entreprise"}
@@ -258,7 +258,7 @@ export default function ClaimPage() {
           {step === 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div>
-                <label style={lbl}><Search size={12} /> Rechercher votre entreprise *</label>
+                <label style={lbl}><Search size={12} aria-hidden="true" /> Rechercher votre entreprise *</label>
                 <CompanySearch onSelect={c => setSelectedCompany(c)} />
               </div>
 
@@ -272,7 +272,7 @@ export default function ClaimPage() {
                     <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{selectedCompany.city} · {selectedCompany.sector}</p>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                    <CheckCircle size={18} color="#10b981" />
+                    <CheckCircle size={18} color="#10b981" aria-hidden="true" />
                     <span style={{ fontSize: 12, fontWeight: 600, color: "#10b981" }}>Sélectionnée</span>
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export default function ClaimPage() {
 
               {/* Section — Identité */}
               <div className="form-section">
-                <span className="form-section-title"><User size={11} style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} />Identité</span>
+                <span className="form-section-title"><User size={11} aria-hidden="true" style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} />Identité</span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
@@ -308,7 +308,7 @@ export default function ClaimPage() {
               <div>
                 <label style={lbl}>Votre poste *</label>
                 <div className="inp-icon-wrap">
-                  <span className="inp-icon"><Briefcase size={15} /></span>
+                  <span className="inp-icon"><Briefcase size={15} aria-hidden="true" /></span>
                   <input value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="Ex : HR Manager, DRH, Directeur RH..." style={inp} />
                 </div>
               </div>
@@ -326,12 +326,12 @@ export default function ClaimPage() {
 
               {/* Section — Contact */}
               <div className="form-section" style={{ marginTop: 8 }}>
-                <span className="form-section-title"><Mail size={11} style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} />Contact professionnel</span>
+                <span className="form-section-title"><Mail size={11} aria-hidden="true" style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} />Contact professionnel</span>
               </div>
               <div>
                 <label style={lbl}>Email professionnel *</label>
                 <div className="inp-icon-wrap">
-                  <span className="inp-icon"><Mail size={15} /></span>
+                  <span className="inp-icon"><Mail size={15} aria-hidden="true" /></span>
                   <input type="email" value={workEmail} onChange={e => setWorkEmail(e.target.value)} placeholder="jean.dupont@entreprise.ch" style={inp} autoComplete="work email" />
                 </div>
                 {workEmail && BANNED.some(d => workEmail.toLowerCase().endsWith(d)) && (
@@ -342,7 +342,7 @@ export default function ClaimPage() {
 
               {/* Section — Vérification */}
               <div className="form-section" style={{ marginTop: 8 }}>
-                <span className="form-section-title"><Link2 size={11} style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} />Vérification légale</span>
+                <span className="form-section-title"><Link2 size={11} aria-hidden="true" style={{ display: "inline", verticalAlign: "middle", marginRight: 5 }} />Vérification légale</span>
               </div>
               <div>
                 <label style={lbl}>
@@ -350,7 +350,7 @@ export default function ClaimPage() {
                   <span className="badge-optional">Optionnel</span>
                 </label>
                 <div className="inp-icon-wrap">
-                  <span className="inp-icon"><Link2 size={15} /></span>
+                  <span className="inp-icon"><Link2 size={15} aria-hidden="true" /></span>
                   <input
                     type="url"
                     value={zefixUrl}
@@ -364,7 +364,7 @@ export default function ClaimPage() {
                   Trouvez votre entreprise sur{" "}
                   <a href="https://www.zefix.ch" target="_blank" rel="noopener noreferrer"
                     style={{ color: "#8b5cf6", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 2 }}>
-                    zefix.ch <ExternalLink size={10} />
+                    zefix.ch <ExternalLink size={10} aria-hidden="true" />
                   </a>{" "}
                   et copiez l'URL. Cela accélère la validation de votre demande.
                 </p>
@@ -373,7 +373,7 @@ export default function ClaimPage() {
               {/* Section — Message */}
               <div>
                 <label style={lbl}>
-                  <MessageSquare size={12} /> Message
+                  <MessageSquare size={12} aria-hidden="true" /> Message
                   <span className="badge-optional">Optionnel</span>
                 </label>
                 <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3}
@@ -443,14 +443,14 @@ export default function ClaimPage() {
               </div>
 
               <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", display: "flex", gap: 10, alignItems: "flex-start" }}>
-                <BadgeCheck size={16} color="#8b5cf6" style={{ flexShrink: 0, marginTop: 1 }} />
+                <BadgeCheck size={16} color="#8b5cf6" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }} />
                 <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
                   Votre compte est créé immédiatement. Vous serez redirigé vers le paiement sécurisé, puis accéderez à votre dashboard. Le badge bleu est accordé sous 48h ouvrées.
                 </p>
               </div>
 
               {state?.error && (
-                <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#ef4444" }}>
+                <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#ef4444" }}>
                   {state.error}
                 </div>
               )}
@@ -458,7 +458,7 @@ export default function ClaimPage() {
           )}
 
           {err && (
-            <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#ef4444", marginTop: 16 }}>
+            <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 14px", fontSize: 13, color: "#ef4444", marginTop: 16 }}>
               {err}
             </div>
           )}
@@ -467,19 +467,19 @@ export default function ClaimPage() {
             {step > 0 && (
               <button type="button" onClick={() => { setStep(s => s - 1); setErr(""); }}
                 style={{ display: "flex", alignItems: "center", gap: 6, padding: "13px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
-                <ArrowLeft size={16} /> Retour
+                <ArrowLeft size={16} aria-hidden="true" /> Retour
               </button>
             )}
             {step < 2 ? (
               <button type="button" onClick={goNext}
                 disabled={step === 0 && !selectedCompany}
                 style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 0", borderRadius: 10, border: "none", cursor: (step === 0 && !selectedCompany) ? "not-allowed" : "pointer", background: (step === 0 && !selectedCompany) ? "var(--surface2)" : "linear-gradient(135deg, #8b5cf6, #f97316)", color: (step === 0 && !selectedCompany) ? "var(--text-muted)" : "#fff", fontWeight: 700, fontSize: 15, transition: "opacity 0.15s" }}>
-                Continuer <ArrowRight size={16} />
+                Continuer <ArrowRight size={16} aria-hidden="true" />
               </button>
             ) : (
               <button type="submit" form="claim-form" disabled={!canSubmit || pending}
                 style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 0", borderRadius: 10, border: "none", background: canSubmit ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface2)", color: canSubmit ? "#fff" : "var(--text-muted)", fontWeight: 700, fontSize: 15, cursor: canSubmit ? "pointer" : "not-allowed", opacity: pending ? 0.7 : 1, transition: "opacity 0.15s" }}>
-                {pending ? "Envoi en cours..." : <><CheckCircle size={16} /> Soumettre ma demande</>}
+                {pending ? "Envoi en cours..." : <><CheckCircle size={16} aria-hidden="true" /> Soumettre ma demande</>}
               </button>
             )}
           </div>

@@ -71,7 +71,7 @@ export default async function CheckoutPage({
         {logo}
         <div style={{ width: "100%", maxWidth: 480, textAlign: "center" }}>
           <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}>
-            <PartyPopper size={32} color="#10b981" />
+            <PartyPopper size={32} color="#10b981" aria-hidden="true" />
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.04em", marginBottom: 12 }}>Bienvenue sur Workie Business !</h1>
           <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 12 }}>
@@ -81,7 +81,7 @@ export default async function CheckoutPage({
             Cette page se rafraîchit automatiquement. Vous serez redirigé vers votre dashboard dès confirmation.
           </p>
           <Link href="/business/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 28px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
-            Accéder au dashboard <ArrowRight size={16} />
+            Accéder au dashboard <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </div>
       </main>
@@ -95,7 +95,7 @@ export default async function CheckoutPage({
         {logo}
         <div style={{ width: "100%", maxWidth: 480, textAlign: "center" }}>
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
-            <XCircle size={28} color="#ef4444" />
+            <XCircle size={28} color="#ef4444" aria-hidden="true" />
           </div>
           <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 10 }}>Erreur de paiement</h1>
           <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
@@ -103,7 +103,7 @@ export default async function CheckoutPage({
             <a href="mailto:hello@workie.ch" style={{ color: "#8b5cf6" }}>hello@workie.ch</a>.
           </p>
           <Link href="/business/checkout" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-            Réessayer <ArrowRight size={15} />
+            Réessayer <ArrowRight size={15} aria-hidden="true" />
           </Link>
         </div>
       </main>
@@ -117,12 +117,12 @@ export default async function CheckoutPage({
         {logo}
         <div style={{ width: "100%", maxWidth: 480, textAlign: "center" }}>
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
-            <XCircle size={28} color="#ef4444" />
+            <XCircle size={28} color="#ef4444" aria-hidden="true" />
           </div>
           <h1 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 10 }}>Paiement annulé</h1>
           <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>Aucun montant n&apos;a été débité. Vous pouvez réessayer à tout moment.</p>
           <Link href="/business/checkout" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-            Réessayer <ArrowRight size={15} />
+            Réessayer <ArrowRight size={15} aria-hidden="true" />
           </Link>
         </div>
       </main>
@@ -175,7 +175,7 @@ Une erreur inattendue s&apos;est produite. Contactez-nous à <a href="mailto:hel
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
             {FEATURES.map(f => (
               <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--text)" }}>
-                <CheckCircle size={16} color="#10b981" /> {f}
+                <CheckCircle size={16} color="#10b981" aria-hidden="true" /> {f}
               </div>
             ))}
           </div>
@@ -185,7 +185,7 @@ Une erreur inattendue s&apos;est produite. Contactez-nous à <a href="mailto:hel
               <form action="/api/business/checkout" method="POST">
                 <input type="hidden" name="price" value="monthly" />
                 <button type="submit" style={{ width: "100%", padding: "16px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 8px 24px rgba(139,92,246,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                  Payer 99 CHF/mois <ArrowRight size={18} />
+                  Payer 99 CHF/mois <ArrowRight size={18} aria-hidden="true" />
                 </button>
               </form>
               <form action="/api/business/checkout" method="POST">
@@ -204,14 +204,14 @@ Une erreur inattendue s&apos;est produite. Contactez-nous à <a href="mailto:hel
                 </p>
               </div>
               <a href="mailto:hello@workie.ch?subject=Activation compte entreprise" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
-                Nous contacter pour activer <ArrowRight size={16} />
+                Nous contacter pour activer <ArrowRight size={16} aria-hidden="true" />
               </a>
             </div>
           )}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "var(--text-muted)" }}>
-          <Shield size={13} /> Sans engagement · Annulation à tout moment · Données sécurisées
+          <Shield size={13} aria-hidden="true" /> Sans engagement · Annulation à tout moment · Données sécurisées
         </div>
       </div>
     </main>

@@ -48,12 +48,12 @@ export function Pagination({ page, pageCount, total, params }: {
     }}>
       {/* Prev */}
       {page > 1 ? (
-        <Link href={buildHref(params, page - 1)} style={btnBase}>
-          <ChevronLeft size={16} />
+        <Link href={buildHref(params, page - 1)} aria-label="Page précédente" style={btnBase}>
+          <ChevronLeft size={16} aria-hidden="true" />
         </Link>
       ) : (
-        <span style={{ ...btnBase, opacity: 0.3, cursor: "not-allowed" }}>
-          <ChevronLeft size={16} />
+        <span aria-disabled="true" style={{ ...btnBase, opacity: 0.3, cursor: "not-allowed" }}>
+          <ChevronLeft size={16} aria-hidden="true" />
         </span>
       )}
 
@@ -74,12 +74,12 @@ export function Pagination({ page, pageCount, total, params }: {
 
       {/* Next */}
       {page < pageCount ? (
-        <Link href={buildHref(params, page + 1)} style={btnBase}>
-          <ChevronRight size={16} />
+        <Link href={buildHref(params, page + 1)} aria-label="Page suivante" style={btnBase}>
+          <ChevronRight size={16} aria-hidden="true" />
         </Link>
       ) : (
-        <span style={{ ...btnBase, opacity: 0.3, cursor: "not-allowed" }}>
-          <ChevronRight size={16} />
+        <span aria-disabled="true" style={{ ...btnBase, opacity: 0.3, cursor: "not-allowed" }}>
+          <ChevronRight size={16} aria-hidden="true" />
         </span>
       )}
 

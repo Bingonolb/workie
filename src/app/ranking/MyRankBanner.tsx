@@ -74,7 +74,7 @@ export function MyRankBanner() {
           {data.cover_url
             // eslint-disable-next-line @next/next/no-img-element
             ? <img src={data.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            : <Trophy size={20} color="#8b5cf6" />}
+            : <Trophy size={20} color="#8b5cf6" aria-hidden="true" />}
         </div>
 
         {/* Info */}

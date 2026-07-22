@@ -31,7 +31,7 @@ export default async function BusinessLoginPage() {
             <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 6, textTransform: "uppercase", opacity: 0.9 }}>Business</span>
           </Link>
           <Link href="/business" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500 }}>
-            <ArrowLeft size={14} /> Espace entreprise
+            <ArrowLeft size={14} aria-hidden="true" /> Espace entreprise
           </Link>
         </div>
 
