@@ -37,7 +37,7 @@ export function PayCampaignButton({ campaignId, totalBudget }: { campaignId: str
           whiteSpace: "nowrap",
         }}
       >
-        <Lock size={13} />
+        <Lock size={13} aria-hidden="true" />
         {loading
           ? "Redirection vers Stripe…"
           : `Payer CHF ${totalBudget.toFixed(2)} · Lancer`}

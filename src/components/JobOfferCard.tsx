@@ -123,7 +123,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
               {job.experience_level && <Badge label={job.experience_level} color="#f97316" />}
               {job.location && (
                 <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13, color: "var(--text-muted)", background: "var(--surface2)", borderRadius: 50, padding: "3px 12px", border: "1px solid var(--border2)" }}>
-                  <MapPin size={12} /> {job.location}
+                  <MapPin size={12} aria-hidden="true" /> {job.location}
                 </span>
               )}
             </div>

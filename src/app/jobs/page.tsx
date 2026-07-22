@@ -189,7 +189,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
               Les offres d&apos;emploi apparaîtront ici dès que des entreprises vérifiées les publieront.
             </p>
             <Link href="/business" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-              Vous êtes RH ? Publier une offre <ArrowRight size={16} />
+              Vous êtes RH ? Publier une offre <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
         ) : filteredJobs.length === 0 ? (

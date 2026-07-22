@@ -216,9 +216,10 @@ export function ExploreFilters({
             {input && (
               <button
                 onMouseDown={e => { e.preventDefault(); clearSearch(); }}
+                aria-label="Effacer la recherche"
                 style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", padding: 4 }}
               >
-                <X size={15} />
+                <X size={15} aria-hidden="true" />
               </button>
             )}
           </div>
@@ -283,7 +284,7 @@ export function ExploreFilters({
               cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s",
             }}
           >
-            <SlidersHorizontal size={15} />
+            <SlidersHorizontal size={15} aria-hidden="true" />
             <span>Filtres</span>
             {activeCount > 0 && (
               <span style={{ background: "#8b5cf6", color: "#fff", borderRadius: 50, fontSize: 10, fontWeight: 800, padding: "1px 6px", minWidth: 18, textAlign: "center" }}>
@@ -383,8 +384,8 @@ export function ExploreFilters({
         {/* View toggle — always navigates via URL (never intercepted by onFilter) */}
         <div style={{ display: "flex", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, padding: 3, gap: 3, flexShrink: 0 }}>
           {([
-            { v: "grid", icon: <LayoutGrid size={16} />, label: "Grille" },
-            { v: "swipe", icon: <Layers size={16} />, label: "Swipe" },
+            { v: "grid", icon: <LayoutGrid size={16} aria-hidden="true" />, label: "Grille" },
+            { v: "swipe", icon: <Layers size={16} aria-hidden="true" />, label: "Swipe" },
           ] as const).map(({ v, icon, label }) => {
             const p = new URLSearchParams(searchParams.toString());
             if (v === "grid") p.delete("view"); else p.set("view", v);
@@ -411,25 +412,25 @@ export function ExploreFilters({
           {current.q && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#8b5cf6" }}>
               🔍 {current.q}
-              <button type="button" onClick={clearSearch} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
+              <button type="button" aria-label="Effacer la recherche" onClick={clearSearch} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
             </span>
           )}
           {current.sector && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: `${SECTOR_COLORS[current.sector] ?? "#8b5cf6"}18`, border: `1px solid ${SECTOR_COLORS[current.sector] ?? "#8b5cf6"}44`, color: SECTOR_COLORS[current.sector] ?? "#8b5cf6" }}>
               {current.sector}
-              <button type="button" onClick={() => push("sector", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
+              <button type="button" aria-label="Retirer le secteur" onClick={() => push("sector", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
             </span>
           )}
           {activeCanton && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.3)", color: "#f97316" }}>
               📍 {activeCanton.name}
-              <button type="button" onClick={() => push("canton", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
+              <button type="button" aria-label="Retirer le canton" onClick={() => push("canton", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
             </span>
           )}
           {sort !== "recent" && view !== "swipe" && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#8b5cf6" }}>
               ↑ {sort === "score" ? "Score" : sort === "rating" ? "Meilleure note" : sort === "reviews" ? "Plus d'avis" : "A→Z"}
-              <button type="button" onClick={() => push("sort", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} /></button>
+              <button type="button" aria-label="Retirer le tri" onClick={() => push("sort", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
             </span>
           )}
         </div>
@@ -451,7 +452,7 @@ export function ExploreFilters({
               onClick={() => setMobileSearchOpen(false)}
               style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text)", padding: 6, display: "flex", flexShrink: 0 }}
             >
-              <ArrowLeft size={22} />
+              <ArrowLeft size={22} aria-hidden="true" />
             </button>
             <div style={{ position: "relative", flex: 1 }}>
               <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
@@ -480,7 +481,7 @@ export function ExploreFilters({
                   onClick={() => setMobileInput("")}
                   style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", padding: 4 }}
                 >
-                  <X size={15} />
+                  <X size={15} aria-hidden="true" />
                 </button>
               )}
             </div>

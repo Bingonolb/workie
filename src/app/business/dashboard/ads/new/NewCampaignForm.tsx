@@ -415,7 +415,7 @@ export function NewCampaignForm({
 
         {/* ── TARGETING ──────────────────────────────────────────────── */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Target size={18} />} title="Ciblage" subtitle="Choisissez votre audience — plus elle est ciblée, plus les profils qui voient votre annonce sont pertinents." />
+          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage" subtitle="Choisissez votre audience — plus elle est ciblée, plus les profils qui voient votre annonce sont pertinents." />
 
           <div style={{ marginBottom: 22 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
@@ -478,7 +478,7 @@ export function NewCampaignForm({
 
         {/* ── BUDGET ─────────────────────────────────────────────────── */}
         <div className="biz-form-card">
-          <SectionHeader icon={<DollarSign size={18} />} title="Budget" subtitle="Ajustez le budget journalier et la durée — le total se calcule automatiquement." />
+          <SectionHeader icon={<DollarSign size={18} aria-hidden="true" />} title="Budget" subtitle="Ajustez le budget journalier et la durée — le total se calcule automatiquement." />
 
           {/* Smart sliders */}
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
@@ -566,9 +566,9 @@ export function NewCampaignForm({
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 1 }}>
             {[
-              { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "/ 1 000 vues", icon: <DollarSign size={14} />, color: "#8b5cf6" },
+              { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "/ 1 000 vues", icon: <DollarSign size={14} aria-hidden="true" />, color: "#8b5cf6" },
               { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions", icon: <Eye size={14} aria-hidden="true" />, color: "#6366f1" },
-              { label: "Portée / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes uniques", icon: <MousePointer size={14} />, color: "#f97316" },
+              { label: "Portée / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes uniques", icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
               { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} aria-hidden="true" />, color: "#10b981" },
             ].map(({ label, value, sub, icon, color }) => (
               <div key={label} style={{

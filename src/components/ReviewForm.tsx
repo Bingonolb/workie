@@ -82,9 +82,9 @@ function PillPicker({ options, value, onChange }: {
 
 function StepBar({ step }: { step: number }) {
   const steps = [
-    { icon: <Briefcase size={14} />, label: "Emploi" },
-    { icon: <Star size={14} />, label: "Notes" },
-    { icon: <MessageSquare size={14} />, label: "Avis" },
+    { icon: <Briefcase size={14} aria-hidden="true" />, label: "Emploi" },
+    { icon: <Star size={14} aria-hidden="true" />, label: "Notes" },
+    { icon: <MessageSquare size={14} aria-hidden="true" />, label: "Avis" },
   ];
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: 28 }}>
@@ -100,7 +100,7 @@ function StepBar({ step }: { step: number }) {
               color: done ? "#10b981" : active ? "#8b5cf6" : "var(--text-muted)",
               fontSize: 12, fontWeight: 600, flexShrink: 0,
             }}>
-              {done ? <CheckCircle size={14} /> : s.icon}
+              {done ? <CheckCircle size={14} aria-hidden="true" /> : s.icon}
               {s.label}
             </div>
             {i < steps.length - 1 && (
@@ -398,7 +398,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
                 background: "var(--surface2)", border: "1px solid var(--border2)",
                 color: "var(--text-muted)", cursor: "pointer",
               }}>
-              <ChevronLeft size={16} /> Retour
+              <ChevronLeft size={16} aria-hidden="true" /> Retour
             </button>
           )}
 
@@ -410,7 +410,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
                 background: "linear-gradient(135deg, #8b5cf6, #f97316)",
                 border: "none", color: "#fff", cursor: "pointer",
               }}>
-              Continuer <ChevronRight size={16} />
+              Continuer <ChevronRight size={16} aria-hidden="true" />
             </button>
           ) : (
             <button type="submit"

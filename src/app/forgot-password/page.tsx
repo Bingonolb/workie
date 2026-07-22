@@ -30,14 +30,14 @@ export default function ForgotPasswordPage() {
               Si cette adresse est associée à un compte, vous recevrez un lien pour réinitialiser votre mot de passe dans les prochaines minutes.
             </p>
             <Link href="/login" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 14, fontWeight: 600, color: "#8b5cf6", textDecoration: "none" }}>
-              <ArrowLeft size={14} /> Retour à la connexion
+              <ArrowLeft size={14} aria-hidden="true" /> Retour à la connexion
             </Link>
           </div>
         ) : (
           <>
             <div style={{ marginBottom: 28 }}>
               <Link href="/login" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
-                <ArrowLeft size={13} /> Retour
+                <ArrowLeft size={13} aria-hidden="true" /> Retour
               </Link>
               <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Mot de passe oublié</h1>
               <p style={{ fontSize: 14, color: "var(--text-muted)" }}>

@@ -158,7 +158,7 @@ export function CompanyVoteButtons({
           ...penaltyStyle,
         }}
       >
-        <Skull size={14} />
+        <Skull size={14} aria-hidden="true" />
         -100 pts
         {!isAdmin && credits > 0 && (
           <span style={{
