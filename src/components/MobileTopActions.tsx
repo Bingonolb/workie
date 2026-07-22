@@ -31,14 +31,17 @@ export function MobileTopActions({ profileUrl, signOutUrl }: { profileUrl: strin
           border: "1px solid var(--border2)",
         }}
       >
-        <Compass size={13} strokeWidth={2} />
+        <Compass size={13} strokeWidth={2} aria-hidden="true" />
         Explorer
       </Link>
 
       {/* Profile dropdown */}
       <div ref={ref} style={{ position: "relative" }}>
         <button
+          type="button"
           onClick={() => setOpen(o => !o)}
+          aria-label="Menu du profil"
+          aria-expanded={open}
           style={{
             display: "flex", alignItems: "center", justifyContent: "center",
             width: 34, height: 34, borderRadius: 8,
@@ -47,7 +50,7 @@ export function MobileTopActions({ profileUrl, signOutUrl }: { profileUrl: strin
             color: "var(--text-muted)", cursor: "pointer",
           }}
         >
-          <User size={15} strokeWidth={2} />
+          <User size={15} strokeWidth={2} aria-hidden="true" />
         </button>
 
         {open && (
@@ -72,7 +75,7 @@ export function MobileTopActions({ profileUrl, signOutUrl }: { profileUrl: strin
                 borderBottom: "1px solid var(--border)",
               }}
             >
-              <Settings size={14} color="var(--text-muted)" />
+              <Settings size={14} color="var(--text-muted)" aria-hidden="true" />
               Modifier le profil
             </Link>
             <a
@@ -84,7 +87,7 @@ export function MobileTopActions({ profileUrl, signOutUrl }: { profileUrl: strin
                 textDecoration: "none",
               }}
             >
-              <LogOut size={14} />
+              <LogOut size={14} aria-hidden="true" />
               Se déconnecter
             </a>
           </div>

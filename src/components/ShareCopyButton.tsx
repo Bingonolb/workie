@@ -25,7 +25,9 @@ export function ShareCopyButton({ url }: { url: string }) {
 
   return (
     <button
+      type="button"
       onClick={copy}
+      aria-live="polite"
       style={{
         width: "100%", padding: "10px 0", borderRadius: 9,
         background: copied ? "#10b981" : "linear-gradient(135deg, #8b5cf6, #f97316)",
