@@ -290,10 +290,8 @@ export async function trackJobApplyClick(jobId: string, companyId: string): Prom
     const hdrs = await headers();
     const canton = hdrs.get("x-vercel-ip-country-region") ?? null;
     const supabase = await createClient();
-    await Promise.all([
-      supabase.from("job_apply_clicks").insert({ job_id: jobId, company_id: companyId, viewer_canton: canton }),
-      supabase.rpc("increment_job_apply_click", { job_id: jobId }),
-    ]);
+    const { error } = await supabase.from("job_apply_clicks").insert({ job_id: jobId, company_id: companyId, viewer_canton: canton });
+    if (!error) await supabase.rpc("increment_job_apply_click", { job_id: jobId });
   } catch { /* silent */ }
 }
 
