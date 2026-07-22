@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendWelcomeEmail } from "@/lib/email";
 
 function extractGeo(request: Request) {
   const h = request.headers;
@@ -91,7 +92,10 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/business/checkout`);
         }
         const isNew = await upsertProfileGeo(user.id);
-        if (isNew) return NextResponse.redirect(`${origin}/explore?welcome=1`);
+        if (isNew) {
+          void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
+          return NextResponse.redirect(`${origin}/explore?welcome=1`);
+        }
       }
       if (next) return NextResponse.redirect(`${origin}${next}`);
       return NextResponse.redirect(`${origin}/explore`);
@@ -117,6 +121,9 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/business/checkout`);
         }
         const isNew = await upsertProfileGeo(user.id);
+        if (isNew) {
+          void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
+        }
         if (next) return NextResponse.redirect(`${origin}${next}`);
         if (isNew) return NextResponse.redirect(`${origin}/explore?welcome=1`);
         return NextResponse.redirect(`${origin}/explore`);
