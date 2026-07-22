@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { PauseCircle, X } from "lucide-react";
 
 interface Props {
@@ -13,6 +13,13 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape" && !isPending) setOpen(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, isPending]);
 
   function confirm() {
     setError("");
@@ -51,7 +58,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
         }}
           onClick={e => { if (e.target === e.currentTarget) setOpen(false); }}
         >
-          <div style={{
+          <div role="dialog" aria-modal="true" aria-label="Confirmer l'annulation de la campagne" style={{
             background: "var(--surface)", border: "1px solid var(--border)",
             borderRadius: 20, padding: "28px 28px 24px", maxWidth: 400, width: "100%",
             boxShadow: "0 24px 64px rgba(0,0,0,0.35)",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Flag, X, ChevronRight, CheckCircle } from "lucide-react";
 import { submitReport, type ReportTargetType } from "@/lib/actions/reports";
 
@@ -76,6 +76,14 @@ export function ReportButton({
     if (isPending) return;
     setOpen(false);
   }
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isPending]);
 
   function submit() {
     if (!category) { setError("Veuillez sélectionner une catégorie."); return; }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Zap, Skull } from "lucide-react";
 import { addBoost, addPenalty } from "@/lib/actions/scores";
@@ -37,6 +37,16 @@ export function CompanyVoteButtons({
   const [checkoutError, setCheckoutError] = useState("");
   const hadCreditsOnMount = useRef(initialCredits > 0);
   const router = useRouter();
+
+  useEffect(() => {
+    const anyOpen = showGuest || showUpgrade;
+    if (!anyOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setShowGuest(false); setShowUpgrade(false); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [showGuest, showUpgrade]);
 
   if (isBusiness) return null;
 

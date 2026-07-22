@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { deleteAccount } from "@/lib/actions/auth";
 import { Trash2, X } from "lucide-react";
 
@@ -9,6 +9,13 @@ export function DeleteAccountButton() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape" && !pending) setOpen(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, pending]);
 
   const handleDelete = () => {
     if (confirm !== "SUPPRIMER") return;
@@ -41,6 +48,9 @@ export function DeleteAccountButton() {
           display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
         }} onClick={() => setOpen(false)}>
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Supprimer le compte"
             onClick={e => e.stopPropagation()}
             style={{
               background: "var(--surface)", border: "1px solid rgba(239,68,68,0.3)",

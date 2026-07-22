@@ -17,6 +17,13 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
     return () => clearTimeout(timer);
   }, [open]);
 
+  useEffect(() => {
+    if (!visible) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setDismissed(true); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [visible]);
+
   return (
     <>
       {/* Overlay — click to dismiss */}
