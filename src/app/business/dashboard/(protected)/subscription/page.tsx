@@ -51,24 +51,24 @@ export default async function SubscriptionPage({
 
       {/* Flash messages */}
       {canceled && (
-        <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", gap: 10, alignItems: "center" }}>
-          <AlertCircle size={18} color="#f59e0b" />
+        <div role="status" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", gap: 10, alignItems: "center" }}>
+          <AlertCircle size={18} color="#f59e0b" aria-hidden="true" />
           <p style={{ fontSize: 14, color: "var(--text)" }}>
             Résiliation programmée. Votre accès reste actif jusqu&apos;à la fin de la période en cours.
           </p>
         </div>
       )}
       {reactivated && (
-        <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", gap: 10, alignItems: "center" }}>
-          <CheckCircle size={18} color="#10b981" />
+        <div role="status" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", gap: 10, alignItems: "center" }}>
+          <CheckCircle size={18} color="#10b981" aria-hidden="true" />
           <p style={{ fontSize: 14, color: "var(--text)" }}>
             Abonnement réactivé. Votre accès continue normalement.
           </p>
         </div>
       )}
       {error && (
-        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", gap: 10, alignItems: "center" }}>
-          <XCircle size={18} color="#ef4444" />
+        <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 18px", marginBottom: 24, display: "flex", gap: 10, alignItems: "center" }}>
+          <XCircle size={18} color="#ef4444" aria-hidden="true" />
           <p style={{ fontSize: 14, color: "var(--text)" }}>
             Une erreur est survenue. Réessaie ou contacte <a href="mailto:hello@workie.ch" style={{ color: "#8b5cf6" }}>hello@workie.ch</a>.
           </p>
@@ -80,10 +80,10 @@ export default async function SubscriptionPage({
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
           <div style={{ width: 44, height: 44, borderRadius: 12, background: isCanceling ? "rgba(245,158,11,0.1)" : isActive ? "rgba(16,185,129,0.1)" : "var(--surface)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {isCanceling
-              ? <AlertCircle size={22} color="#f59e0b" />
+              ? <AlertCircle size={22} color="#f59e0b" aria-hidden="true" />
               : isActive
-                ? <CheckCircle size={22} color="#10b981" />
-                : <XCircle size={22} color="#ef4444" />
+                ? <CheckCircle size={22} color="#10b981" aria-hidden="true" />
+                : <XCircle size={22} color="#ef4444" aria-hidden="true" />
             }
           </div>
           <div>
@@ -112,7 +112,7 @@ export default async function SubscriptionPage({
             /* Reactivate */
             <form action="/api/business/reactivate-subscription" method="POST">
               <button type="submit" style={{ width: "100%", padding: "14px 0", borderRadius: 12, background: "linear-gradient(135deg, #10b981, #059669)", color: "#fff", border: "none", fontWeight: 700, fontSize: 15, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                <RefreshCw size={16} /> Réactiver mon abonnement
+                <RefreshCw size={16} aria-hidden="true" /> Réactiver mon abonnement
               </button>
               <p style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 10, lineHeight: 1.5 }}>
                 Votre abonnement continuera normalement et ne sera pas résilié.
@@ -135,7 +135,7 @@ export default async function SubscriptionPage({
 
         {!isActive && (
           <Link href="/business/checkout" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
-            Réactiver mon abonnement <ArrowRight size={16} />
+            Réactiver mon abonnement <ArrowRight size={16} aria-hidden="true" />
           </Link>
         )}
       </div>
