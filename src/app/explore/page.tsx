@@ -191,9 +191,31 @@ export default async function ExplorePage({
     );
   }
 
+  // JSON-LD ItemList of top companies for Google indexing (grid is client-rendered)
+  const BASE_URL = "https://www.workie.ch";
+  const topForJsonLd = allCompaniesForGrid
+    .filter(c => Number(c.review_count) > 0)
+    .slice(0, 30);
+  const exploreJsonLd = topForJsonLd.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Meilleures entreprises suisses",
+    "url": `${BASE_URL}/explore`,
+    "numberOfItems": topForJsonLd.length,
+    "itemListElement": topForJsonLd.map((c, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "url": `${BASE_URL}/company/${c.id}`,
+      "name": c.name,
+    })),
+  } : null;
+
   return (
     <div className="page-root">
       <Navbar />
+      {exploreJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(exploreJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
+      )}
       <main className="page-main">
         <ExploreClient
           allCompanies={allCompaniesForGrid}

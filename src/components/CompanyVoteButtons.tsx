@@ -188,7 +188,7 @@ export function CompanyVoteButtons({
       {showGuest && (
         <>
           <div onClick={() => setShowGuest(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 10010 }} />
-          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(380px, 92vw)", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "32px 28px", textAlign: "center" }}>
+          <div role="dialog" aria-modal="true" aria-label="Connexion requise" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(380px, 92vw)", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "32px 28px", textAlign: "center" }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>👋</div>
             <h2 style={{ fontSize: 18, fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>Connecte-toi pour voter</h2>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.6 }}>Les votes +100 et -100 pts impactent le classement des entreprises. Crée un compte gratuitement pour participer.</p>
@@ -202,7 +202,7 @@ export function CompanyVoteButtons({
       {showUpgrade && (
         <>
           <div onClick={() => setShowUpgrade(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 10010 }} />
-          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(420px, 92vw)", background: "var(--surface)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 24, overflow: "hidden" }}>
+          <div role="dialog" aria-modal="true" aria-label="Débloquer le vote pénalité" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(420px, 92vw)", background: "var(--surface)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 24, overflow: "hidden" }}>
             <div style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.1), rgba(249,115,22,0.07))", borderBottom: "1px solid rgba(239,68,68,0.15)", padding: "28px 28px 24px", textAlign: "center" }}>
               <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px", fontSize: 24 }}>💀</div>
               <h2 style={{ fontSize: 19, fontWeight: 900, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: 6 }}>

@@ -37,17 +37,21 @@ export function WelcomeModal() {
     <>
       <div onClick={close} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 10200, backdropFilter: "blur(6px)" }} />
 
-      <div style={{
-        position: "fixed", top: "50%", left: "50%",
-        transform: "translate(-50%, -50%)",
-        zIndex: 10201,
-        width: "min(460px, calc(100vw - 32px))",
-        background: "#ffffff",
-        borderRadius: 28,
-        overflow: "hidden",
-        boxShadow: "0 40px 100px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.04)",
-        animation: "wm-in 0.3s cubic-bezier(0.16,1,0.3,1)",
-      }}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Bienvenue sur Workie"
+        style={{
+          position: "fixed", top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 10201,
+          width: "min(460px, calc(100vw - 32px))",
+          background: "#ffffff",
+          borderRadius: 28,
+          overflow: "hidden",
+          boxShadow: "0 40px 100px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.04)",
+          animation: "wm-in 0.3s cubic-bezier(0.16,1,0.3,1)",
+        }}>
 
         {/* Top gradient band */}
         <div style={{ height: 200, background: "linear-gradient(135deg, #8b5cf6 0%, #f97316 100%)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>

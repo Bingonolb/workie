@@ -430,7 +430,7 @@ export function SwipeView({
           const unlocked = isAdmin || penaltyCredits > 0;
           const applied = !isAd(current) && penaltyIds.has((current as Company).id);
           return (
-            <button onClick={handlePenalty} title={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} style={{
+            <button onClick={handlePenalty} title={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} aria-label={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} style={{
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
               width: 52, height: 52, borderRadius: "50%",
               background: applied ? "rgba(239,68,68,0.12)" : "var(--surface)",
@@ -507,7 +507,7 @@ export function SwipeView({
         {isLoggedIn && !isBusiness && !isAd(current) && (() => {
           const boosted = boostIds.has((current as Company).id);
           return (
-            <button onClick={handleBoost} title={boosted ? "Retirer le boost" : "Booster +100 pts"} style={{
+            <button onClick={handleBoost} title={boosted ? "Retirer le boost" : "Booster +100 pts"} aria-label={boosted ? "Retirer le boost" : "Booster +100 pts"} style={{
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
               width: 52, height: 52, borderRadius: "50%",
               background: boosted ? "rgba(139,92,246,0.12)" : "var(--surface)",

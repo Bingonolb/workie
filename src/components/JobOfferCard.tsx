@@ -88,7 +88,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             animation: "fadeIn 0.18s ease",
           }}
         >
-          <div className="job-modal" style={{
+          <div className="job-modal" role="dialog" aria-modal="true" aria-label="Offre d'emploi" style={{
             background: "var(--surface)", borderRadius: 20,
             border: "1px solid var(--border2)",
             width: "100%", maxWidth: 520, maxHeight: "85vh",

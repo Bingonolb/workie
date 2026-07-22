@@ -88,7 +88,7 @@ export function ReportButton({
   }
 
   const trigger = variant === "icon" ? (
-    <button onClick={openModal} title="Signaler" style={{
+    <button onClick={openModal} title="Signaler" aria-label="Signaler ce contenu" style={{
       display: "flex", alignItems: "center", justifyContent: "center",
       width: 32, height: 32, borderRadius: 8, border: "none",
       background: "transparent", cursor: "pointer", color: "var(--text-muted)",
@@ -137,12 +137,16 @@ export function ReportButton({
             padding: "16px",
           }}
         >
-          <div style={{
-            background: "var(--surface)", border: "1px solid var(--border)",
-            borderRadius: 20, width: "100%", maxWidth: 480,
-            boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
-            overflow: "hidden",
-          }}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Signaler un contenu"
+            style={{
+              background: "var(--surface)", border: "1px solid var(--border)",
+              borderRadius: 20, width: "100%", maxWidth: 480,
+              boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
+              overflow: "hidden",
+            }}>
             {/* Header */}
             <div style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
