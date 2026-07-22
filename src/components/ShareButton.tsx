@@ -34,7 +34,7 @@ export function ShareButton({ name, url }: { name: string; url: string }) {
         backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", transition: "all 0.2s",
       }}
     >
-      {copied ? <Check size={15} /> : <Share2 size={15} />}
+      {copied ? <Check size={15} aria-hidden="true" /> : <Share2 size={15} aria-hidden="true" />}
       {copied ? "Copié !" : "Partager"}
     </button>
   );

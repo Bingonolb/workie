@@ -55,7 +55,7 @@ export default async function AnalyticsPage() {
   return (
     <div className="biz-page" style={{ maxWidth: 1000 }}>
       <Link href="/business/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 16 }}>
-        <ArrowLeft size={14} /> Dashboard
+        <ArrowLeft size={14} aria-hidden="true" /> Dashboard
       </Link>
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Analytics</h1>
@@ -100,15 +100,15 @@ export default async function AnalyticsPage() {
 
       {/* ── Section 2 : Réputation ── */}
       <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
-        <Star size={13} /> Réputation employeur
+        <Star size={13} aria-hidden="true" /> Réputation employeur
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
         {[
-          { icon: <Star size={18} color="#f59e0b" fill="#f59e0b" />, label: "Note globale", value: avgOverall !== "–" ? `${avgOverall}/5` : "–" },
-          { icon: <Users size={18} color="#8b5cf6" />, label: "Total avis", value: String(count) },
-          { icon: <ThumbsUp size={18} color="#10b981" />, label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–" },
-          { icon: <TrendingUp size={18} color="#f97316" />, label: "Salaire moyen", value: Number(avgSalary) > 0 ? `${Math.round(Number(avgSalary) / 1000)}k CHF` : "–" },
+          { icon: <Star size={18} color="#f59e0b" fill="#f59e0b" aria-hidden="true" />, label: "Note globale", value: avgOverall !== "–" ? `${avgOverall}/5` : "–" },
+          { icon: <Users size={18} color="#8b5cf6" aria-hidden="true" />, label: "Total avis", value: String(count) },
+          { icon: <ThumbsUp size={18} color="#10b981" aria-hidden="true" />, label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–" },
+          { icon: <TrendingUp size={18} color="#f97316" aria-hidden="true" />, label: "Salaire moyen", value: Number(avgSalary) > 0 ? `${Math.round(Number(avgSalary) / 1000)}k CHF` : "–" },
         ].map(({ icon, label, value }) => (
           <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
@@ -122,7 +122,7 @@ export default async function AnalyticsPage() {
 
       {Number(count) === 0 ? (
         <div style={{ background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.12)", borderRadius: 16, padding: "32px 24px", textAlign: "center", marginBottom: 28 }}>
-          <BarChart2 size={40} style={{ opacity: 0.2, margin: "0 auto 16px" }} />
+          <BarChart2 size={40} aria-hidden="true" style={{ opacity: 0.2, margin: "0 auto 16px" }} />
           <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Les données de réputation arrivent avec les premiers avis</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)", maxWidth: 400, margin: "0 auto" }}>
             Partagez votre lien Workie en interne — les avis sont 100% anonymes et donnent accès aux notes par catégorie, profils des répondants, et évolution mensuelle.
@@ -209,7 +209,7 @@ export default async function AnalyticsPage() {
 
           {/* ── Section 3 : Profil des répondants ── */}
           <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
-            <Users size={13} /> Profil des personnes qui ont laissé un avis
+            <Users size={13} aria-hidden="true" /> Profil des personnes qui ont laissé un avis
           </p>
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
             <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px" }}>

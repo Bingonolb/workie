@@ -125,7 +125,7 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
             alignSelf: "flex-start",
           }}
         >
-          {ad.cta_label} <ExternalLink size={12} />
+          {ad.cta_label} <ExternalLink size={12} aria-hidden="true" />
         </div>
       </div>
     </a>
