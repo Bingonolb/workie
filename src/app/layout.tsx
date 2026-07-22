@@ -15,8 +15,22 @@ import { WelcomeModal } from "@/components/WelcomeModal";
 import { SessionKeepAlive } from "@/components/SessionKeepAlive";
 
 export const metadata: Metadata = {
-  title: "Workie — Les entreprises, sans filtre.",
+  metadataBase: new URL("https://www.workie.ch"),
+  title: {
+    default: "Workie — Les entreprises, sans filtre.",
+    template: "%s",
+  },
   description: "Découvre les vraies conditions de travail des entreprises suisses. Avis anonymes, salaires, culture — la vérité que Glassdoor ne te dit pas.",
+  openGraph: {
+    siteName: "Workie",
+    locale: "fr_CH",
+    type: "website",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Workie — Les entreprises suisses, sans filtre." }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-default.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

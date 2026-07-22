@@ -176,7 +176,7 @@ export function ExploreClient({
         onClear={handleClear}
       />
 
-      {isGuest && total > 0 && allCompanies.length <= 50 && (
+      {isGuest && total > 0 && (
         <div style={{
           background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
           border: "1px solid rgba(139,92,246,0.2)",
