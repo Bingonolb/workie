@@ -14,9 +14,12 @@ export const metadata: Metadata = {
     title: "Offres d'emploi en Suisse · Workie",
     description: "Les jobs des meilleurs employeurs suisses — avec avis anonymes et salaires réels.",
     url: "https://www.workie.ch/jobs",
+    siteName: "Workie",
     type: "website",
+    locale: "fr_CH",
+    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Offres d'emploi en Suisse · Workie" }],
   },
-  twitter: { card: "summary_large_image", title: "Jobs en Suisse · Workie" },
+  twitter: { card: "summary_large_image", title: "Jobs en Suisse · Workie", images: ["https://www.workie.ch/og-default.png"] },
 };
 
 const CONTRACT_COLORS: Record<string, { bg: string; color: string }> = {
@@ -82,8 +85,35 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
     return true;
   });
 
+  // Google Jobs rich snippet — JobPosting schema for each active job
+  const jobsJsonLd = filteredJobs.slice(0, 20).map(job => ({
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": job.title,
+    "datePosted": job.created_at?.slice(0, 10),
+    "validThrough": new Date(new Date(job.created_at).getTime() + 90 * 86400000).toISOString().slice(0, 10),
+    "description": job.description ?? `${job.title} chez ${job.companies?.name ?? "une entreprise suisse"}`,
+    "employmentType": job.contract_type === "CDI" ? "FULL_TIME" : job.contract_type === "CDD" ? "CONTRACTOR" : job.contract_type === "Stage" ? "INTERN" : "OTHER",
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": job.companies?.name ?? "Entreprise Workie",
+      "sameAs": `https://www.workie.ch/company/${job.companies?.id ?? ""}`,
+    },
+    "jobLocation": {
+      "@type": "Place",
+      "address": { "@type": "PostalAddress", "addressLocality": job.location ?? job.companies?.city ?? "Suisse", "addressCountry": "CH" },
+    },
+    ...(job.work_mode === "remote" || job.work_mode === "Remote" || job.work_mode === "télétravail" ? { "jobLocationType": "TELECOMMUTE" } : {}),
+    ...(job.salary_range ? { "baseSalary": { "@type": "MonetaryAmount", "currency": "CHF", "value": { "@type": "QuantitativeValue", "value": job.salary_range, "unitText": "YEAR" } } } : {}),
+    "directApply": !!job.apply_url,
+    "url": job.apply_url ?? `https://www.workie.ch/jobs`,
+  }));
+
   return (
     <div className="page-root">
+      {jobsJsonLd.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobsJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
+      )}
       <Navbar />
 
       {/* Hero */}
