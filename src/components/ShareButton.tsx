@@ -22,6 +22,7 @@ export function ShareButton({ name, url }: { name: string; url: string }) {
 
   return (
     <button
+      type="button"
       onClick={handleShare}
       title="Partager"
       style={{
