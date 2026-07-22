@@ -371,7 +371,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* CIBLAGE */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Target size={18} />} title="Ciblage" subtitle="Plus vous ciblez précisément, plus le CPM augmente — mais meilleure est la qualité de l'audience." />
+          <SectionHeader icon={<Target size={18} />} title="Ciblage" subtitle="Choisissez votre audience — plus elle est ciblée, plus les profils qui voient votre annonce sont pertinents." />
           <div style={{ marginBottom: 22 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</label>
@@ -500,10 +500,10 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
 
           {budgetCapped && (
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", marginBottom: 16 }}>
-              <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>⚠️</span>
-              <p style={{ fontSize: 12, color: "#f59e0b", lineHeight: 1.5 }}>
-                <strong>Budget supérieur à la capacité de l&apos;audience ciblée.</strong> Les impressions journalières sont plafonnées par la taille du segment. Réduisez le budget journalier ou élargissez votre ciblage.
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.2)", marginBottom: 16 }}>
+              <span style={{ fontSize: 15, flexShrink: 0 }}>✅</span>
+              <p style={{ fontSize: 12, color: "#10b981", lineHeight: 1.5 }}>
+                <strong>Couverture maximale</strong> — votre budget atteint l&apos;intégralité de l&apos;audience ciblée chaque jour.
               </p>
             </div>
           )}
@@ -525,7 +525,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
 
           <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 14, lineHeight: 1.5, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 12 }}>
-            Estimations basées sur la distribution géographique OFS 2022 et la capacité journalière de la plateforme. Le CPM intègre une prime de précision (+40% max) pour les audiences très ciblées — cohérent avec les standards Facebook/LinkedIn Ads.
+            Estimations indicatives. Les résultats réels peuvent varier selon l&apos;activité de la plateforme.
           </p>
         </div>
 
