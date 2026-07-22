@@ -200,8 +200,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
         {step === 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <div>
-              <label style={lbl}>Ton poste *</label>
-              <input value={jobTitle} onChange={e => { setJobTitle(e.target.value); setStep1Err(""); }}
+              <label htmlFor="review-job-title" style={lbl}>Ton poste *</label>
+              <input id="review-job-title" value={jobTitle} onChange={e => { setJobTitle(e.target.value); setStep1Err(""); }}
                 placeholder="Ex : Software Engineer, Stage Marketing, CDI Finance..."
                 style={inp} />
             </div>
@@ -235,16 +235,16 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </div>
 
             <div>
-              <label style={lbl}>Salaire annuel brut CHF <span className="badge-optional">Optionnel · Anonyme</span></label>
+              <label htmlFor="review-salary" style={lbl}>Salaire annuel brut CHF <span className="badge-optional">Optionnel · Anonyme</span></label>
               <div style={{ position: "relative" }}>
                 <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-muted)", pointerEvents: "none" }}>CHF</span>
-                <input type="number" value={salary} onChange={e => setSalary(e.target.value)}
+                <input id="review-salary" type="number" value={salary} onChange={e => setSalary(e.target.value)}
                   placeholder="95000" min={10000} max={500000} style={{ ...inp, paddingLeft: 46 }} />
               </div>
               <p className="inp-hint">Jamais attribué à ton nom — aide la communauté à connaître les vrais salaires.</p>
             </div>
 
-            {step1Err && <p style={{ fontSize: 13, color: "#ef4444" }}>{step1Err}</p>}
+            {step1Err && <p role="alert" style={{ fontSize: 13, color: "#ef4444" }}>{step1Err}</p>}
           </div>
         )}
 

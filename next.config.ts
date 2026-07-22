@@ -19,8 +19,8 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Next.js injects inline scripts; unsafe-eval needed for dev HMR (removed in prod by Sentry)
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.sentry.io",
+      // unsafe-eval only in dev (Next.js HMR); stripped in production builds
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""} https://js.stripe.com https://*.sentry.io`,
       // Inline styles used throughout the app via style={{...}}
       "style-src 'self' 'unsafe-inline'",
       // Supabase storage + external image hosts

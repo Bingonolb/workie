@@ -23,10 +23,11 @@ export function AuthForm({
     <form action={formAction} className="space-y-4">
       {mode === "signup" && (
         <div>
-          <label className="mb-1 block text-sm font-medium text-neutral-700">
+          <label htmlFor="auth-username" className="mb-1 block text-sm font-medium text-neutral-700">
             Pseudo
           </label>
           <input
+            id="auth-username"
             name="username"
             required
             placeholder="alex_montres"
@@ -35,10 +36,11 @@ export function AuthForm({
         </div>
       )}
       <div>
-        <label className="mb-1 block text-sm font-medium text-neutral-700">
+        <label htmlFor="auth-email" className="mb-1 block text-sm font-medium text-neutral-700">
           Email
         </label>
         <input
+          id="auth-email"
           type="email"
           name="email"
           required
@@ -47,10 +49,11 @@ export function AuthForm({
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-neutral-700">
+        <label htmlFor="auth-password" className="mb-1 block text-sm font-medium text-neutral-700">
           Mot de passe
         </label>
         <input
+          id="auth-password"
           type="password"
           name="password"
           required

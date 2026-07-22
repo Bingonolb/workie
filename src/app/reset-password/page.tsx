@@ -23,10 +23,11 @@ export default function ResetPasswordPage() {
 
         <form action={action} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>
+            <label htmlFor="reset-password" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>
               Nouveau mot de passe
             </label>
             <input
+              id="reset-password"
               type="password"
               name="password"
               required
@@ -42,7 +43,7 @@ export default function ResetPasswordPage() {
           </div>
 
           {state?.error && (
-            <p style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.1)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)" }}>
+            <p role="alert" style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.1)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)" }}>
               {state.error}
             </p>
           )}

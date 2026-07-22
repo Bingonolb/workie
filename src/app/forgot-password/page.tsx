@@ -47,14 +47,16 @@ export default function ForgotPasswordPage() {
 
             <form action={action} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div>
-                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>
+                <label htmlFor="forgot-email" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>
                   Email
                 </label>
                 <input
+                  id="forgot-email"
                   type="email"
                   name="email"
                   required
                   placeholder="toi@email.com"
+                  autoComplete="email"
                   style={{
                     width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
                     borderRadius: 10, padding: "12px 14px", fontSize: 14, color: "var(--text)",
@@ -64,7 +66,7 @@ export default function ForgotPasswordPage() {
               </div>
 
               {state?.error && (
-                <p style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.1)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)" }}>
+                <p role="alert" style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.1)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)" }}>
                   {state.error}
                 </p>
               )}
