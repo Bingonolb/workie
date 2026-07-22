@@ -196,6 +196,20 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>
         Relationships: [{ foreignKeyName: "profiles_claimed_company_id_fkey"; columns: ["claimed_company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
       }
+      reports: {
+        Row: {
+          id: string; created_at: string; reporter_id: string | null
+          target_type: string; target_id: string; target_label: string | null
+          category: string; explanation: string | null; status: string
+        }
+        Insert: {
+          id?: string; created_at?: string; reporter_id?: string | null
+          target_type: string; target_id: string; target_label?: string | null
+          category: string; explanation?: string | null; status?: string
+        }
+        Update: Partial<Database["public"]["Tables"]["reports"]["Insert"]>
+        Relationships: []
+      }
       review_votes: {
         Row: { review_id: string; user_id: string }
         Insert: { review_id: string; user_id: string }

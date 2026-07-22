@@ -31,6 +31,7 @@ import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { SaveButton } from "@/components/SaveButton";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
+import { ReportButton } from "@/components/ReportButton";
 
 function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   return (
@@ -228,11 +229,18 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Actions */}
-            <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
               <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
               {user && !isBusiness ? (
                 <SaveButton companyId={company.id} initialFav={isFav} />
               ) : (!isBusiness && <GuestSaveButton />)}
+              <ReportButton
+                targetType="company"
+                targetId={company.id}
+                targetLabel={company.name}
+                isLoggedIn={!!user && !isBusiness}
+                variant="icon"
+              />
             </div>
           </div>
         </div>
@@ -366,7 +374,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             ) : (
               <div style={{ position: "relative", marginBottom: 32 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} />)}
+                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user && !isBusiness} companyName={company.name} />)}
                 </div>
                 {!user && reviews.length > 1 && (
                   <div style={{
@@ -564,7 +572,7 @@ const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
   ca_depend: { label: "🤔 Ça dépend", color: "#f59e0b" },
 };
 
-function ReviewCard({ review, reply }: { review: Review; reply?: { content: string; created_at: string } }) {
+function ReviewCard({ review, reply, isLoggedIn = false, companyName = "" }: { review: Review; reply?: { content: string; created_at: string }; isLoggedIn?: boolean; companyName?: string }) {
   const age = (() => {
     const d = new Date(review.created_at);
     const diff = Date.now() - d.getTime();
@@ -661,9 +669,16 @@ function ReviewCard({ review, reply }: { review: Review; reply?: { content: stri
         </div>
       )}
 
-      {/* Helpful */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+      {/* Footer: helpful + signaler */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 4, gap: 8 }}>
         <HelpfulButton reviewId={review.id} initialCount={review.helpful_count} />
+        <ReportButton
+          targetType="review"
+          targetId={review.id}
+          targetLabel={`[${companyName}] ${review.title ?? review.content.slice(0, 100)}`}
+          isLoggedIn={isLoggedIn}
+          variant="link"
+        />
       </div>
     </div>
   );
