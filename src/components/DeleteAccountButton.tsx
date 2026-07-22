@@ -38,7 +38,7 @@ export function DeleteAccountButton() {
           textAlign: "left", display: "flex", alignItems: "center", gap: 8,
         }}
       >
-        <Trash2 size={14} /> Supprimer mon compte
+        <Trash2 size={14} aria-hidden="true" /> Supprimer mon compte
       </button>
 
       {open && (
@@ -64,8 +64,8 @@ export function DeleteAccountButton() {
                   Cette action est <strong style={{ color: "var(--text)" }}>irréversible</strong>. Tous tes avis, favoris et données seront définitivement supprimés.
                 </p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}>
-                <X size={20} />
+              <button type="button" onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}>
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
@@ -78,6 +78,7 @@ export function DeleteAccountButton() {
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
                 placeholder="SUPPRIMER"
+                aria-label="Confirmer la suppression — tapez SUPPRIMER"
                 autoComplete="off"
                 style={{
                   width: "100%", padding: "10px 14px", borderRadius: 10,
@@ -88,7 +89,7 @@ export function DeleteAccountButton() {
             </div>
 
             {error && (
-              <p style={{ fontSize: 13, color: "#ef4444", marginBottom: 12, background: "rgba(239,68,68,0.08)", padding: "8px 12px", borderRadius: 8 }}>
+              <p role="alert" style={{ fontSize: 13, color: "#ef4444", marginBottom: 12, background: "rgba(239,68,68,0.08)", padding: "8px 12px", borderRadius: 8 }}>
                 {error}
               </p>
             )}

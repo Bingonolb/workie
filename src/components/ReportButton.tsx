@@ -105,7 +105,7 @@ export function ReportButton({
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#ef4444"; (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.08)"; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
     >
-      <Flag size={14} />
+      <Flag size={14} aria-hidden="true" />
     </button>
   ) : variant === "button" ? (
     <button type="button" onClick={openModal} style={{
@@ -114,7 +114,7 @@ export function ReportButton({
       background: "var(--surface2)", color: "var(--text-muted)", fontSize: 13,
       fontWeight: 600, cursor: "pointer",
     }}>
-      <Flag size={13} /> Signaler
+      <Flag size={13} aria-hidden="true" /> Signaler
     </button>
   ) : (
     <button type="button" onClick={openModal} style={{
@@ -126,7 +126,7 @@ export function ReportButton({
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; (e.currentTarget as HTMLElement).style.color = "#ef4444"; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
     >
-      <Flag size={11} /> Signaler
+      <Flag size={11} aria-hidden="true" /> Signaler
     </button>
   );
 
@@ -166,7 +166,7 @@ export function ReportButton({
                   background: "rgba(239,68,68,0.1)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <Flag size={16} color="#ef4444" />
+                  <Flag size={16} color="#ef4444" aria-hidden="true" />
                 </div>
                 <div>
                   <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em" }}>
@@ -177,13 +177,13 @@ export function ReportButton({
                   </p>
                 </div>
               </div>
-              <button type="button" onClick={close} disabled={isPending} style={{
+              <button type="button" onClick={close} disabled={isPending} aria-label="Fermer" style={{
                 width: 32, height: 32, borderRadius: 8, border: "none",
                 background: "var(--surface2)", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 color: "var(--text-muted)", flexShrink: 0,
               }}>
-                <X size={15} />
+                <X size={15} aria-hidden="true" />
               </button>
             </div>
 
@@ -197,7 +197,7 @@ export function ReportButton({
                     display: "flex", alignItems: "center", justifyContent: "center",
                     margin: "0 auto 16px",
                   }}>
-                    <CheckCircle size={24} color="#10b981" />
+                    <CheckCircle size={24} color="#10b981" aria-hidden="true" />
                   </div>
                   <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>
                     Signalement envoyé
@@ -221,7 +221,7 @@ export function ReportButton({
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 18 }}>
                     {categories.map(cat => (
-                      <button key={cat} onClick={() => setCategory(cat)} style={{
+                      <button key={cat} type="button" onClick={() => setCategory(cat)} aria-pressed={category === cat} style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         padding: "11px 14px", borderRadius: 10, cursor: "pointer", textAlign: "left",
                         border: category === cat
@@ -271,7 +271,7 @@ export function ReportButton({
                   </p>
 
                   {error && (
-                    <p style={{ fontSize: 13, color: "#ef4444", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                    <p role="alert" style={{ fontSize: 13, color: "#ef4444", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
                       ⚠ {error}
                     </p>
                   )}
@@ -296,7 +296,7 @@ export function ReportButton({
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                       transition: "all 0.15s",
                     }}>
-                      {isPending ? "Envoi…" : <><span>Envoyer le signalement</span><ChevronRight size={15} /></>}
+                      {isPending ? "Envoi…" : <><span>Envoyer le signalement</span><ChevronRight size={15} aria-hidden="true" /></>}
                     </button>
                   </div>
 

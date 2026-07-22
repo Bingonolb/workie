@@ -43,7 +43,9 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
     <>
       {/* Card — clickable to open modal */}
       <button
+        type="button"
         onClick={() => setOpen(true)}
+        aria-label={`Voir l'offre : ${job.title}`}
         style={{
           width: "100%", textAlign: "left", borderRadius: 10,
           background: "var(--surface2)", padding: "12px 14px",
@@ -65,7 +67,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
           {job.work_mode && <Badge label={job.work_mode} color="#10b981" />}
           {job.location && (
             <span style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 3 }}>
-              <MapPin size={10} /> {job.location}
+              <MapPin size={10} aria-hidden="true" /> {job.location}
             </span>
           )}
         </div>
@@ -105,10 +107,12 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
                 <h2 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>{job.title}</h2>
               </div>
               <button
+                type="button"
                 onClick={() => setOpen(false)}
+                aria-label="Fermer"
                 style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
 
@@ -168,7 +172,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
                 onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.opacity = "0.9"}
                 onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.opacity = "1"}
               >
-                Postuler <ExternalLink size={15} />
+                Postuler <ExternalLink size={15} aria-hidden="true" />
               </a>
             ) : (
               <p style={{ textAlign: "center", fontSize: 13, color: "var(--text-muted)" }}>
