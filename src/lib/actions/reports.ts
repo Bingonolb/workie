@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/supabase/server";
 
 export type ReportTargetType = "review" | "company" | "profile";
-export type ReportStatus = "pending" | "reviewed" | "dismissed";
+export type ReportStatus = "pending" | "reviewed" | "dismissed" | "content_deleted";
 
 export interface Report {
   id: string;
@@ -131,7 +131,7 @@ export async function getReports(): Promise<{ reports?: Report[]; error?: string
 
 export async function updateReportStatus(
   id: string,
-  status: "reviewed" | "dismissed"
+  status: "reviewed" | "dismissed" | "content_deleted"
 ): Promise<{ error?: string }> {
   const user = await getUser();
   if (!user) return { error: "Non autorisé" };
@@ -186,8 +186,8 @@ export async function deleteReportedContent(
     return { error: "Type de cible non supporté." };
   }
 
-  // Mark the report as reviewed after deleting content
-  await admin.from("reports").update({ status: "reviewed" }).eq("id", reportId);
+  // Mark the report as content_deleted (distinct from reviewed/dismissed)
+  await admin.from("reports").update({ status: "content_deleted" }).eq("id", reportId);
 
   return {};
 }

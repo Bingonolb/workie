@@ -632,7 +632,7 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
     if (upsertErr) return { error: `Erreur lors de la création du profil : ${upsertErr.message}` };
 
     // ── 4. Insert claim record for admin audit ─────────────────────────────────
-    await adminClient.from("company_claims").insert({
+    const { error: claimInsertErr } = await adminClient.from("company_claims").insert({
       company_name: companyName,
       company_id:   companyId,
       company_website: String(formData.get("company_website") || "") || null,
@@ -647,6 +647,7 @@ export async function submitClaim(_: unknown, formData: FormData): Promise<{ err
       user_id: userId,
       status: "pending",
     });
+    if (claimInsertErr) return { error: `Erreur lors de l'enregistrement de la demande : ${claimInsertErr.message}` };
 
     return { success: true };
   } catch (e) {

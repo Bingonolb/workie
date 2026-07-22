@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2, User, ExternalLink, Trash2, Mail } from "lucide-react";
+import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2, User, ExternalLink, Trash2, Mail, ShieldOff } from "lucide-react";
 import { getReports, updateReportStatus, deleteReportedContent, type Report, type ReportStatus } from "@/lib/actions/reports";
 
 const TYPE_CONFIG = {
@@ -12,12 +12,13 @@ const TYPE_CONFIG = {
 } as const;
 
 const STATUS_CONFIG = {
-  pending:   { label: "En attente",  color: "#f59e0b", bg: "rgba(245,158,11,0.1)"  },
-  reviewed:  { label: "Examiné",     color: "#10b981", bg: "rgba(16,185,129,0.1)"  },
-  dismissed: { label: "Ignoré",      color: "#6b7280", bg: "rgba(107,114,128,0.1)" },
+  pending:         { label: "En attente",  color: "#f59e0b", bg: "rgba(245,158,11,0.1)"  },
+  reviewed:        { label: "Examiné",     color: "#10b981", bg: "rgba(16,185,129,0.1)"  },
+  dismissed:       { label: "Ignoré",      color: "#6b7280", bg: "rgba(107,114,128,0.1)" },
+  content_deleted: { label: "Supprimé",    color: "#ef4444", bg: "rgba(239,68,68,0.1)"   },
 } as const;
 
-type FilterTab = "pending" | "reviewed" | "dismissed" | "all";
+type FilterTab = "pending" | "reviewed" | "dismissed" | "content_deleted" | "all";
 
 export default function AdminReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -60,7 +61,7 @@ export default function AdminReportsPage() {
       if (res.error) {
         setFeedback({ id: report.id, text: res.error, ok: false });
       } else {
-        setFeedback({ id: report.id, text: "Contenu supprimé — signalement marqué examiné ✓", ok: true });
+        setFeedback({ id: report.id, text: "Contenu supprimé définitivement ✓", ok: true });
         load();
       }
       setTimeout(() => setFeedback(null), 5000);
@@ -68,9 +69,10 @@ export default function AdminReportsPage() {
   };
 
   const counts = {
-    pending:   reports.filter(r => r.status === "pending").length,
-    reviewed:  reports.filter(r => r.status === "reviewed").length,
-    dismissed: reports.filter(r => r.status === "dismissed").length,
+    pending:         reports.filter(r => r.status === "pending").length,
+    reviewed:        reports.filter(r => r.status === "reviewed").length,
+    dismissed:       reports.filter(r => r.status === "dismissed").length,
+    content_deleted: reports.filter(r => r.status === "content_deleted").length,
   };
   const filtered = filter === "all" ? reports : reports.filter(r => r.status === filter);
 
@@ -97,11 +99,12 @@ export default function AdminReportsPage() {
       </div>
 
       {/* KPIs */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 28 }}>
         {[
-          { label: "En attente",  value: counts.pending,   color: "#f59e0b" },
-          { label: "Examinés",    value: counts.reviewed,  color: "#10b981" },
-          { label: "Ignorés",     value: counts.dismissed, color: "#6b7280" },
+          { label: "En attente",  value: counts.pending,         color: "#f59e0b" },
+          { label: "Examinés",    value: counts.reviewed,        color: "#10b981" },
+          { label: "Ignorés",     value: counts.dismissed,       color: "#6b7280" },
+          { label: "Supprimés",   value: counts.content_deleted, color: "#ef4444" },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px" }}>
             <p style={{ fontSize: 24, fontWeight: 900, color, letterSpacing: "-0.02em" }}>{value}</p>
@@ -113,10 +116,11 @@ export default function AdminReportsPage() {
       {/* Filter tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
         {([
-          { v: "pending",   l: `En attente (${counts.pending})`   },
-          { v: "reviewed",  l: `Examinés (${counts.reviewed})`    },
-          { v: "dismissed", l: `Ignorés (${counts.dismissed})`    },
-          { v: "all",       l: `Tous (${reports.length})`         },
+          { v: "pending",         l: `En attente (${counts.pending})`           },
+          { v: "reviewed",        l: `Examinés (${counts.reviewed})`            },
+          { v: "dismissed",       l: `Ignorés (${counts.dismissed})`            },
+          { v: "content_deleted", l: `Supprimés (${counts.content_deleted})`    },
+          { v: "all",             l: `Tous (${reports.length})`                 },
         ] as const).map(({ v, l }) => (
           <button key={v} onClick={() => setFilter(v)} style={{
             padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid",
@@ -140,7 +144,7 @@ export default function AdminReportsPage() {
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
           <Clock size={40} style={{ opacity: 0.2, display: "block", margin: "0 auto 16px" }} />
-          <p style={{ fontSize: 16, fontWeight: 600 }}>Aucun signalement {filter !== "all" ? STATUS_CONFIG[filter as ReportStatus]?.label?.toLowerCase() : ""}</p>
+          <p style={{ fontSize: 16, fontWeight: 600 }}>Aucun signalement {filter !== "all" && filter in STATUS_CONFIG ? STATUS_CONFIG[filter as ReportStatus]?.label?.toLowerCase() : ""}</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -233,6 +237,14 @@ export default function AdminReportsPage() {
                   <p style={{ fontSize: 13, fontWeight: 600, color: feedback.ok ? "#10b981" : "#ef4444", marginTop: 8 }}>
                     {feedback.ok ? "✓ " : "✗ "}{feedback.text}
                   </p>
+                )}
+
+                {/* Deleted content notice */}
+                {report.status === "content_deleted" && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", marginTop: 10 }}>
+                    <ShieldOff size={14} color="#ef4444" />
+                    <span style={{ fontSize: 12, color: "#ef4444", fontWeight: 600 }}>Contenu supprimé définitivement</span>
+                  </div>
                 )}
 
                 {/* Actions */}
