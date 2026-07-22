@@ -172,21 +172,21 @@ export default function RegisterPage() {
           {step === 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div>
-                <label style={lbl}>Nom de l&apos;entreprise *</label>
+                <label htmlFor="biz-reg-company" style={lbl}>Nom de l&apos;entreprise *</label>
                 <div style={{ position: "relative" }}>
-                  <Building2 size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-                  <input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Ex : Ma Startup Sàrl, Mon Cabinet SA..." style={{ ...inp, paddingLeft: 40 }} />
+                  <Building2 size={16} aria-hidden="true" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
+                  <input id="biz-reg-company" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Ex : Ma Startup Sàrl, Mon Cabinet SA..." style={{ ...inp, paddingLeft: 40 }} />
                 </div>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
-                  <label style={lbl}>Ville principale</label>
-                  <input value={city} onChange={e => setCity(e.target.value)} placeholder="Ex : Genève, Zurich..." style={inp} />
+                  <label htmlFor="biz-reg-city" style={lbl}>Ville principale</label>
+                  <input id="biz-reg-city" value={city} onChange={e => setCity(e.target.value)} placeholder="Ex : Genève, Zurich..." style={inp} />
                 </div>
                 <div>
-                  <label style={lbl}>Canton</label>
-                  <select value={canton} onChange={e => setCanton(e.target.value)} style={{ ...inp, cursor: "pointer" }}>
+                  <label htmlFor="biz-reg-canton" style={lbl}>Canton</label>
+                  <select id="biz-reg-canton" value={canton} onChange={e => setCanton(e.target.value)} style={{ ...inp, cursor: "pointer" }}>
                     <option value="">Sélectionner...</option>
                     {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -194,8 +194,8 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label style={lbl}>Site web <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
-                <input value={companyWebsite} onChange={e => setCompanyWebsite(e.target.value)} placeholder="https://www.entreprise.ch" style={inp} />
+                <label htmlFor="biz-reg-website" style={lbl}>Site web <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
+                <input id="biz-reg-website" type="url" value={companyWebsite} onChange={e => setCompanyWebsite(e.target.value)} placeholder="https://www.entreprise.ch" style={inp} />
               </div>
 
               <div>
@@ -227,17 +227,17 @@ export default function RegisterPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
-                  <label style={lbl}>Prénom *</label>
-                  <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jean" style={inp} />
+                  <label htmlFor="biz-reg-firstname" style={lbl}>Prénom *</label>
+                  <input id="biz-reg-firstname" autoComplete="given-name" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jean" style={inp} />
                 </div>
                 <div>
-                  <label style={lbl}>Nom *</label>
-                  <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Dupont" style={inp} />
+                  <label htmlFor="biz-reg-lastname" style={lbl}>Nom *</label>
+                  <input id="biz-reg-lastname" autoComplete="family-name" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Dupont" style={inp} />
                 </div>
               </div>
               <div>
-                <label style={lbl}>Votre poste *</label>
-                <input value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="Ex : Fondateur, DRH, CEO..." style={inp} />
+                <label htmlFor="biz-reg-jobtitle" style={lbl}>Votre poste *</label>
+                <input id="biz-reg-jobtitle" autoComplete="organization-title" value={jobTitle} onChange={e => setJobTitle(e.target.value)} placeholder="Ex : Fondateur, DRH, CEO..." style={inp} />
               </div>
               <div>
                 <label style={lbl}>Niveau *</label>
@@ -250,13 +250,13 @@ export default function RegisterPage() {
                 </div>
               </div>
               <div>
-                <label style={lbl}>Email professionnel *</label>
-                <input type="email" value={workEmail} onChange={e => setWorkEmail(e.target.value)} placeholder="jean.dupont@entreprise.ch" style={inp} />
+                <label htmlFor="biz-reg-email" style={lbl}>Email professionnel *</label>
+                <input id="biz-reg-email" type="email" autoComplete="work email" value={workEmail} onChange={e => setWorkEmail(e.target.value)} placeholder="jean.dupont@entreprise.ch" style={inp} />
                 <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>Doit correspondre au domaine de l&apos;entreprise. Gmail, Hotmail, Yahoo non acceptés.</p>
               </div>
               <div>
-                <label style={lbl}>Message <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
-                <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3} placeholder="Contexte supplémentaire pour notre équipe..." style={{ ...inp, resize: "vertical" }} />
+                <label htmlFor="biz-reg-message" style={lbl}>Message <span style={{ fontWeight: 400, opacity: 0.5 }}>(optionnel)</span></label>
+                <textarea id="biz-reg-message" value={message} onChange={e => setMessage(e.target.value)} rows={3} placeholder="Contexte supplémentaire pour notre équipe..." style={{ ...inp, resize: "vertical" }} />
               </div>
             </div>
           )}
@@ -300,17 +300,17 @@ export default function RegisterPage() {
                 <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Créez votre accès Workie Business</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <div>
-                    <label style={lbl}>Email</label>
-                    <input value={workEmail} readOnly style={{ ...inp, opacity: 0.6 }} />
+                    <label htmlFor="biz-reg-email-ro" style={lbl}>Email</label>
+                    <input id="biz-reg-email-ro" value={workEmail} readOnly autoComplete="email" style={{ ...inp, opacity: 0.6 }} />
                   </div>
                   <div>
-                    <label style={lbl}>Mot de passe * <span style={{ fontWeight: 400, opacity: 0.6 }}>(min. 8 caractères)</span></label>
-                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inp} autoComplete="new-password" />
+                    <label htmlFor="biz-reg-pwd" style={lbl}>Mot de passe * <span style={{ fontWeight: 400, opacity: 0.6 }}>(min. 8 caractères)</span></label>
+                    <input id="biz-reg-pwd" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inp} autoComplete="new-password" />
                   </div>
                   <div>
-                    <label style={lbl}>Confirmer le mot de passe *</label>
-                    <input type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="••••••••" style={{ ...inp, borderColor: confirmPwd && confirmPwd !== password ? "#ef4444" : undefined }} autoComplete="new-password" />
-                    {confirmPwd && confirmPwd !== password && <p style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>Les mots de passe ne correspondent pas.</p>}
+                    <label htmlFor="biz-reg-pwd-confirm" style={lbl}>Confirmer le mot de passe *</label>
+                    <input id="biz-reg-pwd-confirm" type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="••••••••" style={{ ...inp, borderColor: confirmPwd && confirmPwd !== password ? "#ef4444" : undefined }} autoComplete="new-password" />
+                    {confirmPwd && confirmPwd !== password && <p role="alert" style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>Les mots de passe ne correspondent pas.</p>}
                   </div>
                 </div>
               </div>
