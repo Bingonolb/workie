@@ -46,14 +46,14 @@ export function CookieBanner() {
         </Link>
       </p>
       <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-        <button onClick={decline} style={{
+        <button type="button" onClick={decline} style={{
           fontSize: 12, fontWeight: 700, color: "var(--text-muted)",
           background: "none", border: "1px solid var(--border)",
           borderRadius: 8, padding: "7px 14px", cursor: "pointer",
         }}>
           Refuser
         </button>
-        <button onClick={accept} style={{
+        <button type="button" onClick={accept} style={{
           fontSize: 12, fontWeight: 700, color: "#fff",
           background: "#8b5cf6", border: "none",
           borderRadius: 8, padding: "7px 16px", cursor: "pointer",

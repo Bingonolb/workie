@@ -73,7 +73,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
                   <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>Cette action est réversible</p>
                 </div>
               </div>
-              <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4 }}>
+              <button type="button" onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4 }}>
                 <X size={18} />
               </button>
             </div>

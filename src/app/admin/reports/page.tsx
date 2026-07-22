@@ -139,7 +139,7 @@ export default function AdminReportsPage() {
       ) : loadError ? (
         <div style={{ padding: "20px 24px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, color: "#ef4444", fontSize: 14 }}>
           ⚠ {loadError}
-          <button onClick={load} style={{ marginLeft: 12, color: "#8b5cf6", background: "none", border: "none", cursor: "pointer", fontWeight: 700, fontSize: 13 }}>Réessayer</button>
+          <button type="button" onClick={load} style={{ marginLeft: 12, color: "#8b5cf6", background: "none", border: "none", cursor: "pointer", fontWeight: 700, fontSize: 13 }}>Réessayer</button>
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
@@ -250,21 +250,21 @@ export default function AdminReportsPage() {
                 {/* Actions */}
                 {report.status === "pending" && (
                   <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
-                    <button onClick={() => handle(report.id, "reviewed")} disabled={isPending} style={{
+                    <button type="button" onClick={() => handle(report.id, "reviewed")} disabled={isPending} style={{
                       display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 9,
                       background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)",
                       color: "#10b981", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1,
                     }}>
                       <CheckCircle size={15} /> Marquer examiné
                     </button>
-                    <button onClick={() => handle(report.id, "dismissed")} disabled={isPending} style={{
+                    <button type="button" onClick={() => handle(report.id, "dismissed")} disabled={isPending} style={{
                       display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 9,
                       background: "rgba(107,114,128,0.08)", border: "1px solid rgba(107,114,128,0.2)",
                       color: "#6b7280", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1,
                     }}>
                       <XCircle size={15} /> Ignorer
                     </button>
-                    <button onClick={() => handleDelete(report)} disabled={isPending} style={{
+                    <button type="button" onClick={() => handleDelete(report)} disabled={isPending} style={{
                       display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 9,
                       background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
                       color: "#ef4444", fontWeight: 700, fontSize: 13, cursor: "pointer", opacity: isPending ? 0.6 : 1,

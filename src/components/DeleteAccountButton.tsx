@@ -64,7 +64,7 @@ export function DeleteAccountButton() {
                   Cette action est <strong style={{ color: "var(--text)" }}>irréversible</strong>. Tous tes avis, favoris et données seront définitivement supprimés.
                 </p>
               </div>
-              <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}>
+              <button type="button" onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}>
                 <X size={20} />
               </button>
             </div>

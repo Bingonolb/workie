@@ -65,7 +65,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)}
+      <button type="button" onClick={() => setOpen(true)}
         style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", border: "none", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
         <Plus size={18} /> Publier une offre
       </button>
@@ -329,41 +329,41 @@ function JobCard({ job, onToggle, onDelete, onEdited }: { job: Job; onToggle: ()
 
         {/* Quick stats chips */}
         <div className="biz-job-card-stats" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <button onClick={handleStatsToggle} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: clicks > 0 ? "#8b5cf6" : "var(--text-muted)", background: clicks > 0 ? "rgba(139,92,246,0.08)" : "var(--surface)", border: `1px solid ${clicks > 0 ? "rgba(139,92,246,0.25)" : "var(--border2)"}`, borderRadius: 8, padding: "5px 10px", cursor: "pointer" }}>
+          <button type="button" onClick={handleStatsToggle} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: clicks > 0 ? "#8b5cf6" : "var(--text-muted)", background: clicks > 0 ? "rgba(139,92,246,0.08)" : "var(--surface)", border: `1px solid ${clicks > 0 ? "rgba(139,92,246,0.25)" : "var(--border2)"}`, borderRadius: 8, padding: "5px 10px", cursor: "pointer" }}>
             <MousePointer size={12} /> {clicks} candidature{clicks !== 1 ? "s" : ""}
             <BarChart2 size={11} style={{ marginLeft: 2, opacity: 0.6 }} />
           </button>
         </div>
 
         <div className="biz-job-card-actions" style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
-          <button onClick={() => setExpanded(e => !e)} title="Détails" aria-label="Détails"
+          <button type="button" onClick={() => setExpanded(e => !e)} title="Détails" aria-label="Détails"
             className="biz-action-btn"
             style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
-          <button onClick={() => { setEditing(true); setExpanded(false); }} title="Modifier" aria-label="Modifier"
+          <button type="button" onClick={() => { setEditing(true); setExpanded(false); }} title="Modifier" aria-label="Modifier"
             className="biz-action-btn"
             style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", cursor: "pointer", color: "#8b5cf6", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Pencil size={15} />
           </button>
-          <button onClick={onToggle} title={job.is_active ? "Désactiver" : "Activer"} aria-label={job.is_active ? "Désactiver" : "Activer"}
+          <button type="button" onClick={onToggle} title={job.is_active ? "Désactiver" : "Activer"} aria-label={job.is_active ? "Désactiver" : "Activer"}
             className="biz-action-btn"
             style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {job.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
           {confirmDelete ? (
             <>
-              <button onClick={onDelete}
+              <button type="button" onClick={onDelete}
                 style={{ padding: "6px 12px", borderRadius: 8, background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.4)", cursor: "pointer", color: "#ef4444", fontSize: 12, fontWeight: 700, minHeight: 44 }}>
                 Confirmer
               </button>
-              <button onClick={() => setConfirmDelete(false)}
+              <button type="button" onClick={() => setConfirmDelete(false)}
                 style={{ padding: "6px 10px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", fontSize: 12, minHeight: 44 }}>
                 Annuler
               </button>
             </>
           ) : (
-            <button onClick={() => setConfirmDelete(true)} title="Supprimer" aria-label="Supprimer"
+            <button type="button" onClick={() => setConfirmDelete(true)} title="Supprimer" aria-label="Supprimer"
               className="biz-action-btn"
               style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", cursor: "pointer", color: "#ef4444", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Trash2 size={16} />

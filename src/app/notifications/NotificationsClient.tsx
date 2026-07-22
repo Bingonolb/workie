@@ -177,7 +177,7 @@ export function NotificationsClient({ initialNotifications, initialUnread }: {
           </span>
         )}
         {unread > 0 && (
-          <button onClick={handleMarkAllRead} style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "6px 10px", borderRadius: 8 }}>
+          <button type="button" onClick={handleMarkAllRead} style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "6px 10px", borderRadius: 8 }}>
             <CheckCheck size={14} /> Tout lire
           </button>
         )}

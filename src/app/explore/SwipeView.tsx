@@ -351,7 +351,7 @@ export function SwipeView({
         <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)" }}>Tu as tout exploré !</p>
         <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{realCount} entreprises découvertes</p>
         <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-          <button onClick={() => { setCompanies(shuffle(companies.filter(c => !isAd(c)))); setIndex(0); setGone(null); setDrag(0); actedIds.current = new Set(); }} style={{ padding: "12px 24px", borderRadius: 50, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
+          <button type="button" onClick={() => { setCompanies(shuffle(companies.filter(c => !isAd(c)))); setIndex(0); setGone(null); setDrag(0); actedIds.current = new Set(); }} style={{ padding: "12px 24px", borderRadius: 50, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
             Recommencer
           </button>
           <a href="/ranking" style={{ padding: "12px 24px", borderRadius: 50, background: "var(--surface)", color: "var(--text)", fontWeight: 700, fontSize: 14, border: "1px solid var(--border2)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -430,7 +430,7 @@ export function SwipeView({
           const unlocked = isAdmin || penaltyCredits > 0;
           const applied = !isAd(current) && penaltyIds.has((current as Company).id);
           return (
-            <button onClick={handlePenalty} title={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} aria-label={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} style={{
+            <button type="button" onClick={handlePenalty} title={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} aria-label={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} style={{
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
               width: 52, height: 52, borderRadius: "50%",
               background: applied ? "rgba(239,68,68,0.12)" : "var(--surface)",
@@ -456,7 +456,7 @@ export function SwipeView({
           );
         })()}
 
-        <button onClick={() => advance("left")} disabled={!!gone} style={{
+        <button type="button" onClick={() => advance("left")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
           background: "var(--surface)",
           border: "2px solid rgba(239,68,68,0.4)",
@@ -471,7 +471,7 @@ export function SwipeView({
           <X size={26} strokeWidth={2.5} />
         </button>
 
-        <button onClick={() => !isAd(current) && current && router.push(`/company/${current.id}`)} disabled={!!gone || isAd(current)} style={{
+        <button type="button" onClick={() => !isAd(current) && current && router.push(`/company/${current.id}`)} disabled={!!gone || isAd(current)} style={{
           width: 48, height: 48, borderRadius: "50%",
           background: "var(--surface)",
           border: "2px solid rgba(99,102,241,0.45)",
@@ -486,7 +486,7 @@ export function SwipeView({
           <Info size={18} strokeWidth={2} />
         </button>
 
-        <button onClick={() => advance("right")} disabled={!!gone} style={{
+        <button type="button" onClick={() => advance("right")} disabled={!!gone} style={{
           width: 64, height: 64, borderRadius: "50%",
           background: !isAd(current) && flameIds.has(current.id)
             ? "linear-gradient(135deg, #f97316, #ea580c)"
@@ -507,7 +507,7 @@ export function SwipeView({
         {isLoggedIn && !isBusiness && !isAd(current) && (() => {
           const boosted = boostIds.has((current as Company).id);
           return (
-            <button onClick={handleBoost} title={boosted ? "Retirer le boost" : "Booster +100 pts"} aria-label={boosted ? "Retirer le boost" : "Booster +100 pts"} style={{
+            <button type="button" onClick={handleBoost} title={boosted ? "Retirer le boost" : "Booster +100 pts"} aria-label={boosted ? "Retirer le boost" : "Booster +100 pts"} style={{
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
               width: 52, height: 52, borderRadius: "50%",
               background: boosted ? "rgba(139,92,246,0.12)" : "var(--surface)",
@@ -605,7 +605,7 @@ export function SwipeView({
                 style={{ width: "100%", padding: "15px 0", borderRadius: 12, background: penaltyCheckoutLoading ? "var(--surface2)" : "linear-gradient(135deg, #ef4444, #f97316)", color: penaltyCheckoutLoading ? "var(--text-muted)" : "#fff", border: "none", fontWeight: 800, fontSize: 15, cursor: penaltyCheckoutLoading ? "not-allowed" : "pointer", letterSpacing: "-0.01em" }}>
                 {penaltyCheckoutLoading ? "Redirection vers Stripe…" : "10 utilisations · 10 CHF"}
               </button>
-              <button onClick={() => setShowPenaltyUpgrade(false)} style={{ display: "block", width: "100%", background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "10px 0 0", textAlign: "center" }}>
+              <button type="button" onClick={() => setShowPenaltyUpgrade(false)} style={{ display: "block", width: "100%", background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "10px 0 0", textAlign: "center" }}>
                 Pas maintenant
               </button>
             </div>

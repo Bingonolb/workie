@@ -101,7 +101,7 @@ export function WelcomeModal() {
             ))}
           </div>
 
-          <button onClick={close} style={{
+          <button type="button" onClick={close} style={{
             width: "100%",
             background: "linear-gradient(135deg, #8b5cf6, #f97316)",
             color: "#fff", fontWeight: 800, fontSize: 15, border: "none",

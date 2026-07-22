@@ -27,7 +27,7 @@ export function PayUserCampaignButton({ campaignId, total }: { campaignId: strin
 
   return (
     <div>
-      <button onClick={handlePay} disabled={loading} style={{
+      <button type="button" onClick={handlePay} disabled={loading} style={{
         display: "inline-flex", alignItems: "center", gap: 6,
         fontSize: 12, fontWeight: 700, color: "#fff",
         padding: "6px 14px", borderRadius: 8, border: "none",

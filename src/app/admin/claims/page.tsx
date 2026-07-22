@@ -118,7 +118,7 @@ export default function ClaimsPage() {
       ) : loadError ? (
         <div style={{ padding: "20px 24px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, color: "#ef4444", fontSize: 14, fontWeight: 600 }}>
           ⚠ Erreur de chargement : {loadError}
-          <button onClick={load} style={{ marginLeft: 14, fontSize: 13, color: "#8b5cf6", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>Réessayer</button>
+          <button type="button" onClick={load} style={{ marginLeft: 14, fontSize: 13, color: "#8b5cf6", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>Réessayer</button>
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>

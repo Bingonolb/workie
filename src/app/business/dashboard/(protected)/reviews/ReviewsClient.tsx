@@ -48,7 +48,7 @@ function ReplyForm({ reviewId, existing, onSuccess }: { reviewId: string; existi
 
   if (!open) {
     return (
-      <button onClick={() => { setText(existing ?? ""); setOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "8px 14px", cursor: "pointer" }}>
+      <button type="button" onClick={() => { setText(existing ?? ""); setOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "8px 14px", cursor: "pointer" }}>
         <MessageCircle size={14} /> {existing ? "Modifier la réponse" : "Répondre à cet avis"}
       </button>
     );
@@ -108,7 +108,7 @@ function ReviewCard({ review, onReload }: { review: Review; onReload: () => void
             <span style={{ fontSize: 12, color: "var(--text-muted)" }}>· {new Date(review.created_at).toLocaleDateString("fr-CH", { month: "short", year: "numeric" })}</span>
           </div>
         </div>
-        <button onClick={() => setExpanded(e => !e)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0, padding: 4 }}>
+        <button type="button" onClick={() => setExpanded(e => !e)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0, padding: 4 }}>
           {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
       </div>

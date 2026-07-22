@@ -96,7 +96,7 @@ export function ReportButton({
   }
 
   const trigger = variant === "icon" ? (
-    <button onClick={openModal} title="Signaler" aria-label="Signaler ce contenu" style={{
+    <button type="button" onClick={openModal} title="Signaler" aria-label="Signaler ce contenu" style={{
       display: "flex", alignItems: "center", justifyContent: "center",
       width: 32, height: 32, borderRadius: 8, border: "none",
       background: "transparent", cursor: "pointer", color: "var(--text-muted)",
@@ -108,7 +108,7 @@ export function ReportButton({
       <Flag size={14} />
     </button>
   ) : variant === "button" ? (
-    <button onClick={openModal} style={{
+    <button type="button" onClick={openModal} style={{
       display: "inline-flex", alignItems: "center", gap: 6,
       padding: "8px 16px", borderRadius: 9, border: "1px solid var(--border2)",
       background: "var(--surface2)", color: "var(--text-muted)", fontSize: 13,
@@ -117,7 +117,7 @@ export function ReportButton({
       <Flag size={13} /> Signaler
     </button>
   ) : (
-    <button onClick={openModal} style={{
+    <button type="button" onClick={openModal} style={{
       display: "inline-flex", alignItems: "center", gap: 4,
       background: "none", border: "none", cursor: "pointer",
       fontSize: 12, color: "var(--text-muted)", fontWeight: 500, padding: 0,
@@ -177,7 +177,7 @@ export function ReportButton({
                   </p>
                 </div>
               </div>
-              <button onClick={close} disabled={isPending} style={{
+              <button type="button" onClick={close} disabled={isPending} style={{
                 width: 32, height: 32, borderRadius: 8, border: "none",
                 background: "var(--surface2)", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -205,7 +205,7 @@ export function ReportButton({
                   <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 20 }}>
                     Merci. Notre équipe examinera ce signalement et prendra les mesures appropriées.
                   </p>
-                  <button onClick={close} style={{
+                  <button type="button" onClick={close} style={{
                     padding: "10px 28px", borderRadius: 10,
                     background: "var(--surface2)", border: "1px solid var(--border2)",
                     color: "var(--text)", fontWeight: 600, fontSize: 14, cursor: "pointer",
@@ -278,7 +278,7 @@ export function ReportButton({
 
                   {/* ── Actions ── */}
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button onClick={close} disabled={isPending} style={{
+                    <button type="button" onClick={close} disabled={isPending} style={{
                       flex: 0, padding: "12px 20px", borderRadius: 10,
                       border: "1px solid var(--border2)", background: "var(--surface2)",
                       color: "var(--text-muted)", fontWeight: 600, fontSize: 14, cursor: "pointer",
@@ -286,7 +286,7 @@ export function ReportButton({
                     }}>
                       Annuler
                     </button>
-                    <button onClick={submit} disabled={isPending || !category} style={{
+                    <button type="button" onClick={submit} disabled={isPending || !category} style={{
                       flex: 1, padding: "12px 20px", borderRadius: 10, border: "none",
                       background: !category || isPending
                         ? "var(--surface2)"
