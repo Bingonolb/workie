@@ -49,7 +49,7 @@ function ReplyForm({ reviewId, existing, onSuccess }: { reviewId: string; existi
   if (!open) {
     return (
       <button type="button" onClick={() => { setText(existing ?? ""); setOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 8, padding: "8px 14px", cursor: "pointer" }}>
-        <MessageCircle size={14} /> {existing ? "Modifier la réponse" : "Répondre à cet avis"}
+        <MessageCircle size={14} aria-hidden="true" /> {existing ? "Modifier la réponse" : "Répondre à cet avis"}
       </button>
     );
   }
@@ -59,7 +59,7 @@ function ReplyForm({ reviewId, existing, onSuccess }: { reviewId: string; existi
       <input type="hidden" name="review_id" value={reviewId} />
       {state?.success && (
         <p style={{ fontSize: 12, color: "#10b981", display: "flex", alignItems: "center", gap: 4 }}>
-          <CheckCircle size={13} /> Réponse publiée
+          <CheckCircle size={13} aria-hidden="true" /> Réponse publiée
         </p>
       )}
       {state?.error && <p style={{ fontSize: 12, color: "#ef4444" }}>{state.error}</p>}
@@ -108,8 +108,8 @@ function ReviewCard({ review, onReload }: { review: Review; onReload: () => void
             <span style={{ fontSize: 12, color: "var(--text-muted)" }}>· {new Date(review.created_at).toLocaleDateString("fr-CH", { month: "short", year: "numeric" })}</span>
           </div>
         </div>
-        <button type="button" onClick={() => setExpanded(e => !e)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0, padding: 4 }}>
-          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        <button type="button" onClick={() => setExpanded(e => !e)} aria-label={expanded ? "Réduire l'avis" : "Voir les détails"} aria-expanded={expanded} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0, padding: 4 }}>
+          {expanded ? <ChevronUp size={18} aria-hidden="true" /> : <ChevronDown size={18} aria-hidden="true" />}
         </button>
       </div>
 
@@ -198,7 +198,7 @@ export function ReviewsClient({ initialReviews }: { initialReviews: Review[] }) 
       {/* Filters */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
         {[{ v: "all", l: `Tous (${reviews.length})` }, { v: "unanswered", l: `Sans réponse (${reviews.filter(r => !r.company_replies?.length).length})` }].map(({ v, l }) => (
-          <button key={v} onClick={() => setFilter(v as "all" | "unanswered")} style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid", borderColor: filter === v ? "#8b5cf6" : "var(--border2)", background: filter === v ? "rgba(139,92,246,0.1)" : "var(--surface2)", color: filter === v ? "#8b5cf6" : "var(--text-muted)" }}>
+          <button key={v} type="button" onClick={() => setFilter(v as "all" | "unanswered")} aria-pressed={filter === v} style={{ padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid", borderColor: filter === v ? "#8b5cf6" : "var(--border2)", background: filter === v ? "rgba(139,92,246,0.1)" : "var(--surface2)", color: filter === v ? "#8b5cf6" : "var(--text-muted)" }}>
             {l}
           </button>
         ))}
@@ -216,7 +216,7 @@ export function ReviewsClient({ initialReviews }: { initialReviews: Review[] }) 
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-muted)" }}>
-          <Star size={40} style={{ opacity: 0.3, margin: "0 auto 16px" }} />
+          <Star size={40} aria-hidden="true" style={{ opacity: 0.3, margin: "0 auto 16px" }} />
           <p style={{ fontSize: 16, fontWeight: 600 }}>Aucun avis pour le moment</p>
           <p style={{ fontSize: 14, marginTop: 8 }}>Les avis de vos employés apparaîtront ici.</p>
         </div>

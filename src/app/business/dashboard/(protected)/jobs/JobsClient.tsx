@@ -41,6 +41,7 @@ function PillGroup({ options, value, onChange, color = "#8b5cf6" }: {
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
       {options.map(o => (
         <button key={o} type="button" onClick={() => onChange(o === value ? "" : o)}
+          aria-pressed={value === o}
           style={{ padding: "8px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid", transition: "all 0.15s",
             borderColor: value === o ? color : "var(--border2)",
             background: value === o ? `${color}18` : "var(--surface2)",
@@ -79,7 +80,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
           <p style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 2 }}>Nouvelle offre d&apos;emploi</p>
           <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Remplissez les informations — plus c&apos;est complet, plus vous attirez les bons profils.</p>
         </div>
-        <button type="button" onClick={() => setOpen(false)}
+        <button type="button" onClick={() => setOpen(false)} aria-label="Fermer"
           style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", fontSize: 20, lineHeight: 1 }}>✕</button>
       </div>
 
@@ -90,7 +91,7 @@ function CreateJobForm({ onCreated }: { onCreated: () => void }) {
         <input type="hidden" name="experience_level" value={experienceLevel} />
 
         {state?.error && (
-          <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#ef4444" }}>
+          <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#ef4444" }}>
             {state.error}
           </div>
         )}
@@ -197,13 +198,13 @@ function EditJobForm({ job, onSaved, onCancel }: { job: Job; onSaved: () => void
     <div style={{ background: "var(--surface2)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 20, padding: "28px 32px", marginBottom: 14 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Modifier l&apos;offre</p>
-        <button type="button" onClick={onCancel} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>
-          <X size={18} />
+        <button type="button" onClick={onCancel} aria-label="Fermer" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
 
       {error && (
-        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#ef4444", marginBottom: 18 }}>
+        <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#ef4444", marginBottom: 18 }}>
           {error}
         </div>
       )}
@@ -329,27 +330,27 @@ function JobCard({ job, onToggle, onDelete, onEdited }: { job: Job; onToggle: ()
 
         {/* Quick stats chips */}
         <div className="biz-job-card-stats" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <button type="button" onClick={handleStatsToggle} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: clicks > 0 ? "#8b5cf6" : "var(--text-muted)", background: clicks > 0 ? "rgba(139,92,246,0.08)" : "var(--surface)", border: `1px solid ${clicks > 0 ? "rgba(139,92,246,0.25)" : "var(--border2)"}`, borderRadius: 8, padding: "5px 10px", cursor: "pointer" }}>
-            <MousePointer size={12} /> {clicks} candidature{clicks !== 1 ? "s" : ""}
-            <BarChart2 size={11} style={{ marginLeft: 2, opacity: 0.6 }} />
+          <button type="button" onClick={handleStatsToggle} aria-expanded={statsOpen} aria-label={`${clicks} candidature${clicks !== 1 ? "s" : ""} — voir les statistiques`} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: clicks > 0 ? "#8b5cf6" : "var(--text-muted)", background: clicks > 0 ? "rgba(139,92,246,0.08)" : "var(--surface)", border: `1px solid ${clicks > 0 ? "rgba(139,92,246,0.25)" : "var(--border2)"}`, borderRadius: 8, padding: "5px 10px", cursor: "pointer" }}>
+            <MousePointer size={12} aria-hidden="true" /> {clicks} candidature{clicks !== 1 ? "s" : ""}
+            <BarChart2 size={11} aria-hidden="true" style={{ marginLeft: 2, opacity: 0.6 }} />
           </button>
         </div>
 
         <div className="biz-job-card-actions" style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
-          <button type="button" onClick={() => setExpanded(e => !e)} title="Détails" aria-label="Détails"
+          <button type="button" onClick={() => setExpanded(e => !e)} title="Détails" aria-label="Détails" aria-expanded={expanded}
             className="biz-action-btn"
             style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {expanded ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
           </button>
           <button type="button" onClick={() => { setEditing(true); setExpanded(false); }} title="Modifier" aria-label="Modifier"
             className="biz-action-btn"
             style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)", cursor: "pointer", color: "#8b5cf6", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Pencil size={15} />
+            <Pencil size={15} aria-hidden="true" />
           </button>
           <button type="button" onClick={onToggle} title={job.is_active ? "Désactiver" : "Activer"} aria-label={job.is_active ? "Désactiver" : "Activer"}
             className="biz-action-btn"
             style={{ padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", cursor: "pointer", color: "var(--text-muted)", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {job.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
+            {job.is_active ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
           </button>
           {confirmDelete ? (
             <>
@@ -366,7 +367,7 @@ function JobCard({ job, onToggle, onDelete, onEdited }: { job: Job; onToggle: ()
             <button type="button" onClick={() => setConfirmDelete(true)} title="Supprimer" aria-label="Supprimer"
               className="biz-action-btn"
               style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", cursor: "pointer", color: "#ef4444", minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Trash2 size={16} />
+              <Trash2 size={16} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -515,7 +516,7 @@ export function JobsClient({ initialJobs }: { initialJobs: Job[] }) {
         </div>
       ) : jobs.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
-          <Briefcase size={48} style={{ opacity: 0.2, margin: "0 auto 20px", display: "block" }} />
+          <Briefcase size={48} aria-hidden="true" style={{ opacity: 0.2, margin: "0 auto 20px", display: "block" }} />
           <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Aucune offre publiée</p>
           <p style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 380, margin: "0 auto" }}>
             Créez votre première offre pour l&apos;afficher sur votre fiche publique et sur <strong>/jobs</strong>.
