@@ -1,9 +1,8 @@
 import { getBusinessAnalytics } from "@/lib/actions/business";
 import { createClient, getBusinessCompanyId } from "@/lib/supabase/server";
-import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2, CheckCircle, Clock, BarChart2 } from "lucide-react";
+import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2, CheckCircle, Clock, BarChart2, Trophy } from "lucide-react";
 import Link from "next/link";
 import { ShareCopyButton } from "@/components/ShareCopyButton";
-import { MyRankBanner } from "@/app/ranking/MyRankBanner";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -99,9 +98,6 @@ export default async function BusinessDashboardPage() {
         ))}
       </div>
 
-      {/* Rank banner */}
-      <MyRankBanner />
-
       {/* Analytics CTA — remplace les graphiques dupliqués */}
       <Link href="/business/dashboard/analytics" style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20,
@@ -144,16 +140,17 @@ export default async function BusinessDashboardPage() {
       {/* Quick actions */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 28 }}>
         {[
-          { href: "/business/dashboard/reviews", label: "Répondre aux avis", desc: "Gérez votre réputation", color: "#8b5cf6" },
-          { href: "/business/dashboard/jobs", label: "Publier une offre", desc: "Attirez des candidats", color: "#f97316" },
-          { href: "/business/dashboard/profile", label: "Compléter la fiche", desc: "Logo, photos, réseaux", color: "#10b981" },
-        ].map(({ href, label, desc, color }) => (
+          { href: "/business/dashboard/reviews", label: "Répondre aux avis", desc: "Gérez votre réputation", color: "#8b5cf6", icon: null },
+          { href: "/business/dashboard/jobs", label: "Publier une offre", desc: "Attirez des candidats", color: "#f97316", icon: null },
+          { href: "/business/dashboard/profile", label: "Compléter la fiche", desc: "Logo, photos, réseaux", color: "#10b981", icon: null },
+          { href: "/ranking", label: "Classement", desc: "Votre position parmi toutes les entreprises", color: "#f59e0b", icon: <Trophy size={18} color="#f59e0b" /> },
+        ].map(({ href, label, desc, color, icon }) => (
           <Link key={href} href={href} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 20px", textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div>
               <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 3 }}>{label}</p>
               <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{desc}</p>
             </div>
-            <ArrowRight size={18} color={color} />
+            {icon ?? <ArrowRight size={18} color={color} />}
           </Link>
         ))}
       </div>
