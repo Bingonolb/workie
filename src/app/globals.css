@@ -186,12 +186,6 @@ main, .page-main, .page-main-sm, .page-main-md {
   .nav-login-link   { display: none !important; }
 }
 
-/* Desktop: swap search icon → search bar */
-@media (min-width: 769px) {
-  .nav-search-icon { display: none !important; }
-  .nav-search-bar  { display: flex !important; }
-}
-
 /* ─── Ranking table ─────────────────────────────────────────────── */
 
 .ranking-row {
@@ -401,9 +395,6 @@ main, .page-main, .page-main-sm, .page-main-md {
 
   /* Hide desktop nav links on mobile */
   .nav-links-desktop { display: none !important; }
-  /* Hide desktop search bar on mobile, show icon */
-  .nav-search-bar { display: none !important; }
-  .nav-search-icon { display: flex !important; }
 
   /* Push page content above bottom nav */
   .page-main    { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
