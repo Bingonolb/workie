@@ -55,6 +55,8 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 }) {
   const [fav, setFav] = useState(isFav);
   const [score, setScore] = useState(Number(company.score));
+  const [coverLoaded, setCoverLoaded] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
   const [pending, startTransition] = useTransition();
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
@@ -83,7 +85,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div className="card-cover img-placeholder" style={{ height: 148, position: "relative", overflow: "hidden" }}>
+        <div className={`card-cover${coverLoaded || !company.cover_url ? "" : " img-placeholder"}`} style={{ height: 148, position: "relative", overflow: "hidden" }}>
           {company.cover_url ? (
             <Image
               src={company.cover_url}
@@ -92,6 +94,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
               sizes="(max-width: 640px) calc(50vw - 24px), 280px"
               style={{ objectFit: "cover" }}
               priority={priority}
+              onLoad={() => setCoverLoaded(true)}
             />
           ) : (
             <div style={{ width: "100%", height: "100%", background: getCoverGradient(company.sector, sectorColor) }} />
@@ -151,19 +154,17 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           {/* Bottom: logo/initials + company name */}
           <div style={{ position: "absolute", bottom: 12, left: 12, right: isBusiness ? 12 : 60, display: "flex", alignItems: "flex-end", gap: 9 }}>
             {/* Logo or initials */}
-            <div style={{ flexShrink: 0, position: "relative", width: 38, height: 38 }}>
-              {/* Initials always rendered as fallback */}
-              <div style={{
-                width: 38, height: 38, borderRadius: 9,
-                background: `${sectorColor}33`,
-                border: `1.5px solid ${sectorColor}66`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 13, fontWeight: 900, color: "#fff",
-                letterSpacing: "-0.02em",
-              }}>
-                {getInitials(company.name)}
-              </div>
-              {/* Logo overlaid on top if available — opacity:0 prevents "?" broken-image flash */}
+            <div style={{ flexShrink: 0, width: 38, height: 38, borderRadius: 9, overflow: "hidden", position: "relative",
+              background: logoLoaded ? "#fff" : `${sectorColor}33`,
+              border: logoLoaded ? "1.5px solid rgba(255,255,255,0.25)" : `1.5px solid ${sectorColor}66`,
+            }}>
+              {/* Initials — hidden once logo loads */}
+              {!logoLoaded && (
+                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em" }}>
+                  {getInitials(company.name)}
+                </div>
+              )}
+              {/* Logo */}
               {company.logo_url && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -172,13 +173,13 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
                   width={38}
                   height={38}
                   loading="lazy"
-                  onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = "1"; }}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  onLoad={() => setLogoLoaded(true)}
+                  onError={() => setLogoLoaded(false)}
                   style={{
                     position: "absolute", inset: 0,
-                    borderRadius: 9, objectFit: "contain", background: "#fff",
-                    border: "1.5px solid rgba(255,255,255,0.25)",
-                    opacity: 0, transition: "opacity 0.1s",
+                    width: "100%", height: "100%",
+                    objectFit: "contain", padding: 3,
+                    opacity: logoLoaded ? 1 : 0,
                   }}
                 />
               )}
@@ -223,11 +224,9 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           {/* Description */}
           {company.description && (
             <p style={{
-              fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.55,
+              fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.6,
               marginBottom: 11,
-              display: "-webkit-box", WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical", overflow: "hidden",
-            } as React.CSSProperties}>
+            }}>
               {company.description}
             </p>
           )}

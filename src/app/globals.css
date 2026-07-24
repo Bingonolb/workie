@@ -77,9 +77,9 @@ html.light {
 }
 
 ::selection { background: rgba(139,92,246,0.3); }
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+/* Hide scrollbars everywhere */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
 a { color: inherit; }
 
 /* ─── Page wrappers ─────────────────────────────────────────────── */
