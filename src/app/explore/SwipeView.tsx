@@ -15,6 +15,7 @@ import type { PublicAdCampaign } from "@/lib/actions/ads";
 const SWIPE_THRESHOLD = 90;
 const PREFETCH_AHEAD = 25;
 const AD_SESSION_KEY = "workie_swipe_ad_shown";
+const STATE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 type AdItem = { __ad: true; campaign: PublicAdCampaign };
 type SwipeItem = Company | AdItem;
@@ -56,19 +57,45 @@ export function SwipeView({
 }) {
   const router = useRouter();
 
-  // Build the initial deck: shuffle companies, then inject ONE ad card at a random position
-  // (only if not already shown this browser session)
+  const stateKey = `workie_swipe_${filters?.sector ?? ""}_${filters?.canton ?? ""}`;
+
+  // Build the initial deck: restore from sessionStorage if recent, otherwise shuffle fresh
   const [companies, setCompanies] = useState<SwipeItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = sessionStorage.getItem(stateKey);
+        if (raw) {
+          const saved = JSON.parse(raw) as { ids: string[]; index: number; actedIds: string[]; timestamp: number };
+          if (Date.now() - saved.timestamp < STATE_TTL_MS) {
+            const byId = new Map(initialCompanies.map(c => [c.id, c]));
+            const restored = saved.ids.map(id => byId.get(id)).filter(Boolean) as SwipeItem[];
+            if (restored.length > 0) return restored;
+          }
+        }
+      } catch { /* ignore */ }
+    }
     const shuffled: SwipeItem[] = shuffle(initialCompanies);
     const alreadyShown = typeof window !== "undefined" && sessionStorage.getItem(AD_SESSION_KEY) === "1";
     if (swipeAds.length > 0 && !alreadyShown) {
-      const pos = 5 + Math.floor(Math.random() * 8); // insert between position 5-12
+      const pos = 5 + Math.floor(Math.random() * 8);
       const campaign = swipeAds[Math.floor(Math.random() * swipeAds.length)];
       shuffled.splice(Math.min(pos, shuffled.length), 0, { __ad: true, campaign });
     }
     return shuffled;
   });
-  const [index, setIndex] = useState(0);
+
+  const [index, setIndex] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = sessionStorage.getItem(stateKey);
+        if (raw) {
+          const saved = JSON.parse(raw) as { ids: string[]; index: number; actedIds: string[]; timestamp: number };
+          if (Date.now() - saved.timestamp < STATE_TTL_MS) return saved.index;
+        }
+      } catch { /* ignore */ }
+    }
+    return 0;
+  });
   const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
   const [penaltyIds, setPenaltyIds] = useState<Set<string>>(new Set());
@@ -82,6 +109,20 @@ export function SwipeView({
   const [showPenaltyUpgrade, setShowPenaltyUpgrade] = useState(false);
   const [penaltyCheckoutLoading, setPenaltyCheckoutLoading] = useState(false);
   const [penaltyCheckoutError, setPenaltyCheckoutError] = useState("");
+
+  // Restore actedIds from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(stateKey);
+      if (raw) {
+        const saved = JSON.parse(raw) as { actedIds: string[]; timestamp: number };
+        if (Date.now() - saved.timestamp < STATE_TTL_MS) {
+          saved.actedIds.forEach(id => actedIds.current.add(id));
+        }
+      }
+    } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (penaltySuccess) {
@@ -116,16 +157,27 @@ export function SwipeView({
     if (isAd(current)) trackAdImpression(current.campaign.id);
     else if (current) router.prefetch(`/company/${current.id}`);
 
-    // Preload next card's cover image so it's ready before the swipe
-    const nextItem = companies[index + 1];
-    if (nextItem && !isAd(nextItem) && (nextItem as Company).cover_url) {
-      const img = new window.Image();
-      img.src = (nextItem as Company).cover_url!;
+    // Preload current + next 3 card images
+    for (let i = 0; i <= 3; i++) {
+      const item = companies[index + i];
+      if (!item) break;
+      const url = isAd(item) ? item.campaign.image_url : (item as Company).cover_url;
+      if (url) {
+        const img = new window.Image();
+        img.src = url;
+      }
     }
-    if (nextItem && isAd(nextItem) && nextItem.campaign.image_url) {
-      const img = new window.Image();
-      img.src = nextItem.campaign.image_url;
-    }
+
+    // Persist state to sessionStorage so navigating away and back restores position
+    try {
+      const ids = companies.filter(c => !isAd(c)).map(c => (c as Company).id);
+      sessionStorage.setItem(stateKey, JSON.stringify({
+        ids,
+        index,
+        actedIds: [...actedIds.current],
+        timestamp: Date.now(),
+      }));
+    } catch { /* ignore quota errors */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
