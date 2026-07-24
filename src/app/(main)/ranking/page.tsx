@@ -57,26 +57,18 @@ export default async function RankingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(rankingJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       <main className="page-main-md">
 
-        {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 34, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 10 }}>
-            Classement des entreprises
-          </h1>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>Top 200</span>
-            <span style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 500 }}>· classées par score communautaire</span>
-          </div>
-        </div>
-
         {/* Business rank banner — client-side fetch, invisible to non-business users */}
         <MyRankBanner />
 
         {/* Table */}
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
           <div style={{ padding: "20px 20px 0" }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 16 }}>
-              Top {companies.length} · trié par score global
-            </p>
+            <div style={{ marginBottom: 16 }}>
+              <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 2 }}>
+                Top {companies.length}
+              </h1>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>trié par score communautaire</p>
+            </div>
           </div>
 
           {companies.length === 0 ? (
