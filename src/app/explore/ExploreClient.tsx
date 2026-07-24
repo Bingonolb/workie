@@ -222,7 +222,7 @@ export function ExploreClient({
               <div style={{ position: "relative", marginTop: 20, overflow: "hidden" }}>
                 <div
                   aria-hidden="true"
-                  className="guest-blur-grid"
+                  className="guest-blur-preview"
                 >
                   {filtered.slice(PAGE_SIZE, PAGE_SIZE + 6).map(c => (
                     <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} isBusiness={false} priority={false} />

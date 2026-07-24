@@ -775,7 +775,6 @@ select:focus-visible {
 
 /* ─── Guest blur gate ───────────────────────────────────────────── */
 
-/* CTA section below blurred content */
 .guest-gate-cta {
   display: flex;
   flex-direction: column;
@@ -786,16 +785,16 @@ select:focus-visible {
   margin-top: 4px;
 }
 
-/* Blurred preview grid — always 3 columns so mobile shows a real grid, not 1 ugly card */
-.guest-blur-grid {
+/* Blurred preview — desktop shows first row of grid, mobile shows top of 1 card */
+.guest-blur-preview {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
   filter: blur(3px);
   pointer-events: none;
   user-select: none;
   opacity: 0.7;
-  max-height: 220px;
+  max-height: 260px;
   overflow: hidden;
 }
 
@@ -805,5 +804,12 @@ select:focus-visible {
   }
   .guest-gate-cta p:first-child {
     font-size: 18px !important;
+  }
+  /* On mobile: less blur, show a bit more content, tighter gap */
+  .guest-blur-preview {
+    filter: blur(2px);
+    opacity: 0.75;
+    max-height: 320px;
+    gap: 12px;
   }
 }
