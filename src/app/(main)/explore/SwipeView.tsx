@@ -297,10 +297,14 @@ export function SwipeView({
     const el = cardRef.current;
     if (!el) return;
 
+    // "h" = horizontal, "v" = vertical, null = undecided
+    let directionLock: "h" | "v" | null = null;
+
     const onTouchStart = (e: TouchEvent) => {
       if (goneRef.current) return;
       const t = e.touches[0];
       dragStart.current = { x: t.clientX, y: t.clientY };
+      directionLock = null;
       setIsDragging(true);
     };
 
@@ -309,9 +313,18 @@ export function SwipeView({
       const t = e.touches[0];
       const dx = t.clientX - dragStart.current.x;
       const dy = t.clientY - dragStart.current.y;
-      if (Math.abs(dx) > Math.abs(dy)) {
+
+      // Lock direction after 5px of movement — never re-evaluate mid-gesture
+      if (directionLock === null && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+        directionLock = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
+      }
+
+      // Vertical gesture: let the browser scroll, don't touch it
+      if (directionLock === "v") return;
+
+      // Horizontal gesture: take over and prevent page scroll
+      if (directionLock === "h") {
         e.preventDefault();
-        // Slight resistance makes it feel more physical
         setDrag(dx * 0.92);
       }
     };

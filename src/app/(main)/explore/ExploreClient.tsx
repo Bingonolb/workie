@@ -94,12 +94,20 @@ export function ExploreClient({
   const [sort, setSort] = useState(initialSort ?? "recent");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Listen for instant view switch from BottomNav (no server round-trip)
+  // Listen for instant view switch from BottomNav/NavLinks (no server round-trip)
   useEffect(() => {
     const handler = (e: Event) => setView((e as CustomEvent<"grid" | "swipe">).detail);
     window.addEventListener("workie:view", handler);
     return () => window.removeEventListener("workie:view", handler);
   }, []);
+
+  // Keep URL in sync with view state so nav active indicators stay correct
+  useEffect(() => {
+    const target = view === "swipe" ? "/explore?view=swipe" : "/explore";
+    if (window.location.pathname + window.location.search !== target) {
+      window.history.replaceState({}, "", target);
+    }
+  }, [view]);
 
   // Session-stable offset: first ad appears at company index 3, 4, or 5.
   // Stored in sessionStorage so it doesn't shift on re-render, but varies
