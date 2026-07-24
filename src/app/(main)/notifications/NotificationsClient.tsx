@@ -170,12 +170,7 @@ export function NotificationsClient({ initialNotifications, initialUnread }: {
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", padding: "40px 20px 100px", maxWidth: 620, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
-        <Link href="/explore" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 600 }}>
-          ← Retour
-        </Link>
-        <div style={{ width: 1, height: 16, background: "var(--border)" }} />
-        <h1 style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", margin: 0 }}>Notifications</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
         {unread > 0 && (
           <span style={{ fontSize: 12, fontWeight: 800, background: "#8b5cf6", color: "#fff", borderRadius: 50, padding: "2px 8px" }}>
             {unread}
