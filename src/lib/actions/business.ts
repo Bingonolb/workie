@@ -320,7 +320,7 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
       .map(t => t.trim().toLowerCase().replace(/^#/, "").replace(/\s+/g, "-"))
       .filter(t => t.length >= 2 && t.length <= 30)
       .slice(0, 10);
-    if (tags.length === 0) return { error: "Ajoutez au moins un mot-clé (ex: startup, tech, innovation)." };
+    if (tags.length < 3) return { error: "Ajoutez au moins 3 mots-clés (ex: startup, tech, innovation)." };
 
     const canton = String(formData.get("canton") || "").trim() || null;
     const employee_range = String(formData.get("employee_range") || "").trim() || null;

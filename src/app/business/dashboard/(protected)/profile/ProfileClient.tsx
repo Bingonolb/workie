@@ -45,6 +45,33 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
   const logoBlobRef = useRef<string | null>(null);
   const coverBlobRef = useRef<string | null>(null);
 
+  const parseTags = (raw: unknown): string[] => {
+    if (Array.isArray(raw)) return (raw as string[]).filter(Boolean);
+    if (typeof raw === "string" && raw.trim()) return raw.split(",").map(t => t.trim()).filter(Boolean);
+    return [];
+  };
+  const [tags, setTags] = useState<string[]>(() => parseTags(initialCompany.tags));
+  const [tagInput, setTagInput] = useState("");
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
+  const addTag = (val: string) => {
+    const clean = val.trim().replace(/^#+/, "").toLowerCase();
+    if (!clean || tags.includes(clean) || tags.length >= 10) return;
+    setTags(prev => [...prev, clean]);
+    setTagInput("");
+  };
+
+  const removeTag = (t: string) => setTags(prev => prev.filter(x => x !== t));
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (["Enter", ",", " "].includes(e.key)) {
+      e.preventDefault();
+      addTag(tagInput);
+    } else if (e.key === "Backspace" && tagInput === "" && tags.length > 0) {
+      setTags(prev => prev.slice(0, -1));
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (logoBlobRef.current) URL.revokeObjectURL(logoBlobRef.current);
@@ -166,13 +193,56 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
             <span style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 6, padding: "2px 7px" }}>Obligatoire</span>
           </div>
           <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 14, lineHeight: 1.6 }}>
-            Séparés par des virgules · ex: <em>startup, innovation, tech, durabilité</em>
+            Tape un mot et appuie sur <kbd style={{ fontSize: 11, background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 4, padding: "1px 5px" }}>Entrée</kbd> ou <kbd style={{ fontSize: 11, background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 4, padding: "1px 5px" }}>Espace</kbd> pour l&apos;ajouter
           </p>
-          <input id="biz-tags" name="tags" type="text"
-            defaultValue={Array.isArray(company.tags) ? (company.tags as string[]).join(", ") : String(company.tags ?? "")}
-            placeholder="startup, innovation, tech, durabilité..."
-            style={inp} />
-          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>Minimum 1 mot-clé · max 10 · apparaissent comme #hashtags sur votre fiche</p>
+
+          {/* Hidden input for form submission */}
+          <input type="hidden" name="tags" value={tags.join(",")} />
+
+          {/* Tag pill input */}
+          <div
+            onClick={() => tagInputRef.current?.focus()}
+            style={{
+              display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center",
+              minHeight: 48, padding: "8px 12px",
+              background: "var(--surface)", border: `1px solid ${tags.length < 3 && tags.length > 0 ? "#ef4444" : "var(--border2)"}`,
+              borderRadius: 10, cursor: "text",
+            }}
+          >
+            {tags.map(t => (
+              <span key={t} style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.25)",
+                borderRadius: 20, padding: "3px 10px 3px 8px",
+                fontSize: 13, fontWeight: 600, color: "#8b5cf6",
+              }}>
+                #{t}
+                <button
+                  type="button"
+                  onClick={e => { e.stopPropagation(); removeTag(t); }}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#8b5cf6", padding: 0, lineHeight: 1, fontSize: 14, opacity: 0.6 }}
+                  aria-label={`Supprimer ${t}`}
+                >×</button>
+              </span>
+            ))}
+            <input
+              ref={tagInputRef}
+              type="text"
+              value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              onBlur={() => { if (tagInput.trim()) addTag(tagInput); }}
+              placeholder={tags.length === 0 ? "startup, innovation, tech..." : ""}
+              style={{
+                border: "none", outline: "none", background: "transparent",
+                fontSize: 14, color: "var(--text)", flex: 1, minWidth: 120,
+              }}
+            />
+          </div>
+
+          <p style={{ fontSize: 11, color: tags.length < 3 ? "#ef4444" : "var(--text-muted)", marginTop: 6 }}>
+            {tags.length}/10 · Minimum 3 · apparaissent comme #hashtags sur votre fiche
+          </p>
         </div>
 
         {/* Description */}
