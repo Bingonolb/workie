@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
-import { Navbar } from "@/components/Navbar";
+
 import { NewUserCampaignForm } from "./NewUserCampaignForm";
 
 export default async function NewUserAdPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
@@ -9,7 +9,6 @@ export default async function NewUserAdPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="page-root">
-      <Navbar />
       <main className="page-main-md" style={{ paddingTop: 24, paddingBottom: 48 }}>
         <NewUserCampaignForm
           prefillHeadline={sp.headline}

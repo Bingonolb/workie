@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser, createClient } from "@/lib/supabase/server";
-import { Navbar } from "@/components/Navbar";
 import { ProfileForm } from "@/components/ProfileForm";
 import { ProfileReviews } from "./ProfileReviews";
 import { getUserReviews } from "@/lib/actions/reviews";
@@ -49,8 +48,6 @@ export default async function ProfilePage() {
           .profile-sidebar { position: static !important; }
         }
       `}</style>
-      <Navbar />
-
       <main className="page-main-md">
 
         {/* ── Header ── */}

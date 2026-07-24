@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { getUserCampaigns } from "@/lib/actions/ads";
-import { Navbar } from "@/components/Navbar";
+
 import Image from "next/image";
 import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft, Megaphone, CreditCard } from "lucide-react";
 import type { AdCampaign } from "@/lib/actions/ads";
@@ -60,7 +60,6 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="page-root">
-      <Navbar />
       <main className="page-main-md" style={{ paddingTop: 24, paddingBottom: 48 }}>
 
         <Link href="/profile" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>

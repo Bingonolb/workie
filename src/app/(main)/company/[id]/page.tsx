@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Navbar } from "@/components/Navbar";
 import { ReviewForm } from "@/components/ReviewForm";
 import { getCachedCompany } from "@/lib/actions/companies";
 import { getCachedReviews } from "@/lib/actions/reviews";
@@ -213,8 +212,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     <div className="page-root">
       <ViewTracker companyId={company.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
-
-      <Navbar />
 
       {/* Preload hero cover — browser fetches directly from CDN before paint */}
       {company.cover_url && <link rel="preload" as="image" href={company.cover_url} />}

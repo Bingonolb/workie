@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { getUserCampaignById, getUserCampaignDailyStats, getUserCampaignCantonStats, pauseUserCampaign } from "@/lib/actions/ads";
-import { Navbar } from "@/components/Navbar";
+
 import { AdStatsChart } from "@/app/business/dashboard/ads/AdStatsChart";
 import { CancelCampaignButton } from "@/components/CancelCampaignButton";
 import Image from "next/image";
@@ -52,7 +52,6 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
 
   return (
     <div className="page-root">
-      <Navbar />
       <main className="page-main-md" style={{ paddingTop: 24, paddingBottom: 48 }}>
 
         <Link href="/profile/ads" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>

@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic"; // needed for auth/cookies
 
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Navbar } from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "Explorer les entreprises suisses · Workie",
@@ -170,7 +169,6 @@ export default async function ExplorePage({
     ]);
     return (
       <div className="page-root">
-        <Navbar />
         <main style={{ maxWidth: 600, margin: "0 auto", padding: "20px 16px 100px" }}>
           <Suspense fallback={null}><ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params}  /></Suspense>
           <SwipeView
@@ -212,7 +210,6 @@ export default async function ExplorePage({
 
   return (
     <div className="page-root">
-      <Navbar />
       {exploreJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(exploreJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       )}

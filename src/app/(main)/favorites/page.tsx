@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Navbar } from "@/components/Navbar";
 import { CompanyCard } from "@/components/CompanyCard";
 import { getFavorites } from "@/lib/actions/favorites";
 import { getUser } from "@/lib/supabase/server";
@@ -24,7 +23,6 @@ export default async function FavoritesPage() {
 
   return (
     <div className="page-root">
-      <Navbar />
       <main className="page-main-md">
         <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>
           Mes favoris

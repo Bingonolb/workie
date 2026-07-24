@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getCachedTopCompanies, getCachedReviewCount } from "@/lib/actions/scores";
 import { TrendingUp, Users, Star } from "lucide-react";
@@ -57,7 +56,6 @@ export default async function RankingPage() {
   return (
     <div className="page-root">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(rankingJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
-      <Navbar />
       <main className="page-main-md">
 
         {/* Header */}
