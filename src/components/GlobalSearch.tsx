@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -17,15 +17,28 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Mount immediately (synchronous — no visible blank frame)
+  useLayoutEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
-    setMounted(true);
-    setTimeout(() => inputRef.current?.focus(), 80);
+    setTimeout(() => inputRef.current?.focus(), 60);
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
+    // iOS-safe scroll lock: freeze body in place
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
       document.body.style.overflow = "";
+      window.scrollTo(0, scrollY);
     };
   }, [onClose]);
 
@@ -43,7 +56,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       } finally {
         setLoading(false);
       }
-    }, 280);
+    }, 150);
   }, []);
 
   useEffect(() => { search(query); }, [query, search]);
@@ -58,7 +71,8 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
         position: "fixed", inset: 0, zIndex: 10100,
         background: "var(--bg)",
         display: "flex", flexDirection: "column",
-        animation: "searchSlideIn 0.22s cubic-bezier(0.32,0.72,0,1) both",
+        animation: "searchSlideIn 0.18s cubic-bezier(0.32,0.72,0,1) both",
+        touchAction: "none",
       }}
     >
       <style>{`
@@ -126,7 +140,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Results */}
-      <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
+      <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "none", touchAction: "pan-y" }}>
         {loading && query && (
           <div style={{ padding: "20px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
         )}

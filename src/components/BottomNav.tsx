@@ -35,11 +35,11 @@ function BottomNavInner({ isBusiness }: { isBusiness: boolean }) {
   }
 
   const USER_LINKS = [
-    { href: "/explore",           Icon: Compass, label: "Explorer", active: pathname === "/explore" && !isSwipeActive },
-    { href: "/explore?view=swipe", Icon: Layers,  label: "Swipe",   active: isSwipeActive },
-    { href: "/ranking",           Icon: Trophy,  label: "Classement", active: pathname.startsWith("/ranking") },
-    { href: "/favorites",         Icon: Flame,   label: "Favoris",  active: pathname.startsWith("/favorites") },
-    { href: "/profile",           Icon: User,    label: "Profil",   active: pathname.startsWith("/profile") },
+    { href: "/explore",            Icon: Compass, label: "Explorer",   active: pathname === "/explore" && !isSwipeActive },
+    { href: "/explore?view=swipe", Icon: Layers,  label: "Swipe",      active: isSwipeActive },
+    { href: "/favorites",          Icon: Flame,   label: "Favoris",    active: pathname.startsWith("/favorites") },
+    { href: "/ranking",            Icon: Trophy,  label: "Classement", active: pathname.startsWith("/ranking") },
+    { href: "/profile",            Icon: User,    label: "Profil",     active: pathname.startsWith("/profile") },
   ];
 
   const handleClick = (active: boolean) => (e: React.MouseEvent) => {
@@ -68,7 +68,7 @@ export function BottomNav({ isBusiness }: { isBusiness: boolean }) {
   return (
     <Suspense fallback={
       <nav className="bottom-nav" aria-hidden="true">
-        {[Compass, Layers, Trophy, Flame, User].map((Icon, i) => (
+        {[Compass, Layers, Flame, Trophy, User].map((Icon, i) => (
           <span key={i} className="bottom-nav-item" style={{ opacity: 0.4 }}>
             <Icon size={22} strokeWidth={1.8} />
           </span>

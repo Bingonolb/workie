@@ -15,12 +15,12 @@ export function SearchButton() {
         title="Rechercher"
         style={{
           display: "flex", alignItems: "center", justifyContent: "center",
-          width: 36, height: 36, borderRadius: 8,
-          background: "none", border: "none",
-          color: "var(--text-muted)", cursor: "pointer",
+          width: 40, height: 40, borderRadius: 10,
+          background: "var(--surface2)", border: "1px solid var(--border2)",
+          color: "var(--text)", cursor: "pointer",
         }}
       >
-        <Search size={18} aria-hidden="true" />
+        <Search size={20} aria-hidden="true" />
       </button>
       {open && <GlobalSearch onClose={() => setOpen(false)} />}
     </>
