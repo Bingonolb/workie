@@ -201,15 +201,6 @@ export function ExploreClient({
 
   return (
     <>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>
-          Explorer les entreprises
-        </h1>
-        <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
-          <span style={{ color: "var(--text)", fontWeight: 700 }}>{total}</span> entreprises
-        </p>
-      </div>
-
       <ExploreFilters
         sectors={SECTORS}
         cantons={CANTONS}
