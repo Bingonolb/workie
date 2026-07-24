@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -35,7 +36,7 @@ export async function getNotifications(): Promise<{ notifications: Notification[
   }
 }
 
-export async function getUnreadCount(): Promise<number> {
+export const getUnreadCount = cache(async function getUnreadCount(): Promise<number> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -49,7 +50,7 @@ export async function getUnreadCount(): Promise<number> {
   } catch {
     return 0;
   }
-}
+});
 
 export async function markAllRead(): Promise<void> {
   try {
