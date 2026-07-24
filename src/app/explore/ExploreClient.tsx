@@ -215,22 +215,63 @@ export function ExploreClient({
             })()}
           </div>
 
-          <div style={{ textAlign: "center", marginTop: 40 }}>
-            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: (hasMore || isGuest) ? 16 : 0 }}>
-              <span style={{ color: "var(--text)", fontWeight: 700 }}>{paginated.length}</span> sur <span style={{ fontWeight: 700 }}>{total}</span> entreprises
-            </p>
-            {isGuest && total > PAGE_SIZE && (
-              <a href="/signup" style={{
-                display: "inline-block",
-                padding: "13px 32px", borderRadius: 50,
-                background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-                color: "#fff", fontWeight: 700, fontSize: 14,
-                textDecoration: "none",
+          {/* Blurred preview + CTA for guests */}
+          {isGuest && filtered.length > PAGE_SIZE && (
+            <div style={{ position: "relative", marginTop: 20, overflow: "hidden" }}>
+              {/* Smooth gradient bridge from visible cards into the blur */}
+              <div style={{
+                position: "absolute", top: 0, left: 0, right: 0, height: 80, zIndex: 1,
+                background: "linear-gradient(to bottom, var(--bg), transparent)",
+                pointerEvents: "none",
+              }} />
+
+              {/* Real cards, blurred */}
+              <div
+                aria-hidden="true"
+                className="explore-grid"
+                style={{
+                  display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20,
+                  filter: "blur(6px)", pointerEvents: "none", userSelect: "none", opacity: 0.6,
+                }}
+              >
+                {filtered.slice(PAGE_SIZE, PAGE_SIZE + 6).map(c => (
+                  <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} isBusiness={false} priority={false} />
+                ))}
+              </div>
+
+              {/* Gradient fade bottom + CTA */}
+              <div style={{
+                position: "absolute", inset: 0, zIndex: 2,
+                background: "linear-gradient(to bottom, transparent 10%, var(--bg) 52%)",
+                pointerEvents: "none",
+              }} />
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 3,
+                display: "flex", flexDirection: "column", alignItems: "center",
+                padding: "0 16px 32px", textAlign: "center",
               }}>
-                Voir les {total - PAGE_SIZE} autres entreprises →
-              </a>
-            )}
-            {hasMore && (
+                <p style={{ fontSize: 19, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.02em" }}>
+                  {filtered.length - PAGE_SIZE} entreprises de plus
+                </p>
+                <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>
+                  Crée un compte gratuit pour tout voir — avis, salaires, classements.
+                </p>
+                <a href="/signup" style={{
+                  display: "inline-block", padding: "13px 32px", borderRadius: 50,
+                  background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                  color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
+                }}>
+                  Créer un compte gratuit →
+                </a>
+              </div>
+            </div>
+          )}
+
+          {hasMore && (
+            <div style={{ textAlign: "center", marginTop: 40 }}>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
+                <span style={{ color: "var(--text)", fontWeight: 700 }}>{paginated.length}</span> sur <span style={{ fontWeight: 700 }}>{total}</span> entreprises
+              </p>
               <button
                 onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
                 style={{
@@ -243,8 +284,8 @@ export function ExploreClient({
               >
                 Voir {Math.min(PAGE_SIZE, total - visibleCount)} de plus
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </>
       )}
     </>

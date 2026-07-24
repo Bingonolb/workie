@@ -26,7 +26,7 @@ const InstagramIcon = () => (
 );
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
-import { GuestModal } from "@/components/GuestModal";
+import { GuestContentGate } from "@/components/GuestContentGate";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { SaveButton } from "@/components/SaveButton";
 import { CompanyHeroLogo } from "@/components/LogoImg";
@@ -295,6 +295,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         }
       `}</style>
       <main className="page-main-sm">
+      <GuestContentGate isGuest={!user}>
         <div className="company-grid two-col" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
           {/* Left column */}
           <div>
@@ -408,23 +409,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 </span>
               </div>
             ) : (
-              <div style={{ position: "relative", marginBottom: 32 }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {(user ? reviews : reviews.slice(0, 1)).map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user} companyName={company.name} initialVoted={votedReviewIds.has(r.id)} />)}
-                </div>
-                {!user && reviews.length > 1 && (
-                  <div style={{
-                    position: "absolute", bottom: 0, left: 0, right: 0, height: 160,
-                    background: "linear-gradient(to bottom, transparent, var(--bg) 90%)",
-                    pointerEvents: "none",
-                  }} />
-                )}
+              <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
+                {reviews.map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user} companyName={company.name} initialVoted={votedReviewIds.has(r.id)} />)}
               </div>
-            )}
-
-            {/* Guest modal — only when there are more reviews to unlock */}
-            {!user && reviews.length > 1 && (
-              <GuestModal reviewCount={reviews.length} />
             )}
 
             {/* Post review */}
@@ -588,6 +575,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
         )}
+      </GuestContentGate>
       </main>
     </div>
   );
