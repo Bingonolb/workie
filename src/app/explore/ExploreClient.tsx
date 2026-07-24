@@ -150,7 +150,7 @@ export function ExploreClient({
           Explorer les entreprises
         </h1>
         <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
-          <span style={{ color: "var(--text)", fontWeight: 700 }}>{total}</span> entreprises · avis 100% authentiques
+          <span style={{ color: "var(--text)", fontWeight: 700 }}>{total}</span> entreprises
         </p>
       </div>
 

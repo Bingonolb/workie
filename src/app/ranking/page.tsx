@@ -71,28 +71,6 @@ export default async function RankingPage() {
           <h1 style={{ fontSize: 34, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 8 }}>
             Classement des entreprises
           </h1>
-          <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.6 }}>
-            Score calculé sur les étoiles des avis, les flammes et les boosts de la communauté.
-          </p>
-        </div>
-
-        {/* KPI strip */}
-        <div className="stat-grid-3" style={{ marginBottom: 32 }}>
-          {[
-            { icon: <Users size={16} color="#8b5cf6" aria-hidden="true" />, value: typedCompanies.length, label: "Entreprises classées", color: "#8b5cf6" },
-            { icon: <Star size={16} color="#f59e0b" fill="#f59e0b" aria-hidden="true" />, value: totalReviews, label: "Avis publiés", color: "#f59e0b" },
-            { icon: <TrendingUp size={16} color="#10b981" aria-hidden="true" />, value: avgRating > 0 ? Number(avgRating).toFixed(2) : "—", label: "Note moyenne", color: "#10b981" },
-          ].map(({ icon, value, label, color }) => (
-            <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                {icon}
-              </div>
-              <div>
-                <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em" }}>{value}</p>
-                <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{label}</p>
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Business rank banner — client-side fetch, invisible to non-business users */}

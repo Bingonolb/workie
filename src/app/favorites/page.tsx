@@ -27,7 +27,7 @@ export default async function FavoritesPage() {
       <Navbar />
       <main className="page-main-md">
         <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>
-          Mes favoris 🔥
+          Mes favoris
         </h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 32 }}>
           {companies.length} entreprise{companies.length > 1 ? "s" : ""} sauvegardée{companies.length > 1 ? "s" : ""}
