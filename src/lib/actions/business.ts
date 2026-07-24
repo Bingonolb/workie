@@ -311,12 +311,30 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
   try {
     const { supabase, company } = await requireBusiness();
 
+    const city = String(formData.get("city") || "").trim();
+    if (!city) return { error: "La ville est obligatoire." };
+
+    const tagsRaw = String(formData.get("tags") || "").trim();
+    const tags = tagsRaw
+      .split(",")
+      .map(t => t.trim().toLowerCase().replace(/^#/, "").replace(/\s+/g, "-"))
+      .filter(t => t.length >= 2 && t.length <= 30)
+      .slice(0, 10);
+    if (tags.length === 0) return { error: "Ajoutez au moins un mot-clé (ex: startup, tech, innovation)." };
+
+    const canton = String(formData.get("canton") || "").trim() || null;
+    const employee_range = String(formData.get("employee_range") || "").trim() || null;
+
     const fields: {
       description: string | null;
       website_url: string | null;
       linkedin_url: string | null;
       twitter_url: string | null;
       instagram_url: string | null;
+      city: string;
+      canton: string | null;
+      employee_range: string | null;
+      tags: string[];
       logo_url?: string | null;
       cover_url?: string;
     } = {
@@ -325,6 +343,10 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
       linkedin_url: safeUrl(String(formData.get("linkedin_url") || "") || null),
       twitter_url: safeUrl(String(formData.get("twitter_url") || "") || null),
       instagram_url: safeUrl(String(formData.get("instagram_url") || "") || null),
+      city,
+      canton,
+      employee_range,
+      tags,
     };
 
     const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];

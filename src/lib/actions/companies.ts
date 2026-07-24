@@ -93,7 +93,8 @@ export async function fetchSwipePage(
   }
 
   const { data } = await q;
-  return (data ?? []) as Company[];
+  // Exclude companies without city or tags — they render as empty cards in the swipe
+  return (data ?? []).filter(c => c.city?.trim() && (c.tags?.length ?? 0) > 0) as Company[];
 }
 
 

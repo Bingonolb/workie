@@ -5,6 +5,19 @@ import { useRouter } from "next/navigation";
 import { getBusinessCompany, updateBusinessProfile } from "@/lib/actions/business";
 import { createClient } from "@/lib/supabase/client";
 import { CheckCircle, Upload, LogOut } from "lucide-react";
+import { EMPLOYEE_RANGES } from "@/lib/types";
+
+const CANTONS = [
+  { code: "ZH", name: "Zürich" }, { code: "BE", name: "Bern" }, { code: "LU", name: "Lucerne" },
+  { code: "UR", name: "Uri" }, { code: "SZ", name: "Schwyz" }, { code: "OW", name: "Obwald" },
+  { code: "NW", name: "Nidwald" }, { code: "GL", name: "Glaris" }, { code: "ZG", name: "Zug" },
+  { code: "FR", name: "Fribourg" }, { code: "SO", name: "Soleure" }, { code: "BS", name: "Bâle-Ville" },
+  { code: "BL", name: "Bâle-Campagne" }, { code: "SH", name: "Schaffhouse" }, { code: "AR", name: "Appenzell A.-Rh." },
+  { code: "AI", name: "Appenzell I.-Rh." }, { code: "SG", name: "St-Gallen" }, { code: "GR", name: "Grisons" },
+  { code: "AG", name: "Argovie" }, { code: "TG", name: "Thurgovie" }, { code: "TI", name: "Tessin" },
+  { code: "VD", name: "Vaud" }, { code: "VS", name: "Valais" }, { code: "NE", name: "Neuchâtel" },
+  { code: "GE", name: "Genève" }, { code: "JU", name: "Jura" },
+];
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface)", border: "1px solid var(--border2)",
@@ -111,6 +124,55 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 5 }}>PNG, JPG · max 10MB · recommandé 1920×1080</p>
             </div>
           </div>
+        </div>
+
+        {/* Localisation & infos — obligatoire */}
+        <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Localisation & infos</p>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 6, padding: "2px 7px" }}>Obligatoire</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="biz-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label htmlFor="biz-city" style={lbl}>Ville *</label>
+                <input id="biz-city" name="city" type="text" required
+                  defaultValue={String(company.city ?? "")}
+                  placeholder="Genève, Zurich, Lausanne..."
+                  style={inp} />
+              </div>
+              <div>
+                <label htmlFor="biz-canton" style={lbl}>Canton</label>
+                <select id="biz-canton" name="canton" defaultValue={String(company.canton ?? "")} style={{ ...inp, cursor: "pointer" }}>
+                  <option value="">— Sélectionner —</option>
+                  {CANTONS.map(c => <option key={c.code} value={c.code}>{c.name} ({c.code})</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label htmlFor="biz-employee-range" style={lbl}>Taille de l&apos;entreprise</label>
+              <select id="biz-employee-range" name="employee_range" defaultValue={String(company.employee_range ?? "")} style={{ ...inp, cursor: "pointer" }}>
+                <option value="">— Sélectionner —</option>
+                {EMPLOYEE_RANGES.map(r => <option key={r} value={r}>{r} employés</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Tags — obligatoire */}
+        <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Mots-clés</p>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 6, padding: "2px 7px" }}>Obligatoire</span>
+          </div>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 14, lineHeight: 1.6 }}>
+            Séparés par des virgules · ex: <em>startup, innovation, tech, durabilité</em>
+          </p>
+          <input id="biz-tags" name="tags" type="text"
+            defaultValue={Array.isArray(company.tags) ? (company.tags as string[]).join(", ") : String(company.tags ?? "")}
+            placeholder="startup, innovation, tech, durabilité..."
+            style={inp} />
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>Minimum 1 mot-clé · max 10 · apparaissent comme #hashtags sur votre fiche</p>
         </div>
 
         {/* Description */}

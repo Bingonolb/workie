@@ -54,7 +54,7 @@ export const getBusinessCompanyData = cache(async () => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("companies")
-    .select("id, name, is_verified, is_subscribed, logo_url, cover_url, website_url, linkedin_url, description, sector, city, canton, employee_range, score, avg_rating, review_count, stripe_subscription_id, subscription_ends_at, subscription_cancel_at_period_end")
+    .select("id, name, is_verified, is_subscribed, logo_url, cover_url, website_url, linkedin_url, twitter_url, instagram_url, description, sector, city, canton, employee_range, tags, score, avg_rating, review_count, stripe_subscription_id, subscription_ends_at, subscription_cancel_at_period_end")
     .eq("id", companyId)
     .maybeSingle();
   return data ?? null;
