@@ -161,10 +161,9 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
         ))}
 
         {!query && (
-          <div style={{ padding: "52px 20px", textAlign: "center" }}>
-            <Search size={28} color="var(--text-muted)" aria-hidden="true" style={{ opacity: 0.3, marginBottom: 12 }} />
-            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>Trouver une entreprise</p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Tape un nom, une ville ou un secteur</p>
+          <div style={{ padding: "48px 20px", textAlign: "center" }}>
+            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Rechercher une entreprise</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nom, ville ou secteur d'activité</p>
           </div>
         )}
       </div>
