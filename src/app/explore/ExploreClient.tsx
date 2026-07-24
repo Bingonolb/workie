@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react"; // useCallback kept for handleFilter/handleClear
+import { useState, useMemo, useCallback, useRef } from "react";
 import { CompanyCard } from "@/components/CompanyCard";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
