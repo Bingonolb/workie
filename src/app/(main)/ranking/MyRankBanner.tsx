@@ -14,19 +14,35 @@ type RankData = {
   rank: number | null;
   total: number;
   ranked_count: number;
-} | null;
+};
+
+type LoadState = "loading" | "none" | RankData;
 
 export function MyRankBanner() {
-  const [data, setData] = useState<RankData>(undefined as unknown as RankData);
+  const [state, setState] = useState<LoadState>("loading");
 
   useEffect(() => {
     fetch("/api/business/my-rank")
       .then(r => r.json())
-      .then(setData)
-      .catch(() => setData(null));
+      .then(d => setState(d ?? "none"))
+      .catch(() => setState("none"));
   }, []);
 
-  if (!data) return null;
+  if (state === "none") return null;
+
+  if (state === "loading") {
+    return (
+      <div style={{
+        height: 76, borderRadius: 18, marginBottom: 24,
+        background: "var(--surface2)", border: "1px solid var(--border)",
+        animation: "pulse 1.5s ease-in-out infinite",
+      }}>
+        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
+      </div>
+    );
+  }
+
+  const data = state;
 
   return (
     <>
