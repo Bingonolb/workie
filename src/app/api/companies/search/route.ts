@@ -15,8 +15,8 @@ export async function GET(request: Request) {
 
   // Fetch starts-with results first (most relevant), then contains-only results
   const [{ data: startsWith }, { data: contains }] = await Promise.all([
-    supabase.from("companies").select("id, name, city, sector").ilike("name", `${safe}%`).order("name").limit(6),
-    supabase.from("companies").select("id, name, city, sector").ilike("name", `%${safe}%`).not("name", "ilike", `${safe}%`).order("name").limit(4),
+    supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `${safe}%`).order("name").limit(6),
+    supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `%${safe}%`).not("name", "ilike", `${safe}%`).order("name").limit(4),
   ]);
 
   const seen = new Set<string>();

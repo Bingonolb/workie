@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
+import { SECTOR_COLORS } from "@/lib/types";
 
-type Suggestion = { id: string; name: string; city: string; sector: string };
+type Suggestion = { id: string; name: string; city: string; sector: string; logo_url?: string | null };
 
 export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const router = useRouter();
@@ -16,18 +17,18 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollYRef = useRef(0);
 
-  // Mount immediately (synchronous — no visible blank frame)
   useLayoutEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 60);
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeOverlay(); };
     document.addEventListener("keydown", onKey);
-    // iOS-safe scroll lock: freeze body in place
-    const scrollY = window.scrollY;
+    // iOS-safe scroll lock
+    scrollYRef.current = window.scrollY;
     document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
+    document.body.style.top = `-${scrollYRef.current}px`;
     document.body.style.left = "0";
     document.body.style.right = "0";
     document.body.style.overflow = "hidden";
@@ -38,9 +39,15 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       document.body.style.left = "";
       document.body.style.right = "";
       document.body.style.overflow = "";
-      window.scrollTo(0, scrollY);
     };
-  }, [onClose]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Close without scroll restoration (used when navigating away)
+  const closeOverlay = (restoreScroll = true) => {
+    if (restoreScroll) window.scrollTo(0, scrollYRef.current);
+    onClose();
+  };
 
   const search = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -61,8 +68,6 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
 
   useEffect(() => { search(query); }, [query, search]);
 
-  const go = (id: string) => { onClose(); router.push(`/company/${id}`); };
-
   if (!mounted) return null;
 
   return createPortal(
@@ -77,20 +82,27 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
     >
       <style>{`
         @keyframes searchSlideIn {
-          from { opacity: 0; transform: translateY(-10px); }
+          from { opacity: 0; transform: translateY(-8px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         .search-result-row {
-          display: flex; align-items: center; gap: 14px;
-          padding: 14px 20px;
+          display: flex; align-items: center; gap: 12px;
+          padding: 12px 20px;
           border-bottom: 1px solid var(--border);
           text-decoration: none;
           transition: background 0.1s;
+          cursor: pointer;
         }
         .search-result-row:hover, .search-result-row:focus-visible {
           background: var(--surface2);
         }
         .search-result-row:active { background: var(--surface3); }
+        .search-results-scroll {
+          overflow-y: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .search-results-scroll::-webkit-scrollbar { display: none; }
       `}</style>
 
       {/* Top bar */}
@@ -100,7 +112,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
         flexShrink: 0, background: "var(--bg)",
       }}>
         <button
-          onClick={onClose}
+          onClick={() => closeOverlay()}
           aria-label="Fermer la recherche"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 10, background: "none", border: "none", cursor: "pointer", color: "var(--text)", flexShrink: 0 }}
         >
@@ -114,8 +126,11 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => {
-              if (e.key === "Enter" && suggestions[0]) go(suggestions[0].id);
-              if (e.key === "Escape") onClose();
+              if (e.key === "Enter" && suggestions[0]) {
+                closeOverlay(false);
+                router.push(`/company/${suggestions[0].id}`);
+              }
+              if (e.key === "Escape") closeOverlay();
             }}
             placeholder="Rechercher une entreprise…"
             autoComplete="off"
@@ -140,7 +155,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Results */}
-      <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "none", touchAction: "pan-y" }}>
+      <div className="search-results-scroll" style={{ flex: 1, touchAction: "pan-y", overscrollBehavior: "none" }}>
         {loading && query && (
           <div style={{ padding: "20px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
         )}
@@ -152,23 +167,36 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
-        {suggestions.map(s => (
-          <Link key={s.id} href={`/company/${s.id}`} onClick={onClose} className="search-result-row">
-            <div style={{
-              width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-              background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 18, fontWeight: 900, color: "#fff",
-            }}>
-              {s.name[0]}
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</p>
-              <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{s.city} · {s.sector}</p>
-            </div>
-            <Search size={14} color="var(--text-muted)" aria-hidden="true" style={{ flexShrink: 0, opacity: 0.4 }} />
-          </Link>
-        ))}
+        {suggestions.map(s => {
+          const accentColor = SECTOR_COLORS[s.sector] ?? "#8b5cf6";
+          return (
+            <Link
+              key={s.id}
+              href={`/company/${s.id}`}
+              prefetch={false}
+              onClick={() => closeOverlay(false)}
+              className="search-result-row"
+            >
+              {/* Logo ou fallback coloré compact */}
+              <div style={{
+                width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                overflow: "hidden",
+                background: s.logo_url ? "var(--surface2)" : `${accentColor}18`,
+                border: `1px solid ${accentColor}30`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                {s.logo_url
+                  ? <img src={s.logo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                  : <span style={{ fontSize: 11, fontWeight: 800, color: accentColor, letterSpacing: "-0.01em" }}>{s.name.slice(0, 2).toUpperCase()}</span>
+                }
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{s.city} · {s.sector}</p>
+              </div>
+            </Link>
+          );
+        })}
 
         {!query && (
           <div style={{ padding: "48px 20px", textAlign: "center" }}>
