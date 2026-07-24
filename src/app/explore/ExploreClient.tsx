@@ -231,7 +231,7 @@ export function ExploreClient({
                 {/* Gradient: fades blurred cards into background */}
                 <div style={{
                   position: "absolute", inset: 0,
-                  background: "linear-gradient(to bottom, transparent 20%, var(--bg) 82%)",
+                  background: "linear-gradient(to bottom, transparent 38%, var(--bg) 88%)",
                   pointerEvents: "none",
                 }} />
               </div>

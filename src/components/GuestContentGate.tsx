@@ -25,7 +25,7 @@ export function GuestContentGate({
         <div style={{
           position: "absolute",
           inset: 0,
-          background: "linear-gradient(to bottom, transparent 25%, var(--bg) 82%)",
+          background: "linear-gradient(to bottom, transparent 38%, var(--bg) 88%)",
           pointerEvents: "none",
         }} />
       </div>
