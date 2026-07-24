@@ -217,54 +217,56 @@ export function ExploreClient({
 
           {/* Blurred preview + CTA for guests */}
           {isGuest && filtered.length > PAGE_SIZE && (
-            <div style={{ position: "relative", marginTop: 20, overflow: "hidden" }}>
-              {/* Smooth gradient bridge from visible cards into the blur */}
-              <div style={{
-                position: "absolute", top: 0, left: 0, right: 0, height: 80, zIndex: 1,
-                background: "linear-gradient(to bottom, var(--bg), transparent)",
-                pointerEvents: "none",
-              }} />
-
-              {/* Real cards, blurred */}
-              <div
-                aria-hidden="true"
-                className="explore-grid"
-                style={{
-                  display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20,
-                  filter: "blur(6px)", pointerEvents: "none", userSelect: "none", opacity: 0.6,
-                }}
-              >
-                {filtered.slice(PAGE_SIZE, PAGE_SIZE + 6).map(c => (
-                  <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} isBusiness={false} priority={false} />
-                ))}
+            <>
+              {/* Blurred cards — only first row visible, fades out quickly */}
+              <div style={{ position: "relative", marginTop: 20, overflow: "hidden" }}>
+                <div
+                  aria-hidden="true"
+                  style={{
+                    display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20,
+                    filter: "blur(3px)", pointerEvents: "none", userSelect: "none", opacity: 0.7,
+                    maxHeight: 260, overflow: "hidden",
+                  }}
+                >
+                  {filtered.slice(PAGE_SIZE, PAGE_SIZE + 6).map(c => (
+                    <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} isBusiness={false} priority={false} />
+                  ))}
+                </div>
+                {/* Gradient: fades blurred cards into background */}
+                <div style={{
+                  position: "absolute", inset: 0,
+                  background: "linear-gradient(to bottom, transparent 20%, var(--bg) 82%)",
+                  pointerEvents: "none",
+                }} />
               </div>
 
-              {/* Gradient fade bottom + CTA */}
+              {/* CTA — normal flow, right below the blurred area */}
               <div style={{
-                position: "absolute", inset: 0, zIndex: 2,
-                background: "linear-gradient(to bottom, transparent 10%, var(--bg) 52%)",
-                pointerEvents: "none",
-              }} />
-              <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 3,
                 display: "flex", flexDirection: "column", alignItems: "center",
-                padding: "0 16px 32px", textAlign: "center",
+                padding: "32px 16px 48px", textAlign: "center",
+                borderTop: "1px solid var(--border)",
+                marginTop: 4,
               }}>
-                <p style={{ fontSize: 19, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.02em" }}>
+                <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.025em" }}>
                   {filtered.length - PAGE_SIZE} entreprises de plus
                 </p>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>
-                  Crée un compte gratuit pour tout voir — avis, salaires, classements.
+                <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 22, maxWidth: 300, lineHeight: 1.6 }}>
+                  Avis complets, salaires réels, classements — gratuit et 100% anonyme.
                 </p>
                 <a href="/signup" style={{
-                  display: "inline-block", padding: "13px 32px", borderRadius: 50,
+                  display: "inline-block", padding: "13px 28px", borderRadius: 12,
                   background: "linear-gradient(135deg, #8b5cf6, #f97316)",
                   color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
                 }}>
-                  Créer un compte gratuit →
+                  Créer un compte — gratuit
+                </a>
+                <a href="/login" style={{
+                  marginTop: 12, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500,
+                }}>
+                  Déjà un compte ? <span style={{ color: "#8b5cf6", fontWeight: 600 }}>Se connecter</span>
                 </a>
               </div>
-            </div>
+            </>
           )}
 
           {hasMore && (
