@@ -1,30 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search } from "lucide-react";
 import { GlobalSearch } from "./GlobalSearch";
 
 export function SearchButton() {
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setOpen(true);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
-
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Rechercher"
-        title="Rechercher (⌘K)"
+        title="Rechercher"
         style={{
           display: "flex", alignItems: "center", justifyContent: "center",
           width: 40, height: 40, borderRadius: 10,
