@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { CompanyCard } from "@/components/CompanyCard";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
+import { SwipeView } from "./SwipeView";
 import type { Company } from "@/lib/types";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 
@@ -57,9 +58,15 @@ function sortCompanies(companies: Company[], sort: string): Company[] {
 export function ExploreClient({
   allCompanies,
   favIds: initialFavIds,
+  flameIds: initialFlameIds,
+  swipeAds,
   isLoggedIn,
   isBusiness,
   isGuest,
+  isAdmin,
+  penaltyCredits,
+  penaltySuccess,
+  initialView,
   initialSector,
   initialCanton,
   initialSort,
@@ -67,18 +74,32 @@ export function ExploreClient({
 }: {
   allCompanies: Company[];
   favIds: string[];
+  flameIds: string[];
+  swipeAds: PublicAdCampaign[];
   isLoggedIn: boolean;
   isBusiness: boolean;
   isGuest: boolean;
+  isAdmin: boolean;
+  penaltyCredits: number;
+  penaltySuccess: boolean;
+  initialView: "grid" | "swipe";
   initialSector?: string;
   initialCanton?: string;
   initialSort?: string;
   squareAds: PublicAdCampaign[];
 }) {
+  const [view, setView] = useState<"grid" | "swipe">(initialView);
   const [sector, setSector] = useState(initialSector ?? "");
   const [canton, setCanton] = useState(initialCanton ?? "");
   const [sort, setSort] = useState(initialSort ?? "recent");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Listen for instant view switch from BottomNav (no server round-trip)
+  useEffect(() => {
+    const handler = (e: Event) => setView((e as CustomEvent<"grid" | "swipe">).detail);
+    window.addEventListener("workie:view", handler);
+    return () => window.removeEventListener("workie:view", handler);
+  }, []);
 
   // Session-stable offset: first ad appears at company index 3, 4, or 5.
   // Stored in sessionStorage so it doesn't shift on re-render, but varies
@@ -105,6 +126,11 @@ export function ExploreClient({
     if (canton) result = result.filter(c => c.canton === canton);
     return sortCompanies(result, sort);
   }, [allCompanies, sector, canton, sort]);
+
+  // Swipe companies: same filtered set, only cards with city + tags (needed for SwipeCard)
+  const swipeCompanies = useMemo(() =>
+    filtered.filter(c => c.city?.trim() && (c.tags?.length ?? 0) > 0),
+  [filtered]);
 
   const total = filtered.length;
   // Guests see the first 12 companies only — no load-more, no ads.
@@ -141,7 +167,37 @@ export function ExploreClient({
     setVisibleCount(PAGE_SIZE);
   }, []);
 
-  const current = { sector: sector || undefined, canton: canton || undefined, sort: sort !== "recent" ? sort : undefined, view: "grid" as const };
+  const current = { sector: sector || undefined, canton: canton || undefined, sort: sort !== "recent" ? sort : undefined, view: view as "grid" | "swipe" };
+
+  if (view === "swipe") {
+    return (
+      <>
+        <ExploreFilters
+          sectors={SECTORS}
+          cantons={CANTONS}
+          current={current}
+          onFilter={(key, value) => {
+            if (key === "sector") setSector(value ?? "");
+            else if (key === "canton") setCanton(value ?? "");
+          }}
+          onClear={() => { setSector(""); setCanton(""); }}
+        />
+        <SwipeView
+          key={`${sector}-${canton}`}
+          companies={swipeCompanies}
+          initialFavIds={initialFavIds}
+          initialFlameIds={initialFlameIds}
+          isLoggedIn={isLoggedIn}
+          isAdmin={isAdmin}
+          isBusiness={isBusiness}
+          penaltyCredits={penaltyCredits}
+          penaltySuccess={penaltySuccess}
+          filters={{ sector: sector || undefined, canton: canton || undefined }}
+          swipeAds={swipeAds}
+        />
+      </>
+    );
+  }
 
   return (
     <>

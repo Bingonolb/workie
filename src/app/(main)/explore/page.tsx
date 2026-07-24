@@ -1,8 +1,6 @@
 export const dynamic = "force-dynamic"; // needed for auth/cookies
 
 import type { Metadata } from "next";
-import { Suspense } from "react";
-
 export const metadata: Metadata = {
   title: "Explorer les entreprises suisses · Workie",
   description: "Découvre les avis anonymes et salaires des entreprises en Suisse. Tech, Pharma, Finance, Conseil et plus.",
@@ -22,13 +20,11 @@ export const metadata: Metadata = {
     images: ["https://www.workie.ch/og-default.png"],
   },
 };
-import { getAllCompaniesForGrid, getAllCompaniesForSwipe } from "@/lib/actions/companies";
+import { getAllCompaniesForGrid } from "@/lib/actions/companies";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import { getUserFlameIds } from "@/lib/actions/scores";
 import { getUser } from "@/lib/supabase/server";
-import { ExploreFilters } from "./ExploreFilters";
 import { ExploreClient } from "./ExploreClient";
-import { SwipeView } from "./SwipeView";
 import { getActiveAds, getViewerCanton } from "@/lib/actions/ads";
 import type { Company } from "@/lib/types";
 
@@ -95,14 +91,12 @@ export default async function ExplorePage({
   const [user, favIds, flameIds, isAdmin, bizCompanyId, squareAds, swipeAds, allCompaniesForGrid] = await Promise.all([
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
-    isSwipe ? getUserFlameIds().catch(() => [] as string[]) : Promise.resolve([] as string[]),
+    getUserFlameIds().catch(() => [] as string[]),
     import("@/lib/supabase/server").then(m => m.getIsAdmin()).catch(() => false),
     import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
-    !isSwipe ? getActiveAds({ format: "square", canton: viewerCanton ?? undefined }).catch(() => []) : Promise.resolve([]),
-    isSwipe
-      ? getActiveAds({ format: "swipe", canton: viewerCanton ?? undefined, sector: params.sector }).catch(() => [])
-      : Promise.resolve([]),
-    !isSwipe ? getAllCompaniesForGrid().catch(() => [] as Company[]) : Promise.resolve([] as Company[]),
+    getActiveAds({ format: "square", canton: viewerCanton ?? undefined }).catch(() => []),
+    getActiveAds({ format: "swipe", canton: viewerCanton ?? undefined, sector: params.sector }).catch(() => []),
+    getAllCompaniesForGrid().catch(() => [] as Company[]),
   ]);
   const isBusiness = !!bizCompanyId;
 
@@ -162,32 +156,7 @@ export default async function ExplorePage({
     return Number(profile?.penalty_credits ?? 0);
   };
 
-  if (isSwipe) {
-    const [companies, penaltyCredits] = await Promise.all([
-      getAllCompaniesForSwipe(filters),
-      resolvePenaltyCredits(),
-    ]);
-    return (
-      <div className="page-root">
-        <main style={{ maxWidth: 600, margin: "0 auto", padding: "20px 16px 100px" }}>
-          <Suspense fallback={null}><ExploreFilters sectors={SECTORS} cantons={CANTONS} current={params}  /></Suspense>
-          <SwipeView
-            key={`${params.sector ?? ""}-${params.canton ?? ""}-${params.q ?? ""}`}
-            companies={companies as Company[]}
-            initialFavIds={favIds}
-            initialFlameIds={flameIds}
-            isLoggedIn={!!user}
-            isAdmin={isAdmin}
-            isBusiness={isBusiness}
-            penaltyCredits={penaltyCredits}
-            penaltySuccess={penaltySuccess}
-            filters={filters}
-            swipeAds={swipeAds}
-          />
-        </main>
-      </div>
-    );
-  }
+  const penaltyCredits = await resolvePenaltyCredits();
 
   // JSON-LD ItemList of top companies for Google indexing (grid is client-rendered)
   const BASE_URL = "https://www.workie.ch";
@@ -217,9 +186,15 @@ export default async function ExplorePage({
         <ExploreClient
           allCompanies={allCompaniesForGrid}
           favIds={favIds}
+          flameIds={flameIds}
+          swipeAds={swipeAds}
           isLoggedIn={!!user}
           isBusiness={isBusiness}
           isGuest={!user}
+          isAdmin={isAdmin}
+          penaltyCredits={penaltyCredits}
+          penaltySuccess={penaltySuccess}
+          initialView={isSwipe ? "swipe" : "grid"}
           initialSector={params.sector}
           initialCanton={params.canton}
           initialSort={params.sort}

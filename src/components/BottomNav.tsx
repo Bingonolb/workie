@@ -42,7 +42,16 @@ function BottomNavInner({ isBusiness }: { isBusiness: boolean }) {
     { href: "/profile",            Icon: User,    label: "Profil",     active: pathname.startsWith("/profile") },
   ];
 
-  const handleClick = (active: boolean) => (e: React.MouseEvent) => {
+  const handleClick = (href: string, active: boolean) => (e: React.MouseEvent) => {
+    // Explorer↔Swipe: switch client-side (no server round-trip) when already on /explore
+    if (pathname === "/explore" && (href === "/explore" || href === "/explore?view=swipe")) {
+      e.preventDefault();
+      const targetView = href.includes("swipe") ? "swipe" : "grid";
+      const targetUrl = targetView === "swipe" ? "/explore?view=swipe" : "/explore";
+      window.dispatchEvent(new CustomEvent("workie:view", { detail: targetView }));
+      window.history.pushState({}, "", targetUrl);
+      return;
+    }
     if (active) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }
   };
 
@@ -53,7 +62,7 @@ function BottomNavInner({ isBusiness }: { isBusiness: boolean }) {
           key={href}
           href={href}
           className={`bottom-nav-item${active ? " active" : ""}`}
-          onClick={handleClick(active)}
+          onClick={handleClick(href, active)}
           aria-current={active ? "page" : undefined}
         >
           <Icon size={22} strokeWidth={active ? 2.5 : 1.8} aria-hidden="true" />
