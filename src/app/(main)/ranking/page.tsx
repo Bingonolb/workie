@@ -67,7 +67,7 @@ export default async function RankingPage() {
               <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 2 }}>
                 Top {companies.length}
               </h1>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>trié par score communautaire</p>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>Trié par score communautaire</p>
             </div>
           </div>
 
