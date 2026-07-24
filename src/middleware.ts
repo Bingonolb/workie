@@ -1,3 +1,4 @@
+import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 // ── In-memory rate limiting (per Vercel instance) ─────────────────────────────
@@ -27,37 +28,6 @@ function maybePrune() {
   }
 }
 
-// ── Zero-network session detection ────────────────────────────────────────────
-// @supabase/ssr v0.12+ stores cookies as "base64-<base64url_encoded_json>".
-// Older reads expect raw JSON — we handle both formats.
-const PROJECT_REF = "xtbdxfzbbuedlktpqpna";
-const BASE64_COOKIE_PREFIX = "base64-";
-
-function decodeSupabaseCookie(value: string): string {
-  if (!value.startsWith(BASE64_COOKIE_PREFIX)) return value;
-  const b64 = value.slice(BASE64_COOKIE_PREFIX.length)
-    .replace(/-/g, "+").replace(/_/g, "/");
-  const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
-  // atob is available in Edge runtime (Web API)
-  return atob(padded);
-}
-
-function hasSession(request: NextRequest): boolean {
-  // Chunked cookies (.0, .1, …): presence of .0 means a session exists
-  const chunked = request.cookies.get(`sb-${PROJECT_REF}-auth-token.0`);
-  if (chunked !== undefined) return true;
-
-  const single = request.cookies.get(`sb-${PROJECT_REF}-auth-token`);
-  if (!single?.value) return false;
-  try {
-    const raw = decodeSupabaseCookie(single.value);
-    const session = JSON.parse(raw) as { refresh_token?: string };
-    return !!session.refresh_token;
-  } catch {
-    return false;
-  }
-}
-
 const PUBLIC_PATHS = [
   "/login", "/signup", "/auth",
   "/forgot-password", "/reset-password",
@@ -77,6 +47,7 @@ export async function middleware(request: NextRequest) {
 
     maybePrune();
 
+    // Rate limiting — early return before touching Supabase
     if (pathname === "/api/companies/search") {
       if (rateLimited(ip, "search", 30))
         return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
@@ -98,7 +69,33 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
     }
 
-    const loggedIn = hasSession(request);
+    // Session refresh via Supabase SSR — this is the only correct way to renew
+    // the access token on mobile without the user having to log in again.
+    // getUser() checks JWT expiry locally; only hits the network when the token
+    // is actually expired (at most once per hour per session).
+    let response = NextResponse.next({ request });
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return request.cookies.getAll(); },
+          setAll(cookiesToSet) {
+            // Forward refreshed tokens to both the request (for Server Components)
+            // and the response (so the browser receives the updated cookie).
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+            response = NextResponse.next({ request });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const loggedIn = !!user;
     const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p)) || pathname === "/";
 
     if (!loggedIn && !isPublic) {
@@ -114,7 +111,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    return NextResponse.next();
+    // Return response (not NextResponse.next()) so refreshed cookies reach the browser
+    return response;
   } catch {
     return NextResponse.next();
   }
