@@ -7,36 +7,34 @@ import { signInWithGoogle } from "@/lib/actions/auth";
 
 export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: boolean }) {
   const [timerVisible, setTimerVisible] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
   const pathname = usePathname();
-  const visible = !dismissed && (open !== undefined ? open : timerVisible);
+  // Non-dismissable: once visible it stays until the user signs in.
+  const visible = open !== undefined ? open : timerVisible;
 
   useEffect(() => {
     if (open !== undefined) return;
-    const timer = setTimeout(() => setTimerVisible(true), 800);
+    const timer = setTimeout(() => setTimerVisible(true), 700);
     return () => clearTimeout(timer);
   }, [open]);
 
+  // Block body scroll when modal is open
   useEffect(() => {
-    if (!visible) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setDismissed(true); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    if (visible) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
   }, [visible]);
 
   return (
     <>
-      {/* Overlay — click to dismiss */}
+      {/* Non-clickable overlay */}
       <div
-        onClick={() => setDismissed(true)}
         style={{
           position: "fixed", inset: 0, zIndex: 10002,
-          background: "rgba(0,0,0,0.6)",
-          backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)",
+          background: "rgba(0,0,0,0.65)",
+          backdropFilter: "blur(3px)", WebkitBackdropFilter: "blur(3px)",
           opacity: visible ? 1 : 0,
           transition: "opacity 0.3s ease",
           pointerEvents: visible ? "auto" : "none",
-          cursor: "pointer",
         }}
       />
 

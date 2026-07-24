@@ -3,26 +3,27 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const COOKIE_KEY = "workie_cookie_consent";
+// Cookie-based consent: persists on iOS Safari even after localStorage is cleared (ITP).
+const CONSENT_COOKIE = "wk_consent";
+const MAX_AGE = 365 * 24 * 60 * 60;
+
+function readConsent(): string | null {
+  const match = document.cookie.split(";").find(c => c.trim().startsWith(`${CONSENT_COOKIE}=`));
+  return match ? (match.split("=")[1]?.trim() ?? null) : null;
+}
+function writeConsent(value: string) {
+  document.cookie = `${CONSENT_COOKIE}=${value}; Max-Age=${MAX_AGE}; SameSite=Lax; path=/`;
+}
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(COOKIE_KEY)) setVisible(true);
-    } catch { /* private browsing */ }
+    if (!readConsent()) setVisible(true);
   }, []);
 
-  const accept = () => {
-    try { localStorage.setItem(COOKIE_KEY, "accepted"); } catch { /* */ }
-    setVisible(false);
-  };
-
-  const decline = () => {
-    try { localStorage.setItem(COOKIE_KEY, "declined"); } catch { /* */ }
-    setVisible(false);
-  };
+  const accept = () => { writeConsent("accepted"); setVisible(false); };
+  const decline = () => { writeConsent("declined"); setVisible(false); };
 
   if (!visible) return null;
 

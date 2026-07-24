@@ -117,22 +117,25 @@ export function ExploreClient({
   }, [allCompanies, sector, canton, search, sort]);
 
   const total = filtered.length;
-  const paginated = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < total;
+  // Guests see the first 12 companies only — no load-more, no ads.
+  const guestCap = isGuest ? PAGE_SIZE : Infinity;
+  const paginated = filtered.slice(0, Math.min(visibleCount, guestCap));
+  const hasMore = !isGuest && visibleCount < total;
 
   // Map<companyIndex → slotNumber> — which companies get an ad inserted before them.
   // One ad every AD_INTERVAL companies, starting at adOffset.
   // slotNumber drives cyclic rotation: squareAds[slotNumber % squareAds.length].
   const AD_INTERVAL = 7;
+  const adsForGrid = isGuest ? [] : squareAds;
   const adSlotMap = useMemo((): Map<number, number> => {
-    if (squareAds.length === 0 || paginated.length < adOffset.current + 1) return new Map();
+    if (adsForGrid.length === 0 || paginated.length < adOffset.current + 1) return new Map();
     const map = new Map<number, number>();
     let slotNum = 0;
     for (let idx = adOffset.current; idx < paginated.length; idx += AD_INTERVAL) {
       map.set(idx, slotNum++);
     }
     return map;
-  }, [squareAds.length, paginated.length, adOffset]);
+  }, [adsForGrid.length, paginated.length, adOffset]);
 
   const handleFilter = useCallback((key: string, value: string | undefined) => {
     setVisibleCount(PAGE_SIZE);
@@ -183,9 +186,8 @@ export function ExploreClient({
           borderRadius: 16, padding: "16px 20px", marginBottom: 20,
           display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
         }}>
-          <span style={{ fontSize: 20 }}>🔒</span>
           <p style={{ fontSize: 14, color: "var(--text-muted)", flex: 1 }}>
-            <strong style={{ color: "var(--text)" }}>1700+ entreprises disponibles.</strong>{" "}
+            <strong style={{ color: "var(--text)" }}>{total} entreprises disponibles.</strong>{" "}
             <a href="/signup" style={{ color: "#8b5cf6", fontWeight: 700, textDecoration: "none" }}>Créer un compte gratuit</a> pour tout voir.
           </p>
         </div>
@@ -204,11 +206,7 @@ export function ExploreClient({
               paginated.forEach((c, i) => {
                 const slotNum = adSlotMap.get(i);
                 if (slotNum !== undefined) {
-                  // Cyclic rotation: with 100 ads, each slot shows a different one;
-                  // with 1 ad, it repeats (freq cap in AdSquareCard handles dedup).
-                  const ad = squareAds[slotNum % squareAds.length];
-                  // key uses slotNum (not ad.id) so the same ad can appear in 2 slots
-                  // without React deduplication, while remaining stable across "load more".
+                  const ad = adsForGrid[slotNum % adsForGrid.length];
                   items.push(<AdSquareCard key={`ad-slot-${slotNum}`} ad={ad} />);
                 }
                 items.push(<CompanyCard key={c.id} company={c} isFav={initialFavIds.includes(c.id)} isLoggedIn={isLoggedIn} isBusiness={isBusiness} priority={items.length === 0} />);
@@ -218,9 +216,20 @@ export function ExploreClient({
           </div>
 
           <div style={{ textAlign: "center", marginTop: 40 }}>
-            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: hasMore ? 16 : 0 }}>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: (hasMore || isGuest) ? 16 : 0 }}>
               <span style={{ color: "var(--text)", fontWeight: 700 }}>{paginated.length}</span> sur <span style={{ fontWeight: 700 }}>{total}</span> entreprises
             </p>
+            {isGuest && total > PAGE_SIZE && (
+              <a href="/signup" style={{
+                display: "inline-block",
+                padding: "13px 32px", borderRadius: 50,
+                background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                color: "#fff", fontWeight: 700, fontSize: 14,
+                textDecoration: "none",
+              }}>
+                Voir les {total - PAGE_SIZE} autres entreprises →
+              </a>
+            )}
             {hasMore && (
               <button
                 onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
