@@ -218,15 +218,11 @@ export function ExploreClient({
           {/* Blurred preview + CTA for guests */}
           {isGuest && filtered.length > PAGE_SIZE && (
             <>
-              {/* Blurred cards — only first row visible, fades out quickly */}
+              {/* Blurred cards — 3 columns always (blurred = decorative), fades out quickly */}
               <div style={{ position: "relative", marginTop: 20, overflow: "hidden" }}>
                 <div
                   aria-hidden="true"
-                  style={{
-                    display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20,
-                    filter: "blur(3px)", pointerEvents: "none", userSelect: "none", opacity: 0.7,
-                    maxHeight: 260, overflow: "hidden",
-                  }}
+                  className="guest-blur-grid"
                 >
                   {filtered.slice(PAGE_SIZE, PAGE_SIZE + 6).map(c => (
                     <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} isBusiness={false} priority={false} />
@@ -241,12 +237,7 @@ export function ExploreClient({
               </div>
 
               {/* CTA — normal flow, right below the blurred area */}
-              <div style={{
-                display: "flex", flexDirection: "column", alignItems: "center",
-                padding: "32px 16px 48px", textAlign: "center",
-                borderTop: "1px solid var(--border)",
-                marginTop: 4,
-              }}>
+              <div className="guest-gate-cta">
                 <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.025em" }}>
                   {filtered.length - PAGE_SIZE} entreprises de plus
                 </p>

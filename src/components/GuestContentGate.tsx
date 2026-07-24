@@ -38,12 +38,7 @@ export function GuestContentGate({
       </div>
 
       {/* CTA — normal flow, no empty space, always visible */}
-      <div style={{
-        display: "flex", flexDirection: "column", alignItems: "center",
-        padding: "36px 24px 52px", textAlign: "center",
-        borderTop: "1px solid var(--border)",
-        marginTop: 4,
-      }}>
+      <div className="guest-gate-cta">
         <p style={{ fontSize: 21, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.025em" }}>
           Accède aux avis complets
         </p>
