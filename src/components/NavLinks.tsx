@@ -18,18 +18,29 @@ function NavLinksInner() {
     { href: "/profile",            label: "Profil",      icon: <User    size={15} aria-hidden="true" />, active: pathname.startsWith("/profile") },
   ];
 
+  const handleClick = (href: string) => (e: React.MouseEvent) => {
+    if (pathname === "/explore" && (href === "/explore" || href === "/explore?view=swipe")) {
+      e.preventDefault();
+      const targetView = href.includes("swipe") ? "swipe" : "grid";
+      window.dispatchEvent(new CustomEvent("workie:view", { detail: targetView }));
+      window.history.pushState({}, "", targetView === "swipe" ? "/explore?view=swipe" : "/explore");
+    }
+  };
+
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 1 }}>
       {LINKS.map(({ href, icon, label, active }) => (
-        <Link key={href} href={href} title={label} aria-current={active ? "page" : undefined} style={{
-          display: "flex", alignItems: "center", gap: 5,
-          padding: "8px 10px", borderRadius: 8,
-          fontSize: 13, fontWeight: active ? 700 : 500,
-          color: active ? "var(--text)" : "var(--text-muted)",
-          background: active ? "var(--surface2)" : "transparent",
-          textDecoration: "none", transition: "all 0.15s",
-          minWidth: 40, justifyContent: "center",
-        }}>
+        <Link key={href} href={href} title={label} aria-current={active ? "page" : undefined}
+          onClick={handleClick(href)}
+          style={{
+            display: "flex", alignItems: "center", gap: 5,
+            padding: "8px 10px", borderRadius: 8,
+            fontSize: 13, fontWeight: active ? 700 : 500,
+            color: active ? "var(--text)" : "var(--text-muted)",
+            background: active ? "var(--surface2)" : "transparent",
+            textDecoration: "none", transition: "all 0.15s",
+            minWidth: 40, justifyContent: "center",
+          }}>
           {icon} <span className="nav-label">{label}</span>
         </Link>
       ))}

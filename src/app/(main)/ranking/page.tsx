@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { getCachedTopCompanies, getCachedReviewCount } from "@/lib/actions/scores";
-import { TrendingUp, Users, Star } from "lucide-react";
 import { RankingTable } from "./RankingList";
 import { MyRankBanner } from "./MyRankBanner";
 import type { Company } from "@/lib/types";
@@ -60,15 +59,13 @@ export default async function RankingPage() {
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981" }} />
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Mis à jour toutes les minutes
-            </span>
-          </div>
-          <h1 style={{ fontSize: 34, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 8 }}>
+          <h1 style={{ fontSize: 34, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 10 }}>
             Classement des entreprises
           </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>Top 200</span>
+            <span style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 500 }}>· classées par score communautaire</span>
+          </div>
         </div>
 
         {/* Business rank banner — client-side fetch, invisible to non-business users */}
