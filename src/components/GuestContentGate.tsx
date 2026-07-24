@@ -17,14 +17,7 @@ export function GuestContentGate({
       <div style={{ position: "relative", overflow: "hidden" }}>
         <div
           aria-hidden="true"
-          style={{
-            filter: "blur(3px)",
-            pointerEvents: "none",
-            userSelect: "none",
-            opacity: 0.72,
-            maxHeight: 220,
-            overflow: "hidden",
-          }}
+          className="guest-blur-content"
         >
           {children}
         </div>

@@ -798,6 +798,16 @@ select:focus-visible {
   overflow: hidden;
 }
 
+/* Content gate on company page */
+.guest-blur-content {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.72;
+  max-height: 220px;
+  overflow: hidden;
+}
+
 @media (max-width: 768px) {
   .guest-gate-cta {
     padding: 24px 16px 36px;
@@ -805,11 +815,15 @@ select:focus-visible {
   .guest-gate-cta p:first-child {
     font-size: 18px !important;
   }
-  /* On mobile: less blur, show a bit more content, tighter gap */
   .guest-blur-preview {
     filter: blur(2px);
     opacity: 0.75;
     max-height: 320px;
     gap: 12px;
+  }
+  .guest-blur-content {
+    filter: blur(2px);
+    opacity: 0.78;
+    max-height: 260px;
   }
 }
