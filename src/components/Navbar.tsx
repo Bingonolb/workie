@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { getUser, getIsAdmin, getBusinessCompanyId } from "@/lib/supabase/server";
-
 import { Shield, LayoutDashboard, Bell } from "lucide-react";
-import { ThemeToggle } from "./ThemeToggle";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
+import { SearchButton } from "./SearchButton";
 import { getUnreadCount } from "@/lib/actions/notifications";
 
 export async function Navbar() {
@@ -42,7 +41,7 @@ export async function Navbar() {
           )}
         </Link>
 
-        {/* Desktop nav links — hidden on mobile (bottom nav takes over) */}
+        {/* Desktop nav links */}
         {user && (
           <div className="nav-links-desktop" style={{ display: "flex", alignItems: "center", gap: 4 }}>
             {isBusiness ? (
@@ -76,9 +75,9 @@ export async function Navbar() {
           </div>
         )}
 
-        {/* Right side */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <ThemeToggle />
+        {/* Right side: search + notifications */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {user && <SearchButton />}
           {user && !isBusiness && (
             <Link href="/notifications" title="Notifications" aria-label={unreadCount > 0 ? `Notifications (${unreadCount > 9 ? "9+" : unreadCount} non lues)` : "Notifications"} style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: 8, color: "var(--text-muted)", textDecoration: "none" }}>
               <Bell size={18} aria-hidden="true" />
@@ -90,22 +89,18 @@ export async function Navbar() {
             </Link>
           )}
           {!user && (
-            <>
-              <Link href="/signup" style={{
-                fontSize: 13, fontWeight: 700, textDecoration: "none",
-                background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-                color: "#fff", borderRadius: 8, padding: "7px 14px",
-              }}>
-                S&apos;inscrire
-              </Link>
-            </>
+            <Link href="/signup" style={{
+              fontSize: 13, fontWeight: 700, textDecoration: "none",
+              background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+              color: "#fff", borderRadius: 8, padding: "7px 14px",
+            }}>
+              S&apos;inscrire
+            </Link>
           )}
         </div>
       </nav>
 
-      {/* Bottom tab bar — mobile only, logged-in users */}
       {user && <BottomNav isBusiness={isBusiness} />}
-      {/* Skip-link target — receives focus when "Aller au contenu principal" is activated */}
       <div id="main-content" tabIndex={-1} style={{ outline: "none" }} />
     </>
   );

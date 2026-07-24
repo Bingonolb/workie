@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef } from "react"; // useCallback kept for handleFilter/handleClear
 import { CompanyCard } from "@/components/CompanyCard";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
@@ -63,7 +63,6 @@ export function ExploreClient({
   initialSector,
   initialCanton,
   initialSort,
-  initialSearch,
   squareAds,
 }: {
   allCompanies: Company[];
@@ -74,13 +73,11 @@ export function ExploreClient({
   initialSector?: string;
   initialCanton?: string;
   initialSort?: string;
-  initialSearch?: string;
   squareAds: PublicAdCampaign[];
 }) {
   const [sector, setSector] = useState(initialSector ?? "");
   const [canton, setCanton] = useState(initialCanton ?? "");
   const [sort, setSort] = useState(initialSort ?? "recent");
-  const [search, setSearch] = useState(initialSearch ?? "");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Session-stable offset: first ad appears at company index 3, 4, or 5.
@@ -106,15 +103,8 @@ export function ExploreClient({
     let result = allCompanies;
     if (sector) result = result.filter(c => c.sector === sector);
     if (canton) result = result.filter(c => c.canton === canton);
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      result = result.filter(c =>
-        c.name.toLowerCase().includes(q) ||
-        c.city?.toLowerCase().includes(q)
-      );
-    }
     return sortCompanies(result, sort);
-  }, [allCompanies, sector, canton, search, sort]);
+  }, [allCompanies, sector, canton, sort]);
 
   const total = filtered.length;
   // Guests see the first 12 companies only — no load-more, no ads.
@@ -144,20 +134,14 @@ export function ExploreClient({
     else if (key === "sort") setSort(value ?? "recent");
   }, []);
 
-  const handleSearch = useCallback((q: string) => {
-    setSearch(q);
-    setVisibleCount(PAGE_SIZE);
-  }, []);
-
   const handleClear = useCallback(() => {
     setSector("");
     setCanton("");
     setSort("recent");
-    setSearch("");
     setVisibleCount(PAGE_SIZE);
   }, []);
 
-  const current = { sector: sector || undefined, canton: canton || undefined, q: search || undefined, sort: sort !== "recent" ? sort : undefined, view: "grid" as const };
+  const current = { sector: sector || undefined, canton: canton || undefined, sort: sort !== "recent" ? sort : undefined, view: "grid" as const };
 
   return (
     <>
@@ -175,7 +159,6 @@ export function ExploreClient({
         cantons={CANTONS}
         current={current}
         onFilter={handleFilter}
-        onSearch={handleSearch}
         onClear={handleClear}
       />
 

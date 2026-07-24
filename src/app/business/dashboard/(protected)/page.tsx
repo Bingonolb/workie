@@ -3,6 +3,7 @@ import { createClient, getBusinessCompanyId } from "@/lib/supabase/server";
 import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2, CheckCircle, Clock, BarChart2, Trophy } from "lucide-react";
 import Link from "next/link";
 import { ShareCopyButton } from "@/components/ShareCopyButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -40,11 +41,14 @@ export default async function BusinessDashboardPage() {
   return (
     <div className="biz-page" style={{ maxWidth: 1100 }}>
       {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Dashboard</h1>
-        <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
-          Réputation employeur de <strong style={{ color: "var(--text)" }}>{String(co.name ?? "")}</strong>
-        </p>
+      <div style={{ marginBottom: 32, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Dashboard</h1>
+          <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
+            Réputation employeur de <strong style={{ color: "var(--text)" }}>{String(co.name ?? "")}</strong>
+          </p>
+        </div>
+        <ThemeToggle />
       </div>
 
       {/* New reviews banner */}

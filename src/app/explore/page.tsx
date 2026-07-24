@@ -226,7 +226,6 @@ export default async function ExplorePage({
           initialSector={params.sector}
           initialCanton={params.canton}
           initialSort={params.sort}
-          initialSearch={params.q}
           squareAds={squareAds}
         />
       </main>
