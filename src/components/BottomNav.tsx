@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Compass, Trophy, Flame, User, LayoutDashboard, Star, Briefcase, BarChart2, Megaphone, Layers } from "lucide-react";
+import { Compass, TrendingUp, Flame, User, LayoutDashboard, Star, Briefcase, BarChart2, Megaphone, Layers } from "lucide-react";
 
 const BIZ_LINKS = [
   { href: "/business/dashboard",           Icon: LayoutDashboard, label: "Dashboard" },
@@ -38,7 +38,7 @@ function BottomNavInner({ isBusiness }: { isBusiness: boolean }) {
     { href: "/explore",            Icon: Compass, label: "Explorer",   active: pathname === "/explore" && !isSwipeActive },
     { href: "/explore?view=swipe", Icon: Layers,  label: "Swipe",      active: isSwipeActive },
     { href: "/favorites",          Icon: Flame,   label: "Favoris",    active: pathname.startsWith("/favorites") },
-    { href: "/ranking",            Icon: Trophy,  label: "Classement", active: pathname.startsWith("/ranking") },
+    { href: "/ranking",            Icon: TrendingUp, label: "Classement", active: pathname.startsWith("/ranking") },
     { href: "/profile",            Icon: User,    label: "Profil",     active: pathname.startsWith("/profile") },
   ];
 
@@ -68,7 +68,7 @@ export function BottomNav({ isBusiness }: { isBusiness: boolean }) {
   return (
     <Suspense fallback={
       <nav className="bottom-nav" aria-hidden="true">
-        {[Compass, Layers, Flame, Trophy, User].map((Icon, i) => (
+        {[Compass, Layers, Flame, TrendingUp, User].map((Icon, i) => (
           <span key={i} className="bottom-nav-item" style={{ opacity: 0.4 }}>
             <Icon size={22} strokeWidth={1.8} />
           </span>

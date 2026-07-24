@@ -186,7 +186,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 {s.logo_url
-                  ? <img src={s.logo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                  ? <img src={s.logo_url} alt="" style={{ width: 28, height: 28, objectFit: "contain", display: "block" }} />
                   : <span style={{ fontSize: 11, fontWeight: 800, color: accentColor, letterSpacing: "-0.01em" }}>{s.name.slice(0, 2).toUpperCase()}</span>
                 }
               </div>
