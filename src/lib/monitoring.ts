@@ -1,5 +1,3 @@
-"use server";
-
 import * as Sentry from "@sentry/nextjs";
 
 /**
