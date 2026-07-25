@@ -88,18 +88,22 @@ export type Database = {
           company_id: string; cpm_chf: number; created_at: string | null
           cta_label: string; cta_url: string; daily_budget_chf: number
           end_date: string | null; format: string; headline: string; id: string
-          image_url: string; impression_count: number; spent_chf: number
-          start_date: string; status: string; target_cantons: string[]
-          target_sectors: string[]; total_budget_chf: number; updated_at: string | null
+          image_url: string; impression_count: number; paid_at: string | null
+          spent_chf: number; start_date: string; status: string
+          stripe_session_id: string | null; target_cantons: string[]
+          target_sectors: string[]; total_budget_chf: number
+          updated_at: string | null; user_id: string | null
         }
         Insert: {
           admin_note?: string | null; body_text?: string | null; click_count?: number
           company_id: string; cpm_chf: number; created_at?: string | null
           cta_label?: string; cta_url: string; daily_budget_chf: number
           end_date?: string | null; format: string; headline: string; id?: string
-          image_url: string; impression_count?: number; spent_chf?: number
-          start_date: string; status?: string; target_cantons?: string[]
-          target_sectors?: string[]; total_budget_chf: number; updated_at?: string | null
+          image_url: string; impression_count?: number; paid_at?: string | null
+          spent_chf?: number; start_date: string; status?: string
+          stripe_session_id?: string | null; target_cantons?: string[]
+          target_sectors?: string[]; total_budget_chf: number
+          updated_at?: string | null; user_id?: string | null
         }
         Update: Partial<Database["public"]["Tables"]["ad_campaigns"]["Insert"]>
         Relationships: [{ foreignKeyName: "ad_campaigns_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
@@ -246,6 +250,8 @@ export type Database = {
     }
     Views: { [_ in never]: never }
     Functions: {
+      get_campaign_canton_stats: { Args: { p_campaign_id: string }; Returns: { canton: string; clicks: number; impressions: number }[] }
+      get_campaign_daily_stats: { Args: { p_campaign_id: string }; Returns: { clicks: number; day: string; impressions: number }[] }
       increment_ad_click: { Args: { p_campaign_id: string }; Returns: undefined }
       increment_ad_impression: { Args: { p_campaign_id: string }; Returns: undefined }
       increment_helpful: { Args: { review_id: string }; Returns: undefined }

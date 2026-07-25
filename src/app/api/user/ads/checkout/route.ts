@@ -18,13 +18,12 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: campaign } = await (supabase as any)
+    const { data: campaign } = await supabase
       .from("ad_campaigns")
       .select("id, headline, total_budget_chf, status, user_id")
       .eq("id", campaign_id)
       .eq("user_id", user.id)
-      .maybeSingle() as { data: { id: string; headline: string; total_budget_chf: number; status: string; user_id: string } | null };
+      .maybeSingle();
 
     if (!campaign) return NextResponse.json({ error: "Campagne introuvable" }, { status: 404 });
     if (campaign.status !== "payment_pending") {

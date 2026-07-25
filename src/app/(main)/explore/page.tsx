@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     images: ["https://www.workie.ch/og-default.png"],
   },
 };
-import { getAllCompaniesForGrid } from "@/lib/actions/companies";
+import { fetchGridPage } from "@/lib/actions/companies";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import { getUserFlameIds } from "@/lib/actions/scores";
 import { getUser } from "@/lib/supabase/server";
@@ -96,8 +96,9 @@ export default async function ExplorePage({
     import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
     getActiveAds({ format: "square", canton: viewerCanton ?? undefined }).catch(() => []),
     getActiveAds({ format: "swipe", canton: viewerCanton ?? undefined, sector: params.sector }).catch(() => []),
-    getAllCompaniesForGrid().catch(() => [] as Company[]),
+    fetchGridPage({ sector: params.sector, canton: params.canton, sort: params.sort }, 0).catch(() => ({ companies: [] as Company[], total: 0 })),
   ]);
+  const { companies: initialCompanies, total: initialTotal } = allCompaniesForGrid;
   const isBusiness = !!bizCompanyId;
 
   // Helper: resolve penalty credits (with optional Stripe verification on redirect)
@@ -160,7 +161,7 @@ export default async function ExplorePage({
 
   // JSON-LD ItemList of top companies for Google indexing (grid is client-rendered)
   const BASE_URL = "https://www.workie.ch";
-  const topForJsonLd = allCompaniesForGrid
+  const topForJsonLd = initialCompanies
     .filter(c => Number(c.review_count) > 0)
     .slice(0, 30);
   const exploreJsonLd = topForJsonLd.length > 0 ? {
@@ -184,7 +185,8 @@ export default async function ExplorePage({
       )}
       <main className="page-main">
         <ExploreClient
-          allCompanies={allCompaniesForGrid}
+          initialCompanies={initialCompanies}
+          initialTotal={initialTotal}
           favIds={favIds}
           flameIds={flameIds}
           swipeAds={swipeAds}

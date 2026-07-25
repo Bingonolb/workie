@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient, getUser, getBusinessCompanyData } from "@/lib/supabase/server";
@@ -110,8 +110,7 @@ async function fetchAnalyticsForCompany(companyId: string) {
         .order("created_at", { ascending: true })
         .limit(5000),
       // 30d only — enough for trend chart + week/today stats + canton breakdown
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any)
+      supabase
         .from("company_views")
         .select("viewed_at, viewer_canton")
         .eq("company_id", companyId)
