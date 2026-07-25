@@ -158,8 +158,8 @@ export type Database = {
         ]
       }
       company_views: {
-        Row: { company_id: string; id: string; user_id: string | null; viewed_at: string | null }
-        Insert: { company_id: string; id?: string; user_id?: string | null; viewed_at?: string | null }
+        Row: { company_id: string; id: string; user_id: string | null; viewed_at: string | null; viewer_canton: string | null; viewer_city: string | null }
+        Insert: { company_id: string; id?: string; user_id?: string | null; viewed_at?: string | null; viewer_canton?: string | null; viewer_city?: string | null }
         Update: Partial<Database["public"]["Tables"]["company_views"]["Insert"]>
         Relationships: [{ foreignKeyName: "company_views_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
       }

@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser, getIsAdmin } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 // Central admin guard — all /admin/* routes inherit this.
 // Individual pages may still fetch their own data but don't need to repeat the auth check.

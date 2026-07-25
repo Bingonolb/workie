@@ -545,14 +545,13 @@ export async function trackCompanyView(companyId: string): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser();
     const viewer_canton = h.get("x-vercel-ip-country-region") ?? null;
     const viewer_city   = h.get("x-vercel-ip-city") ?? null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from("company_views") as any).insert({ company_id: companyId, user_id: user?.id ?? null, viewer_canton, viewer_city });
+    await supabase.from("company_views").insert({ company_id: companyId, user_id: user?.id ?? null, viewer_canton, viewer_city });
   } catch { /* silent */ }
 }
 
 export async function deleteJobOffer(id: string): Promise<{ error?: string }> {
   try {
-    const { supabase, company } = await requireBusiness();
+    const { supabase, company } = await requireSubscribedBusiness();
     const { error } = await supabase.from("job_offers").delete().eq("id", id).eq("company_id", company.id);
     if (error) return { error: error.message };
     revalidatePath("/business/dashboard/jobs");
