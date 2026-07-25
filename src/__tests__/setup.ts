@@ -7,5 +7,8 @@ vi.mock("next/cache", () => ({
   // Pass-through: returns the function as-is so cached functions can be tested directly
   unstable_cache: vi.fn((fn: unknown) => fn),
 }));
-vi.mock("next/headers", () => ({ cookies: vi.fn(() => ({ getAll: () => [], set: vi.fn() })) }));
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(() => ({ getAll: () => [], set: vi.fn() })),
+  headers: vi.fn(async () => ({ get: vi.fn(() => null) })),
+}));
 vi.mock("next/navigation", () => ({ redirect: vi.fn((url: string) => { throw new Error(`REDIRECT:${url}`); }) }));

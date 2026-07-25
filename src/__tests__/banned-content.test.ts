@@ -61,6 +61,8 @@ function chain(result: unknown) {
   const b: Record<string, unknown> = {};
   const self = () => b;
   ["select","eq","not","ilike","order","limit","neq","in"].forEach(m => { b[m] = self; });
+  // gte is used by the per-user 24h rate-limit check — always count:0 so tests pass through
+  b["gte"] = () => Promise.resolve({ data: null, count: 0, error: null });
   b["maybeSingle"] = async () => result;
   b["insert"] = async () => ({ error: null });
   return b;

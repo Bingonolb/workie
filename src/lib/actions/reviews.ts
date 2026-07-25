@@ -7,6 +7,19 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
 import type { Review } from "@/lib/types";
 
+// ── Column selectors ─────────────────────────────────────────────────────────
+
+// submitter_ip and flag_reason are moderation-only fields — never sent to the frontend.
+export const REVIEW_PUBLIC_COLS = [
+  "id", "company_id", "user_id",
+  "rating_overall", "rating_culture", "rating_management", "rating_worklife", "rating_career",
+  "title", "content", "pros", "cons", "job_title", "salary_chf",
+  "is_current", "is_anonymous", "employment_type", "duration_range",
+  "work_mode", "would_recommend", "knew_before",
+  "start_year", "end_year", "helpful_count", "created_at",
+  "status", "is_verified_author",
+].join(",");
+
 // ── Read actions ────────────────────────────────────────────────────────────
 
 export async function getUserReviews(): Promise<(Review & { company_name: string })[]> {
@@ -25,12 +38,12 @@ export async function getReviews(companyId: string, limit = 100) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("reviews")
-    .select("*")
+    .select(REVIEW_PUBLIC_COLS)
     .eq("company_id", companyId)
     .eq("status", "published")
     .order("created_at", { ascending: false })
     .limit(limit);
-  return (data ?? []) as Review[];
+  return (data ?? []) as unknown as Review[];
 }
 
 export const getCachedReviews = unstable_cache(
@@ -38,12 +51,12 @@ export const getCachedReviews = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("reviews")
-      .select("*")
+      .select(REVIEW_PUBLIC_COLS)
       .eq("company_id", companyId)
       .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(100);
-    return (data ?? []) as Review[];
+    return (data ?? []) as unknown as Review[];
   },
   ["reviews"],
   { revalidate: 60, tags: ["reviews"] }
@@ -272,6 +285,18 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
     .eq("user_id", user.id)
     .maybeSingle();
   if (existing) return { error: "Tu as déjà posté un avis pour cette entreprise." };
+
+  // Per-user global rate limit: max 3 review submissions per 24h across all companies.
+  // Catches multi-company bombing even when the user changes IP or uses a VPN.
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { count: recentCount } = await supabase
+    .from("reviews")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", since24h);
+  if ((recentCount ?? 0) >= 3) {
+    return { error: "Tu as atteint la limite de 3 avis par 24h. Réessaie demain." };
+  }
 
   // Capture IP for fraud tracking (stored, never shown publicly)
   const h = await headers();
