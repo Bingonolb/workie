@@ -7,20 +7,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
 import type { Review } from "@/lib/types";
 
-// ── Column selectors ─────────────────────────────────────────────────────────
-
-// submitter_ip and flag_reason are moderation-only fields — never sent to the frontend.
-export const REVIEW_PUBLIC_COLS = [
-  "id", "company_id", "user_id",
-  "rating_overall", "rating_culture", "rating_management", "rating_worklife", "rating_career",
-  "title", "content", "pros", "cons", "job_title", "salary_chf",
-  "is_current", "is_anonymous", "employment_type", "duration_range",
-  "work_mode", "would_recommend", "knew_before",
-  "start_year", "end_year", "helpful_count", "created_at",
-  "status", "is_verified_author",
-].join(",");
+import { REVIEW_PUBLIC_COLS } from "@/lib/actions/columns";
 
 // ── Read actions ────────────────────────────────────────────────────────────
+
+export { REVIEW_PUBLIC_COLS };
 
 export async function getUserReviews(): Promise<(Review & { company_name: string })[]> {
   const supabase = await createClient();

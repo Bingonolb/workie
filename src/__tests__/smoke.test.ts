@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ── Column-security invariants (pure static assertions, no mocking needed) ──
 
-import { REVIEW_PUBLIC_COLS } from "@/lib/actions/reviews";
-import { COMPANY_PUBLIC_COLS } from "@/lib/actions/companies";
+import { REVIEW_PUBLIC_COLS, COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
 
 describe("REVIEW_PUBLIC_COLS", () => {
   const cols = REVIEW_PUBLIC_COLS.split(",");

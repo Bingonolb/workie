@@ -50,15 +50,8 @@ export async function fetchSwipePage(
 
 const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,logo_url,score,is_verified,tags,description,profile_score";
 
-// Public-safe company columns — Stripe billing, subscription internals, and claimed_by
-// are admin-only fields and must never reach the public company page.
-export const COMPANY_PUBLIC_COLS = [
-  "id", "name", "sector", "subsector", "city", "canton", "employee_range",
-  "description", "logo_url", "cover_url", "website_url", "linkedin_url",
-  "twitter_url", "instagram_url", "founded_year", "avg_salary_chf",
-  "avg_rating", "review_count", "tags", "is_verified", "is_subscribed",
-  "score", "profile_score", "created_at", "zefix_uid",
-].join(",");
+import { COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
+export { COMPANY_PUBLIC_COLS };
 
 // Cached 60s — revalidateTag("companies") is called after mutations
 // Uses admin client — cookies() must not be called inside unstable_cache
