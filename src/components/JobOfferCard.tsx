@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, MapPin, ExternalLink } from "lucide-react";
 
 type Job = {
@@ -38,6 +39,9 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   return (
     <>
@@ -77,13 +81,13 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
         <p style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>Voir l'offre →</p>
       </button>
 
-      {/* Modal */}
-      {open && (
+      {/* Modal — portaled to document.body to escape sticky/transform stacking contexts */}
+      {open && mounted && createPortal(
         <div
           className="job-modal-overlay"
           onClick={e => { if (e.target === e.currentTarget) setOpen(false); }}
           style={{
-            position: "fixed", inset: 0, zIndex: 10002,
+            position: "fixed", inset: 0, zIndex: 10200,
             background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: "20px",
@@ -131,7 +135,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             {/* Salary */}
             {job.salary_range && (
               <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 20 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Salaire</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Salaire annuel (CHF)</p>
                 <p style={{ fontSize: 18, fontWeight: 900, color: "#10b981" }}>{job.salary_range}</p>
               </div>
             )}
@@ -180,7 +184,8 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
               </p>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style>{`
