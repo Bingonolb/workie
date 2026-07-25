@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // ISR — MyRankBanner is a client component that fetches its own auth state
 
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
@@ -24,12 +24,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RankingPage() {
-  const [companies, reviewCount, bizCompanyId] = await Promise.all([
+  const [companies, reviewCount] = await Promise.all([
     getCachedTopCompanies(200).catch(() => [] as Company[]),
     getCachedReviewCount().catch(() => 0),
-    import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
   ]);
-  const isBusiness = !!bizCompanyId;
   const typedCompanies = companies as Company[];
 
   const withRating = typedCompanies.filter(c => Number(c.avg_rating) > 0);
@@ -59,7 +57,7 @@ export default async function RankingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(rankingJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       <main className="page-main-md">
 
-        {isBusiness && <MyRankBanner />}
+        <MyRankBanner />
 
         {/* Table */}
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>

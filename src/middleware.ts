@@ -92,7 +92,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (loggedIn && (pathname === "/login" || pathname === "/signup")) {
+    if (loggedIn && (pathname === "/" || pathname === "/login" || pathname === "/signup")) {
       const url = request.nextUrl.clone();
       url.pathname = "/explore";
       return NextResponse.redirect(url);

@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { unstable_cache } from "next/cache";
-import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ArrowRight, Star, Shield, Zap, Eye, TrendingUp, MessageCircle, BarChart3, BadgeCheck } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
 const getLandingCounts = unstable_cache(
   async () => {
@@ -44,11 +42,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [user, counts] = await Promise.all([
-    getUser().catch(() => null),
-    getLandingCounts(),
-  ]);
-  if (user) redirect("/explore");
+  const counts = await getLandingCounts();
   const nCompanies = counts.companies;
   const nReviews = counts.reviews;
 

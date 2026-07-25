@@ -1,7 +1,7 @@
 ﻿"use server";
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-import { createClient, getUser, getBusinessCompanyData } from "@/lib/supabase/server";
+import { createClient, getUser, getBusinessCompanyData, getIsAdmin } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyFavoriteUsers } from "@/lib/actions/notifications";
 import { headers } from "next/headers";
@@ -36,9 +36,9 @@ async function requireBusiness() {
 async function requireSubscribedBusiness() {
   const result = await requireBusiness();
   if (!result.company.is_subscribed) {
-    // Admins bypass subscription checks
-    const { data: p } = await result.supabase.from("profiles").select("role").eq("id", result.user.id).maybeSingle();
-    if (p?.role !== "admin") throw new Error("Abonnement actif requis pour cette fonctionnalité.");
+    // getIsAdmin() is cache()-wrapped — reuses the profile already fetched by getProfile()
+    const isAdmin = await getIsAdmin();
+    if (!isAdmin) throw new Error("Abonnement actif requis pour cette fonctionnalité.");
   }
   return result;
 }
