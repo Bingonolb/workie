@@ -11,105 +11,97 @@ async function isBusiness(supabase: any, userId: string): Promise<boolean> {
 }
 
 export async function addFlame(companyId: string): Promise<void> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  if (await isBusiness(supabase, user.id)) return;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    if (await isBusiness(supabase, user.id)) return;
 
-  const { data: existing } = await supabase
-    .from("score_events")
-    .select("id")
-    .eq("company_id", companyId)
-    .eq("user_id", user.id)
-    .eq("event_type", "flame")
-    .maybeSingle();
+    const { data: existing } = await supabase
+      .from("score_events").select("id")
+      .eq("company_id", companyId).eq("user_id", user.id).eq("event_type", "flame")
+      .maybeSingle();
 
-  if (existing) {
-    const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
-    if (error) { console.error("[addFlame] delete error:", error.message); return; }
-  } else {
-    const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "flame", points: 1 });
-    if (error) { console.error("[addFlame] insert error:", error.message); return; }
-  }
-  revalidatePath("/explore");
-  revalidatePath("/ranking");
-  revalidatePath(`/company/${companyId}`);
-  revalidateTag("companies", {});
-  revalidateTag("top-companies", {});
-}
-
-export async function addBoost(companyId: string): Promise<void> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  if (await isBusiness(supabase, user.id)) return;
-
-  const { data: existing } = await supabase
-    .from("score_events")
-    .select("id")
-    .eq("company_id", companyId)
-    .eq("user_id", user.id)
-    .eq("event_type", "boost")
-    .maybeSingle();
-
-  if (existing) {
-    const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
-    if (error) { console.error("[addBoost] delete error:", error.message); return; }
+    if (existing) {
+      const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
+      if (error) { console.error("[addFlame] delete error:", error.message); return; }
+    } else {
+      const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "flame", points: 1 });
+      if (error) { console.error("[addFlame] insert error:", error.message); return; }
+    }
     revalidatePath("/explore");
     revalidatePath("/ranking");
     revalidatePath(`/company/${companyId}`);
-    return;
-  }
+    revalidateTag("companies", {});
+    revalidateTag("top-companies", {});
+  } catch (e) { console.error("[addFlame] unexpected error:", e); }
+}
 
-  const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
-  if (error) { console.error("[addBoost] insert error:", error.message); return; }
-  revalidatePath("/explore");
-  revalidatePath("/ranking");
-  revalidatePath(`/company/${companyId}`);
-  revalidateTag("companies", {});
-  revalidateTag("top-companies", {});
+export async function addBoost(companyId: string): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    if (await isBusiness(supabase, user.id)) return;
+
+    const { data: existing } = await supabase
+      .from("score_events").select("id")
+      .eq("company_id", companyId).eq("user_id", user.id).eq("event_type", "boost")
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
+      if (error) { console.error("[addBoost] delete error:", error.message); return; }
+      revalidatePath("/explore");
+      revalidatePath("/ranking");
+      revalidatePath(`/company/${companyId}`);
+      return;
+    }
+
+    const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
+    if (error) { console.error("[addBoost] insert error:", error.message); return; }
+    revalidatePath("/explore");
+    revalidatePath("/ranking");
+    revalidatePath(`/company/${companyId}`);
+    revalidateTag("companies", {});
+    revalidateTag("top-companies", {});
+  } catch (e) { console.error("[addBoost] unexpected error:", e); }
 }
 
 export async function addPenalty(companyId: string): Promise<void> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-  const { data: profile } = await supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle();
-  const isAdmin = profile?.role === "admin";
-  const credits = Number(profile?.penalty_credits ?? 0);
-  if (!isAdmin && credits <= 0) return;
+    const { data: profile } = await supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle();
+    const isAdmin = profile?.role === "admin";
+    const credits = Number(profile?.penalty_credits ?? 0);
+    if (!isAdmin && credits <= 0) return;
 
-  const admin = createAdminClient();
+    const admin = createAdminClient();
+    const { data: existing } = await admin
+      .from("score_events").select("id")
+      .eq("company_id", companyId).eq("user_id", user.id).eq("event_type", "penalty")
+      .maybeSingle();
 
-  const { data: existing } = await admin
-    .from("score_events")
-    .select("id")
-    .eq("company_id", companyId)
-    .eq("user_id", user.id)
-    .eq("event_type", "penalty")
-    .maybeSingle();
-
-  if (existing) {
-    // Toggle off — refund 1 credit atomically via RPC (avoids read+write race)
-    await admin.from("score_events").delete().eq("id", existing.id);
-    if (!isAdmin) {
-      await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 1 });
+    if (existing) {
+      await admin.from("score_events").delete().eq("id", existing.id);
+      if (!isAdmin) await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 1 });
+    } else {
+      if (!isAdmin) {
+        const { data: ok } = await supabase.rpc("spend_penalty_credit", { uid: user.id });
+        if (!ok) return;
+      }
+      await admin.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
     }
-  } else {
-    // Spend 1 credit atomically — returns false if credits were 0 (race condition guard)
-    if (!isAdmin) {
-      const { data: ok } = await supabase.rpc("spend_penalty_credit", { uid: user.id });
-      if (!ok) return; // someone else consumed the last credit first
-    }
-    await admin.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
-  }
 
-  revalidatePath("/explore");
-  revalidatePath("/ranking");
-  revalidatePath(`/company/${companyId}`);
-  revalidateTag("companies", {});
-  revalidateTag("top-companies", {});
+    revalidatePath("/explore");
+    revalidatePath("/ranking");
+    revalidatePath(`/company/${companyId}`);
+    revalidateTag("companies", {});
+    revalidateTag("top-companies", {});
+  } catch (e) { console.error("[addPenalty] unexpected error:", e); }
 }
 
 export async function getTopCompanies(limit = 200) {

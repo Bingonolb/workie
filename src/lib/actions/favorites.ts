@@ -6,45 +6,53 @@ import { addFlame } from "@/lib/actions/scores";
 import type { Company } from "@/lib/types";
 
 export async function toggleFavorite(companyId: string): Promise<void> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-  const { data: existing } = await supabase
-    .from("favorites").select("company_id").eq("user_id", user.id).eq("company_id", companyId).maybeSingle();
+    const { data: existing } = await supabase
+      .from("favorites").select("company_id").eq("user_id", user.id).eq("company_id", companyId).maybeSingle();
 
-  if (existing) {
-    await supabase.from("favorites").delete().eq("user_id", user.id).eq("company_id", companyId);
-  } else {
-    const [{ error }] = await Promise.all([
-      supabase.from("favorites").insert({ user_id: user.id, company_id: companyId }),
-      addFlame(companyId),
-    ]);
-    if (error && error.code !== "23505") throw error;
-  }
-  revalidatePath("/profile");
-  revalidatePath("/favorites");
-  revalidatePath(`/company/${companyId}`);
+    if (existing) {
+      await supabase.from("favorites").delete().eq("user_id", user.id).eq("company_id", companyId);
+    } else {
+      const [{ error }] = await Promise.all([
+        supabase.from("favorites").insert({ user_id: user.id, company_id: companyId }),
+        addFlame(companyId),
+      ]);
+      if (error && error.code !== "23505") console.error("[toggleFavorite] insert error:", error.message);
+    }
+    revalidatePath("/profile");
+    revalidatePath("/favorites");
+    revalidatePath(`/company/${companyId}`);
+  } catch (e) { console.error("[toggleFavorite] unexpected error:", e); }
 }
 
 export async function getFavorites(): Promise<Company[]> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
 
-  const { data } = await supabase
-    .from("favorites")
-    .select("companies(id, name, sector, subsector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, logo_url, score, is_verified, tags, description)")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("favorites")
+      .select("companies(id, name, sector, subsector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, logo_url, score, is_verified, tags, description)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
-  return ((data ?? []).map((r: any) => r.companies).filter(Boolean)) as Company[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return ((data ?? []).map((r: any) => r.companies).filter(Boolean)) as Company[];
+  } catch (e) { console.error("[getFavorites] unexpected error:", e); return []; }
 }
 
 export async function getUserFavoriteIds(): Promise<string[]> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-  const { data } = await supabase.from("favorites").select("company_id").eq("user_id", user.id);
-  return (data ?? []).map((r: any) => r.company_id);
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+    const { data } = await supabase.from("favorites").select("company_id").eq("user_id", user.id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data ?? []).map((r: any) => r.company_id);
+  } catch (e) { console.error("[getUserFavoriteIds] unexpected error:", e); return []; }
 }

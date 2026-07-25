@@ -28,22 +28,28 @@ export const getUser = cache(async () => {
   return user;
 });
 
-// Cached per-request: isAdmin check shared across Navbar + any page that needs it.
-export const getIsAdmin = cache(async () => {
-  const user = await getUser();
-  if (!user) return false;
-  const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  return data?.role === "admin";
-});
-
-// Cached per-request: returns claimed_company_id if user is a business account.
-export const getBusinessCompanyId = cache(async (): Promise<string | null> => {
+// Single cached profile fetch — role + claimed_company_id in one query.
+// Both getIsAdmin() and getBusinessCompanyId() derive from this.
+const getProfile = cache(async () => {
   const user = await getUser();
   if (!user) return null;
   const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
-  return data?.claimed_company_id ?? null;
+  const { data } = await supabase
+    .from("profiles")
+    .select("role, claimed_company_id")
+    .eq("id", user.id)
+    .maybeSingle();
+  return data ?? null;
+});
+
+export const getIsAdmin = cache(async () => {
+  const profile = await getProfile();
+  return profile?.role === "admin";
+});
+
+export const getBusinessCompanyId = cache(async (): Promise<string | null> => {
+  const profile = await getProfile();
+  return profile?.claimed_company_id ?? null;
 });
 
 // Cached per-request: full company row for the logged-in business user.

@@ -53,8 +53,12 @@ const nextConfig: NextConfig = {
   images: {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    // All image URLs come from our own DB — wildcard is safe here
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "*.supabase.in" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "avatars.githubusercontent.com" },
+    ],
     // Cache optimised images for 7 days on Vercel CDN (default is 60s — way too short)
     minimumCacheTTL: 604800,
     formats: ["image/avif", "image/webp"],
