@@ -58,6 +58,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.supabase.in" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "picsum.photos" },
     ],
     // Cache optimised images for 7 days on Vercel CDN (default is 60s — way too short)
     minimumCacheTTL: 604800,
