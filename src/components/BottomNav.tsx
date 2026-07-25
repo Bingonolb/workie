@@ -47,7 +47,13 @@ function BottomNavInner({ isBusiness }: { isBusiness: boolean }) {
     if (pathname === "/explore" && (href === "/explore" || href === "/explore?view=swipe")) {
       e.preventDefault();
       const targetView = href.includes("swipe") ? "swipe" : "grid";
+      const isSameView = active; // clicking the already-active tab
       const targetUrl = targetView === "swipe" ? "/explore?view=swipe" : "/explore";
+      if (isSameView) {
+        // Tap the active tab → scroll to top, no view change
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
       window.dispatchEvent(new CustomEvent("workie:view", { detail: targetView }));
       window.history.pushState({}, "", targetUrl);
       return;
