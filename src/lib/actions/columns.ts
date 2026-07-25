@@ -12,6 +12,8 @@ export const REVIEW_PUBLIC_COLS = [
   "status", "is_verified_author",
 ].join(",");
 
+export const GRID_PAGE_SIZE = 24;
+
 // Stripe billing, subscription internals, and claimed_by are admin-only fields
 // and must never reach the public company page.
 export const COMPANY_PUBLIC_COLS = [

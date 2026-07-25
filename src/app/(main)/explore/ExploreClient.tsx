@@ -5,7 +5,8 @@ import { CompanyCard } from "@/components/CompanyCard";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
 import { SwipeView } from "./SwipeView";
-import { fetchGridPage, GRID_PAGE_SIZE } from "@/lib/actions/companies";
+import { fetchGridPage } from "@/lib/actions/companies";
+import { GRID_PAGE_SIZE } from "@/lib/actions/columns";
 import type { Company } from "@/lib/types";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 

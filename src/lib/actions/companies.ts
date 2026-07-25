@@ -48,11 +48,9 @@ export async function fetchSwipePage(
 }
 
 
+import { GRID_PAGE_SIZE, COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
+
 const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,logo_url,score,is_verified,tags,description,profile_score";
-
-import { COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
-
-export const GRID_PAGE_SIZE = 24;
 
 // Paginated, filtered, server-sorted — replaces the 850KB getAllCompaniesForGrid blob.
 // Uses adminClient: no cookies(), safe to call from both server components and client actions.
