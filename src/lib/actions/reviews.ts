@@ -45,6 +45,35 @@ export const getCachedReviews = unstable_cache(
 
 type ReviewState = { error?: string; success?: boolean } | undefined;
 
+const URL_PATTERN = /https?:\/\/|www\.|\.com|\.ch|\.net|\.org/i;
+const REPEAT_CHAR_PATTERN = /(.)\1{5,}/;
+
+function checkContentQuality(content: string, pros: string, cons: string): string | null {
+  for (const [field, text] of [["avis", content], ["points positifs", pros], ["points négatifs", cons]] as const) {
+    if (!text) continue;
+    const letters = text.replace(/[^a-zA-ZÀ-ÿ]/g, "");
+    const uppers = text.replace(/[^A-ZÀ-Ÿ]/g, "").length;
+    if (letters.length > 10 && uppers / letters.length > 0.6) {
+      return `Trop de majuscules dans les ${field}. Écris normalement.`;
+    }
+    if (URL_PATTERN.test(text)) {
+      return `Les ${field} ne peuvent pas contenir de liens.`;
+    }
+    if (REPEAT_CHAR_PATTERN.test(text)) {
+      return `Caractères répétés détectés dans les ${field}.`;
+    }
+  }
+  const words = content.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const unique = new Set(words);
+  if (words.length >= 5 && unique.size < 8) {
+    return "L'avis doit contenir au moins 8 mots différents.";
+  }
+  if (pros && cons && pros.trim().toLowerCase() === cons.trim().toLowerCase()) {
+    return "Les points positifs et négatifs ne peuvent pas être identiques.";
+  }
+  return null;
+}
+
 export async function submitReview(_prev: ReviewState, formData: FormData): Promise<ReviewState> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -102,6 +131,10 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   if (content.length > 5000) return { error: "L'avis ne peut pas dépasser 5000 caractères." };
   if (title && title.length > 150) return { error: "Le titre ne peut pas dépasser 150 caractères." };
   if (job_title && job_title.length > 100) return { error: "Le poste ne peut pas dépasser 100 caractères." };
+
+  // Content quality checks — catches spam, copy-paste, and low-effort submissions
+  const qualityCheck = checkContentQuality(content, pros ?? "", cons ?? "");
+  if (qualityCheck) return { error: qualityCheck };
 
   // Check if user already reviewed this company
   const { data: existing } = await supabase
