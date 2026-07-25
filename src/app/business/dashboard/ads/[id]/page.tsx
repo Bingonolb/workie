@@ -69,7 +69,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             <div style={{ width: 100, height: 100, borderRadius: 14, overflow: "hidden", flexShrink: 0, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {campaign.image_url
                 // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={campaign.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ? <img src={campaign.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                 : <span style={{ fontSize: 36 }}>📣</span>
               }
             </div>

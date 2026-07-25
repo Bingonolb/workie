@@ -106,7 +106,7 @@ export function AdminAdsClient() {
               <div style={{ display: "flex", gap: 16, padding: "18px 20px", flexWrap: "wrap" }}>
                 <div style={{ width: 80, height: 80, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: "var(--surface2)" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={c.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={c.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>

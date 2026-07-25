@@ -231,7 +231,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                     {/* Company info */}
                     <Link href={`/company/${co.id}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 10 }}>
                       {co.logo_url ? (
-                        <img src={co.logo_url} alt={co.name} style={{ width: 28, height: 28, borderRadius: 6, objectFit: "cover", border: "1px solid var(--border)" }} />
+                        <img src={co.logo_url} alt={co.name} style={{ width: 28, height: 28, borderRadius: 6, objectFit: "cover", border: "1px solid var(--border)" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                       ) : (
                         <div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg, ${sectorColor}, #f97316)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "#fff", flexShrink: 0 }}>
                           {co.name[0]}

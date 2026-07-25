@@ -159,7 +159,7 @@ export function AdminCompanyForm({ company }: { company: Company }) {
                 </div>
               )}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={displayCover} alt="" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 10, border: `2px solid ${coverPreview ? "#8b5cf6" : "var(--border)"}` }} />
+              <img src={displayCover} alt="" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 10, border: `2px solid ${coverPreview ? "#8b5cf6" : "var(--border)"}` }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
             </div>
           )}
         </div>

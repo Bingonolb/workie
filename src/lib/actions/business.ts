@@ -17,6 +17,8 @@ function safeUrl(raw: string | null): string | null {
   } catch { return null; }
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function requireBusiness() {
   // Both getUser() and getBusinessCompanyData() are cache()-wrapped —
   // they share the same result as the layout/page in the same request.
@@ -28,6 +30,17 @@ async function requireBusiness() {
   const profile = { claimed_company_id: company.id, role: "business" };
 
   return { user, supabase, company, profile };
+}
+
+// Requires an active subscription or admin role.
+async function requireSubscribedBusiness() {
+  const result = await requireBusiness();
+  if (!result.company.is_subscribed) {
+    // Admins bypass subscription checks
+    const { data: p } = await result.supabase.from("profiles").select("role").eq("id", result.user.id).maybeSingle();
+    if (p?.role !== "admin") throw new Error("Abonnement actif requis pour cette fonctionnalité.");
+  }
+  return result;
 }
 
 // ── Getters ───────────────────────────────────────────────────────────────────
@@ -297,11 +310,15 @@ export async function getJobCantonStats(jobId: string): Promise<{ canton: string
 
 export async function trackJobApplyClick(jobId: string, companyId: string): Promise<void> {
   try {
+    if (!UUID_RE.test(jobId) || !UUID_RE.test(companyId)) return;
     const hdrs = await headers();
     const canton = hdrs.get("x-vercel-ip-country-region") ?? null;
-    const supabase = await createClient();
-    const { error } = await supabase.from("job_apply_clicks").insert({ job_id: jobId, company_id: companyId, viewer_canton: canton });
-    if (!error) await supabase.rpc("increment_job_apply_click", { job_id: jobId });
+    const admin = createAdminClient();
+    // Verify job exists and belongs to the stated company — prevents stat inflation with arbitrary IDs
+    const { data: job } = await admin.from("job_offers").select("id").eq("id", jobId).eq("company_id", companyId).maybeSingle();
+    if (!job) return;
+    const { error } = await admin.from("job_apply_clicks").insert({ job_id: jobId, company_id: companyId, viewer_canton: canton });
+    if (!error) await admin.rpc("increment_job_apply_click", { job_id: jobId });
   } catch { /* silent */ }
 }
 
@@ -398,7 +415,7 @@ export async function updateBusinessProfile(_: unknown, formData: FormData): Pro
 
 export async function replyToReview(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
   try {
-    const { supabase, company } = await requireBusiness();
+    const { supabase, company } = await requireSubscribedBusiness();
     const review_id = String(formData.get("review_id") || "");
     if (!review_id) return { error: "Avis introuvable." };
     const content = String(formData.get("content") || "").trim();
@@ -440,7 +457,7 @@ export async function replyToReview(_: unknown, formData: FormData): Promise<{ e
 
 export async function createJobOffer(_: unknown, formData: FormData): Promise<{ error?: string; success?: boolean }> {
   try {
-    const { supabase, company } = await requireBusiness();
+    const { supabase, company } = await requireSubscribedBusiness();
 
     const title = String(formData.get("title") || "").trim();
     if (!title) return { error: "Le titre du poste est obligatoire." };
@@ -481,7 +498,7 @@ export async function createJobOffer(_: unknown, formData: FormData): Promise<{ 
 
 export async function updateJobOffer(id: string, formData: FormData): Promise<{ error?: string; success?: boolean }> {
   try {
-    const { supabase, company } = await requireBusiness();
+    const { supabase, company } = await requireSubscribedBusiness();
 
     const title = String(formData.get("title") || "").trim();
     if (!title) return { error: "Le titre du poste est obligatoire." };
@@ -512,7 +529,7 @@ export async function updateJobOffer(id: string, formData: FormData): Promise<{ 
 
 export async function toggleJobOffer(id: string, is_active: boolean): Promise<{ error?: string }> {
   try {
-    const { supabase, company } = await requireBusiness();
+    const { supabase, company } = await requireSubscribedBusiness();
     const { error } = await supabase.from("job_offers").update({ is_active }).eq("id", id).eq("company_id", company.id);
     if (error) return { error: error.message };
     revalidatePath("/business/dashboard/jobs");

@@ -100,13 +100,23 @@ export async function getReports(): Promise<{ reports?: Report[]; error?: string
   const reporterNameMap: Record<string, string> = {};
 
   await Promise.all([
-    // Emails via auth admin API
-    ...reporterIds.map(async id => {
-      try {
-        const { data: u } = await admin.auth.admin.getUserById(id);
-        if (u?.user?.email) reporterEmailMap[id] = u.user.email;
-      } catch { /* ignore */ }
-    }),
+    // Emails via single paginated listUsers — avoids N auth API calls
+    (async () => {
+      if (reporterIds.length === 0) return;
+      const remaining = new Set(reporterIds);
+      let page = 1;
+      while (remaining.size > 0) {
+        const { data: usersPage } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+        for (const u of usersPage?.users ?? []) {
+          if (remaining.has(u.id) && u.email) {
+            reporterEmailMap[u.id] = u.email;
+            remaining.delete(u.id);
+          }
+        }
+        if ((usersPage?.users ?? []).length < 1000 || remaining.size === 0) break;
+        page++;
+      }
+    })(),
     // Names via profiles table
     (async () => {
       if (reporterIds.length === 0) return;

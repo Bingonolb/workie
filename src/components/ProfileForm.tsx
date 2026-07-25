@@ -75,7 +75,7 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
           }}>
             {displayAvatar
               // eslint-disable-next-line @next/next/no-img-element
-              ? <img src={displayAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ? <img src={displayAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
               : <span style={{ fontSize: 22, fontWeight: 900, color: "#fff" }}>{initial}</span>
             }
           </div>

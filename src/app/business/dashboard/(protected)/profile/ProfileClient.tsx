@@ -116,7 +116,7 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
               <label style={lbl}>Logo</label>
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
                 {(logoPreview ?? company.logo_url) ? (
-                  <img src={logoPreview ?? String(company.logo_url)} alt="logo" style={{ width: 64, height: 64, borderRadius: 12, objectFit: "cover", border: "1px solid var(--border)" }} />
+                  <img src={logoPreview ?? String(company.logo_url)} alt="logo" style={{ width: 64, height: 64, borderRadius: 12, objectFit: "cover", border: "1px solid var(--border)" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                 ) : (
                   <div style={{ width: 64, height: 64, borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, color: "#fff" }}>
                     {String(company.name ?? "?")[0]}
@@ -139,7 +139,7 @@ export function ProfileClient({ initialCompany }: { initialCompany: Company }) {
             <div>
               <label style={lbl}>Photo de couverture</label>
               {(coverPreview ?? company.cover_url) && (
-                <img src={coverPreview ?? String(company.cover_url)} alt="cover" style={{ width: "100%", height: 80, objectFit: "cover", borderRadius: 10, border: "1px solid var(--border)", marginBottom: 8 }} />
+                <img src={coverPreview ?? String(company.cover_url)} alt="cover" style={{ width: "100%", height: 80, objectFit: "cover", borderRadius: 10, border: "1px solid var(--border)", marginBottom: 8 }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
               )}
               <label style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border2)", fontSize: 13, fontWeight: 600, color: "var(--text-muted)", cursor: "pointer", width: "fit-content" }}>
                 <Upload size={14} aria-hidden="true" /> Changer la photo

@@ -142,7 +142,7 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
                 }}>
                   {c.cover_url && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={c.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                   )}
                 </div>
 

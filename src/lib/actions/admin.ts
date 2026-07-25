@@ -157,12 +157,21 @@ export async function getClaims() {
         .in("claimed_company_id", companyIds);
 
       if (profiles && profiles.length > 0) {
-        const profileIds = profiles.map(p => p.id);
+        const profileIds = new Set(profiles.map(p => p.id));
+        // Single paginated listUsers call instead of N getUserById calls
         const emailById: Record<string, string> = {};
-        await Promise.all(profileIds.map(async id => {
-          const { data: u } = await adminClient.auth.admin.getUserById(id);
-          if (u?.user?.email) emailById[id] = u.user.email;
-        }));
+        let page = 1;
+        while (profileIds.size > 0) {
+          const { data: usersPage } = await adminClient.auth.admin.listUsers({ page, perPage: 1000 });
+          for (const u of usersPage?.users ?? []) {
+            if (profileIds.has(u.id) && u.email) {
+              emailById[u.id] = u.email;
+              profileIds.delete(u.id);
+            }
+          }
+          if ((usersPage?.users ?? []).length < 1000 || profileIds.size === 0) break;
+          page++;
+        }
         for (const p of profiles) {
           if (p.claimed_company_id) ownerMap[p.claimed_company_id] = emailById[p.id] ?? p.id;
         }
