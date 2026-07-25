@@ -55,10 +55,10 @@ export const getCachedReviews = unstable_cache(
 const BANNED_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
   // Personal name attacks: "Monsieur/Madame/M. X est un" — targets an individual
   { pattern: /\b(monsieur|madame|m\.|mme\.?)\s+\w+\s+(est\s+(un|une)|est\s+vraiment|est\s+franchement)/i, reason: "Attaque personnelle nominative détectée." },
-  // Explicit slurs (fr/de/en — non-exhaustive but covers common cases)
-  { pattern: /\b(connard|salope|enculé|fdp|va\s*te\s*faire|nique\s*(ta|sa)|pd\b|pédé|pute|bâtard|batard|con\b|conne\b|idiot|idiote|imbécile|débile|crétin|abruti)\b/i, reason: "Le contenu contient des insultes. Exprime-toi de façon constructive." },
-  // Discrimination: race, religion, gender, orientation
-  { pattern: /\b(raciste|racisme|antisémite|islamophobie|homophobie|transphobie|sexiste|sexisme)\b.*\b(entreprise|boite|société|management|patron|RH)\b/i, reason: "Mentions de discrimination détectées — avis transmis à la modération." },
+  // Explicit slurs — Unicode-aware boundaries (?<![a-zA-ZÀ-ÿ]) replaces \b so accented chars (enculé, pédé…) are caught
+  { pattern: /(?<![a-zA-ZÀ-ÿ])(connard|salope|enculé|fdp|va\s*te\s*faire|nique\s*(ta|sa)|pédé|pute|bâtard|batard|imbécile|débile|crétin|abruti|con(?:ne?)?)(?![a-zA-ZÀ-ÿ])/i, reason: "Le contenu contient des insultes. Exprime-toi de façon constructive." },
+  // Discrimination: race, religion, gender, orientation — bidirectional ("boîte raciste" OR "raciste dans cette boîte")
+  { pattern: /(?:\b(?:raciste|racisme|antisémite|islamophobie|homophobie|transphobie|sexiste|sexisme)\b.*\b(?:entreprise|boite|boîte|société|management|patron|rh)\b|\b(?:entreprise|boite|boîte|société|management|patron|rh)\b.*\b(?:raciste|racisme|antisémite|islamophobie|homophobie|transphobie|sexiste|sexisme)\b)/i, reason: "Mentions de discrimination détectées — avis transmis à la modération." },
   // Direct threats
   { pattern: /\b(je\s+vais|on\s+va|va)\s+(te|vous|lui)\s+(tuer|détruire|ruiner|attaquer|poursuivre)/i, reason: "Menace détectée." },
   // Publishing private information (doxxing)

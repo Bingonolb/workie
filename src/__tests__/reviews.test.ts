@@ -10,6 +10,25 @@ vi.mock("@/lib/supabase/server", () => ({
   })),
 }));
 
+// Admin client used by isIpAbuse and findSimilarReview — no env vars in test
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: vi.fn(() => ({
+    from: vi.fn(() => {
+      const proxy: Record<string, unknown> = new Proxy({}, {
+        get(_t, prop: string) {
+          if (prop === "then") return undefined;
+          if (prop === "maybeSingle") return async () => ({ data: null, error: null });
+          if (prop === "gte" || prop === "lt" || prop === "lte" || prop === "gt") {
+            return () => Promise.resolve({ data: [], count: 0, error: null });
+          }
+          return () => proxy;
+        },
+      });
+      return proxy;
+    }),
+  })),
+}));
+
 import { submitReview, voteHelpful } from "@/lib/actions/reviews";
 
 // Helper to build a chainable Supabase query builder that resolves to `result`

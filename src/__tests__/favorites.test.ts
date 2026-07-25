@@ -37,8 +37,9 @@ describe("toggleFavorite", () => {
     await expect(toggleFavorite("company-1")).resolves.toBeUndefined();
   });
 
-  it("throws on unexpected DB error during insert", async () => {
+  it("resolves silently on unexpected DB error during insert (errors are logged, not thrown)", async () => {
     const { createClient } = await import("@/lib/supabase/server");
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.mocked(createClient).mockResolvedValueOnce({
       auth: { getUser: async () => ({ data: { user: { id: "user-1" } } }) },
       from: vi.fn(() => ({
@@ -46,6 +47,8 @@ describe("toggleFavorite", () => {
         insert: async () => ({ error: { code: "42501", message: "RLS violation" } }),
       })),
     } as any);
-    await expect(toggleFavorite("company-1")).rejects.toMatchObject({ code: "42501" });
+    await expect(toggleFavorite("company-1")).resolves.toBeUndefined();
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("toggleFavorite"), expect.anything());
+    consoleSpy.mockRestore();
   });
 });
