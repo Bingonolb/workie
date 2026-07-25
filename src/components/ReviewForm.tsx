@@ -124,6 +124,9 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   const [durationRange, setDurationRange] = useState("");
   const [workMode, setWorkMode] = useState("");
   const [salary, setSalary] = useState("");
+  const [startYear, setStartYear] = useState("");
+  const [endYear, setEndYear] = useState("");
+  const currentYear = new Date().getFullYear();
 
   // Step 1 — Notes
   const [ratingMgmt, setRatingMgmt] = useState(0);
@@ -199,6 +202,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
         <input type="hidden" name="cons" value={cons} />
         <input type="hidden" name="content" value={content} />
         <input type="hidden" name="knew_before" value={knewBefore} />
+        <input type="hidden" name="start_year" value={startYear} />
+        <input type="hidden" name="end_year" value={endYear} />
 
         {/* ── Step 0 : Emploi ── */}
         {step === 0 && (
@@ -231,6 +236,41 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             <div>
               <label style={lbl}>Durée dans cette entreprise *</label>
               <PillPicker options={DURATION_RANGES} value={durationRange} onChange={v => { setDurationRange(v); setStep1Err(""); }} />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: isCurrent ? "1fr" : "1fr 1fr", gap: 14 }}>
+              <div>
+                <label htmlFor="review-start-year" style={lbl}>
+                  Année de début <span className="badge-optional">Optionnel</span>
+                </label>
+                <input
+                  id="review-start-year"
+                  type="number"
+                  value={startYear}
+                  onChange={e => setStartYear(e.target.value)}
+                  placeholder={String(currentYear - 3)}
+                  min={1950}
+                  max={currentYear}
+                  style={inp}
+                />
+              </div>
+              {!isCurrent && (
+                <div>
+                  <label htmlFor="review-end-year" style={lbl}>
+                    Année de fin <span className="badge-optional">Optionnel</span>
+                  </label>
+                  <input
+                    id="review-end-year"
+                    type="number"
+                    value={endYear}
+                    onChange={e => setEndYear(e.target.value)}
+                    placeholder={String(currentYear - 1)}
+                    min={1950}
+                    max={currentYear}
+                    style={inp}
+                  />
+                </div>
+              )}
             </div>
 
             <div>

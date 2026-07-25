@@ -370,6 +370,72 @@ export async function sendNewReviewEmail(email: string, companyName: string, com
   } catch { /* non-blocking */ }
 }
 
+export async function sendAdminFlagAlert(
+  companyName: string,
+  flagReason: string,
+  excerpt: string
+): Promise<void> {
+  if (!resend) return;
+  const reasonLabel = flagReason === "ip_abuse" ? "IP suspecte (même IP, même entreprise, comptes différents)"
+    : flagReason === "similar_content" ? "Contenu similaire à un avis existant (Jaccard ≥ 0.45)"
+    : flagReason;
+  const safeCompany = escapeHtml(companyName);
+  const safeExcerpt = escapeHtml(excerpt);
+  const safeReason = escapeHtml(reasonLabel);
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8" /><title>Avis flaggé — Workie Admin</title></head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+  <tr>
+    <td style="background:linear-gradient(135deg,#ef4444 0%,#f97316 100%);padding:32px 40px;text-align:center;">
+      <h1 style="margin:0;font-size:28px;font-weight:900;color:#ffffff;">⚠ Avis flaggé automatiquement</h1>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:40px 40px 32px;">
+      <p style="margin:0 0 16px;font-size:15px;color:#374151;">Un avis a été soumis et flaggé automatiquement avant publication.</p>
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.06em;">Raison</p>
+        <p style="margin:0;font-size:14px;color:#374151;">${safeReason}</p>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">Entreprise</p>
+        <p style="margin:0;font-size:14px;font-weight:700;color:#111827;">${safeCompany}</p>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">Extrait</p>
+        <p style="margin:0;font-size:13px;color:#4b5563;line-height:1.6;">${safeExcerpt}…</p>
+      </div>
+      <table cellpadding="0" cellspacing="0"><tr><td>
+        <a href="${BASE}/admin/flagged-reviews" style="display:inline-block;background:linear-gradient(135deg,#ef4444,#f97316);color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 28px;border-radius:10px;">
+          Voir les avis flaggés →
+        </a>
+      </td></tr></table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:20px 40px;border-top:1px solid #f3f4f6;text-align:center;">
+      <p style="margin:0;font-size:12px;color:#d1d5db;">© ${new Date().getFullYear()} Workie Admin</p>
+    </td>
+  </tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: "riverse3@gmail.com",
+      subject: `⚠ Avis flaggé — ${companyName} (${flagReason === "ip_abuse" ? "IP suspecte" : "contenu similaire"})`,
+      html,
+    });
+  } catch { /* non-blocking */ }
+}
+
 export async function sendWelcomeEmail(email: string, username: string): Promise<void> {
   if (!resend) return; // fail silently if RESEND_API_KEY not set
   try {

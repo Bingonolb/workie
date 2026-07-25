@@ -94,8 +94,39 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+// ── Review relevance scoring ──────────────────────────────────────────────────
+// Weighted combination of recency, helpful votes, completeness, and verified author.
+// All factors normalized to [0, 1]. Weights sum to 1.0.
+
+function reviewRelevanceScore(review: Review): number {
+  const ageMs = Date.now() - new Date(review.created_at ?? 0).getTime();
+  const ageDays = ageMs / 86400000;
+  // Exponential decay, half-life ~18 months — recent reviews stay on top
+  // but a 3-year-old review with 20 votes can still beat a 1-month-old with 0
+  const recencyScore = Math.exp(-ageDays / 540);
+
+  // Log scale: 10 votes ≈ 0.7, 20 votes ≈ 1.0, beyond that capped
+  const helpfulScore = Math.min(Math.log1p(Number(review.helpful_count ?? 0)) / Math.log1p(20), 1);
+
+  // Optional fields: each filled field raises quality perception
+  const optionalFields = [
+    review.pros, review.cons, review.salary_chf, review.title,
+    review.rating_culture, review.rating_management, review.rating_worklife, review.rating_career,
+    review.start_year,
+  ];
+  const completeness = optionalFields.filter(v => v !== null && v !== undefined && v !== 0 && v !== "").length / optionalFields.length;
+
+  // Small bonus for Stripe-verified authors
+  const verifiedBonus = review.is_verified_author ? 0.08 : 0;
+
+  return helpfulScore * 0.35 + recencyScore * 0.42 + completeness * 0.15 + verifiedBonus;
+}
+
+type SortMode = "relevance" | "recent" | "helpful";
+
+export default async function CompanyPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ sort?: string }> }) {
+  const [{ id }, sp] = await Promise.all([params, searchParams]);
+  const sortMode: SortMode = (["relevance", "recent", "helpful"].includes(sp.sort ?? "")) ? sp.sort as SortMode : "relevance";
   // createClient runs in parallel with the other fetches — not sequential
   const [company, reviews, user, favIds, supabase, bizCompanyId] = await Promise.all([
     getCachedCompany(id).catch(() => null),
@@ -108,6 +139,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
   // Guard early — no need to run 5 more queries for a non-existent company
   if (!company) notFound();
+
+  // Sort reviews server-side so the initial render matches the user's intent
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (sortMode === "recent") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    if (sortMode === "helpful") return Number(b.helpful_count ?? 0) - Number(a.helpful_count ?? 0);
+    return reviewRelevanceScore(b) - reviewRelevanceScore(a);
+  });
 
   const [repliesResult, jobsResult, voteData, profileData, similarCompaniesData, helpfulVotesResult] = await Promise.all([
     Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
@@ -380,10 +418,35 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Reviews */}
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 16 }}>
-              Avis des employés ({company.review_count})
-            </h2>
+            {/* Reviews header + sort tabs */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
+                Avis des employés ({company.review_count})
+              </h2>
+              {sortedReviews.length > 1 && (
+                <div style={{ display: "flex", gap: 6 }}>
+                  {([
+                    { v: "relevance", l: "Pertinence" },
+                    { v: "recent",    l: "Récents" },
+                    { v: "helpful",   l: "Utiles" },
+                  ] as const).map(({ v, l }) => (
+                    <Link
+                      key={v}
+                      href={`/company/${id}${v === "relevance" ? "" : `?sort=${v}`}`}
+                      style={{
+                        fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 8,
+                        textDecoration: "none",
+                        background: sortMode === v ? "rgba(139,92,246,0.12)" : "var(--surface2)",
+                        color: sortMode === v ? "#8b5cf6" : "var(--text-muted)",
+                        border: `1px solid ${sortMode === v ? "rgba(139,92,246,0.35)" : "var(--border2)"}`,
+                      }}
+                    >
+                      {l}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {reviews.length === 0 ? (
               <div style={{
@@ -407,7 +470,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             ) : (
               <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
-                {reviews.map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user} companyName={company.name} initialVoted={votedReviewIds.has(r.id)} />)}
+                {sortedReviews.map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user} companyName={company.name} initialVoted={votedReviewIds.has(r.id)} />)}
               </div>
             )}
 
@@ -611,11 +674,24 @@ function ReviewCard({ review, reply, isLoggedIn = false, companyName = "", initi
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
             <Stars rating={Number(review.rating_overall)} size={13} />
             <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{Number(review.rating_overall).toFixed(1)}</span>
             {rec && (
               <span style={{ fontSize: 11, fontWeight: 700, color: rec.color, marginLeft: 4 }}>{rec.label}</span>
+            )}
+            {review.is_verified_author && (
+              <span
+                title="Identité vérifiée via Stripe Identity"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 50,
+                  background: "rgba(16,185,129,0.1)", color: "#10b981",
+                  border: "1px solid rgba(16,185,129,0.25)",
+                }}
+              >
+                <CheckCircle size={10} aria-hidden="true" /> Identité vérifiée
+              </span>
             )}
           </div>
           {review.title && <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>}

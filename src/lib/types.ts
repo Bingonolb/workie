@@ -52,6 +52,10 @@ export interface Review {
   end_year: number | null;
   helpful_count: number;
   created_at: string;
+  status: "published" | "flagged" | "removed";
+  is_verified_author: boolean;
+  flag_reason: string | null;
+  submitter_ip: string | null;
 }
 
 export interface Profile {
@@ -220,11 +224,13 @@ export type Database = {
         Row: {
           company_id: string; cons: string | null; content: string; created_at: string | null
           duration_range: string | null; employment_type: string | null; end_year: number | null
-          helpful_count: number | null; id: string; is_anonymous: boolean | null
-          is_current: boolean | null; job_title: string | null; knew_before: string | null
+          flag_reason: string | null; helpful_count: number | null; id: string
+          is_anonymous: boolean | null; is_current: boolean | null; is_verified_author: boolean
+          job_title: string | null; knew_before: string | null
           pros: string | null; rating_career: number | null; rating_culture: number | null
           rating_management: number | null; rating_overall: number; rating_worklife: number | null
-          salary_chf: number | null; start_year: number | null; title: string | null
+          salary_chf: number | null; start_year: number | null; status: string
+          submitter_ip: string | null; title: string | null
           user_id: string | null; work_mode: string | null; would_recommend: string | null
         }
         Insert: Partial<Database["public"]["Tables"]["reviews"]["Row"]> & { company_id: string; content: string; rating_overall: number }

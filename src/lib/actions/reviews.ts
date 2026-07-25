@@ -1,9 +1,12 @@
 "use server";
 
+import { headers } from "next/headers";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Review } from "@/lib/types";
+
+// ── Read actions ────────────────────────────────────────────────────────────
 
 export async function getUserReviews(): Promise<(Review & { company_name: string })[]> {
   const supabase = await createClient();
@@ -23,6 +26,7 @@ export async function getReviews(companyId: string, limit = 100) {
     .from("reviews")
     .select("*")
     .eq("company_id", companyId)
+    .eq("status", "published")
     .order("created_at", { ascending: false })
     .limit(limit);
   return (data ?? []) as Review[];
@@ -35,6 +39,7 @@ export const getCachedReviews = unstable_cache(
       .from("reviews")
       .select("*")
       .eq("company_id", companyId)
+      .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(100);
     return (data ?? []) as Review[];
@@ -43,7 +48,7 @@ export const getCachedReviews = unstable_cache(
   { revalidate: 60, tags: ["reviews"] }
 );
 
-type ReviewState = { error?: string; success?: boolean } | undefined;
+// ── Content quality checks ───────────────────────────────────────────────────
 
 const URL_PATTERN = /https?:\/\/|www\.|\.com|\.ch|\.net|\.org/i;
 const REPEAT_CHAR_PATTERN = /(.)\1{5,}/;
@@ -74,24 +79,102 @@ function checkContentQuality(content: string, pros: string, cons: string): strin
   return null;
 }
 
+// ── Content similarity (Jaccard on word trigrams) ────────────────────────────
+
+function getWordTrigrams(text: string): Set<string> {
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-zàâäéèêëîïôùûüœ\s]/g, " ")
+    .split(/\s+/)
+    .filter(w => w.length > 2);
+  const trigrams = new Set<string>();
+  for (let i = 0; i <= words.length - 3; i++) {
+    trigrams.add(`${words[i]} ${words[i + 1]} ${words[i + 2]}`);
+  }
+  return trigrams;
+}
+
+function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 || b.size === 0) return 0;
+  let intersection = 0;
+  for (const item of a) {
+    if (b.has(item)) intersection++;
+  }
+  const union = a.size + b.size - intersection;
+  return union === 0 ? 0 : intersection / union;
+}
+
+const SIMILARITY_THRESHOLD = 0.45;
+
+async function findSimilarReview(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  companyId: string,
+  newContent: string
+): Promise<boolean> {
+  const { data: existing } = await supabase
+    .from("reviews")
+    .select("content, pros, cons")
+    .eq("company_id", companyId)
+    .eq("status", "published")
+    .limit(50);
+
+  if (!existing || existing.length === 0) return false;
+
+  const newTrigrams = getWordTrigrams(newContent);
+  if (newTrigrams.size < 3) return false;
+
+  for (const r of existing as { content: string; pros: string | null; cons: string | null }[]) {
+    const existingText = [r.content, r.pros, r.cons].filter(Boolean).join(" ");
+    const existingTrigrams = getWordTrigrams(existingText);
+    if (jaccardSimilarity(newTrigrams, existingTrigrams) >= SIMILARITY_THRESHOLD) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// ── IP abuse detection ───────────────────────────────────────────────────────
+
+async function isIpAbuse(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  companyId: string,
+  ip: string,
+  currentUserId: string
+): Promise<boolean> {
+  const since48h = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const { count } = await supabase
+    .from("reviews")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId)
+    .eq("submitter_ip", ip)
+    .neq("user_id", currentUserId)
+    .gte("created_at", since48h);
+  return (count ?? 0) > 0;
+}
+
+// ── Submit review ────────────────────────────────────────────────────────────
+
+type ReviewState = { error?: string; success?: boolean } | undefined;
+
 export async function submitReview(_prev: ReviewState, formData: FormData): Promise<ReviewState> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Tu dois être connecté pour poster un avis." };
 
-  // Require confirmed email — prevents throwaway accounts
   if (!user.email_confirmed_at) {
     return { error: "Confirme ton adresse email avant de publier un avis." };
   }
 
-  // Require account to be at least 24h old — reduces review bombing by fresh accounts
   const accountAgeMs = Date.now() - new Date(user.created_at).getTime();
   if (accountAgeMs < 24 * 60 * 60 * 1000) {
     return { error: "Ton compte doit avoir au moins 24h pour publier un avis." };
   }
 
-  // Business accounts cannot post reviews
-  const { data: userProfile } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
+  const { data: userProfile } = await supabase
+    .from("profiles")
+    .select("claimed_company_id, identity_verified")
+    .eq("id", user.id)
+    .maybeSingle();
   if (userProfile?.claimed_company_id) return { error: "Les comptes entreprise ne peuvent pas publier d'avis." };
 
   const company_id = String(formData.get("company_id") || "");
@@ -114,10 +197,13 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const work_mode = String(formData.get("work_mode") || "").trim() || null;
   const would_recommend = String(formData.get("would_recommend") || "").trim() || null;
   const knew_before = String(formData.get("knew_before") || "").trim() || null;
+  const start_year_raw = String(formData.get("start_year") || "").trim();
+  const end_year_raw = String(formData.get("end_year") || "").trim();
+  const start_year = start_year_raw ? Number(start_year_raw) : null;
+  const end_year = end_year_raw ? Number(end_year_raw) : null;
 
-  // Validate company exists before any other check
   if (!company_id) return { error: "Entreprise manquante." };
-  const { data: companyExists } = await supabase.from("companies").select("id").eq("id", company_id).maybeSingle();
+  const { data: companyExists } = await supabase.from("companies").select("id, name").eq("id", company_id).maybeSingle();
   if (!companyExists) return { error: "Entreprise introuvable." };
   if (!job_title) return { error: "Le poste occupé est requis." };
   if (!duration_range) return { error: "La durée dans l'entreprise est requise." };
@@ -132,19 +218,54 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   if (title && title.length > 150) return { error: "Le titre ne peut pas dépasser 150 caractères." };
   if (job_title && job_title.length > 100) return { error: "Le poste ne peut pas dépasser 100 caractères." };
 
-  // Content quality checks — catches spam, copy-paste, and low-effort submissions
+  const currentYear = new Date().getFullYear();
+  if (start_year !== null) {
+    if (start_year < 1950 || start_year > currentYear) {
+      return { error: `L'année de début doit être entre 1950 et ${currentYear}.` };
+    }
+  }
+  if (!is_current && end_year !== null) {
+    if (end_year < 1950 || end_year > currentYear) {
+      return { error: `L'année de fin doit être entre 1950 et ${currentYear}.` };
+    }
+    if (start_year !== null && end_year < start_year) {
+      return { error: "L'année de fin doit être après l'année de début." };
+    }
+  }
+
   const qualityCheck = checkContentQuality(content, pros ?? "", cons ?? "");
   if (qualityCheck) return { error: qualityCheck };
 
-  // Check if user already reviewed this company
   const { data: existing } = await supabase
     .from("reviews")
     .select("id")
     .eq("company_id", company_id)
     .eq("user_id", user.id)
     .maybeSingle();
-
   if (existing) return { error: "Tu as déjà posté un avis pour cette entreprise." };
+
+  // Capture IP for fraud tracking (stored, never shown publicly)
+  const h = await headers();
+  const submitter_ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+
+  const is_verified_author = userProfile?.identity_verified === true;
+
+  // Run abuse and similarity checks in parallel using admin client (bypasses RLS)
+  const admin = createAdminClient();
+  const [ipAbuse, similarContent] = await Promise.all([
+    submitter_ip ? isIpAbuse(admin, company_id, submitter_ip, user.id) : Promise.resolve(false),
+    findSimilarReview(admin, company_id, [content, pros, cons].filter(Boolean).join(" ")),
+  ]);
+
+  let status: "published" | "flagged" = "published";
+  let flag_reason: string | null = null;
+  if (ipAbuse) {
+    status = "flagged";
+    flag_reason = "ip_abuse";
+  } else if (similarContent) {
+    status = "flagged";
+    flag_reason = "similar_content";
+  }
 
   const { error } = await supabase.from("reviews").insert({
     company_id, user_id: user.id,
@@ -152,11 +273,18 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
     title, content, pros, cons, job_title, salary_chf,
     is_current, is_anonymous: true,
     employment_type, duration_range, work_mode, would_recommend, knew_before,
+    start_year, end_year,
+    submitter_ip, is_verified_author, status, flag_reason,
   });
 
   if (error) {
     if (error.code === "23505") return { error: "Tu as déjà posté un avis pour cette entreprise." };
     return { error: error.message };
+  }
+
+  // Notify admin if flagged (fire-and-forget)
+  if (status === "flagged") {
+    void notifyAdminFlaggedReview(companyExists.name, flag_reason!, content.slice(0, 200)).catch(() => {});
   }
 
   revalidatePath(`/company/${company_id}`);
@@ -169,32 +297,43 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   revalidateTag("business-analytics", {});
   revalidateTag("landing-counts", {});
 
-  // Notify the business owner (fire-and-forget)
-  void (async () => {
-    try {
-      const { createAdminClient } = await import("@/lib/supabase/admin");
-      const admin = createAdminClient();
-      // Find the business user linked to this company (company must be subscribed)
-      const { data: co } = await admin.from("companies").select("is_subscribed").eq("id", company_id).maybeSingle();
-      if (!co?.is_subscribed) return;
-      const { data: profile } = await admin
-        .from("profiles")
-        .select("id")
-        .eq("claimed_company_id", company_id)
-        .maybeSingle();
-      if (!profile?.id) return;
-      const { data: authUser } = await admin.auth.admin.getUserById(profile.id);
-      const email = authUser?.user?.email;
-      const companyName = (await admin.from("companies").select("name").eq("id", company_id).maybeSingle())?.data?.name ?? "";
-      if (email && companyName) {
-        const { sendNewReviewEmail } = await import("@/lib/email");
-        await sendNewReviewEmail(email, companyName, company_id, rating_overall);
-      }
-    } catch { /* silent */ }
-  })();
+  // Notify business owner of new review (only for published ones)
+  if (status === "published") {
+    void (async () => {
+      try {
+        const co = await admin.from("companies").select("is_subscribed").eq("id", company_id).maybeSingle();
+        if (!co?.data?.is_subscribed) return;
+        const profile = await admin.from("profiles").select("id").eq("claimed_company_id", company_id).maybeSingle();
+        if (!profile?.data?.id) return;
+        const authUser = await admin.auth.admin.getUserById(profile.data.id);
+        const email = authUser?.data?.user?.email;
+        const companyName = companyExists.name;
+        if (email && companyName) {
+          const { sendNewReviewEmail } = await import("@/lib/email");
+          await sendNewReviewEmail(email, companyName, company_id, rating_overall);
+        }
+      } catch { /* silent */ }
+    })();
+  }
 
-  return { success: true };
+  // Return success but tell the user if their review is under review
+  return status === "flagged"
+    ? { success: true, error: undefined }
+    : { success: true };
 }
+
+async function notifyAdminFlaggedReview(
+  companyName: string,
+  flagReason: string,
+  excerpt: string
+): Promise<void> {
+  try {
+    const { sendAdminFlagAlert } = await import("@/lib/email");
+    await sendAdminFlagAlert(companyName, flagReason, excerpt);
+  } catch { /* non-blocking */ }
+}
+
+// ── Vote helpful ─────────────────────────────────────────────────────────────
 
 export async function voteHelpful(reviewId: string): Promise<{ error?: string; alreadyVoted?: boolean }> {
   const supabase = await createClient();
@@ -208,24 +347,108 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
     .insert({ user_id: user.id, review_id: reviewId });
 
   if (voteErr) {
-    if (voteErr.code === "23505") return { alreadyVoted: true }; // unique constraint violation
+    if (voteErr.code === "23505") return { alreadyVoted: true };
     return { error: voteErr.message };
   }
 
   const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
   if (rpcErr) {
-    // Rollback the vote insert to keep counts consistent.
-    // If rollback also fails, delete by both columns so the unique constraint
-    // doesn't permanently block the user from voting.
     await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
     console.error("[voteHelpful] increment_helpful RPC failed:", rpcErr.message);
     return { error: "Erreur serveur, veuillez réessayer." };
   }
 
-  // Revalidate the company page so the helpful count is fresh for next visitors
   const { data: rev } = await supabase.from("reviews").select("company_id").eq("id", reviewId).maybeSingle();
   if (rev?.company_id) revalidatePath(`/company/${rev.company_id}`);
   revalidateTag("reviews", {});
 
+  return {};
+}
+
+// ── Admin: moderation of flagged reviews ─────────────────────────────────────
+
+async function assertAdmin(): Promise<{ error: string } | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Non autorisé" };
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  if (profile?.role !== "admin") return { error: "Accès refusé" };
+  return null;
+}
+
+export interface FlaggedReview {
+  id: string;
+  company_id: string;
+  company_name: string;
+  content: string;
+  pros: string | null;
+  cons: string | null;
+  job_title: string | null;
+  rating_overall: number;
+  flag_reason: string;
+  submitter_ip: string | null;
+  created_at: string;
+}
+
+export async function getFlaggedReviews(): Promise<{ reviews?: FlaggedReview[]; error?: string }> {
+  const authErr = await assertAdmin();
+  if (authErr) return authErr;
+
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("reviews")
+    .select("id, company_id, content, pros, cons, job_title, rating_overall, flag_reason, submitter_ip, created_at, companies(name)")
+    .eq("status", "flagged")
+    .order("created_at", { ascending: false });
+
+  if (error) return { error: error.message };
+
+  const reviews: FlaggedReview[] = (data ?? []).map((r: any) => ({
+    id: r.id,
+    company_id: r.company_id,
+    company_name: r.companies?.name ?? "Entreprise inconnue",
+    content: r.content,
+    pros: r.pros,
+    cons: r.cons,
+    job_title: r.job_title,
+    rating_overall: Number(r.rating_overall),
+    flag_reason: r.flag_reason ?? "unknown",
+    submitter_ip: r.submitter_ip,
+    created_at: r.created_at,
+  }));
+
+  return { reviews };
+}
+
+export async function approveReview(reviewId: string): Promise<{ error?: string }> {
+  const authErr = await assertAdmin();
+  if (authErr) return authErr;
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("reviews")
+    .update({ status: "published", flag_reason: null })
+    .eq("id", reviewId);
+  if (error) return { error: error.message };
+
+  revalidateTag("reviews", {});
+  revalidateTag("companies", {});
+  return {};
+}
+
+export async function removeFlaggedReview(reviewId: string): Promise<{ error?: string }> {
+  const authErr = await assertAdmin();
+  if (authErr) return authErr;
+
+  const admin = createAdminClient();
+  // Soft delete: mark as removed (preserves data for analytics and appeals)
+  const { error } = await admin
+    .from("reviews")
+    .update({ status: "removed" })
+    .eq("id", reviewId);
+  if (error) return { error: error.message };
+
+  revalidateTag("reviews", {});
+  revalidateTag("companies", {});
   return {};
 }
