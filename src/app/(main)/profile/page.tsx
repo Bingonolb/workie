@@ -167,6 +167,18 @@ export default async function ProfilePage() {
               </div>
               <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 16 }}>
                 <ThemeToggle />
+                <a
+                  href="/api/user/export"
+                  download
+                  style={{
+                    display: "block", width: "100%", padding: "11px 16px", borderRadius: 10,
+                    background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+                    color: "#8b5cf6", fontWeight: 600, fontSize: 13, cursor: "pointer",
+                    textDecoration: "none", textAlign: "left",
+                  }}
+                >
+                  ⬇ Télécharger mes données (RGPD)
+                </a>
                 <form action={signOut}>
                   <button type="submit" style={{
                     width: "100%", padding: "11px 16px", borderRadius: 10,

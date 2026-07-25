@@ -163,9 +163,16 @@ export async function deleteAccount(): Promise<{ error?: string }> {
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const admin = createAdminClient();
 
-  // Delete in dependency order
+  // Anonymize reviews: disconnect from user but keep the content for the community.
+  // The FK on reviews.user_id is ON DELETE SET NULL, so we only need to null it out here.
+  // submitter_ip is also scrubbed at deletion time (personal data, no longer needed).
+  await admin
+    .from("reviews")
+    .update({ user_id: null, submitter_ip: null })
+    .eq("user_id", user.id);
+
+  // Personal data with no community value — hard delete
   await admin.from("review_votes").delete().eq("user_id", user.id);
-  await admin.from("reviews").delete().eq("user_id", user.id);
   await admin.from("score_events").delete().eq("user_id", user.id);
   await admin.from("favorites").delete().eq("user_id", user.id);
   await admin.from("reports").delete().eq("reporter_id", user.id);

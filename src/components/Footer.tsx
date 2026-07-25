@@ -16,6 +16,7 @@ export function Footer() {
         <nav style={{ display: "flex", flexWrap: "wrap", gap: "8px 20px", alignItems: "center" }}>
           <Link href="/cgu" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>CGU</Link>
           <Link href="/confidentialite" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Confidentialité</Link>
+          <Link href="/mentions-legales" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Mentions légales</Link>
           <a href="mailto:contact@workie.ch" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Contact</a>
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>© {new Date().getFullYear()} Workie</span>
         </nav>

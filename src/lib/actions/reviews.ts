@@ -48,6 +48,31 @@ export const getCachedReviews = unstable_cache(
   { revalidate: 60, tags: ["reviews"] }
 );
 
+// ── Banned words (defamation, hate speech, discrimination) ───────────────────
+
+// Patterns that signal personal attacks, hate speech, or discriminatory content.
+// These flag for human review rather than auto-reject, since context matters.
+const BANNED_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
+  // Personal name attacks: "Monsieur/Madame/M. X est un" — targets an individual
+  { pattern: /\b(monsieur|madame|m\.|mme\.?)\s+\w+\s+(est\s+(un|une)|est\s+vraiment|est\s+franchement)/i, reason: "Attaque personnelle nominative détectée." },
+  // Explicit slurs (fr/de/en — non-exhaustive but covers common cases)
+  { pattern: /\b(connard|salope|enculé|fdp|va\s*te\s*faire|nique\s*(ta|sa)|pd\b|pédé|pute|bâtard|batard|con\b|conne\b|idiot|idiote|imbécile|débile|crétin|abruti)\b/i, reason: "Le contenu contient des insultes. Exprime-toi de façon constructive." },
+  // Discrimination: race, religion, gender, orientation
+  { pattern: /\b(raciste|racisme|antisémite|islamophobie|homophobie|transphobie|sexiste|sexisme)\b.*\b(entreprise|boite|société|management|patron|RH)\b/i, reason: "Mentions de discrimination détectées — avis transmis à la modération." },
+  // Direct threats
+  { pattern: /\b(je\s+vais|on\s+va|va)\s+(te|vous|lui)\s+(tuer|détruire|ruiner|attaquer|poursuivre)/i, reason: "Menace détectée." },
+  // Publishing private information (doxxing)
+  { pattern: /\b\d{2}\s?\d{3}\s?\d{2}\s?\d{2}\b|\b(\+41|0041|0)\s?[1-9]\d\s?\d{3}\s?\d{2}\s?\d{2}\b/, reason: "Numéro de téléphone détecté — ne publie pas d'informations personnelles." },
+];
+
+function checkBannedContent(content: string, pros: string, cons: string): string | null {
+  const combined = [content, pros, cons].filter(Boolean).join(" ");
+  for (const { pattern, reason } of BANNED_PATTERNS) {
+    if (pattern.test(combined)) return reason;
+  }
+  return null;
+}
+
 // ── Content quality checks ───────────────────────────────────────────────────
 
 const URL_PATTERN = /https?:\/\/|www\.|\.com|\.ch|\.net|\.org/i;
@@ -232,6 +257,9 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
       return { error: "L'année de fin doit être après l'année de début." };
     }
   }
+
+  const bannedCheck = checkBannedContent(content, pros ?? "", cons ?? "");
+  if (bannedCheck) return { error: bannedCheck };
 
   const qualityCheck = checkContentQuality(content, pros ?? "", cons ?? "");
   if (qualityCheck) return { error: qualityCheck };
