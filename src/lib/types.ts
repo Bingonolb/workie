@@ -101,14 +101,14 @@ export type Database = {
         Relationships: [{ foreignKeyName: "ad_campaigns_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
       }
       ad_clicks: {
-        Row: { campaign_id: string; clicked_at: string | null; id: string; user_id: string | null; viewer_canton: string | null }
-        Insert: { campaign_id: string; clicked_at?: string | null; id?: string; user_id?: string | null; viewer_canton?: string | null }
+        Row: { campaign_id: string; clicked_at: string | null; id: string; user_id: string | null; viewer_canton: string | null; viewer_ip: string | null }
+        Insert: { campaign_id: string; clicked_at?: string | null; id?: string; user_id?: string | null; viewer_canton?: string | null; viewer_ip?: string | null }
         Update: Partial<Database["public"]["Tables"]["ad_clicks"]["Insert"]>
         Relationships: [{ foreignKeyName: "ad_clicks_campaign_id_fkey"; columns: ["campaign_id"]; isOneToOne: false; referencedRelation: "ad_campaigns"; referencedColumns: ["id"] }]
       }
       ad_impressions: {
-        Row: { campaign_id: string; id: string; user_id: string | null; viewed_at: string | null; viewer_canton: string | null; viewer_city: string | null }
-        Insert: { campaign_id: string; id?: string; user_id?: string | null; viewed_at?: string | null; viewer_canton?: string | null; viewer_city?: string | null }
+        Row: { campaign_id: string; id: string; user_id: string | null; viewed_at: string | null; viewer_canton: string | null; viewer_city: string | null; viewer_ip: string | null }
+        Insert: { campaign_id: string; id?: string; user_id?: string | null; viewed_at?: string | null; viewer_canton?: string | null; viewer_city?: string | null; viewer_ip?: string | null }
         Update: Partial<Database["public"]["Tables"]["ad_impressions"]["Insert"]>
         Relationships: [{ foreignKeyName: "ad_impressions_campaign_id_fkey"; columns: ["campaign_id"]; isOneToOne: false; referencedRelation: "ad_campaigns"; referencedColumns: ["id"] }]
       }

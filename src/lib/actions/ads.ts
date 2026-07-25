@@ -450,42 +450,36 @@ export async function adminSetCampaignStatus(
   } catch (e) { return { error: (e as Error).message }; }
 }
 
-// In-process rate limit for ad tracking — prevents budget exhaustion attacks.
-// Key: "ip:campaign:type", Value: last_seen_ms
-// Limit: 1 impression and 1 click per campaign per IP per 10 minutes.
-const adRl = new Map<string, number>();
-const AD_RL_WINDOW = 10 * 60_000;
-
-function adRateLimited(ip: string, campaignId: string, type: "imp" | "clk"): boolean {
-  const key = `${ip}:${campaignId}:${type}`;
-  const now = Date.now();
-  const last = adRl.get(key);
-  if (last && now - last < AD_RL_WINDOW) return true;
-  adRl.set(key, now);
-  // Prune stale entries to prevent unbounded memory growth on warm instances
-  if (adRl.size > 5000) {
-    for (const [k, ts] of adRl) {
-      if (now - ts > AD_RL_WINDOW) adRl.delete(k);
-    }
-  }
-  return false;
-}
+const AD_RL_WINDOW_MIN = 10;
 
 export async function trackAdImpression(campaignId: string): Promise<void> {
   try {
     const h = await headers();
-    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    if (adRateLimited(ip, campaignId, "imp")) return;
+    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 
     const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
+
+    // DB-level rate limit: 1 impression per IP per campaign per 10 min
+    if (ip) {
+      const since = new Date(Date.now() - AD_RL_WINDOW_MIN * 60_000).toISOString();
+      const { count } = await supabase
+        .from("ad_impressions")
+        .select("id", { count: "exact", head: true })
+        .eq("campaign_id", campaignId)
+        .eq("viewer_ip", ip)
+        .gte("viewed_at", since);
+      if ((count ?? 0) > 0) return;
+    }
+
     const { error: insErr } = await supabase.from("ad_impressions").insert({
       campaign_id: campaignId,
       user_id: user?.id ?? null,
       viewer_canton: geo.canton,
       viewer_city: geo.city,
+      viewer_ip: ip,
     });
-    // 23505 = unique_violation (DB-level rate limit for logged-in users)
+    // 23505 = unique_violation (DB-level dedup for logged-in users)
     if (insErr && (insErr as { code?: string }).code !== "23505") {
       console.error("[trackAdImpression] insert error:", insErr.message);
     }
@@ -498,15 +492,28 @@ export async function trackAdImpression(campaignId: string): Promise<void> {
 export async function trackAdClick(campaignId: string): Promise<void> {
   try {
     const h = await headers();
-    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    if (adRateLimited(ip, campaignId, "clk")) return;
+    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 
     const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
+
+    // DB-level rate limit: 1 click per IP per campaign per 10 min
+    if (ip) {
+      const since = new Date(Date.now() - AD_RL_WINDOW_MIN * 60_000).toISOString();
+      const { count } = await supabase
+        .from("ad_clicks")
+        .select("id", { count: "exact", head: true })
+        .eq("campaign_id", campaignId)
+        .eq("viewer_ip", ip)
+        .gte("clicked_at", since);
+      if ((count ?? 0) > 0) return;
+    }
+
     const { error: clkErr } = await supabase.from("ad_clicks").insert({
       campaign_id: campaignId,
       user_id: user?.id ?? null,
       viewer_canton: geo.canton,
+      viewer_ip: ip,
     });
     if (!clkErr) {
       await supabase.rpc("increment_ad_click", { p_campaign_id: campaignId });
