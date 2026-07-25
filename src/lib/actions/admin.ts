@@ -157,9 +157,12 @@ export async function getClaims() {
         .in("claimed_company_id", companyIds);
 
       if (profiles && profiles.length > 0) {
-        const usersRes = await adminClient.auth.admin.listUsers({ perPage: 1000 });
-        const allUsers = usersRes.data?.users ?? [];
-        const emailById = Object.fromEntries(allUsers.map(u => [u.id, u.email ?? ""]));
+        const profileIds = profiles.map(p => p.id);
+        const emailById: Record<string, string> = {};
+        await Promise.all(profileIds.map(async id => {
+          const { data: u } = await adminClient.auth.admin.getUserById(id);
+          if (u?.user?.email) emailById[id] = u.user.email;
+        }));
         for (const p of profiles) {
           if (p.claimed_company_id) ownerMap[p.claimed_company_id] = emailById[p.id] ?? p.id;
         }
