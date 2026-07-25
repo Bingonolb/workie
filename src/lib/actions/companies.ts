@@ -78,7 +78,7 @@ export async function fetchSwipePage(
   const supabase = await createClient();
   let q = supabase
     .from("companies")
-    .select("*")
+    .select(GRID_COLS)
     .order("profile_score", { ascending: false, nullsFirst: false })
     .order("score", { ascending: false, nullsFirst: false })
     .order("avg_rating", { ascending: false, nullsFirst: false })

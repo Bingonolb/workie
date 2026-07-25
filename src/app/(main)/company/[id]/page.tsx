@@ -153,7 +153,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
     user ? Promise.resolve(supabase.from("score_events").select("event_type").eq("company_id", id).eq("user_id", user.id).in("event_type", ["boost", "penalty"])).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     user ? Promise.resolve(supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle()).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     Promise.resolve(supabase.from("companies").select("id, name, city, avg_rating, review_count, cover_url, is_verified, sector").eq("sector", company.sector).neq("id", id).order("score", { ascending: false }).limit(4)).then(r => r.data ?? []).catch(() => []),
-    user ? Promise.resolve(supabase.from("review_votes").select("review_id").eq("user_id", user.id)).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
+    user && reviews.length > 0 ? Promise.resolve(supabase.from("review_votes").select("review_id").eq("user_id", user.id).in("review_id", reviews.map(r => r.id))).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
   ]);
   const repliesMap = Object.fromEntries(
     (repliesResult.data ?? []).map((r: { review_id: string; content: string; created_at: string | null }) => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
