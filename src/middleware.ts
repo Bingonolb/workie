@@ -1,32 +1,20 @@
 import { createServerClient } from "@supabase/ssr";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { type NextRequest, NextResponse } from "next/server";
 
-// ── In-memory rate limiting (per Vercel instance) ─────────────────────────────
-const rlMap = new Map<string, [number, number]>();
-const RL_WINDOW_MS = 60_000;
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
-function rateLimited(ip: string, bucket: string, limit: number): boolean {
-  const key = `${ip}:${bucket}`;
-  const now = Date.now();
-  const entry = rlMap.get(key);
-  if (!entry || now - entry[1] > RL_WINDOW_MS) {
-    rlMap.set(key, [1, now]);
-    return false;
-  }
-  if (entry[0] >= limit) return true;
-  entry[0]++;
-  return false;
-}
-
-let lastPrune = Date.now();
-function maybePrune() {
-  const now = Date.now();
-  if (now - lastPrune < 300_000) return;
-  lastPrune = now;
-  for (const [k, [, start]] of rlMap) {
-    if (now - start > RL_WINDOW_MS * 2) rlMap.delete(k);
-  }
-}
+// Sliding window rate limits — shared across all Vercel instances via Redis
+const rl = {
+  search:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60s"),  prefix: "rl:search",   ephemeralCache: new Map() }),
+  checkout: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60s"),   prefix: "rl:checkout", ephemeralCache: new Map() }),
+  actions:  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, "60s"), prefix: "rl:actions",  ephemeralCache: new Map() }),
+  auth:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60s"),  prefix: "rl:auth",     ephemeralCache: new Map() }),
+};
 
 const PUBLIC_PATHS = [
   "/login", "/signup", "/auth",
@@ -42,37 +30,32 @@ export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
     const method = request.method;
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
     const isServerAction = method === "POST" && !!request.headers.get("next-action");
-
-    maybePrune();
 
     // Rate limiting — early return before touching Supabase
     if (pathname === "/api/companies/search") {
-      if (rateLimited(ip, "search", 30))
-        return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      const { success } = await rl.search.limit(ip);
+      if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
     if (method === "POST" && (
       pathname === "/api/business/checkout" ||
       pathname === "/api/business/ads/checkout" ||
       pathname === "/api/user/checkout-penalty"
     )) {
-      if (rateLimited(ip, "checkout", 5))
-        return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      const { success } = await rl.checkout.limit(ip);
+      if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
     if (isServerAction) {
-      if (rateLimited(ip, "actions", 120))
-        return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      const { success } = await rl.actions.limit(ip);
+      if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
     }
     if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
-      if (rateLimited(ip, "auth", 15))
-        return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
+      const { success } = await rl.auth.limit(ip);
+      if (!success) return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
     }
 
-    // Session refresh via Supabase SSR — this is the only correct way to renew
-    // the access token on mobile without the user having to log in again.
-    // getUser() checks JWT expiry locally; only hits the network when the token
-    // is actually expired (at most once per hour per session).
+    // Session refresh via Supabase SSR
     let response = NextResponse.next({ request });
 
     const supabase = createServerClient(
@@ -82,8 +65,6 @@ export async function middleware(request: NextRequest) {
         cookies: {
           getAll() { return request.cookies.getAll(); },
           setAll(cookiesToSet) {
-            // Forward refreshed tokens to both the request (for Server Components)
-            // and the response (so the browser receives the updated cookie).
             cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
             response = NextResponse.next({ request });
             cookiesToSet.forEach(({ name, value, options }) =>
@@ -111,7 +92,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Return response (not NextResponse.next()) so refreshed cookies reach the browser
     return response;
   } catch {
     return NextResponse.next();
