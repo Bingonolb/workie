@@ -107,6 +107,8 @@ export function ExploreClient({
     if (window.location.pathname + window.location.search !== target) {
       window.history.replaceState({}, "", target);
     }
+    // Scroll to top when entering swipe view so the card is fully visible
+    if (view === "swipe") window.scrollTo({ top: 0, behavior: "instant" });
   }, [view]);
 
   // Session-stable offset: first ad appears at company index 3, 4, or 5.

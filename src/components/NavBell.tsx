@@ -48,9 +48,10 @@ function NotifItem({ n, onRead, onDelete, onClose }: {
   return (
     <div style={{
       opacity: exiting ? 0 : 1,
-      maxHeight: exiting ? 0 : 200,
+      maxHeight: exiting ? 0 : 300,
       overflow: "hidden",
-      transition: "all 0.22s ease",
+      transition: exiting ? "opacity 0.22s ease, max-height 0.28s ease" : "none",
+      animation: exiting ? "none" : "notifIn 0.18s ease both",
     }}>
       <Link
         href={href}
@@ -183,6 +184,8 @@ export function NavBell({ initialUnread }: { initialUnread: number }) {
           </span>
         )}
       </button>
+
+      <style>{`@keyframes notifIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
       {/* Backdrop */}
       <div

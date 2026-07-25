@@ -433,9 +433,9 @@ export function SwipeView({
   const isLeft = drag < -20;
 
   return (
-    <div className="swipe-container" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+    <div className="swipe-container" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: "clamp(8px, 3vh, 24px)" }}>
       {/* Card stack */}
-      <div style={{ position: "relative", width: "min(420px, 96vw)", height: "min(500px, 56vh)", touchAction: "pan-y" }}>
+      <div style={{ position: "relative", width: "min(420px, 96vw)", height: "min(490px, calc(100dvh - 310px))", touchAction: "pan-y" }}>
         {/* Toast — top of card, smooth slide-in */}
         {toast && (
           <div key={toast.msg} style={{
