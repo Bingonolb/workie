@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { captureServerError } from "@/lib/monitoring";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function isBusiness(supabase: any, userId: string): Promise<boolean> {
@@ -24,17 +25,17 @@ export async function addFlame(companyId: string): Promise<void> {
 
     if (existing) {
       const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
-      if (error) { console.error("[addFlame] delete error:", error.message); return; }
+      if (error) { captureServerError(error, { action: "addFlame", step: "delete" }); return; }
     } else {
       const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "flame", points: 1 });
-      if (error) { console.error("[addFlame] insert error:", error.message); return; }
+      if (error) { captureServerError(error, { action: "addFlame", step: "insert" }); return; }
     }
     revalidatePath("/explore");
     revalidatePath("/ranking");
     revalidatePath(`/company/${companyId}`);
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
-  } catch (e) { console.error("[addFlame] unexpected error:", e); }
+  } catch (e) { captureServerError(e, { action: "addFlame" }); }
 }
 
 export async function addBoost(companyId: string): Promise<void> {
@@ -51,7 +52,7 @@ export async function addBoost(companyId: string): Promise<void> {
 
     if (existing) {
       const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
-      if (error) { console.error("[addBoost] delete error:", error.message); return; }
+      if (error) { captureServerError(error, { action: "addBoost", step: "delete" }); return; }
       revalidatePath("/explore");
       revalidatePath("/ranking");
       revalidatePath(`/company/${companyId}`);
@@ -59,13 +60,13 @@ export async function addBoost(companyId: string): Promise<void> {
     }
 
     const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
-    if (error) { console.error("[addBoost] insert error:", error.message); return; }
+    if (error) { captureServerError(error, { action: "addBoost", step: "insert" }); return; }
     revalidatePath("/explore");
     revalidatePath("/ranking");
     revalidatePath(`/company/${companyId}`);
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
-  } catch (e) { console.error("[addBoost] unexpected error:", e); }
+  } catch (e) { captureServerError(e, { action: "addBoost" }); }
 }
 
 export async function addPenalty(companyId: string): Promise<void> {
@@ -101,7 +102,7 @@ export async function addPenalty(companyId: string): Promise<void> {
     revalidatePath(`/company/${companyId}`);
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
-  } catch (e) { console.error("[addPenalty] unexpected error:", e); }
+  } catch (e) { captureServerError(e, { action: "addPenalty" }); }
 }
 
 export async function getTopCompanies(limit = 200) {

@@ -4,59 +4,9 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Company } from "@/lib/types";
-import { PAGE_SIZE } from "@/lib/constants";
 
 function escapeLike(s: string) {
   return s.replace(/[%_\\]/g, "\\$&");
-}
-
-export async function getCompanies(filters?: {
-  sector?: string;
-  canton?: string;
-  search?: string;
-  page?: number;
-  sort?: string;
-}) {
-  const supabase = await createClient();
-  const page = Math.max(1, filters?.page ?? 1);
-  const from = (page - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-
-  const sort = filters?.sort ?? "recent";
-  let query = supabase.from("companies").select("*", { count: "exact" });
-
-  if (sort === "rating") {
-    query = query.order("avg_rating", { ascending: false }).order("review_count", { ascending: false }).order("name", { ascending: true });
-  } else if (sort === "reviews") {
-    query = query.order("review_count", { ascending: false }).order("avg_rating", { ascending: false }).order("name", { ascending: true });
-  } else if (sort === "name") {
-    query = query.order("name", { ascending: true });
-  } else if (sort === "score") {
-    query = query.order("score", { ascending: false }).order("avg_rating", { ascending: false }).order("name", { ascending: true });
-  } else {
-    // default: profils les plus complets en premier, puis score communautaire
-    query = query
-      .order("profile_score", { ascending: false, nullsFirst: false })
-      .order("score", { ascending: false, nullsFirst: false })
-      .order("name", { ascending: true });
-  }
-
-  // Minimum 10 employees — exclude "1-10" range
-  query = query.neq("employee_range", "1-10");
-
-  if (filters?.sector) query = query.eq("sector", filters.sector);
-  if (filters?.canton) query = query.eq("canton", filters.canton);
-  if (filters?.search) {
-    query = query.ilike("name", `%${escapeLike(filters.search.trim())}%`);
-  }
-
-  const { data, count } = await query.range(from, to);
-  return {
-    companies: (data ?? []) as Company[],
-    total: count ?? 0,
-    page,
-    pageCount: Math.ceil((count ?? 0) / PAGE_SIZE),
-  };
 }
 
 const SWIPE_PAGE_SIZE = 50;

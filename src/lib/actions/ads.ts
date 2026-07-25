@@ -8,6 +8,7 @@ import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { calculateCPM } from "@/lib/ads/pricing";
 import type { AdFormat } from "@/lib/ads/pricing";
+import { captureServerError } from "@/lib/monitoring";
 
 async function getViewerGeo(): Promise<{ canton: string | null; city: string | null }> {
   try {
@@ -273,7 +274,7 @@ export async function getActiveAds(opts?: {
 
     // Strip financial fields before sending to client
     return pool.slice(0, opts?.limit ?? 10).map(({ spent_chf: _s, total_budget_chf: _t, daily_budget_chf: _d, cpm_chf: _c, ...rest }) => rest as PublicAdCampaign);
-  } catch (e) { console.error("[getActiveAds] error:", e); return []; }
+  } catch (e) { captureServerError(e, { action: "getActiveAds" }); return []; }
 }
 
 export async function getCampaignDailyStats(campaignId: string): Promise<{ day: string; impressions: number; clicks: number }[]> {
@@ -289,7 +290,7 @@ export async function getCampaignDailyStats(campaignId: string): Promise<{ day: 
       impressions: Number(r.impressions),
       clicks: Number(r.clicks),
     }));
-  } catch (e) { console.error("[getCampaignDailyStats] error:", e); return []; }
+  } catch (e) { captureServerError(e, { action: "getCampaignDailyStats" }); return []; }
 }
 
 export async function getUserCampaignById(id: string): Promise<AdCampaign | null> {
@@ -481,12 +482,12 @@ export async function trackAdImpression(campaignId: string): Promise<void> {
     });
     // 23505 = unique_violation (DB-level dedup for logged-in users)
     if (insErr && (insErr as { code?: string }).code !== "23505") {
-      console.error("[trackAdImpression] insert error:", insErr.message);
+      captureServerError(insErr, { action: "trackAdImpression", step: "insert", campaignId });
     }
     if (!insErr) {
       await supabase.rpc("increment_ad_impression", { p_campaign_id: campaignId });
     }
-  } catch (e) { console.error("[trackAdImpression] error:", e); }
+  } catch (e) { captureServerError(e, { action: "trackAdImpression" }); }
 }
 
 export async function trackAdClick(campaignId: string): Promise<void> {
@@ -518,7 +519,7 @@ export async function trackAdClick(campaignId: string): Promise<void> {
     if (!clkErr) {
       await supabase.rpc("increment_ad_click", { p_campaign_id: campaignId });
     }
-  } catch (e) { console.error("[trackAdClick] error:", e); }
+  } catch (e) { captureServerError(e, { action: "trackAdClick" }); }
 }
 
 export async function getCampaignCantonStats(campaignId: string): Promise<{ canton: string; impressions: number; clicks: number }[]> {

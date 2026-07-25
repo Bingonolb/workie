@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { addFlame } from "@/lib/actions/scores";
+import { captureServerError } from "@/lib/monitoring";
 import type { Company } from "@/lib/types";
 
 export async function toggleFavorite(companyId: string): Promise<void> {
@@ -21,12 +22,12 @@ export async function toggleFavorite(companyId: string): Promise<void> {
         supabase.from("favorites").insert({ user_id: user.id, company_id: companyId }),
         addFlame(companyId),
       ]);
-      if (error && error.code !== "23505") console.error("[toggleFavorite] insert error:", error.message);
+      if (error && error.code !== "23505") captureServerError(error, { action: "toggleFavorite", step: "insert", companyId });
     }
     revalidatePath("/profile");
     revalidatePath("/favorites");
     revalidatePath(`/company/${companyId}`);
-  } catch (e) { console.error("[toggleFavorite] unexpected error:", e); }
+  } catch (e) { captureServerError(e, { action: "toggleFavorite" }); }
 }
 
 export async function getFavorites(): Promise<Company[]> {
@@ -43,7 +44,7 @@ export async function getFavorites(): Promise<Company[]> {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return ((data ?? []).map((r: any) => r.companies).filter(Boolean)) as Company[];
-  } catch (e) { console.error("[getFavorites] unexpected error:", e); return []; }
+  } catch (e) { captureServerError(e, { action: "getFavorites" }); return []; }
 }
 
 export async function getUserFavoriteIds(): Promise<string[]> {
@@ -54,5 +55,5 @@ export async function getUserFavoriteIds(): Promise<string[]> {
     const { data } = await supabase.from("favorites").select("company_id").eq("user_id", user.id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data ?? []).map((r: any) => r.company_id);
-  } catch (e) { console.error("[getUserFavoriteIds] unexpected error:", e); return []; }
+  } catch (e) { captureServerError(e, { action: "getUserFavoriteIds" }); return []; }
 }

@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { captureServerError } from "@/lib/monitoring";
 import type { Review } from "@/lib/types";
 
 // ── Read actions ────────────────────────────────────────────────────────────
@@ -382,7 +383,7 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
   const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
   if (rpcErr) {
     await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
-    console.error("[voteHelpful] increment_helpful RPC failed:", rpcErr.message);
+    captureServerError(rpcErr, { action: "voteHelpful", step: "increment_helpful_rpc", reviewId });
     return { error: "Erreur serveur, veuillez réessayer." };
   }
 
