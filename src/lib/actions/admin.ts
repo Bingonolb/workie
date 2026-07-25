@@ -151,29 +151,15 @@ export async function getClaims() {
     let ownerMap: Record<string, string> = {};
 
     if (companyIds.length > 0) {
+      // profiles.email is kept in sync with auth.users via trigger — no Auth Admin API call needed
       const { data: profiles } = await adminClient
         .from("profiles")
-        .select("id, claimed_company_id")
+        .select("id, claimed_company_id, email")
         .in("claimed_company_id", companyIds);
 
-      if (profiles && profiles.length > 0) {
-        const profileIds = new Set(profiles.map(p => p.id));
-        // Single paginated listUsers call instead of N getUserById calls
-        const emailById: Record<string, string> = {};
-        let page = 1;
-        while (profileIds.size > 0) {
-          const { data: usersPage } = await adminClient.auth.admin.listUsers({ page, perPage: 1000 });
-          for (const u of usersPage?.users ?? []) {
-            if (profileIds.has(u.id) && u.email) {
-              emailById[u.id] = u.email;
-              profileIds.delete(u.id);
-            }
-          }
-          if ((usersPage?.users ?? []).length < 1000 || profileIds.size === 0) break;
-          page++;
-        }
-        for (const p of profiles) {
-          if (p.claimed_company_id) ownerMap[p.claimed_company_id] = emailById[p.id] ?? p.id;
+      for (const p of profiles ?? []) {
+        if (p.claimed_company_id) {
+          ownerMap[p.claimed_company_id] = p.email ?? p.id;
         }
       }
     }

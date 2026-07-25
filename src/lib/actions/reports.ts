@@ -99,38 +99,17 @@ export async function getReports(): Promise<{ reports?: Report[]; error?: string
   const reporterEmailMap: Record<string, string> = {};
   const reporterNameMap: Record<string, string> = {};
 
-  await Promise.all([
-    // Emails via single paginated listUsers — avoids N auth API calls
-    (async () => {
-      if (reporterIds.length === 0) return;
-      const remaining = new Set(reporterIds);
-      let page = 1;
-      while (remaining.size > 0) {
-        const { data: usersPage } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
-        for (const u of usersPage?.users ?? []) {
-          if (remaining.has(u.id) && u.email) {
-            reporterEmailMap[u.id] = u.email;
-            remaining.delete(u.id);
-          }
-        }
-        if ((usersPage?.users ?? []).length < 1000 || remaining.size === 0) break;
-        page++;
-      }
-    })(),
-    // Names via profiles table
-    (async () => {
-      if (reporterIds.length === 0) return;
-      const { data: profiles } = await admin
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", reporterIds);
-      if (profiles) {
-        for (const p of profiles as { id: string; full_name: string | null }[]) {
-          if (p.full_name) reporterNameMap[p.id] = p.full_name;
-        }
-      }
-    })(),
-  ]);
+  // Single SQL query — profiles.email is synced from auth.users via trigger
+  if (reporterIds.length > 0) {
+    const { data: profiles } = await admin
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", reporterIds);
+    for (const p of profiles ?? []) {
+      if (p.email) reporterEmailMap[p.id] = p.email;
+      if (p.full_name) reporterNameMap[p.id] = p.full_name;
+    }
+  }
 
   // Resolve company_id for review-type reports so admin can navigate to them
   const reviewIds = rows.filter(r => r.target_type === "review").map(r => r.target_id);
