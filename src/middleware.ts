@@ -58,7 +58,7 @@ export async function middleware(request: NextRequest) {
     }
     if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
       const { success } = await rl.auth.limit(ip);
-      if (!success) return NextResponse.redirect(new URL("/login?error=trop_de_requetes", request.url));
+      if (!success) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
     }
 
     // Session refresh via Supabase SSR
