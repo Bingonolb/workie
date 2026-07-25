@@ -14,6 +14,8 @@ const rl = {
   checkout: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60s"),   prefix: "rl:checkout", ephemeralCache: new Map() }),
   actions:  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, "60s"), prefix: "rl:actions",  ephemeralCache: new Map() }),
   auth:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60s"),  prefix: "rl:auth",     ephemeralCache: new Map() }),
+  // RGPD export: heavy query (6 parallel DB reads). 2 per minute per IP is generous for a human.
+  export:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(2, "60s"),   prefix: "rl:export",   ephemeralCache: new Map() }),
 };
 
 const PUBLIC_PATHS = [
@@ -21,7 +23,7 @@ const PUBLIC_PATHS = [
   "/forgot-password", "/reset-password",
   "/explore", "/company", "/ranking", "/salaires", "/jobs",
   "/business", "/api",
-  "/cgu", "/confidentialite",
+  "/cgu", "/confidentialite", "/mentions-legales",
   "/robots.txt", "/sitemap.xml", "/_next", "/favicon",
   "/onboarding",
 ];
@@ -49,6 +51,10 @@ export async function middleware(request: NextRequest) {
     if (isServerAction) {
       const { success } = await rl.actions.limit(ip);
       if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+    }
+    if (pathname === "/api/user/export") {
+      const { success } = await rl.export.limit(ip);
+      if (!success) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
     }
     if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
       const { success } = await rl.auth.limit(ip);
