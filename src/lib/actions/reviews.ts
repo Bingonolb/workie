@@ -11,8 +11,6 @@ import { REVIEW_PUBLIC_COLS } from "@/lib/actions/columns";
 
 // ── Read actions ────────────────────────────────────────────────────────────
 
-export { REVIEW_PUBLIC_COLS };
-
 export async function getUserReviews(): Promise<(Review & { company_name: string })[]> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

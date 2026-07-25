@@ -51,7 +51,6 @@ export async function fetchSwipePage(
 const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,logo_url,score,is_verified,tags,description,profile_score";
 
 import { COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
-export { COMPANY_PUBLIC_COLS };
 
 // Cached 60s — revalidateTag("companies") is called after mutations
 // Uses admin client — cookies() must not be called inside unstable_cache
