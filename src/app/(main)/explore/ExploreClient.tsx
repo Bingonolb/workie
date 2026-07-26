@@ -79,6 +79,17 @@ export function ExploreClient({
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // Preload ALL company covers into browser cache as soon as the list is known.
+  // This ensures Swipe/Ranking/Favoris show cached images with no reload.
+  useEffect(() => {
+    companies.forEach(c => {
+      const url = c.cover_url || `/api/og?title=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(c.sector ?? "")}`;
+      const img = new window.Image();
+      img.src = url;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Listen for instant view switch from BottomNav/NavLinks (no server round-trip)
   useEffect(() => {
     const handler = (e: Event) => setView((e as CustomEvent<"grid" | "swipe">).detail);
