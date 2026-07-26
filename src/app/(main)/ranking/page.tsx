@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     siteName: "Workie",
     type: "website",
     locale: "fr_CH",
-    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Classement des employeurs suisses · Workie" }],
+    images: [{ url: "https://www.workie.ch/api/og?title=Classement+des+employeurs+suisses+%C2%B7+Workie&sub=200+entreprises+class%C3%A9es+par+la+communaut%C3%A9", width: 1200, height: 630, alt: "Classement des employeurs suisses · Workie" }],
   },
-  twitter: { card: "summary_large_image", title: "Classement des employeurs suisses · Workie", images: ["https://www.workie.ch/og-default.png"] },
+  twitter: { card: "summary_large_image", title: "Classement des employeurs suisses · Workie", images: ["https://www.workie.ch/api/og?title=Classement+des+employeurs+suisses+%C2%B7+Workie&sub=200+entreprises+class%C3%A9es+par+la+communaut%C3%A9"] },
 };
 
 export default async function RankingPage() {

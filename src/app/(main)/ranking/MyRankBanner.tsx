@@ -30,17 +30,7 @@ export function MyRankBanner() {
 
   if (state === "none") return null;
 
-  if (state === "loading") {
-    return (
-      <div style={{
-        height: 76, borderRadius: 18, marginBottom: 24,
-        background: "var(--surface2)", border: "1px solid var(--border)",
-        animation: "pulse 1.5s ease-in-out infinite",
-      }}>
-        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }`}</style>
-      </div>
-    );
-  }
+  if (state === "loading") return null;
 
   const data = state;
 
