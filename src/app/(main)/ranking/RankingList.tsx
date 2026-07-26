@@ -124,10 +124,14 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                     width: 36, height: 36, borderRadius: 8, overflow: "hidden",
                     flexShrink: 0, background: `linear-gradient(135deg, ${sectorColor}44, ${sectorColor}22)`,
                   }}>
-                    {c.cover_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.cover_url} alt="" style={{ objectFit: "cover", width: "100%", height: "100%" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                    )}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={c.cover_url || `/api/og?title=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(c.sector ?? "")}`}
+                      alt=""
+                      loading="eager"
+                      style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    />
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <p style={{

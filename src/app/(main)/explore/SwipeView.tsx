@@ -157,15 +157,14 @@ export function SwipeView({
     if (isAd(current)) trackAdImpression(current.campaign.id);
     else if (current) router.prefetch(`/company/${current.id}`);
 
-    // Preload current + next 3 card images
-    for (let i = 0; i <= 3; i++) {
+    // Preload current + next 8 card images
+    for (let i = 0; i <= 8; i++) {
       const item = companies[index + i];
       if (!item) break;
-      const url = isAd(item) ? item.campaign.image_url : (item as Company).cover_url;
-      if (url) {
-        const img = new window.Image();
-        img.src = url;
-      }
+      const co = item as Company;
+      const url = isAd(item) ? item.campaign.image_url
+        : (co.cover_url || `/api/og?title=${encodeURIComponent(co.name)}&sub=${encodeURIComponent(co.sector ?? "")}`);
+      if (url) { const img = new window.Image(); img.src = url; }
     }
 
     // Persist state to sessionStorage so navigating away and back restores position
@@ -180,6 +179,17 @@ export function SwipeView({
     } catch { /* ignore quota errors */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
+
+  // Preload ALL images on mount so swiping never shows blank covers
+  useEffect(() => {
+    companies.forEach(item => {
+      const co = item as Company;
+      const url = isAd(item) ? item.campaign.image_url
+        : (co.cover_url || `/api/og?title=${encodeURIComponent(co.name)}&sub=${encodeURIComponent(co.sector ?? "")}`);
+      if (url) { const img = new window.Image(); img.src = url; }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Prefetch next batch silently, well before the user reaches the end
   useEffect(() => {
@@ -703,9 +713,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
       <div style={{ height: "55%", position: "relative", overflow: "hidden",
-        background: company.cover_url
-          ? `url(${company.cover_url}) center / cover no-repeat`
-          : `linear-gradient(135deg, ${sectorColor}, #f97316)`,
+        background: `url(${company.cover_url || `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`}) center / cover no-repeat, linear-gradient(135deg, ${sectorColor}, #f97316)`,
       }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.8))" }} />
 

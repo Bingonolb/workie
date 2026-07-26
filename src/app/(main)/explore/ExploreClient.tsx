@@ -270,7 +270,8 @@ export function ExploreClient({
                       isFav={initialFavIds.includes(c.id)}
                       isLoggedIn={isLoggedIn}
                       isBusiness={isBusiness}
-                      priority={items.length === 0}
+                      priority={i < 8}
+                      loading="eager"
                     />
                   );
                 });

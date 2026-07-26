@@ -46,12 +46,17 @@ function StarDisplay({ rating }: { rating: number }) {
   );
 }
 
-export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusiness = false, priority = false }: {
+function getOgCover(company: Company): string {
+  return `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`;
+}
+
+export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusiness = false, priority = false, loading = "eager" }: {
   company: Company;
   isFav?: boolean;
   isLoggedIn?: boolean;
   isBusiness?: boolean;
   priority?: boolean;
+  loading?: "eager" | "lazy";
 }) {
   const [fav, setFav] = useState(isFav);
   const [score, setScore] = useState(Number(company.score));
@@ -87,22 +92,21 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
       }}>
         {/* Cover */}
         <div className={`card-cover${coverLoaded ? "" : " img-placeholder"}`} style={{ height: 148, position: "relative", overflow: "hidden" }}>
-          {company.cover_url && !coverFailed ? (
-            <Image
-              src={company.cover_url}
-              alt=""
-              fill
-              sizes="(max-width: 640px) calc(50vw - 24px), 280px"
-              style={{ objectFit: "cover", opacity: coverLoaded ? 1 : 0, transition: "opacity 0.3s" }}
-              priority={priority}
-              onLoad={() => setCoverLoaded(true)}
-              onError={() => { setCoverFailed(true); setCoverLoaded(true); }}
-            />
-          ) : null}
-          {/* Gradient fallback — shown when no cover_url, or image fails, or while loading */}
-          {(!company.cover_url || coverFailed || !coverLoaded) && (
+          {/* Gradient placeholder shown while image loads */}
+          {!coverLoaded && (
             <div style={{ position: "absolute", inset: 0, background: getCoverGradient(company.sector, sectorColor) }} />
           )}
+          <Image
+            src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
+            alt=""
+            fill
+            sizes="(max-width: 640px) calc(50vw - 24px), 280px"
+            style={{ objectFit: "cover", opacity: coverLoaded ? 1 : 0, transition: "opacity 0.2s" }}
+            priority={priority}
+            {...(!priority && { loading })}
+            onLoad={() => setCoverLoaded(true)}
+            onError={() => { if (!coverFailed) { setCoverFailed(true); setCoverLoaded(false); } }}
+          />
 
           {/* Gradient overlay */}
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 35%, rgba(0,0,0,0.6) 75%, rgba(0,0,0,0.82) 100%)" }} />
@@ -176,7 +180,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
                   alt=""
                   width={38}
                   height={38}
-                  loading="lazy"
+                  loading="eager"
                   onLoad={() => setLogoLoaded(true)}
                   onError={() => setLogoLoaded(false)}
                   style={{
