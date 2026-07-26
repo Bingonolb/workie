@@ -69,9 +69,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
     : `Avis anonymes sur ${company.name} — salaires, culture, management. La vérité que Glassdoor ne te dit pas.`;
   const url = `${BASE_URL}/company/${id}`;
+  const ogApiUrl = `${BASE_URL}/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(`${company.city} · ${company.sector}`)}${Number(company.avg_rating) > 0 ? `&rating=${Number(company.avg_rating).toFixed(1)}&reviews=${company.review_count}` : ""}`;
   const ogImage = company.cover_url
     ? [{ url: company.cover_url, width: 1200, height: 630, alt: company.name }]
-    : [{ url: `${BASE_URL}/og-default.png`, width: 1200, height: 630, alt: "Workie" }];
+    : [{ url: ogApiUrl, width: 1200, height: 630, alt: company.name }];
   return {
     title: `${company.name} · Avis & Salaires · Workie`,
     description: desc,
