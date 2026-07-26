@@ -9,8 +9,8 @@ import { getUserReviews } from "@/lib/actions/reviews";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 import type { Profile } from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { signOut } from "@/lib/actions/auth";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
+import { SignOutButton } from "@/components/SignOutButton";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import Link from "next/link";
 
@@ -170,16 +170,7 @@ export default async function ProfilePage() {
                 >
                   ⬇ Télécharger mes données (RGPD)
                 </a>
-                <form action={signOut}>
-                  <button type="submit" style={{
-                    width: "100%", padding: "11px 16px", borderRadius: 10,
-                    background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
-                    color: "#ef4444", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                    textAlign: "left",
-                  }}>
-                    Se déconnecter
-                  </button>
-                </form>
+                <SignOutButton />
                 <DeleteAccountButton />
               </div>
             </div>
