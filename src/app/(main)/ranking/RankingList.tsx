@@ -6,21 +6,17 @@ import { Flame, Star, TrendingUp, Zap, Search } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 
-const SECTORS = ["Tous", "Tech", "Finance", "Assurances", "Pharma", "Santé", "Conseil", "Industrie", "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture", "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie"];
-
 const MEDALS = ["🥇", "🥈", "🥉"];
 
 export function RankingTable({ companies }: { companies: Company[] }) {
-  const [sector, setSector] = useState("Tous");
   const [search, setSearch] = useState("");
   const maxScore = Math.max(...companies.map(c => Number(c.score ?? 0)), 1);
 
   const q = search.trim().toLowerCase();
   const filtered = companies
-    .filter(c => sector === "Tous" || c.sector === sector)
     .filter(c => !q || c.name.toLowerCase().includes(q) || c.city?.toLowerCase().includes(q));
   const globalRankMap = new Map(companies.map((c, i) => [c.id, i]));
-  const isFiltered = sector !== "Tous" || q.length > 0;
+  const isFiltered = q.length > 0;
 
   return (
     <div>
@@ -40,25 +36,6 @@ export function RankingTable({ companies }: { companies: Company[] }) {
             }}
           />
         </div>
-      </div>
-
-      {/* Sector filter */}
-      <div className="ranking-sectors" style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 20px 20px" }}>
-        {SECTORS.map(s => {
-          const color = s === "Tous" ? "#8b5cf6" : (SECTOR_COLORS[s] ?? "#8b5cf6");
-          const active = sector === s;
-          return (
-            <button key={s} type="button" onClick={() => setSector(s)} aria-pressed={active} style={{
-              padding: "5px 14px", borderRadius: 6, fontSize: 12, fontWeight: 600,
-              border: active ? `1px solid ${color}` : "1px solid var(--border)",
-              background: active ? `${color}18` : "transparent",
-              color: active ? color : "var(--text-muted)",
-              cursor: "pointer", transition: "all 0.15s",
-            }}>
-              {s}
-            </button>
-          );
-        })}
       </div>
 
       {/* Table header */}
@@ -123,15 +100,15 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                   <div style={{
                     width: 36, height: 36, borderRadius: 8, overflow: "hidden",
                     flexShrink: 0, background: `linear-gradient(135deg, ${sectorColor}44, ${sectorColor}22)`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 12, fontWeight: 900, color: sectorColor, letterSpacing: "-0.02em",
                   }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={c.cover_url || `/api/og?title=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(c.sector ?? "")}`}
-                      alt=""
-                      loading="eager"
-                      style={{ objectFit: "cover", width: "100%", height: "100%" }}
-                      onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                    />
+                    {c.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={c.logo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                    ) : (
+                      (c.name.trim().replace(/[^a-zA-ZÀ-ÿ\s]/g, " ").trim().split(/\s+/).slice(0, 2).map((w: string) => w[0]).join("").toUpperCase())
+                    )}
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <p style={{

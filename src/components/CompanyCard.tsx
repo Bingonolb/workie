@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import { Flame, Star, Users, MapPin, TrendingUp } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
@@ -95,15 +96,13 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           {!coverLoaded && (
             <div style={{ position: "absolute", inset: 0, background: getCoverGradient(company.sector, sectorColor) }} />
           )}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
             alt=""
-            fetchPriority={priority ? "high" : "auto"}
-            loading={loading}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+            priority={priority}
             style={{
-              position: "absolute", inset: 0,
-              width: "100%", height: "100%",
               objectFit: "cover",
               opacity: coverLoaded ? 1 : 0,
               transition: "opacity 0.2s",
