@@ -177,7 +177,7 @@ export function ExploreClient({
 
   // Swipe companies: same list filtered for city + tags (SwipeView loads more itself)
   const swipeCompanies = useMemo(
-    () => companies.filter(c => c.city?.trim() && (c.tags?.length ?? 0) > 0),
+    () => companies.filter(c => c.city?.trim()),
     [companies],
   );
 

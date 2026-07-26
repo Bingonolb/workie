@@ -703,18 +703,59 @@ export function SwipeView({
   );
 }
 
+const SECTOR_DEFAULT_TAGS: Record<string, string[]> = {
+  "Tech":                   ["innovation", "digital", "remote"],
+  "Finance":                ["finance", "banking", "investment"],
+  "Assurances":             ["assurances", "risk", "courtage"],
+  "Pharma":                 ["life-sciences", "r&d", "biotech"],
+  "Santé":                  ["healthcare", "médecine", "bien-être"],
+  "Conseil":                ["consulting", "stratégie", "management"],
+  "Industrie":              ["manufacturing", "industrie", "engineering"],
+  "Automobile":             ["automotive", "mobilité", "engineering"],
+  "Horlogerie":             ["luxury", "swiss-made", "savoir-faire"],
+  "Commerce":               ["retail", "distribution", "vente"],
+  "Alimentation":           ["food", "nutrition", "fmcg"],
+  "Agriculture":            ["agriculture", "durabilité", "nature"],
+  "Éducation & Recherche":  ["éducation", "recherche", "innovation"],
+  "Sports & Fashion":       ["sport", "mode", "lifestyle"],
+  "Transport":              ["logistique", "mobilité", "transport"],
+  "Énergie":                ["énergie", "cleantech", "durabilité"],
+  "Droit":                  ["legal", "compliance", "droit"],
+  "Bâtiment":               ["construction", "immobilier", "ingénierie"],
+  "Beauté":                 ["beauté", "cosmétiques", "bien-être"],
+  "Administration publique":["service-public", "gouvernance", "suisse"],
+};
+function getSwipeTags(company: Company): string[] {
+  const existing = (company.tags ?? []).slice(0, 4);
+  if (existing.length >= 4) return existing;
+  const defaults = SECTOR_DEFAULT_TAGS[company.sector] ?? ["swiss", "professionnel", "équipe"];
+  return [...existing, ...defaults.filter(t => !existing.includes(t))].slice(0, 4);
+}
+
 function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
   company: Company; flameIds: Set<string>;
   overlayDir: "left" | "right" | null; overlayOpacity: number;
 }) {
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
   const isFav = flameIds.has(company.id);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const coverSrc = company.cover_url || `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`;
 
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
-      <div style={{ height: "55%", position: "relative", overflow: "hidden",
-        background: `url(${company.cover_url || `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`}) center / cover no-repeat, linear-gradient(135deg, ${sectorColor}, #f97316)`,
-      }}>
+      <div style={{ height: "55%", position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={coverSrc}
+          alt=""
+          style={{
+            position: "absolute", inset: 0, width: "100%", height: "100%",
+            objectFit: "cover",
+            opacity: imgLoaded ? 1 : 0,
+            transition: "opacity 0.4s ease",
+          }}
+          onLoad={() => setImgLoaded(true)}
+        />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.8))" }} />
 
         {overlayDir === "right" && (
@@ -775,13 +816,11 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
             {company.description}
           </p>
         )}
-        {company.tags?.length > 0 && (
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {company.tags.slice(0, 4).map(tag => (
-              <span key={tag} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 50, background: "var(--surface2)", color: "var(--text-muted)" }}>#{tag}</span>
-            ))}
-          </div>
-        )}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {getSwipeTags(company).map(tag => (
+            <span key={tag} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 50, background: "var(--surface2)", color: "var(--text-muted)", fontWeight: 600 }}>#{tag}</span>
+          ))}
+        </div>
       </div>
     </div>
   );

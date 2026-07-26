@@ -50,6 +50,39 @@ function getOgCover(company: Company): string {
   return `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`;
 }
 
+const SECTOR_DEFAULT_TAGS: Record<string, string[]> = {
+  "Tech":                   ["innovation", "digital", "remote"],
+  "Finance":                ["finance", "banking", "investment"],
+  "Assurances":             ["assurances", "risk", "courtage"],
+  "Pharma":                 ["life-sciences", "r&d", "biotech"],
+  "Santé":                  ["healthcare", "médecine", "bien-être"],
+  "Conseil":                ["consulting", "stratégie", "management"],
+  "Industrie":              ["manufacturing", "industrie", "engineering"],
+  "Automobile":             ["automotive", "mobilité", "engineering"],
+  "Horlogerie":             ["luxury", "swiss-made", "savoir-faire"],
+  "Commerce":               ["retail", "distribution", "vente"],
+  "Alimentation":           ["food", "nutrition", "fmcg"],
+  "Agriculture":            ["agriculture", "durabilité", "nature"],
+  "Éducation & Recherche":  ["éducation", "recherche", "innovation"],
+  "Sports & Fashion":       ["sport", "mode", "lifestyle"],
+  "Transport":              ["logistique", "mobilité", "transport"],
+  "Énergie":                ["énergie", "cleantech", "durabilité"],
+  "Droit":                  ["legal", "compliance", "droit"],
+  "Bâtiment":               ["construction", "immobilier", "ingénierie"],
+  "Beauté":                 ["beauté", "cosmétiques", "bien-être"],
+  "Administration publique":["service-public", "gouvernance", "suisse"],
+};
+
+function getDisplayTags(company: Company): string[] {
+  const existing = (company.tags ?? []).slice(0, 3);
+  if (existing.length >= 3) return existing;
+  const defaults = SECTOR_DEFAULT_TAGS[company.sector] ?? ["swiss", "professionnel", "équipe"];
+  return [...existing, ...defaults.filter(t => !existing.includes(t))].slice(0, 3);
+}
+
+// Neutral blur placeholder — shows instantly before the real image loads
+const BLUR_DATA_URL = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMyMDIwMzAiLz48L3N2Zz4=";
+
 export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusiness = false, priority = false, loading = "eager" }: {
   company: Company;
   isFav?: boolean;
@@ -60,7 +93,6 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
 }) {
   const [fav, setFav] = useState(isFav);
   const [score, setScore] = useState(Number(company.score));
-  const [coverLoaded, setCoverLoaded] = useState(false);
   const [coverFailed, setCoverFailed] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -91,24 +123,17 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div className={`card-cover${coverLoaded ? "" : " img-placeholder"}`} style={{ height: 148, position: "relative", overflow: "hidden" }}>
-          {/* Gradient placeholder shown while image loads */}
-          {!coverLoaded && (
-            <div style={{ position: "absolute", inset: 0, background: getCoverGradient(company.sector, sectorColor) }} />
-          )}
+        <div style={{ height: 148, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
           <Image
             src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
             alt=""
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
             priority={priority}
-            style={{
-              objectFit: "cover",
-              opacity: coverLoaded ? 1 : 0,
-              transition: "opacity 0.2s",
-            }}
-            onLoad={() => setCoverLoaded(true)}
-            onError={() => { if (!coverFailed) { setCoverFailed(true); setCoverLoaded(false); } }}
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
+            style={{ objectFit: "cover" }}
+            onError={() => { if (!coverFailed) { setCoverFailed(true); } }}
           />
 
           {/* Gradient overlay */}
@@ -251,18 +276,16 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
             )}
           </div>
 
-          {/* Tags */}
-          {company.tags?.length > 0 && (
-            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-              {company.tags.slice(0, 3).map(tag => (
-                <span key={tag} style={{
-                  fontSize: 10, padding: "2px 7px", borderRadius: 50,
-                  background: "var(--surface3)", color: "var(--text-muted)",
-                  fontWeight: 600,
-                }}>#{tag}</span>
-              ))}
-            </div>
-          )}
+          {/* Tags — toujours affichés */}
+          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+            {getDisplayTags(company).map(tag => (
+              <span key={tag} style={{
+                fontSize: 10, padding: "2px 7px", borderRadius: 50,
+                background: "var(--surface3)", color: "var(--text-muted)",
+                fontWeight: 600,
+              }}>#{tag}</span>
+            ))}
+          </div>
         </div>
       </div>
     </Link>
