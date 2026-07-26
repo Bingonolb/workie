@@ -56,6 +56,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
   const [fav, setFav] = useState(isFav);
   const [score, setScore] = useState(Number(company.score));
   const [coverLoaded, setCoverLoaded] = useState(false);
+  const [coverFailed, setCoverFailed] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [pending, startTransition] = useTransition();
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
@@ -85,19 +86,22 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div className={`card-cover${coverLoaded || !company.cover_url ? "" : " img-placeholder"}`} style={{ height: 148, position: "relative", overflow: "hidden" }}>
-          {company.cover_url ? (
+        <div className={`card-cover${coverLoaded ? "" : " img-placeholder"}`} style={{ height: 148, position: "relative", overflow: "hidden" }}>
+          {company.cover_url && !coverFailed ? (
             <Image
               src={company.cover_url}
               alt=""
               fill
               sizes="(max-width: 640px) calc(50vw - 24px), 280px"
-              style={{ objectFit: "cover" }}
+              style={{ objectFit: "cover", opacity: coverLoaded ? 1 : 0, transition: "opacity 0.3s" }}
               priority={priority}
               onLoad={() => setCoverLoaded(true)}
+              onError={() => { setCoverFailed(true); setCoverLoaded(true); }}
             />
-          ) : (
-            <div style={{ width: "100%", height: "100%", background: getCoverGradient(company.sector, sectorColor) }} />
+          ) : null}
+          {/* Gradient fallback — shown when no cover_url, or image fails, or while loading */}
+          {(!company.cover_url || coverFailed || !coverLoaded) && (
+            <div style={{ position: "absolute", inset: 0, background: getCoverGradient(company.sector, sectorColor) }} />
           )}
 
           {/* Gradient overlay */}

@@ -11,6 +11,7 @@ import type { Profile } from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { signOut } from "@/lib/actions/auth";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -62,17 +63,7 @@ export default async function ProfilePage() {
           gap: 20,
         }}>
           {/* Avatar */}
-          <div style={{
-            width: 80, height: 80, borderRadius: 20, flexShrink: 0,
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            overflow: "hidden",
-          }}>
-            {profile?.avatar_url
-              ? <img src={profile.avatar_url} alt="" loading="eager" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} /> // eslint-disable-line @next/next/no-img-element
-              : <span style={{ fontSize: 32, fontWeight: 900, color: "#fff" }}>{initial}</span>
-            }
-          </div>
+          <ProfileAvatar src={profile?.avatar_url ?? null} initial={initial} />
 
           {/* Identity */}
           <div style={{ flex: 1, minWidth: 0 }}>
