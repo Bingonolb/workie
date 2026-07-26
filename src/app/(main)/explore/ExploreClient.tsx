@@ -137,6 +137,8 @@ export function ExploreClient({
     applyFilters("", "", "recent");
   }, [applyFilters]);
 
+  const [newFrom, setNewFrom] = useState<number>(-1);
+
   const loadMore = async () => {
     if (loadingMore) return;
     const nextPage = page + 1;
@@ -146,7 +148,10 @@ export function ExploreClient({
         { sector: sector || undefined, canton: canton || undefined, sort },
         nextPage,
       );
-      setCompanies(prev => [...prev, ...result.companies]);
+      setCompanies(prev => {
+        setNewFrom(prev.length);
+        return [...prev, ...result.companies];
+      });
       setPage(nextPage);
     } finally {
       setLoadingMore(false);
@@ -274,16 +279,25 @@ export function ExploreClient({
                     const ad = adsForGrid[slotNum % adsForGrid.length];
                     items.push(<AdSquareCard key={`ad-slot-${slotNum}`} ad={ad} />);
                   }
+                  const isNew = newFrom >= 0 && i >= newFrom;
+                  const delay = isNew ? Math.min((i - newFrom) * 40, 400) : 0;
                   items.push(
-                    <CompanyCard
+                    <div
                       key={c.id}
-                      company={c}
-                      isFav={initialFavIds.includes(c.id)}
-                      isLoggedIn={isLoggedIn}
-                      isBusiness={isBusiness}
-                      priority={i < 8}
-                      loading="eager"
-                    />
+                      style={isNew ? {
+                        animation: `cardIn 0.35s ease-out both`,
+                        animationDelay: `${delay}ms`,
+                      } : undefined}
+                    >
+                      <CompanyCard
+                        company={c}
+                        isFav={initialFavIds.includes(c.id)}
+                        isLoggedIn={isLoggedIn}
+                        isBusiness={isBusiness}
+                        priority={i < 8}
+                        loading="eager"
+                      />
+                    </div>
                   );
                 });
                 return items;
