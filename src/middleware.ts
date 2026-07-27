@@ -3,20 +3,27 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { type NextRequest, NextResponse } from "next/server";
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
-
-// Sliding window rate limits — shared across all Vercel instances via Redis
-const rl = {
-  search:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60s"),  prefix: "rl:search",   ephemeralCache: new Map() }),
-  checkout: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60s"),   prefix: "rl:checkout", ephemeralCache: new Map() }),
-  actions:  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, "60s"), prefix: "rl:actions",  ephemeralCache: new Map() }),
-  auth:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60s"),  prefix: "rl:auth",     ephemeralCache: new Map() }),
-  // RGPD export: heavy query (6 parallel DB reads). 2 per minute per IP is generous for a human.
-  export:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(2, "60s"),   prefix: "rl:export",   ephemeralCache: new Map() }),
+// Lazy init — if UPSTASH env vars are missing (e.g. Vercel plan migration), rate limiting is
+// disabled rather than crashing the Edge Function for every request.
+type RateLimiters = {
+  search: Ratelimit; checkout: Ratelimit; actions: Ratelimit; auth: Ratelimit; export: Ratelimit;
 };
+let rl: RateLimiters | null = null;
+try {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  });
+  rl = {
+    search:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60s"),  prefix: "rl:search",   ephemeralCache: new Map() }),
+    checkout: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60s"),   prefix: "rl:checkout", ephemeralCache: new Map() }),
+    actions:  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, "60s"), prefix: "rl:actions",  ephemeralCache: new Map() }),
+    auth:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60s"),  prefix: "rl:auth",     ephemeralCache: new Map() }),
+    export:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(2, "60s"),   prefix: "rl:export",   ephemeralCache: new Map() }),
+  };
+} catch {
+  // Redis env vars not configured — rate limiting disabled until vars are added to Vercel
+}
 
 const PUBLIC_PATHS = [
   "/login", "/signup", "/auth",
@@ -35,30 +42,32 @@ export async function middleware(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
     const isServerAction = method === "POST" && !!request.headers.get("next-action");
 
-    // Rate limiting — early return before touching Supabase
-    if (pathname === "/api/companies/search") {
-      const { success } = await rl.search.limit(ip);
-      if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
-    }
-    if (method === "POST" && (
-      pathname === "/api/business/checkout" ||
-      pathname === "/api/business/ads/checkout" ||
-      pathname === "/api/user/checkout-penalty"
-    )) {
-      const { success } = await rl.checkout.limit(ip);
-      if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
-    }
-    if (isServerAction) {
-      const { success } = await rl.actions.limit(ip);
-      if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
-    }
-    if (pathname === "/api/user/export") {
-      const { success } = await rl.export.limit(ip);
-      if (!success) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
-    }
-    if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
-      const { success } = await rl.auth.limit(ip);
-      if (!success) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
+    // Rate limiting — early return before touching Supabase (no-op if Redis not configured)
+    if (rl) {
+      if (pathname === "/api/companies/search") {
+        const { success } = await rl.search.limit(ip);
+        if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      }
+      if (method === "POST" && (
+        pathname === "/api/business/checkout" ||
+        pathname === "/api/business/ads/checkout" ||
+        pathname === "/api/user/checkout-penalty"
+      )) {
+        const { success } = await rl.checkout.limit(ip);
+        if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      }
+      if (isServerAction) {
+        const { success } = await rl.actions.limit(ip);
+        if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+      }
+      if (pathname === "/api/user/export") {
+        const { success } = await rl.export.limit(ip);
+        if (!success) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
+      }
+      if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
+        const { success } = await rl.auth.limit(ip);
+        if (!success) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
+      }
     }
 
     const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p)) || pathname === "/";
