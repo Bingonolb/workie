@@ -99,9 +99,10 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: 8, overflow: "hidden",
-                    flexShrink: 0, background: `linear-gradient(135deg, ${sectorColor}44, ${sectorColor}22)`,
+                    flexShrink: 0, background: "var(--surface3)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 12, fontWeight: 900, color: sectorColor, letterSpacing: "-0.02em",
+                    fontSize: 12, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "-0.01em",
+                    border: "1px solid var(--border)",
                   }}>
                     {c.logo_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
