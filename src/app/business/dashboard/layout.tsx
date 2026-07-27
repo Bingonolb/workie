@@ -10,7 +10,12 @@ import { BottomNav } from "@/components/BottomNav";
 import { MobileTopActions } from "@/components/MobileTopActions";
 
 export default async function BusinessDashboardLayout({ children }: { children: React.ReactNode }) {
-  const [user, company] = await Promise.all([getUser(), getBusinessCompanyData()]);
+  let user, company;
+  try {
+    [user, company] = await Promise.all([getUser(), getBusinessCompanyData()]);
+  } catch(e) {
+    return <div style={{padding:40,color:"red",fontFamily:"monospace"}}><b>LAYOUT ERROR (data fetch):</b><br/>{String(e)}</div>;
+  }
   if (!user) redirect("/api/auth/signout?next=/login");
   if (!company) redirect("/business");
 
