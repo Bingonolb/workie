@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
 export default async function BusinessDashboardPage() {
+  try {
   const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
   const [supabase, bizCompanyId] = await Promise.all([createClient(), getBusinessCompanyId()]);
 
@@ -203,4 +204,9 @@ export default async function BusinessDashboardPage() {
       </div>
     </div>
   );
+  } catch (e) {
+    return <div style={{ padding: 40, fontFamily: "monospace", color: "red" }}>
+      <b>DEBUG ERROR:</b><br/>{String(e)}<br/>{(e instanceof Error) ? e.stack : "no stack"}
+    </div>;
+  }
 }
