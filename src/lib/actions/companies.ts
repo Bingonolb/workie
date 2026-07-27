@@ -5,8 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Company } from "@/lib/types";
 
-function escapeLike(s: string) {
-  return s.replace(/[%_\\]/g, "\\$&");
+function toAccentRegex(q: string): string {
+  const map: Record<string, string> = {
+    e: "[eéèêëEÉÈÊË]", a: "[aàâäAÀÂÄ]", u: "[uùûüUÙÛÜ]",
+    i: "[iîïIÎÏ]", o: "[oôöOÔÖ]", c: "[cçCÇ]",
+  };
+  return q.toLowerCase().split("").map(ch => map[ch] ?? ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("");
 }
 
 const SWIPE_PAGE_SIZE = 50;
@@ -39,7 +43,7 @@ export async function fetchSwipePage(
   if (filters?.sector) q = q.eq("sector", filters.sector);
   if (filters?.canton) q = q.eq("canton", filters.canton);
   if (filters?.search) {
-    q = q.ilike("name", `%${escapeLike(filters.search.trim())}%`);
+    q = q.filter("name", "imatch", toAccentRegex(filters.search.trim()));
   }
 
   const { data } = await q;
