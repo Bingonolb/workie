@@ -4,6 +4,7 @@ import { getUser, createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { AdminCompanyForm } from "./AdminCompanyForm";
 import { ArrowLeft, Shield } from "lucide-react";
+import { SECTOR_COLORS } from "@/lib/types";
 import type { Company } from "@/lib/types";
 
 export default async function AdminEditCompanyPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,9 +15,15 @@ export default async function AdminEditCompanyPage({ params }: { params: Promise
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") redirect("/explore");
 
-  const { data } = await supabase.from("companies").select("*").eq("id", id).maybeSingle();
+  const [{ data }, { data: sectorRows }] = await Promise.all([
+    supabase.from("companies").select("*").eq("id", id).maybeSingle(),
+    supabase.from("companies").select("sector").not("sector", "is", null),
+  ]);
   if (!data) notFound();
   const company = data as Company;
+
+  const dbSectors = sectorRows?.map(r => r.sector as string).filter(Boolean) ?? [];
+  const allSectors = [...new Set([...Object.keys(SECTOR_COLORS), ...dbSectors])].sort();
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
@@ -40,7 +47,7 @@ export default async function AdminEditCompanyPage({ params }: { params: Promise
         </div>
 
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: 28 }}>
-          <AdminCompanyForm company={company} />
+          <AdminCompanyForm company={company} sectors={allSectors} />
         </div>
 
       </main>

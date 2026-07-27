@@ -1,8 +1,21 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-function escapeLike(s: string) {
-  return s.replace(/[%_\\]/g, "\\$&");
+// Expand each letter to a regex group covering French accent variants
+function toAccentRegex(q: string): string {
+  const map: Record<string, string> = {
+    e: "[eéèêëEÉÈÊË]",
+    a: "[aàâäAÀÂÄ]",
+    u: "[uùûüUÙÛÜ]",
+    i: "[iîïIÎÏ]",
+    o: "[oôöOÔÖ]",
+    c: "[cçCÇ]",
+  };
+  return q.toLowerCase().split("").map(ch => {
+    const group = map[ch];
+    if (group) return group;
+    return ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }).join("");
 }
 
 export async function GET(request: Request) {
@@ -11,20 +24,20 @@ export async function GET(request: Request) {
   if (q.length < 1) return NextResponse.json({ companies: [] });
 
   const supabase = await createClient();
-  const safe = escapeLike(q);
+  const pattern = toAccentRegex(q);
 
-  // Fetch starts-with results first (most relevant), then contains-only results
-  const [{ data: startsWith }, { data: contains }] = await Promise.all([
-    supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `${safe}%`).order("name").limit(6),
-    supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `%${safe}%`).not("name", "ilike", `${safe}%`).order("name").limit(4),
-  ]);
+  // One query with accent-insensitive regex, then split starts-with vs contains in JS
+  const { data } = await supabase
+    .from("companies")
+    .select("id, name, city, sector, logo_url")
+    .filter("name", "~*", pattern)
+    .order("name")
+    .limit(10);
 
-  const seen = new Set<string>();
-  const results = [...(startsWith ?? []), ...(contains ?? [])].filter(c => {
-    if (seen.has(c.id)) return false;
-    seen.add(c.id);
-    return true;
-  }).slice(0, 8);
+  const startRe = new RegExp(`^${pattern}`, "i");
+  const startsWith = (data ?? []).filter(c => startRe.test(c.name));
+  const contains  = (data ?? []).filter(c => !startRe.test(c.name));
+  const results = [...startsWith.slice(0, 6), ...contains.slice(0, 4)].slice(0, 8);
 
   return NextResponse.json({ companies: results }, {
     headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },

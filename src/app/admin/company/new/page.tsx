@@ -4,6 +4,7 @@ import { getUser, createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { AdminNewCompanyForm } from "./AdminNewCompanyForm";
 import { ArrowLeft, Shield } from "lucide-react";
+import { SECTOR_COLORS } from "@/lib/types";
 
 export default async function AdminNewCompanyPage() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -11,6 +12,10 @@ export default async function AdminNewCompanyPage() {
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") redirect("/explore");
+
+  const { data: sectorRows } = await supabase.from("companies").select("sector").not("sector", "is", null);
+  const dbSectors = sectorRows?.map(r => r.sector as string).filter(Boolean) ?? [];
+  const allSectors = [...new Set([...Object.keys(SECTOR_COLORS), ...dbSectors])].sort();
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
@@ -33,7 +38,7 @@ export default async function AdminNewCompanyPage() {
         </div>
 
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: 28 }}>
-          <AdminNewCompanyForm />
+          <AdminNewCompanyForm sectors={allSectors} />
         </div>
       </main>
     </div>
