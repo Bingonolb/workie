@@ -11,7 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@sentry/nextjs": "^10.65.0",
+    "@sentry/nextjs": "^10.68.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.0",
     "@tanstack/react-query": "^5.101.2",
@@ -39,6 +39,7 @@
     "vitest": "^2.1.9"
   },
   "allowScripts": {
-    "@sentry/cli@2.58.6": true
+    "@sentry/cli@2.58.6": true,
+    "@sentry/nextjs@10.68.0": true
   }
 }

@@ -268,7 +268,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           )}
 
           {/* Location + size + salary */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: company.tags?.length > 0 ? 10 : 0 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 10 }}>
             <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
             <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
             {Number(company.avg_salary_chf) > 0 && (

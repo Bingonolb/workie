@@ -14,12 +14,12 @@ export const metadata: Metadata = {
     siteName: "Workie",
     type: "website",
     locale: "fr_CH",
-    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Workie Espace Entreprise" }],
+    images: [{ url: "https://www.workie.ch/api/og?title=Espace+Entreprise+%C2%B7+Workie&sub=G%C3%A9rez+votre+r%C3%A9putation+employeur+en+Suisse", width: 1200, height: 630, alt: "Workie Espace Entreprise" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Espace Entreprise · Workie",
-    images: ["https://www.workie.ch/og-default.png"],
+    images: ["https://www.workie.ch/api/og?title=Espace+Entreprise+%C2%B7+Workie&sub=G%C3%A9rez+votre+r%C3%A9putation+employeur+en+Suisse"],
   },
 };
 
