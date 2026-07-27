@@ -26,11 +26,11 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   const pattern = toAccentRegex(q);
 
-  // One query with accent-insensitive regex, then split starts-with vs contains in JS
+  // One query with accent-insensitive regex (imatch = ~* in PostgREST), then split in JS
   const { data } = await supabase
     .from("companies")
     .select("id, name, city, sector, logo_url")
-    .filter("name", "~*", pattern)
+    .filter("name", "imatch", pattern)
     .order("name")
     .limit(10);
 
