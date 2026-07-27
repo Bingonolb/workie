@@ -1,5 +1,4 @@
-import { getBusinessAnalytics } from "@/lib/actions/business";
-import { createClient, getBusinessCompanyId } from "@/lib/supabase/server";
+import { createClient, getBusinessCompanyId, getBusinessCompanyData } from "@/lib/supabase/server";
 import { Star, MessageCircle, TrendingUp, Users, ArrowRight, AlertCircle, Share2, CheckCircle, Clock, BarChart2, Trophy } from "lucide-react";
 import Link from "next/link";
 import { ShareCopyButton } from "@/components/ShareCopyButton";
@@ -8,36 +7,38 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
 export default async function BusinessDashboardPage() {
-  try {
   const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-  const [supabase, bizCompanyId] = await Promise.all([createClient(), getBusinessCompanyId()]);
 
-  const [data, newReviewsResult] = await Promise.all([
-    getBusinessAnalytics(),
-    bizCompanyId
-      ? supabase.from("reviews").select("*", { count: "exact", head: true }).eq("company_id", bizCompanyId).gte("created_at", weekAgo)
-      : Promise.resolve({ count: 0 }),
+  const [supabase, companyId, company] = await Promise.all([
+    createClient(),
+    getBusinessCompanyId(),
+    getBusinessCompanyData(),
   ]);
 
-  if ("error" in data && data.error) {
-    return <div style={{ padding: 40, color: "var(--text-muted)" }}>{data.error}</div>;
-  }
+  if (!company) return null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count, avgOverall, recommendRate, avgSalary, company } = data as any;
-  const newReviews = newReviewsResult.count;
+  const newReviewsResult = companyId
+    ? await supabase
+        .from("reviews")
+        .select("*", { count: "exact", head: true })
+        .eq("company_id", companyId)
+        .gte("created_at", weekAgo)
+    : { count: 0 };
 
-  const co = company as Record<string, unknown>;
+  const count = Number(company.review_count) || 0;
+  const avgOverall = Number(company.avg_rating) > 0 ? Number(company.avg_rating).toFixed(1) : "–";
+  const newReviews = newReviewsResult.count ?? 0;
+
   const profileFields = [
-    { label: "Description", done: !!co.description },
-    { label: "Logo", done: !!co.logo_url },
-    { label: "Photo de couverture", done: !!co.cover_url },
-    { label: "Site web", done: !!co.website_url },
-    { label: "LinkedIn", done: !!co.linkedin_url },
+    { label: "Description", done: !!company.description },
+    { label: "Logo", done: !!company.logo_url },
+    { label: "Photo de couverture", done: !!company.cover_url },
+    { label: "Site web", done: !!company.website_url },
+    { label: "LinkedIn", done: !!company.linkedin_url },
   ];
   const completedCount = profileFields.filter(f => f.done).length;
   const completionPct = Math.round((completedCount / profileFields.length) * 100);
-  const shareUrl = co.id ? `${SITE_URL}/company/${co.id}` : null;
+  const shareUrl = company.id ? `${SITE_URL}/company/${company.id}` : null;
 
   return (
     <div className="biz-page" style={{ maxWidth: 1100 }}>
@@ -46,14 +47,14 @@ export default async function BusinessDashboardPage() {
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 6 }}>Dashboard</h1>
           <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
-            Réputation employeur de <strong style={{ color: "var(--text)" }}>{String(co.name ?? "")}</strong>
+            Réputation employeur de <strong style={{ color: "var(--text)" }}>{company.name ?? ""}</strong>
           </p>
         </div>
         <ThemeToggle />
       </div>
 
       {/* New reviews banner */}
-      {(newReviews ?? 0) > 0 && (
+      {newReviews > 0 && (
         <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "16px 20px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(139,92,246,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -61,7 +62,7 @@ export default async function BusinessDashboardPage() {
             </div>
             <div>
               <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>
-                {newReviews} nouvel{(newReviews ?? 0) > 1 ? "aux" : ""} avis cette semaine
+                {newReviews} nouvel{newReviews > 1 ? "aux" : ""} avis cette semaine
               </p>
               <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Répondez rapidement — les candidats lisent vos réponses.</p>
             </div>
@@ -73,7 +74,7 @@ export default async function BusinessDashboardPage() {
       )}
 
       {/* No reviews yet */}
-      {Number(count) === 0 && (
+      {count === 0 && (
         <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "20px 24px", marginBottom: 28, display: "flex", gap: 14, alignItems: "flex-start" }}>
           <AlertCircle size={20} color="#8b5cf6" aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
           <div>
@@ -83,13 +84,13 @@ export default async function BusinessDashboardPage() {
         </div>
       )}
 
-      {/* KPIs — 4 chiffres clés, vue rapide uniquement */}
+      {/* KPIs */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 28 }}>
         {[
-          { label: "Note globale", value: avgOverall ?? "–", suffix: "/5", color: "#f59e0b", icon: <Star size={20} color="#f59e0b" fill="#f59e0b" aria-hidden="true" /> },
+          { label: "Note globale", value: avgOverall, suffix: avgOverall !== "–" ? "/5" : "", color: "#f59e0b", icon: <Star size={20} color="#f59e0b" fill="#f59e0b" aria-hidden="true" /> },
           { label: "Total avis", value: String(count), suffix: "", color: "#8b5cf6", icon: <MessageCircle size={20} color="#8b5cf6" aria-hidden="true" /> },
-          { label: "Recommandent", value: recommendRate !== null ? `${recommendRate}%` : "–", suffix: "", color: "#10b981", icon: <TrendingUp size={20} color="#10b981" aria-hidden="true" /> },
-          { label: "Salaire moyen", value: Number(avgSalary) > 0 ? `${(Number(avgSalary) / 1000).toFixed(0)}k` : "–", suffix: Number(avgSalary) > 0 ? " CHF" : "", color: "#f97316", icon: <Users size={20} color="#f97316" aria-hidden="true" /> },
+          { label: "Recommandent", value: "–", suffix: "", color: "#10b981", icon: <TrendingUp size={20} color="#10b981" aria-hidden="true" /> },
+          { label: "Salaire moyen", value: "–", suffix: "", color: "#f97316", icon: <Users size={20} color="#f97316" aria-hidden="true" /> },
         ].map(({ label, value, suffix, color, icon }) => (
           <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
@@ -103,7 +104,7 @@ export default async function BusinessDashboardPage() {
         ))}
       </div>
 
-      {/* Analytics CTA — remplace les graphiques dupliqués */}
+      {/* Analytics CTA */}
       <Link href="/business/dashboard/analytics" style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20,
         marginBottom: 20, padding: "20px 24px", borderRadius: 16, textDecoration: "none",
@@ -204,9 +205,4 @@ export default async function BusinessDashboardPage() {
       </div>
     </div>
   );
-  } catch (e) {
-    return <div style={{ padding: 40, fontFamily: "monospace", color: "red" }}>
-      <b>DEBUG ERROR:</b><br/>{String(e)}<br/>{(e instanceof Error) ? e.stack : "no stack"}
-    </div>;
-  }
 }

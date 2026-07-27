@@ -262,7 +262,10 @@ const getCachedAnalytics = unstable_cache(
 export async function getBusinessAnalytics() {
   try {
     const { company } = await requireBusiness();
-    const data = await getCachedAnalytics(company.id);
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Analytics indisponibles pour le moment. Réessayez.")), 8000)
+    );
+    const data = await Promise.race([getCachedAnalytics(company.id), timeout]);
     return { ...data, company };
   } catch (e) {
     return { error: (e as Error).message };
