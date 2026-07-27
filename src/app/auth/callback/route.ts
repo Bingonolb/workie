@@ -50,9 +50,7 @@ export async function GET(request: Request) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await supabase.from("profiles").update(updates as any).eq("id", userId);
       }
-      // Check if onboarding was seen (for existing profiles that haven't completed it)
-      const { data: prof } = await supabase.from("profiles").select("has_seen_onboarding").eq("id", userId).maybeSingle();
-      return prof?.has_seen_onboarding === false;
+      return false; // Profil existant — ne pas renvoyer l'email de bienvenue
     } else {
       // New profile — use canton from user_metadata, fallback to geo
       const emailBase = u?.email?.split("@")[0]?.replace(/[^a-z0-9]/gi, "").toLowerCase() ?? "user";
