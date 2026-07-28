@@ -5,12 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Company } from "@/lib/types";
 
-function toAccentRegex(q: string): string {
-  const map: Record<string, string> = {
-    e: "[eéèêëEÉÈÊË]", a: "[aàâäAÀÂÄ]", u: "[uùûüUÙÛÜ]",
-    i: "[iîïIÎÏ]", o: "[oôöOÔÖ]", c: "[cçCÇ]",
-  };
-  return q.toLowerCase().split("").map(ch => map[ch] ?? ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("");
+function stripAccents(s: string) {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+function escapeLike(s: string) {
+  return s.replace(/[%_\\]/g, "\\$&");
 }
 
 const SWIPE_PAGE_SIZE = 50;
@@ -43,7 +43,14 @@ export async function fetchSwipePage(
   if (filters?.sector) q = q.eq("sector", filters.sector);
   if (filters?.canton) q = q.eq("canton", filters.canton);
   if (filters?.search) {
-    q = q.filter("name", "imatch", toAccentRegex(filters.search.trim()));
+    const raw = filters.search.trim();
+    const stripped = escapeLike(stripAccents(raw));
+    const original = escapeLike(raw);
+    if (stripped !== original) {
+      q = q.or(`name.ilike.%${original}%,name.ilike.%${stripped}%`);
+    } else {
+      q = q.ilike("name", `%${original}%`);
+    }
   }
 
   const { data } = await q;
