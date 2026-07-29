@@ -1,10 +1,9 @@
 "use client";
 
-import { useTransition, useState, useRef, useEffect } from "react";
+import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile } from "@/lib/actions/profile";
 import type { Profile } from "@/lib/types";
-import { ImageIcon } from "lucide-react";
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface2)", border: "1px solid var(--border2, var(--border))",
@@ -20,21 +19,7 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
   const [pending, startTransition] = useTransition();
   const [success, setSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    return () => { if (avatarPreview) URL.revokeObjectURL(avatarPreview); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [avatarPreview]);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
-    setAvatarPreview(URL.createObjectURL(file));
-  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,7 +30,6 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
         const res = await updateProfile(formData);
         if (res?.error) { setSaveError(res.error); return; }
         setSuccess(true);
-        setAvatarPreview(null);
         router.refresh();
         setTimeout(() => setSuccess(false), 3000);
       } catch (err) {
@@ -54,67 +38,10 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
     });
   };
 
-  const currentAvatar = profile?.avatar_url ?? null;
-  const displayAvatar = avatarPreview ?? currentAvatar;
-  const initial = (profile?.full_name?.[0] ?? profile?.username?.[0] ?? email[0] ?? "?").toUpperCase();
-
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-      {/* Avatar preview + upload */}
-      <div>
-        <label style={lbl}>Photo de profil</label>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          {/* Current / preview avatar */}
-          <div style={{
-            width: 64, height: 64, borderRadius: 14, flexShrink: 0, overflow: "hidden",
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            border: avatarPreview ? "2px solid #8b5cf6" : "2px solid var(--border)",
-            position: "relative",
-          }}>
-            {displayAvatar
-              // eslint-disable-next-line @next/next/no-img-element
-              ? <img src={displayAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-              : <span style={{ fontSize: 22, fontWeight: 900, color: "#fff" }}>{initial}</span>
-            }
-          </div>
-
-          <div style={{ flex: 1 }}>
-            {avatarPreview && (
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 6 }}>
-                Aperçu — cliquez sur Enregistrer pour confirmer
-              </p>
-            )}
-            <label style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "8px 14px", borderRadius: 8, cursor: "pointer",
-              background: "var(--surface2)", border: "1px solid var(--border)",
-              fontSize: 12, fontWeight: 600, color: "var(--text-muted)",
-            }}>
-              <ImageIcon size={13} aria-hidden="true" /> Choisir une photo
-              <input
-                ref={fileRef}
-                name="avatar"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
-            </label>
-            {avatarPreview && (
-              <button type="button" onClick={() => { setAvatarPreview(null); if (fileRef.current) fileRef.current.value = ""; }} style={{
-                marginLeft: 8, fontSize: 12, color: "#ef4444",
-                background: "none", border: "none", cursor: "pointer", fontWeight: 600,
-              }}>
-                Annuler
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-<div className="profile-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div className="profile-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div style={{ gridColumn: "1 / -1" }}>
           <label htmlFor="full_name" style={lbl}>Nom complet</label>
           <input id="full_name" name="full_name" defaultValue={profile?.full_name ?? ""} placeholder="Alex Martin" style={inp}

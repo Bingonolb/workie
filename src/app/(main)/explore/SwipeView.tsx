@@ -208,6 +208,21 @@ export function SwipeView({
     }).catch(() => { fetchingRef.current = false; });
   }, [index, companies.length, filters, exhausted]);
 
+  // Auto-reshuffle when deck is empty instead of showing an end screen
+  const deckEmpty = index > 0 && index >= companies.length;
+  useEffect(() => {
+    if (!deckEmpty) return;
+    nextOffsetRef.current = 50 + Math.floor(Math.random() * 200);
+    fetchingRef.current = false;
+    actedIds.current = new Set();
+    setExhausted(false);
+    setCompanies([]);
+    setIndex(0);
+    setGone(null);
+    setDrag(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deckEmpty]);
+
   const next = companies[index + 1];
   currentRef.current = current;
   const totalSeen = index;
@@ -418,24 +433,7 @@ export function SwipeView({
     else setDrag(0);
   };
 
-  if (!current) {
-    const realCount = companies.filter(c => !isAd(c)).length;
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 500, gap: 16 }}>
-        <div style={{ fontSize: 52 }}>🔥</div>
-        <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)" }}>Tu as tout exploré !</p>
-        <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{realCount} entreprises découvertes</p>
-        <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-          <button type="button" onClick={() => { setCompanies(shuffle(companies.filter(c => !isAd(c)))); setIndex(0); setGone(null); setDrag(0); actedIds.current = new Set(); }} style={{ padding: "12px 24px", borderRadius: 50, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>
-            Recommencer
-          </button>
-          <a href="/ranking" style={{ padding: "12px 24px", borderRadius: 50, background: "var(--surface)", color: "var(--text)", fontWeight: 700, fontSize: 14, border: "1px solid var(--border2)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
-            <Flame size={14} fill="#f97316" color="#f97316" aria-hidden="true" /> Classement
-          </a>
-        </div>
-      </div>
-    );
-  }
+  if (!current) return null;
 
   const rotate = drag / 14;
   const overlayOpacity = Math.min(Math.abs(drag) / SWIPE_THRESHOLD, 1);
@@ -445,7 +443,7 @@ export function SwipeView({
   return (
     <div className="swipe-container" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: "clamp(8px, 3vh, 24px)" }}>
       {/* Card stack */}
-      <div style={{ position: "relative", width: "min(420px, 96vw)", height: "clamp(300px, calc(100dvh - 340px), 490px)", touchAction: "pan-y" }}>
+      <div style={{ position: "relative", width: "min(420px, 96vw)", height: "clamp(300px, calc(100svh - 340px), 490px)", touchAction: "pan-y" }}>
         {/* Toast — top of card, smooth slide-in */}
         {toast && (
           <div key={toast.msg} style={{
