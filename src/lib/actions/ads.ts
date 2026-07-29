@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { randomUUID } from "crypto";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
@@ -233,6 +233,26 @@ export async function getAdminCampaigns(): Promise<{
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+// Cached raw ad pool — uses adminClient (no cookies), shared across all requests.
+// Financial fields stripped in getActiveAds() after cache hit.
+const _getAdPoolCached = unstable_cache(
+  async (format: AdFormat | undefined, today: string): Promise<AdCampaign[]> => {
+    const admin = createAdminClient();
+    let q = admin
+      .from("ad_campaigns")
+      .select("id, company_id, user_id, format, headline, body_text, image_url, cta_label, cta_url, target_cantons, target_sectors, status, start_date, end_date, impression_count, click_count, created_at, spent_chf, total_budget_chf")
+      .eq("status", "active")
+      .lte("start_date", today)
+      .or(`end_date.is.null,end_date.gte.${today}`)
+      .order("spent_chf", { ascending: true });
+    if (format) q = (q as typeof q).eq("format", format);
+    const { data } = await (q as typeof q).limit(50);
+    return (data ?? []) as unknown as AdCampaign[];
+  },
+  ["active-ads"],
+  { revalidate: 30, tags: ["ad-campaigns"] }
+);
+
 export async function getActiveAds(opts?: {
   format?: AdFormat;
   canton?: string;
@@ -240,36 +260,23 @@ export async function getActiveAds(opts?: {
   limit?: number;
 }): Promise<PublicAdCampaign[]> {
   try {
-    const supabase = await createClient();
     const today = new Date().toISOString().slice(0, 10);
-    // Select only what's needed: public fields + spent/total for budget safety check (stripped before returning)
-    let q = supabase
-      .from("ad_campaigns")
-      .select("id, company_id, user_id, format, headline, body_text, image_url, cta_label, cta_url, target_cantons, target_sectors, status, start_date, end_date, impression_count, click_count, created_at, spent_chf, total_budget_chf")
-      .eq("status", "active")
-      .lte("start_date", today)
-      .or(`end_date.is.null,end_date.gte.${today}`)
-      .order("spent_chf", { ascending: true }); // prioritise less-spent campaigns
-    if (opts?.format) q = q.eq("format", opts.format);
-    const { data } = await q.limit(50); // fetch pool, then filter + shuffle
+    const rawPool = await _getAdPoolCached(opts?.format, today);
 
-    const pool = ((data ?? []) as unknown as AdCampaign[]).filter(ad => {
+    const pool = rawPool.filter(ad => {
       if (ad.end_date && ad.end_date < today) return false;
-      // status='active' already excludes exhausted campaigns (set by increment_ad_impression RPC)
-      // This is a safety fallback only — spent/total are available server-side for this check
       if (Number(ad.spent_chf) >= Number(ad.total_budget_chf)) return false;
       if (opts?.canton && ad.target_cantons.length > 0 && !ad.target_cantons.includes(opts.canton)) return false;
       if (opts?.sector && ad.target_sectors.length > 0 && !ad.target_sectors.includes(opts.sector)) return false;
       return true;
     });
 
-    // Fisher-Yates shuffle for rotation
+    // Fisher-Yates shuffle for fair rotation (each caller gets a different order)
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
 
-    // Strip financial fields before sending to client
     return pool.slice(0, opts?.limit ?? 10).map(({ spent_chf: _s, total_budget_chf: _t, daily_budget_chf: _d, cpm_chf: _c, ...rest }) => rest as PublicAdCampaign);
   } catch (e) { captureServerError(e, { action: "getActiveAds" }); return []; }
 }

@@ -38,10 +38,10 @@ export function ExploreClient({
   favIds: initialFavIds,
   flameIds: initialFlameIds,
   swipeAds,
-  isLoggedIn,
-  isGuest,
-  isAdmin,
-  penaltyCredits,
+  isLoggedIn: initialIsLoggedIn,
+  isGuest: initialIsGuest,
+  isAdmin: initialIsAdmin,
+  penaltyCredits: initialPenaltyCredits,
   penaltySuccess,
   initialView,
   initialSector,
@@ -70,6 +70,16 @@ export function ExploreClient({
   const [canton, setCanton] = useState(initialCanton ?? "");
   const [sort, setSort] = useState(initialSort ?? "recent");
 
+  // Auth state — SSR passes empty defaults, hydrated from /api/user/context on mount
+  const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
+  const [isGuest, setIsGuest] = useState(initialIsGuest);
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
+  const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
+  const [favIds, setFavIds] = useState<string[]>(initialFavIds);
+  const [flameIds, setFlameIds] = useState<string[]>(initialFlameIds);
+  const [squareAdsState, setSquareAdsState] = useState<PublicAdCampaign[]>(squareAds);
+  const [swipeAdsState, setSwipeAdsState] = useState<PublicAdCampaign[]>(swipeAds);
+
   // Server-driven company list + total count
   const [companies, setCompanies] = useState<Company[]>(initialCompanies);
   const [total, setTotal] = useState(initialTotal);
@@ -85,6 +95,54 @@ export function ExploreClient({
       const img = new window.Image();
       img.src = url;
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Read URL params on mount and apply filters + view if present
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const urlSector = sp.get("sector") ?? "";
+    const urlCanton = sp.get("canton") ?? "";
+    const urlSort   = sp.get("sort")   ?? "recent";
+    const urlView   = sp.get("view");
+    const urlPenalty = sp.get("penalty_success") === "1";
+
+    if (urlView === "swipe") setView("swipe");
+    if (urlPenalty) {
+      // Penalty success — user will see updated credits after /api/user/context loads
+    }
+    if (urlSector || urlCanton || urlSort !== "recent") {
+      setSector(urlSector);
+      setCanton(urlCanton);
+      setSort(urlSort);
+      startTransition(async () => {
+        const result = await fetchGridPage(
+          { sector: urlSector || undefined, canton: urlCanton || undefined, sort: urlSort },
+          0,
+        );
+        setCompanies(result.companies);
+        setTotal(result.total);
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Hydrate auth state + ads client-side (page is ISR/CDN-cached, no cookies in SSR)
+  useEffect(() => {
+    const sectorParam = sector ? `&sector=${encodeURIComponent(sector)}` : "";
+    Promise.all([
+      fetch("/api/user/context").then(r => r.json()),
+      fetch(`/api/ads/active?${sectorParam}`).then(r => r.json()),
+    ]).then(([ctx, ads]) => {
+      setIsLoggedIn(ctx.isLoggedIn);
+      setIsGuest(!ctx.isLoggedIn);
+      setIsAdmin(ctx.isAdmin);
+      setFavIds(ctx.favIds);
+      setFlameIds(ctx.flameIds);
+      setPenaltyCredits(ctx.penaltyCredits);
+      if (ads.squareAds) setSquareAdsState(ads.squareAds);
+      if (ads.swipeAds) setSwipeAdsState(ads.swipeAds);
+    }).catch(() => { /* leave defaults */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -183,7 +241,7 @@ export function ExploreClient({
 
   // Ad slot map: one ad every 7 companies starting at adOffset
   const AD_INTERVAL = 7;
-  const adsForGrid = isGuest ? [] : squareAds;
+  const adsForGrid = isGuest ? [] : squareAdsState;
   const adSlotMap = useMemo((): Map<number, number> => {
     if (adsForGrid.length === 0 || companies.length < adOffset.current + 1) return new Map();
     const map = new Map<number, number>();
@@ -217,14 +275,14 @@ export function ExploreClient({
         <SwipeView
           key={`${sector}-${canton}`}
           companies={swipeCompanies}
-          initialFavIds={initialFavIds}
-          initialFlameIds={initialFlameIds}
+          initialFavIds={favIds}
+          initialFlameIds={flameIds}
           isLoggedIn={isLoggedIn}
           isAdmin={isAdmin}
           penaltyCredits={penaltyCredits}
           penaltySuccess={penaltySuccess}
           filters={{ sector: sector || undefined, canton: canton || undefined }}
-          swipeAds={swipeAds}
+          swipeAds={swipeAdsState}
         />
       </>
     );
@@ -288,7 +346,7 @@ export function ExploreClient({
                     >
                       <CompanyCard
                         company={c}
-                        isFav={initialFavIds.includes(c.id)}
+                        isFav={favIds.includes(c.id)}
                         isLoggedIn={isLoggedIn}
                         priority={i < 8}
                         loading="eager"

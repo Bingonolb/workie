@@ -1,13 +1,27 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 function escapeLike(s: string) {
   return s.replace(/[%_\\]/g, "\\$&");
 }
 
-// Normalize accents for comparison: é→e, à→a, etc.
 function stripAccents(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+// Module-level cache: survives across concurrent requests within a serverless instance.
+// Key = query string, value = { data, expires }. Max 500 entries, 30s TTL.
+type SearchResult = { id: string; name: string; city: string; sector: string; logo_url: string | null };
+const searchCache = new Map<string, { data: SearchResult[]; expires: number }>();
+const CACHE_TTL = 30_000;
+const MAX_CACHE_ENTRIES = 500;
+
+function evictExpired() {
+  const now = Date.now();
+  for (const [k, v] of searchCache) {
+    if (v.expires < now) searchCache.delete(k);
+    if (searchCache.size <= MAX_CACHE_ENTRIES) break;
+  }
 }
 
 export async function GET(request: Request) {
@@ -15,19 +29,26 @@ export async function GET(request: Request) {
   const q = (searchParams.get("q") ?? "").trim().slice(0, 100);
   if (q.length < 1) return NextResponse.json({ companies: [] });
 
-  const supabase = await createClient();
+  // Check in-memory cache first
+  const cacheKey = q.toLowerCase();
+  const cached = searchCache.get(cacheKey);
+  if (cached && cached.expires > Date.now()) {
+    return NextResponse.json({ companies: cached.data }, {
+      headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
+    });
+  }
+
+  const supabase = createAdminClient();
 
   // Search with both the original query AND its accent-stripped version
   const qStripped = stripAccents(q);
   const safe = escapeLike(q);
   const safeStripped = escapeLike(qStripped);
 
-  // Fetch up to 20 candidates using both variants, then rank in JS
   const queries = [
     supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `${safe}%`).order("name").limit(6),
     supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `%${safe}%`).not("name", "ilike", `${safe}%`).order("name").limit(6),
   ];
-  // Only add stripped query if it differs (avoids duplicate requests)
   if (safeStripped !== safe) {
     queries.push(
       supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `${safeStripped}%`).order("name").limit(6),
@@ -53,7 +74,12 @@ export async function GET(request: Request) {
     }
   }
 
-  const final = [...startsWith.slice(0, 6), ...contains.slice(0, 4)].slice(0, 8);
+  const final = [...startsWith.slice(0, 6), ...contains.slice(0, 4)].slice(0, 8) as SearchResult[];
+
+  // Store in module-level cache
+  if (searchCache.size >= MAX_CACHE_ENTRIES) evictExpired();
+  searchCache.set(cacheKey, { data: final, expires: Date.now() + CACHE_TTL });
+
   return NextResponse.json({ companies: final }, {
     headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
   });

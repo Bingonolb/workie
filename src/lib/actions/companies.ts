@@ -63,58 +63,69 @@ import { GRID_PAGE_SIZE, COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
 
 const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,logo_url,score,is_verified,tags,description,profile_score";
 
-// Paginated, filtered, server-sorted — replaces the 850KB getAllCompaniesForGrid blob.
-// Uses adminClient: no cookies(), safe to call from both server components and client actions.
+// Cached grid fetcher — no cookies(), uses adminClient, safe to cache across requests.
+// All users with the same filters share one DB query per 60s instead of N.
+const _fetchGridPageCached = unstable_cache(
+  async (
+    filters: { sector?: string; canton?: string; sort?: string },
+    page: number
+  ): Promise<{ companies: Company[]; total: number }> => {
+    const admin = createAdminClient();
+
+    let q = admin
+      .from("companies")
+      .select(GRID_COLS, { count: "exact" })
+      .neq("employee_range", "1-10");
+
+    if (filters.sector) q = q.eq("sector", filters.sector);
+    if (filters.canton) q = q.eq("canton", filters.canton);
+
+    switch (filters.sort) {
+      case "rating":
+        q = q
+          .order("avg_rating",   { ascending: false, nullsFirst: false })
+          .order("review_count", { ascending: false, nullsFirst: false })
+          .order("name",         { ascending: true });
+        break;
+      case "reviews":
+        q = q
+          .order("review_count", { ascending: false, nullsFirst: false })
+          .order("avg_rating",   { ascending: false, nullsFirst: false })
+          .order("name",         { ascending: true });
+        break;
+      case "score":
+        q = q
+          .order("score",      { ascending: false, nullsFirst: false })
+          .order("avg_rating", { ascending: false, nullsFirst: false })
+          .order("name",       { ascending: true });
+        break;
+      case "name":
+        q = q.order("name", { ascending: true });
+        break;
+      default:
+        q = q
+          .order("profile_score", { ascending: false, nullsFirst: false })
+          .order("score",         { ascending: false, nullsFirst: false })
+          .order("avg_rating",    { ascending: false, nullsFirst: false })
+          .order("name",          { ascending: true });
+    }
+
+    const { data, count } = await q.range(
+      page * GRID_PAGE_SIZE,
+      (page + 1) * GRID_PAGE_SIZE - 1
+    );
+
+    return { companies: (data ?? []) as Company[], total: count ?? 0 };
+  },
+  ["grid-page"],
+  { revalidate: 60, tags: ["companies"] }
+);
+
 export async function fetchGridPage(
   filters: { sector?: string; canton?: string; sort?: string },
   page: number
 ): Promise<{ companies: Company[]; total: number }> {
-  const admin = createAdminClient();
-
-  let q = admin
-    .from("companies")
-    .select(GRID_COLS, { count: "exact" })
-    .neq("employee_range", "1-10");
-
-  if (filters.sector) q = q.eq("sector", filters.sector);
-  if (filters.canton) q = q.eq("canton", filters.canton);
-
-  switch (filters.sort) {
-    case "rating":
-      q = q
-        .order("avg_rating",   { ascending: false, nullsFirst: false })
-        .order("review_count", { ascending: false, nullsFirst: false })
-        .order("name",         { ascending: true });
-      break;
-    case "reviews":
-      q = q
-        .order("review_count", { ascending: false, nullsFirst: false })
-        .order("avg_rating",   { ascending: false, nullsFirst: false })
-        .order("name",         { ascending: true });
-      break;
-    case "score":
-      q = q
-        .order("score",      { ascending: false, nullsFirst: false })
-        .order("avg_rating", { ascending: false, nullsFirst: false })
-        .order("name",       { ascending: true });
-      break;
-    case "name":
-      q = q.order("name", { ascending: true });
-      break;
-    default:
-      q = q
-        .order("profile_score", { ascending: false, nullsFirst: false })
-        .order("score",         { ascending: false, nullsFirst: false })
-        .order("avg_rating",    { ascending: false, nullsFirst: false })
-        .order("name",          { ascending: true });
-  }
-
-  const { data, count } = await q.range(
-    page * GRID_PAGE_SIZE,
-    (page + 1) * GRID_PAGE_SIZE - 1
-  );
-
-  return { companies: (data ?? []) as Company[], total: count ?? 0 };
+  return _fetchGridPageCached(filters, page);
 }
 
 export const getCachedCompany = unstable_cache(
