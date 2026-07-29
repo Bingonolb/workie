@@ -1,9 +1,9 @@
-import { Navbar } from "@/components/Navbar";
+import { NavbarClient } from "@/components/NavbarClient";
 
-export default async function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Navbar />
+      <NavbarClient />
       {children}
     </>
   );
