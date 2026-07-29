@@ -52,46 +52,23 @@ export default async function ProfilePage() {
 
         {/* ── Header ── */}
         <div className="profile-header" style={{
-          position: "relative",
-          borderRadius: 22,
-          overflow: "hidden",
-          marginBottom: 20,
+          background: "var(--surface)",
           border: "1px solid var(--border)",
+          borderRadius: 20,
+          padding: "28px 32px",
+          marginBottom: 20,
         }}>
-          {/* Gradient cover band */}
-          <div style={{
-            height: 90,
-            background: "linear-gradient(135deg, #6d28d9 0%, #8b5cf6 40%, #f97316 100%)",
-          }} />
-          {/* Identity block overlapping the cover */}
-          <div style={{
-            background: "var(--surface)",
-            padding: "0 28px 22px",
-          }}>
-            {/* Avatar circle — pulled up into the cover */}
-            <div style={{
-              width: 72, height: 72, borderRadius: 20,
-              background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              border: "3px solid var(--surface)",
-              marginTop: -36, marginBottom: 12,
-              fontSize: 28, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em",
-              userSelect: "none",
-            }}>
-              {initial}
-            </div>
-            <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 5 }}>
-              {displayName}
-            </h1>
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px 16px" }}>
-              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{user.email}</span>
-              {(profile?.city || profile?.country) && (
-                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                  📍 {[profile.city, profile.country].filter(Boolean).join(", ")}
-                </span>
-              )}
-              <span style={{ fontSize: 12, color: "var(--text-muted)" }}>🗓 Membre depuis {memberSince}</span>
-            </div>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 14 }}>
+            {displayName}
+          </h1>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{user.email}</span>
+            {(profile?.city || profile?.country) && (
+              <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
+                {[profile.city, profile.country].filter(Boolean).join(", ")}
+              </span>
+            )}
+            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>Membre depuis {memberSince}</span>
           </div>
         </div>
 
