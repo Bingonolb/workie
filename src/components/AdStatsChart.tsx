@@ -23,7 +23,6 @@ export function AdStatsChart({ stats }: { stats: DayStat[] }) {
 
   return (
     <div style={{ padding: "0 20px 18px" }}>
-      {/* Header row */}
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
@@ -48,7 +47,6 @@ export function AdStatsChart({ stats }: { stats: DayStat[] }) {
         </div>
       </div>
 
-      {/* Bar chart */}
       <div
         style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 60 }}
         onPointerLeave={() => setActiveIdx(null)}
@@ -79,7 +77,6 @@ export function AdStatsChart({ stats }: { stats: DayStat[] }) {
         })}
       </div>
 
-      {/* X-axis */}
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 10, color: "var(--text-muted)" }}>
         <span>{formatDay(stats[0]?.day ?? "")}</span>
         <span>{formatDay(stats[14]?.day ?? "")}</span>

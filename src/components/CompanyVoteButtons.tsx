@@ -9,7 +9,6 @@ export function CompanyVoteButtons({
   companyId,
   isLoggedIn,
   isAdmin,
-  isBusiness,
   penaltyCredits: initialCredits,
   initialBoosted,
   initialPenalized,
@@ -19,7 +18,6 @@ export function CompanyVoteButtons({
   companyId: string;
   isLoggedIn: boolean;
   isAdmin: boolean;
-  isBusiness: boolean;
   penaltyCredits: number;
   initialBoosted: boolean;
   initialPenalized: boolean;
@@ -47,8 +45,6 @@ export function CompanyVoteButtons({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [showGuest, showUpgrade]);
-
-  if (isBusiness) return null;
 
   const showToast = (msg: string, color: string) => {
     setToast({ msg, color });

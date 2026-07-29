@@ -83,11 +83,10 @@ function getDisplayTags(company: Company): string[] {
 // Neutral blur placeholder — shows instantly before the real image loads
 const BLUR_DATA_URL = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMyMDIwMzAiLz48L3N2Zz4=";
 
-export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusiness = false, priority = false, loading = "eager" }: {
+export function CompanyCard({ company, isFav = false, isLoggedIn = false, priority = false, loading = "eager" }: {
   company: Company;
   isFav?: boolean;
   isLoggedIn?: boolean;
-  isBusiness?: boolean;
   priority?: boolean;
   loading?: "eager" | "lazy";
 }) {
@@ -154,7 +153,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           {/* Score badge on cover */}
           {score > 0 && (
             <div style={{
-              position: "absolute", top: 11, right: isBusiness ? 11 : 62,
+              position: "absolute", top: 11, right: 62,
               background: "rgba(0,0,0,0.45)",
               backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
               borderRadius: 50, padding: "3px 8px",
@@ -167,28 +166,26 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           )}
 
           {/* Flame / Favorite */}
-          {!isBusiness && (
-            <button
-              type="button"
-              onClick={handleFav}
-              disabled={pending}
-              aria-pressed={fav}
-              aria-label={fav ? `Retirer ${company.name} des favoris` : `Ajouter ${company.name} aux favoris`}
-              style={{
-                position: "absolute", top: 8, right: 8,
-                width: 40, height: 40, borderRadius: "50%",
-                background: fav ? "rgba(249,115,22,0.88)" : "rgba(13,13,19,0.55)",
-                border: fav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.12)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", transition: "all 0.18s",
-              }}
-            >
-              <Flame size={15} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.7)"} aria-hidden="true" />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleFav}
+            disabled={pending}
+            aria-pressed={fav}
+            aria-label={fav ? `Retirer ${company.name} des favoris` : `Ajouter ${company.name} aux favoris`}
+            style={{
+              position: "absolute", top: 8, right: 8,
+              width: 40, height: 40, borderRadius: "50%",
+              background: fav ? "rgba(249,115,22,0.88)" : "rgba(13,13,19,0.55)",
+              border: fav ? "1px solid rgba(249,115,22,0.5)" : "1px solid rgba(255,255,255,0.12)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", transition: "all 0.18s",
+            }}
+          >
+            <Flame size={15} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.7)"} aria-hidden="true" />
+          </button>
 
           {/* Bottom: logo/initials + company name */}
-          <div style={{ position: "absolute", bottom: 12, left: 12, right: isBusiness ? 12 : 60, display: "flex", alignItems: "flex-end", gap: 9 }}>
+          <div style={{ position: "absolute", bottom: 12, left: 12, right: 60, display: "flex", alignItems: "flex-end", gap: 9 }}>
             {/* Logo or initials */}
             <div style={{ flexShrink: 0, width: 38, height: 38, borderRadius: 9, overflow: "hidden", position: "relative",
               background: logoLoaded ? "#fff" : `${sectorColor}33`,

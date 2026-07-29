@@ -39,7 +39,6 @@ export function ExploreClient({
   flameIds: initialFlameIds,
   swipeAds,
   isLoggedIn,
-  isBusiness,
   isGuest,
   isAdmin,
   penaltyCredits,
@@ -56,7 +55,6 @@ export function ExploreClient({
   flameIds: string[];
   swipeAds: PublicAdCampaign[];
   isLoggedIn: boolean;
-  isBusiness: boolean;
   isGuest: boolean;
   isAdmin: boolean;
   penaltyCredits: number;
@@ -223,7 +221,6 @@ export function ExploreClient({
           initialFlameIds={initialFlameIds}
           isLoggedIn={isLoggedIn}
           isAdmin={isAdmin}
-          isBusiness={isBusiness}
           penaltyCredits={penaltyCredits}
           penaltySuccess={penaltySuccess}
           filters={{ sector: sector || undefined, canton: canton || undefined }}
@@ -293,7 +290,6 @@ export function ExploreClient({
                         company={c}
                         isFav={initialFavIds.includes(c.id)}
                         isLoggedIn={isLoggedIn}
-                        isBusiness={isBusiness}
                         priority={i < 8}
                         loading="eager"
                       />
@@ -310,7 +306,7 @@ export function ExploreClient({
                 <div style={{ position: "relative", marginTop: 20, overflow: "hidden" }}>
                   <div aria-hidden="true" className="guest-blur-preview">
                     {blurCompanies.map(c => (
-                      <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} isBusiness={false} priority={false} />
+                      <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} priority={false} />
                     ))}
                   </div>
                   <div style={{

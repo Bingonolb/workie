@@ -88,22 +88,20 @@ export default async function ExplorePage({
   // Resolve viewer canton FIRST (profile → IP fallback) for ad targeting
   const viewerCanton = await getViewerCanton().catch(() => null);
 
-  const [user, favIds, flameIds, isAdmin, bizCompanyId, squareAds, swipeAds, allCompaniesForGrid] = await Promise.all([
+  const [user, favIds, flameIds, isAdmin, squareAds, swipeAds, allCompaniesForGrid] = await Promise.all([
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
     getUserFlameIds().catch(() => [] as string[]),
     import("@/lib/supabase/server").then(m => m.getIsAdmin()).catch(() => false),
-    import("@/lib/supabase/server").then(m => m.getBusinessCompanyId()).catch(() => null),
     getActiveAds({ format: "square", canton: viewerCanton ?? undefined }).catch(() => []),
     getActiveAds({ format: "swipe", canton: viewerCanton ?? undefined, sector: params.sector }).catch(() => []),
     fetchGridPage({ sector: params.sector, canton: params.canton, sort: params.sort }, 0).catch(() => ({ companies: [] as Company[], total: 0 })),
   ]);
   const { companies: initialCompanies, total: initialTotal } = allCompaniesForGrid;
-  const isBusiness = !!bizCompanyId;
 
   // Helper: resolve penalty credits (with optional Stripe verification on redirect)
   const resolvePenaltyCredits = async (): Promise<number> => {
-    if (!user || isBusiness || isAdmin) return 0;
+    if (!user || isAdmin) return 0;
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
     if (penaltySuccess && process.env.STRIPE_SECRET_KEY) {
@@ -191,7 +189,6 @@ export default async function ExplorePage({
           flameIds={flameIds}
           swipeAds={swipeAds}
           isLoggedIn={!!user}
-          isBusiness={isBusiness}
           isGuest={!user}
           isAdmin={isAdmin}
           penaltyCredits={penaltyCredits}

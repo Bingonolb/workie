@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
-import { trackJobApplyClick } from "@/lib/actions/business";
+import { trackJobApplyClick } from "@/lib/actions/analytics";
 
 export function JobApplyButton({ jobId, companyId, applyUrl }: { jobId: string; companyId: string; applyUrl: string }) {
   const handleClick = () => {

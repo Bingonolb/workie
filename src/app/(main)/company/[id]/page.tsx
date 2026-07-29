@@ -7,7 +7,7 @@ import { getCachedCompany } from "@/lib/actions/companies";
 import { getCachedReviews } from "@/lib/actions/reviews";
 import { createClient } from "@/lib/supabase/server";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
-import { getUser, getBusinessCompanyId } from "@/lib/supabase/server";
+import { getUser } from "@/lib/supabase/server";
 import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle } from "lucide-react";
 import { HelpfulButton } from "@/components/HelpfulButton";
 import { ShareButton } from "@/components/ShareButton";
@@ -109,11 +109,11 @@ function reviewRelevanceScore(review: Review): number {
   // Log scale: 10 votes ≈ 0.7, 20 votes ≈ 1.0, beyond that capped
   const helpfulScore = Math.min(Math.log1p(Number(review.helpful_count ?? 0)) / Math.log1p(20), 1);
 
-  // Optional fields: each filled field raises quality perception
+  // Optional fields in the new format (ratings-only)
   const optionalFields = [
-    review.pros, review.cons, review.salary_chf, review.title,
+    review.salary_chf,
     review.rating_culture, review.rating_management, review.rating_worklife, review.rating_career,
-    review.start_year,
+    review.work_mode, review.employment_type, review.duration_range,
   ];
   const completeness = optionalFields.filter(v => v !== null && v !== undefined && v !== 0 && v !== "").length / optionalFields.length;
 
@@ -129,39 +129,38 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const sortMode: SortMode = (["relevance", "recent", "helpful"].includes(sp.sort ?? "")) ? sp.sort as SortMode : "relevance";
   // createClient runs in parallel with the other fetches — not sequential
-  const [company, reviews, user, favIds, supabase, bizCompanyId] = await Promise.all([
+  const [company, reviews, user, favIds, supabase] = await Promise.all([
     getCachedCompany(id).catch(() => null),
     getCachedReviews(id).catch(() => [] as Review[]),
     getUser().catch(() => null),
     getUserFavoriteIds().catch(() => [] as string[]),
     createClient(),
-    getBusinessCompanyId().catch(() => null),
   ]);
 
   // Guard early — no need to run 5 more queries for a non-existent company
   if (!company) notFound();
 
+  // Only show new-format reviews (ratings only, no text fields)
+  const newFormatReviews = reviews.filter(r =>
+    !r.content && !r.pros && !r.cons && !(r as unknown as { knew_before?: string }).knew_before
+  );
+
   // Sort reviews server-side so the initial render matches the user's intent
-  const sortedReviews = [...reviews].sort((a, b) => {
+  const sortedReviews = [...newFormatReviews].sort((a, b) => {
     if (sortMode === "recent") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     if (sortMode === "helpful") return Number(b.helpful_count ?? 0) - Number(a.helpful_count ?? 0);
     return reviewRelevanceScore(b) - reviewRelevanceScore(a);
   });
 
-  const [repliesResult, jobsResult, voteData, profileData, similarCompaniesData, helpfulVotesResult] = await Promise.all([
-    Promise.resolve(supabase.from("company_replies").select("review_id, content, created_at").eq("company_id", id)).catch(() => ({ data: null })),
+  const [jobsResult, voteData, profileData, similarCompaniesData, helpfulVotesResult] = await Promise.all([
     Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
     user ? Promise.resolve(supabase.from("score_events").select("event_type").eq("company_id", id).eq("user_id", user.id).in("event_type", ["boost", "penalty"])).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     user ? Promise.resolve(supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle()).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     Promise.resolve(supabase.from("companies").select("id, name, city, avg_rating, review_count, cover_url, is_verified, sector").eq("sector", company.sector).neq("id", id).order("score", { ascending: false }).limit(4)).then(r => r.data ?? []).catch(() => []),
     user && reviews.length > 0 ? Promise.resolve(supabase.from("review_votes").select("review_id").eq("user_id", user.id).in("review_id", reviews.map(r => r.id))).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
   ]);
-  const repliesMap = Object.fromEntries(
-    (repliesResult.data ?? []).map((r: { review_id: string; content: string; created_at: string | null }) => [r.review_id, { ...r, created_at: r.created_at ?? "" }])
-  );
   const jobs: { id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null; experience_level: string | null; salary_range: string | null; apply_url: string | null; description: string | null; created_at: string | null }[] = jobsResult.data ?? [];
 
-  const isBusiness = !!bizCompanyId;
   const votedReviewIds = new Set<string>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ((helpfulVotesResult as any)?.data ?? []).map((v: { review_id: string }) => v.review_id)
@@ -200,10 +199,8 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   }, {});
   const dominantMode = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
-  // Top reviews for rich snippet (max 3, must have title + content)
-  const topReviews = reviews
-    .filter(r => r.content && r.content.length >= 50 && Number(r.rating_overall) > 0)
-    .slice(0, 3);
+  // Rich snippet reviews not generated (new format has no text content)
+  const topReviews: typeof reviews = [];
 
   const jsonLd = [
     {
@@ -303,9 +300,11 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
             {/* Actions */}
             <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
               <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
-              {user && !isBusiness ? (
+              {user ? (
                 <SaveButton companyId={company.id} initialFav={isFav} />
-              ) : (!isBusiness && <GuestSaveButton />)}
+              ) : (
+                <GuestSaveButton />
+              )}
               <ReportButton
                 targetType="company"
                 targetId={company.id}
@@ -358,22 +357,19 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
               ))}
             </div>
 
-            {/* Vote buttons — toujours visibles pour les users employees */}
-            {!isBusiness && (
-              <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-                <CompanyVoteButtons
-                  companyId={company.id}
-                  isLoggedIn={!!user}
-                  isAdmin={isAdmin}
-                  isBusiness={isBusiness}
-                  penaltyCredits={penaltyCredits}
-                  initialBoosted={initialBoosted}
-                  initialPenalized={initialPenalized}
-                  initialScore={Number(company.score ?? 0)}
-                  variant="card"
-                />
-              </div>
-            )}
+            {/* Vote buttons */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
+              <CompanyVoteButtons
+                companyId={company.id}
+                isLoggedIn={!!user}
+                isAdmin={isAdmin}
+                penaltyCredits={penaltyCredits}
+                initialBoosted={initialBoosted}
+                initialPenalized={initialPenalized}
+                initialScore={Number(company.score ?? 0)}
+                variant="card"
+              />
+            </div>
 
             {/* Ratings breakdown */}
             {Number(company.review_count) > 0 && (
@@ -471,7 +467,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
               </div>
             ) : (
               <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
-                {sortedReviews.map(r => <ReviewCard key={r.id} review={r} reply={repliesMap[r.id]} isLoggedIn={!!user} companyName={company.name} initialVoted={votedReviewIds.has(r.id)} />)}
+                {sortedReviews.map(r => <ReviewCard key={r.id} review={r} isLoggedIn={!!user} companyName={company.name} initialVoted={votedReviewIds.has(r.id)} />)}
               </div>
             )}
 
@@ -479,11 +475,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
               <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partage ton expérience</h3>
               <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>Ton avis est anonyme par défaut. Aide la communauté à faire les bons choix.</p>
-              {isBusiness ? (
-                <div style={{ textAlign: "center", padding: "24px", color: "var(--text-muted)", fontSize: 14 }}>
-                  Les comptes business ne peuvent pas publier d&apos;avis.
-                </div>
-              ) : user ? (
+              {user ? (
                 <ReviewForm companyId={company.id} />
               ) : (
                 <div style={{ textAlign: "center", padding: "24px" }}>
@@ -573,26 +565,6 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
               </div>
             )}
 
-            {/* Business CTA — only for non-subscribed companies and non-business users */}
-            {!company.is_subscribed && !isBusiness && (
-              <div style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: "18px 20px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 900, letterSpacing: "-0.02em" }}>
-                    <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>workie</span>
-                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.04em", color: "#8b5cf6", marginLeft: 4, textTransform: "uppercase" as const }}>Business</span>
-                  </span>
-                </div>
-                <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 14 }}>
-                  Vous représentez <strong style={{ color: "var(--text)" }}>{company.name}</strong> ? Revendiquez cette fiche pour répondre aux avis et accéder aux analytics.
-                </p>
-                <Link href="/business/claim" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px 0", borderRadius: 9, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-                  Revendiquer ma fiche
-                </Link>
-                <Link href="/business/login" style={{ display: "block", textAlign: "center", fontSize: 11, color: "var(--text-muted)", marginTop: 8, textDecoration: "none" }}>
-                  Déjà un compte ? Se connecter →
-                </Link>
-              </div>
-            )}
           </div>
         </div>
 
@@ -657,7 +629,21 @@ const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
   ca_depend: { label: "🤔 Ça dépend", color: "#f59e0b" },
 };
 
-function ReviewCard({ review, reply, isLoggedIn = false, companyName = "", initialVoted = false }: { review: Review; reply?: { content: string; created_at: string }; isLoggedIn?: boolean; companyName?: string; initialVoted?: boolean }) {
+function SubRatingBar({ label, value }: { label: string; value: number | null }) {
+  if (!value) return null;
+  const pct = Math.round((value / 5) * 100);
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <span style={{ fontSize: 11, color: "var(--text-muted)", width: 90, flexShrink: 0 }}>{label}</span>
+      <div style={{ flex: 1, height: 4, background: "var(--surface3)", borderRadius: 2, overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 2 }} />
+      </div>
+      <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text)", width: 24, textAlign: "right" }}>{Number(value).toFixed(1)}</span>
+    </div>
+  );
+}
+
+function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted = false }: { review: Review; isLoggedIn?: boolean; companyName?: string; initialVoted?: boolean }) {
   const age = (() => {
     const d = new Date(review.created_at);
     const diff = Date.now() - d.getTime();
@@ -669,113 +655,87 @@ function ReviewCard({ review, reply, isLoggedIn = false, companyName = "", initi
   })();
 
   const rec = review.would_recommend ? RECOMMEND_LABELS[review.would_recommend] : null;
+  const hasSubRatings = review.rating_culture || review.rating_management || review.rating_worklife || review.rating_career;
+
+  const chips: { label: string; color?: string; bg?: string; bold?: boolean }[] = [];
+  if (review.job_title) chips.push({ label: review.job_title, bold: true });
+  if (review.employment_type) chips.push({ label: EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type });
+  if (review.duration_range) chips.push({ label: DURATION_LABELS[review.duration_range] ?? review.duration_range });
+  if (review.work_mode) chips.push({ label: WORK_MODE_LABELS[review.work_mode] ?? review.work_mode });
+  if (Number(review.salary_chf) > 0) chips.push({ label: `CHF ${Math.round(Number(review.salary_chf) / 1000)}k / an`, color: "#10b981", bg: "rgba(16,185,129,0.08)", bold: true });
+  if (review.is_current) chips.push({ label: "Employé actuel", color: "#10b981", bg: "rgba(16,185,129,0.08)", bold: true });
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-            <Stars rating={Number(review.rating_overall)} size={13} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{Number(review.rating_overall).toFixed(1)}</span>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "20px 22px" }}>
+      {/* Top row: rating + recommend + date */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          {/* Big rating circle */}
+          <div style={{
+            width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
+            background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(249,115,22,0.08))",
+            border: "2px solid rgba(139,92,246,0.2)",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ fontSize: 17, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(review.rating_overall).toFixed(1)}</span>
+            <span style={{ fontSize: 8, color: "var(--text-muted)", fontWeight: 600 }}>/ 5</span>
+          </div>
+          <div>
+            <Stars rating={Number(review.rating_overall)} size={14} />
             {rec && (
-              <span style={{ fontSize: 11, fontWeight: 700, color: rec.color, marginLeft: 4 }}>{rec.label}</span>
-            )}
-            {review.is_verified_author && (
-              <span
-                title="Identité vérifiée via Stripe Identity"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 4,
-                  fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 50,
-                  background: "rgba(16,185,129,0.1)", color: "#10b981",
-                  border: "1px solid rgba(16,185,129,0.25)",
-                }}
-              >
-                <CheckCircle size={10} aria-hidden="true" /> Identité vérifiée
-              </span>
+              <div style={{ marginTop: 4 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: rec.color }}>{rec.label}</span>
+              </div>
             )}
           </div>
-          {review.title && <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>}
+          {review.is_verified_author && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 50,
+              background: "rgba(16,185,129,0.1)", color: "#10b981",
+              border: "1px solid rgba(16,185,129,0.25)",
+            }}>
+              <CheckCircle size={10} aria-hidden="true" /> Vérifié
+            </span>
+          )}
         </div>
-        <p style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{age}</p>
+        <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{age}</span>
       </div>
 
-      {/* Metadata line */}
-      {(() => {
-        const meta: { label: string; color?: string; bold?: boolean }[] = [];
-        if (review.job_title) meta.push({ label: review.job_title, bold: true, color: "var(--text-sub)" });
-        if (review.employment_type) meta.push({ label: EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type });
-        if (review.duration_range) meta.push({ label: DURATION_LABELS[review.duration_range] ?? review.duration_range });
-        if (review.work_mode) meta.push({ label: WORK_MODE_LABELS[review.work_mode] ?? review.work_mode });
-        if (Number(review.salary_chf) > 0) meta.push({ label: `CHF ${Math.round(Number(review.salary_chf) / 1000)}k / an`, color: "#10b981", bold: true });
-        if (review.is_current) meta.push({ label: "Employé actuel", color: "#10b981", bold: true });
-        if (meta.length === 0) return null;
-        return (
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", marginBottom: 12, rowGap: 2 }}>
-            {meta.map((m, i) => (
-              <span key={i} style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ fontSize: 12, color: m.color ?? "var(--text-muted)", fontWeight: m.bold ? 600 : 400 }}>{m.label}</span>
-                {i < meta.length - 1 && <span style={{ color: "var(--border2)", margin: "0 7px", userSelect: "none" }}>·</span>}
-              </span>
-            ))}
-          </div>
-        );
-      })()}
-
-      {/* Content */}
-      {review.content && (
-        <p style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.7, marginBottom: 12 }}>
-          {review.content}
-        </p>
-      )}
-
-      {/* Pros / Cons */}
-      {(review.pros || review.cons) && (
-        <div className="review-pros-cons" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-          {review.pros && (
-            <div style={{ background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 10, padding: "10px 12px" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", marginBottom: 4 }}>👍 Points positifs</p>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.pros}</p>
-            </div>
-          )}
-          {review.cons && (
-            <div style={{ background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 10, padding: "10px 12px" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", marginBottom: 4 }}>👎 Points négatifs</p>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.cons}</p>
-            </div>
-          )}
+      {/* Metadata chips */}
+      {chips.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+          {chips.map((c, i) => (
+            <span key={i} style={{
+              fontSize: 11, fontWeight: c.bold ? 600 : 400,
+              padding: "3px 10px", borderRadius: 50,
+              background: c.bg ?? "var(--surface2)",
+              color: c.color ?? "var(--text-muted)",
+              border: "1px solid var(--border2)",
+            }}>
+              {c.label}
+            </span>
+          ))}
         </div>
       )}
 
-      {/* Knew before */}
-      {review.knew_before && (
-        <div style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 10, padding: "10px 12px", marginBottom: 12 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 4 }}>💡 Ce que j'aurais voulu savoir avant</p>
-          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>{review.knew_before}</p>
+      {/* Sub-ratings */}
+      {hasSubRatings && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 7, paddingTop: 14, borderTop: "1px solid var(--border)", marginBottom: 14 }}>
+          <SubRatingBar label="👔 Management" value={review.rating_management ? Number(review.rating_management) : null} />
+          <SubRatingBar label="⚖️ Vie pro/perso" value={review.rating_worklife ? Number(review.rating_worklife) : null} />
+          <SubRatingBar label="🌍 Culture" value={review.rating_culture ? Number(review.rating_culture) : null} />
+          <SubRatingBar label="🚀 Évolution" value={review.rating_career ? Number(review.rating_career) : null} />
         </div>
       )}
 
-      {/* Employer reply */}
-      {reply && (
-        <div style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "14px 16px", marginTop: 4, marginBottom: 8 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#8b5cf6", marginBottom: 6, display: "flex", alignItems: "center", gap: 5 }}>
-            <svg viewBox="0 0 22 22" style={{ width: 13, height: 13 }} aria-hidden="true"><circle cx="11" cy="11" r="11" fill="#1D9BF0" /><path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" /></svg>
-            Réponse officielle de l'employeur
-          </p>
-          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{reply.content}</p>
-          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6, opacity: 0.6 }}>
-            {new Date(reply.created_at).toLocaleDateString("fr-CH", { day: "numeric", month: "long", year: "numeric" })}
-          </p>
-        </div>
-      )}
-
-      {/* Footer: helpful + signaler */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 4, gap: 8 }}>
+      {/* Footer */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: hasSubRatings || chips.length > 0 ? 0 : 4 }}>
         <HelpfulButton reviewId={review.id} initialCount={review.helpful_count} initialVoted={initialVoted} />
         <ReportButton
           targetType="review"
           targetId={review.id}
-          targetLabel={`[${companyName}] ${review.title ?? (review.content ? review.content.slice(0, 100) : `Avis — ${review.job_title ?? "employé"}`)}`}
+          targetLabel={`[${companyName}] Avis — ${review.job_title ?? "employé"}`}
           isLoggedIn={isLoggedIn}
           variant="link"
         />

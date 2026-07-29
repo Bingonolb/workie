@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { getUserCampaignById, getUserCampaignDailyStats, getUserCampaignCantonStats, pauseUserCampaign } from "@/lib/actions/ads";
 
-import { AdStatsChart } from "@/app/business/dashboard/ads/AdStatsChart";
+import { AdStatsChart } from "@/components/AdStatsChart";
 import { CancelCampaignButton } from "@/components/CancelCampaignButton";
 import Image from "next/image";
 import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, Clock, CheckCircle, XCircle, PauseCircle } from "lucide-react";

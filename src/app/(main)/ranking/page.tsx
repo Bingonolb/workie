@@ -1,10 +1,9 @@
-export const revalidate = 60; // ISR — MyRankBanner is a client component that fetches its own auth state
+export const revalidate = 60;
 
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
 import { getCachedTopCompanies, getCachedReviewCount } from "@/lib/actions/scores";
 import { RankingTable } from "./RankingList";
-import { MyRankBanner } from "./MyRankBanner";
 import type { Company } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -56,8 +55,6 @@ export default async function RankingPage() {
     <div className="page-root">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(rankingJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       <main className="page-main-md">
-
-        <MyRankBanner />
 
         {/* Table */}
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>

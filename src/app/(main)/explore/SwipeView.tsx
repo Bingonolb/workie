@@ -38,7 +38,6 @@ export function SwipeView({
   initialFlameIds,
   isLoggedIn,
   isAdmin = false,
-  isBusiness = false,
   penaltyCredits: initialPenaltyCredits = 0,
   penaltySuccess = false,
   filters,
@@ -49,7 +48,6 @@ export function SwipeView({
   initialFlameIds: string[];
   isLoggedIn: boolean;
   isAdmin?: boolean;
-  isBusiness?: boolean;
   penaltyCredits?: number;
   penaltySuccess?: boolean;
   filters?: { sector?: string; canton?: string; search?: string };
@@ -242,9 +240,7 @@ export function SwipeView({
       setFavIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
       // toggleFavorite now internally calls addFlame when saving — no separate addFlame call needed
       toggleFavorite((current as Company).id);
-      if (!isBusiness) {
-        setFlameIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
-      }
+      setFlameIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
       showToast("🔥 Enregistré !", "#f97316");
     } else if (dir === "right") {
       showToast("👀 Découverte !", "#6b7280");
@@ -501,7 +497,7 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {isLoggedIn && !isBusiness && !isAd(current) && (() => {
+        {isLoggedIn && !isAd(current) && (() => {
           const unlocked = isAdmin || penaltyCredits > 0;
           const applied = !isAd(current) && penaltyIds.has((current as Company).id);
           return (
@@ -582,7 +578,7 @@ export function SwipeView({
           <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} aria-hidden="true" />
         </button>
 
-        {isLoggedIn && !isBusiness && !isAd(current) && (() => {
+        {isLoggedIn && !isAd(current) && (() => {
           const boosted = boostIds.has((current as Company).id);
           return (
             <button type="button" onClick={handleBoost} title={boosted ? "Retirer le boost" : "Booster +100 pts"} aria-label={boosted ? "Retirer le boost" : "Booster +100 pts"} style={{
@@ -607,7 +603,7 @@ export function SwipeView({
       {/* Legend — hidden on mobile */}
       <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
-          {isLoggedIn && !isBusiness && <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
+          {isLoggedIn && <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
           <span>✕ passer</span>
           <span>ℹ détail</span>
           <span>🔥 sauvegarder</span>
