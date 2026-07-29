@@ -723,9 +723,11 @@ function ReviewCard({ review, reply, isLoggedIn = false, companyName = "", initi
       })()}
 
       {/* Content */}
-      <p style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.7, marginBottom: 12 }}>
-        {review.content}
-      </p>
+      {review.content && (
+        <p style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.7, marginBottom: 12 }}>
+          {review.content}
+        </p>
+      )}
 
       {/* Pros / Cons */}
       {(review.pros || review.cons) && (
@@ -773,7 +775,7 @@ function ReviewCard({ review, reply, isLoggedIn = false, companyName = "", initi
         <ReportButton
           targetType="review"
           targetId={review.id}
-          targetLabel={`[${companyName}] ${review.title ?? review.content.slice(0, 100)}`}
+          targetLabel={`[${companyName}] ${review.title ?? (review.content ? review.content.slice(0, 100) : `Avis — ${review.job_title ?? "employé"}`)}`}
           isLoggedIn={isLoggedIn}
           variant="link"
         />
