@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ArrowRight, Star, Shield, Zap, Eye, TrendingUp, MessageCircle, BarChart3, BadgeCheck } from "lucide-react";
+import { ArrowRight, Star, Shield, Zap, Eye, TrendingUp, MessageCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
@@ -203,58 +203,6 @@ export default async function Home() {
             <Link href="/ranking" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
               Voir le classement
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Section Entreprises (discrète, en bas) ── */}
-      <section style={{ padding: "64px 24px" }}>
-        <div style={{ maxWidth: 860, margin: "0 auto" }}>
-          <div className="landing-biz-grid" style={{
-            background: "linear-gradient(135deg, rgba(139,92,246,0.05), rgba(249,115,22,0.04))",
-            border: "1px solid rgba(139,92,246,0.15)",
-            borderRadius: 24, padding: "48px 40px",
-          }}>
-            <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "4px 12px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#8b5cf6" }}>
-                <BadgeCheck size={13} aria-hidden="true" /> Pour les entreprises
-              </div>
-              <h2 style={{ fontSize: "clamp(20px, 4vw, 30px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 12 }}>
-                Votre entreprise est sur Workie.
-              </h2>
-              <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 24, maxWidth: 480 }}>
-                Revendiquez votre fiche pour répondre aux avis, gérer votre image employeur et accéder aux insights de vos employés. Badge vérifié inclus.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 28 }}>
-                {["Répondre aux avis", "Stats & insights", "Offres d'emploi", "Badge vérifié"].map(f => (
-                  <span key={f} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 50, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
-                    ✓ {f}
-                  </span>
-                ))}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                <Link href="/business" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)", color: "#8b5cf6", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-                  Revendiquer ma fiche <ArrowRight size={16} aria-hidden="true" />
-                </Link>
-                <span style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 600 }}>
-                  À partir de <strong style={{ color: "var(--text)" }}>99 CHF/mois</strong>
-                </span>
-              </div>
-            </div>
-            <div className="landing-biz-grid-aside" style={{ textAlign: "center", flexShrink: 0 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {[
-                  { icon: <BarChart3 size={20} color="#8b5cf6" aria-hidden="true" />, label: "Analytics avancés" },
-                  { icon: <MessageCircle size={20} color="#f97316" aria-hidden="true" />, label: "Répondre aux avis" },
-                  { icon: <svg viewBox="0 0 22 22" style={{ width: 20, height: 20 }}><circle cx="11" cy="11" r="11" fill="#1D9BF0" /><path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" /></svg>, label: "Badge vérifié" },
-                ].map(({ icon, label }) => (
-                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 12, minWidth: 180 }}>
-                    {icon}
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>

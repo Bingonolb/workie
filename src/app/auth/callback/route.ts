@@ -87,7 +87,6 @@ export async function GET(request: Request) {
             full_name: (user.user_metadata?.full_name as string | undefined)
               ?? (`${(user.user_metadata?.first_name as string | undefined) ?? ""} ${(user.user_metadata?.last_name as string | undefined) ?? ""}`.trim() || null),
           });
-          return NextResponse.redirect(`${origin}/business/checkout`);
         }
         const isNew = await upsertProfileGeo(user.id);
         if (isNew) {
@@ -116,7 +115,6 @@ export async function GET(request: Request) {
             full_name: (user.user_metadata?.full_name as string | undefined)
               ?? (`${(user.user_metadata?.first_name as string | undefined) ?? ""} ${(user.user_metadata?.last_name as string | undefined) ?? ""}`.trim() || null),
           });
-          return NextResponse.redirect(`${origin}/business/checkout`);
         }
         const isNew = await upsertProfileGeo(user.id);
         if (isNew) {

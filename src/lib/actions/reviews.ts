@@ -334,7 +334,6 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   revalidateTag("companies", {});
   revalidateTag("reviews", {});
   revalidateTag("top-companies", {});
-  revalidateTag("business-analytics", {});
   revalidateTag("landing-counts", {});
 
   // Notify business owner of new review (only for published ones)

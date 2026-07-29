@@ -207,7 +207,6 @@ export async function deleteReportedContent(
   revalidateTag("companies", {});
   revalidateTag("reviews", {});
   revalidateTag("top-companies", {});
-  revalidateTag("business-analytics", {});
   revalidateTag("landing-counts", {});
 
   return {};

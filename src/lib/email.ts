@@ -197,8 +197,8 @@ function claimReceivedHtml(rawFirstName: string, rawCompanyName: string): string
 
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:36px;">
         <tr><td align="center">
-          <a href="${BASE}/business/dashboard" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#f97316);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:12px;">
-            Accéder à mon espace →
+          <a href="${BASE}/explore" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#f97316);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:12px;">
+            Accéder à Workie →
           </a>
         </td></tr>
       </table>
@@ -264,8 +264,8 @@ function claimApprovedHtml(rawFirstName: string, rawCompanyName: string): string
 
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr><td align="center">
-          <a href="${BASE}/business/dashboard" style="display:inline-block;background:linear-gradient(135deg,#10b981,#059669);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:12px;">
-            Accéder à mon dashboard →
+          <a href="${BASE}/explore" style="display:inline-block;background:linear-gradient(135deg,#10b981,#059669);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:12px;">
+            Accéder à Workie →
           </a>
         </td></tr>
       </table>
@@ -341,7 +341,7 @@ export async function sendNewReviewEmail(email: string, companyName: string, com
         Consultez l'avis complet depuis votre espace Workie Business et répondez-y pour montrer à la communauté que vous êtes à l'écoute.
       </p>
       <table cellpadding="0" cellspacing="0"><tr><td>
-        <a href="${BASE}/business/dashboard/reviews" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#f97316);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
+        <a href="${BASE}/explore" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#f97316);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
           Voir l'avis →
         </a>
       </td></tr></table>

@@ -210,7 +210,6 @@ export async function approveClaim(
     if (claimUpdateErr) return { error: `Erreur mise à jour demande : ${claimUpdateErr.message}` };
 
     revalidatePath("/admin/claims");
-    revalidatePath("/business/dashboard");
     revalidatePath(`/company/${companyId}`);
 
     // Notify the company owner by email

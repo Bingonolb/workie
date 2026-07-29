@@ -29,7 +29,7 @@ const PUBLIC_PATHS = [
   "/login", "/signup", "/auth",
   "/forgot-password", "/reset-password",
   "/explore", "/company", "/ranking", "/salaires", "/jobs",
-  "/business", "/api",
+  "/api",
   "/cgu", "/confidentialite", "/mentions-legales",
   "/robots.txt", "/sitemap.xml", "/_next", "/favicon",
   "/onboarding",
@@ -48,11 +48,7 @@ export async function middleware(request: NextRequest) {
         const { success } = await rl.search.limit(ip);
         if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
       }
-      if (method === "POST" && (
-        pathname === "/api/business/checkout" ||
-        pathname === "/api/business/ads/checkout" ||
-        pathname === "/api/user/checkout-penalty"
-      )) {
+      if (method === "POST" && pathname === "/api/user/checkout-penalty") {
         const { success } = await rl.checkout.limit(ip);
         if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
       }

@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/explore", "/company/", "/ranking", "/salaires", "/jobs", "/business"],
-        disallow: ["/admin", "/business/dashboard", "/api/", "/profile", "/favorites"],
+        allow: ["/", "/explore", "/company/", "/ranking", "/salaires", "/jobs"],
+        disallow: ["/admin", "/api/", "/profile", "/favorites"],
       },
     ],
     sitemap: "https://www.workie.ch/sitemap.xml",
