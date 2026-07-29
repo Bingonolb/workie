@@ -5,7 +5,7 @@ import { CompanyCard } from "@/components/CompanyCard";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
 import { SwipeView } from "./SwipeView";
-import { fetchGridPage } from "@/lib/actions/companies";
+import { fetchGridPage, fetchSwipePage } from "@/lib/actions/companies";
 import { GRID_PAGE_SIZE } from "@/lib/actions/columns";
 import type { Company } from "@/lib/types";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
@@ -70,9 +70,10 @@ export function ExploreClient({
   const [canton, setCanton] = useState(initialCanton ?? "");
   const [sort, setSort] = useState(initialSort ?? "recent");
 
-  // Auth state — SSR passes empty defaults, hydrated from /api/user/context on mount
+  // null = auth not yet resolved (loading). Avoids flash of cadenas for logged-in users.
+  const [authReady, setAuthReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
-  const [isGuest, setIsGuest] = useState(initialIsGuest);
+  const [isGuest, setIsGuest] = useState(false); // optimistic false until auth resolves
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
   const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
   const [favIds, setFavIds] = useState<string[]>(initialFavIds);
@@ -135,14 +136,15 @@ export function ExploreClient({
       fetch(`/api/ads/active?${sectorParam}`).then(r => r.json()),
     ]).then(([ctx, ads]) => {
       setIsLoggedIn(ctx.isLoggedIn);
-      setIsGuest(!ctx.isLoggedIn);
+      setIsGuest(!ctx.isLoggedIn);  // only lock after we know for sure
+      setAuthReady(true);
       setIsAdmin(ctx.isAdmin);
       setFavIds(ctx.favIds);
       setFlameIds(ctx.flameIds);
       setPenaltyCredits(ctx.penaltyCredits);
       if (ads.squareAds) setSquareAdsState(ads.squareAds);
       if (ads.swipeAds) setSwipeAdsState(ads.swipeAds);
-    }).catch(() => { /* leave defaults */ });
+    }).catch(() => { setAuthReady(true); /* leave defaults */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -231,17 +233,14 @@ export function ExploreClient({
     }
   }
 
-  // Swipe companies: same list filtered for city + tags (SwipeView loads more itself)
-  const swipeCompanies = useMemo(
-    () => companies.filter(c => c.city?.trim()),
-    [companies],
-  );
+  // Swipe uses its own fetched pool (random offset) — pass empty so SwipeView fetches immediately
+  const swipeCompanies: Company[] = [];
 
   const hasMore = (page + 1) * GRID_PAGE_SIZE < total;
 
   // Ad slot map: one ad every 7 companies starting at adOffset
   const AD_INTERVAL = 7;
-  const adsForGrid = isGuest ? [] : squareAdsState;
+  const adsForGrid = (authReady && isGuest) ? [] : squareAdsState;
   const adSlotMap = useMemo((): Map<number, number> => {
     if (adsForGrid.length === 0 || companies.length < adOffset.current + 1) return new Map();
     const map = new Map<number, number>();
@@ -289,8 +288,10 @@ export function ExploreClient({
   }
 
   // Guest: show first GUEST_VISIBLE, blur GUEST_BLUR, hide the rest
-  const visibleCompanies = isGuest ? companies.slice(0, GUEST_VISIBLE) : companies;
-  const blurCompanies    = isGuest ? companies.slice(GUEST_VISIBLE, GUEST_VISIBLE + GUEST_BLUR) : [];
+  // Only apply guest restrictions after auth is confirmed (avoids flash of cadenas for logged-in users)
+  const guestActive = authReady && isGuest;
+  const visibleCompanies = guestActive ? companies.slice(0, GUEST_VISIBLE) : companies;
+  const blurCompanies    = guestActive ? companies.slice(GUEST_VISIBLE, GUEST_VISIBLE + GUEST_BLUR) : [];
 
   return (
     <>
@@ -302,7 +303,7 @@ export function ExploreClient({
         onClear={handleClear}
       />
 
-      {isGuest && total > 0 && (
+      {guestActive && total > 0 && (
         <div style={{
           background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
           border: "1px solid rgba(139,92,246,0.2)",
@@ -359,7 +360,7 @@ export function ExploreClient({
             </div>
 
             {/* Blurred preview + CTA for guests */}
-            {isGuest && blurCompanies.length > 0 && (
+            {guestActive && blurCompanies.length > 0 && (
               <>
                 <div style={{ position: "relative", marginTop: 20, overflow: "hidden" }}>
                   <div aria-hidden="true" className="guest-blur-preview">
@@ -398,7 +399,7 @@ export function ExploreClient({
             )}
 
             {/* Load more for logged-in users */}
-            {!isGuest && hasMore && (
+            {!guestActive && hasMore && (
               <div style={{ textAlign: "center", marginTop: 40 }}>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
                   <span style={{ color: "var(--text)", fontWeight: 700 }}>{companies.length}</span> sur <span style={{ fontWeight: 700 }}>{total}</span> entreprises

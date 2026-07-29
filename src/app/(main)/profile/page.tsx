@@ -11,7 +11,6 @@ import type { Profile } from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { SignOutButton } from "@/components/SignOutButton";
-import { ProfileAvatar } from "@/components/ProfileAvatar";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -62,9 +61,6 @@ export default async function ProfilePage() {
           alignItems: "center",
           gap: 20,
         }}>
-          {/* Avatar */}
-          <ProfileAvatar src={profile?.avatar_url ?? null} initial={initial} />
-
           {/* Identity */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>

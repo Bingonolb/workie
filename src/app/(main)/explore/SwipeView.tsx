@@ -147,7 +147,9 @@ export function SwipeView({
   goneRef.current = gone;
   const swipeCountRef = useRef(0);
   const fetchingRef = useRef(false);
-  const nextOffsetRef = useRef(initialCompanies.length);
+  // Start at a random offset so swipe pool is varied, not just top-rated favorites
+  const randomStartOffset = useRef(50 + Math.floor(Math.random() * 150));
+  const nextOffsetRef = useRef(initialCompanies.length > 0 ? initialCompanies.length : randomStartOffset.current);
 
   // Track impression when the ad card becomes the current card
   const current = companies[index];
@@ -189,10 +191,12 @@ export function SwipeView({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Prefetch next batch silently, well before the user reaches the end
+  // Prefetch next batch silently — triggers on mount when deck is empty, and when nearing the end
   useEffect(() => {
     if (exhausted || fetchingRef.current) return;
-    if (index < companies.length - PREFETCH_AHEAD) return;
+    const nearEnd = index >= companies.length - PREFETCH_AHEAD;
+    const isEmpty = companies.length === 0;
+    if (!nearEnd && !isEmpty) return;
     fetchingRef.current = true;
     fetchSwipePage(filters, nextOffsetRef.current).then(batch => {
       fetchingRef.current = false;

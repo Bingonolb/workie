@@ -228,7 +228,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <PillPicker options={DURATION_RANGES} value={durationRange} onChange={v => { setDurationRange(v); setStep1Err(""); }} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: isCurrent ? "1fr" : "1fr 1fr", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isCurrent ? "1fr" : "repeat(auto-fit, minmax(130px, 1fr))", gap: 14 }}>
               <div>
                 <label htmlFor="review-start-year" style={lbl}>
                   Année de début <span className="badge-optional">Optionnel</span>

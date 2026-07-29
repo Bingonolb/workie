@@ -729,6 +729,36 @@ function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted
         </div>
       )}
 
+      {/* Text content — pros/cons (new form) or legacy content/title */}
+      {(review.pros || review.cons || review.knew_before || review.content || review.title) && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 14, borderTop: "1px solid var(--border)", marginBottom: 14 }}>
+          {review.title && !review.pros && !review.cons && (
+            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>
+          )}
+          {review.pros && (
+            <div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.05em" }}>Points positifs</span>
+              <p style={{ fontSize: 13, color: "var(--text)", marginTop: 3, lineHeight: 1.55 }}>{review.pros}</p>
+            </div>
+          )}
+          {review.cons && (
+            <div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", textTransform: "uppercase", letterSpacing: "0.05em" }}>Points négatifs</span>
+              <p style={{ fontSize: 13, color: "var(--text)", marginTop: 3, lineHeight: 1.55 }}>{review.cons}</p>
+            </div>
+          )}
+          {review.knew_before && (
+            <div>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.05em" }}>Ce que j&apos;aurais voulu savoir</span>
+              <p style={{ fontSize: 13, color: "var(--text)", marginTop: 3, lineHeight: 1.55 }}>{review.knew_before}</p>
+            </div>
+          )}
+          {!review.pros && !review.cons && review.content && (
+            <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55 }}>{review.content}</p>
+          )}
+        </div>
+      )}
+
       {/* Footer */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: hasSubRatings || chips.length > 0 ? 0 : 4 }}>
         <HelpfulButton reviewId={review.id} initialCount={review.helpful_count} initialVoted={initialVoted} />
