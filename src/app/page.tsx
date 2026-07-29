@@ -274,15 +274,7 @@ export default async function Home() {
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Explorer</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }, { href: "/jobs", label: "Offres d'emploi" }].map(({ href, label }) => (
-                  <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Entreprises</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[{ href: "/business", label: "Workie Business" }, { href: "/business/claim", label: "Revendiquer ma fiche" }, { href: "/profile/ads", label: "Faire de la publicité" }].map(({ href, label }) => (
+                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }, { href: "/jobs", label: "Offres d'emploi" }, { href: "/profile/ads", label: "Faire de la publicité" }].map(({ href, label }) => (
                   <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
                 ))}
               </div>

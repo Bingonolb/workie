@@ -19,13 +19,6 @@ const CANTONS = [
   { code: "UR", name: "Uri" }, { code: "AI", name: "App. I.Rh." },
 ];
 
-const SECTORS = [
-  "Tech", "Finance", "Assurances", "Pharma", "Santé", "Conseil", "Industrie",
-  "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture",
-  "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie",
-  "Droit", "Bâtiment", "Beauté", "Administration publique",
-];
-
 const inp: React.CSSProperties = {
   width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: 12, padding: "0 16px", height: 48, fontSize: 16,
@@ -77,7 +70,6 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
   const [format, setFormat] = useState<"square" | "swipe">(prefillFormat ?? "square");
   const [selectedCantons, setSelectedCantons] = useState<string[]>([]);
-  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [dailyBudget, setDailyBudget] = useState(prefillDaily ?? 20);
   const [durationDays, setDurationDays] = useState(14);
   const totalBudget = dailyBudget * durationDays;
@@ -114,8 +106,8 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   const [bodyText, setBodyText] = useState("");
   const [ctaLabel, setCtaLabel] = useState(prefillCtaLabel ?? "En savoir plus");
 
-  const reach = audienceReach(selectedCantons, selectedSectors);
-  const cpm = calculateCPM(format, selectedCantons, selectedSectors);
+  const reach = audienceReach(selectedCantons, []);
+  const cpm = calculateCPM(format, selectedCantons, []);
   const dailyImpressions = estimateDailyImpressions(dailyBudget, cpm, reach);
   const dailyReach = estimateDailyReach(dailyBudget, cpm, reach);
   const totalImpressions = dailyImpressions * durationDays;
@@ -123,8 +115,6 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
   const toggleCanton = useCallback((code: string) =>
     setSelectedCantons(p => p.includes(code) ? p.filter(c => c !== code) : [...p, code]), []);
-  const toggleSector = useCallback((s: string) =>
-    setSelectedSectors(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]), []);
 
   const durationLabel = durationDays >= 30
     ? `${Math.floor(durationDays / 30)} mois ${durationDays % 30 > 0 ? `${durationDays % 30}j` : ""}`
@@ -169,7 +159,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
       <form action={action}>
         <input type="hidden" name="target_cantons" value={JSON.stringify(selectedCantons)} />
-        <input type="hidden" name="target_sectors" value={JSON.stringify(selectedSectors)} />
+        <input type="hidden" name="target_sectors" value="[]" />
         <input type="hidden" name="daily_budget_chf" value={dailyBudget} />
         <input type="hidden" name="total_budget_chf" value={totalBudget} />
         <input type="hidden" name="format" value={format} />
@@ -370,64 +360,34 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
         </div>
 
-        {/* CIBLAGE */}
+        {/* CIBLAGE CANTON */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage" subtitle="Choisissez votre audience — plus elle est ciblée, plus les profils qui voient votre annonce sont pertinents." />
-          <div style={{ marginBottom: 22 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</label>
-              <button type="button" onClick={() => setSelectedCantons(c => c.length === CANTONS.length ? [] : CANTONS.map(x => x.code))} style={{
-                fontSize: 11, padding: "2px 9px", borderRadius: 50, cursor: "pointer", fontWeight: 700,
-                border: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "1px solid rgba(249,115,22,0.4)" : "1px solid rgba(255,255,255,0.1)",
-                background: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "rgba(249,115,22,0.1)" : "rgba(255,255,255,0.06)",
-                color: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "#f97316" : "var(--text-muted)",
-              }}>
-                {selectedCantons.length === 0 || selectedCantons.length === CANTONS.length
-                  ? "✓ Toute la Suisse"
-                  : `${selectedCantons.length} sélectionné${selectedCantons.length > 1 ? "s" : ""}`}
-              </button>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-              {CANTONS.map(c => {
-                const sel = selectedCantons.includes(c.code);
-                return (
-                  <button key={c.code} type="button" onClick={() => toggleCanton(c.code)} title={c.name} style={{
-                    padding: "6px 13px", borderRadius: 50, fontSize: 12, fontWeight: 700, cursor: "pointer",
-                    border: sel ? "1.5px solid #f97316" : "1px solid rgba(255,255,255,0.1)",
-                    background: sel ? "rgba(249,115,22,0.14)" : "transparent",
-                    color: sel ? "#f97316" : "var(--text-muted)", transition: "all 0.12s",
-                  }}>{c.code}</button>
-                );
-              })}
-            </div>
+          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage géographique" subtitle="Sélectionnez les cantons ciblés — ou laissez vide pour diffuser dans toute la Suisse." />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</span>
+            <button type="button" onClick={() => setSelectedCantons(c => c.length === CANTONS.length ? [] : CANTONS.map(x => x.code))} style={{
+              fontSize: 11, padding: "2px 9px", borderRadius: 50, cursor: "pointer", fontWeight: 700,
+              border: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "1px solid rgba(249,115,22,0.4)" : "1px solid rgba(255,255,255,0.1)",
+              background: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "rgba(249,115,22,0.1)" : "rgba(255,255,255,0.06)",
+              color: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "#f97316" : "var(--text-muted)",
+            }}>
+              {selectedCantons.length === 0 || selectedCantons.length === CANTONS.length
+                ? "✓ Toute la Suisse"
+                : `${selectedCantons.length} sélectionné${selectedCantons.length > 1 ? "s" : ""}`}
+            </button>
           </div>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Secteurs</label>
-              <button type="button" onClick={() => setSelectedSectors(s => s.length === SECTORS.length ? [] : [...SECTORS])} style={{
-                fontSize: 11, padding: "2px 9px", borderRadius: 50, cursor: "pointer", fontWeight: 700,
-                border: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "1px solid rgba(139,92,246,0.4)" : "1px solid rgba(255,255,255,0.1)",
-                background: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "rgba(139,92,246,0.1)" : "rgba(255,255,255,0.06)",
-                color: selectedSectors.length === 0 || selectedSectors.length === SECTORS.length ? "#8b5cf6" : "var(--text-muted)",
-              }}>
-                {selectedSectors.length === 0 || selectedSectors.length === SECTORS.length
-                  ? "✓ Tous les secteurs"
-                  : `${selectedSectors.length} sélectionné${selectedSectors.length > 1 ? "s" : ""}`}
-              </button>
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-              {SECTORS.map(s => {
-                const sel = selectedSectors.includes(s);
-                return (
-                  <button key={s} type="button" onClick={() => toggleSector(s)} style={{
-                    padding: "6px 14px", borderRadius: 50, fontSize: 12, fontWeight: 700, cursor: "pointer",
-                    border: sel ? "1.5px solid #8b5cf6" : "1px solid rgba(255,255,255,0.1)",
-                    background: sel ? "rgba(139,92,246,0.14)" : "transparent",
-                    color: sel ? "#8b5cf6" : "var(--text-muted)", transition: "all 0.12s",
-                  }}>{s}</button>
-                );
-              })}
-            </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+            {CANTONS.map(c => {
+              const sel = selectedCantons.includes(c.code);
+              return (
+                <button key={c.code} type="button" onClick={() => toggleCanton(c.code)} title={c.name} style={{
+                  padding: "6px 13px", borderRadius: 50, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  border: sel ? "1.5px solid #f97316" : "1px solid rgba(255,255,255,0.1)",
+                  background: sel ? "rgba(249,115,22,0.14)" : "transparent",
+                  color: sel ? "#f97316" : "var(--text-muted)", transition: "all 0.12s",
+                }}>{c.code}</button>
+              );
+            })}
           </div>
         </div>
 

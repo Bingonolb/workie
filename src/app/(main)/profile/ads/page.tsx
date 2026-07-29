@@ -282,7 +282,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
             {[
-              { step: "1", text: "Créez votre campagne avec visuel et ciblage" },
+              { step: "1", text: "Créez votre campagne avec visuel, canton et budget" },
               { step: "2", text: "Paiement sécurisé du budget total via Stripe" },
               { step: "3", text: "Notre équipe valide la campagne sous 24h ouvrées" },
               { step: "4", text: "Votre pub apparaît sur Workie selon votre budget" },
