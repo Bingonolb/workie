@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { submitReview } from "@/lib/actions/reviews";
-import { ChevronRight, ChevronLeft, Briefcase, Star, MessageSquare, CheckCircle } from "lucide-react";
+import { ChevronRight, ChevronLeft, Briefcase, Star, CheckCircle } from "lucide-react";
 
 const EMPLOYMENT_TYPES = [
   { value: "cdi", label: "CDI" },
@@ -84,7 +84,6 @@ function StepBar({ step }: { step: number }) {
   const steps = [
     { icon: <Briefcase size={14} aria-hidden="true" />, label: "Emploi" },
     { icon: <Star size={14} aria-hidden="true" />, label: "Notes" },
-    { icon: <MessageSquare size={14} aria-hidden="true" />, label: "Avis" },
   ];
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: 28 }}>
@@ -141,19 +140,10 @@ export function ReviewForm({ companyId }: { companyId: string }) {
     : 0;
   const [wouldRecommend, setWouldRecommend] = useState("");
 
-  // Step 2 — Avis
-  const [title, setTitle] = useState("");
-  const [pros, setPros] = useState("");
-  const [cons, setCons] = useState("");
-  const [content, setContent] = useState("");
-  const [knewBefore, setKnewBefore] = useState("");
-
   const [step1Err, setStep1Err] = useState("");
   const [step2Err, setStep2Err] = useState("");
-  const [charteAccepted, setCharteAccepted] = useState(false);
 
-  const canSubmit = content.length >= 50 && pros.trim().length >= 10 && cons.trim().length >= 10
-    && ratingOverall > 0 && !!wouldRecommend && charteAccepted;
+  const canSubmit = ratingOverall > 0 && !!wouldRecommend;
 
   const goNext = () => {
     setStep1Err("");
@@ -197,11 +187,11 @@ export function ReviewForm({ companyId }: { companyId: string }) {
         <input type="hidden" name="rating_worklife" value={ratingWl} />
         <input type="hidden" name="rating_career" value={ratingCareer} />
         <input type="hidden" name="would_recommend" value={wouldRecommend} />
-        <input type="hidden" name="title" value={title} />
-        <input type="hidden" name="pros" value={pros} />
-        <input type="hidden" name="cons" value={cons} />
-        <input type="hidden" name="content" value={content} />
-        <input type="hidden" name="knew_before" value={knewBefore} />
+        <input type="hidden" name="title" value="" />
+        <input type="hidden" name="pros" value="" />
+        <input type="hidden" name="cons" value="" />
+        <input type="hidden" name="content" value="" />
+        <input type="hidden" name="knew_before" value="" />
         <input type="hidden" name="start_year" value={startYear} />
         <input type="hidden" name="end_year" value={endYear} />
 
@@ -336,96 +326,10 @@ export function ReviewForm({ companyId }: { companyId: string }) {
           </div>
         )}
 
-        {/* ── Step 2 : Avis ── */}
-        {step === 2 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 12, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-start" }}>
-              <span style={{ fontSize: 16 }}>🔒</span>
-              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                Ton avis est <strong style={{ color: "var(--text)" }}>affiché anonymement</strong>. Seul ton poste et ta durée seront visibles.
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="review-title" style={lbl}>Titre <span className="badge-optional">Optionnel</span></label>
-              <input id="review-title" value={title} onChange={e => setTitle(e.target.value)}
-                placeholder="Ex : Bonne boîte mais attention au rythme..." style={inp} />
-            </div>
-
-            <style>{`@media (max-width: 500px) { .review-pros-cons { grid-template-columns: 1fr !important; } }`}</style>
-            <div className="review-pros-cons" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              <div>
-                <label htmlFor="review-pros" style={lbl}>👍 Points positifs *</label>
-                <textarea id="review-pros" value={pros} onChange={e => setPros(e.target.value)} rows={3}
-                  placeholder="Ce que j'ai vraiment apprécié..." style={{ ...inp, resize: "vertical" }} />
-              </div>
-              <div>
-                <label htmlFor="review-cons" style={lbl}>👎 Points négatifs *</label>
-                <textarea id="review-cons" value={cons} onChange={e => setCons(e.target.value)} rows={3}
-                  placeholder="Ce qui m'a déçu ou frustré..." style={{ ...inp, resize: "vertical" }} />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <label htmlFor="review-content" style={lbl}>Ton avis complet * <span style={{ fontWeight: 400, opacity: 0.5 }}>(min. 50 caractères)</span></label>
-                <span style={{ fontSize: 11, color: content.length >= 50 ? "#10b981" : "#f97316" }}>
-                  {content.length < 50 ? `encore ${50 - content.length} caractères min.` : "✓ Bon à publier"}
-                </span>
-              </div>
-              <textarea id="review-content" value={content} onChange={e => setContent(e.target.value)} rows={5}
-                placeholder="Décris ton expérience honnêtement : projets, ambiance, management, ce que tu referais ou pas..."
-                style={{ ...inp, resize: "vertical" }} />
-            </div>
-
-            <div>
-              <label htmlFor="review-knew-before" style={lbl}>💡 Ce que j'aurais voulu savoir avant <span className="badge-optional">Optionnel</span></label>
-              <textarea id="review-knew-before" value={knewBefore} onChange={e => setKnewBefore(e.target.value)} rows={2}
-                placeholder="Un conseil à quelqu'un qui rejoint cette boîte..."
-                style={{ ...inp, resize: "vertical" }} />
-            </div>
-
-            {/* Charte d'engagement */}
-            <div style={{
-              background: "var(--surface2)", border: `1px solid ${charteAccepted ? "rgba(16,185,129,0.35)" : "var(--border2)"}`,
-              borderRadius: 14, padding: "16px 18px", transition: "border-color 0.2s",
-            }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 12, letterSpacing: "0.02em", textTransform: "uppercase" }}>
-                Charte de bonne foi
-              </p>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 7 }}>
-                {[
-                  "J'ai eu une expérience personnelle avec cette entreprise",
-                  "J'écris de bonne foi et sans intention malveillante",
-                  "Je n'invente pas de faits et ne diffame pas de personnes",
-                  "Je ne divulgue pas d'informations confidentielles",
-                  "Je n'utilise pas de langage insultant ou discriminatoire",
-                ].map((item, i) => (
-                  <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                    <span style={{ color: "#10b981", flexShrink: 0, marginTop: 1 }}>✓</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <label style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14, cursor: "pointer" }}>
-                <input
-                  type="checkbox"
-                  checked={charteAccepted}
-                  onChange={e => setCharteAccepted(e.target.checked)}
-                  style={{ width: 18, height: 18, accentColor: "#8b5cf6", cursor: "pointer", flexShrink: 0 }}
-                />
-                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>
-                  Je confirme respecter cette charte et j'engage ma responsabilité en cas de fausse déclaration.
-                </span>
-              </label>
-            </div>
-
-            {state?.error && (
-              <p style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.08)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)" }}>
-                {state.error}
-              </p>
-            )}
-          </div>
+        {state?.error && step === 1 && (
+          <p style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.08)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)", marginTop: 12 }}>
+            {state.error}
+          </p>
         )}
 
         {/* Navigation */}
@@ -442,7 +346,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </button>
           )}
 
-          {step < 2 ? (
+          {step < 1 ? (
             <button type="button" onClick={goNext}
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,

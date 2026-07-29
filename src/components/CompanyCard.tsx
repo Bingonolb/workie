@@ -260,9 +260,11 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, isBusi
           {/* Description */}
           {company.description && (
             <p style={{
-              fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.6,
+              fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.5,
               marginBottom: 11,
-            }}>
+              display: "-webkit-box", WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical", overflow: "hidden",
+            } as React.CSSProperties}>
               {company.description}
             </p>
           )}

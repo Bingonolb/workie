@@ -270,7 +270,7 @@ export function ExploreClient({
           </div>
         ) : (
           <>
-            <div className="explore-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
+            <div className="explore-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 28 }}>
               {(() => {
                 const items: React.ReactNode[] = [];
                 visibleCompanies.forEach((c, i) => {
