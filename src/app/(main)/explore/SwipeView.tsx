@@ -399,9 +399,10 @@ export function SwipeView({
       el.removeEventListener("touchend", onTouchEnd);
       el.removeEventListener("click", onClickCapture, { capture: true });
     };
-  // Re-attach when card changes (new company) so currentRef is always fresh
+  // Re-attach when card changes (new company) so currentRef is always fresh.
+  // Also re-attach when companies first load (index stays 0 but cardRef was null on mount).
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
+  }, [index, companies.length > 0]);
 
   // Desktop mouse handlers (pointer events work fine without passive concern)
   const onMouseDown = (e: React.MouseEvent) => {
@@ -424,6 +425,8 @@ export function SwipeView({
       if (c && isAd(c)) {
         trackAdClick(c.campaign.id);
         window.open(c.campaign.cta_url, "_blank", "noopener,noreferrer");
+      } else if (c && !isAd(c)) {
+        router.push(`/company/${c.id}`);
       }
       setDrag(0);
       return;
@@ -482,7 +485,7 @@ export function SwipeView({
               : gone
                 ? "transform 0.26s cubic-bezier(0.4, 0, 1, 1)"
                 : "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            cursor: isDragging ? "grabbing" : "grab",
+            cursor: isDragging ? "grabbing" : "pointer",
             touchAction: "pan-y",
           }}
           onMouseDown={onMouseDown}

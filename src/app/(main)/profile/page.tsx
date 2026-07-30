@@ -52,16 +52,58 @@ export default async function ProfilePage() {
 
         {/* ── Header ── */}
         <div className="profile-header" style={{
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
+          position: "relative",
           borderRadius: 20,
-          padding: "28px 32px",
+          overflow: "hidden",
           marginBottom: 20,
+          border: "1px solid var(--border)",
+          background: "var(--surface)",
         }}>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 14 }}>
-            {displayName}
-          </h1>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {/* Name zone — dark panel with "Workie" watermark text */}
+          <div style={{
+            position: "relative",
+            padding: "32px 32px 28px",
+            background: "linear-gradient(160deg, #0d0d14 0%, #131320 100%)",
+            overflow: "hidden",
+          }}>
+            {/* Watermark */}
+            <span aria-hidden="true" style={{
+              position: "absolute",
+              right: -8, top: "50%",
+              transform: "translateY(-50%)",
+              fontSize: 96, fontWeight: 900,
+              color: "rgba(255,255,255,0.04)",
+              letterSpacing: "-0.05em",
+              userSelect: "none",
+              lineHeight: 1,
+              pointerEvents: "none",
+            }}>
+              Workie
+            </span>
+            {/* Accent line */}
+            <div style={{
+              width: 32, height: 3, borderRadius: 2,
+              background: "linear-gradient(90deg, #8b5cf6, #f97316)",
+              marginBottom: 14,
+            }} />
+            <h1 style={{
+              fontSize: 28, fontWeight: 900,
+              color: "#fff",
+              letterSpacing: "-0.035em",
+              lineHeight: 1.1,
+              margin: 0,
+            }}>
+              {displayName}
+            </h1>
+          </div>
+
+          {/* Info row */}
+          <div style={{
+            padding: "16px 32px 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 5,
+          }}>
             <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{user.email}</span>
             {(profile?.city || profile?.country) && (
               <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
