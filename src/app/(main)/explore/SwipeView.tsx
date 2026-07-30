@@ -389,14 +389,22 @@ export function SwipeView({
       if (!dragStart.current) e.stopPropagation();
     };
 
+    const onTouchCancel = () => {
+      dragStart.current = null;
+      setIsDragging(false);
+      setDrag(0);
+    };
+
     el.addEventListener("touchstart", onTouchStart, { passive: true });
     el.addEventListener("touchmove", onTouchMove, { passive: false });
     el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchCancel, { passive: true });
     el.addEventListener("click", onClickCapture, { capture: true });
     return () => {
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
       el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchCancel);
       el.removeEventListener("click", onClickCapture, { capture: true });
     };
   // Re-attach when card changes (new company) so currentRef is always fresh.
