@@ -97,20 +97,16 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
                 {/* Company */}
                 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 8, overflow: "hidden",
-                    flexShrink: 0, background: "var(--surface3)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 12, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "-0.01em",
-                    border: "1px solid var(--border)",
-                  }}>
-                    {c.logo_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.logo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                    ) : (
-                      (c.name.trim().replace(/[^a-zA-ZÀ-ÿ\s]/g, " ").trim().split(/\s+/).slice(0, 2).map((w: string) => w[0]).join("").toUpperCase())
-                    )}
-                  </div>
+                  {c.logo_url && (
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 8, overflow: "hidden",
+                      flexShrink: 0, background: "var(--surface3)",
+                      border: "1px solid var(--border)",
+                    }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={c.logo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = "none"; }} />
+                    </div>
+                  )}
                   <div style={{ minWidth: 0 }}>
                     <p style={{
                       fontSize: 14, fontWeight: 700, color: "var(--text)",
