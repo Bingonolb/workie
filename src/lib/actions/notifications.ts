@@ -4,12 +4,20 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export type NotifiedCompany = {
+  id: string;
+  name: string;
+  sector: string | null;
+  city: string | null;
+};
+
 export type Notification = {
   id: string;
   type: string;
   title: string;
   body: string | null;
-  data: Record<string, string>;
+  // `new_companies` stores { companies: NotifiedCompany[] }; older types store flat strings.
+  data: Record<string, string> & { companies?: NotifiedCompany[] };
   read: boolean;
   created_at: string;
 };
@@ -80,6 +88,27 @@ export async function deleteNotification(id: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// Internal: annonce une nouvelle entreprise à tous les membres.
+// Le regroupement est fait côté Postgres (voir notify_new_company) : plusieurs
+// entreprises ajoutées dans la même journée arrivent dans UNE seule
+// notification, pas une par entreprise.
+export async function notifyNewCompany(
+  companyId: string,
+  companyName: string,
+  sector?: string | null,
+  city?: string | null,
+): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    await admin.rpc("notify_new_company", {
+      p_company_id: companyId,
+      p_company_name: companyName,
+      p_company_sector: sector ?? null,
+      p_company_city: city ?? null,
+    });
+  } catch { /* silent — ne doit jamais bloquer la création d'entreprise */ }
 }
 
 // Internal: fan-out notifications to all users who favorited a company

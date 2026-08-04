@@ -48,13 +48,14 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
 
 function RatingBar({ label, value }: { label: string; value: number | null }) {
   if (!value) return null;
+  const color = ratingColor(value);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <span className="rating-bar-label" style={{ fontSize: 12, color: "var(--text-muted)", width: 120, flexShrink: 0 }}>{label}</span>
-      <div style={{ flex: 1, height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
-        <div style={{ width: `${(value / 5) * 100}%`, height: "100%", background: "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 3 }} />
+      <div style={{ flex: 1, height: 7, background: "var(--surface3)", borderRadius: 4, overflow: "hidden" }}>
+        <div style={{ width: `${(value / 5) * 100}%`, height: "100%", background: color, borderRadius: 4 }} />
       </div>
-      <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", width: 30 }}>{Number(value).toFixed(1)}</span>
+      <span style={{ fontSize: 12, fontWeight: 800, color, width: 30, fontVariantNumeric: "tabular-nums" }}>{Number(value).toFixed(1)}</span>
     </div>
   );
 }
@@ -452,13 +453,13 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
                   </div>
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
                     <RatingBar label="👔 Management" value={avgMgmt} />
-                    <RatingBar label="⚖️ Vie pro/perso" value={avgWl} />
+                    <RatingBar label="🏡 Vie pro/perso" value={avgWl} />
                     <RatingBar label="🌍 Culture" value={avgCulture} />
                     <RatingBar label="🚀 Évolution" value={avgCareer} />
                     <RatingBar label="🕐 Flexibilité" value={avgFlexibility} />
                     <RatingBar label="🏆 Reconnaissance" value={avgRecognition} />
-                    <RatingBar label="⚖️ Charge travail" value={avgWorkload} />
-                    <RatingBar label="🌈 Diversité" value={avgDiversity} />
+                    <RatingBar label="📊 Charge travail" value={avgWorkload} />
+                    <RatingBar label="🤝 Diversité" value={avgDiversity} />
                   </div>
                 </div>
 
@@ -710,16 +711,26 @@ const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
   ca_depend: { label: "🤔 Ça dépend", color: "#f59e0b" },
 };
 
+// Score-driven colour so a weak rating reads as weak at a glance — a flat
+// gradient made 1/5 and 5/5 look identical.
+function ratingColor(value: number): string {
+  if (value >= 4) return "#10b981";   // solide
+  if (value >= 3) return "#f59e0b";   // moyen
+  if (value >= 2) return "#f97316";   // faible
+  return "#ef4444";                   // critique
+}
+
 function SubRatingBar({ label, value }: { label: string; value: number | null }) {
   if (!value) return null;
   const pct = Math.round((value / 5) * 100);
+  const color = ratingColor(value);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <span style={{ fontSize: 11, color: "var(--text-muted)", width: 90, flexShrink: 0 }}>{label}</span>
-      <div style={{ flex: 1, height: 4, background: "var(--surface3)", borderRadius: 2, overflow: "hidden" }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 2 }} />
+      <span style={{ fontSize: 11, color: "var(--text-muted)", width: 108, flexShrink: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+      <div style={{ flex: 1, height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden", minWidth: 40 }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3 }} />
       </div>
-      <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text)", width: 24, textAlign: "right" }}>{Number(value).toFixed(1)}</span>
+      <span style={{ fontSize: 11, fontWeight: 800, color, width: 24, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{Number(value).toFixed(1)}</span>
     </div>
   );
 }
@@ -803,15 +814,15 @@ function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted
 
       {/* Sub-ratings */}
       {hasSubRatings && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 7, paddingTop: 14, borderTop: "1px solid var(--border)", marginBottom: 14 }}>
+        <div className="review-subratings" style={{ paddingTop: 14, borderTop: "1px solid var(--border)", marginBottom: 14 }}>
           <SubRatingBar label="👔 Management" value={review.rating_management ? Number(review.rating_management) : null} />
-          <SubRatingBar label="⚖️ Vie pro/perso" value={review.rating_worklife ? Number(review.rating_worklife) : null} />
+          <SubRatingBar label="🏡 Vie pro/perso" value={review.rating_worklife ? Number(review.rating_worklife) : null} />
           <SubRatingBar label="🌍 Culture" value={review.rating_culture ? Number(review.rating_culture) : null} />
           <SubRatingBar label="🚀 Évolution" value={review.rating_career ? Number(review.rating_career) : null} />
           <SubRatingBar label="🕐 Flexibilité" value={review.rating_flexibility ? Number(review.rating_flexibility) : null} />
           <SubRatingBar label="🏆 Reconnaissance" value={review.rating_recognition ? Number(review.rating_recognition) : null} />
-          <SubRatingBar label="⚖️ Charge travail" value={review.rating_workload ? Number(review.rating_workload) : null} />
-          <SubRatingBar label="🌈 Diversité" value={review.rating_diversity ? Number(review.rating_diversity) : null} />
+          <SubRatingBar label="📊 Charge travail" value={review.rating_workload ? Number(review.rating_workload) : null} />
+          <SubRatingBar label="🤝 Diversité" value={review.rating_diversity ? Number(review.rating_diversity) : null} />
         </div>
       )}
 

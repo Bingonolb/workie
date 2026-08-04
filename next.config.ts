@@ -60,6 +60,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "picsum.photos" },
+      // adminAddCompany dérive automatiquement le logo depuis le domaine du
+      // site web : sans cette entrée, next/image lève et la fiche entreprise
+      // renvoie une 500 (635 entreprises concernées lors de la découverte).
+      { protocol: "https", hostname: "logo.clearbit.com" },
     ],
     // Cache optimised images for 7 days on Vercel CDN (default is 60s — way too short)
     minimumCacheTTL: 604800,

@@ -313,7 +313,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 0 }}>Notes par catégorie *</p>
               <StarPicker name="rating_management" label="👔 Management direct" value={ratingMgmt} onChange={v => { setRatingMgmt(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_worklife" label="⚖️ Équilibre vie pro / perso" value={ratingWl} onChange={v => { setRatingWl(v); setStep2Err(""); }} />
+              <StarPicker name="rating_worklife" label="🏡 Équilibre vie pro / perso" value={ratingWl} onChange={v => { setRatingWl(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
               <StarPicker name="rating_culture" label="🌍 Ambiance & culture" value={ratingCulture} onChange={v => { setRatingCulture(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
@@ -361,9 +361,9 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <div style={{ height: 1, background: "var(--border)" }} />
               <StarPicker name="rating_recognition" label="🏆 Reconnaissance du travail" value={ratingRecognition} onChange={setRatingRecognition} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_workload" label="⚖️ Charge de travail" value={ratingWorkload} onChange={setRatingWorkload} />
+              <StarPicker name="rating_workload" label="📊 Charge de travail" value={ratingWorkload} onChange={setRatingWorkload} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_diversity" label="🌈 Diversité & inclusion" value={ratingDiversity} onChange={setRatingDiversity} />
+              <StarPicker name="rating_diversity" label="🤝 Diversité & inclusion" value={ratingDiversity} onChange={setRatingDiversity} />
             </div>
 
             <div>

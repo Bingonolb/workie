@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { Bell, Briefcase, CheckCheck, MessageCircle, Trash2, MoreHorizontal } from "lucide-react";
+import { Bell, Briefcase, Building2, CheckCheck, MessageCircle, Trash2, MoreHorizontal } from "lucide-react";
 import { markAllRead, markRead, deleteNotification, type Notification } from "@/lib/actions/notifications";
 
 function timeAgo(date: string) {
@@ -18,6 +18,7 @@ function timeAgo(date: string) {
 const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   new_job_offer: { icon: <Briefcase size={16} aria-hidden="true" />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
   review_reply:  { icon: <MessageCircle size={16} aria-hidden="true" />, color: "#10b981", bg: "rgba(16,185,129,0.12)" },
+  new_companies: { icon: <Building2 size={16} aria-hidden="true" />, color: "#f97316", bg: "rgba(249,115,22,0.12)" },
 };
 
 function NotificationItem({ n, onRead, onDelete }: {
@@ -27,11 +28,15 @@ function NotificationItem({ n, onRead, onDelete }: {
 }) {
   const cfg = TYPE_CONFIG[n.type] ?? { icon: <Bell size={16} aria-hidden="true" />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" };
   const data = n.data as Record<string, string>;
+  // A "new companies" digest links to several companies at once, so it can't be
+  // wrapped in a single <a> — it renders one chip per company instead.
+  const companies = n.type === "new_companies" ? (n.data.companies ?? []) : [];
+  const isDigest = companies.length > 0;
   const href = n.type === "review_reply" && data.company_id
     ? `/company/${data.company_id}#avis`
     : n.type === "new_job_offer" && data.company_id
     ? `/company/${data.company_id}`
-    : "/jobs";
+    : "/explore";
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -43,27 +48,15 @@ function NotificationItem({ n, onRead, onDelete }: {
     await onDelete(n.id);
   };
 
-  return (
-    <div style={{
-      opacity: exiting ? 0 : 1,
-      transform: exiting ? "scale(0.97) translateY(-4px)" : "none",
-      transition: exiting ? "all 0.22s ease" : "none",
-      maxHeight: exiting ? 0 : 200,
-      overflow: "hidden",
-    }}>
-      <Link
-        href={href}
-        onClick={(e) => {
-          if (menuOpen) { e.preventDefault(); return; }
-          if (!n.read) onRead(n.id);
-        }}
-        style={{
-          display: "flex", alignItems: "flex-start", gap: 14,
-          padding: "14px 16px", borderRadius: 14, textDecoration: "none",
-          background: n.read ? "var(--surface)" : "var(--surface2)",
-          border: `1px solid ${n.read ? "var(--border)" : "rgba(139,92,246,0.25)"}`,
-        }}
-      >
+  const cardStyle: React.CSSProperties = {
+    display: "flex", alignItems: "flex-start", gap: 14,
+    padding: "14px 16px", borderRadius: 14, textDecoration: "none",
+    background: n.read ? "var(--surface)" : "var(--surface2)",
+    border: `1px solid ${n.read ? "var(--border)" : "rgba(139,92,246,0.25)"}`,
+  };
+
+  const cardInner = (
+    <>
         <div style={{ width: 38, height: 38, borderRadius: 10, background: cfg.bg, display: "flex", alignItems: "center", justifyContent: "center", color: cfg.color, flexShrink: 0 }}>
           {cfg.icon}
         </div>
@@ -72,12 +65,26 @@ function NotificationItem({ n, onRead, onDelete }: {
           <p style={{ fontSize: 14, fontWeight: n.read ? 600 : 800, color: "var(--text)", marginBottom: 2, lineHeight: 1.3 }}>
             {n.title}
           </p>
-          {n.body && (
+          {isDigest ? (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+              {companies.map(c => (
+                <Link
+                  key={c.id}
+                  href={`/company/${c.id}`}
+                  onClick={() => { if (!n.read) onRead(n.id); }}
+                  className="notif-company-chip"
+                >
+                  {c.name}
+                  {c.city && <span style={{ opacity: 0.6, fontWeight: 500 }}> · {c.city}</span>}
+                </Link>
+              ))}
+            </div>
+          ) : n.body ? (
             <p style={{ fontSize: 13, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {n.body}
             </p>
-          )}
-          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{timeAgo(n.created_at)}</p>
+          ) : null}
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: isDigest ? 10 : 4 }}>{timeAgo(n.created_at)}</p>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
@@ -136,7 +143,32 @@ function NotificationItem({ n, onRead, onDelete }: {
             )}
           </div>
         </div>
-      </Link>
+    </>
+  );
+
+  return (
+    <div style={{
+      opacity: exiting ? 0 : 1,
+      transform: exiting ? "scale(0.97) translateY(-4px)" : "none",
+      transition: exiting ? "all 0.22s ease" : "none",
+      // Generous cap: a digest can list up to 12 company chips and must not clip.
+      maxHeight: exiting ? 0 : 600,
+      overflow: "hidden",
+    }}>
+      {isDigest ? (
+        <div style={cardStyle}>{cardInner}</div>
+      ) : (
+        <Link
+          href={href}
+          onClick={(e) => {
+            if (menuOpen) { e.preventDefault(); return; }
+            if (!n.read) onRead(n.id);
+          }}
+          style={cardStyle}
+        >
+          {cardInner}
+        </Link>
+      )}
     </div>
   );
 }

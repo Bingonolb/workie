@@ -263,6 +263,7 @@ export type Database = {
       increment_ad_click: { Args: { p_campaign_id: string }; Returns: undefined }
       increment_ad_impression: { Args: { p_campaign_id: string }; Returns: undefined }
       increment_helpful: { Args: { review_id: string }; Returns: undefined }
+      notify_new_company: { Args: { p_company_id: string; p_company_name: string; p_company_sector: string | null; p_company_city: string | null }; Returns: number }
       increment_job_apply_click: { Args: { job_id: string }; Returns: undefined }
       increment_penalty_credits: { Args: { uid: string; amount: number }; Returns: undefined }
       spend_penalty_credit: { Args: { uid: string }; Returns: boolean }

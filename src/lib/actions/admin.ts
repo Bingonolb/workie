@@ -5,6 +5,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
+import { notifyNewCompany } from "@/lib/actions/notifications";
 
 async function requireAdmin() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -103,8 +104,18 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       avg_rating: 0, review_count: 0, score: 0,
     };
 
-    const { error } = await supabase.from("companies").insert(fields);
+    const { data: created, error } = await supabase
+      .from("companies")
+      .insert(fields)
+      .select("id")
+      .single();
     if (error) return { error: error.message };
+
+    // Annonce aux membres. Regroupé côté DB : ajouter plusieurs entreprises
+    // d'affilée ne produit qu'une notification listant les nouveautés.
+    if (created?.id) {
+      await notifyNewCompany(created.id, fields.name, fields.sector, fields.city);
+    }
 
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
