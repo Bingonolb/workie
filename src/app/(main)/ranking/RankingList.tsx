@@ -104,7 +104,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                       border: "1px solid var(--border)",
                     }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={c.logo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = "none"; }} />
+                      <img src={c.logo_url} alt="" loading="lazy" decoding="async" className="img-fade" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = "none"; }} />
                     </div>
                   )}
                   <div style={{ minWidth: 0 }}>

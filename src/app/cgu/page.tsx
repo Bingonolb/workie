@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Navbar } from "@/components/Navbar";
+import { NavbarClient } from "@/components/NavbarClient";
+import { Footer } from "@/components/Footer";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function CGUPage() {
   return (
     <div style={{ background: "var(--bg)", minHeight: "100dvh" }}>
-      <Navbar />
+      <NavbarClient />
       <main style={{ maxWidth: 780, margin: "0 auto", padding: "48px 24px 100px" }}>
         <h1 style={{ fontSize: 32, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 8 }}>
           Conditions générales d&apos;utilisation
@@ -96,6 +97,7 @@ export default function CGUPage() {
           <Link href="/explore" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>Retour à l&apos;accueil</Link>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

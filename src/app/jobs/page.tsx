@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Navbar } from "@/components/Navbar";
+import { NavbarClient } from "@/components/NavbarClient";
+import { Footer } from "@/components/Footer";
 
 export const revalidate = 60; // ISR: rebuild every 60s, or on revalidatePath("/jobs")
 import { MapPin, Briefcase, ArrowRight, BadgeCheck } from "lucide-react";
@@ -116,7 +117,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
       {jobsJsonLd.length > 0 && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobsJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       )}
-      <Navbar />
+      <NavbarClient />
 
       {/* Hero */}
       <section style={{ background: "var(--surface2)", borderBottom: "1px solid var(--border)", padding: "52px 24px 40px" }}>
@@ -228,7 +229,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
                     {/* Company info */}
                     <Link href={`/company/${co.id}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 10 }}>
                       {co.logo_url ? (
-                        <img src={co.logo_url} alt={co.name} style={{ width: 28, height: 28, borderRadius: 6, objectFit: "cover", border: "1px solid var(--border)" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                        <img src={co.logo_url} alt={co.name} loading="lazy" decoding="async" className="img-fade" style={{ width: 28, height: 28, borderRadius: 6, objectFit: "cover", border: "1px solid var(--border)" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                       ) : (
                         <div style={{ width: 28, height: 28, borderRadius: 6, background: `linear-gradient(135deg, ${sectorColor}, #f97316)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "#fff", flexShrink: 0 }}>
                           {co.name[0]}
@@ -286,19 +287,8 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
           </div>
         )}
 
-        {/* CTA recruteurs */}
-        <div style={{ marginTop: 48, background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 20, padding: "32px 36px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
-          <div>
-            <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Vous recrutez ?</p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
-              Publiez vos offres sur Workie et touchez des candidats qui connaissent déjà votre culture d&apos;entreprise.
-            </p>
-          </div>
-          <Link href="/business" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none", whiteSpace: "nowrap" }}>
-            Espace entreprise <ArrowRight size={16} aria-hidden="true" />
-          </Link>
-        </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -122,7 +122,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div style={{ height: 210, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
+        <div className="card-cover" style={{ height: 210, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
           <Image
             src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
             alt=""
@@ -213,6 +213,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
                     width: "100%", height: "100%",
                     objectFit: "contain", padding: 3,
                     opacity: logoLoaded ? 1 : 0,
+                    transition: "opacity 0.25s ease",
                   }}
                 />
               )}

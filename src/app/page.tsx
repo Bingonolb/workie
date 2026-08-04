@@ -239,9 +239,6 @@ export default async function Home() {
                 <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
                   Créer une campagne →
                 </Link>
-                <Link href="/business" style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600, textDecoration: "none" }}>
-                  Vous êtes une entreprise ? →
-                </Link>
               </div>
             </div>
             <div className="landing-ads-aside" style={{ flexDirection: "column", gap: 10, minWidth: 200 }}>

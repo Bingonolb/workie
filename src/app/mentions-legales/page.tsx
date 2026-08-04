@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Navbar } from "@/components/Navbar";
+import { NavbarClient } from "@/components/NavbarClient";
+import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Mentions légales — Workie",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 export default function MentionsLegalesPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
-      <Navbar />
+      <NavbarClient />
       <main style={{ maxWidth: 760, margin: "0 auto", padding: "48px 28px 100px" }}>
         <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 8 }}>
           Mentions légales
@@ -78,6 +79,7 @@ export default function MentionsLegalesPage() {
           </p>
         </Section>
       </main>
+      <Footer />
     </div>
   );
 }

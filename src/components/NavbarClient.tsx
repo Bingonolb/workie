@@ -12,6 +12,7 @@ type UserCtx = {
   isLoggedIn: boolean;
   isAdmin: boolean;
   penaltyCredits: number;
+  unreadCount: number;
 };
 
 export function NavbarClient() {
@@ -21,7 +22,7 @@ export function NavbarClient() {
     fetch("/api/user/context")
       .then(r => r.json())
       .then((data: UserCtx) => setCtx(data))
-      .catch(() => setCtx({ isLoggedIn: false, isAdmin: false, penaltyCredits: 0 }));
+      .catch(() => setCtx({ isLoggedIn: false, isAdmin: false, penaltyCredits: 0, unreadCount: 0 }));
   }, []);
 
   const isLoggedIn = ctx?.isLoggedIn ?? false;
@@ -67,7 +68,7 @@ export function NavbarClient() {
 
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {isLoggedIn && <SearchButton />}
-          {isLoggedIn && <NavBell initialUnread={0} />}
+          {isLoggedIn && <NavBell initialUnread={ctx?.unreadCount ?? 0} />}
           {!isLoggedIn && ctx !== null && (
             <Link href="/signup" style={{
               fontSize: 13, fontWeight: 700, textDecoration: "none",

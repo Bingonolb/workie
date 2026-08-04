@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Navbar } from "@/components/Navbar";
+import { NavbarClient } from "@/components/NavbarClient";
 
 export default function NotFound() {
   return (
     <>
-      <Navbar />
+      <NavbarClient />
       <div style={{
         minHeight: "80vh", display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",

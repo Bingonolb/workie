@@ -94,8 +94,8 @@ function NotifItem({ n, onRead, onDelete, onClose }: {
             </button>
             {menuOpen && (
               <>
-                <div style={{ position: "fixed", inset: 0, zIndex: 9 }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); }} />
-                <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, width: 160, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.14)", zIndex: 10, overflow: "hidden" }}>
+                <div style={{ position: "fixed", inset: 0, zIndex: 10002 }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); }} />
+                <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, width: 160, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.14)", zIndex: 10003, overflow: "hidden" }}>
                   {!n.read && (
                     <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onRead(n.id); }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "10px 14px", background: "none", border: "none", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text)", cursor: "pointer" }}>
                       <CheckCheck size={13} color="var(--text-muted)" /> Marquer comme lu

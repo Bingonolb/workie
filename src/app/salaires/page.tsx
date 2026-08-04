@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Navbar } from "@/components/Navbar";
+import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 import { TrendingUp, Users, Briefcase } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
@@ -202,7 +202,7 @@ export default async function SalairesPage() {
   return (
     <div className="page-root">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(salairesJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
-      <Navbar />
+      <NavbarClient />
 
       {/* Hero */}
       <section style={{ background: "var(--surface2)", borderBottom: "1px solid var(--border)", padding: "52px 24px 40px" }}>
