@@ -481,8 +481,6 @@ main, .page-main, .page-main-sm, .page-main-md {
   .company-hero-title { font-size: 22px !important; letter-spacing: "-0.02em" !important; }
   .company-hero-logo { width: 52px !important; height: 52px !important; border-radius: 10px !important; }
 .company-hero-bottom { bottom: 16px !important; }
-  /* Review pros/cons → stack */
-  .review-pros-cons { grid-template-columns: 1fr !important; }
 }
 
 /* ─── Job offer modal → bottom sheet on mobile ──────────────────── */

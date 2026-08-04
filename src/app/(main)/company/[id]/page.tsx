@@ -155,13 +155,11 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   // Guard early — no need to run 5 more queries for a non-existent company
   if (!company) notFound();
 
-  // Only show new-format reviews (ratings only, no text fields)
-  const newFormatReviews = reviews.filter(r =>
-    !r.content && !r.pros && !r.cons && !(r as unknown as { knew_before?: string }).knew_before
-  );
-
+  // Tous les avis sont affichés, notes uniquement. Les anciens avis rédigés
+  // étaient auparavant masqués alors qu'ils comptaient dans la moyenne — leur
+  // texte n'est simplement plus rendu (voir ReviewCard).
   // Sort reviews server-side so the initial render matches the user's intent
-  const sortedReviews = [...newFormatReviews].sort((a, b) => {
+  const sortedReviews = [...reviews].sort((a, b) => {
     if (sortMode === "recent") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     if (sortMode === "helpful") return Number(b.helpful_count ?? 0) - Number(a.helpful_count ?? 0);
     return reviewRelevanceScore(b) - reviewRelevanceScore(a);
@@ -228,8 +226,6 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   }, {});
   const dominantMode = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
-  // Rich snippet reviews not generated (new format has no text content)
-  const topReviews: typeof reviews = [];
 
   const jsonLd = [
     {
@@ -260,17 +256,9 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
         { "@type": "ListItem", "position": 4, "name": company.name, "item": `${BASE_URL}/company/${company.id}` },
       ],
     },
-    ...topReviews.map(r => ({
-      "@context": "https://schema.org",
-      "@type": "Review",
-      "itemReviewed": { "@type": "Organization", "name": company.name },
-      "reviewRating": { "@type": "Rating", "ratingValue": Number(r.rating_overall), "bestRating": 5, "worstRating": 1 },
-      "name": r.title ?? `Avis sur ${company.name}`,
-      "reviewBody": r.content.slice(0, 500),
-      "datePublished": r.created_at?.slice(0, 10) ?? undefined,
-      "author": { "@type": "Person", "name": "Employé anonyme" },
-      "publisher": { "@type": "Organization", "name": "Workie", "url": BASE_URL },
-    })),
+    // Pas d'objets Review individuels : le format 100% notes n'a pas de corps
+    // de texte, et c'est aggregateRating (émis plus haut) qui porte les étoiles
+    // dans les résultats de recherche.
   ];
 
   return (
@@ -771,35 +759,9 @@ function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted
         </div>
       )}
 
-      {/* Text content — pros/cons (new form) or legacy content/title */}
-      {(review.pros || review.cons || review.knew_before || review.content || review.title) && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 14, borderTop: "1px solid var(--border)", marginBottom: 14 }}>
-          {review.title && !review.pros && !review.cons && (
-            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{review.title}</p>
-          )}
-          {review.pros && (
-            <div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.05em" }}>Points positifs</span>
-              <p style={{ fontSize: 13, color: "var(--text)", marginTop: 3, lineHeight: 1.55 }}>{review.pros}</p>
-            </div>
-          )}
-          {review.cons && (
-            <div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#ef4444", textTransform: "uppercase", letterSpacing: "0.05em" }}>Points négatifs</span>
-              <p style={{ fontSize: 13, color: "var(--text)", marginTop: 3, lineHeight: 1.55 }}>{review.cons}</p>
-            </div>
-          )}
-          {review.knew_before && (
-            <div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.05em" }}>Ce que j&apos;aurais voulu savoir</span>
-              <p style={{ fontSize: 13, color: "var(--text)", marginTop: 3, lineHeight: 1.55 }}>{review.knew_before}</p>
-            </div>
-          )}
-          {!review.pros && !review.cons && review.content && (
-            <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55 }}>{review.content}</p>
-          )}
-        </div>
-      )}
+      {/* Aucun texte n'est rendu : la plateforme est passée au format 100% notes.
+          Les anciens avis conservent leur texte en base mais seules leurs notes
+          sont affichées. */}
 
       {/* Footer */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: hasSubRatings || chips.length > 0 ? 0 : 4 }}>
