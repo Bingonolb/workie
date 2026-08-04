@@ -105,7 +105,7 @@ function NotificationItem({ n, onRead, onDelete }: {
               <>
                 {/* Backdrop to close menu on outside tap (mobile-friendly) */}
                 <div
-                  style={{ position: "fixed", inset: 0, zIndex: 9 }}
+                  style={{ position: "fixed", inset: 0, zIndex: 10002 }}
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); }}
                 />
                 <div style={{
@@ -113,7 +113,7 @@ function NotificationItem({ n, onRead, onDelete }: {
                   width: 160, background: "var(--surface)",
                   border: "1px solid var(--border)", borderRadius: 10,
                   boxShadow: "0 6px 24px rgba(0,0,0,0.14)",
-                  zIndex: 10, overflow: "hidden",
+                  zIndex: 10003, overflow: "hidden",
                 }}>
                   {!n.read && (
                     <button

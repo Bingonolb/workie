@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 function escapeLike(s: string) {
   return s.replace(/[%_\\]/g, "\\$&");
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     });
   }
 
-  const supabase = createAdminClient();
+  const supabase = await createClient();
 
   // Search with both the original query AND its accent-stripped version
   const qStripped = stripAccents(q);

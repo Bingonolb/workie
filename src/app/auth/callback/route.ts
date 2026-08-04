@@ -57,8 +57,10 @@ export async function GET(request: Request) {
       const username = (u?.user_metadata?.username as string | undefined) ?? `${emailBase}_${userId.slice(0, 6)}`;
       const fullName = (u?.user_metadata?.full_name as string | undefined) ?? null;
       const cantonField = metaCanton ? { canton: metaCanton } : {};
+      const metaBirthYear = u?.user_metadata?.birth_year as number | undefined;
+      const birthYearField = metaBirthYear ? { birth_year: metaBirthYear } : {};
       await supabase.from("profiles").upsert(
-        { id: userId, username, full_name: fullName, ...cantonField, ...geoFields, ...extra },
+        { id: userId, username, full_name: fullName, ...cantonField, ...birthYearField, ...geoFields, ...extra },
         { onConflict: "id", ignoreDuplicates: true }
       );
       return true;

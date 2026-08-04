@@ -67,6 +67,7 @@ export interface Profile {
   country: string | null;
   bio: string | null;
   role: "user" | "admin" | null;
+  birth_year: number | null;
   created_at: string;
 }
 
@@ -194,7 +195,7 @@ export type Database = {
       }
       profiles: {
         Row: {
-          avatar_url: string | null; bio: string | null; canton: string | null; city: string | null
+          avatar_url: string | null; bio: string | null; birth_year: number | null; canton: string | null; city: string | null
           claimed_company_id: string | null; country: string | null; created_at: string
           email: string | null; full_name: string | null; has_penalty_pass: boolean; has_seen_onboarding: boolean; id: string; identity_verified: boolean
           identity_verified_at: string | null; last_penalty_session_id: string | null; penalty_credits: number; role: string; stripe_verification_session_id: string | null

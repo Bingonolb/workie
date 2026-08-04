@@ -41,6 +41,8 @@ export async function signUp(
   const firstName = String(formData.get("first_name") || "").trim();
   const lastName = String(formData.get("last_name") || "").trim();
   const canton = String(formData.get("canton") || "").trim();
+  const birthYearRaw = String(formData.get("birth_year") || "").trim();
+  const birthYear = birthYearRaw ? parseInt(birthYearRaw, 10) : null;
 
   if (!email || !password || !firstName || !lastName) {
     return { error: "Tous les champs sont requis." };
@@ -50,6 +52,10 @@ export async function signUp(
   }
   if (!canton) {
     return { error: "Sélectionne ton canton." };
+  }
+  const currentYear = new Date().getFullYear();
+  if (!birthYear || birthYear < 1920 || birthYear > currentYear - 13) {
+    return { error: "Sélectionne ton année de naissance." };
   }
   if (password.length < 6) {
     return { error: "Le mot de passe doit faire au moins 6 caractères." };
@@ -67,7 +73,7 @@ export async function signUp(
     email,
     password,
     options: {
-      data: { username, full_name: fullName, first_name: firstName, last_name: lastName, canton },
+      data: { username, full_name: fullName, first_name: firstName, last_name: lastName, canton, birth_year: birthYear },
       // No `next` param — callback will redirect to /onboarding for type=signup
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback`,
     },

@@ -34,6 +34,9 @@ export function AuthFormWorkie({
     "Vaud","Zoug","Zurich",
   ];
 
+  const currentYear = new Date().getFullYear();
+  const BIRTH_YEARS = Array.from({ length: currentYear - 13 - 1940 + 1 }, (_, i) => currentYear - 13 - i);
+
   return (
     <div>
       {/* Google button */}
@@ -74,12 +77,21 @@ export function AuthFormWorkie({
                 <input id="last_name" name="last_name" required placeholder="Dupont" style={inp} />
               </div>
             </div>
-            <div>
-              <label htmlFor="canton" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
-              <select id="canton" name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
-                <option value="">Sélectionne ton canton</option>
-                {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="canton" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
+                <select id="canton" name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
+                  <option value="">Sélectionne ton canton</option>
+                  {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="birth_year" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Année de naissance *</label>
+                <select id="birth_year" name="birth_year" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
+                  <option value="">Année</option>
+                  {BIRTH_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
             </div>
           </>
         )}
