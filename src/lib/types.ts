@@ -35,6 +35,10 @@ export interface Review {
   rating_management: number | null;
   rating_worklife: number | null;
   rating_career: number | null;
+  rating_flexibility: number | null;
+  rating_recognition: number | null;
+  rating_workload: number | null;
+  rating_diversity: number | null;
   title: string | null;
   content: string;
   pros: string | null;
@@ -47,6 +51,7 @@ export interface Review {
   duration_range: string | null;
   work_mode: "présentiel" | "hybride" | "remote" | null;
   would_recommend: "oui" | "non" | "ca_depend" | null;
+  would_return: "oui" | "peut_etre" | "non" | null;
   knew_before: string | null;
   start_year: number | null;
   end_year: number | null;
@@ -234,9 +239,11 @@ export type Database = {
           job_title: string | null; knew_before: string | null
           pros: string | null; rating_career: number | null; rating_culture: number | null
           rating_management: number | null; rating_overall: number; rating_worklife: number | null
+          rating_flexibility: number | null; rating_recognition: number | null
+          rating_workload: number | null; rating_diversity: number | null
           salary_chf: number | null; start_year: number | null; status: string
           submitter_ip: string | null; title: string | null
-          user_id: string | null; work_mode: string | null; would_recommend: string | null
+          user_id: string | null; work_mode: string | null; would_recommend: string | null; would_return: string | null
         }
         Insert: Partial<Database["public"]["Tables"]["reviews"]["Row"]> & { company_id: string; content: string; rating_overall: number }
         Update: Partial<Database["public"]["Tables"]["reviews"]["Row"]>

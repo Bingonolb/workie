@@ -211,6 +211,11 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const rating_management = Number(formData.get("rating_management") || 0) || null;
   const rating_worklife = Number(formData.get("rating_worklife") || 0) || null;
   const rating_career = Number(formData.get("rating_career") || 0) || null;
+  const rating_flexibility = Number(formData.get("rating_flexibility") || 0) || null;
+  const rating_recognition = Number(formData.get("rating_recognition") || 0) || null;
+  const rating_workload = Number(formData.get("rating_workload") || 0) || null;
+  const rating_diversity = Number(formData.get("rating_diversity") || 0) || null;
+  const would_return = String(formData.get("would_return") || "").trim() || null;
   const title = String(formData.get("title") || "").trim() || null;
   const content = String(formData.get("content") || "").trim();
   const pros = String(formData.get("pros") || "").trim() || null;
@@ -310,9 +315,10 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const { error } = await supabase.from("reviews").insert({
     company_id, user_id: user.id,
     rating_overall, rating_culture, rating_management, rating_worklife, rating_career,
+    rating_flexibility, rating_recognition, rating_workload, rating_diversity,
     title, content, pros, cons, job_title, salary_chf,
     is_current, is_anonymous: true,
-    employment_type, duration_range, work_mode, would_recommend, knew_before,
+    employment_type, duration_range, work_mode, would_recommend, would_return, knew_before,
     start_year, end_year,
     submitter_ip, is_verified_author, status, flag_reason,
   });

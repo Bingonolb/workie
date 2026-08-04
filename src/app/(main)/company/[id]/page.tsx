@@ -59,6 +59,61 @@ function RatingBar({ label, value }: { label: string; value: number | null }) {
   );
 }
 
+// Radar chart — one glance at strengths/weaknesses across all rated categories.
+// Pure SVG, no external lib. Axes with no data (null) are drawn at center (0).
+function RatingRadar({ axes }: { axes: { label: string; value: number | null }[] }) {
+  const size = 240;
+  const center = size / 2;
+  const maxR = size / 2 - 34; // leave room for labels
+  const n = axes.length;
+  const angleFor = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
+
+  const pointAt = (i: number, ratio: number) => {
+    const a = angleFor(i);
+    return [center + Math.cos(a) * maxR * ratio, center + Math.sin(a) * maxR * ratio] as const;
+  };
+
+  const dataPoints = axes.map((ax, i) => pointAt(i, Math.max(0, Math.min(1, (ax.value ?? 0) / 5))));
+  const dataPath = dataPoints.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ") + " Z";
+
+  const rings = [0.25, 0.5, 0.75, 1];
+
+  return (
+    <div style={{ display: "flex", justifyContent: "center" }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Répartition des notes par catégorie">
+        {/* Grid rings */}
+        {rings.map(r => {
+          const ringPath = axes.map((_, i) => {
+            const [x, y] = pointAt(i, r);
+            return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+          }).join(" ") + " Z";
+          return <path key={r} d={ringPath} fill="none" stroke="var(--border)" strokeWidth={1} />;
+        })}
+        {/* Spokes */}
+        {axes.map((_, i) => {
+          const [x, y] = pointAt(i, 1);
+          return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke="var(--border)" strokeWidth={1} />;
+        })}
+        {/* Data area */}
+        <path d={dataPath} fill="rgba(139,92,246,0.22)" stroke="#8b5cf6" strokeWidth={2} strokeLinejoin="round" />
+        {dataPoints.map(([x, y], i) => axes[i].value ? <circle key={i} cx={x} cy={y} r={3} fill="#8b5cf6" /> : null)}
+        {/* Labels */}
+        {axes.map((ax, i) => {
+          const a = angleFor(i);
+          const lx = center + Math.cos(a) * (maxR + 26);
+          const ly = center + Math.sin(a) * (maxR + 26);
+          return (
+            <text key={ax.label} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
+              fontSize={9.5} fontWeight={700} fill="var(--text-muted)">
+              {ax.label}
+            </text>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -178,7 +233,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
   // Sub-ratings averages — each computed independently to avoid null-as-zero bias
-  const subAvg = (field: "rating_culture" | "rating_management" | "rating_worklife" | "rating_career") => {
+  const subAvg = (field: "rating_culture" | "rating_management" | "rating_worklife" | "rating_career" | "rating_flexibility" | "rating_recognition" | "rating_workload" | "rating_diversity") => {
     const subset = reviews.filter(r => r[field]);
     return subset.length ? subset.reduce((s, r) => s + Number(r[field]), 0) / subset.length : null;
   };
@@ -186,6 +241,21 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   const avgMgmt = subAvg("rating_management");
   const avgWl = subAvg("rating_worklife");
   const avgCareer = subAvg("rating_career");
+  const avgFlexibility = subAvg("rating_flexibility");
+  const avgRecognition = subAvg("rating_recognition");
+  const avgWorkload = subAvg("rating_workload");
+  const avgDiversity = subAvg("rating_diversity");
+  const radarAxes = [
+    { label: "Management", value: avgMgmt },
+    { label: "Vie pro/perso", value: avgWl },
+    { label: "Culture", value: avgCulture },
+    { label: "Évolution", value: avgCareer },
+    { label: "Flexibilité", value: avgFlexibility },
+    { label: "Reconnaissance", value: avgRecognition },
+    { label: "Charge travail", value: avgWorkload },
+    { label: "Diversité", value: avgDiversity },
+  ];
+  const hasRadarData = radarAxes.some(a => a.value !== null);
 
   // Would recommend stats
   const withRecommend = reviews.filter(r => r.would_recommend);
@@ -385,8 +455,19 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
                     <RatingBar label="⚖️ Vie pro/perso" value={avgWl} />
                     <RatingBar label="🌍 Culture" value={avgCulture} />
                     <RatingBar label="🚀 Évolution" value={avgCareer} />
+                    <RatingBar label="🕐 Flexibilité" value={avgFlexibility} />
+                    <RatingBar label="🏆 Reconnaissance" value={avgRecognition} />
+                    <RatingBar label="⚖️ Charge travail" value={avgWorkload} />
+                    <RatingBar label="🌈 Diversité" value={avgDiversity} />
                   </div>
                 </div>
+
+                {/* Radar chart — visual overview of strengths/weaknesses at a glance */}
+                {hasRadarData && (
+                  <div style={{ paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+                    <RatingRadar axes={radarAxes} />
+                  </div>
+                )}
 
                 {/* Recommend + work mode badges */}
                 {(recPct !== null || dominantMode) && (
@@ -655,7 +736,8 @@ function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted
   })();
 
   const rec = review.would_recommend ? RECOMMEND_LABELS[review.would_recommend] : null;
-  const hasSubRatings = review.rating_culture || review.rating_management || review.rating_worklife || review.rating_career;
+  const hasSubRatings = review.rating_culture || review.rating_management || review.rating_worklife || review.rating_career
+    || review.rating_flexibility || review.rating_recognition || review.rating_workload || review.rating_diversity;
 
   const chips: { label: string; color?: string; bg?: string; bold?: boolean }[] = [];
   if (review.job_title) chips.push({ label: review.job_title, bold: true });
@@ -726,6 +808,10 @@ function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted
           <SubRatingBar label="⚖️ Vie pro/perso" value={review.rating_worklife ? Number(review.rating_worklife) : null} />
           <SubRatingBar label="🌍 Culture" value={review.rating_culture ? Number(review.rating_culture) : null} />
           <SubRatingBar label="🚀 Évolution" value={review.rating_career ? Number(review.rating_career) : null} />
+          <SubRatingBar label="🕐 Flexibilité" value={review.rating_flexibility ? Number(review.rating_flexibility) : null} />
+          <SubRatingBar label="🏆 Reconnaissance" value={review.rating_recognition ? Number(review.rating_recognition) : null} />
+          <SubRatingBar label="⚖️ Charge travail" value={review.rating_workload ? Number(review.rating_workload) : null} />
+          <SubRatingBar label="🌈 Diversité" value={review.rating_diversity ? Number(review.rating_diversity) : null} />
         </div>
       )}
 

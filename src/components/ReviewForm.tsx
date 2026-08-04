@@ -30,6 +30,12 @@ const RECOMMEND = [
   { value: "ca_depend", label: "🤔 Ça dépend" },
 ];
 
+const WOULD_RETURN = [
+  { value: "oui", label: "❤️ Oui" },
+  { value: "peut_etre", label: "🤷 Peut-être" },
+  { value: "non", label: "❌ Non" },
+];
+
 const RATING_LABELS: Record<number, string> = {
   1: "Catastrophique", 2: "Décevant", 3: "Correct", 4: "Bien", 5: "Excellent",
 };
@@ -84,6 +90,7 @@ function StepBar({ step }: { step: number }) {
   const steps = [
     { icon: <Briefcase size={14} aria-hidden="true" />, label: "Emploi" },
     { icon: <Star size={14} aria-hidden="true" />, label: "Notes" },
+    { icon: <Star size={14} aria-hidden="true" />, label: "Ressenti" },
   ];
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: 28 }}>
@@ -133,8 +140,18 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   const [ratingCulture, setRatingCulture] = useState(0);
   const [ratingCareer, setRatingCareer] = useState(0);
 
+  // Step 2 — Ressenti
+  const [ratingFlexibility, setRatingFlexibility] = useState(0);
+  const [ratingRecognition, setRatingRecognition] = useState(0);
+  const [ratingWorkload, setRatingWorkload] = useState(0);
+  const [ratingDiversity, setRatingDiversity] = useState(0);
+  const [wouldReturn, setWouldReturn] = useState("");
+
   // Auto-calculate overall from sub-ratings (only non-zero ones)
-  const subRatings = [ratingMgmt, ratingWl, ratingCulture, ratingCareer].filter(r => r > 0);
+  const subRatings = [
+    ratingMgmt, ratingWl, ratingCulture, ratingCareer,
+    ratingFlexibility, ratingRecognition, ratingWorkload, ratingDiversity,
+  ].filter(r => r > 0);
   const ratingOverall = subRatings.length > 0
     ? Math.round(subRatings.reduce((a, b) => a + b, 0) / subRatings.length)
     : 0;
@@ -142,18 +159,20 @@ export function ReviewForm({ companyId }: { companyId: string }) {
 
   const [step1Err, setStep1Err] = useState("");
   const [step2Err, setStep2Err] = useState("");
+  const [step3Err, setStep3Err] = useState("");
 
-  const canSubmit = ratingOverall > 0 && !!wouldRecommend;
+  const canSubmit = ratingOverall > 0 && !!wouldRecommend && !!wouldReturn;
 
   const goNext = () => {
     setStep1Err("");
     setStep2Err("");
+    setStep3Err("");
     if (step === 0) {
       if (!jobTitle.trim()) { setStep1Err("Le poste est obligatoire."); return; }
       if (!durationRange) { setStep1Err("La durée est obligatoire."); return; }
     }
     if (step === 1) {
-      if (ratingOverall === 0) { setStep2Err("La note globale est obligatoire."); return; }
+      if (ratingOverall === 0) { setStep2Err("Note au moins une catégorie."); return; }
       if (!wouldRecommend) { setStep2Err("Indiquer si tu recommanderais est obligatoire."); return; }
     }
     setStep(s => s + 1);
@@ -186,7 +205,12 @@ export function ReviewForm({ companyId }: { companyId: string }) {
         <input type="hidden" name="rating_management" value={ratingMgmt} />
         <input type="hidden" name="rating_worklife" value={ratingWl} />
         <input type="hidden" name="rating_career" value={ratingCareer} />
+        <input type="hidden" name="rating_flexibility" value={ratingFlexibility} />
+        <input type="hidden" name="rating_recognition" value={ratingRecognition} />
+        <input type="hidden" name="rating_workload" value={ratingWorkload} />
+        <input type="hidden" name="rating_diversity" value={ratingDiversity} />
         <input type="hidden" name="would_recommend" value={wouldRecommend} />
+        <input type="hidden" name="would_return" value={wouldReturn} />
         <input type="hidden" name="title" value="" />
         <input type="hidden" name="pros" value="" />
         <input type="hidden" name="cons" value="" />
@@ -326,7 +350,40 @@ export function ReviewForm({ companyId }: { companyId: string }) {
           </div>
         )}
 
-        {state?.error && step === 1 && (
+        {/* ── Step 2 : Ressenti ── */}
+        {step === 2 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 0 }}>
+                Encore quelques catégories <span className="badge-optional">Optionnel</span>
+              </p>
+              <StarPicker name="rating_flexibility" label="🕐 Flexibilité (horaires, télétravail)" value={ratingFlexibility} onChange={setRatingFlexibility} />
+              <div style={{ height: 1, background: "var(--border)" }} />
+              <StarPicker name="rating_recognition" label="🏆 Reconnaissance du travail" value={ratingRecognition} onChange={setRatingRecognition} />
+              <div style={{ height: 1, background: "var(--border)" }} />
+              <StarPicker name="rating_workload" label="⚖️ Charge de travail" value={ratingWorkload} onChange={setRatingWorkload} />
+              <div style={{ height: 1, background: "var(--border)" }} />
+              <StarPicker name="rating_diversity" label="🌈 Diversité & inclusion" value={ratingDiversity} onChange={setRatingDiversity} />
+            </div>
+
+            <div>
+              <label style={lbl}>Reviendrais-tu travailler ici ? *</label>
+              <div style={{ display: "flex", gap: 10 }}>
+                {WOULD_RETURN.map(r => (
+                  <button key={r.value} type="button" onClick={() => { setWouldReturn(r.value); setStep3Err(""); }}
+                    className={`pill-btn${wouldReturn === r.value ? " active" : ""}`}
+                    style={{ flex: 1, justifyContent: "center", fontSize: 14, padding: "12px 0" }}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {step3Err && <p style={{ fontSize: 13, color: "#ef4444" }}>{step3Err}</p>}
+          </div>
+        )}
+
+        {state?.error && step === 2 && (
           <p style={{ fontSize: 13, color: "#ef4444", background: "rgba(239,68,68,0.08)", borderRadius: 10, padding: "10px 14px", border: "1px solid rgba(239,68,68,0.2)", marginTop: 12 }}>
             {state.error}
           </p>
@@ -346,7 +403,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </button>
           )}
 
-          {step < 1 ? (
+          {step < 2 ? (
             <button type="button" onClick={goNext}
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
