@@ -483,8 +483,6 @@ main, .page-main, .page-main-sm, .page-main-md {
 .company-hero-bottom { bottom: 16px !important; }
   /* Review pros/cons → stack */
   .review-pros-cons { grid-template-columns: 1fr !important; }
-  /* Rating bar label too wide → shrink */
-  .rating-bar-label { width: 100px !important; font-size: 11px !important; }
 }
 
 /* ─── Job offer modal → bottom sheet on mobile ──────────────────── */
@@ -784,6 +782,28 @@ select:focus-visible {
   border-color: var(--border2);
   background: var(--surface3);
   color: var(--text);
+}
+
+/* Aggregate rating tiles — auto-fit means the column count adapts to the
+   available width instead of being fixed, so it cannot overflow on narrow
+   phones (3 columns at 360px, up to 8 on desktop). */
+.rating-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: 10px;
+}
+.rating-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 6px;
+  border-radius: 14px;
+  border: 1px solid;
+  text-align: center;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* Per-review sub-ratings — two columns so 8 categories stay compact,

@@ -46,71 +46,30 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   );
 }
 
-function RatingBar({ label, value }: { label: string; value: number | null }) {
-  if (!value) return null;
-  const color = ratingColor(value);
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <span className="rating-bar-label" style={{ fontSize: 12, color: "var(--text-muted)", width: 120, flexShrink: 0 }}>{label}</span>
-      <div style={{ flex: 1, height: 7, background: "var(--surface3)", borderRadius: 4, overflow: "hidden" }}>
-        <div style={{ width: `${(value / 5) * 100}%`, height: "100%", background: color, borderRadius: 4 }} />
-      </div>
-      <span style={{ fontSize: 12, fontWeight: 800, color, width: 30, fontVariantNumeric: "tabular-nums" }}>{Number(value).toFixed(1)}</span>
-    </div>
-  );
-}
-
-// Radar chart — one glance at strengths/weaknesses across all rated categories.
-// Pure SVG, no external lib. Axes with no data (null) are drawn at center (0).
-function RatingRadar({ axes }: { axes: { label: string; value: number | null }[] }) {
-  const size = 240;
-  const center = size / 2;
-  const maxR = size / 2 - 34; // leave room for labels
-  const n = axes.length;
-  const angleFor = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
-
-  const pointAt = (i: number, ratio: number) => {
-    const a = angleFor(i);
-    return [center + Math.cos(a) * maxR * ratio, center + Math.sin(a) * maxR * ratio] as const;
-  };
-
-  const dataPoints = axes.map((ax, i) => pointAt(i, Math.max(0, Math.min(1, (ax.value ?? 0) / 5))));
-  const dataPath = dataPoints.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ") + " Z";
-
-  const rings = [0.25, 0.5, 0.75, 1];
+// Une tuile par catégorie notée. Remplace l'ancien radar SVG, dont les
+// étiquettes débordaient du viewBox sur les écrans étroits, et qui demandait
+// un effort de lecture inutile pour l'info recherchée : quelle catégorie est
+// bonne, laquelle ne l'est pas. Grille auto-fit : ne peut pas déborder.
+function RatingTiles({ items }: { items: { emoji: string; label: string; value: number | null }[] }) {
+  const shown = items.filter((i): i is { emoji: string; label: string; value: number } => i.value !== null);
+  if (shown.length === 0) return null;
 
   return (
-    <div style={{ display: "flex", justifyContent: "center" }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Répartition des notes par catégorie">
-        {/* Grid rings */}
-        {rings.map(r => {
-          const ringPath = axes.map((_, i) => {
-            const [x, y] = pointAt(i, r);
-            return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-          }).join(" ") + " Z";
-          return <path key={r} d={ringPath} fill="none" stroke="var(--border)" strokeWidth={1} />;
-        })}
-        {/* Spokes */}
-        {axes.map((_, i) => {
-          const [x, y] = pointAt(i, 1);
-          return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke="var(--border)" strokeWidth={1} />;
-        })}
-        {/* Data area */}
-        <path d={dataPath} fill="rgba(139,92,246,0.22)" stroke="#8b5cf6" strokeWidth={2} strokeLinejoin="round" />
-        {dataPoints.map(([x, y], i) => axes[i].value ? <circle key={i} cx={x} cy={y} r={3} fill="#8b5cf6" /> : null)}
-        {/* Labels */}
-        {axes.map((ax, i) => {
-          const a = angleFor(i);
-          const lx = center + Math.cos(a) * (maxR + 26);
-          const ly = center + Math.sin(a) * (maxR + 26);
-          return (
-            <text key={ax.label} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
-              fontSize={9.5} fontWeight={700} fill="var(--text-muted)">
-              {ax.label}
-            </text>
-          );
-        })}
-      </svg>
+    <div className="rating-tiles">
+      {shown.map(({ emoji, label, value }) => {
+        const color = ratingColor(value);
+        return (
+          <div key={label} className="rating-tile" style={{ borderColor: `${color}40`, background: `${color}14` }}>
+            <span style={{ fontSize: 18, lineHeight: 1 }} aria-hidden="true">{emoji}</span>
+            <span style={{ fontSize: 21, fontWeight: 900, color, lineHeight: 1.1, fontVariantNumeric: "tabular-nums" }}>
+              {value.toFixed(1)}
+            </span>
+            <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--text-muted)", lineHeight: 1.25 }}>
+              {label}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -246,17 +205,16 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   const avgRecognition = subAvg("rating_recognition");
   const avgWorkload = subAvg("rating_workload");
   const avgDiversity = subAvg("rating_diversity");
-  const radarAxes = [
-    { label: "Management", value: avgMgmt },
-    { label: "Vie pro/perso", value: avgWl },
-    { label: "Culture", value: avgCulture },
-    { label: "Évolution", value: avgCareer },
-    { label: "Flexibilité", value: avgFlexibility },
-    { label: "Reconnaissance", value: avgRecognition },
-    { label: "Charge travail", value: avgWorkload },
-    { label: "Diversité", value: avgDiversity },
+  const ratingTiles = [
+    { emoji: "👔", label: "Management",   value: avgMgmt },
+    { emoji: "🏡", label: "Vie perso",    value: avgWl },
+    { emoji: "🌍", label: "Ambiance",     value: avgCulture },
+    { emoji: "🚀", label: "Évolution",    value: avgCareer },
+    { emoji: "🕐", label: "Flexibilité",  value: avgFlexibility },
+    { emoji: "🏆", label: "Reconnaissance", value: avgRecognition },
+    { emoji: "📊", label: "Charge",       value: avgWorkload },
+    { emoji: "🤝", label: "Inclusion",    value: avgDiversity },
   ];
-  const hasRadarData = radarAxes.some(a => a.value !== null);
 
   // Would recommend stats
   const withRecommend = reviews.filter(r => r.would_recommend);
@@ -445,30 +403,17 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
             {/* Ratings breakdown */}
             {Number(company.review_count) > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px", marginBottom: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 20 }}>
-                  <div style={{ textAlign: "center" }}>
-                    <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 18, flexWrap: "wrap" }}>
+                  <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
+                  <div>
                     <Stars rating={Number(company.avg_rating)} size={18} />
                     <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>{company.review_count} avis</p>
                   </div>
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-                    <RatingBar label="👔 Management" value={avgMgmt} />
-                    <RatingBar label="🏡 Vie pro/perso" value={avgWl} />
-                    <RatingBar label="🌍 Culture" value={avgCulture} />
-                    <RatingBar label="🚀 Évolution" value={avgCareer} />
-                    <RatingBar label="🕐 Flexibilité" value={avgFlexibility} />
-                    <RatingBar label="🏆 Reconnaissance" value={avgRecognition} />
-                    <RatingBar label="📊 Charge travail" value={avgWorkload} />
-                    <RatingBar label="🤝 Diversité" value={avgDiversity} />
-                  </div>
                 </div>
 
-                {/* Radar chart — visual overview of strengths/weaknesses at a glance */}
-                {hasRadarData && (
-                  <div style={{ paddingTop: 16, borderTop: "1px solid var(--border)" }}>
-                    <RatingRadar axes={radarAxes} />
-                  </div>
-                )}
+                {/* Une tuile par catégorie : lisible d'un coup d'œil et la
+                    grille auto-fit ne peut pas déborder sur petit écran. */}
+                <RatingTiles items={ratingTiles} />
 
                 {/* Recommend + work mode badges */}
                 {(recPct !== null || dominantMode) && (

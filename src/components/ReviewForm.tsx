@@ -211,11 +211,9 @@ export function ReviewForm({ companyId }: { companyId: string }) {
         <input type="hidden" name="rating_diversity" value={ratingDiversity} />
         <input type="hidden" name="would_recommend" value={wouldRecommend} />
         <input type="hidden" name="would_return" value={wouldReturn} />
-        <input type="hidden" name="title" value="" />
-        <input type="hidden" name="pros" value="" />
-        <input type="hidden" name="cons" value="" />
-        <input type="hidden" name="content" value="" />
-        <input type="hidden" name="knew_before" value="" />
+        {/* Format 100% notes: aucun champ texte n'est collecté. title/pros/cons/
+            content/knew_before sont volontairement absents — submitReview les
+            résout en null (content en chaîne vide, la colonne étant NOT NULL). */}
         <input type="hidden" name="start_year" value={startYear} />
         <input type="hidden" name="end_year" value={endYear} />
 
