@@ -35,7 +35,7 @@ if (!FICHIER || FICHIER.startsWith("--")) {
 }
 
 const TIMEOUT_MS = 12_000;
-const PARALLELE = 8;
+const PARALLELE = 5;
 
 function chargerEnv() {
   try {
@@ -50,7 +50,16 @@ chargerEnv();
 const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY,
   { auth: { persistSession: false } });
 
-const REVENDEURS = /(hugedomains|sedo\.com|afternic|dan\.com|domainmarket|parkingcrew|bodis\.com|undeveloped|spaceship\.com|namecheap)/i;
+/**
+ * Revendeurs de noms de domaine, comparés au domaine enregistrable et non à
+ * l'URL entière. Chercher « dan.com » dans la chaîne rejetait givaudan.com —
+ * un sous-mot suffisait à faire passer une entreprise réelle pour une page de
+ * vente.
+ */
+const REVENDEURS = new Set([
+  "hugedomains.com", "sedo.com", "afternic.com", "dan.com", "domainmarket.com",
+  "parkingcrew.net", "bodis.com", "undeveloped.com", "spaceship.com", "namecheap.com",
+]);
 const SIGNAUX_PARKING = /(domain (is|may be) for sale|buy this domain|diese website steht zum verkauf|ce domaine est à vendre|domain (is )?parked)/i;
 
 function domaineDe(url) {
@@ -59,7 +68,21 @@ function domaineDe(url) {
   } catch { return null; }
 }
 
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+
+/**
+ * Un 429 vient de nos propres requêtes parallèles, pas du site : le rejeter
+ * ferait passer un domaine parfaitement valide pour inexploitable. On laisse
+ * retomber la cadence et on redemande une fois.
+ */
 async function verifier(url) {
+  const premier = await tenter(url);
+  if (premier.motif !== "http 429") return premier;
+  await dormir(4000);
+  return tenter(url);
+}
+
+async function tenter(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
@@ -78,7 +101,7 @@ async function verifier(url) {
     if (depart && arrivee && depart !== arrivee) {
       return { ok: false, motif: `redirige vers ${arrivee}` };
     }
-    if (REVENDEURS.test(r.url)) return { ok: false, motif: "domaine en vente" };
+    if (arrivee && REVENDEURS.has(arrivee)) return { ok: false, motif: "domaine en vente" };
 
     if (r.ok) {
       const html = (await r.text()).slice(0, 40_000);
