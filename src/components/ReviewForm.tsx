@@ -133,6 +133,8 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   const [startYear, setStartYear] = useState("");
   const [endYear, setEndYear] = useState("");
   const currentYear = new Date().getFullYear();
+  // Années proposées, de la plus récente à la plus ancienne (50 ans de recul)
+  const YEARS = Array.from({ length: 51 }, (_, i) => currentYear - i);
 
   // Step 1 — Notes
   const [ratingMgmt, setRatingMgmt] = useState(0);
@@ -250,37 +252,45 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <PillPicker options={DURATION_RANGES} value={durationRange} onChange={v => { setDurationRange(v); setStep1Err(""); }} />
             </div>
 
+            {/* Listes déroulantes plutôt que des champs numériques libres :
+                on ne peut choisir qu'une année plausible, et l'année de fin
+                ne propose jamais une date antérieure au début. */}
             <div style={{ display: "grid", gridTemplateColumns: isCurrent ? "1fr" : "repeat(auto-fit, minmax(130px, 1fr))", gap: 14 }}>
               <div>
                 <label htmlFor="review-start-year" style={lbl}>
                   Année de début <span className="badge-optional">Optionnel</span>
                 </label>
-                <input
+                <select
                   id="review-start-year"
-                  type="number"
                   value={startYear}
-                  onChange={e => setStartYear(e.target.value)}
-                  placeholder={String(currentYear - 3)}
-                  min={1950}
-                  max={currentYear}
-                  style={inp}
-                />
+                  onChange={e => {
+                    const v = e.target.value;
+                    setStartYear(v);
+                    // Une fin devenue antérieure au début n'a plus de sens
+                    if (v && endYear && Number(endYear) < Number(v)) setEndYear("");
+                  }}
+                  style={selectStyle}
+                >
+                  <option value="">Non précisé</option>
+                  {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
               </div>
               {!isCurrent && (
                 <div>
                   <label htmlFor="review-end-year" style={lbl}>
                     Année de fin <span className="badge-optional">Optionnel</span>
                   </label>
-                  <input
+                  <select
                     id="review-end-year"
-                    type="number"
                     value={endYear}
                     onChange={e => setEndYear(e.target.value)}
-                    placeholder={String(currentYear - 1)}
-                    min={1950}
-                    max={currentYear}
-                    style={inp}
-                  />
+                    style={selectStyle}
+                  >
+                    <option value="">Non précisé</option>
+                    {YEARS.filter(y => !startYear || y >= Number(startYear)).map(y => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
                 </div>
               )}
             </div>
@@ -435,6 +445,9 @@ const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
   borderRadius: 10, padding: "11px 14px", fontSize: 16, color: "var(--text)",
   outline: "none", boxSizing: "border-box",
+};
+const selectStyle: React.CSSProperties = {
+  ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer",
 };
 const lbl: React.CSSProperties = {
   display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6,

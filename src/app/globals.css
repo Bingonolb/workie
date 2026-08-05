@@ -782,30 +782,9 @@ select:focus-visible {
   color: var(--text);
 }
 
-/* Aggregate rating tiles — auto-fit means the column count adapts to the
-   available width instead of being fixed, so it cannot overflow on narrow
-   phones (3 columns at 360px, up to 8 on desktop). */
-.rating-tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
-  gap: 10px;
-}
-.rating-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 12px 6px;
-  border-radius: 14px;
-  border: 1px solid;
-  text-align: center;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-/* Per-review sub-ratings — two columns so 8 categories stay compact,
-   collapsing to one column when there isn't room for two readable bars. */
+/* Rating rows — two columns so the 8 categories stay compact, collapsing to
+   one column when there isn't room for two readable bars. Used both for the
+   company summary and for each individual review. */
 .review-subratings {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

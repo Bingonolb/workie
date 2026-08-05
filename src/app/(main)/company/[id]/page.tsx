@@ -46,30 +46,49 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   );
 }
 
-// Une tuile par catégorie notée. Remplace l'ancien radar SVG, dont les
-// étiquettes débordaient du viewBox sur les écrans étroits, et qui demandait
-// un effort de lecture inutile pour l'info recherchée : quelle catégorie est
-// bonne, laquelle ne l'est pas. Grille auto-fit : ne peut pas déborder.
-function RatingTiles({ items }: { items: { emoji: string; label: string; value: number | null }[] }) {
-  const shown = items.filter((i): i is { emoji: string; label: string; value: number } => i.value !== null);
-  if (shown.length === 0) return null;
+// Source unique des catégories notées : la synthèse entreprise et chaque avis
+// affichent exactement les mêmes lignes, toujours les huit, y compris celles
+// sans donnée (rendues « — »). Sans ça, un avis ancien paraissait n'avoir été
+// interrogé que sur quatre critères.
+const RATING_CATEGORIES = [
+  { key: "rating_management",  label: "Management" },
+  { key: "rating_worklife",    label: "Vie pro / perso" },
+  { key: "rating_culture",     label: "Ambiance & culture" },
+  { key: "rating_career",      label: "Évolution" },
+  { key: "rating_flexibility", label: "Flexibilité" },
+  { key: "rating_recognition", label: "Reconnaissance" },
+  { key: "rating_workload",    label: "Charge de travail" },
+  { key: "rating_diversity",   label: "Diversité & inclusion" },
+] as const;
 
+function RatingRow({ label, value }: { label: string; value: number | null }) {
+  const color = value !== null ? ratingColor(value) : "var(--text-muted)";
+  const pct = value !== null ? (value / 5) * 100 : 0;
   return (
-    <div className="rating-tiles">
-      {shown.map(({ emoji, label, value }) => {
-        const color = ratingColor(value);
-        return (
-          <div key={label} className="rating-tile" style={{ borderColor: `${color}40`, background: `${color}14` }}>
-            <span style={{ fontSize: 18, lineHeight: 1 }} aria-hidden="true">{emoji}</span>
-            <span style={{ fontSize: 21, fontWeight: 900, color, lineHeight: 1.1, fontVariantNumeric: "tabular-nums" }}>
-              {value.toFixed(1)}
-            </span>
-            <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--text-muted)", lineHeight: 1.25 }}>
-              {label}
-            </span>
-          </div>
-        );
-      })}
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <span style={{ flex: "1 1 0", minWidth: 0, fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {label}
+      </span>
+      <div style={{ flex: "0 0 72px", height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3 }} />
+      </div>
+      <span style={{ flex: "0 0 26px", textAlign: "right", fontSize: 12, fontWeight: 800, color, fontVariantNumeric: "tabular-nums" }}>
+        {value !== null ? value.toFixed(1) : "—"}
+      </span>
+    </div>
+  );
+}
+
+// Indicateur oui/non agrégé (recommandation, retour). Toujours rendu, avec un
+// état explicite quand personne n'a encore répondu.
+function StatPill({ label, pct }: { label: string; pct: number | null }) {
+  const color = pct === null ? "var(--text-muted)" : pct >= 70 ? "#10b981" : pct >= 40 ? "#f59e0b" : "#ef4444";
+  return (
+    <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
+      <span style={{ fontSize: 16, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+        {pct === null ? "—" : `${pct}%`}
+      </span>
+      <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>{label}</span>
     </div>
   );
 }
@@ -203,21 +222,26 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   const avgRecognition = subAvg("rating_recognition");
   const avgWorkload = subAvg("rating_workload");
   const avgDiversity = subAvg("rating_diversity");
-  const ratingTiles = [
-    { emoji: "👔", label: "Management",   value: avgMgmt },
-    { emoji: "🏡", label: "Vie perso",    value: avgWl },
-    { emoji: "🌍", label: "Ambiance",     value: avgCulture },
-    { emoji: "🚀", label: "Évolution",    value: avgCareer },
-    { emoji: "🕐", label: "Flexibilité",  value: avgFlexibility },
-    { emoji: "🏆", label: "Reconnaissance", value: avgRecognition },
-    { emoji: "📊", label: "Charge",       value: avgWorkload },
-    { emoji: "🤝", label: "Inclusion",    value: avgDiversity },
-  ];
+  const avgByCategory: Record<string, number | null> = {
+    rating_management:  avgMgmt,
+    rating_worklife:    avgWl,
+    rating_culture:     avgCulture,
+    rating_career:      avgCareer,
+    rating_flexibility: avgFlexibility,
+    rating_recognition: avgRecognition,
+    rating_workload:    avgWorkload,
+    rating_diversity:   avgDiversity,
+  };
 
   // Would recommend stats
   const withRecommend = reviews.filter(r => r.would_recommend);
   const recOui = withRecommend.filter(r => r.would_recommend === "oui").length;
   const recPct = withRecommend.length ? Math.round((recOui / withRecommend.length) * 100) : null;
+
+  // Would return stats — « peut-être » ne compte pas comme un oui
+  const withReturn = reviews.filter(r => r.would_return);
+  const retOui = withReturn.filter(r => r.would_return === "oui").length;
+  const retPct = withReturn.length ? Math.round((retOui / withReturn.length) * 100) : null;
 
   // Work mode breakdown — single-pass reduce
   const modeCounts = reviews.reduce((acc: Record<string, number>, r) => {
@@ -399,33 +423,25 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
                   </div>
                 </div>
 
-                {/* Une tuile par catégorie : lisible d'un coup d'œil et la
-                    grille auto-fit ne peut pas déborder sur petit écran. */}
-                <RatingTiles items={ratingTiles} />
+                {/* Les huit catégories sont toujours listées, y compris celles
+                    sans donnée, pour que l'étendue du questionnaire soit
+                    visible quelle que soit l'ancienneté des avis. */}
+                <div className="review-subratings">
+                  {RATING_CATEGORIES.map(({ key, label }) => (
+                    <RatingRow key={key} label={label} value={avgByCategory[key]} />
+                  ))}
+                </div>
 
-                {/* Recommend + work mode badges */}
-                {(recPct !== null || dominantMode) && (
-                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap", paddingTop: 16, borderTop: "1px solid var(--border)" }}>
-                    {recPct !== null && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, background: recPct >= 70 ? "rgba(16,185,129,0.1)" : recPct >= 40 ? "rgba(249,115,22,0.1)" : "rgba(239,68,68,0.1)", border: `1px solid ${recPct >= 70 ? "rgba(16,185,129,0.25)" : recPct >= 40 ? "rgba(249,115,22,0.25)" : "rgba(239,68,68,0.25)"}`, borderRadius: 10, padding: "8px 14px" }}>
-                        <span style={{ fontSize: 18 }}>{recPct >= 70 ? "👍" : recPct >= 40 ? "🤔" : "👎"}</span>
-                        <div>
-                          <p style={{ fontSize: 18, fontWeight: 900, color: recPct >= 70 ? "#10b981" : recPct >= 40 ? "#f97316" : "#ef4444", lineHeight: 1 }}>{recPct}%</p>
-                          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>recommandent</p>
-                        </div>
-                      </div>
-                    )}
-                    {dominantMode && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 14px" }}>
-                        <span style={{ fontSize: 18 }}>{dominantMode === "remote" ? "🏠" : dominantMode === "hybride" ? "🔀" : "🏢"}</span>
-                        <div>
-                          <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", lineHeight: 1.2, textTransform: "capitalize" }}>{dominantMode}</p>
-                          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>mode dominant</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", paddingTop: 16, marginTop: 16, borderTop: "1px solid var(--border)" }}>
+                  <StatPill label="recommandent" pct={recPct} />
+                  <StatPill label="reviendraient" pct={retPct} />
+                  {dominantMode && (
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", textTransform: "capitalize" }}>{dominantMode}</span>
+                      <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>mode dominant</span>
+                    </div>
+                  )}
+                </div>
 
               </div>
             )}
@@ -639,9 +655,15 @@ const WORK_MODE_LABELS: Record<string, string> = {
   "présentiel": "🏢 Présentiel", hybride: "🔀 Hybride", remote: "🏠 Remote",
 };
 const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
-  oui: { label: "👍 Recommandé", color: "#10b981" },
-  non: { label: "👎 Ne recommande pas", color: "#ef4444" },
-  ca_depend: { label: "🤔 Ça dépend", color: "#f59e0b" },
+  oui:       { label: "Recommande",          color: "#10b981" },
+  non:       { label: "Ne recommande pas",   color: "#ef4444" },
+  ca_depend: { label: "Recommande : mitigé", color: "#f59e0b" },
+};
+
+const RETURN_LABELS: Record<string, { label: string; color: string }> = {
+  oui:       { label: "Reviendrait",           color: "#10b981" },
+  peut_etre: { label: "Reviendrait : peut-être", color: "#f59e0b" },
+  non:       { label: "Ne reviendrait pas",    color: "#ef4444" },
 };
 
 // Score-driven colour so a weak rating reads as weak at a glance — a flat
@@ -651,21 +673,6 @@ function ratingColor(value: number): string {
   if (value >= 3) return "#f59e0b";   // moyen
   if (value >= 2) return "#f97316";   // faible
   return "#ef4444";                   // critique
-}
-
-function SubRatingBar({ label, value }: { label: string; value: number | null }) {
-  if (!value) return null;
-  const pct = Math.round((value / 5) * 100);
-  const color = ratingColor(value);
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <span style={{ fontSize: 11, color: "var(--text-muted)", width: 108, flexShrink: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
-      <div style={{ flex: 1, height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden", minWidth: 40 }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3 }} />
-      </div>
-      <span style={{ fontSize: 11, fontWeight: 800, color, width: 24, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{Number(value).toFixed(1)}</span>
-    </div>
-  );
 }
 
 function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted = false }: { review: Review; isLoggedIn?: boolean; companyName?: string; initialVoted?: boolean }) {
@@ -680,6 +687,7 @@ function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted
   })();
 
   const rec = review.would_recommend ? RECOMMEND_LABELS[review.would_recommend] : null;
+  const ret = review.would_return ? RETURN_LABELS[review.would_return] : null;
   const hasSubRatings = review.rating_culture || review.rating_management || review.rating_worklife || review.rating_career
     || review.rating_flexibility || review.rating_recognition || review.rating_workload || review.rating_diversity;
 
@@ -708,11 +716,14 @@ function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted
           </div>
           <div>
             <Stars rating={Number(review.rating_overall)} size={14} />
-            {rec && (
-              <div style={{ marginTop: 4 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: rec.color }}>{rec.label}</span>
-              </div>
-            )}
+            <div style={{ marginTop: 4, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: rec ? rec.color : "var(--text-muted)" }}>
+                {rec ? rec.label : "Recommande : —"}
+              </span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: ret ? ret.color : "var(--text-muted)" }}>
+                {ret ? ret.label : "Reviendrait : —"}
+              </span>
+            </div>
           </div>
           {review.is_verified_author && (
             <span style={{
@@ -748,14 +759,10 @@ function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted
       {/* Sub-ratings */}
       {hasSubRatings && (
         <div className="review-subratings" style={{ paddingTop: 14, borderTop: "1px solid var(--border)", marginBottom: 14 }}>
-          <SubRatingBar label="👔 Management" value={review.rating_management ? Number(review.rating_management) : null} />
-          <SubRatingBar label="🏡 Vie pro/perso" value={review.rating_worklife ? Number(review.rating_worklife) : null} />
-          <SubRatingBar label="🌍 Culture" value={review.rating_culture ? Number(review.rating_culture) : null} />
-          <SubRatingBar label="🚀 Évolution" value={review.rating_career ? Number(review.rating_career) : null} />
-          <SubRatingBar label="🕐 Flexibilité" value={review.rating_flexibility ? Number(review.rating_flexibility) : null} />
-          <SubRatingBar label="🏆 Reconnaissance" value={review.rating_recognition ? Number(review.rating_recognition) : null} />
-          <SubRatingBar label="📊 Charge travail" value={review.rating_workload ? Number(review.rating_workload) : null} />
-          <SubRatingBar label="🤝 Diversité" value={review.rating_diversity ? Number(review.rating_diversity) : null} />
+          {RATING_CATEGORIES.map(({ key, label }) => {
+            const raw = review[key];
+            return <RatingRow key={key} label={label} value={raw ? Number(raw) : null} />;
+          })}
         </div>
       )}
 
