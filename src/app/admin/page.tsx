@@ -83,14 +83,11 @@ export default async function AdminPage() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <Link href="/admin/claims" style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-              <Inbox size={15} aria-hidden="true" /> Demandes
-              {(pendingClaims ?? 0) > 0 && (
-                <span style={{ position: "absolute", top: -6, right: -6, background: "#ef4444", color: "#fff", fontSize: 10, fontWeight: 800, borderRadius: 50, width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {pendingClaims}
-                </span>
-              )}
-            </Link>
+            {/* Le bouton « Demandes » pointait vers /admin/claims, qui n'a
+                jamais eu de page : clic = 404. La revendication d'entreprise
+                est dormante (plus de formulaire depuis le retrait de l'espace
+                entreprise, 0 demande en attente). La logique serveur
+                (approveClaim, emails) est conservée pour son retour. */}
             <Link href="/admin/reports" style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
               <Flag size={15} aria-hidden="true" /> Signalements
               {(pendingReports ?? 0) > 0 && (

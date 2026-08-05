@@ -147,8 +147,13 @@ export function SwipeView({
   goneRef.current = gone;
   const swipeCountRef = useRef(0);
   const fetchingRef = useRef(false);
-  // Start at a random offset so swipe pool is varied, not just top-rated favorites
-  const randomStartOffset = useRef(50 + Math.floor(Math.random() * 150));
+  // Départ à un offset aléatoire pour varier le pool plutôt que de resservir
+  // toujours les mieux notées. Mais uniquement SANS filtre : un filtre réduit
+  // souvent le pool sous cet offset (Uri : 1 entreprise, Glaris : 4, Neuchâtel
+  // : 45), la requête repartait au-delà du dernier résultat et il fallait un
+  // second aller-retour pour s'en remettre — d'où un écran blanc prolongé.
+  const hasFilters = !!(filters?.sector || filters?.canton || filters?.search);
+  const randomStartOffset = useRef(hasFilters ? 0 : 50 + Math.floor(Math.random() * 150));
   const nextOffsetRef = useRef(initialCompanies.length > 0 ? initialCompanies.length : randomStartOffset.current);
 
   // Track impression when the ad card becomes the current card
@@ -204,21 +209,40 @@ export function SwipeView({
     const isEmpty = companies.length === 0;
     if (!nearEnd && !isEmpty) return;
     fetchingRef.current = true;
-    fetchSwipePage(filters, nextOffsetRef.current).then(batch => {
-      fetchingRef.current = false;
-      if (batch.length === 0) { setExhausted(true); return; }
-      nextOffsetRef.current += batch.length;
-      const fresh = shuffle(batch.filter(c => !actedIds.current.has(c.id)));
-      if (fresh.length > 0) setCompanies(prev => [...prev, ...fresh]);
-      if (batch.length < 50) setExhausted(true);
-    }).catch(() => { fetchingRef.current = false; });
+
+    (async () => {
+      try {
+        let batch = await fetchSwipePage(filters, nextOffsetRef.current);
+
+        // L'offset de départ est volontairement aléatoire (50–200) pour varier
+        // le pool. Mais un filtre étroit peut renvoyer bien moins d'entreprises
+        // que cet offset — Uri en compte 1, Nidwald 2, Glaris 4 — et la requête
+        // repart alors au-delà du dernier résultat : deck vide, écran blanc.
+        // Si rien ne revient alors que le deck est encore vide, on reprend à 0.
+        if (batch.length === 0 && isEmpty && nextOffsetRef.current > 0) {
+          nextOffsetRef.current = 0;
+          batch = await fetchSwipePage(filters, 0);
+        }
+
+        fetchingRef.current = false;
+        if (batch.length === 0) { setExhausted(true); return; }
+        nextOffsetRef.current += batch.length;
+        const fresh = shuffle(batch.filter(c => !actedIds.current.has(c.id)));
+        if (fresh.length > 0) setCompanies(prev => [...prev, ...fresh]);
+        if (batch.length < 50) setExhausted(true);
+      } catch {
+        fetchingRef.current = false;
+      }
+    })();
   }, [index, companies.length, filters, exhausted]);
 
   // Auto-reshuffle when deck is empty instead of showing an end screen
   const deckEmpty = index > 0 && index >= companies.length;
   useEffect(() => {
     if (!deckEmpty) return;
-    nextOffsetRef.current = 50 + Math.floor(Math.random() * 200);
+    // Même règle qu'au démarrage : pas d'offset aléatoire quand un filtre
+    // restreint le pool, sinon le re-mélange retombe sur un deck vide.
+    nextOffsetRef.current = hasFilters ? 0 : 50 + Math.floor(Math.random() * 200);
     fetchingRef.current = false;
     actedIds.current = new Set();
     setExhausted(false);
