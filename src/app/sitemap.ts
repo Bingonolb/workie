@@ -22,11 +22,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // Admin client — no cookies needed, works in crawler context
     const admin = createAdminClient();
-    const { data: companies } = await admin
-      .from("companies")
-      .select("id, review_count, created_at")
-      .order("score", { ascending: false })
-      .limit(5000);
+
+    // Pagination obligatoire : PostgREST plafonne toute requête à 1000 lignes
+    // côté serveur, un .limit(5000) ne le contourne pas. Le sitemap ne listait
+    // donc que 1000 des 1796 entreprises — près de 800 fiches invisibles pour
+    // les moteurs de recherche.
+    const PAGE = 1000;
+    const companies: { id: string; review_count: number | null; created_at: string | null }[] = [];
+    for (let from = 0; from < 10_000; from += PAGE) {
+      const { data, error } = await admin
+        .from("companies")
+        .select("id, review_count, created_at")
+        .order("score", { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (error || !data || data.length === 0) break;
+      companies.push(...data);
+      if (data.length < PAGE) break;
+    }
 
     const companyRoutes: MetadataRoute.Sitemap = (companies ?? []).map(c => ({
       url: `${base}/company/${c.id}`,
