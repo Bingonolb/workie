@@ -69,7 +69,10 @@ function RatingRow({ label, value }: { label: string; value: number | null }) {
       <span style={{ flex: "1 1 0", minWidth: 0, fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
         {label}
       </span>
-      <div style={{ flex: "0 0 72px", height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
+      {/* Barre volontairement étroite : dans une carte d'avis en 2 colonnes,
+          chaque colonne fait ~215px et les libellés longs (« Diversité &
+          inclusion ») étaient tronqués au-delà de 56px de barre. */}
+      <div style={{ flex: "0 0 56px", height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
         <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3 }} />
       </div>
       <span style={{ flex: "0 0 26px", textAlign: "right", fontSize: 12, fontWeight: 800, color, fontVariantNumeric: "tabular-nums" }}>
