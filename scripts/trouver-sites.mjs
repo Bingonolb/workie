@@ -101,12 +101,27 @@ async function tester(url) {
 }
 
 /**
+ * Domaines en vente ou stationnés. Ils affichent le nom recherché — puisqu'ils
+ * vendent précisément ce nom — et passaient donc la vérification par mots-clés.
+ * Constaté sur Sygnum Bank, rattachée à une page de vente HugeDomains.
+ */
+const REVENDEURS = /(hugedomains|sedo\.com|afternic|dan\.com|domainmarket|parkingcrew|bodis\.com|undeveloped|namecheap|godaddy\.com\/domain)/i;
+
+const SIGNAUX_PARKING = /(this domain (is|may be) for sale|buy this domain|domain (is )?parked|cette page est en construction|under construction|coming soon|acheter ce domaine)/i;
+
+/**
  * Le domaine n'est retenu que si la page mentionne l'entreprise. C'est ce qui
  * évite de rattacher un homonyme — un cabinet américain à un façonnier suisse,
  * un centre commercial à un internat.
  */
-function correspond(html, nom) {
-  const texte = html.toLowerCase().replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+function correspond(html, nom, urlFinale) {
+  if (REVENDEURS.test(urlFinale)) return false;
+  if (SIGNAUX_PARKING.test(html)) return false;
+  // Une page trop maigre n'est pas un vrai site d'entreprise
+  const texte = html.toLowerCase().replace(/<script[\s\S]*?<\/script>/g, " ")
+                    .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  if (texte.length < 300) return false;
+
   const cles = motsCles(nom);
   if (cles.length === 0) return false;
   const trouves = cles.filter(c => texte.includes(c)).length;
@@ -133,7 +148,7 @@ async function main() {
     let retenu = null;
     for (const url of candidats(e.name)) {
       const r = await tester(url);
-      if (r && correspond(r.html, e.name)) { retenu = r.url; break; }
+      if (r && correspond(r.html, e.name, r.url)) { retenu = r.url; break; }
       await dormir(80);
     }
 
