@@ -28,14 +28,15 @@ function initialsOf(name: string): string {
   return (words[0][0] + words[1][0]).toUpperCase();
 }
 
-export function CompanyHeroLogo({ src, alt, className, name }: { src: string; alt: string; className?: string; name?: string }) {
+export function CompanyHeroLogo({ src, alt, className, name }: { src: string | null; alt: string; className?: string; name?: string }) {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
 
-  // Ne jamais démonter le bloc en cas d'échec : il occupe une largeur fixe dans
-  // une rangée flex, donc le retirer décalait le titre et toute la ligne
-  // d'infos. Beaucoup de logos viennent de Clearbit, qui renvoie 404 dès que
-  // le domaine est inconnu — l'échec est fréquent, pas marginal.
+  // Ne jamais démonter le bloc, ni en cas d'échec ni faute de logo : il occupe
+  // une largeur fixe dans une rangée flex, donc le retirer décalait le titre et
+  // toute la ligne d'infos. Le cas normal est désormais l'absence de logo — on
+  // n'affiche plus les marques de tiers — et ce sont les initiales qui tiennent
+  // la place.
   return (
     <div
       className={className}
@@ -55,7 +56,7 @@ export function CompanyHeroLogo({ src, alt, className, name }: { src: string; al
           {name ? initialsOf(name) : ""}
         </span>
       )}
-      {!errored && (
+      {src && !errored && (
         <Image
           src={src}
           alt={alt}

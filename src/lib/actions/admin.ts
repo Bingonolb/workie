@@ -89,14 +89,11 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       description: String(formData.get("description") || "").slice(0, 3000) || null,
       cover_url: String(formData.get("cover_url") || "") || null,
       website_url: String(formData.get("website_url") || "") || null,
-      logo_url: (() => {
-        const explicit = String(formData.get("logo_url") || "");
-        if (explicit) return explicit;
-        const site = String(formData.get("website_url") || "");
-        if (!site) return null;
-        const domain = site.replace(/^https?:\/\/(www\.)?/, "").replace(/\/.*$/, "");
-        return domain ? `https://logo.clearbit.com/${domain}` : null;
-      })(),
+      // Aucune dérivation automatique de logo. Le logo d'une entreprise est une
+      // marque déposée : l'afficher suppose une autorisation qu'on n'a pas.
+      // Le champ n'est renseigné que si quelqu'un le saisit explicitement, en
+      // assumant ce droit. À défaut, LogoImg affiche les initiales.
+      logo_url: String(formData.get("logo_url") || "") || null,
       linkedin_url: String(formData.get("linkedin_url") || "") || null,
       twitter_url: String(formData.get("twitter_url") || "") || null,
       instagram_url: String(formData.get("instagram_url") || "") || null,

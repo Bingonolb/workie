@@ -7,6 +7,7 @@ import { Flame, Star, Users, MapPin, TrendingUp } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
+import { logoAffichable } from "@/lib/logo";
 
 const SECTOR_GRADIENTS: Record<string, string> = {
   "Tech":                  "linear-gradient(135deg, #6d28d9 0%, #1e40af 100%)",
@@ -197,11 +198,11 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
                   {getInitials(company.name)}
                 </div>
               )}
-              {/* Logo */}
-              {company.logo_url && (
+              {/* Logo — seulement s'il est hébergé chez nous (voir logoAffichable) */}
+              {logoAffichable(company.logo_url) && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={company.logo_url}
+                  src={logoAffichable(company.logo_url)!}
                   alt=""
                   width={38}
                   height={38}

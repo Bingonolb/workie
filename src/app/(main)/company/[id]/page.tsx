@@ -32,6 +32,7 @@ import { GuestContentGate } from "@/components/GuestContentGate";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { SaveButton } from "@/components/SaveButton";
 import { CompanyHeroLogo } from "@/components/LogoImg";
+import { logoAffichable } from "@/lib/logo";
 import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
 import { ReportButton } from "@/components/ReportButton";
 
@@ -248,7 +249,9 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
       "@type": "Organization",
       "name": company.name,
       "url": company.website_url ?? undefined,
-      "logo": company.logo_url ?? undefined,
+      // Même règle que l'affichage : on ne déclare pas à Google un logo de
+      // marque qu'on n'a pas le droit de diffuser.
+      "logo": logoAffichable(company.logo_url) ?? undefined,
       "description": company.description ?? undefined,
       "address": { "@type": "PostalAddress", "addressLocality": company.city, "addressCountry": "CH" },
       ...(Number(company.avg_rating) > 0 && Number(company.review_count) > 0 ? {
@@ -299,15 +302,15 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
         <div className="company-hero-bottom" style={{ position: "absolute", bottom: 24, left: 0, right: 0 }}>
           <div className="company-hero-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "0 28px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
-              {/* Logo overlay — wrapper porte le fond blanc, img fade-in après load */}
-              {company.logo_url && (
-                <CompanyHeroLogo
-                  src={company.logo_url}
-                  alt={`${company.name} logo`}
-                  className="company-hero-logo"
-                  name={company.name}
-                />
-              )}
+              {/* Bloc identité — initiales par défaut, logo seulement s'il est
+                  hébergé chez nous (voir logoAffichable). Toujours monté :
+                  le retirer décale le titre et la ligne d'infos. */}
+              <CompanyHeroLogo
+                src={logoAffichable(company.logo_url)}
+                alt={`${company.name} logo`}
+                className="company-hero-logo"
+                name={company.name}
+              />
               <div>
               <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 10, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
                 <ArrowLeft size={14} aria-hidden="true" /> Retour
