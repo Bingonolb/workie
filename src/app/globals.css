@@ -246,7 +246,10 @@ main, .page-main, .page-main-sm, .page-main-md {
 .filter-panel {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  /* Ancré à gauche : le bouton « Filtres » est en début de rangée, donc un
+     panneau ancré à droite s'étendait vers la gauche et sortait de l'écran
+     (visible entre 640px et ~800px de large, où le panneau fait 480px). */
+  left: 0;
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: 18px;
@@ -254,6 +257,8 @@ main, .page-main, .page-main-sm, .page-main-md {
   z-index: 500;
   box-shadow: 0 16px 48px rgba(0,0,0,0.5);
   width: min(480px, 92vw);
+  /* Filet de sécurité si le bouton se retrouve un jour plus à droite */
+  max-width: calc(100vw - 24px);
 }
 @media (max-width: 640px) {
   .filter-panel {

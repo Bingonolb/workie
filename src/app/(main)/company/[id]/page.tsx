@@ -25,6 +25,9 @@ const InstagramIcon = () => (
 );
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
+// Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
+// d'avis et les tests de colonnes s'appuient sur la même liste.
+import { RATING_CATEGORIES } from "@/lib/reviewCategories";
 import { GuestContentGate } from "@/components/GuestContentGate";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { SaveButton } from "@/components/SaveButton";
@@ -45,21 +48,6 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
     </span>
   );
 }
-
-// Source unique des catégories notées : la synthèse entreprise et chaque avis
-// affichent exactement les mêmes lignes, toujours les huit, y compris celles
-// sans donnée (rendues « — »). Sans ça, un avis ancien paraissait n'avoir été
-// interrogé que sur quatre critères.
-const RATING_CATEGORIES = [
-  { key: "rating_management",  label: "Management" },
-  { key: "rating_worklife",    label: "Vie pro / perso" },
-  { key: "rating_culture",     label: "Ambiance & culture" },
-  { key: "rating_career",      label: "Évolution" },
-  { key: "rating_flexibility", label: "Flexibilité" },
-  { key: "rating_recognition", label: "Reconnaissance" },
-  { key: "rating_workload",    label: "Charge de travail" },
-  { key: "rating_diversity",   label: "Diversité & inclusion" },
-] as const;
 
 function RatingRow({ label, value }: { label: string; value: number | null }) {
   const color = value !== null ? ratingColor(value) : "var(--text-muted)";

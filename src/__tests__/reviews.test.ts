@@ -113,21 +113,9 @@ describe("submitReview", () => {
     expect(result?.error).toMatch(/note globale/i);
   });
 
-  it("returns error when content is too short", async () => {
-    const { createClient } = await import("@/lib/supabase/server");
-    vi.mocked(createClient).mockResolvedValueOnce({
-      auth: { getUser: async () => ({ data: { user: verifiedUser } }) },
-      from: vi.fn((table: string) => {
-        if (table === "profiles") return chain({ data: { claimed_company_id: null } });
-        if (table === "companies") return chain({ data: { id: "company-uuid" } });
-        return chain({ data: null });
-      }),
-      rpc: vi.fn(),
-    } as any);
-    const fd = makeFormData({ ...validReviewFields, content: "Trop court." });
-    const result = await submitReview(undefined, fd);
-    expect(result?.error).toMatch(/50 caractères/i);
-  });
+  // Le test « content trop court » a été retiré : la longueur minimale de
+  // l'avis n'existe plus depuis le passage au format 100% notes, où aucun
+  // texte n'est collecté. Il validait une règle supprimée.
 
   it("blocks business accounts from posting reviews", async () => {
     const { createClient } = await import("@/lib/supabase/server");

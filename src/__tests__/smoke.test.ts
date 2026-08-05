@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // ── Column-security invariants (pure static assertions, no mocking needed) ──
 
 import { REVIEW_PUBLIC_COLS, COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
+import { RATING_CATEGORIES } from "@/lib/reviewCategories";
 
 describe("REVIEW_PUBLIC_COLS", () => {
   const cols = REVIEW_PUBLIC_COLS.split(",");
@@ -24,6 +25,22 @@ describe("REVIEW_PUBLIC_COLS", () => {
     for (const col of required) {
       expect(cols).toContain(col);
     }
+  });
+
+  // Dérivé de la liste réellement affichée, pas d'une copie manuelle : ajouter
+  // une catégorie à l'interface sans l'ajouter ici fait échouer ce test.
+  // Sans ce garde-fou, les 4 catégories ajoutées (flexibilité, reconnaissance,
+  // charge, diversité) étaient écrites en base mais jamais relues, et
+  // s'affichaient « — » alors que l'utilisateur les avait bien renseignées.
+  it("selects every rated category rendered by the UI", () => {
+    for (const { key } of RATING_CATEGORIES) {
+      expect(cols).toContain(key);
+    }
+  });
+
+  it("selects the yes/no answers rendered on a review", () => {
+    expect(cols).toContain("would_recommend");
+    expect(cols).toContain("would_return");
   });
 });
 
