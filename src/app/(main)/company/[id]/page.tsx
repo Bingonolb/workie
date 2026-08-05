@@ -317,6 +317,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
                   src={company.logo_url}
                   alt={`${company.name} logo`}
                   className="company-hero-logo"
+                  name={company.name}
                 />
               )}
               <div>
