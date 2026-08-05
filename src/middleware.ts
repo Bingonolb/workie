@@ -32,8 +32,20 @@ const PUBLIC_PATHS = [
   "/api",
   "/cgu", "/confidentialite", "/mentions-legales",
   "/robots.txt", "/sitemap.xml", "/_next", "/favicon",
+  // Le manifeste PWA doit rester lisible sans session, sinon l'installation
+  // « Ajouter à l'écran d'accueil » échoue pour les visiteurs non connectés.
+  "/manifest.webmanifest",
   "/onboarding",
 ];
+
+// Correspondance sur une frontière de segment : `startsWith` seul rendrait
+// public toute route dont le nom *commence* par un préfixe listé (/apikeys
+// serait couvert par "/api", /companyadmin par "/company"). Ici seuls le
+// chemin exact et ses sous-chemins comptent.
+function isPublicPath(pathname: string): boolean {
+  if (pathname === "/") return true;
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
 
 export async function middleware(request: NextRequest) {
   try {
@@ -42,31 +54,42 @@ export async function middleware(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
     const isServerAction = method === "POST" && !!request.headers.get("next-action");
 
-    // Rate limiting — early return before touching Supabase (no-op if Redis not configured)
+    // Rate limiting — early return before touching Supabase.
+    //
+    // Chaque appel est isolé : le constructeur Redis ne lève pas quand les
+    // variables Upstash manquent, donc `rl` est non-null même sans backend et
+    // `limit()` lève à l'exécution. Sans cette isolation, l'exception remontait
+    // au catch global du middleware, qui répond `next()` — l'authentification
+    // était alors purement et simplement sautée sur les chemins limités.
+    // Le rate limiting doit échouer en mode passant, jamais le contrôle d'accès.
+    const allowed = async (limiter: Ratelimit): Promise<boolean> => {
+      try {
+        const { success } = await limiter.limit(ip);
+        return success;
+      } catch {
+        return true; // backend indisponible → on laisse passer, sans court-circuiter l'auth
+      }
+    };
+
     if (rl) {
       if (pathname === "/api/companies/search") {
-        const { success } = await rl.search.limit(ip);
-        if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+        if (!await allowed(rl.search)) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
       }
       if (method === "POST" && pathname === "/api/user/checkout-penalty") {
-        const { success } = await rl.checkout.limit(ip);
-        if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+        if (!await allowed(rl.checkout)) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
       }
       if (isServerAction) {
-        const { success } = await rl.actions.limit(ip);
-        if (!success) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
+        if (!await allowed(rl.actions)) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
       }
       if (pathname === "/api/user/export") {
-        const { success } = await rl.export.limit(ip);
-        if (!success) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
+        if (!await allowed(rl.export)) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
       }
       if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
-        const { success } = await rl.auth.limit(ip);
-        if (!success) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
+        if (!await allowed(rl.auth)) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
       }
     }
 
-    const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p)) || pathname === "/";
+    const isPublic = isPublicPath(pathname);
     // Routes that redirect logged-in users elsewhere
     const isAuthRoute = pathname === "/" || pathname === "/login" || pathname === "/signup";
 
