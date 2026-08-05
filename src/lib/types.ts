@@ -6,7 +6,9 @@ export interface Company {
   subsector: string | null;
   city: string;
   canton: string | null;
-  employee_range: string;
+  // Nullable : la taille d'effectif n'est renseignée que lorsqu'elle provient
+  // d'une source vérifiable. Les valeurs pré-remplies ont été purgées.
+  employee_range: string | null;
   description: string | null;
   logo_url: string | null;
   cover_url: string | null;

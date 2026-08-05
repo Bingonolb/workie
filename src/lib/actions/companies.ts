@@ -37,7 +37,6 @@ export async function fetchSwipePage(
     .order("score", { ascending: false, nullsFirst: false })
     .order("avg_rating", { ascending: false, nullsFirst: false })
     .order("name", { ascending: true })
-    .neq("employee_range", "1-10")
     .range(offset, offset + SWIPE_PAGE_SIZE - 1);
 
   if (filters?.sector) q = q.eq("sector", filters.sector);
@@ -75,7 +74,6 @@ const _fetchGridPageCached = unstable_cache(
     let q = admin
       .from("companies")
       .select(GRID_COLS, { count: "exact" })
-      .neq("employee_range", "1-10");
 
     if (filters.sector) q = q.eq("sector", filters.sector);
     if (filters.canton) q = q.eq("canton", filters.canton);

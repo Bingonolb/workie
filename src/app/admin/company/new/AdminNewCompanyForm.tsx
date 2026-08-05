@@ -78,7 +78,9 @@ export function AdminNewCompanyForm({ sectors }: { sectors: string[] }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div>
           <label style={lbl}>Taille</label>
-          <select name="employee_range" defaultValue={EMPLOYEE_RANGES[0]} style={{ ...inp, cursor: "pointer" }}>
+          {/* Vide par défaut : ne rien affirmer tant que la taille n'est pas connue. */}
+          <select name="employee_range" defaultValue="" style={{ ...inp, cursor: "pointer" }}>
+            <option value="">Non renseignée</option>
             {EMPLOYEE_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>

@@ -267,10 +267,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             </p>
           )}
 
-          {/* Location + size + salary */}
+          {/* Location + size + salary — chaque puce n'apparaît que si la donnée
+              existe réellement. La taille d'effectif n'est plus affichée tant
+              qu'elle n'est pas issue d'une source vérifiable. */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 10 }}>
             <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
-            <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
+            {company.employee_range && (
+              <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
+            )}
             {Number(company.avg_salary_chf) > 0 && (
               <InfoChip icon={<TrendingUp size={11} aria-hidden="true" />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
             )}

@@ -149,7 +149,7 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
                 {/* Name + city */}
                 <div>
                   <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{c.name}</p>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{c.city}{c.canton ? `, ${c.canton}` : ""} · {c.employee_range} emp.</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{c.city}{c.canton ? `, ${c.canton}` : ""}{c.employee_range ? ` · ${c.employee_range} emp.` : ""}</p>
                 </div>
 
                 {/* Rating */}

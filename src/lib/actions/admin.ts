@@ -45,7 +45,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
       subsector: String(formData.get("subsector") || "") || null,
       city: String(formData.get("city") || ""),
       canton: String(formData.get("canton") || "") || null,
-      employee_range: String(formData.get("employee_range") || ""),
+      employee_range: String(formData.get("employee_range") || "") || null,
       description: String(formData.get("description") || "").slice(0, 3000) || null,
       cover_url,
       logo_url: String(formData.get("logo_url") || "") || null,
@@ -83,7 +83,9 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       subsector: String(formData.get("subsector") || "") || null,
       city: String(formData.get("city") || ""),
       canton: String(formData.get("canton") || "") || null,
-      employee_range: String(formData.get("employee_range") || "11-50"),
+      // Pas de valeur par défaut : une taille non saisie reste inconnue plutôt
+      // que d'affirmer « 11-50 » sans source.
+      employee_range: String(formData.get("employee_range") || "") || null,
       description: String(formData.get("description") || "").slice(0, 3000) || null,
       cover_url: String(formData.get("cover_url") || "") || null,
       website_url: String(formData.get("website_url") || "") || null,

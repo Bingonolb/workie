@@ -375,13 +375,24 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
               </div>
             )}
 
-            {/* Key stats */}
-            <div className="company-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 32 }}>
-              {[
+            {/* Key stats — seules les données réellement disponibles sont
+                affichées. Le salaire moyen ne provient que des avis publiés ;
+                tant que personne n'en a déclaré, la tuile n'apparaît pas
+                (mieux vaut rien qu'un « N/A » qui laisse croire à une donnée
+                manquante alors qu'aucune n'a jamais existé). */}
+            {/* auto-fit : le nombre de tuiles varie selon les données réellement
+                disponibles (1 à 4), la grille s'ajuste au lieu d'être figée à 3. */}
+            <div className="company-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, marginBottom: 32 }}>
+              {([
                 { icon: <MapPin size={18} color="#8b5cf6" aria-hidden="true" />, value: `${company.city}${company.canton ? `, ${company.canton}` : ""}`, label: "Localisation" },
-                { icon: <Users size={18} color="#f97316" aria-hidden="true" />, value: company.employee_range, label: "Employés" },
-                { icon: <TrendingUp size={18} color="#10b981" aria-hidden="true" />, value: Number(company.avg_salary_chf) > 0 ? `CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k` : "N/A", label: "Salaire moyen" },
-              ].map(({ icon, value, label }) => (
+                company.employee_range
+                  ? { icon: <Users size={18} color="#f97316" aria-hidden="true" />, value: company.employee_range, label: "Employés" }
+                  : null,
+                Number(company.avg_salary_chf) > 0
+                  ? { icon: <TrendingUp size={18} color="#10b981" aria-hidden="true" />, value: `CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`, label: "Salaire moyen déclaré" }
+                  : null,
+                { icon: <Star size={18} color="#f59e0b" aria-hidden="true" />, value: Number(company.review_count) > 0 ? `${Number(company.avg_rating).toFixed(1)} / 5` : "Aucun avis", label: `${company.review_count} avis` },
+              ].filter(Boolean) as { icon: React.ReactNode; value: string; label: string }[]).map(({ icon, value, label }) => (
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
                   <div style={{ marginBottom: 8 }}>{icon}</div>
                   <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 2 }}>{value}</p>

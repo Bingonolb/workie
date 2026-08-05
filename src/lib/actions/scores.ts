@@ -110,7 +110,6 @@ export async function getTopCompanies(limit = 200) {
   const { data } = await supabase
     .from("companies")
     .select("id, name, sector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified, tags")
-    .neq("employee_range", "1-10")
     .order("score", { ascending: false })
     .order("avg_rating", { ascending: false })
     .order("review_count", { ascending: false })
@@ -124,7 +123,6 @@ export const getCachedTopCompanies = unstable_cache(
     const { data } = await admin
       .from("companies")
       .select("id, name, sector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified, tags")
-      .neq("employee_range", "1-10")
       .order("score", { ascending: false })
       .order("avg_rating", { ascending: false })
       .order("review_count", { ascending: false })

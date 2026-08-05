@@ -116,7 +116,10 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div>
           <label style={lbl}>Taille</label>
-          <select name="employee_range" defaultValue={company.employee_range} style={{ ...inp, cursor: "pointer" }}>
+          {/* Option vide en tête : une taille non renseignée doit rester
+              non renseignée tant qu'elle n'est pas vérifiée. */}
+          <select name="employee_range" defaultValue={company.employee_range ?? ""} style={{ ...inp, cursor: "pointer" }}>
+            <option value="">Non renseignée</option>
             {EMPLOYEE_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>

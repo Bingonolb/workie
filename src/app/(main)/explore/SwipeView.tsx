@@ -854,7 +854,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <Chip icon={<MapPin size={12} aria-hidden="true" />} label={`${company.city}${company.canton ? `, ${company.canton}` : ""}`} />
-          <Chip icon={<Users size={12} aria-hidden="true" />} label={`${company.employee_range} emp.`} />
+          {company.employee_range && <Chip icon={<Users size={12} aria-hidden="true" />} label={`${company.employee_range} emp.`} />}
           {Number(company.avg_salary_chf) > 0 && <Chip icon={<TrendingUp size={12} aria-hidden="true" />} label={`CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`} color="#10b981" />}
         </div>
         {company.description && (
