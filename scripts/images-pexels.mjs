@@ -246,12 +246,16 @@ async function chercher(terme) {
 }
 
 /**
- * URL haute définition, recadrée au format de la bannière. On part de
- * `original` et on impose les dimensions : les variantes prêtes à l'emploi de
- * Pexels plafonnent à 940 px de large, ce qui pixellise sur un écran Retina.
+ * URL de référence, recadrée au format de la bannière.
+ *
+ * On stocke une largeur de 1600 et non l'original : c'est la taille utile pour
+ * un hero en écran large à densité double, et le poids téléchargé compte
+ * davantage que des pixels que personne ne verra. Les cartes, elles, dérivent
+ * des largeurs plus petites de cette même URL en changeant `w` — le CDN Pexels
+ * redimensionne à la volée, sans passer par l'optimiseur d'images.
  */
 function urlHD(photo) {
-  return `${photo.src.original}?auto=compress&cs=tinysrgb&fit=crop&w=1920&h=1080`;
+  return `${photo.src.original}?auto=compress&cs=tinysrgb&fit=crop&w=1600&h=900`;
 }
 
 async function main() {
@@ -293,6 +297,7 @@ async function main() {
     if (!ESSAI) {
       const { error: err } = await db.from("companies").update({
         cover_url: urlHD(photo),
+        cover_color: photo.avg_color,
         cover_credit: photo.photographer,
         cover_credit_url: photo.url,
         cover_source: "pexels",

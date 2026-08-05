@@ -8,6 +8,7 @@ import { addBoost, addPenalty } from "@/lib/actions/scores";
 import { fetchSwipePage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
+import { prechargerCouvertures, largeurCouverture } from "@/components/CoverImage";
 import { GuestModal } from "@/components/GuestModal";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
@@ -162,15 +163,17 @@ export function SwipeView({
     if (isAd(current)) trackAdImpression(current.campaign.id);
     else if (current) router.prefetch(`/company/${current.id}`);
 
-    // Preload current + next 8 card images
+    // Les 8 cartes suivantes, décodées d'avance. On demande la largeur de la
+    // carte et non l'original stocké en 1600 px : à cette taille, huit
+    // téléchargements simultanés saturaient la connexion et retardaient la
+    // carte que l'utilisateur avait sous les yeux.
+    const aPrecharger: (string | null | undefined)[] = [];
     for (let i = 0; i <= 8; i++) {
       const item = companies[index + i];
       if (!item) break;
-      const co = item as Company;
-      const url = isAd(item) ? item.campaign.image_url
-        : (co.cover_url || `/api/og?title=${encodeURIComponent(co.name)}&sub=${encodeURIComponent(co.sector ?? "")}`);
-      if (url) { const img = new window.Image(); img.src = url; }
+      aPrecharger.push(isAd(item) ? item.campaign.image_url : (item as Company).cover_url);
     }
+    prechargerCouvertures(aPrecharger, 940);
 
     // Persist state to sessionStorage so navigating away and back restores position
     try {
@@ -189,17 +192,20 @@ export function SwipeView({
   // cet effet tournait au montage alors que le deck est encore vide (il est
   // chargé à un offset aléatoire juste après) : plus rien n'était préchargé et
   // chaque carte se téléchargeait sous les yeux de l'utilisateur.
+  //
+  // On se limite aux 15 premières : précharger un deck de cent cartes d'un coup
+  // met en file d'attente autant de requêtes, et la toute première carte —
+  // la seule que l'utilisateur regarde — attend derrière les autres.
   const preloadedRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    for (const item of companies) {
-      const co = item as Company;
-      const url = isAd(item) ? item.campaign.image_url
-        : (co.cover_url || `/api/og?title=${encodeURIComponent(co.name)}&sub=${encodeURIComponent(co.sector ?? "")}`);
+    const aFaire: string[] = [];
+    for (const item of companies.slice(0, 15)) {
+      const url = isAd(item) ? item.campaign.image_url : (item as Company).cover_url;
       if (!url || preloadedRef.current.has(url)) continue;
       preloadedRef.current.add(url);
-      const img = new window.Image();
-      img.src = url;
+      aFaire.push(url);
     }
+    prechargerCouvertures(aFaire, 940);
   }, [companies]);
 
   // Prefetch next batch silently — triggers on mount when deck is empty, and when nearing the end
@@ -782,15 +788,18 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
 
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
-      {/* Shimmer tant que la couverture n'est pas décodée : un aplat gris se
-          lit comme une image cassée, un shimmer se lit comme un chargement. */}
+      {/* Fond à la couleur dominante de la photo : la carte est colorée dès le
+          premier rendu, donc pas de shimmer ni d'aplat gris même hors ligne. */}
       <div
-        className={imgLoaded ? undefined : "img-placeholder"}
-        style={{ height: "55%", position: "relative", overflow: "hidden", background: "var(--surface2)" }}
+        className={imgLoaded || company.cover_color ? undefined : "img-placeholder"}
+        style={{
+          height: "55%", position: "relative", overflow: "hidden",
+          background: company.cover_color || "var(--surface2)",
+        }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={coverSrc}
+          src={largeurCouverture(coverSrc, 940)}
           alt=""
           fetchPriority="high"
           decoding="async"
@@ -798,7 +807,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
             position: "absolute", inset: 0, width: "100%", height: "100%",
             objectFit: "cover",
             opacity: imgLoaded ? 1 : 0,
-            transition: "opacity 0.4s ease",
+            transition: "opacity 0.25s ease-out",
           }}
           onLoad={() => setImgLoaded(true)}
         />

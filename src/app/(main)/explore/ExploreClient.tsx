@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef, useTransition, useEffect } from "react";
 import { CompanyCard } from "@/components/CompanyCard";
+import { prechargerCouvertures } from "@/components/CoverImage";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
 import { SwipeView } from "./SwipeView";
@@ -88,14 +89,18 @@ export function ExploreClient({
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // Preload ALL company covers into browser cache as soon as the list is known.
-  // This ensures Swipe/Ranking/Favoris show cached images with no reload.
+  // Préchargement des bannières encore hors écran du lot courant.
+  //
+  // La version précédente tirait l'URL stockée telle quelle, soit 1600 px de
+  // large, pour chaque entreprise de la liste. Ces téléchargements entraient en
+  // concurrence avec les images réellement visibles et retardaient l'affichage
+  // au lieu de l'accélérer. On demande désormais la largeur d'une carte, et on
+  // laisse passer le premier rendu avant de commencer.
   useEffect(() => {
-    companies.forEach(c => {
-      const url = c.cover_url || `/api/og?title=${encodeURIComponent(c.name)}&sub=${encodeURIComponent(c.sector ?? "")}`;
-      const img = new window.Image();
-      img.src = url;
-    });
+    const t = setTimeout(() => {
+      prechargerCouvertures(companies.slice(6).map(c => c.cover_url), 640);
+    }, 600);
+    return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -216,6 +221,44 @@ export function ExploreClient({
   }, [applyFilters]);
 
   const [newFrom, setNewFrom] = useState<number>(-1);
+
+  /**
+   * Photos du lot suivant, téléchargées et décodées à l'avance.
+   *
+   * On précharge les images, pas les données : la requête de données prend
+   * quelques dizaines de millisecondes, alors que 24 photos représentent
+   * l'essentiel de l'attente. Au clic, le rendu est immédiat parce que les
+   * images sont déjà dans le cache du navigateur.
+   *
+   * Une version antérieure réutilisait aussi la promesse de données ; elle
+   * renvoyait un lot vide au moment du clic et la liste ne grandissait plus.
+   * Le gain ne valait pas le risque : la récupération des données reste dans
+   * loadMore, là où elle a toujours fonctionné.
+   */
+  useEffect(() => {
+    if ((page + 1) * GRID_PAGE_SIZE >= total) return;
+
+    // requestIdleCallback : on ne dispute pas la bande passante aux images
+    // encore en cours de chargement dans le lot visible.
+    const lancer = () => {
+      fetchGridPage(
+        { sector: sector || undefined, canton: canton || undefined, sort },
+        page + 1,
+      )
+        .then(r => prechargerCouvertures(r.companies.map(c => c.cover_url), 640))
+        .catch(() => { /* le clic refera la requête */ });
+    };
+
+    const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
+    const surIdle = typeof w.requestIdleCallback === "function";
+    const id = surIdle
+      ? w.requestIdleCallback!(lancer, { timeout: 2500 })
+      : window.setTimeout(lancer, 1500);
+    return () => {
+      if (surIdle) (window as unknown as { cancelIdleCallback: (i: number) => void }).cancelIdleCallback(id);
+      else clearTimeout(id);
+    };
+  }, [page, sector, canton, sort, total]);
 
   const loadMore = async () => {
     if (loadingMore) return;

@@ -60,7 +60,7 @@ export async function fetchSwipePage(
 
 import { GRID_PAGE_SIZE, COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
 
-const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,logo_url,score,is_verified,tags,description,profile_score";
+const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,cover_color,logo_url,score,is_verified,tags,description,profile_score";
 
 // Cached grid fetcher — no cookies(), uses adminClient, safe to cache across requests.
 // All users with the same filters share one DB query per 60s instead of N.

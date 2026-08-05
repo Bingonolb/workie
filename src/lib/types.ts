@@ -12,6 +12,7 @@ export interface Company {
   description: string | null;
   logo_url: string | null;
   cover_url: string | null;
+  cover_color: string | null;
   website_url: string | null;
   linkedin_url: string | null;
   twitter_url: string | null;
@@ -132,7 +133,9 @@ export type Database = {
         Row: {
           avg_rating: number | null; avg_salary_chf: number | null; canton: string | null
           city: string; claimed_by: string | null; cover_url: string | null
-          created_at: string | null; description: string | null; employee_range: string | null
+          cover_color: string | null; cover_credit: string | null; cover_credit_url: string | null
+          cover_source: string | null; cover_query: string | null
+          created_at: string | null; description: string | null; description_source: string | null; employee_range: string | null
           founded_year: number | null; id: string; instagram_url: string | null
           is_subscribed: boolean | null; is_verified: boolean | null; linkedin_url: string | null
           logo_url: string | null; name: string; profile_score: number | null; review_count: number | null; score: number

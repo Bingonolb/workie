@@ -7,6 +7,7 @@ import { Flame, Star, Users, MapPin, TrendingUp } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
+import { CoverImage } from "@/components/CoverImage";
 import { logoAffichable } from "@/lib/logo";
 
 const SECTOR_GRADIENTS: Record<string, string> = {
@@ -124,16 +125,11 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
       }}>
         {/* Cover */}
         <div className="card-cover" style={{ height: 210, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
-          <Image
+          <CoverImage
             src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
-            alt=""
-            fill
+            color={company.cover_color}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
             priority={priority}
-            placeholder="blur"
-            blurDataURL={BLUR_DATA_URL}
-            style={{ objectFit: "cover" }}
-            onError={() => { if (!coverFailed) { setCoverFailed(true); } }}
           />
 
           {/* Gradient overlay */}

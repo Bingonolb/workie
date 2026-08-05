@@ -38,7 +38,7 @@ export async function getFavorites(): Promise<Company[]> {
 
     const { data } = await supabase
       .from("favorites")
-      .select("companies(id, name, sector, subsector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, logo_url, score, is_verified, tags, description)")
+      .select("companies(id, name, sector, subsector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, cover_color, logo_url, score, is_verified, tags, description)")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
