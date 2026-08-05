@@ -88,13 +88,37 @@ const REJETS = [
   /^[^.]{0,40}$/,                       // slogan sans phrase
 ];
 
+/**
+ * Vocabulaire promotionnel : mots qui remplissent une phrase sans rien dire du
+ * métier. Repéré sur Zühlke — « nous relions stratégie, IA et excellence
+ * technique pour transformer les investissements en résultats » — qui passait
+ * le filtre initial parce que la phrase est longue et grammaticalement complète.
+ */
+const MOTS_CREUX = /\b(excellence|leidenschaft|passion|innovativ|innovation|zukunft|avenir|vision|erfolg|succès|success|partner|lösungen|solutions|kompetenz|compétence|qualität|qualité|vertrauen|confiance|nachhaltig|durable|massgeschneidert|sur[- ]mesure|ganzheitlich|globale?)\b/gi;
+
+/**
+ * Termes concrets : métier, produit, secteur, chiffre. Un texte qui n'en
+ * contient aucun ne renseigne pas le lecteur, quelle que soit sa longueur.
+ */
+const MOTS_CONCRETS = /\b(\d{2,}|herstell|produz|fabric|produit|product|vend|verkauf|vertrieb|distribu|bank|banque|versicher|assuran|spital|klinik|hôpital|schul|école|university|universit|transport|bahn|train|bus|energie|énergie|strom|électric|bau|construct|immobil|software|logiciel|maschine|machine|labor|pharma|lebensmittel|aliment|restaurant|hotel|hôtel|garage|apotheke|pharmacie|conseil|beratung|audit|avocat|anwalt|kanzlei|étude|fiduciaire|treuhand|landwirt|agricol|montre|uhren|horlog)/i;
+
 function estExploitable(texte) {
   if (!texte) return false;
   if (texte.length < LONGUEUR_MIN || texte.length > LONGUEUR_MAX) return false;
   if (REJETS.some(r => r.test(texte))) return false;
+
   // Au moins trois mots de plus de 4 lettres : filtre les suites de mots-clés
   const motsUtiles = texte.split(/\s+/).filter(m => m.replace(/[^\p{L}]/gu, "").length > 4);
-  return motsUtiles.length >= 3;
+  if (motsUtiles.length < 3) return false;
+
+  // Le texte doit nommer une activité réelle, pas seulement se féliciter
+  if (!MOTS_CONCRETS.test(texte)) return false;
+
+  // Trop de superlatifs pour trop peu de substance
+  const creux = (texte.match(MOTS_CREUX) ?? []).length;
+  if (creux >= 3) return false;
+
+  return true;
 }
 
 // Domaine enregistrable, pour comparer avant/après redirection
