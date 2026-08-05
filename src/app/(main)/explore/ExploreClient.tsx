@@ -155,12 +155,32 @@ export function ExploreClient({
     return () => window.removeEventListener("workie:view", handler);
   }, []);
 
-  // Keep URL in sync with view state
-  useEffect(() => {
-    const target = view === "swipe" ? "/explore?view=swipe" : "/explore";
+  // L'URL doit refléter l'état complet (filtres + vue), pas seulement la vue.
+  // L'ancienne version réécrivait « /explore » ou « /explore?view=swipe » en
+  // dur, ce qui effaçait sector/canton/sort : un lien filtré n'était pas
+  // partageable et un rechargement perdait les filtres.
+  const syncUrl = useCallback((s: string, c: string, so: string, v: string) => {
+    const p = new URLSearchParams();
+    if (s) p.set("sector", s);
+    if (c) p.set("canton", c);
+    if (so && so !== "recent") p.set("sort", so);
+    if (v === "swipe") p.set("view", "swipe");
+    const qs = p.toString();
+    const target = `/explore${qs ? `?${qs}` : ""}`;
     if (window.location.pathname + window.location.search !== target) {
       window.history.replaceState({}, "", target);
     }
+  }, []);
+
+  // Au montage, l'URL fait déjà foi — on ne la réécrit qu'après un changement,
+  // sinon on écraserait les paramètres d'arrivée avant leur lecture.
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) { didMountRef.current = true; return; }
+    syncUrl(sector, canton, sort, view);
+  }, [sector, canton, sort, view, syncUrl]);
+
+  useEffect(() => {
     if (view === "swipe") window.scrollTo({ top: 0, behavior: "instant" });
   }, [view]);
 
