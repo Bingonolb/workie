@@ -60,6 +60,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "picsum.photos" },
+      // Bannières d'entreprise. Sans cette entrée, next/image lève côté serveur
+      // et la fiche renvoie une 500 — l'échec ne se voit pas au build.
+      { protocol: "https", hostname: "images.pexels.com" },
       // logo.clearbit.com a été retiré : les logos d'entreprise sont des marques
       // déposées et 588 fiches en affichaient un sans autorisation. Le champ
       // logo_url est vidé en base et LogoImg affiche les initiales à la place.
