@@ -191,6 +191,56 @@ const TERMES = [
   [/nettoyage|propreté/i, "cleaning service professional"],
 ];
 
+/**
+ * Marques pour lesquelles Pexels détient de vraies photos du produit.
+ *
+ * Vérifié marque par marque avant d'entrer dans cette liste : une recherche par
+ * nom renvoie toujours des centaines de résultats, même pour « Holdigaz » (614)
+ * ou « Sefar » (461), donc le nombre de résultats ne prouve rien. Le seul signal
+ * fiable est le texte alternatif de la photo, qui doit contenir le nom en mot
+ * entier.
+ *
+ * Ce contrôle écarte aussi des homonymes qui passeraient autrement : « Cartier »
+ * renvoie le pont Jacques-Cartier de Montréal, « Zurich » la ville plutôt que
+ * l'assureur, « Patagonia » la région plutôt que la marque, et « Roche » des
+ * formations rocheuses. C'est pourquoi la liste est écrite à la main plutôt que
+ * déduite du nom de l'entreprise.
+ *
+ * Les autres entreprises gardent leur image de métier, qui fait déjà sens : un
+ * laboratoire pour Roche, un rayon de supermarché pour Migros.
+ *
+ * Forme : "nom exact en base": ["requête Pexels", "mot à retrouver dans l'alt"]
+ */
+const MARQUES = {
+  // Horlogerie
+  "Rolex SA":                  ["Rolex watch", "rolex"],
+  "Omega":                     ["Omega watch", "omega"],
+  "Breitling SA":              ["Breitling watch", "breitling"],
+  "Tissot SA":                 ["Tissot watch", "tissot"],
+  "Longines SA":               ["Longines watch", "longines"],
+  // Automobile
+  "Porsche Suisse":            ["Porsche car", "porsche"],
+  "Mercedes-Benz Schweiz AG":  ["Mercedes-Benz car", "mercedes"],
+  "BMW (Schweiz) AG":          ["BMW car", "bmw"],
+  "Tesla Suisse":              ["Tesla car", "tesla"],
+  "Toyota (Suisse) SA":        ["Toyota car", "toyota"],
+  "Renault Suisse SA":         ["Renault car", "renault"],
+  "Peugeot Suisse SA":         ["Peugeot car", "peugeot"],
+  "Volvo Car Suisse":          ["Volvo car", "volvo"],
+  "Subaru Suisse SA":          ["Subaru car", "subaru"],
+  "Hyundai (Suisse) SA":       ["Hyundai car", "hyundai"],
+  "Honda Suisse":              ["Honda motorcycle", "honda"],
+  "Citroën Suisse SA":         ["Citroen car", "citroen"],
+  // Sport et mode
+  "Nike Switzerland GmbH":     ["Nike shoes", "nike"],
+  "Adidas Switzerland AG":     ["Adidas shoes", "adidas"],
+  "Puma SE Switzerland Branch":["Puma shoes", "puma"],
+  "New Balance Switzerland AG":["New Balance sneakers", "new balance"],
+  // Alimentation et finance
+  "Lindt & Sprüngli AG":       ["Lindt chocolate", "lindt"],
+  "UBS":                       ["UBS bank building", "ubs"],
+};
+
 /** Repli par secteur : jamais d'image générique de bureau. */
 const PAR_SECTEUR = {
   "Horlogerie": "watchmaker workshop tweezers",
@@ -281,8 +331,21 @@ async function main() {
   let ecrites = 0, sansPhoto = 0;
 
   for (const e of aTraiter) {
-    const terme = requetePour(e.subsector, e.sector);
-    const photos = await chercher(terme);
+    // Une photo de la marque quand elle existe, le métier sinon.
+    let terme = requetePour(e.subsector, e.sector);
+    let photos = [];
+
+    const marque = MARQUES[e.name];
+    if (marque) {
+      const [requete, mot] = marque;
+      const candidates = await chercher(requete);
+      const re = new RegExp(`\\b${mot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+      const vraies = candidates.filter(p => re.test(p.alt ?? ""));
+      if (vraies.length > 0) { terme = requete; photos = vraies; }
+      else console.log(`  · ${e.name} — aucune photo de la marque, repli sur « ${terme} »`);
+    }
+
+    if (photos.length === 0) photos = await chercher(terme);
 
     if (photos.length === 0) {
       sansPhoto++;
