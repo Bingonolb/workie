@@ -10,10 +10,17 @@ type RateLimiters = {
 };
 let rl: RateLimiters | null = null;
 try {
-  const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
+  // Le constructeur Redis accepte une url indéfinie sans se plaindre : le
+  // try/catch ci-dessous ne suffisait donc pas à désactiver la limitation quand
+  // les variables manquent. Résultat mesuré en production locale, sans ces
+  // variables : /login et /signup répondaient en 4,35 s de façon parfaitement
+  // reproductible, le temps que la requête vers une URL indéfinie échoue.
+  // On vérifie donc explicitement leur présence.
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) throw new Error("Upstash non configuré");
+
+  const redis = new Redis({ url, token });
   rl = {
     search:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60s"),  prefix: "rl:search",   ephemeralCache: new Map() }),
     checkout: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60s"),   prefix: "rl:checkout", ephemeralCache: new Map() }),
@@ -62,10 +69,19 @@ export async function middleware(request: NextRequest) {
     // au catch global du middleware, qui répond `next()` — l'authentification
     // était alors purement et simplement sautée sur les chemins limités.
     // Le rate limiting doit échouer en mode passant, jamais le contrôle d'accès.
+    // Délai maximal : le client Upstash n'en impose aucun, donc un incident
+    // chez eux ferait attendre chaque visiteur aussi longtemps que dure la
+    // panne. La limitation de débit protège des abus ; elle ne doit jamais
+    // devenir elle-même la cause d'une lenteur.
+    const DELAI_MAX_MS = 500;
+
     const allowed = async (limiter: Ratelimit): Promise<boolean> => {
       try {
-        const { success } = await limiter.limit(ip);
-        return success;
+        const verdict = await Promise.race([
+          limiter.limit(ip).then(r => r.success),
+          new Promise<boolean>(resolve => setTimeout(() => resolve(true), DELAI_MAX_MS)),
+        ]);
+        return verdict;
       } catch {
         return true; // backend indisponible → on laisse passer, sans court-circuiter l'auth
       }
