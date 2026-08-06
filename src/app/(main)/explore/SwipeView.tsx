@@ -147,6 +147,11 @@ export function SwipeView({
   const advanceRef = useRef<(dir: "left" | "right") => void>(() => {});
   const currentRef = useRef<typeof companies[0] | undefined>(undefined);
   goneRef.current = gone;
+  // Verrou de transition et minuteurs en cours. Les seconds n'étaient jamais
+  // annulés : un swipe suivi d'une navigation laissait un setState s'exécuter
+  // sur un composant démonté.
+  const transitionRef = useRef(false);
+  const minuteursRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const swipeCountRef = useRef(0);
   const fetchingRef = useRef(false);
   // Départ à un offset aléatoire pour varier le pool plutôt que de resservir
@@ -256,6 +261,7 @@ export function SwipeView({
     setCompanies([]);
     setIndex(0);
     setGone(null);
+    transitionRef.current = false;
     setDrag(0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deckEmpty]);
@@ -273,8 +279,31 @@ export function SwipeView({
 
   const markActed = (id: string) => actedIds.current.add(id);
 
+  /** Fait glisser la carte puis passe à la suivante, en relâchant le verrou. */
+  const programmerAvance = useCallback(() => {
+    const t = setTimeout(() => {
+      setIndex(i => i + 1);
+      setGone(null);
+      setDrag(0);
+      transitionRef.current = false;
+    }, 280);
+    minuteursRef.current.push(t);
+  }, []);
+
+  useEffect(() => () => {
+    minuteursRef.current.forEach(clearTimeout);
+    minuteursRef.current = [];
+  }, []);
+
   const advance = useCallback((dir: "left" | "right") => {
-    if (!current || gone) return;
+    // Verrou synchrone. `gone` est un état React : entre l'appel et le rendu
+    // suivant il vaut encore null dans cette closure, donc deux swipes
+    // rapprochés franchissaient tous les deux le garde-fou, programmaient deux
+    // minuteurs et incrémentaient l'index deux fois — une carte sautée à chaque
+    // fois, et un « enregistré » attribué à la mauvaise entreprise. Un ref est
+    // écrit immédiatement, avant tout rendu.
+    if (!current || gone || transitionRef.current) return;
+    transitionRef.current = true;
 
     // Ad card: swipe freely (no login gate), track click on right swipe
     if (isAd(current)) {
@@ -284,11 +313,16 @@ export function SwipeView({
         window.open(current.campaign.cta_url, "_blank", "noopener,noreferrer");
       }
       setGone(dir);
-      setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 280);
+      programmerAvance();
       return;
     }
 
-    if (!isLoggedIn && swipeCountRef.current >= 1) { requireLogin(); setDrag(0); return; }
+    // Sortie anticipée : le verrou doit être relâché, sinon le visiteur qui
+    // atteint la limite ne peut plus jamais swiper.
+    if (!isLoggedIn && swipeCountRef.current >= 1) {
+      transitionRef.current = false;
+      requireLogin(); setDrag(0); return;
+    }
     if (!isLoggedIn) { swipeCountRef.current += 1; }
     markActed(current.id);
     setGone(dir);
@@ -303,7 +337,7 @@ export function SwipeView({
     } else {
       showToast("✕ Passé", "#ef4444");
     }
-    setTimeout(() => { setIndex(i => i + 1); setGone(null); setDrag(0); }, 280);
+    programmerAvance();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, gone, isLoggedIn, requireLogin]);
   advanceRef.current = advance;

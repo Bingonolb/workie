@@ -24,15 +24,21 @@ import { estPexels, aLaLargeur } from "@/lib/coverUrl";
  */
 
 /**
- * Candidats proposés au navigateur. On s'arrête à 940 volontairement.
+ * Candidats proposés au navigateur.
  *
- * Une carte mesure 358 px de large sur un écran de 1280, et au plus la largeur
- * de l'écran sur mobile. Laisser des candidats à 1280 et 1600 ne servait rien :
- * le navigateur est libre de prendre un candidat plus grand que nécessaire — il
- * le fait notamment quand une variante est déjà en cache — et il téléchargeait
- * un 1600 px pour un emplacement de 358. Mesuré sur /explore avant correction.
+ * Le plafond était initialement à 1600, et le navigateur téléchargeait
+ * effectivement un 1600 px pour un emplacement de 358 — 198 Ko au lieu de 28.
+ * Descendu à 940, il a résolu le poids mais sous-servait les écrans à forte
+ * densité : une carte pleine largeur sur un téléphone à densité triple demande
+ * plus de 1000 px, et l'image paraissait moins nette qu'avant.
+ *
+ * 1280 est donc le bon plafond : il couvre le mobile haute densité sans jamais
+ * être choisi sur un écran de bureau, où `sizes` annonce 400 px. Ce qui
+ * empêchait auparavant `sizes` d'être respecté, ce sont les attributs
+ * width/height à 1600x900, qui poussaient le navigateur vers les gros
+ * candidats ; ils valent maintenant 640x360.
  */
-const LARGEURS = [320, 480, 640, 940];
+const LARGEURS = [320, 480, 640, 940, 1280];
 
 export function CoverImage({
   src,
