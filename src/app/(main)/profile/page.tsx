@@ -119,8 +119,7 @@ export default async function ProfilePage() {
           {([
             { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b", href: null },
             { emoji: "🔥", value: String(favIds.length), label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
-            { emoji: "📊", value: String(reviews.length), label: "Avis publiés", color: "#10b981", href: null },
-            { emoji: "📣", value: "Pub", label: "Faire de la publicité", color: "#8b5cf6", href: "/profile/ads" },
+            { emoji: "📊", value: String(reviews.length), label: "Avis publiés", color: "#10b981", href: null },
           ] as { emoji: string; value: string; label: string; color: string; href: string | null }[]).map(({ emoji, value, label, color, href }) => {
             const inner = (
               <>
