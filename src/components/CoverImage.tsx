@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { estPexels, aLaLargeur } from "@/lib/coverUrl";
 
 /**
  * Bannière d'entreprise, servie directement par le CDN Pexels.
@@ -32,21 +33,6 @@ import { useState } from "react";
  * un 1600 px pour un emplacement de 358. Mesuré sur /explore avant correction.
  */
 const LARGEURS = [320, 480, 640, 940];
-
-/** Remplace la largeur dans une URL Pexels sans toucher au reste des paramètres. */
-function aLaLargeur(url: string, w: number): string {
-  const h = Math.round((w * 9) / 16);
-  return url.replace(/([?&])w=\d+/, `$1w=${w}`).replace(/([?&])h=\d+/, `$1h=${h}`);
-}
-
-function estPexels(url: string): boolean {
-  return url.startsWith("https://images.pexels.com/");
-}
-
-/** Même URL, à la largeur voulue. Sans effet sur les sources non-Pexels. */
-export function largeurCouverture(url: string, w: number): string {
-  return estPexels(url) ? aLaLargeur(url, w) : url;
-}
 
 export function CoverImage({
   src,

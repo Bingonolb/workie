@@ -135,3 +135,40 @@ export const getCachedCompany = unstable_cache(
   ["company"],
   { revalidate: 60, tags: ["companies"] }
 );
+
+/**
+ * Offres d'emploi et entreprises voisines : deux données publiques, identiques
+ * pour tous les visiteurs, qui étaient pourtant réinterrogées à chaque
+ * affichage de fiche. Mesuré en production, une fiche coûtait environ 200 ms
+ * là où /explore répondait en 5 ms depuis son cache.
+ */
+export const getCachedJobOffers = unstable_cache(
+  async (companyId: string) => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("job_offers")
+      .select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at")
+      .eq("company_id", companyId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+    return data ?? [];
+  },
+  ["job-offers"],
+  { revalidate: 300, tags: ["companies"] }
+);
+
+export const getCachedSimilarCompanies = unstable_cache(
+  async (sector: string, excludeId: string) => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("companies")
+      .select("id, name, city, avg_rating, review_count, cover_url, cover_color, is_verified, sector")
+      .eq("sector", sector)
+      .neq("id", excludeId)
+      .order("score", { ascending: false })
+      .limit(4);
+    return data ?? [];
+  },
+  ["similar-companies"],
+  { revalidate: 300, tags: ["companies"] }
+);

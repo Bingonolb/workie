@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ReviewForm } from "@/components/ReviewForm";
-import { getCachedCompany } from "@/lib/actions/companies";
+import { getCachedCompany, getCachedJobOffers, getCachedSimilarCompanies } from "@/lib/actions/companies";
 import { getCachedReviews } from "@/lib/actions/reviews";
 import { createClient } from "@/lib/supabase/server";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
@@ -33,6 +33,8 @@ import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { SaveButton } from "@/components/SaveButton";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { logoAffichable } from "@/lib/logo";
+import { CoverImage } from "@/components/CoverImage";
+import { largeurCouverture } from "@/lib/coverUrl";
 import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
 import { ReportButton } from "@/components/ReportButton";
 
@@ -176,14 +178,15 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
     return reviewRelevanceScore(b) - reviewRelevanceScore(a);
   });
 
-  const [jobsResult, voteData, profileData, similarCompaniesData, helpfulVotesResult] = await Promise.all([
-    Promise.resolve(supabase.from("job_offers").select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at").eq("company_id", id).eq("is_active", true).order("created_at", { ascending: false })).catch(() => ({ data: null })),
+  // Les deux données publiques passent par le cache partagé ; seules celles qui
+  // dépendent du visiteur touchent encore la base à chaque affichage.
+  const [jobs, voteData, profileData, similarCompaniesData, helpfulVotesResult] = await Promise.all([
+    getCachedJobOffers(id).catch(() => [] as never[]),
     user ? Promise.resolve(supabase.from("score_events").select("event_type").eq("company_id", id).eq("user_id", user.id).in("event_type", ["boost", "penalty"])).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     user ? Promise.resolve(supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle()).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
-    Promise.resolve(supabase.from("companies").select("id, name, city, avg_rating, review_count, cover_url, is_verified, sector").eq("sector", company.sector).neq("id", id).order("score", { ascending: false }).limit(4)).then(r => r.data ?? []).catch(() => []),
+    getCachedSimilarCompanies(company.sector, id).catch(() => []),
     user && reviews.length > 0 ? Promise.resolve(supabase.from("review_votes").select("review_id").eq("user_id", user.id).in("review_id", reviews.map(r => r.id))).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
   ]);
-  const jobs: { id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null; experience_level: string | null; salary_range: string | null; apply_url: string | null; description: string | null; created_at: string | null }[] = jobsResult.data ?? [];
 
   const votedReviewIds = new Set<string>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -285,15 +288,23 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
 
       {/* Preload hero cover — browser fetches directly from CDN before paint */}
-      {company.cover_url && <link rel="preload" as="image" href={company.cover_url} />}
+      {/* On préannonce la largeur réellement affichée. L'URL stockée fait
+          1600 px : la précharger telle quelle faisait télécharger 198 Ko là où
+          la même photo en pèse 81 à la taille du hero. */}
+      {company.cover_url && (
+        <link rel="preload" as="image" href={largeurCouverture(company.cover_url, 1280)} fetchPriority="high" />
+      )}
 
       {/* Hero cover */}
       <div className="hero-cover">
         {/* CSS background = direct CDN, no Vercel proxy hop */}
         <div style={{
           position: "absolute", inset: 0,
+          // La couleur dominante de la photo est peinte sous l'image : le hero
+          // est coloré dès le premier rendu au lieu d'afficher un vide.
+          backgroundColor: company.cover_color ?? sectorColor,
           background: company.cover_url
-            ? `url(${company.cover_url}) center / cover no-repeat`
+            ? `url(${largeurCouverture(company.cover_url, 1280)}) center / cover no-repeat, ${company.cover_color ?? sectorColor}`
             : `linear-gradient(135deg, ${sectorColor}, #f97316)`,
         }} />
         {/* Top gradient — darkens so navbar stays readable */}
@@ -612,13 +623,14 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
               Autres entreprises · {company.sector}
             </h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
-              {similarCompaniesData.map((c: { id: string; name: string; city: string; avg_rating: number | string | null; review_count: number | string | null; cover_url: string | null; is_verified: boolean | null; sector: string }) => (
+              {similarCompaniesData.map((c: { id: string; name: string; city: string; avg_rating: number | string | null; review_count: number | string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; sector: string }) => (
                 <Link key={c.id} href={`/company/${c.id}`} style={{ textDecoration: "none" }}>
                   <div className="company-card" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
-                    <div style={{ height: 80, background: c.cover_url ? "none" : "linear-gradient(135deg, #8b5cf6, #3b82f6)", position: "relative" }}>
-                      {c.cover_url && (
-                        <Image src={c.cover_url} alt="" fill sizes="200px" style={{ objectFit: "cover" }} />
-                      )}
+                    <div style={{ height: 80, background: c.cover_color ?? "linear-gradient(135deg, #8b5cf6, #3b82f6)", position: "relative" }}>
+                      {/* Servi en direct par le CDN : ces 4 vignettes passaient
+                          par l'optimiseur, soit 4 transformations d'image
+                          déclenchées à chaque affichage de fiche. */}
+                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="200px" />
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6))" }} />
                     </div>
                     <div style={{ padding: "12px 14px" }}>
