@@ -594,14 +594,19 @@ main, .page-main, .page-main-sm, .page-main-md {
   .page-subtitle { font-size: 13px !important; }
 }
 
-/* Company card — cover shrinks as the viewport narrows so the card body
-   stays visible without scrolling. Desktop default is 210px (inline). */
+/* Carte entreprise — la photo rétrécissait à mesure que l'écran se réduit,
+   pour garder le corps de carte visible sans défiler. Sur mobile elle tombait
+   ainsi à 160px, soit moins de hauteur que le bloc de texte sous elle : la
+   photo passait au second plan alors que c'est elle qu'on regarde d'abord, et
+   sur une grille à une seule colonne la place ne manque pas.
+   Le bureau garde ses 210px (valeur en ligne dans le composant) : à deux ou
+   trois colonnes, l'équilibre y était déjà bon. */
 @media (max-width: 900px) {
-  .card-cover { height: 185px !important; }
+  .card-cover { height: 250px !important; }
 }
 @media (max-width: 480px) {
   .card-company-name { font-size: 13px !important; }
-  .card-cover { height: 160px !important; }
+  .card-cover { height: 260px !important; }
 }
 
 /* Landing hero buttons — stack + full width */
