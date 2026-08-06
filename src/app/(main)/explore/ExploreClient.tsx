@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useTransition, useEffect } from "react";
+import { useState, useMemo, useCallback, useRef, useTransition, useEffect, useLayoutEffect } from "react";
 import { CompanyCard } from "@/components/CompanyCard";
 import { prechargerCouvertures } from "@/components/CoverImage";
 import { ExploreFilters } from "./ExploreFilters";
@@ -104,8 +104,14 @@ export function ExploreClient({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Read URL params on mount and apply filters + view if present
-  useEffect(() => {
+  // Lecture des paramètres d'URL au montage.
+  //
+  // useLayoutEffect et non useEffect : la page étant servie depuis le cache, le
+  // serveur rend toujours la grille, et c'est le client qui bascule sur le
+  // swipe quand l'URL le demande. Avec useEffect, la bascule survient après le
+  // premier affichage — on voit donc la grille apparaître puis céder la place
+  // aux cartes. Ici elle a lieu avant que le navigateur peigne, sans à-coup.
+  useLayoutEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const urlSector = sp.get("sector") ?? "";
     const urlCanton = sp.get("canton") ?? "";
