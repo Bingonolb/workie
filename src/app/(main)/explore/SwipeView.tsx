@@ -59,21 +59,22 @@ export function SwipeView({
 
   const stateKey = `workie_swipe_${filters?.sector ?? ""}_${filters?.canton ?? ""}`;
 
+  /** Deck en cours, s'il a été laissé récemment. Lu une fois, pas à chaque état. */
+  type Sauvegarde = { deck?: SwipeItem[]; index: number; actedIds: string[]; offsetSuivant?: number; timestamp: number };
+  const sauvegarde = ((): Sauvegarde | null => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem(stateKey);
+      if (!raw) return null;
+      const s = JSON.parse(raw) as Sauvegarde;
+      if (Date.now() - s.timestamp >= STATE_TTL_MS) return null;
+      return s.deck?.length ? s : null;
+    } catch { return null; }
+  })();
+
   // Build the initial deck: restore from sessionStorage if recent, otherwise shuffle fresh
   const [companies, setCompanies] = useState<SwipeItem[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const raw = sessionStorage.getItem(stateKey);
-        if (raw) {
-          const saved = JSON.parse(raw) as { ids: string[]; index: number; actedIds: string[]; timestamp: number };
-          if (Date.now() - saved.timestamp < STATE_TTL_MS) {
-            const byId = new Map(initialCompanies.map(c => [c.id, c]));
-            const restored = saved.ids.map(id => byId.get(id)).filter(Boolean) as SwipeItem[];
-            if (restored.length > 0) return restored;
-          }
-        }
-      } catch { /* ignore */ }
-    }
+    if (sauvegarde) return sauvegarde.deck!;
     const shuffled: SwipeItem[] = shuffle(initialCompanies);
     const alreadyShown = typeof window !== "undefined" && sessionStorage.getItem(AD_SESSION_KEY) === "1";
     if (swipeAds.length > 0 && !alreadyShown) {
@@ -84,18 +85,7 @@ export function SwipeView({
     return shuffled;
   });
 
-  const [index, setIndex] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const raw = sessionStorage.getItem(stateKey);
-        if (raw) {
-          const saved = JSON.parse(raw) as { ids: string[]; index: number; actedIds: string[]; timestamp: number };
-          if (Date.now() - saved.timestamp < STATE_TTL_MS) return saved.index;
-        }
-      } catch { /* ignore */ }
-    }
-    return 0;
-  });
+  const [index, setIndex] = useState<number>(() => sauvegarde?.index ?? 0);
   const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
   const [penaltyIds, setPenaltyIds] = useState<Set<string>>(new Set());
@@ -110,17 +100,9 @@ export function SwipeView({
   const [penaltyCheckoutLoading, setPenaltyCheckoutLoading] = useState(false);
   const [penaltyCheckoutError, setPenaltyCheckoutError] = useState("");
 
-  // Restore actedIds from sessionStorage on mount
+  // Entreprises déjà vues : restaurées pour ne pas les reproposer.
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(stateKey);
-      if (raw) {
-        const saved = JSON.parse(raw) as { actedIds: string[]; timestamp: number };
-        if (Date.now() - saved.timestamp < STATE_TTL_MS) {
-          saved.actedIds.forEach(id => actedIds.current.add(id));
-        }
-      }
-    } catch { /* ignore */ }
+    sauvegarde?.actedIds?.forEach(id => actedIds.current.add(id));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -161,7 +143,10 @@ export function SwipeView({
   // second aller-retour pour s'en remettre — d'où un écran blanc prolongé.
   const hasFilters = !!(filters?.sector || filters?.canton || filters?.search);
   const randomStartOffset = useRef(hasFilters ? 0 : 50 + Math.floor(Math.random() * 150));
-  const nextOffsetRef = useRef(initialCompanies.length > 0 ? initialCompanies.length : randomStartOffset.current);
+  const nextOffsetRef = useRef(
+    sauvegarde?.offsetSuivant
+      ?? (initialCompanies.length > 0 ? initialCompanies.length : randomStartOffset.current)
+  );
 
   // Track impression when the ad card becomes the current card
   const current = companies[index];
@@ -183,11 +168,21 @@ export function SwipeView({
 
     // Persist state to sessionStorage so navigating away and back restores position
     try {
-      const ids = companies.filter(c => !isAd(c)).map(c => (c as Company).id);
+      // On enregistre le deck lui-même, pas seulement les identifiants.
+      // L'ancienne version les relisait dans `initialCompanies` — un tableau
+      // toujours vide ici, puisque le swipe charge son propre pool. La
+      // restauration échouait donc systématiquement : retour au swipe, tout
+      // était rechargé et l'utilisateur perdait l'entreprise qu'il regardait.
+      //
+      // On ne garde que ce qui reste à voir, plafonné : au-delà, l'espace de
+      // session se remplirait pour des cartes qui seront de toute façon
+      // remplacées par la pagination.
+      const aGarder = companies.slice(Math.max(0, index - 1), index + 40);
       sessionStorage.setItem(stateKey, JSON.stringify({
-        ids,
-        index,
+        deck: aGarder,
+        index: Math.min(index, 1),
         actedIds: [...actedIds.current],
+        offsetSuivant: nextOffsetRef.current,
         timestamp: Date.now(),
       }));
     } catch { /* ignore quota errors */ }
@@ -199,13 +194,14 @@ export function SwipeView({
   // chargé à un offset aléatoire juste après) : plus rien n'était préchargé et
   // chaque carte se téléchargeait sous les yeux de l'utilisateur.
   //
-  // On se limite aux 15 premières : précharger un deck de cent cartes d'un coup
-  // met en file d'attente autant de requêtes, et la toute première carte —
-  // la seule que l'utilisateur regarde — attend derrière les autres.
+  // On couvre les 25 premières, comme /explore couvre son lot de 24 : assez
+  // pour qu'on ne voie jamais une carte se charger, sans mettre un deck de cent
+  // requêtes en file — la toute première carte, la seule regardée, attendrait
+  // alors derrière les autres.
   const preloadedRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     const aFaire: string[] = [];
-    for (const item of companies.slice(0, 15)) {
+    for (const item of companies.slice(0, 25)) {
       const url = isAd(item) ? item.campaign.image_url : (item as Company).cover_url;
       if (!url || preloadedRef.current.has(url)) continue;
       preloadedRef.current.add(url);
@@ -836,6 +832,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         <img
           src={largeurCouverture(coverSrc, 940)}
           alt=""
+          loading="eager"
           fetchPriority="high"
           decoding="async"
           style={{
