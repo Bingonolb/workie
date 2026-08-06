@@ -207,11 +207,58 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* La section publicité de l'accueil est retirée tant que l'offre
-          entreprise n'est pas ouverte : elle promettait un service — diffuser
-          une annonce, définir un budget — qu'aucun visiteur ne peut souscrire
-          aujourd'hui. Le parcours annonceur lui-même reste en place sous
-          /profile/ads, fermé par un layout de garde. */}
+      {/* ── Section Publicité ── */}
+      <section style={{ padding: "64px 24px", borderTop: "1px solid var(--border)" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div className="landing-ads-grid">
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 50, padding: "4px 12px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
+                📣 Faire de la publicité
+              </div>
+              <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 12 }}>
+                Touchez des milliers de candidats actifs en Suisse.
+              </h2>
+              <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.75, marginBottom: 20, maxWidth: 520 }}>
+                Que vous ayez une entreprise ou un projet personnel, vous pouvez diffuser une annonce sur Workie sans abonnement.
+                Vous définissez votre budget, votre ciblage, et vous ne payez que ce que vous consommez.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+                {[
+                  "À partir de CHF 5/jour",
+                  "Paiement unique via Stripe",
+                  "Ciblage par canton & secteur",
+                  "Stats en temps réel",
+                  "Sans abonnement",
+                ].map(f => (
+                  <span key={f} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 50, background: "var(--surface)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
+                    ✓ {f}
+                  </span>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+                  Créer une campagne →
+                </Link>
+              </div>
+            </div>
+            <div className="landing-ads-aside" style={{ flexDirection: "column", gap: 10, minWidth: 200 }}>
+              {[
+                { label: "Format Carré", desc: "Dans la grille Explore", price: "dès CHF 4/CPM", emoji: "⬛" },
+                { label: "Format Swipe", desc: "Plein écran, tous les 10 swipes", price: "dès CHF 6/CPM", emoji: "📱" },
+              ].map(({ label, desc, price, emoji }) => (
+                <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 24 }}>{emoji}</span>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{label}</p>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{desc}</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#8b5cf6", marginTop: 2 }}>{price}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ── Footer ── */}
       <footer style={{ borderTop: "1px solid var(--border)", padding: "36px 24px 24px" }}>
@@ -224,10 +271,7 @@ export default async function Home() {
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Explorer</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {/* L'offre entreprise n'est pas ouverte : ni revendication de fiche ni
-                    campagne publicitaire. Les entrées correspondantes sont retirées
-                    tant que le service n'existe pas. */}
-                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }].map(({ href, label }) => (
+                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }, { href: "/jobs", label: "Offres d'emploi" }, { href: "/profile/ads", label: "Faire de la publicité" }].map(({ href, label }) => (
                   <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
                 ))}
               </div>
