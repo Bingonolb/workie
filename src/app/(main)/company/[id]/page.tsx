@@ -2,17 +2,16 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ReviewForm } from "@/components/ReviewForm";
 import { getCachedCompany, getCachedJobOffers, getCachedSimilarCompanies } from "@/lib/actions/companies";
 import { getCachedReviews } from "@/lib/actions/reviews";
-import { createClient } from "@/lib/supabase/server";
-import { getUserFavoriteIds } from "@/lib/actions/favorites";
-import { getUser } from "@/lib/supabase/server";
 import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle } from "lucide-react";
-import { HelpfulButton } from "@/components/HelpfulButton";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
+import { Stars, RatingRow, StatPill, ratingColor } from "@/components/company/notation";
+import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
+import { ActionsFiche, VotesFiche, PorteInvite, FormulaireAvis } from "@/components/company/Interactions";
+import { SectionAvis } from "@/components/company/SectionAvis";
 
 const LinkedinIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
@@ -28,66 +27,42 @@ import type { Review } from "@/lib/types";
 // Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
 // d'avis et les tests de colonnes s'appuient sur la même liste.
 import { RATING_CATEGORIES } from "@/lib/reviewCategories";
-import { GuestContentGate } from "@/components/GuestContentGate";
-import { GuestSaveButton } from "@/components/GuestSaveButton";
-import { SaveButton } from "@/components/SaveButton";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { logoAffichable } from "@/lib/logo";
 import { CoverImage } from "@/components/CoverImage";
 import { largeurCouverture } from "@/lib/coverUrl";
-import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
-import { ReportButton } from "@/components/ReportButton";
-
-function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
-  return (
-    <span aria-hidden="true" style={{ display: "inline-flex", gap: 2 }}>
-      {[1, 2, 3, 4, 5].map(n => (
-        <Star key={n} size={size}
-          fill={n <= Math.round(rating) ? "#f59e0b" : "transparent"}
-          color={n <= Math.round(rating) ? "#f59e0b" : "var(--border2)"}
-          strokeWidth={1.5}
-        />
-      ))}
-    </span>
-  );
-}
-
-function RatingRow({ label, value }: { label: string; value: number | null }) {
-  const color = value !== null ? ratingColor(value) : "var(--text-muted)";
-  const pct = value !== null ? (value / 5) * 100 : 0;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <span style={{ flex: "1 1 0", minWidth: 0, fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-        {label}
-      </span>
-      {/* Barre volontairement étroite : dans une carte d'avis en 2 colonnes,
-          chaque colonne fait ~215px et les libellés longs (« Diversité &
-          inclusion ») étaient tronqués au-delà de 56px de barre. */}
-      <div style={{ flex: "0 0 56px", height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3 }} />
-      </div>
-      <span style={{ flex: "0 0 26px", textAlign: "right", fontSize: 12, fontWeight: 800, color, fontVariantNumeric: "tabular-nums" }}>
-        {value !== null ? value.toFixed(1) : "—"}
-      </span>
-    </div>
-  );
-}
-
-// Indicateur oui/non agrégé (recommandation, retour). Toujours rendu, avec un
-// état explicite quand personne n'a encore répondu.
-function StatPill({ label, pct }: { label: string; pct: number | null }) {
-  const color = pct === null ? "var(--text-muted)" : pct >= 70 ? "#10b981" : pct >= 40 ? "#f59e0b" : "#ef4444";
-  return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
-      <span style={{ fontSize: 16, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-        {pct === null ? "—" : `${pct}%`}
-      </span>
-      <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>{label}</span>
-    </div>
-  );
-}
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+
+// La fiche ne lit plus ni cookie ni searchParams : Next peut la rendre une fois
+// et la servir depuis le cache, et surtout la précharger au survol d'un lien —
+// ce qu'une route dynamique interdit.
+export const revalidate = 300;
+
+/**
+ * Pré-génère les fiches les plus consultées.
+ *
+ * Un segment dynamique reste rendu à la demande tant qu'aucun paramètre n'est
+ * connu à la compilation — même sans lecture de cookie. Or c'est précisément ce
+ * statut qui empêche Next de précharger la page au survol d'un lien : le clic
+ * attend alors un aller-retour serveur complet.
+ *
+ * On se limite aux 300 mieux classées plutôt qu'aux 1033 : elles couvrent
+ * l'essentiel de la navigation depuis /explore et le classement, et le reste
+ * est rendu au premier accès puis mis en cache pour 5 minutes.
+ */
+export async function generateStaticParams() {
+  try {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const { data } = await createAdminClient()
+      .from("companies").select("id").order("score", { ascending: false }).limit(300);
+    return (data ?? []).map(c => ({ id: c.id }));
+  } catch {
+    // Base injoignable à la compilation : on laisse tout se rendre à la demande
+    // plutôt que de faire échouer le build.
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -123,85 +98,28 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-// ── Review relevance scoring ──────────────────────────────────────────────────
-// Weighted combination of recency, helpful votes, completeness, and verified author.
-// All factors normalized to [0, 1]. Weights sum to 1.0.
+export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
-function reviewRelevanceScore(review: Review): number {
-  const ageMs = Date.now() - new Date(review.created_at ?? 0).getTime();
-  const ageDays = ageMs / 86400000;
-  // Exponential decay, half-life ~18 months — recent reviews stay on top
-  // but a 3-year-old review with 20 votes can still beat a 1-month-old with 0
-  const recencyScore = Math.exp(-ageDays / 540);
-
-  // Log scale: 10 votes ≈ 0.7, 20 votes ≈ 1.0, beyond that capped
-  const helpfulScore = Math.min(Math.log1p(Number(review.helpful_count ?? 0)) / Math.log1p(20), 1);
-
-  // Optional fields in the new format (ratings-only)
-  const optionalFields = [
-    review.salary_chf,
-    review.rating_culture, review.rating_management, review.rating_worklife, review.rating_career,
-    review.work_mode, review.employment_type, review.duration_range,
-  ];
-  const completeness = optionalFields.filter(v => v !== null && v !== undefined && v !== 0 && v !== "").length / optionalFields.length;
-
-  // Small bonus for Stripe-verified authors
-  const verifiedBonus = review.is_verified_author ? 0.08 : 0;
-
-  return helpfulScore * 0.35 + recencyScore * 0.42 + completeness * 0.15 + verifiedBonus;
-}
-
-type SortMode = "relevance" | "recent" | "helpful";
-
-export default async function CompanyPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ sort?: string }> }) {
-  const [{ id }, sp] = await Promise.all([params, searchParams]);
-  const sortMode: SortMode = (["relevance", "recent", "helpful"].includes(sp.sort ?? "")) ? sp.sort as SortMode : "relevance";
-  // createClient runs in parallel with the other fetches — not sequential
-  const [company, reviews, user, favIds, supabase] = await Promise.all([
+  // Aucune lecture de cookie ni de searchParams ici : c'est ce qui permet à
+  // Next de rendre la fiche une fois pour tout le monde et de la servir depuis
+  // le cache. Ce qui dépend du visiteur est chargé par FournisseurEtatFiche.
+  const [company, reviews] = await Promise.all([
     getCachedCompany(id).catch(() => null),
     getCachedReviews(id).catch(() => [] as Review[]),
-    getUser().catch(() => null),
-    getUserFavoriteIds().catch(() => [] as string[]),
-    createClient(),
   ]);
 
-  // Guard early — no need to run 5 more queries for a non-existent company
   if (!company) notFound();
 
   // Tous les avis sont affichés, notes uniquement. Les anciens avis rédigés
   // étaient auparavant masqués alors qu'ils comptaient dans la moyenne — leur
-  // texte n'est simplement plus rendu (voir ReviewCard).
-  // Sort reviews server-side so the initial render matches the user's intent
-  const sortedReviews = [...reviews].sort((a, b) => {
-    if (sortMode === "recent") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    if (sortMode === "helpful") return Number(b.helpful_count ?? 0) - Number(a.helpful_count ?? 0);
-    return reviewRelevanceScore(b) - reviewRelevanceScore(a);
-  });
-
-  // Les deux données publiques passent par le cache partagé ; seules celles qui
-  // dépendent du visiteur touchent encore la base à chaque affichage.
-  const [jobs, voteData, profileData, similarCompaniesData, helpfulVotesResult] = await Promise.all([
+  // texte n'est simplement plus rendu (voir SectionAvis). Le tri est appliqué
+  // côté client, pour qu'il ne coûte plus une navigation.
+  const [jobs, similarCompaniesData] = await Promise.all([
     getCachedJobOffers(id).catch(() => [] as never[]),
-    user ? Promise.resolve(supabase.from("score_events").select("event_type").eq("company_id", id).eq("user_id", user.id).in("event_type", ["boost", "penalty"])).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
-    user ? Promise.resolve(supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle()).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
     getCachedSimilarCompanies(company.sector, id).catch(() => []),
-    user && reviews.length > 0 ? Promise.resolve(supabase.from("review_votes").select("review_id").eq("user_id", user.id).in("review_id", reviews.map(r => r.id))).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
   ]);
 
-  const votedReviewIds = new Set<string>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ((helpfulVotesResult as any)?.data ?? []).map((v: { review_id: string }) => v.review_id)
-  );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const profileRow = (profileData as any)?.data;
-  const isAdmin = profileRow?.role === "admin";
-  const penaltyCredits = Number(profileRow?.penalty_credits ?? 0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const voteEvents: { event_type: string }[] = (voteData as any)?.data ?? [];
-  const initialBoosted = voteEvents.some(e => e.event_type === "boost");
-  const initialPenalized = voteEvents.some(e => e.event_type === "penalty");
-
-  const isFav = favIds.includes(company.id);
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 
   // Sub-ratings averages — each computed independently to avoid null-as-zero bias
@@ -283,6 +201,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
   ];
 
   return (
+    <FournisseurEtatFiche companyId={company.id}>
     <div className="page-root">
       <ViewTracker companyId={company.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
@@ -347,18 +266,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
             {/* Actions */}
             <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
               <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
-              {user ? (
-                <SaveButton companyId={company.id} initialFav={isFav} />
-              ) : (
-                <GuestSaveButton />
-              )}
-              <ReportButton
-                targetType="company"
-                targetId={company.id}
-                targetLabel={company.name}
-                isLoggedIn={!!user}
-                variant="icon"
-              />
+              <ActionsFiche companyId={company.id} companyName={company.name} />
             </div>
           </div>
         </div>
@@ -377,7 +285,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
         }
       `}</style>
       <main className="page-main-sm">
-      <GuestContentGate isGuest={!user}>
+      <PorteInvite>
         <div className="company-grid two-col" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
           {/* Left column */}
           <div>
@@ -417,16 +325,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
 
             {/* Vote buttons */}
             <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-              <CompanyVoteButtons
-                companyId={company.id}
-                isLoggedIn={!!user}
-                isAdmin={isAdmin}
-                penaltyCredits={penaltyCredits}
-                initialBoosted={initialBoosted}
-                initialPenalized={initialPenalized}
-                initialScore={Number(company.score ?? 0)}
-                variant="card"
-              />
+              <VotesFiche companyId={company.id} initialScore={Number(company.score ?? 0)} />
             </div>
 
             {/* Ratings breakdown */}
@@ -468,29 +367,6 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
               <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
                 Avis des employés ({company.review_count})
               </h2>
-              {sortedReviews.length > 1 && (
-                <div style={{ display: "flex", gap: 6 }}>
-                  {([
-                    { v: "relevance", l: "Pertinence" },
-                    { v: "recent",    l: "Récents" },
-                    { v: "helpful",   l: "Utiles" },
-                  ] as const).map(({ v, l }) => (
-                    <Link
-                      key={v}
-                      href={`/company/${id}${v === "relevance" ? "" : `?sort=${v}`}`}
-                      style={{
-                        fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 8,
-                        textDecoration: "none",
-                        background: sortMode === v ? "rgba(139,92,246,0.12)" : "var(--surface2)",
-                        color: sortMode === v ? "#8b5cf6" : "var(--text-muted)",
-                        border: `1px solid ${sortMode === v ? "rgba(139,92,246,0.35)" : "var(--border2)"}`,
-                      }}
-                    >
-                      {l}
-                    </Link>
-                  ))}
-                </div>
-              )}
             </div>
 
             {reviews.length === 0 ? (
@@ -515,7 +391,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
               </div>
             ) : (
               <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
-                {sortedReviews.map(r => <ReviewCard key={r.id} review={r} isLoggedIn={!!user} companyName={company.name} initialVoted={votedReviewIds.has(r.id)} />)}
+                <SectionAvis reviews={reviews} companyName={company.name} />
               </div>
             )}
 
@@ -523,19 +399,7 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
               <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partage ton expérience</h3>
               <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>Ton avis est anonyme par défaut. Aide la communauté à faire les bons choix.</p>
-              {user ? (
-                <ReviewForm companyId={company.id} />
-              ) : (
-                <div style={{ textAlign: "center", padding: "24px" }}>
-                  <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>Connecte-toi pour partager un avis anonyme.</p>
-                  <Link href="/login" style={{
-                    display: "inline-block", background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-                    color: "#fff", fontWeight: 700, borderRadius: 10, padding: "12px 28px", textDecoration: "none", fontSize: 14,
-                  }}>
-                    Se connecter
-                  </Link>
-                </div>
-              )}
+              <FormulaireAvis companyId={company.id} />
             </div>
           </div>
 
@@ -657,148 +521,10 @@ export default async function CompanyPage({ params, searchParams }: { params: Pr
             </div>
           </div>
         )}
-      </GuestContentGate>
+      </PorteInvite>
       </main>
     </div>
+    </FournisseurEtatFiche>
   );
 }
 
-const EMPLOYMENT_LABELS: Record<string, string> = {
-  cdi: "CDI", cdd: "CDD", stage: "Stage", alternance: "Alternance", freelance: "Freelance",
-};
-const DURATION_LABELS: Record<string, string> = {
-  moins_6mois: "< 6 mois", "6mois_2ans": "6 mois – 2 ans", plus_2ans: "+ 2 ans",
-};
-const WORK_MODE_LABELS: Record<string, string> = {
-  "présentiel": "🏢 Présentiel", hybride: "🔀 Hybride", remote: "🏠 Remote",
-};
-const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
-  oui:       { label: "Recommande",          color: "#10b981" },
-  non:       { label: "Ne recommande pas",   color: "#ef4444" },
-  ca_depend: { label: "Recommande : mitigé", color: "#f59e0b" },
-};
-
-const RETURN_LABELS: Record<string, { label: string; color: string }> = {
-  oui:       { label: "Reviendrait",           color: "#10b981" },
-  peut_etre: { label: "Reviendrait : peut-être", color: "#f59e0b" },
-  non:       { label: "Ne reviendrait pas",    color: "#ef4444" },
-};
-
-// Score-driven colour so a weak rating reads as weak at a glance — a flat
-// gradient made 1/5 and 5/5 look identical.
-function ratingColor(value: number): string {
-  if (value >= 4) return "#10b981";   // solide
-  if (value >= 3) return "#f59e0b";   // moyen
-  if (value >= 2) return "#f97316";   // faible
-  return "#ef4444";                   // critique
-}
-
-function ReviewCard({ review, isLoggedIn = false, companyName = "", initialVoted = false }: { review: Review; isLoggedIn?: boolean; companyName?: string; initialVoted?: boolean }) {
-  const age = (() => {
-    const d = new Date(review.created_at);
-    const diff = Date.now() - d.getTime();
-    const days = Math.floor(diff / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days < 7) return `Il y a ${days}j`;
-    if (days < 30) return `Il y a ${Math.floor(days / 7)} sem.`;
-    return `Il y a ${Math.floor(days / 30)} mois`;
-  })();
-
-  const rec = review.would_recommend ? RECOMMEND_LABELS[review.would_recommend] : null;
-  const ret = review.would_return ? RETURN_LABELS[review.would_return] : null;
-  const hasSubRatings = review.rating_culture || review.rating_management || review.rating_worklife || review.rating_career
-    || review.rating_flexibility || review.rating_recognition || review.rating_workload || review.rating_diversity;
-
-  const chips: { label: string; color?: string; bg?: string; bold?: boolean }[] = [];
-  if (review.job_title) chips.push({ label: review.job_title, bold: true });
-  if (review.employment_type) chips.push({ label: EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type });
-  if (review.duration_range) chips.push({ label: DURATION_LABELS[review.duration_range] ?? review.duration_range });
-  if (review.work_mode) chips.push({ label: WORK_MODE_LABELS[review.work_mode] ?? review.work_mode });
-  if (Number(review.salary_chf) > 0) chips.push({ label: `CHF ${Math.round(Number(review.salary_chf) / 1000)}k / an`, color: "#10b981", bg: "rgba(16,185,129,0.08)", bold: true });
-  if (review.is_current) chips.push({ label: "Employé actuel", color: "#10b981", bg: "rgba(16,185,129,0.08)", bold: true });
-
-  return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "20px 22px" }}>
-      {/* Top row: rating + recommend + date */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          {/* Big rating circle */}
-          <div style={{
-            width: 52, height: 52, borderRadius: "50%", flexShrink: 0,
-            background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(249,115,22,0.08))",
-            border: "2px solid rgba(139,92,246,0.2)",
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{ fontSize: 17, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(review.rating_overall).toFixed(1)}</span>
-            <span style={{ fontSize: 8, color: "var(--text-muted)", fontWeight: 600 }}>/ 5</span>
-          </div>
-          <div>
-            <Stars rating={Number(review.rating_overall)} size={14} />
-            <div style={{ marginTop: 4, display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: rec ? rec.color : "var(--text-muted)" }}>
-                {rec ? rec.label : "Recommande : —"}
-              </span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: ret ? ret.color : "var(--text-muted)" }}>
-                {ret ? ret.label : "Reviendrait : —"}
-              </span>
-            </div>
-          </div>
-          {review.is_verified_author && (
-            <span style={{
-              display: "inline-flex", alignItems: "center", gap: 4,
-              fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 50,
-              background: "rgba(16,185,129,0.1)", color: "#10b981",
-              border: "1px solid rgba(16,185,129,0.25)",
-            }}>
-              <CheckCircle size={10} aria-hidden="true" /> Vérifié
-            </span>
-          )}
-        </div>
-        <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{age}</span>
-      </div>
-
-      {/* Metadata chips */}
-      {chips.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-          {chips.map((c, i) => (
-            <span key={i} style={{
-              fontSize: 11, fontWeight: c.bold ? 600 : 400,
-              padding: "3px 10px", borderRadius: 50,
-              background: c.bg ?? "var(--surface2)",
-              color: c.color ?? "var(--text-muted)",
-              border: "1px solid var(--border2)",
-            }}>
-              {c.label}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Sub-ratings */}
-      {hasSubRatings && (
-        <div className="review-subratings" style={{ paddingTop: 14, borderTop: "1px solid var(--border)", marginBottom: 14 }}>
-          {RATING_CATEGORIES.map(({ key, label }) => {
-            const raw = review[key];
-            return <RatingRow key={key} label={label} value={raw ? Number(raw) : null} />;
-          })}
-        </div>
-      )}
-
-      {/* Aucun texte n'est rendu : la plateforme est passée au format 100% notes.
-          Les anciens avis conservent leur texte en base mais seules leurs notes
-          sont affichées. */}
-
-      {/* Footer */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: hasSubRatings || chips.length > 0 ? 0 : 4 }}>
-        <HelpfulButton reviewId={review.id} initialCount={review.helpful_count} initialVoted={initialVoted} />
-        <ReportButton
-          targetType="review"
-          targetId={review.id}
-          targetLabel={`[${companyName}] Avis — ${review.job_title ?? "employé"}`}
-          isLoggedIn={isLoggedIn}
-          variant="link"
-        />
-      </div>
-    </div>
-  );
-}

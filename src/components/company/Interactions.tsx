@@ -1,0 +1,76 @@
+"use client";
+
+import Link from "next/link";
+import { useEtatFiche } from "./EtatFiche";
+import { SaveButton } from "@/components/SaveButton";
+import { GuestSaveButton } from "@/components/GuestSaveButton";
+import { ReportButton } from "@/components/ReportButton";
+import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
+import { GuestContentGate } from "@/components/GuestContentGate";
+import { ReviewForm } from "@/components/ReviewForm";
+
+/**
+ * Zones d'une fiche entreprise qui dépendent du visiteur.
+ *
+ * Elles étaient rendues côté serveur à partir du cookie de session, ce qui
+ * forçait Next à traiter toute la route comme dynamique — donc impossible à
+ * précharger au survol d'un lien. Les voici isolées côté client, alimentées par
+ * le contexte, pour que le reste de la page redevienne cacheable.
+ */
+
+export function ActionsFiche({ companyId, companyName }: { companyId: string; companyName: string }) {
+  const { isLoggedIn, isFav } = useEtatFiche();
+  return (
+    <>
+      {isLoggedIn ? <SaveButton companyId={companyId} initialFav={isFav} /> : <GuestSaveButton />}
+      <ReportButton
+        targetType="company"
+        targetId={companyId}
+        targetLabel={companyName}
+        isLoggedIn={isLoggedIn}
+        variant="icon"
+      />
+    </>
+  );
+}
+
+export function VotesFiche({ companyId, initialScore }: { companyId: string; initialScore: number }) {
+  const { isLoggedIn, isAdmin, penaltyCredits, boosted, penalized } = useEtatFiche();
+  return (
+    <CompanyVoteButtons
+      companyId={companyId}
+      isLoggedIn={isLoggedIn}
+      isAdmin={isAdmin}
+      penaltyCredits={penaltyCredits}
+      initialBoosted={boosted}
+      initialPenalized={penalized}
+      initialScore={initialScore}
+      variant="card"
+    />
+  );
+}
+
+/** Contenu réservé : flouté pour un visiteur, entier une fois connecté. */
+export function PorteInvite({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn } = useEtatFiche();
+  return <GuestContentGate isGuest={!isLoggedIn}>{children}</GuestContentGate>;
+}
+
+export function FormulaireAvis({ companyId }: { companyId: string }) {
+  const { isLoggedIn } = useEtatFiche();
+  if (isLoggedIn) return <ReviewForm companyId={companyId} />;
+  return (
+    <div style={{ textAlign: "center", padding: "24px" }}>
+      <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
+        Connecte-toi pour partager un avis anonyme.
+      </p>
+      <Link href="/login" style={{
+        display: "inline-block", background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+        color: "#fff", fontWeight: 700, borderRadius: 10, padding: "12px 28px",
+        textDecoration: "none", fontSize: 14,
+      }}>
+        Se connecter
+      </Link>
+    </div>
+  );
+}
