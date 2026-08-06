@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { addFlame } from "@/lib/actions/scores";
 import { captureServerError } from "@/lib/monitoring";
 import type { Company } from "@/lib/types";
@@ -32,8 +32,11 @@ export async function toggleFavorite(companyId: string): Promise<void> {
 
 export async function getFavorites(): Promise<Company[]> {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // getUser() est mis en cache pour la durée de la requête, contrairement à
+    // supabase.auth.getUser() appelé directement : la page des favoris
+    // vérifiait ainsi l'identité deux fois, soit un aller-retour réseau de
+    // trop avant même de lire les données.
+    const [user, supabase] = await Promise.all([getUser(), createClient()]);
     if (!user) return [];
 
     const { data } = await supabase
@@ -49,8 +52,7 @@ export async function getFavorites(): Promise<Company[]> {
 
 export async function getUserFavoriteIds(): Promise<string[]> {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const [user, supabase] = await Promise.all([getUser(), createClient()]);
     if (!user) return [];
     const { data } = await supabase.from("favorites").select("company_id").eq("user_id", user.id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
