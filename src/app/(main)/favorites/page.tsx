@@ -42,7 +42,7 @@ export default async function FavoritesPage() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
             {companies.map((c, i) => (
-              <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={true} priority={i < 4} loading="eager" />
+              <CompanyCard key={c.id} company={c} isFav={favIds.includes(c.id)} isLoggedIn={true} priority={i < 4} />
             ))}
           </div>
         )}

@@ -79,8 +79,15 @@ export function CoverImage({
         // navigateur vers les plus gros candidats du srcset.
         width={640}
         height={360}
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
+        // Jamais de chargement différé à l'intérieur d'un lot déjà affiché.
+        // Les cartes hors écran étaient en `lazy` : elles ne démarraient qu'au
+        // moment où l'utilisateur arrivait dessus, ce qui rendait le
+        // téléchargement visible à chaque défilement. Elles partent maintenant
+        // tout de suite, en priorité basse pour ne pas disputer la bande
+        // passante aux cartes réellement à l'écran — donc déjà là quand on y
+        // arrive.
+        loading="eager"
+        fetchPriority={priority ? "high" : "low"}
         decoding="async"
         onLoad={() => setCharge(true)}
         onError={() => setCharge(false)}

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState, useTransition } from "react";
 import { Flame, Star, Users, MapPin, TrendingUp } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
@@ -9,29 +8,6 @@ import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { CoverImage } from "@/components/CoverImage";
 import { logoAffichable } from "@/lib/logo";
-
-const SECTOR_GRADIENTS: Record<string, string> = {
-  "Tech":                  "linear-gradient(135deg, #6d28d9 0%, #1e40af 100%)",
-  "Finance":               "linear-gradient(135deg, #1d4ed8 0%, #0f172a 100%)",
-  "Assurances":            "linear-gradient(135deg, #0284c7 0%, #1e3a5f 100%)",
-  "Pharma":                "linear-gradient(135deg, #059669 0%, #0c2d20 100%)",
-  "Santé":                 "linear-gradient(135deg, #10b981 0%, #064e3b 100%)",
-  "Conseil":               "linear-gradient(135deg, #d97706 0%, #7c2d12 100%)",
-  "Industrie":             "linear-gradient(135deg, #475569 0%, #0f172a 100%)",
-  "Automobile":            "linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%)",
-  "Horlogerie":            "linear-gradient(135deg, #ea580c 0%, #431407 100%)",
-  "Commerce":              "linear-gradient(135deg, #9333ea 0%, #3b0764 100%)",
-  "Alimentation":          "linear-gradient(135deg, #65a30d 0%, #1a2e05 100%)",
-  "Agriculture":           "linear-gradient(135deg, #4d7c0f 0%, #1a2e05 100%)",
-  "Éducation & Recherche": "linear-gradient(135deg, #0891b2 0%, #0c4a6e 100%)",
-  "Sports & Fashion":      "linear-gradient(135deg, #db2777 0%, #500724 100%)",
-  "Transport":             "linear-gradient(135deg, #0d9488 0%, #134e4a 100%)",
-  "Énergie":               "linear-gradient(135deg, #ca8a04 0%, #451a03 100%)",
-};
-
-function getCoverGradient(sector: string, sectorColor: string): string {
-  return SECTOR_GRADIENTS[sector] ?? `linear-gradient(135deg, ${sectorColor} 0%, #0f172a 100%)`;
-}
 
 function getInitials(name: string): string {
   const words = name.trim().replace(/[^a-zA-ZÀ-ÿ\s]/g, " ").trim().split(/\s+/);
@@ -52,49 +28,14 @@ function getOgCover(company: Company): string {
   return `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`;
 }
 
-const SECTOR_DEFAULT_TAGS: Record<string, string[]> = {
-  "Tech":                   ["innovation", "digital", "remote"],
-  "Finance":                ["finance", "banking", "investment"],
-  "Assurances":             ["assurances", "risk", "courtage"],
-  "Pharma":                 ["life-sciences", "r&d", "biotech"],
-  "Santé":                  ["healthcare", "médecine", "bien-être"],
-  "Conseil":                ["consulting", "stratégie", "management"],
-  "Industrie":              ["manufacturing", "industrie", "engineering"],
-  "Automobile":             ["automotive", "mobilité", "engineering"],
-  "Horlogerie":             ["luxury", "swiss-made", "savoir-faire"],
-  "Commerce":               ["retail", "distribution", "vente"],
-  "Alimentation":           ["food", "nutrition", "fmcg"],
-  "Agriculture":            ["agriculture", "durabilité", "nature"],
-  "Éducation & Recherche":  ["éducation", "recherche", "innovation"],
-  "Sports & Fashion":       ["sport", "mode", "lifestyle"],
-  "Transport":              ["logistique", "mobilité", "transport"],
-  "Énergie":                ["énergie", "cleantech", "durabilité"],
-  "Droit":                  ["legal", "compliance", "droit"],
-  "Bâtiment":               ["construction", "immobilier", "ingénierie"],
-  "Beauté":                 ["beauté", "cosmétiques", "bien-être"],
-  "Administration publique":["service-public", "gouvernance", "suisse"],
-};
-
-function getDisplayTags(company: Company): string[] {
-  const existing = (company.tags ?? []).slice(0, 3);
-  if (existing.length >= 3) return existing;
-  const defaults = SECTOR_DEFAULT_TAGS[company.sector] ?? ["swiss", "professionnel", "équipe"];
-  return [...existing, ...defaults.filter(t => !existing.includes(t))].slice(0, 3);
-}
-
-// Neutral blur placeholder — shows instantly before the real image loads
-const BLUR_DATA_URL = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMyMDIwMzAiLz48L3N2Zz4=";
-
-export function CompanyCard({ company, isFav = false, isLoggedIn = false, priority = false, loading = "eager" }: {
+export function CompanyCard({ company, isFav = false, isLoggedIn = false, priority = false }: {
   company: Company;
   isFav?: boolean;
   isLoggedIn?: boolean;
   priority?: boolean;
-  loading?: "eager" | "lazy";
 }) {
   const [fav, setFav] = useState(isFav);
   const [score, setScore] = useState(Number(company.score));
-  const [coverFailed, setCoverFailed] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [pending, startTransition] = useTransition();
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
@@ -124,9 +65,9 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div className="card-cover" style={{ height: 210, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
+        <div className="card-cover" style={{ height: 320, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
           <CoverImage
-            src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
+            src={company.cover_url ?? getOgCover(company)}
             color={company.cover_color}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
             priority={priority}
@@ -238,55 +179,28 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           </div>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: "12px 14px 14px" }}>
-          {/* Rating row */}
-          {(Number(company.avg_rating) > 0 || Number(company.review_count) > 0) && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              {Number(company.avg_rating) > 0 && <StarDisplay rating={Number(company.avg_rating)} />}
-              {Number(company.review_count) > 0 && (
-                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                  {company.review_count} avis
-                </span>
-              )}
-            </div>
+        {/* Sous la photo : une seule ligne. Le nom et le métier sont déjà
+            incrustés sur l'image, la description et les étiquettes vivent
+            désormais sur la fiche — ici elles faisaient un pavé plus haut que
+            la photo elle-même. Chaque élément n'apparaît que si la donnée
+            existe : la taille d'effectif reste masquée tant qu'elle n'a pas de
+            source vérifiable. */}
+        <div style={{
+          padding: "9px 14px 11px",
+          display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+        }}>
+          {Number(company.avg_rating) > 0 && <StarDisplay rating={Number(company.avg_rating)} />}
+          {Number(company.review_count) > 0 && (
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{company.review_count} avis</span>
+          )}
+          <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
+          {company.employee_range && (
+            <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
+          )}
+          {Number(company.avg_salary_chf) > 0 && (
+            <InfoChip icon={<TrendingUp size={11} aria-hidden="true" />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
           )}
 
-          {/* Description */}
-          {company.description && (
-            <p style={{
-              fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.5,
-              marginBottom: 11,
-              display: "-webkit-box", WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical", overflow: "hidden",
-            } as React.CSSProperties}>
-              {company.description}
-            </p>
-          )}
-
-          {/* Location + size + salary — chaque puce n'apparaît que si la donnée
-              existe réellement. La taille d'effectif n'est plus affichée tant
-              qu'elle n'est pas issue d'une source vérifiable. */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 10 }}>
-            <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
-            {company.employee_range && (
-              <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
-            )}
-            {Number(company.avg_salary_chf) > 0 && (
-              <InfoChip icon={<TrendingUp size={11} aria-hidden="true" />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
-            )}
-          </div>
-
-          {/* Tags — toujours affichés */}
-          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-            {getDisplayTags(company).map(tag => (
-              <span key={tag} style={{
-                fontSize: 10, padding: "2px 7px", borderRadius: 50,
-                background: "var(--surface3)", color: "var(--text-muted)",
-                fontWeight: 600,
-              }}>#{tag}</span>
-            ))}
-          </div>
         </div>
       </div>
     </Link>

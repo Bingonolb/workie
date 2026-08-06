@@ -413,7 +413,6 @@ export function ExploreClient({
                         isFav={favIds.includes(c.id)}
                         isLoggedIn={isLoggedIn}
                         priority={i < 8}
-                        loading="eager"
                       />
                     </div>
                   );

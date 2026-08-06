@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   },
 };
 import { fetchGridPage } from "@/lib/actions/companies";
+import { largeurCouverture } from "@/lib/coverUrl";
 import { ExploreClient } from "./ExploreClient";
 import type { Company } from "@/lib/types";
 
@@ -54,6 +55,21 @@ export default async function ExplorePage() {
       {exploreJsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(exploreJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
       )}
+      {/* Le navigateur commence à télécharger les premières bannières dès la
+          lecture du HTML, sans attendre le chargement ni l'exécution du
+          JavaScript. C'est ce qui fait qu'elles sont déjà là au premier rendu
+          plutôt que d'apparaître ensuite. */}
+      {initialCompanies.slice(0, 8).map(c => c.cover_url && (
+        <link
+          key={c.id}
+          rel="preload"
+          as="image"
+          href={largeurCouverture(c.cover_url, 640)}
+          imageSrcSet={`${largeurCouverture(c.cover_url, 480)} 480w, ${largeurCouverture(c.cover_url, 640)} 640w, ${largeurCouverture(c.cover_url, 940)} 940w`}
+          imageSizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+          fetchPriority="high"
+        />
+      ))}
       <main className="page-main">
         <ExploreClient
           initialCompanies={initialCompanies}
