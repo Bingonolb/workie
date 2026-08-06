@@ -35,7 +35,7 @@ import { readFileSync } from "node:fs";
 
 const ESSAI = process.argv.includes("--essai");
 const MAX = Number(process.argv.find(a => a.startsWith("--max="))?.split("=")[1] ?? Infinity);
-const PAR_REQUETE = 20;      // photos récupérées par terme, pour la rotation
+const PAR_REQUETE = 40;      // 20 laissait passer des photos de marque situées plus loin dans les résultats
 const PAUSE_MS = 350;        // Pexels : 200 requêtes/heure
 
 function chargerEnv() {
@@ -219,7 +219,7 @@ const MARQUES = {
   "Tissot SA":                 ["Tissot watch", "tissot"],
   "Longines SA":               ["Longines watch", "longines"],
   // Automobile
-  "Porsche Suisse":            ["Porsche car", "porsche"],
+  "Porsche Suisse":            ["Porsche 911", "porsche"],
   "Mercedes-Benz Schweiz AG":  ["Mercedes-Benz car", "mercedes"],
   "BMW (Schweiz) AG":          ["BMW car", "bmw"],
   "Tesla Suisse":              ["Tesla car", "tesla"],
@@ -308,6 +308,26 @@ function urlHD(photo) {
   return `${photo.src.original}?auto=compress&cs=tinysrgb&fit=crop&w=1600&h=900`;
 }
 
+/**
+ * Vérifie que la photo est réellement servie.
+ *
+ * Une photo retirée du catalogue reste dans les résultats de recherche, mais
+ * son fichier est remplacé par un petit PNG de substitution servi en 200 — donc
+ * invisible pour un contrôle par code de statut. Porsche Suisse affichait ainsi
+ * une image cassée : 10 Ko de PNG au lieu d'un JPEG de 200 Ko.
+ */
+async function servieVraiment(photo) {
+  const url = `${photo.src.original}?auto=compress&cs=tinysrgb&fit=crop&w=1280&h=720`;
+  try {
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; workie.ch/1.0)" } });
+    if (!r.ok) return false;
+    const type = r.headers.get("content-type") ?? "";
+    const poids = (await r.arrayBuffer()).byteLength;
+    if (/\.jpe?g/i.test(photo.src.original) && type.includes("png")) return false;
+    return poids >= 25_000;
+  } catch { return false; }
+}
+
 async function main() {
   // PostgREST plafonne toute réponse à 1000 lignes, sans erreur ni avertissement.
   // Un premier passage avait donc laissé 33 fiches sur 1033 avec leur ancienne
@@ -315,9 +335,12 @@ async function main() {
   const entreprises = [];
   const PAGE = 500;
   for (let de = 0; ; de += PAGE) {
-    const { data, error } = await db
-      .from("companies").select("id, name, sector, subsector, cover_url")
-      .order("score", { ascending: false }).range(de, de + PAGE - 1);
+    // --manquantes : ne retraite que les fiches sans bannière, par exemple
+    // après que verifier-images.mjs a vidé celles dont la photo a disparu du
+    // catalogue. Sans ce filtre, chaque passage revérifie les mille photos.
+    let q = db.from("companies").select("id, name, sector, subsector, cover_url");
+    if (process.argv.includes("--manquantes")) q = q.is("cover_url", null);
+    const { data, error } = await q.order("score", { ascending: false }).range(de, de + PAGE - 1);
     if (error) { console.error(error.message); process.exit(1); }
     entreprises.push(...data);
     if (data.length < PAGE) break;
@@ -330,32 +353,50 @@ async function main() {
   const rang = new Map();
   let ecrites = 0, sansPhoto = 0;
 
-  for (const e of aTraiter) {
-    // Une photo de la marque quand elle existe, le métier sinon.
-    let terme = requetePour(e.subsector, e.sector);
-    let photos = [];
+  /** Première photo réellement servie d'une liste, en tournant sur le compteur. */
+  async function premiereServie(liste, terme, nom) {
+    for (let essai = 0; essai < Math.min(liste.length, 6); essai++) {
+      const i = rang.get(terme) ?? 0;
+      rang.set(terme, i + 1);
+      const candidate = liste[i % liste.length];
+      if (await servieVraiment(candidate)) return candidate;
+      console.log(`  · ${nom} — photo ${candidate.id} indisponible, on passe à la suivante`);
+    }
+    return null;
+  }
 
+  for (const e of aTraiter) {
+    const termeMetier = requetePour(e.subsector, e.sector);
+    let terme = termeMetier;
+    let photo = null;
+
+    // Une photo de la marque quand elle existe et qu'elle est réellement
+    // servie. Le repli sur le métier doit aussi couvrir le cas où la marque a
+    // bien des photos mais qu'aucune n'est disponible : Porsche n'avait qu'une
+    // seule correspondance stricte, et c'est précisément celle qui avait
+    // disparu du catalogue.
     const marque = MARQUES[e.name];
     if (marque) {
       const [requete, mot] = marque;
-      const candidates = await chercher(requete);
       const re = new RegExp(`\\b${mot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
-      const vraies = candidates.filter(p => re.test(p.alt ?? ""));
-      if (vraies.length > 0) { terme = requete; photos = vraies; }
-      else console.log(`  · ${e.name} — aucune photo de la marque, repli sur « ${terme} »`);
+      const vraies = (await chercher(requete)).filter(p => re.test(p.alt ?? ""));
+      if (vraies.length > 0) {
+        photo = await premiereServie(vraies, requete, e.name);
+        if (photo) terme = requete;
+      }
+      if (!photo) console.log(`  · ${e.name} — pas de photo de marque disponible, repli sur « ${termeMetier} »`);
     }
 
-    if (photos.length === 0) photos = await chercher(terme);
-
-    if (photos.length === 0) {
-      sansPhoto++;
-      console.log(`  ✗ ${e.name} — aucune photo pour « ${terme} »`);
-      continue;
+    if (!photo) {
+      const photos = await chercher(termeMetier);
+      if (photos.length === 0) {
+        sansPhoto++;
+        console.log(`  ✗ ${e.name} — aucune photo pour « ${termeMetier} »`);
+        continue;
+      }
+      photo = await premiereServie(photos, termeMetier, e.name);
+      if (!photo) { sansPhoto++; console.log(`  ✗ ${e.name} — aucune photo servie pour « ${termeMetier} »`); continue; }
     }
-
-    const i = rang.get(terme) ?? 0;
-    rang.set(terme, i + 1);
-    const photo = photos[i % photos.length];
 
     if (!ESSAI) {
       const { error: err } = await db.from("companies").update({
