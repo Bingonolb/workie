@@ -21,7 +21,14 @@ export function NavbarClient() {
   useEffect(() => {
     fetch("/api/user/context")
       .then(r => r.json())
-      .then((data: UserCtx) => setCtx(data))
+      .then((data: UserCtx) => {
+        setCtx(data);
+        // Mémorisé pour la fiche entreprise : rendue une fois pour tout le
+        // monde, elle partait en état visiteur et affichait un flou d'une
+        // fraction de seconde avant de se dévoiler. La barre de navigation
+        // connaît l'état dès la première page visitée, donc bien avant.
+        try { localStorage.setItem("workie_connecte", data.isLoggedIn ? "1" : "0"); } catch { /* sans conséquence */ }
+      })
       .catch(() => setCtx({ isLoggedIn: false, isAdmin: false, penaltyCredits: 0, unreadCount: 0 }));
   }, []);
 

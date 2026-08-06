@@ -286,9 +286,27 @@ export function SwipeView({
     minuteursRef.current.push(t);
   }, []);
 
+  // Instantané courant, relu au démontage. L'enregistrement ne se déclenchait
+  // que sur changement d'index : quitter la vue sans swiper, ou juste après un
+  // swipe, laissait la sauvegarde en retard d'une carte.
+  const instantaneRef = useRef<{ deck: SwipeItem[]; index: number } | null>(null);
+  instantaneRef.current = { deck: companies, index };
+
   useEffect(() => () => {
     minuteursRef.current.forEach(clearTimeout);
     minuteursRef.current = [];
+    const inst = instantaneRef.current;
+    if (!inst?.deck.length) return;
+    try {
+      sessionStorage.setItem(stateKey, JSON.stringify({
+        deck: inst.deck.slice(Math.max(0, inst.index - 1), inst.index + 40),
+        index: Math.min(inst.index, 1),
+        actedIds: [...actedIds.current],
+        offsetSuivant: nextOffsetRef.current,
+        timestamp: Date.now(),
+      }));
+    } catch { /* quota : la sauvegarde précédente reste valable */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const advance = useCallback((dir: "left" | "right") => {
