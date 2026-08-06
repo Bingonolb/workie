@@ -486,15 +486,15 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 20 }}>
               Autres entreprises · {company.sector}
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
-              {similarCompaniesData.map((c: { id: string; name: string; city: string; avg_rating: number | string | null; review_count: number | string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; sector: string }) => (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 16 }}>
+              {similarCompaniesData.map((c: { id: string; name: string; city: string; avg_rating: number | string | null; review_count: number | string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; sector: string; subsector: string | null }) => (
                 <Link key={c.id} href={`/company/${c.id}`} style={{ textDecoration: "none" }}>
                   <div className="company-card" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
-                    <div style={{ height: 80, background: c.cover_color ?? "linear-gradient(135deg, #8b5cf6, #3b82f6)", position: "relative" }}>
+                    <div style={{ height: 130, background: c.cover_color ?? "linear-gradient(135deg, #8b5cf6, #3b82f6)", position: "relative" }}>
                       {/* Servi en direct par le CDN : ces 4 vignettes passaient
                           par l'optimiseur, soit 4 transformations d'image
                           déclenchées à chaque affichage de fiche. */}
-                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="200px" />
+                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="250px" />
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6))" }} />
                     </div>
                     <div style={{ padding: "12px 14px" }}>
@@ -507,6 +507,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                           </svg>
                         )}
                       </p>
+                      {c.subsector && (
+                        <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginBottom: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {c.subsector}
+                        </p>
+                      )}
                       <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-muted)" }}>
                         {Number(c.avg_rating) > 0 && (
                           <span style={{ color: "#f59e0b", fontWeight: 700 }}>★ {Number(c.avg_rating).toFixed(1)}</span>

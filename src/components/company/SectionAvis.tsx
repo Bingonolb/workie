@@ -114,6 +114,11 @@ export function SectionAvis({ reviews, companyName }: { reviews: Review[]; compa
 function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
   review: Review; isLoggedIn: boolean; companyName: string; initialVoted: boolean;
 }) {
+  // L'ancienneté dépend de l'heure courante, donc le serveur et le navigateur
+  // ne calculent pas forcément la même chose — le rendu n'est pas pur. React
+  // détecte alors l'écart à l'hydratation et refait le rendu : c'est une des
+  // sources des sursauts visibles à l'ouverture d'une fiche. On lui signale que
+  // cet écart est attendu, ce qui évite le second rendu.
   const age = (() => {
     const jours = Math.floor((Date.now() - new Date(review.created_at).getTime()) / 86400000);
     if (jours === 0) return "Aujourd'hui";
@@ -169,7 +174,7 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
             </span>
           )}
         </div>
-        <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{age}</span>
+        <span suppressHydrationWarning style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{age}</span>
       </div>
 
       {puces.length > 0 && (

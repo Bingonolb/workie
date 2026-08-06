@@ -162,7 +162,7 @@ export const getCachedSimilarCompanies = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("companies")
-      .select("id, name, city, avg_rating, review_count, cover_url, cover_color, is_verified, sector")
+      .select("id, name, city, avg_rating, review_count, cover_url, cover_color, is_verified, sector, subsector")
       .eq("sector", sector)
       .neq("id", excludeId)
       .order("score", { ascending: false })

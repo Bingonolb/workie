@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
 import type { Review } from "@/lib/types";
@@ -12,8 +12,11 @@ import { REVIEW_PUBLIC_COLS } from "@/lib/actions/columns";
 // ── Read actions ────────────────────────────────────────────────────────────
 
 export async function getUserReviews(): Promise<(Review & { company_name: string })[]> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // getUser() est mis en cache pour la durée de la requête ; appeler
+  // supabase.auth.getUser() directement ajoutait un aller-retour réseau vers
+  // l'authentification à chaque affichage du profil, en plus de celui que la
+  // page fait déjà.
+  const [user, supabase] = await Promise.all([getUser(), createClient()]);
   if (!user) return [];
   const { data } = await supabase
     .from("reviews")
