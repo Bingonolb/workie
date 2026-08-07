@@ -16,9 +16,15 @@ describe("REVIEW_PUBLIC_COLS", () => {
     expect(cols).not.toContain("flag_reason");
   });
 
+  // Un avis affiché « anonyme » partait avec l'identifiant de compte de son
+  // auteur. Aucun composant ne s'en servait : c'était une fuite pure.
+  it("never exposes user_id to the frontend", () => {
+    expect(cols).not.toContain("user_id");
+  });
+
   it("includes all fields required to render a review card", () => {
     const required = [
-      "id", "company_id", "user_id", "rating_overall", "content",
+      "id", "company_id", "rating_overall", "content",
       "pros", "cons", "job_title", "helpful_count", "created_at",
       "status", "is_verified_author", "is_anonymous",
     ];
@@ -123,6 +129,10 @@ describe("submitReview — per-user 24h rate limit", () => {
   //   companies: .select().eq().maybeSingle() → company
   //   reviews (dupe check):   .select().eq().eq().maybeSingle() → null (no prior review)
   //   reviews (rate limit):   .select(id, {count,head}).eq().gte() → {count: N}
+  //
+  // Les deux gardes sur reviews passent par la clé de service : elles filtrent
+  // sur user_id, dont le droit de lecture a été retiré aux rôles anon et
+  // authenticated. Le mock doit donc couvrir les deux clients.
   function makeReviewsClient(recentCount: number) {
     const user = { id: "u1", email_confirmed_at: "2025-01-01", created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() };
     return {
@@ -143,8 +153,18 @@ describe("submitReview — per-user 24h rate limit", () => {
                 // Rate-limit count query
                 return { eq: () => ({ gte: () => Promise.resolve({ count: recentCount, data: null, error: null }) }) };
               }
-              // Duplicate-per-company check (no prior review)
-              return { eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null }) }) }) };
+              // Deux chaînes partagent ce préfixe .select().eq().eq() :
+              //   - le doublon par entreprise, qui finit en .maybeSingle()
+              //   - findSimilarReview, qui finit en .limit()
+              // Le mock doit donc offrir les deux terminaisons.
+              return {
+                eq: () => ({
+                  eq: () => ({
+                    maybeSingle: async () => ({ data: null }),
+                    limit: async () => ({ data: [], error: null }),
+                  }),
+                }),
+              };
             },
             insert: async () => ({ error: null }),
           };
@@ -156,7 +176,9 @@ describe("submitReview — per-user 24h rate limit", () => {
 
   it("allows submission when user has 0 reviews in the last 24h", async () => {
     const { createClient } = await import("@/lib/supabase/server");
+    const { createAdminClient } = await import("@/lib/supabase/admin");
     vi.mocked(createClient).mockResolvedValue(makeReviewsClient(0));
+    vi.mocked(createAdminClient).mockReturnValue(makeReviewsClient(0));
     const result = await submitReview(undefined, makeFormData());
     // May hit other checks (content quality etc.) but NOT the rate limit
     expect(result?.error).not.toBe("Tu as atteint la limite de 3 avis par 24h. Réessaie demain.");
@@ -164,7 +186,9 @@ describe("submitReview — per-user 24h rate limit", () => {
 
   it("blocks submission when user has 3 reviews in the last 24h", async () => {
     const { createClient } = await import("@/lib/supabase/server");
+    const { createAdminClient } = await import("@/lib/supabase/admin");
     vi.mocked(createClient).mockResolvedValue(makeReviewsClient(3));
+    vi.mocked(createAdminClient).mockReturnValue(makeReviewsClient(3));
     const result = await submitReview(undefined, makeFormData());
     expect(result?.error).toBe("Tu as atteint la limite de 3 avis par 24h. Réessaie demain.");
   });

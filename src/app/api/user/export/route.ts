@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { REVIEW_PUBLIC_COLS } from "@/lib/actions/columns";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,9 @@ export async function GET() {
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       // Colonnes explicites : les droits sur reviews sont par colonne depuis
       // la fermeture de submitter_ip et flag_reason, et "*" est alors refusé.
-      supabase.from("reviews").select(`${REVIEW_PUBLIC_COLS}, companies(name)`).eq("user_id", user.id),
+      // Clé de service : le filtre porte sur user_id, colonne fermée aux rôles
+      // anon et authenticated. L'identité vient de la session déjà validée.
+      createAdminClient().from("reviews").select(`${REVIEW_PUBLIC_COLS}, companies(name)`).eq("user_id", user.id),
       supabase.from("favorites").select("*, companies(name, sector)").eq("user_id", user.id),
       supabase.from("review_votes").select("review_id, created_at").eq("user_id", user.id),
       supabase.from("notifications").select("*").eq("user_id", user.id),

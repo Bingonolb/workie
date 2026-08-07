@@ -6,8 +6,13 @@
 // ajoutée ici, sinon elle est écrite en base mais jamais relue — le champ
 // apparaît vide côté public sans qu'aucune erreur ne soit levée.
 // Couvert par src/__tests__/smoke.test.ts.
+// user_id volontairement absent. Aucun composant ne l'affichait, et le laisser
+// partait avec chaque avis public : la page annonçait « anonyme » pendant que
+// la réponse livrait l'identifiant de compte de l'auteur. L'anonymat était
+// cosmétique. Les requêtes qui filtrent sur user_id passent désormais par la
+// clé de service, seule à conserver le droit de lecture sur cette colonne.
 export const REVIEW_PUBLIC_COLS = [
-  "id", "company_id", "user_id",
+  "id", "company_id",
   "rating_overall", "rating_culture", "rating_management", "rating_worklife", "rating_career",
   "rating_flexibility", "rating_recognition", "rating_workload", "rating_diversity",
   "title", "content", "pros", "cons", "job_title", "salary_chf",

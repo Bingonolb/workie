@@ -16,12 +16,17 @@ export async function getUserReviews(): Promise<(Review & { company_name: string
   // supabase.auth.getUser() directement ajoutait un aller-retour réseau vers
   // l'authentification à chaque affichage du profil, en plus de celui que la
   // page fait déjà.
-  const [user, supabase] = await Promise.all([getUser(), createClient()]);
+  const user = await getUser();
   if (!user) return [];
   // Colonnes explicites plutôt que "*". Les droits de lecture sur reviews sont
-  // désormais par colonne — submitter_ip et flag_reason sont fermés — et
+  // par colonne — submitter_ip, flag_reason et user_id sont fermés — et
   // PostgREST refuse "*" dès qu'une colonne échappe au rôle appelant.
-  const { data } = await supabase
+  //
+  // Clé de service parce que le filtre porte sur user_id : PostgreSQL exige le
+  // droit de lecture sur une colonne même pour filtrer dessus. L'identité vient
+  // de getUser(), qui a validé le jeton — le filtre reste donc borné à
+  // l'utilisateur courant.
+  const { data } = await createAdminClient()
     .from("reviews")
     .select(`${REVIEW_PUBLIC_COLS}, companies(name)`)
     .eq("user_id", user.id)
@@ -275,7 +280,13 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const qualityCheck = checkContentQuality(content, pros ?? "", cons ?? "");
   if (qualityCheck) return { error: qualityCheck };
 
-  const { data: existing } = await supabase
+  // Clé de service : ces deux gardes filtrent sur user_id, dont le droit de
+  // lecture a été retiré aux rôles anon et authenticated. Avec le client
+  // soumis aux RLS, la requête échouerait — et elle échouerait en silence,
+  // laissant passer les doublons et la limite de 3 avis par 24 h.
+  const gardes = createAdminClient();
+
+  const { data: existing } = await gardes
     .from("reviews")
     .select("id")
     .eq("company_id", company_id)
@@ -286,7 +297,7 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   // Per-user global rate limit: max 3 review submissions per 24h across all companies.
   // Catches multi-company bombing even when the user changes IP or uses a VPN.
   const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { count: recentCount } = await supabase
+  const { count: recentCount } = await gardes
     .from("reviews")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
