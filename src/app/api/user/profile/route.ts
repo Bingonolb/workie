@@ -23,10 +23,15 @@ export async function GET() {
       return NextResponse.json({ authentifie: false }, { status: 401, headers: sansCache });
     }
 
-    const [{ data: profile }, reviews, favIds] = await Promise.all([
+    const [{ data: profile }, reviews, favIds, { count: adsActives }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       getUserReviews().catch(() => []),
       getUserFavoriteIds().catch(() => [] as string[]),
+      // Compte seul, sans ramener les lignes : la tuile n'affiche qu'un nombre.
+      supabase.from("ad_campaigns")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "active"),
     ]);
 
     return NextResponse.json({
@@ -36,6 +41,7 @@ export async function GET() {
       profile: profile ?? null,
       reviews,
       favCount: favIds.length,
+      adsActives: adsActives ?? 0,
     }, { headers: sansCache });
   } catch {
     return NextResponse.json({ authentifie: false }, { status: 500, headers: sansCache });

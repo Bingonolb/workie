@@ -16,6 +16,7 @@ type Donnees = {
   profile: Profile | null;
   reviews: (Review & { company_name: string })[];
   favCount: number;
+  adsActives: number;
 };
 
 /**
@@ -51,6 +52,7 @@ export function ProfilClient() {
 
   const profile = d?.profile ?? null;
   const reviews = d?.reviews ?? [];
+  const adsActives = d?.adsActives ?? 0;
   const displayName = profile?.full_name || profile?.username || (d ? "Workie User" : " ");
   const memberSince = d?.creeLe
     ? new Date(d.creeLe).toLocaleDateString("fr-CH", { month: "long", year: "numeric" })
@@ -131,7 +133,14 @@ export function ProfilClient() {
           { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b", href: null },
           { emoji: "🔥", value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
           { emoji: "📊", value: d ? String(reviews.length) : "—", label: "Avis publiés", color: "#10b981", href: null },
-          { emoji: "📣", value: "Pub", label: "Faire de la publicité", color: "#8b5cf6", href: "/profile/ads" },
+          // Dès qu'une campagne tourne, la tuile affiche le compte comme ses
+          // trois voisines : un nombre, un libellé. Le mot « Pub » à la place
+          // du chiffre cassait l'alignement de lecture et, surtout, ne disait
+          // pas qu'une campagne était en cours. Sans campagne, elle redevient
+          // une invitation.
+          adsActives > 0
+            ? { emoji: "📣", value: String(adsActives), label: `Pub${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" }
+            : { emoji: "📣", value: "Pub", label: "Faire de la publicité", color: "#8b5cf6", href: "/profile/ads" },
         ] as { emoji: string; value: string; label: string; color: string; href: string | null }[]).map(({ emoji, value, label, color, href }) => {
           const inner = (
             <>
