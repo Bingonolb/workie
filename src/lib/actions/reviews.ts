@@ -399,7 +399,12 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
     return { error: voteErr.message };
   }
 
-  const { error: rpcErr } = await supabase.rpc("increment_helpful", { review_id: reviewId });
+  // Par la clé de service : le droit d'exécution a été retiré à anon et
+  // authenticated. La clé anon est publique, et PostgREST exposait cette
+  // fonction sur /rest/v1/rpc — le compteur « utile » pouvait être gonflé
+  // sans être connecté et sans passer par l'insertion dans review_votes qui
+  // garantit un vote par personne. Les vérifications ci-dessus ne changent pas.
+  const { error: rpcErr } = await createAdminClient().rpc("increment_helpful", { review_id: reviewId });
   if (rpcErr) {
     await supabase.from("review_votes").delete().eq("user_id", user.id).eq("review_id", reviewId);
     captureServerError(rpcErr, { action: "voteHelpful", step: "increment_helpful_rpc", reviewId });

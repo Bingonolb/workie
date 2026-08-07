@@ -113,7 +113,7 @@ export async function getUserCampaignDailyStats(campaignId: string): Promise<{ d
     // Ownership check: ensure this campaign belongs to the calling user
     const { data: owned } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("user_id", user.id).maybeSingle();
     if (!owned) return [];
-    const { data } = await supabase.rpc("get_campaign_daily_stats", { p_campaign_id: campaignId });
+    const { data } = await createAdminClient().rpc("get_campaign_daily_stats", { p_campaign_id: campaignId });
     return (data ?? []).map((r: { day: string; impressions: number; clicks: number }) => ({
       day: r.day,
       impressions: Number(r.impressions),
@@ -127,7 +127,7 @@ export async function getUserCampaignCantonStats(campaignId: string): Promise<{ 
     const { supabase, user } = await requireUser();
     const { data: owned } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("user_id", user.id).maybeSingle();
     if (!owned) return [];
-    const { data } = await supabase.rpc("get_campaign_canton_stats", { p_campaign_id: campaignId });
+    const { data } = await createAdminClient().rpc("get_campaign_canton_stats", { p_campaign_id: campaignId });
     return (data ?? []).map((r: { canton: string; impressions: number; clicks: number }) => ({
       canton: r.canton,
       impressions: Number(r.impressions),
@@ -287,7 +287,7 @@ export async function getCampaignDailyStats(campaignId: string): Promise<{ day: 
     // Ownership check: ensure this campaign belongs to the calling business
     const { data: owned } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("company_id", companyId).maybeSingle();
     if (!owned) return [];
-    const { data } = await supabase.rpc("get_campaign_daily_stats", { p_campaign_id: campaignId });
+    const { data } = await createAdminClient().rpc("get_campaign_daily_stats", { p_campaign_id: campaignId });
     return (data ?? []).map((r: { day: string; impressions: number; clicks: number }) => ({
       day: r.day,
       impressions: Number(r.impressions),
@@ -488,7 +488,12 @@ export async function trackAdImpression(campaignId: string): Promise<void> {
       captureServerError(insErr, { action: "trackAdImpression", step: "insert", campaignId });
     }
     if (!insErr) {
-      await supabase.rpc("increment_ad_impression", { p_campaign_id: campaignId });
+      // Par la clé de service : le droit d'exécution a été retiré à anon et
+      // authenticated. La clé anon est publique, et PostgREST exposait cette
+      // fonction sur /rest/v1/rpc — n'importe qui pouvait donc l'appeler en
+      // boucle et vider le budget d'un annonceur, sans passer par la limite
+      // par IP ci-dessus. Les vérifications restent celles de cette fonction.
+      await createAdminClient().rpc("increment_ad_impression", { p_campaign_id: campaignId });
     }
   } catch (e) { captureServerError(e, { action: "trackAdImpression" }); }
 }
@@ -520,7 +525,9 @@ export async function trackAdClick(campaignId: string): Promise<void> {
       viewer_ip: ip,
     });
     if (!clkErr) {
-      await supabase.rpc("increment_ad_click", { p_campaign_id: campaignId });
+      // Voir trackAdImpression : appel par la clé de service, l'exécution
+      // publique de cette fonction a été retirée.
+      await createAdminClient().rpc("increment_ad_click", { p_campaign_id: campaignId });
     }
   } catch (e) { captureServerError(e, { action: "trackAdClick" }); }
 }
@@ -530,7 +537,7 @@ export async function getCampaignCantonStats(campaignId: string): Promise<{ cant
     const { supabase, companyId } = await requireBusiness();
     const { data: owned } = await supabase.from("ad_campaigns").select("id").eq("id", campaignId).eq("company_id", companyId).maybeSingle();
     if (!owned) return [];
-    const { data } = await supabase.rpc("get_campaign_canton_stats", { p_campaign_id: campaignId });
+    const { data } = await createAdminClient().rpc("get_campaign_canton_stats", { p_campaign_id: campaignId });
     return (data ?? []).map((r: { canton: string; impressions: number; clicks: number }) => ({
       canton: r.canton,
       impressions: Number(r.impressions),

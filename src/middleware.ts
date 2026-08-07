@@ -54,6 +54,53 @@ function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
+/**
+ * État de la session déduit du cookie seul, sans appel réseau.
+ *
+ * `supabase.auth.getUser()` valide le jeton auprès de Supabase : un
+ * aller-retour réseau avant le moindre octet, sur *chaque* requête protégée.
+ * Mesuré en local : 175 à 200 ms pour /profile et /favorites, contre 14 à
+ * 25 ms pour /explore et /ranking qui prennent la voie rapide publique. Une
+ * fois ces deux pages passées en statique, c'était tout ce qui restait.
+ *
+ * Or le middleware n'a qu'une décision à prendre : rediriger ou laisser
+ * passer. La date d'expiration inscrite dans le jeton suffit pour ça, et elle
+ * se lit sur place. On ne repasse par le réseau que près de l'expiration,
+ * quand il faut réellement rafraîchir les cookies.
+ *
+ * Cette lecture ne vérifie pas la signature — elle n'a pas à le faire. Un
+ * cookie fabriqué avec une expiration lointaine ne donne accès qu'à la
+ * coquille statique, qui ne contient que la mise en page. Toute donnée
+ * personnelle passe par getUser() côté serveur et par les politiques RLS, qui
+ * eux vérifient la signature. Le middleware oriente ; il ne protège pas seul.
+ */
+function etatSession(request: NextRequest): "valide" | "a_rafraichir" | "absente" {
+  // Le cookie de session est découpé en tranches (.0, .1, …) dès qu'il dépasse
+  // la taille maximale d'un cookie. Il faut les recoller dans l'ordre.
+  const tranches = request.cookies.getAll()
+    .filter(c => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  if (tranches.length === 0) return "absente";
+
+  try {
+    let brut = tranches.map(c => c.value).join("");
+    if (brut.startsWith("base64-")) brut = atob(brut.slice(7));
+    const jeton = JSON.parse(brut)?.access_token;
+    if (typeof jeton !== "string") return "a_rafraichir";
+
+    const charge = JSON.parse(atob(jeton.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    const exp = Number(charge?.exp);
+    if (!Number.isFinite(exp)) return "a_rafraichir";
+
+    // Marge de deux minutes : au-delà, on laisse Supabase rafraîchir plutôt
+    // que de laisser un jeton expirer en cours de route.
+    return exp * 1000 - Date.now() > 120_000 ? "valide" : "a_rafraichir";
+  } catch {
+    // Cookie illisible : on ne devine pas, on laisse Supabase trancher.
+    return "a_rafraichir";
+  }
+}
+
 export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
@@ -115,7 +162,31 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next({ request });
     }
 
-    // Session refresh via Supabase SSR — only for protected routes + auth routes
+    // Décision sans réseau tant que le jeton est valide. Voir etatSession :
+    // c'est ce qui ramène les routes protégées au niveau des publiques.
+    const etat = etatSession(request);
+
+    if (etat === "absente") {
+      if (!isPublic) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/login";
+        url.searchParams.set("next", pathname + request.nextUrl.search);
+        return NextResponse.redirect(url);
+      }
+      return NextResponse.next({ request });
+    }
+
+    if (etat === "valide") {
+      if (isAuthRoute) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/explore";
+        return NextResponse.redirect(url);
+      }
+      return NextResponse.next({ request });
+    }
+
+    // Jeton proche de l'expiration ou illisible : là seulement on passe par
+    // Supabase, qui valide et réécrit les cookies rafraîchis.
     let response = NextResponse.next({ request });
 
     const supabase = createServerClient(

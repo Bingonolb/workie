@@ -44,7 +44,11 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
     <div>
       {/* Table header */}
       <div className="profile-reviews-grid" style={{
-        display: "grid", gridTemplateColumns: "1fr 90px 80px 80px 80px",
+        // Plancher de 120 px sur la colonne du nom. En `1fr` pur elle pouvait être
+// réduite à zéro par les colonnes fixes, et le nom — en nowrap sous overflow
+// hidden — disparaissait sans laisser de trace. Avec un minimum, c'est la
+// dernière colonne qui déborde plutôt que la plus importante qui s'efface.
+display: "grid", gridTemplateColumns: "minmax(120px, 1fr) 90px 80px 80px 80px",
         padding: "8px 20px", borderBottom: "1px solid var(--border)",
       }}>
         {["Entreprise / Poste", "Contrat", "Note", "Salaire", "Date"].map((h, i) => (
@@ -66,7 +70,11 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
             <div
               className="profile-reviews-grid"
               style={{
-                display: "grid", gridTemplateColumns: "1fr 90px 80px 80px 80px",
+                // Plancher de 120 px sur la colonne du nom. En `1fr` pur elle pouvait être
+// réduite à zéro par les colonnes fixes, et le nom — en nowrap sous overflow
+// hidden — disparaissait sans laisser de trace. Avec un minimum, c'est la
+// dernière colonne qui déborde plutôt que la plus importante qui s'efface.
+display: "grid", gridTemplateColumns: "minmax(120px, 1fr) 90px 80px 80px 80px",
                 alignItems: "center", padding: "14px 20px",
                 borderBottom: "1px solid var(--border)",
                 transition: "background 0.12s", cursor: "pointer",

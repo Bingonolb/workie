@@ -79,14 +79,20 @@ export function CoverImage({
         // navigateur vers les plus gros candidats du srcset.
         width={640}
         height={360}
-        // Jamais de chargement différé à l'intérieur d'un lot déjà affiché.
-        // Les cartes hors écran étaient en `lazy` : elles ne démarraient qu'au
-        // moment où l'utilisateur arrivait dessus, ce qui rendait le
-        // téléchargement visible à chaque défilement. Elles partent maintenant
-        // tout de suite, en priorité basse pour ne pas disputer la bande
-        // passante aux cartes réellement à l'écran — donc déjà là quand on y
-        // arrive.
-        loading="eager"
+        // `eager` seulement pour les cartes visibles sans défiler.
+        //
+        // Tout était en `eager` auparavant, pour éviter que le téléchargement
+        // se voie au défilement sur un lot de 24 cartes. Sur /favorites le
+        // compte n'est pas plafonné : mesuré sur un écran de 375 px, 72 images
+        // en `eager` dont 62 déjà téléchargées alors que deux seulement
+        // étaient à l'écran. C'est toute la bande passante d'un téléphone
+        // dépensée pour rien.
+        //
+        // `lazy` ne réintroduit pas l'à-coup redouté : les navigateurs
+        // déclenchent le chargement bien avant que l'image entre dans la vue,
+        // avec une avance de l'ordre du millier de pixels. Le vrai levier
+        // reste `priority`, que les grilles passent à leurs premières cartes.
+        loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "low"}
         decoding="async"
         onLoad={() => setCharge(true)}

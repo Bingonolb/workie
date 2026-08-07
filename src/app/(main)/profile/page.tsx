@@ -22,7 +22,15 @@ export default function ProfilePage() {
   return (
     <div className="page-root">
       <style>{`
-        @media (max-width: 700px) {
+        /* 900 et non 700 : la barre latérale fait 340 px de large, donc en
+           dessous de 900 il ne reste plus assez de place à gauche pour le
+           tableau des avis. Ses colonnes fixes (contrat, note, salaire, date)
+           occupent 330 px ; le nom de l'entreprise se retrouvait écrasé à
+           quelques pixels et, comme il est en nowrap sous overflow hidden,
+           il disparaissait complètement. La variante compacte du tableau ne
+           prenait le relais qu'à 600 px : toute la bande 600–900 affichait
+           des lignes sans nom d'entreprise. */
+        @media (max-width: 900px) {
           .profile-kpi { grid-template-columns: 1fr !important; }
           .profile-grid { grid-template-columns: 1fr !important; }
           .profile-sidebar { position: static !important; }
