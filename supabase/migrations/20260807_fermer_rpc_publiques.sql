@@ -51,3 +51,10 @@ alter function public.calc_rating_overall()            set search_path = public,
 alter function public.protect_company_sensitive_fields() set search_path = public, pg_temp;
 alter function public.recalc_company_score_on_review()   set search_path = public, pg_temp;
 alter function public.update_company_stats()             set search_path = public, pg_temp;
+
+-- Rectification du même jour : les deux fonctions de statistiques vérifient
+-- elles-mêmes la propriété de la campagne via auth.uid(). Elles ne fuyaient
+-- donc pas, et les fermer cassait la page de statistiques — appelées avec la
+-- clé de service, auth.uid() vaut NULL et leur propre garde rejetait l'appel.
+grant execute on function public.get_campaign_daily_stats(uuid)  to authenticated;
+grant execute on function public.get_campaign_canton_stats(uuid) to authenticated;
