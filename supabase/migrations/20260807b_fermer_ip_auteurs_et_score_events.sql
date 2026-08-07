@@ -51,3 +51,28 @@ drop policy if exists "Anyone can read score events" on public.score_events;
 create policy "Users read own score events"
   on public.score_events for select
   using (user_id = (select auth.uid()));
+
+-- Complément : user_id retiré lui aussi de la liste publique.
+--
+-- Chaque avis public partait avec l'identifiant de compte de son auteur. Les
+-- 18 avis sont marqués anonymes, 5 portaient pourtant un user_id lisible : la
+-- page annonçait « anonyme » pendant que la réponse livrait de quoi remonter
+-- au compte. Aucun composant ne s'en servait — fuite pure.
+--
+-- Trois requêtes le filtraient, et PostgreSQL exige le droit de lecture sur
+-- une colonne même pour filtrer dessus. Les fermer sans traiter ces requêtes
+-- aurait neutralisé en silence la garde anti-doublon et la limite de 3 avis
+-- par 24 h. Elles passent par la clé de service, avec une identité issue de
+-- getUser().
+revoke select on public.reviews from anon, authenticated;
+
+grant select (
+  id, company_id,
+  rating_overall, rating_culture, rating_management, rating_worklife, rating_career,
+  rating_flexibility, rating_recognition, rating_workload, rating_diversity,
+  title, content, pros, cons, job_title, salary_chf,
+  is_current, is_anonymous, employment_type, duration_range,
+  work_mode, would_recommend, would_return, knew_before,
+  start_year, end_year, helpful_count, created_at,
+  status, is_verified_author
+) on public.reviews to anon, authenticated;

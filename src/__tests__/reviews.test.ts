@@ -130,16 +130,21 @@ describe("submitReview", () => {
 
   it("blocks duplicate review for same user+company", async () => {
     const { createClient } = await import("@/lib/supabase/server");
+    const { createAdminClient } = await import("@/lib/supabase/admin");
     vi.mocked(createClient).mockResolvedValueOnce({
       auth: { getUser: async () => ({ data: { user: verifiedUser } }) },
       from: vi.fn((table: string) => {
         if (table === "profiles") return chain({ data: { claimed_company_id: null } });
         if (table === "companies") return chain({ data: { id: "company-uuid" } });
-        // existing review found
-        if (table === "reviews") return chain({ data: { id: "existing-review" } });
         return chain({ data: null });
       }),
       rpc: vi.fn(),
+    } as any);
+    // La garde anti-doublon interroge reviews par la clé de service : elle
+    // filtre sur user_id, colonne fermée aux rôles anon et authenticated.
+    // Simuler l'ancien client validerait une garde qui ne s'exécute plus.
+    vi.mocked(createAdminClient).mockReturnValueOnce({
+      from: vi.fn(() => chain({ data: { id: "existing-review" } })),
     } as any);
     const result = await submitReview(undefined, makeFormData(validReviewFields));
     expect(result?.error).toMatch(/déjà posté/i);
