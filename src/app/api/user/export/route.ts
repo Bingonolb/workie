@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUser, createClient } from "@/lib/supabase/server";
+import { REVIEW_PUBLIC_COLS } from "@/lib/actions/columns";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,9 @@ export async function GET() {
   const [profileRes, reviewsRes, favoritesRes, votesRes, notificationsRes, reportsRes] =
     await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-      supabase.from("reviews").select("*, companies(name)").eq("user_id", user.id),
+      // Colonnes explicites : les droits sur reviews sont par colonne depuis
+      // la fermeture de submitter_ip et flag_reason, et "*" est alors refusé.
+      supabase.from("reviews").select(`${REVIEW_PUBLIC_COLS}, companies(name)`).eq("user_id", user.id),
       supabase.from("favorites").select("*, companies(name, sector)").eq("user_id", user.id),
       supabase.from("review_votes").select("review_id, created_at").eq("user_id", user.id),
       supabase.from("notifications").select("*").eq("user_id", user.id),

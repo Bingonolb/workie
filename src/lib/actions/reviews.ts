@@ -18,9 +18,12 @@ export async function getUserReviews(): Promise<(Review & { company_name: string
   // page fait déjà.
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
   if (!user) return [];
+  // Colonnes explicites plutôt que "*". Les droits de lecture sur reviews sont
+  // désormais par colonne — submitter_ip et flag_reason sont fermés — et
+  // PostgREST refuse "*" dès qu'une colonne échappe au rôle appelant.
   const { data } = await supabase
     .from("reviews")
-    .select("*, companies(name)")
+    .select(`${REVIEW_PUBLIC_COLS}, companies(name)`)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
   return (data ?? []).map((r: any) => ({ ...r, company_name: r.companies?.name ?? "Entreprise inconnue" }));

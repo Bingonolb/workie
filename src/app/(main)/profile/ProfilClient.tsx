@@ -33,6 +33,7 @@ type Donnees = {
  */
 export function ProfilClient() {
   const [d, setD] = useState<Donnees | null>(null);
+  const [echec, setEchec] = useState(false);
 
   useEffect(() => {
     let annule = false;
@@ -46,9 +47,31 @@ export function ProfilClient() {
         return r.json();
       })
       .then(j => { if (j && !annule) setD(j); })
-      .catch(() => {});
+      // Sans cet état, un échec laissait la page sur son squelette
+      // indéfiniment, sans un mot : constaté en production pendant une
+      // interruption de l'API. Un écran figé n'apprend rien à personne.
+      .catch(() => { if (!annule) setEchec(true); });
     return () => { annule = true; };
   }, []);
+
+  if (echec) {
+    return (
+      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "48px 32px", textAlign: "center" }}>
+        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger ton profil</p>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>Tes données sont intactes, c&apos;est l&apos;affichage qui a échoué.</p>
+        <button
+          onClick={() => window.location.reload()}
+          style={{
+            background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff",
+            fontWeight: 700, border: "none", borderRadius: 10, padding: "11px 26px",
+            fontSize: 14, cursor: "pointer",
+          }}
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  }
 
   const profile = d?.profile ?? null;
   const reviews = d?.reviews ?? [];

@@ -20,6 +20,7 @@ import type { Company } from "@/lib/types";
  */
 export function FavorisClient() {
   const [companies, setCompanies] = useState<Company[] | null>(null);
+  const [echec, setEchec] = useState(false);
 
   useEffect(() => {
     let annule = false;
@@ -33,9 +34,30 @@ export function FavorisClient() {
         return r.json();
       })
       .then(d => { if (d && !annule) setCompanies(d.companies ?? []); })
-      .catch(() => { if (!annule) setCompanies([]); });
+      // Un échec réseau affichait « Aucun favori pour l'instant » — un message
+      // faux, qui laisse croire à une perte. On distingue les deux cas.
+      .catch(() => { if (!annule) setEchec(true); });
     return () => { annule = true; };
   }, []);
+
+  if (echec) {
+    return (
+      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "48px 32px", textAlign: "center" }}>
+        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger tes favoris</p>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>Ils sont toujours là, c&apos;est l&apos;affichage qui a échoué.</p>
+        <button
+          onClick={() => window.location.reload()}
+          style={{
+            background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff",
+            fontWeight: 700, border: "none", borderRadius: 10, padding: "11px 26px",
+            fontSize: 14, cursor: "pointer",
+          }}
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  }
 
   if (companies === null) return <GrilleAttente />;
 
