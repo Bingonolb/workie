@@ -464,10 +464,17 @@ export async function trackAdImpression(campaignId: string): Promise<void> {
     const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
 
-    // DB-level rate limit: 1 impression per IP per campaign per 10 min
+    // Limite : une impression par IP, par campagne, toutes les 10 minutes.
+    //
+    // Ce comptage passe par la clé de service, et il le faut. La politique de
+    // lecture de ad_impressions ne laisse lire que le propriétaire de la
+    // campagne : avec le client soumis aux RLS, un visiteur ordinaire lisait
+    // toujours zéro et la limite ne se déclenchait jamais. Vérifié en
+    // production, l'API renvoyait « Content-Range: */0 » alors que la ligne
+    // existait. L'annonceur était donc facturé à chaque rechargement de page.
     if (ip) {
       const since = new Date(Date.now() - AD_RL_WINDOW_MIN * 60_000).toISOString();
-      const { count } = await supabase
+      const { count } = await createAdminClient()
         .from("ad_impressions")
         .select("id", { count: "exact", head: true })
         .eq("campaign_id", campaignId)
@@ -506,10 +513,11 @@ export async function trackAdClick(campaignId: string): Promise<void> {
     const [supabase, geo] = await Promise.all([createClient(), getViewerGeo()]);
     const { data: { user } } = await supabase.auth.getUser();
 
-    // DB-level rate limit: 1 click per IP per campaign per 10 min
+    // Même correction que pour les impressions : le comptage doit passer par
+    // la clé de service, sinon la limite lit toujours zéro.
     if (ip) {
       const since = new Date(Date.now() - AD_RL_WINDOW_MIN * 60_000).toISOString();
-      const { count } = await supabase
+      const { count } = await createAdminClient()
         .from("ad_clicks")
         .select("id", { count: "exact", head: true })
         .eq("campaign_id", campaignId)
@@ -524,7 +532,12 @@ export async function trackAdClick(campaignId: string): Promise<void> {
       viewer_canton: geo.canton,
       viewer_ip: ip,
     });
-    if (!clkErr) {
+    // Une insertion en échec était jusqu'ici parfaitement silencieuse, alors
+    // que le pendant côté impressions est signalé. Un clic perdu ne se voyait
+    // donc nulle part : ni dans les compteurs, ni dans les alertes.
+    if (clkErr) {
+      captureServerError(clkErr, { action: "trackAdClick", step: "insert", campaignId });
+    } else {
       // Voir trackAdImpression : appel par la clé de service, l'exécution
       // publique de cette fonction a été retirée.
       await createAdminClient().rpc("increment_ad_click", { p_campaign_id: campaignId });

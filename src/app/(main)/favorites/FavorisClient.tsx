@@ -58,11 +58,20 @@ export function FavorisClient() {
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
-      {companies.map((c, i) => (
-        <CompanyCard key={c.id} company={c} isFav isLoggedIn priority={i < 4} />
-      ))}
-    </div>
+    <>
+      {/* Repère de volume. Sans lui la grille ressemble à un mur sans fin :
+          on ne sait pas si on a tout vu, ni quand la liste devient assez
+          longue pour mériter une recherche. Discret et en haut de page, pas
+          sur les cartes, où il ferait doublon avec le compteur 🔥. */}
+      <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
+        {companies.length} entreprise{companies.length > 1 ? "s" : ""}
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
+        {companies.map((c, i) => (
+          <CompanyCard key={c.id} company={c} isFav isLoggedIn priority={i < 4} />
+        ))}
+      </div>
+    </>
   );
 }
 
