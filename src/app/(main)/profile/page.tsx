@@ -1,44 +1,24 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getUser, createClient } from "@/lib/supabase/server";
-import { ProfileForm } from "@/components/ProfileForm";
-import { ProfileReviews } from "./ProfileReviews";
-import { getUserReviews } from "@/lib/actions/reviews";
-import { getUserFavoriteIds } from "@/lib/actions/favorites";
-import type { Profile } from "@/lib/types";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { DeleteAccountButton } from "@/components/DeleteAccountButton";
-import { SignOutButton } from "@/components/SignOutButton";
-import Link from "next/link";
+import { ProfilClient } from "./ProfilClient";
 
+/**
+ * Page profil.
+ *
+ * Coquille statique. La version précédente était en force-dynamic : validation
+ * du jeton auprès de Supabase puis trois requêtes en base avant le premier
+ * octet — 965 ms à froid, 300 à 400 ms ensuite, pendant lesquelles l'écran ne
+ * bougeait pas. Le contenu arrive maintenant via /api/user/profile.
+ *
+ * L'accès reste protégé : le middleware garde ce chemin, et la route d'API
+ * refait la vérification côté serveur. Rien de personnel n'est mis en cache —
+ * la coquille ne contient que la mise en page.
+ */
 export const metadata: Metadata = {
   title: "Mon profil · Workie",
   robots: { index: false, follow: false },
 };
 
-export default async function ProfilePage() {
-  const [user, supabase] = await Promise.all([getUser(), createClient()]);
-  if (!user) redirect("/api/auth/signout?next=/login");
-
-  const [{ data: profileRaw }, reviews, favIds] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    getUserReviews().catch(() => [] as Awaited<ReturnType<typeof getUserReviews>>),
-    getUserFavoriteIds().catch(() => [] as string[]),
-  ]);
-
-  const profile = profileRaw as Profile | null;
-  const displayName = profile?.full_name || profile?.username || "Workie User";
-  const initial = (displayName[0] ?? "W").toUpperCase();
-  const memberSince = new Date(user.created_at ?? Date.now()).toLocaleDateString("fr-CH", {
-    month: "long",
-    year: "numeric",
-  });
-  const avgRating = reviews.length
-    ? (reviews.reduce((s, r) => s + Number(r.rating_overall), 0) / reviews.length).toFixed(1)
-    : null;
-
+export default function ProfilePage() {
   return (
     <div className="page-root">
       <style>{`
@@ -49,167 +29,7 @@ export default async function ProfilePage() {
         }
       `}</style>
       <main className="page-main-md">
-
-        {/* ── Header ── */}
-        <div className="profile-header" style={{
-          position: "relative",
-          borderRadius: 20,
-          overflow: "hidden",
-          marginBottom: 20,
-          border: "1px solid var(--border)",
-          background: "var(--surface)",
-        }}>
-          {/* Name zone — dark panel with "Workie" watermark text */}
-          <div style={{
-            position: "relative",
-            padding: "32px 32px 28px",
-            background: "linear-gradient(160deg, #0d0d14 0%, #131320 100%)",
-            overflow: "hidden",
-          }}>
-            {/* Watermark */}
-            <span aria-hidden="true" style={{
-              position: "absolute",
-              right: -8, top: "50%",
-              transform: "translateY(-50%)",
-              fontSize: 96, fontWeight: 900,
-              color: "rgba(255,255,255,0.04)",
-              letterSpacing: "-0.05em",
-              userSelect: "none",
-              lineHeight: 1,
-              pointerEvents: "none",
-            }}>
-              Workie
-            </span>
-            {/* Accent line */}
-            <div style={{
-              width: 32, height: 3, borderRadius: 2,
-              background: "linear-gradient(90deg, #8b5cf6, #f97316)",
-              marginBottom: 14,
-            }} />
-            <h1 style={{
-              fontSize: 28, fontWeight: 900,
-              color: "#fff",
-              letterSpacing: "-0.035em",
-              lineHeight: 1.1,
-              margin: 0,
-            }}>
-              {displayName}
-            </h1>
-          </div>
-
-          {/* Info row */}
-          <div style={{
-            padding: "16px 32px 20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 5,
-          }}>
-            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{user.email}</span>
-            {(profile?.city || profile?.country) && (
-              <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
-                {[profile.city, profile.country].filter(Boolean).join(", ")}
-              </span>
-            )}
-            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>Membre depuis {memberSince}</span>
-          </div>
-        </div>
-
-        {/* ── KPI strip ── */}
-        <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
-          {([
-            { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b", href: null },
-            { emoji: "🔥", value: String(favIds.length), label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
-            { emoji: "📊", value: String(reviews.length), label: "Avis publiés", color: "#10b981", href: null },
-            { emoji: "📣", value: "Pub", label: "Faire de la publicité", color: "#8b5cf6", href: "/profile/ads" },
-          ] as { emoji: string; value: string; label: string; color: string; href: string | null }[]).map(({ emoji, value, label, color, href }) => {
-            const inner = (
-              <>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
-                  {emoji}
-                </div>
-                <div>
-                  <p style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
-                  <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
-                </div>
-              </>
-            );
-            return href ? (
-              <Link key={label} href={href} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14, textDecoration: "none" }}>
-                {inner}
-              </Link>
-            ) : (
-              <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14 }}>
-                {inner}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ── Main grid ── */}
-        <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16, alignItems: "start" }}>
-
-          {/* Reviews table */}
-          <div style={{
-            background: "var(--surface)", border: "1px solid var(--border)",
-            borderRadius: 18, overflow: "hidden",
-          }}>
-            <div style={{
-              padding: "16px 22px", borderBottom: "1px solid var(--border)",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-            }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>
-                Mes avis · <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>{reviews.length} publié{reviews.length !== 1 ? "s" : ""}</span>
-              </p>
-            </div>
-            <ProfileReviews reviews={reviews} />
-          </div>
-
-          {/* Right column */}
-          <div className="profile-sidebar" style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 16 }}>
-
-            {/* Edit form */}
-            <div style={{
-              background: "var(--surface)", border: "1px solid var(--border)",
-              borderRadius: 18, overflow: "hidden",
-            }}>
-              <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Modifier le profil</p>
-              </div>
-              <div style={{ padding: 22 }}>
-                <ProfileForm profile={profile} email={user.email ?? ""} />
-              </div>
-            </div>
-
-            {/* Réglages */}
-            <div style={{
-              background: "var(--surface)", border: "1px solid var(--border)",
-              borderRadius: 18, overflow: "hidden",
-            }}>
-              <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Réglages</p>
-              </div>
-              <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 16 }}>
-                <ThemeToggle />
-                <a
-                  href="/api/user/export"
-                  download
-                  style={{
-                    display: "block", width: "100%", padding: "11px 16px", borderRadius: 10,
-                    background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)",
-                    color: "#8b5cf6", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                    textDecoration: "none", textAlign: "left",
-                  }}
-                >
-                  ⬇ Télécharger mes données (RGPD)
-                </a>
-                <SignOutButton />
-                <DeleteAccountButton />
-              </div>
-            </div>
-
-          </div>
-
-        </div>
+        <ProfilClient />
       </main>
     </div>
   );
