@@ -73,7 +73,7 @@ const orgSchema = {
   url: "https://www.workie.ch",
   logo: "https://www.workie.ch/icon.svg",
   sameAs: [],
-  contactPoint: { "@type": "ContactPoint", contactType: "customer support", availableLanguage: ["French", "German"] },
+  contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "contact@workie.ch", availableLanguage: ["French", "German"] },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

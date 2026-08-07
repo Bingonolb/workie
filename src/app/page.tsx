@@ -47,31 +47,11 @@ export default async function Home() {
   const nCompanies = counts.companies;
   const nReviews = counts.reviews;
 
-  const websiteJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Workie",
-    "url": "https://www.workie.ch",
-    "description": "Avis anonymes d'employés, salaires réels et classement des entreprises suisses.",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://www.workie.ch/explore?q={search_term_string}",
-      },
-      "query-input": "required name=search_term_string",
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Workie",
-      "url": "https://www.workie.ch",
-      "logo": { "@type": "ImageObject", "url": "https://www.workie.ch/og-default.png" },
-    },
-  };
-
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
+      {/* Pas de WebSite déclaré ici : le layout en publie déjà un, plus
+          complet, sur toutes les pages. Deux entités WebSite pour une même
+          URL obligent Google à choisir laquelle décrit le site. */}
 
       {/* ── Navbar ── */}
       <nav className="landing-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>

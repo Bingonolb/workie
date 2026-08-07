@@ -24,7 +24,7 @@ export default function MentionsLegalesPage() {
           <address style={{ fontStyle: "normal", marginTop: 12, lineHeight: 1.9 }}>
             <strong>Workie</strong><br />
             Suisse<br />
-            Contact : <a href="mailto:support@workie.ch" style={{ color: "var(--accent)", textDecoration: "none" }}>support@workie.ch</a>
+            Contact : <a href="mailto:contact@workie.ch" style={{ color: "var(--accent)", textDecoration: "none" }}>contact@workie.ch</a>
           </address>
         </Section>
 
@@ -52,7 +52,7 @@ export default function MentionsLegalesPage() {
             Workie n'est pas responsable des avis publiés par ses utilisateurs, mais s'engage à retirer tout contenu signalé comme illicite dans les meilleurs délais.
           </p>
           <p style={{ marginTop: 12 }}>
-            Pour signaler un contenu : <a href="mailto:support@workie.ch" style={{ color: "var(--accent)", textDecoration: "none" }}>support@workie.ch</a>
+            Pour signaler un contenu : <a href="mailto:contact@workie.ch" style={{ color: "var(--accent)", textDecoration: "none" }}>contact@workie.ch</a>
           </p>
         </Section>
 
