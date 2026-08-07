@@ -38,6 +38,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
   return (
     <>
       <button
+        className="ads-action"
         type="button"
         onClick={() => setOpen(true)}
         style={{

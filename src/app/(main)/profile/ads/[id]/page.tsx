@@ -52,16 +52,42 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
 
   return (
     <div className="page-root">
+      <style>{`
+        /* Le rendu large est correct et ne change pas : tout ce qui suit est
+           borné au mobile.
+
+           Le défaut : la grille des indicateurs restait en deux colonnes quelle
+           que soit la largeur. Mesuré sur un écran de 375 px, elle tenait deux
+           colonnes de 191 et 139 px, et les sous-grilles tombaient à 150 px de
+           large pour y loger jusqu'à trois colonnes. « Dépensé » et son montant
+           se touchaient, le CTR était coupé en deux. */
+        @media (max-width: 760px) {
+          .ads-kpi-grid { grid-template-columns: 1fr !important; }
+
+          /* Cibles tactiles : « Mettre en pause » faisait 35 px de haut et le
+             retour 20 px, là où un doigt en demande 44. */
+          .ads-retour { min-height: 44px; align-items: center; }
+          .ads-action { min-height: 44px !important; padding-left: 18px !important; padding-right: 18px !important; }
+          .ads-bascule { min-height: 44px !important; min-width: 64px !important; font-size: 13px !important; }
+          .ads-lien { display: inline-flex !important; align-items: center; min-height: 44px; }
+
+          /* Le visuel de 100 px et le titre se disputaient la largeur : le
+             titre passait sur quatre lignes. Le visuel s'étale, le titre
+             respire. */
+          .ads-entete { flex-direction: column !important; gap: 14px !important; }
+          .ads-visuel { width: 100% !important; height: 160px !important; }
+        }
+      `}</style>
       <main className="page-main-md" style={{ paddingTop: 24, paddingBottom: 48 }}>
 
-        <Link href="/profile/ads" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
+        <Link href="/profile/ads" className="ads-retour" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
           <ArrowLeft size={14} aria-hidden="true" /> Mes publicités
         </Link>
 
         {/* Header */}
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, overflow: "hidden", marginBottom: 20 }}>
-          <div style={{ display: "flex", gap: 20, padding: "22px 24px", flexWrap: "wrap" }}>
-            <div style={{ width: 100, height: 100, borderRadius: 14, overflow: "hidden", flexShrink: 0, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="ads-entete" style={{ display: "flex", gap: 20, padding: "22px 24px", flexWrap: "wrap" }}>
+            <div className="ads-visuel" style={{ width: 100, height: 100, borderRadius: 14, overflow: "hidden", flexShrink: 0, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {campaign.image_url
                 ? <Image src={campaign.image_url} alt="" width={100} height={100} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
                 : <span style={{ fontSize: 36 }}>📣</span>
@@ -87,7 +113,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                 {campaign.target_cantons.length > 0 && <span>📍 {campaign.target_cantons.join(", ")}</span>}
                 {campaign.target_sectors.length > 0 && <span>🏭 {campaign.target_sectors.join(", ")}</span>}
               </div>
-              <a href={campaign.cta_url} target="_blank" rel="noopener noreferrer"
+              <a href={campaign.cta_url} target="_blank" rel="noopener noreferrer" className="ads-lien"
                 style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 10, fontSize: 13, color: "#8b5cf6", textDecoration: "none" }}>
                 {campaign.cta_label} <ExternalLink size={12} aria-hidden="true" />
               </a>
@@ -101,7 +127,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
         </div>
 
         {/* KPIs */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 20 }}>
+        <div className="ads-kpi-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 20 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 20px" }}>
               <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>Performance totale</p>

@@ -36,7 +36,11 @@ export function AdStatsChart({ stats }: { stats: DayStat[] }) {
         </div>
         <div style={{ display: "flex", gap: 4 }}>
           {(["impressions", "clicks"] as const).map(m => (
-            <button key={m} onClick={() => { setMetric(m); setActiveIdx(null); }} style={{
+            <button key={m} onClick={() => { setMetric(m); setActiveIdx(null); }} className="ads-bascule" style={{
+              // 3 px de rembourrage vertical donnaient une cible de 23 px de
+              // haut. Le minimum tenable au doigt est 44 ; la media query de la
+              // page de statistiques s'en charge sur mobile, sans toucher au
+              // rendu large qui convenait.
               padding: "3px 10px", borderRadius: 50, fontSize: 11, fontWeight: 600, cursor: "pointer", border: "none",
               background: metric === m ? "#8b5cf6" : "var(--surface2)",
               color: metric === m ? "#fff" : "var(--text-muted)",
