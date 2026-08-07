@@ -23,7 +23,7 @@ export default function ConfidentialitePage() {
         </p>
 
         <Section title="1. Responsable du traitement">
-          <p>Workie Sàrl, Suisse — <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a></p>
+          <p>Workie, Suisse — <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a></p>
         </Section>
 
         <Section title="2. Données collectées">

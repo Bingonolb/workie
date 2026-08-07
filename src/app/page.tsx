@@ -4,6 +4,7 @@ import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ArrowRight, Star, Shield, Zap, Eye, TrendingUp, MessageCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LandingFaq } from "@/components/LandingFaq";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
@@ -175,7 +176,7 @@ export default async function Home() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
             {[
               { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" aria-hidden="true" />, bg: "rgba(245,158,11,0.1)", title: "Avis authentiques", desc: "Chaque avis est soumis à une charte de bonne foi. Aucun contenu sponsorisé, aucune intervention des entreprises." },
-              { icon: <Shield size={22} color="#10b981" aria-hidden="true" />, bg: "rgba(16,185,129,0.1)", title: "Anonymat garanti", desc: "Ton identité n'est jamais exposée. Tu partages librement, sans conséquences professionnelles." },
+              { icon: <Shield size={22} color="#10b981" aria-hidden="true" />, bg: "rgba(16,185,129,0.1)", title: "Anonymat par défaut", desc: "Ton nom n'est jamais publié et ton compte n'est pas relié aux avis côté public." },
               { icon: <TrendingUp size={22} color="#8b5cf6" aria-hidden="true" />, bg: "rgba(139,92,246,0.1)", title: "Salaires réels", desc: "Des chiffres concrets, partagés anonymement par des employés en poste. Sache exactement ce que vaut ton profil." },
               { icon: <MessageCircle size={22} color="#f97316" aria-hidden="true" />, bg: "rgba(249,115,22,0.1)", title: "Simple et direct", desc: "Une expérience pensée pour aller à l'essentiel — chercher, comparer, décider." },
             ].map(({ icon, bg, title, desc }) => (
@@ -264,6 +265,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── FAQ ── */}
+      <LandingFaq />
 
       {/* ── Footer ── */}
       <footer style={{ borderTop: "1px solid var(--border)", padding: "36px 24px 24px" }}>

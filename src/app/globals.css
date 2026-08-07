@@ -902,3 +902,14 @@ select:focus-visible {
     max-height: 300px;
   }
 }
+
+/* FAQ de la page d'accueil.
+   Le marqueur natif de <summary> est retiré au profit du +/− à droite : le
+   triangle par défaut n'est pas stylable de façon fiable d'un navigateur à
+   l'autre, et il se place à gauche du texte, ce qui décale l'alignement. */
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::marker { content: ""; }
+.faq-item[open] .faq-chevron { transform: rotate(45deg); }
+.faq-chevron { transition: transform 0.18s ease; display: inline-block; }
+.faq-item summary:hover { background: var(--surface2); }
+.faq-item summary:focus-visible { outline: 2px solid #8b5cf6; outline-offset: -2px; }

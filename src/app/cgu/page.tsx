@@ -23,7 +23,7 @@ export default function CGUPage() {
         </p>
 
         <Section title="1. Présentation de Workie">
-          <p>Workie est une plateforme en ligne permettant aux employés de partager anonymement leurs avis sur les entreprises suisses, ainsi que des informations sur les salaires et les conditions de travail. Workie est exploité par Workie Sàrl, Suisse.</p>
+          <p>Workie est une plateforme en ligne permettant aux employés de partager anonymement leurs avis sur les entreprises suisses, ainsi que des informations sur les salaires et les conditions de travail. Workie est exploité depuis la Suisse.</p>
           <p>En accédant à la plateforme ou en créant un compte, vous acceptez les présentes CGU dans leur intégralité.</p>
         </Section>
 
