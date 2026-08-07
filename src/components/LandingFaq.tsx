@@ -133,15 +133,15 @@ const ENTREES: Entree[] = [
   {
     q: "Workie est-il suisse ? Où sont hébergées les données ?",
     texte:
-      "Workie est opéré depuis la Suisse et consacré aux entreprises suisses. L'hébergement applicatif est assuré par Vercel (États-Unis) et la base de données par Supabase sur des serveurs situés en Europe.",
+      "Workie est opéré depuis la Suisse et consacré aux entreprises suisses. L'application est servie par Vercel, la base de données par Supabase sur des serveurs situés en Europe, et la messagerie par Infomaniak, en Suisse.",
     r: (
       <>
         Workie est opéré depuis la Suisse et consacré aux entreprises suisses — 1 033
         entreprises référencées, dans les 26 cantons.
         <br /><br />
-        L'infrastructure, en revanche, n'est pas suisse et nous préférons le dire franchement :
-        l'application est hébergée par Vercel, aux États-Unis, et la base de données par
-        Supabase sur des serveurs situés en Europe. Le détail figure dans les{" "}
+        L&apos;infrastructure est répartie entre plusieurs prestataires. L&apos;application est
+        servie par Vercel, la base de données par Supabase sur des serveurs situés en Europe,
+        et la messagerie par Infomaniak, en Suisse. Le détail figure dans les{" "}
         <Link href="/mentions-legales" style={{ color: "#8b5cf6" }}>mentions légales</Link> et
         dans la{" "}
         <Link href="/confidentialite" style={{ color: "#8b5cf6" }}>politique de confidentialité</Link>.
