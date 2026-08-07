@@ -145,7 +145,12 @@ export default async function Home() {
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 24 }}>
             {[
-              { n: "01", icon: "🔍", title: "Recherche", desc: "Par nom, canton ou secteur. Plus de 1 500 entreprises suisses référencées, des PME aux multinationales." },
+              { n: "01", icon: "🔍", title: "Recherche", // Pas de nombre en dur ici : le bandeau juste au-dessus affiche le
+              // compte réel, et il annonçait 1 033 quand cette ligne promettait
+              // « plus de 1 500 » — les deux à l'écran en même temps. Sur un site
+              // dont l'argument est la fiabilité de l'information, se contredire
+              // sur sa propre taille est ce qui coûte le plus cher.
+              desc: "Par nom, canton ou secteur. Des PME aux multinationales, dans toute la Suisse." },
               { n: "02", icon: "📖", title: "Explore", desc: "Management, culture, salaires, évolution de carrière — des retours d'employés actuels et anciens." },
               { n: "03", icon: "✍️", title: "Contribue", desc: "Partage ton expérience anonymement. Chaque avis renforce la valeur de la plateforme pour tous." },
             ].map(({ n, icon, title, desc }) => (
