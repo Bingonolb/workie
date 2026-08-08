@@ -35,12 +35,13 @@ type Donnees = {
 export function ProfilClient() {
   // On repart de la dernière réponse connue : au retour sur la page, le
   // contenu est là avant même le premier rendu, plus de squelette à revoir.
-  const [d, setD] = useState<Donnees | null>(() => {
+  // Forme vérifiée avant usage : une valeur inattendue en mémoire ne doit
+  // jamais faire tomber la page, elle doit simplement être ignorée.
+  const [depuisMemoire] = useState(() => {
     const c = lireCache<Donnees>(CLE_PROFIL);
-    // Forme vérifiée avant usage : une valeur inattendue en mémoire ne doit
-    // jamais faire tomber la page, elle doit simplement être ignorée.
     return c && Array.isArray(c.reviews) ? c : null;
   });
+  const [d, setD] = useState<Donnees | null>(depuisMemoire);
   const [echec, setEchec] = useState(false);
 
   useEffect(() => {
@@ -92,11 +93,15 @@ export function ProfilClient() {
     ? (reviews.reduce((s, r) => s + Number(r.rating_overall), 0) / reviews.length).toFixed(1)
     : null;
 
-  // Le fondu ne s'applique qu'à la première arrivée des données. Au retour
-  // depuis le cache, le contenu est déjà là : le faire réapparaître serait une
-  // animation gratuite, et c'est ce qui donne l'impression de rechargement.
+  // Le fondu ne se joue que si les données ont dû être attendues. Il se jouait
+  // auparavant à chaque visite, mémoire comprise : la classe était présente dès
+  // le premier rendu, donc l'animation partait même quand le contenu était déjà
+  // là. La page paraissait charger alors qu'elle n'avait rien à charger — c'est
+  // précisément l'impression qu'on cherchait à supprimer.
+  const anime = d !== null && depuisMemoire === null;
+
   return (
-    <div className={d ? "apparition" : undefined}>
+    <div className={anime ? "apparition" : undefined}>
       {/* ── Header ── */}
       <div className="profile-header" style={{
         position: "relative",
