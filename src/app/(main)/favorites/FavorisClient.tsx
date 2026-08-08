@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Flame } from "lucide-react";
 import { CompanyCard } from "@/components/CompanyCard";
 import type { Company } from "@/lib/types";
+import { lireCache, ecrireCache, CLE_FAVORIS } from "@/lib/cacheSession";
 
 /**
  * Liste des favoris, chargée après affichage.
@@ -19,7 +20,7 @@ import type { Company } from "@/lib/types";
  * écran vide à une grille pleine, en poussant tout vers le bas.
  */
 export function FavorisClient() {
-  const [companies, setCompanies] = useState<Company[] | null>(null);
+  const [companies, setCompanies] = useState<Company[] | null>(() => lireCache<Company[]>(CLE_FAVORIS) ?? null);
   const [echec, setEchec] = useState(false);
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function FavorisClient() {
         if (r.status === 401) { window.location.href = "/api/auth/signout?next=/login"; return null; }
         return r.json();
       })
-      .then(d => { if (d && !annule) setCompanies(d.companies ?? []); })
+      .then(d => { if (d && !annule) { ecrireCache(CLE_FAVORIS, d.companies ?? []); setCompanies(d.companies ?? []); } })
       // Un échec réseau affichait « Aucun favori pour l'instant » — un message
       // faux, qui laisse croire à une perte. On distingue les deux cas.
       .catch(() => { if (!annule) setEchec(true); });

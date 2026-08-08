@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Compass, TrendingUp, Flame, User, Layers } from "lucide-react";
+import { precharger, CLE_PROFIL, CLE_FAVORIS } from "@/lib/cacheSession";
 
 function BottomNavInner() {
   const pathname = usePathname();
@@ -35,6 +36,11 @@ function BottomNavInner() {
     if (active) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }
   };
 
+  const prechargerCible = (href: string) => {
+    if (href === "/profile") precharger(CLE_PROFIL, "/api/user/profile");
+    else if (href === "/favorites") precharger(CLE_FAVORIS, "/api/user/favorites");
+  };
+
   return (
     <nav className="bottom-nav">
       {USER_LINKS.map(({ href, Icon, label, active }) => (
@@ -43,6 +49,11 @@ function BottomNavInner() {
           href={href}
           className={`bottom-nav-item${active ? " active" : ""}`}
           onClick={handleClick(href, active)}
+          // Le contenu part au survol, ou au premier contact du doigt sur
+          // mobile. Le temps que le doigt se lève et que la page s'affiche, la
+          // réponse est déjà là — la page n'a plus rien à attendre.
+          onPointerEnter={() => prechargerCible(href)}
+          onTouchStart={() => prechargerCible(href)}
           aria-current={active ? "page" : undefined}
         >
           <Icon size={22} strokeWidth={active ? 2.5 : 1.8} aria-hidden="true" />

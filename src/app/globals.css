@@ -991,3 +991,16 @@ body.mode-swipe .page-root {
   height: calc(100dvh - 56px);
   overflow: hidden;
 }
+
+/* Arrivée des données personnelles.
+   Le contenu remplaçait le squelette d'un coup, ce qui se ressentait comme une
+   secousse plutôt que comme un chargement. Un fondu très court suffit à rendre
+   la bascule lisible sans donner l'impression d'attendre. */
+.apparition { animation: apparition 0.18s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes apparition {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .apparition { animation: none; }
+}

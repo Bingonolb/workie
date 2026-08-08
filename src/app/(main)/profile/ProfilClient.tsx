@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { SignOutButton } from "@/components/SignOutButton";
 import type { Profile, Review } from "@/lib/types";
+import { lireCache, ecrireCache, CLE_PROFIL } from "@/lib/cacheSession";
 
 type Donnees = {
   authentifie: boolean;
@@ -32,7 +33,9 @@ type Donnees = {
  * contenu saute quand les données arrivent.
  */
 export function ProfilClient() {
-  const [d, setD] = useState<Donnees | null>(null);
+  // On repart de la dernière réponse connue : au retour sur la page, le
+  // contenu est là avant même le premier rendu, plus de squelette à revoir.
+  const [d, setD] = useState<Donnees | null>(() => lireCache<Donnees>(CLE_PROFIL) ?? null);
   const [echec, setEchec] = useState(false);
 
   useEffect(() => {
@@ -46,7 +49,7 @@ export function ProfilClient() {
         if (r.status === 401) { window.location.href = "/api/auth/signout?next=/login"; return null; }
         return r.json();
       })
-      .then(j => { if (j && !annule) setD(j); })
+      .then(j => { if (j && !annule) { ecrireCache(CLE_PROFIL, j); setD(j); } })
       // Sans cet état, un échec laissait la page sur son squelette
       // indéfiniment, sans un mot : constaté en production pendant une
       // interruption de l'API. Un écran figé n'apprend rien à personne.
@@ -84,8 +87,11 @@ export function ProfilClient() {
     ? (reviews.reduce((s, r) => s + Number(r.rating_overall), 0) / reviews.length).toFixed(1)
     : null;
 
+  // Le fondu ne s'applique qu'à la première arrivée des données. Au retour
+  // depuis le cache, le contenu est déjà là : le faire réapparaître serait une
+  // animation gratuite, et c'est ce qui donne l'impression de rechargement.
   return (
-    <>
+    <div className={d ? "apparition" : undefined}>
       {/* ── Header ── */}
       <div className="profile-header" style={{
         position: "relative",
@@ -258,6 +264,6 @@ export function ProfilClient() {
         </div>
 
       </div>
-    </>
+    </div>
   );
 }

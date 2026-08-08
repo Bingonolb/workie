@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signOut } from "@/lib/actions/auth";
 import { LogOut, X } from "lucide-react";
+import { viderCache } from "@/lib/cacheSession";
 
 export function SignOutButton() {
   const [open, setOpen] = useState(false);
@@ -10,6 +11,10 @@ export function SignOutButton() {
 
   const handleSignOut = async () => {
     setPending(true);
+    // Les données du compte sont gardées en mémoire le temps de la navigation
+    // pour éviter de les recharger à chaque retour sur le profil. Elles doivent
+    // disparaître ici, sans quoi le compte suivant verrait celles du précédent.
+    viderCache();
     await signOut();
   };
 
