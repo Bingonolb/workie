@@ -909,7 +909,85 @@ select:focus-visible {
    l'autre, et il se place à gauche du texte, ce qui décale l'alignement. */
 .faq-item summary::-webkit-details-marker { display: none; }
 .faq-item summary::marker { content: ""; }
-.faq-item[open] .faq-chevron { transform: rotate(45deg); }
-.faq-chevron { transition: transform 0.18s ease; display: inline-block; }
-.faq-item summary:hover { background: var(--surface2); }
-.faq-item summary:focus-visible { outline: 2px solid #8b5cf6; outline-offset: -2px; }
+
+/* Question et réponse se confondaient : même fond, même gouttière, seul le
+   gras les distinguait. La réponse est désormais séparée par un trait, et le
+   bloc ouvert prend la teinte de l'accent — on voit d'un coup d'œil où on en
+   est dans la liste. */
+.faq-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.faq-item[open] {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 22px rgba(139, 92, 246, 0.09);
+}
+
+.faq-question {
+  cursor: pointer;
+  list-style: none;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  /* 44 px : la plus petite cible confortable au doigt. */
+  min-height: 44px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.faq-item[open] .faq-question { color: #8b5cf6; }
+.faq-question:hover { background: var(--surface2); }
+.faq-question:focus-visible { outline: 2px solid #8b5cf6; outline-offset: -2px; }
+
+.faq-reponse {
+  margin: 0 20px;
+  padding: 16px 0 18px;
+  border-top: 1px solid var(--border2, var(--border));
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+/* Le +/− pivote, et la réponse arrive en fondu plutôt que d'apparaître d'un
+   bloc : <details> n'anime rien nativement, c'est ce qui donnait ce côté sec. */
+.faq-chevron {
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  display: inline-block;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), color 0.18s ease;
+}
+.faq-item[open] .faq-chevron { transform: rotate(45deg); color: #8b5cf6; }
+.faq-item[open] .faq-reponse { animation: faq-ouverture 0.22s cubic-bezier(0.4, 0, 0.2, 1); }
+
+@keyframes faq-ouverture {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Un lecteur qui a demandé moins d'animation ne doit pas en subir. */
+@media (prefers-reduced-motion: reduce) {
+  .faq-item[open] .faq-reponse { animation: none; }
+  .faq-chevron, .faq-item, .faq-question { transition: none; }
+}
+
+/* Vue swipe : elle occupe l'écran, exactement, et ne défile pas.
+   Elle débordait de 56 px — la hauteur de la barre de navigation, que
+   .page-root ne déduisait pas de son 100dvh. Ce débattement suffisait à faire
+   passer un geste de swipe pour un défilement, et la carte semblait se figer.
+   overscroll-behavior coupe en plus le tiré-pour-rafraîchir sur mobile.
+   Le geste des cartes n'est pas touché : touch-action reste celui de
+   .swipe-container, inchangé. */
+body.mode-swipe { overflow: hidden; overscroll-behavior: none; }
+body.mode-swipe .page-root {
+  min-height: 0;
+  height: calc(100dvh - 56px);
+  overflow: hidden;
+}

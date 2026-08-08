@@ -191,8 +191,22 @@ export function ExploreClient({
     syncUrl(sector, canton, sort, view);
   }, [sector, canton, sort, view, syncUrl]);
 
+  // La vue swipe occupe exactement l'écran et ne défile pas.
+  //
+  // Elle défilait de 56 px auparavant — la hauteur de la barre de navigation,
+  // que .page-root ne déduisait pas de son 100dvh. Ce débattement minuscule
+  // suffisait à gâcher le geste : le verrou de direction du glissement rendait
+  // la main au navigateur dès qu'un mouvement partait vers le bas, et une fois
+  // en butée il n'y avait plus rien à faire défiler. Le geste était mort pour
+  // toute sa durée et la carte semblait figée.
+  //
+  // Le verrou posé sur le corps du document plutôt que sur un conteneur : la
+  // barre du bas est en position fixe et la barre du haut collante, aucune des
+  // deux ne se laisse contenir proprement par un parent en hauteur figée.
   useEffect(() => {
-    if (view === "swipe") window.scrollTo({ top: 0, behavior: "instant" });
+    if (view !== "swipe") return;
+    document.body.classList.add("mode-swipe");
+    return () => document.body.classList.remove("mode-swipe");
   }, [view]);
 
   // Re-fetch from page 0 whenever filters/sort change

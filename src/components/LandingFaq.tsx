@@ -33,7 +33,7 @@ const ENTREES: Entree[] = [
         Workie est une plateforme suisse où des employés partagent anonymement leur expérience de
         travail — ambiance, management, équilibre de vie, salaire. Les avis viennent
         exclusivement des utilisateurs. Aucune entreprise ne peut acheter, écrire ou faire
-        retirer un avis parce qu'il lui déplaît.
+        retirer un avis parce qu&apos;il lui déplaît.
       </>
     ),
   },
@@ -43,18 +43,18 @@ const ENTREES: Entree[] = [
       "Ton nom n'est jamais publié et ton identifiant de compte n'est pas transmis au navigateur avec les avis. Ton adresse IP est conservée côté serveur pour la seule détection d'abus, et effacée lorsque tu supprimes ton compte.",
     r: (
       <>
-        Ton nom n'est jamais publié. L'identifiant de ton compte n'est pas transmis au
-        navigateur avec les avis, ce qui veut dire qu'aucun visiteur — ni aucune entreprise —
+        Ton nom n&apos;est jamais publié. L&apos;identifiant de ton compte n&apos;est pas transmis au
+        navigateur avec les avis, ce qui veut dire qu&apos;aucun visiteur — ni aucune entreprise —
         ne peut relier un avis à un profil en inspectant la page.
         <br /><br />
         Une donnée reste conservée côté serveur : ton adresse IP au moment de la publication.
         Elle sert uniquement à repérer les abus, par exemple plusieurs avis rédigés depuis le
-        même endroit pour gonfler ou descendre une note. Elle n'est jamais affichée, et elle
+        même endroit pour gonfler ou descendre une note. Elle n&apos;est jamais affichée, et elle
         est effacée lorsque tu supprimes ton compte.
         <br /><br />
         Ce que nous ne pouvons pas promettre : si tu décris ton poste avec assez de détails
         pour être la seule personne à y correspondre, ton employeur pourra te reconnaître. Le
-        seul rempart, là, c'est ce que tu choisis d'écrire.
+        seul rempart, là, c&apos;est ce que tu choisis d&apos;écrire.
       </>
     ),
   },
@@ -64,11 +64,11 @@ const ENTREES: Entree[] = [
       "Les fiches ne contiennent que des informations d'entreprise publiques : nom, secteur, canton, site officiel. Aucune donnée interne ou confidentielle. Les appréciations viennent uniquement des avis d'utilisateurs.",
     r: (
       <>
-        Une fiche d'entreprise ne contient que des informations publiques : la dénomination, le
-        secteur, le canton, le site officiel. Rien d'interne, rien de confidentiel, aucun
-        document d'entreprise.
+        Une fiche d&apos;entreprise ne contient que des informations publiques : la dénomination, le
+        secteur, le canton, le site officiel. Rien d&apos;interne, rien de confidentiel, aucun
+        document d&apos;entreprise.
         <br /><br />
-        Tout ce qui relève de l'appréciation — notes, ambiance, salaires, management — provient
+        Tout ce qui relève de l&apos;appréciation — notes, ambiance, salaires, management — provient
         uniquement des avis déposés par les utilisateurs. Workie ne produit aucune évaluation
         de son côté.
         <br /><br />
@@ -82,11 +82,11 @@ const ENTREES: Entree[] = [
       "Il faut un compte avec adresse e-mail confirmée, âgé d'au moins 24 heures. Un seul avis par entreprise et par personne, et trois avis maximum par 24 heures.",
     r: (
       <>
-        Il faut un compte dont l'adresse e-mail est confirmée et qui existe depuis au moins
-        24 heures. Cette attente n'est pas une formalité : elle rend coûteuse la création de
+        Il faut un compte dont l&apos;adresse e-mail est confirmée et qui existe depuis au moins
+        24 heures. Cette attente n&apos;est pas une formalité : elle rend coûteuse la création de
         comptes jetables destinés à fabriquer de faux avis.
         <br /><br />
-        S'ajoutent deux limites : un seul avis par entreprise et par personne, et trois avis
+        S&apos;ajoutent deux limites : un seul avis par entreprise et par personne, et trois avis
         au maximum sur 24 heures. Les comptes rattachés à une entreprise ne peuvent pas voter
         sur les avis qui la concernent.
       </>
@@ -105,7 +105,7 @@ const ENTREES: Entree[] = [
         · un repérage des publications répétées depuis une même adresse réseau ;<br />
         · une file de modération alimentée par les signalements, relue à la main.
         <br /><br />
-        Aucun dispositif n'est infaillible. C'est pourquoi le signalement est ouvert à tous, y
+        Aucun dispositif n&apos;est infaillible. C&apos;est pourquoi le signalement est ouvert à tous, y
         compris aux entreprises concernées.
       </>
     ),
@@ -116,11 +116,11 @@ const ENTREES: Entree[] = [
       "Signalez-le depuis la fiche : il part en modération et sera relu. Un avis n'est pas retiré parce qu'il est négatif, mais il l'est s'il enfreint nos règles — propos diffamatoires, haineux, discriminatoires, ou expérience manifestement inventée.",
     r: (
       <>
-        Signalez-le depuis la fiche de l'entreprise. Le signalement part en modération et
-        l'avis est relu.
+        Signalez-le depuis la fiche de l&apos;entreprise. Le signalement part en modération et
+        l&apos;avis est relu.
         <br /><br />
-        Soyons clairs sur la ligne : un avis n'est pas retiré parce qu'il est négatif, ni parce
-        qu'il déplaît. Il l'est s'il enfreint nos règles — propos diffamatoires, haineux ou
+        Soyons clairs sur la ligne : un avis n&apos;est pas retiré parce qu&apos;il est négatif, ni parce
+        qu&apos;il déplaît. Il l&apos;est s&apos;il enfreint nos règles — propos diffamatoires, haineux ou
         discriminatoires, attaque contre une personne nommée, ou expérience manifestement
         inventée. Un jugement défavorable exprimé de bonne foi sur des conditions de travail
         reste publié.
@@ -159,7 +159,7 @@ const ENTREES: Entree[] = [
         <br /><br />
         La plateforme se finance par la publicité, ce qui permet de ne facturer ni les
         employés qui témoignent, ni les lecteurs. Les emplacements publicitaires sont
-        identifiés comme tels et n'influencent ni les notes, ni le classement.
+        identifiés comme tels et n&apos;influencent ni les notes, ni le classement.
       </>
     ),
   },
@@ -169,12 +169,12 @@ const ENTREES: Entree[] = [
       "Depuis ton profil, tu peux télécharger l'ensemble de tes données et supprimer ton compte. La suppression détache tes avis de ton identité et efface l'adresse IP conservée pour la détection d'abus.",
     r: (
       <>
-        Depuis ton profil, deux boutons : télécharger l'ensemble de tes données, et supprimer
+        Depuis ton profil, deux boutons : télécharger l&apos;ensemble de tes données, et supprimer
         ton compte.
         <br /><br />
-        La suppression détache tes avis de ton identité et efface l'adresse IP conservée pour
-        la détection d'abus. Les avis eux-mêmes peuvent rester en ligne, sans plus aucun lien
-        avec toi — c'est ce qui évite qu'une entreprise puisse faire disparaître les
+        La suppression détache tes avis de ton identité et efface l&apos;adresse IP conservée pour
+        la détection d&apos;abus. Les avis eux-mêmes peuvent rester en ligne, sans plus aucun lien
+        avec toi — c&apos;est ce qui évite qu&apos;une entreprise puisse faire disparaître les
         témoignages la concernant en poussant leurs auteurs à fermer leur compte.
       </>
     ),
@@ -220,39 +220,18 @@ export function LandingFaq() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {ENTREES.map(({ q, r }) => (
-            <details
-              key={q}
-              className="faq-item"
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: 14,
-                overflow: "hidden",
-              }}
-            >
-              <summary
-                style={{
-                  cursor: "pointer",
-                  listStyle: "none",
-                  padding: "16px 20px",
-                  fontSize: 15,
-                  fontWeight: 700,
-                  color: "var(--text)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 16,
-                  // 44 px minimum : c'est la taille d'une cible tactile
-                  // utilisable au doigt.
-                  minHeight: 44,
-                }}
-              >
+            // Apparence entièrement en CSS : un style en ligne l'emporte sur
+            // une feuille de style, donc les règles d'état ouvert ne pouvaient
+            // pas reprendre la main sur la bordure ni sur la couleur.
+            <details key={q} className="faq-item">
+              <summary className="faq-question">
                 {q}
-                <span className="faq-chevron" aria-hidden="true" style={{ color: "var(--text-muted)", fontSize: 20, lineHeight: 1, flexShrink: 0 }}>
-                  +
-                </span>
+                <span className="faq-chevron" aria-hidden="true">+</span>
               </summary>
-              <div style={{ padding: "0 20px 18px", fontSize: 14, lineHeight: 1.65, color: "var(--text-muted)" }}>
+              {/* Un trait sépare la réponse de la question. Sans lui, les deux
+                  blocs se confondaient : même fond, même gouttière, seul le
+                  gras distinguait l'un de l'autre. */}
+              <div className="faq-reponse">
                 {r}
               </div>
             </details>
