@@ -35,7 +35,12 @@ type Donnees = {
 export function ProfilClient() {
   // On repart de la dernière réponse connue : au retour sur la page, le
   // contenu est là avant même le premier rendu, plus de squelette à revoir.
-  const [d, setD] = useState<Donnees | null>(() => lireCache<Donnees>(CLE_PROFIL) ?? null);
+  const [d, setD] = useState<Donnees | null>(() => {
+    const c = lireCache<Donnees>(CLE_PROFIL);
+    // Forme vérifiée avant usage : une valeur inattendue en mémoire ne doit
+    // jamais faire tomber la page, elle doit simplement être ignorée.
+    return c && Array.isArray(c.reviews) ? c : null;
+  });
   const [echec, setEchec] = useState(false);
 
   useEffect(() => {

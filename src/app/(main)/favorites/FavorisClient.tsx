@@ -20,7 +20,15 @@ import { lireCache, ecrireCache, CLE_FAVORIS } from "@/lib/cacheSession";
  * écran vide à une grille pleine, en poussant tout vers le bas.
  */
 export function FavorisClient() {
-  const [companies, setCompanies] = useState<Company[] | null>(() => lireCache<Company[]>(CLE_FAVORIS) ?? null);
+  // On relit la réponse brute de l'API, la même forme que celle rangée par le
+  // préchargement du lien. Les deux écrivaient auparavant des formes
+  // différentes — un objet d'un côté, un tableau de l'autre — et le composant
+  // appelait .map sur l'objet : écran d'erreur dès qu'on effleurait le lien
+  // avant d'ouvrir la page.
+  const [companies, setCompanies] = useState<Company[] | null>(() => {
+    const c = lireCache<{ companies?: Company[] }>(CLE_FAVORIS);
+    return Array.isArray(c?.companies) ? c.companies : null;
+  });
   const [echec, setEchec] = useState(false);
 
   useEffect(() => {
@@ -34,7 +42,7 @@ export function FavorisClient() {
         if (r.status === 401) { window.location.href = "/api/auth/signout?next=/login"; return null; }
         return r.json();
       })
-      .then(d => { if (d && !annule) { ecrireCache(CLE_FAVORIS, d.companies ?? []); setCompanies(d.companies ?? []); } })
+      .then(d => { if (d && !annule) { ecrireCache(CLE_FAVORIS, d); setCompanies(Array.isArray(d.companies) ? d.companies : []); } })
       // Un échec réseau affichait « Aucun favori pour l'instant » — un message
       // faux, qui laisse croire à une perte. On distingue les deux cas.
       .catch(() => { if (!annule) setEchec(true); });
