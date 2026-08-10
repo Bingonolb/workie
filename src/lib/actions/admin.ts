@@ -15,27 +15,44 @@ async function requireAdmin() {
   return { user, supabase };
 }
 
-export async function adminUpdateCompany(id: string, formData: FormData): Promise<{ error?: string }> {
+export async function adminUpdateCompany(id: string, formData: FormData): Promise<{ error?: string; avertissement?: string }> {
   try {
     await requireAdmin();
     const admin = createAdminClient();
 
     const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
-    const MAX_IMG = 10 * 1024 * 1024;
+    // 7 Mo, et non 10 : la requête elle-même est plafonnée à 8 Mo. Annoncer
+    // une limite que la plateforme n'accorde pas produisait un échec sans
+    // message, avant même d'arriver ici.
+    const MAX_IMG = 7 * 1024 * 1024;
 
-    // Handle cover file upload (takes priority over URL field)
+    // Un problème d'image n'annule plus l'enregistrement.
+    //
+    // Auparavant, un format inattendu ou un envoi en échec interrompait toute
+    // l'action : le texte saisi était perdu et il fallait tout ressaisir, sans
+    // savoir pourquoi. Les deux sujets sont maintenant séparés — le texte est
+    // enregistré, et l'image signalée à part.
+    let avertissement: string | null = null;
     let cover_url: string | null = String(formData.get("cover_url") || "") || null;
     const coverFile = formData.get("cover_file");
     if (coverFile instanceof File && coverFile.size > 0) {
-      if (!ALLOWED_IMG.includes(coverFile.type)) return { error: "Format non supporté (JPG, PNG, WebP, GIF)." };
-      if (coverFile.size > MAX_IMG) return { error: "Image trop lourde (max 10 MB)." };
-      const ext = EXT_MAP[coverFile.type] ?? "jpg";
-      const path = `covers/${id}/${randomUUID()}.${ext}`;
-      const { error: upErr } = await admin.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
-      if (!upErr) {
-        const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
-        cover_url = pub.publicUrl;
+      if (!ALLOWED_IMG.includes(coverFile.type)) {
+        avertissement = "Le texte est enregistré. L'image a été ignorée : format non supporté (JPG, PNG, WebP, GIF).";
+      } else if (coverFile.size > MAX_IMG) {
+        avertissement = "Le texte est enregistré. L'image a été ignorée : trop lourde (7 Mo maximum).";
+      } else {
+        const ext = EXT_MAP[coverFile.type] ?? "jpg";
+        const path = `covers/${id}/${randomUUID()}.${ext}`;
+        const { error: upErr } = await admin.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
+        if (upErr) {
+          // L'échec était jusqu'ici parfaitement silencieux : l'ancienne image
+          // restait en place sans que personne ne sache pourquoi.
+          avertissement = "Le texte est enregistré. L'envoi de l'image a échoué, l'ancienne est conservée.";
+        } else {
+          const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
+          cover_url = pub.publicUrl;
+        }
       }
     }
 
@@ -66,7 +83,8 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     revalidatePath("/admin/companies");
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
-    return {};
+    // Le texte est bien enregistré ; l'avertissement ne concerne que l'image.
+    return avertissement ? { avertissement } : {};
   } catch (e) {
     return { error: (e as Error).message };
   }

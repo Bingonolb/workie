@@ -100,6 +100,8 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   const [imagePreview, setImagePreview] = useState<string>(prefillImage ?? "");
   const [imageUrl, setImageUrl] = useState(prefillImage ?? "");
   const blobRef = useRef<string | null>(null);
+  const champImageRef = useRef<HTMLInputElement>(null);
+  const [infoImage, setInfoImage] = useState<string | null>(null);
   useEffect(() => { return () => { if (blobRef.current) URL.revokeObjectURL(blobRef.current); }; }, []);
 
   const [headline, setHeadline] = useState(prefillHeadline ?? "");
@@ -220,18 +222,38 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                   <p style={{ fontSize: 14, fontWeight: 700, color: imagePreview ? "#8b5cf6" : "var(--text)", marginBottom: 3 }}>
                     {imagePreview ? "✓ Image chargée — changer" : "Uploader une image HD"}
                   </p>
-                  <p style={{ fontSize: 11, color: "var(--text-muted)" }}>PNG, JPG, WebP · Max 10 MB</p>
+                  <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    {infoImage ?? "PNG, JPG, WebP — n'importe quelle taille, l'image est optimisée automatiquement"}
+                  </p>
                 </div>
-                <input type="file" name="image_file" accept="image/*" style={{ display: "none" }}
-                  onChange={e => {
+                <input ref={champImageRef} type="file" name="image_file" accept="image/*" style={{ display: "none" }}
+                  onChange={async e => {
                     const f = e.target.files?.[0];
-                    if (f) {
-                      if (blobRef.current) URL.revokeObjectURL(blobRef.current);
-                      const url = URL.createObjectURL(f);
-                      blobRef.current = url;
-                      setImageUrl("");
-                      setImagePreview(url);
+                    if (!f) return;
+                    setInfoImage("Optimisation…");
+
+                    // Réduction dans le navigateur : la requête ne peut pas
+                    // dépasser 8 Mo, et une photo d'appareil les dépasse
+                    // souvent. Sans cette étape l'envoi échouait sans message.
+                    const { preparerImage, formaterPoids } = await import("@/lib/preparerImage");
+                    const r = await preparerImage(f);
+
+                    if (r.reduite && champImageRef.current) {
+                      // On remplace le fichier choisi par sa version allégée,
+                      // pour que le formulaire envoie bien celle-ci.
+                      const dt = new DataTransfer();
+                      dt.items.add(r.fichier);
+                      champImageRef.current.files = dt.files;
+                      setInfoImage(`Optimisée : ${formaterPoids(r.avant)} → ${formaterPoids(r.apres)}`);
+                    } else {
+                      setInfoImage(`${formaterPoids(r.apres)} · prête`);
                     }
+
+                    if (blobRef.current) URL.revokeObjectURL(blobRef.current);
+                    const url = URL.createObjectURL(r.fichier);
+                    blobRef.current = url;
+                    setImageUrl("");
+                    setImagePreview(url);
                   }} />
               </label>
             </div>

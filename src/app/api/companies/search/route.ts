@@ -1,26 +1,42 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-function escapeLike(s: string) {
-  return s.replace(/[%_\\]/g, "\\$&");
-}
+/**
+ * Recherche d'entreprises.
+ *
+ * Le classement est fait en base, par `rechercher_entreprises`. C'est
+ * délibéré : la version précédente enchaînait quatre requêtes `ilike` puis
+ * triait en JavaScript, et surtout elle retirait les accents de la saisie sans
+ * les retirer de la colonne. Chercher « etat de geneve » dans une colonne
+ * contenant « État de Genève » ne pouvait donc pas aboutir — le traitement
+ * empêchait la correspondance au lieu de l'aider. La ponctuation n'était pas
+ * traitée du tout, d'où l'échec de « JP Morgan » face à « J.P. Morgan ».
+ *
+ * Les deux côtés sont désormais normalisés de la même façon — minuscules, sans
+ * accents, sans ponctuation — et le classement suit six paliers, du nom exact
+ * à la simple ressemblance, ce qui absorbe les fautes de frappe. Deux index
+ * couvrent les deux usages : préfixe et trigramme.
+ */
 
-function stripAccents(s: string) {
-  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-}
+type Resultat = {
+  id: string;
+  name: string;
+  city: string;
+  sector: string;
+  logo_url: string | null;
+};
 
-// Module-level cache: survives across concurrent requests within a serverless instance.
-// Key = query string, value = { data, expires }. Max 500 entries, 30s TTL.
-type SearchResult = { id: string; name: string; city: string; sector: string; logo_url: string | null };
-const searchCache = new Map<string, { data: SearchResult[]; expires: number }>();
-const CACHE_TTL = 30_000;
-const MAX_CACHE_ENTRIES = 500;
+// Mémoire courte partagée par les requêtes d'une même instance : une frappe au
+// clavier déclenche plusieurs appels rapprochés, souvent identiques.
+const cache = new Map<string, { data: Resultat[]; expire: number }>();
+const DUREE_CACHE = 30_000;
+const MAX_ENTREES = 500;
 
-function evictExpired() {
-  const now = Date.now();
-  for (const [k, v] of searchCache) {
-    if (v.expires < now) searchCache.delete(k);
-    if (searchCache.size <= MAX_CACHE_ENTRIES) break;
+function purger() {
+  const maintenant = Date.now();
+  for (const [k, v] of cache) {
+    if (v.expire < maintenant) cache.delete(k);
+    if (cache.size <= MAX_ENTREES) break;
   }
 }
 
@@ -29,58 +45,33 @@ export async function GET(request: Request) {
   const q = (searchParams.get("q") ?? "").trim().slice(0, 100);
   if (q.length < 1) return NextResponse.json({ companies: [] });
 
-  // Check in-memory cache first
-  const cacheKey = q.toLowerCase();
-  const cached = searchCache.get(cacheKey);
-  if (cached && cached.expires > Date.now()) {
-    return NextResponse.json({ companies: cached.data }, {
+  const cle = q.toLowerCase();
+  const enCache = cache.get(cle);
+  if (enCache && enCache.expire > Date.now()) {
+    return NextResponse.json({ companies: enCache.data }, {
       headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
     });
   }
 
   const supabase = await createClient();
+  const { data, error } = await supabase.rpc("rechercher_entreprises", { terme: q, nb: 8 });
 
-  // Search with both the original query AND its accent-stripped version
-  const qStripped = stripAccents(q);
-  const safe = escapeLike(q);
-  const safeStripped = escapeLike(qStripped);
-
-  const queries = [
-    supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `${safe}%`).order("name").limit(6),
-    supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `%${safe}%`).not("name", "ilike", `${safe}%`).order("name").limit(6),
-  ];
-  if (safeStripped !== safe) {
-    queries.push(
-      supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `${safeStripped}%`).order("name").limit(6),
-      supabase.from("companies").select("id, name, city, sector, logo_url").ilike("name", `%${safeStripped}%`).not("name", "ilike", `${safeStripped}%`).order("name").limit(6),
-    );
+  if (error) {
+    // Une recherche en échec ne doit pas casser la page : on renvoie une liste
+    // vide, la barre reste utilisable.
+    return NextResponse.json({ companies: [] }, { headers: { "Cache-Control": "no-store" } });
   }
 
-  const results = await Promise.all(queries);
-  const seen = new Set<string>();
-  const startsWith: typeof results[0]["data"] = [];
-  const contains:   typeof results[0]["data"] = [];
+  const companies: Resultat[] = (data ?? []).map(
+    (r: Resultat & { rang: number; ressemblance: number }) => ({
+      id: r.id, name: r.name, city: r.city, sector: r.sector, logo_url: r.logo_url,
+    })
+  );
 
-  for (const { data } of results) {
-    for (const c of data ?? []) {
-      if (seen.has(c.id)) continue;
-      seen.add(c.id);
-      const nameNorm = stripAccents(c.name);
-      if (nameNorm.startsWith(qStripped) || c.name.toLowerCase().startsWith(q.toLowerCase())) {
-        startsWith.push(c);
-      } else {
-        contains.push(c);
-      }
-    }
-  }
+  if (cache.size >= MAX_ENTREES) purger();
+  cache.set(cle, { data: companies, expire: Date.now() + DUREE_CACHE });
 
-  const final = [...startsWith.slice(0, 6), ...contains.slice(0, 4)].slice(0, 8) as SearchResult[];
-
-  // Store in module-level cache
-  if (searchCache.size >= MAX_CACHE_ENTRIES) evictExpired();
-  searchCache.set(cacheKey, { data: final, expires: Date.now() + CACHE_TTL });
-
-  return NextResponse.json({ companies: final }, {
+  return NextResponse.json({ companies }, {
     headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
   });
 }

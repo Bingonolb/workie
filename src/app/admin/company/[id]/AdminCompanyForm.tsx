@@ -26,6 +26,7 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
   const [tagInput, setTagInput] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const blobRef = useRef<string | null>(null);
+  const [infoImage, setInfoImage] = useState<string | null>(null);
 
   const addTag = useCallback((raw: string) => {
     const t = raw.trim().replace(/^#+/, "").slice(0, 40);
@@ -48,11 +49,28 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
     if (blobRef.current) { URL.revokeObjectURL(blobRef.current); blobRef.current = null; }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setInfoImage("Optimisation…");
+
+    // La requête ne peut pas dépasser 8 Mo. Une photo d'appareil les dépasse
+    // souvent, et l'envoi échouait alors sans message exploitable — d'où
+    // l'impression que « ça bugue » sur une image sur deux. On réduit ici.
+    const { preparerImage, formaterPoids } = await import("@/lib/preparerImage");
+    const r = await preparerImage(file);
+
+    if (r.reduite && fileRef.current) {
+      const dt = new DataTransfer();
+      dt.items.add(r.fichier);
+      fileRef.current.files = dt.files;
+      setInfoImage(`Optimisée : ${formaterPoids(r.avant)} → ${formaterPoids(r.apres)}`);
+    } else {
+      setInfoImage(`${formaterPoids(r.apres)} · prête`);
+    }
+
     revokeBlobPreview();
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(r.fichier);
     blobRef.current = url;
     setCoverPreview(url);
   };
@@ -64,6 +82,10 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
     startTransition(async () => {
       const res = await adminUpdateCompany(company.id, formData);
       if (res.error) { setError(res.error); return; }
+      // Le texte a été enregistré même si l'image a échoué : on reste sur la
+      // page pour le dire, plutôt que de partir en laissant croire que tout
+      // s'est bien passé.
+      if (res.avertissement) { setInfoImage(res.avertissement); setError(null); return; }
       window.location.href = "/admin";
     });
   };
@@ -147,7 +169,9 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
             style={inp}
           />
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>ou uploader un fichier :</span>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+              {infoImage ?? "ou uploader un fichier — n'importe quelle taille, réduite automatiquement à 2560 px"}
+            </span>
             <label style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "7px 14px", borderRadius: 8, cursor: "pointer",

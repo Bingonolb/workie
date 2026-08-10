@@ -4,7 +4,6 @@ import { Shield } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
 import { SearchButton } from "./SearchButton";
-import { NavBell } from "./NavBell";
 import { getUnreadCount } from "@/lib/actions/notifications";
 
 export async function Navbar() {
@@ -57,7 +56,10 @@ export async function Navbar() {
         {/* Right side: search + notifications */}
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {user && <SearchButton />}
-          {user && <NavBell initialUnread={unreadCount} />}
+          {/* Cloche retirée : aucune notification n'a jamais été émise — table vide —
+              et un bouton qui ne mène à rien coûte de l'attention. La page et la
+              table restent en place, il suffira de rétablir cette ligne. */}
+              {/* {user && <NavBell initialUnread={unreadCount} />} */}
           {!user && (
             <Link href="/signup" style={{
               fontSize: 13, fontWeight: 700, textDecoration: "none",

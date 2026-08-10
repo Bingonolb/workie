@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
+import { refusDeContribution } from "@/lib/actions/compteVerifie";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function isBusiness(supabase: any, userId: string): Promise<boolean> {
@@ -28,7 +29,9 @@ async function ecrireFlamme(companyId: string, pose: boolean): Promise<void> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    // Un compte tout juste créé ne doit pas pouvoir déplacer une entreprise
+    // dans le classement — c'est le levier de la fabrication de réputation.
+    if (!user || refusDeContribution(user)) return;
     if (await isBusiness(supabase, user.id)) return;
 
     const { data: existante } = await supabase
@@ -67,7 +70,7 @@ export async function addBoost(companyId: string): Promise<void> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user || refusDeContribution(user)) return;
     if (await isBusiness(supabase, user.id)) return;
 
     const { data: existing } = await supabase
@@ -98,7 +101,7 @@ export async function addPenalty(companyId: string): Promise<void> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user || refusDeContribution(user)) return;
 
     const { data: profile } = await supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle();
     const isAdmin = profile?.role === "admin";

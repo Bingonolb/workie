@@ -6,7 +6,6 @@ import { Shield } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
 import { SearchButton } from "./SearchButton";
-import { NavBell } from "./NavBell";
 
 type UserCtx = {
   isLoggedIn: boolean;
@@ -75,7 +74,10 @@ export function NavbarClient() {
 
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {isLoggedIn && <SearchButton />}
-          {isLoggedIn && <NavBell initialUnread={ctx?.unreadCount ?? 0} />}
+          {/* Cloche retirée : aucune notification n'a jamais été émise — table vide —
+              et un bouton qui ne mène à rien coûte de l'attention. La page et la
+              table restent en place, il suffira de rétablir cette ligne. */}
+              {/* {isLoggedIn && <NavBell initialUnread={ctx?.unreadCount ?? 0} />} */}
           {!isLoggedIn && ctx !== null && (
             <Link href="/signup" style={{
               fontSize: 13, fontWeight: 700, textDecoration: "none",
