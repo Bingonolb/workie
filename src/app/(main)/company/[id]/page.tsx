@@ -8,7 +8,7 @@ import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle } from "
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
-import { Stars, RatingRow, StatPill, ratingColor } from "@/components/company/notation";
+import { Stars, RatingRow, StatPill, ratingColor, RepartitionNotes } from "@/components/company/notation";
 import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
 import { ActionsFiche, VotesFiche, PorteInvite, FormulaireAvis } from "@/components/company/Interactions";
 import { SectionAvis } from "@/components/company/SectionAvis";
@@ -328,24 +328,48 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               <VotesFiche companyId={company.id} initialScore={Number(company.score ?? 0)} />
             </div>
 
-            {/* Ratings breakdown */}
+            {/* Synthèse — traitement distinct des cartes d'avis.
+                Les deux blocs affichaient les mêmes lignes avec les mêmes
+                barres : rien ne permettait à l'œil de séparer la moyenne de
+                l'entreprise d'un témoignage isolé. La synthèse porte donc un
+                liseré coloré, un fond légèrement teinté, et surtout la
+                répartition des notes — qu'un avis seul ne peut pas montrer. */}
             {Number(company.review_count) > 0 && (
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px", marginBottom: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 18, flexWrap: "wrap" }}>
-                  <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
-                  <div>
-                    <Stars rating={Number(company.avg_rating)} size={18} />
-                    <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>{company.review_count} avis</p>
-                  </div>
-                </div>
+              <div style={{
+                background: "linear-gradient(180deg, rgba(139,92,246,0.06), transparent 60%), var(--surface)",
+                border: "1px solid var(--border)",
+                borderTop: "3px solid transparent",
+                borderImage: "linear-gradient(90deg, #8b5cf6, #f97316) 1",
+                borderRadius: 18, padding: "24px", marginBottom: 32,
+              }}>
+                <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+                  Synthèse des avis
+                </p>
 
-                {/* Les huit catégories sont toujours listées, y compris celles
-                    sans donnée, pour que l'étendue du questionnaire soit
-                    visible quelle que soit l'ancienneté des avis. */}
-                <div className="review-subratings">
-                  {RATING_CATEGORIES.map(({ key, label }) => (
-                    <RatingRow key={key} label={label} value={avgByCategory[key]} />
-                  ))}
+                <div className="fiche-synthese">
+                  {/* Colonne gauche : la note et sa répartition */}
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16, flexWrap: "wrap" }}>
+                      <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
+                      <div>
+                        <Stars rating={Number(company.avg_rating)} size={18} />
+                        <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                          sur {company.review_count} avis
+                        </p>
+                      </div>
+                    </div>
+                    <RepartitionNotes notes={reviews.map(r => Number(r.rating_overall))} />
+                  </div>
+
+                  {/* Colonne droite : le détail par catégorie.
+                      Les huit sont toujours listées, y compris celles sans
+                      donnée, pour que l'étendue du questionnaire reste visible
+                      quelle que soit l'ancienneté des avis. */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                    {RATING_CATEGORIES.map(({ key, label }) => (
+                      <RatingRow key={key} label={label} value={avgByCategory[key]} />
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", paddingTop: 16, marginTop: 16, borderTop: "1px solid var(--border)" }}>

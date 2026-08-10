@@ -66,3 +66,51 @@ export function StatPill({ label, pct }: { label: string; pct: number | null }) 
     </div>
   );
 }
+
+/**
+ * Répartition des notes, de 5 à 1 étoile.
+ *
+ * C'est ce qui distingue une synthèse d'un avis isolé. Les deux blocs
+ * affichaient jusqu'ici les mêmes lignes de catégories, avec les mêmes barres :
+ * l'œil ne pouvait pas les séparer, et le résumé n'apprenait rien de plus que
+ * la carte du dessous.
+ *
+ * Une répartition ne peut exister qu'au pluriel, et elle dit ce qu'une moyenne
+ * cache : une note de 3,5 issue de deux avis opposés n'est pas la même chose
+ * qu'une note de 3,5 partagée par tout le monde.
+ */
+export function RepartitionNotes({ notes }: { notes: number[] }) {
+  if (notes.length === 0) return null;
+
+  const paliers = [5, 4, 3, 2, 1].map(etoile => ({
+    etoile,
+    // Une note de 4,5 compte pour 5 : c'est ainsi que la lisent les gens.
+    nombre: notes.filter(n => Math.round(n) === etoile).length,
+  }));
+  const maximum = Math.max(...paliers.map(p => p.nombre), 1);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 5 }} aria-label="Répartition des notes">
+      {paliers.map(({ etoile, nombre }) => (
+        <div key={etoile} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ flex: "0 0 26px", fontSize: 11.5, color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+            {etoile} ★
+          </span>
+          <div style={{ flex: 1, height: 8, background: "var(--surface3)", borderRadius: 4, overflow: "hidden" }}>
+            <div
+              style={{
+                width: `${(nombre / maximum) * 100}%`,
+                height: "100%",
+                borderRadius: 4,
+                background: nombre > 0 ? "linear-gradient(90deg, #8b5cf6, #f97316)" : "transparent",
+              }}
+            />
+          </div>
+          <span style={{ flex: "0 0 20px", textAlign: "right", fontSize: 11.5, fontWeight: 700, color: nombre > 0 ? "var(--text)" : "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+            {nombre}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -131,13 +131,23 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
   const ret = review.would_return ? RETURN_LABELS[review.would_return] : null;
   const sousNotes = RATING_CATEGORIES.some(({ key }) => review[key]);
 
-  const puces: { label: string; color?: string; bg?: string; bold?: boolean }[] = [];
-  if (review.job_title) puces.push({ label: review.job_title, bold: true });
-  if (review.employment_type) puces.push({ label: EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type });
-  if (review.duration_range) puces.push({ label: DURATION_LABELS[review.duration_range] ?? review.duration_range });
-  if (review.work_mode) puces.push({ label: WORK_MODE_LABELS[review.work_mode] ?? review.work_mode });
-  if (Number(review.salary_chf) > 0) puces.push({ label: `CHF ${Math.round(Number(review.salary_chf) / 1000)}k / an`, color: "#10b981", bg: "rgba(16,185,129,0.08)", bold: true });
-  if (review.is_current) puces.push({ label: "Employé actuel", color: "#10b981", bg: "rgba(16,185,129,0.08)", bold: true });
+  // La situation de la personne, en une phrase lisible plutôt qu'en pastilles
+  // alignées. Sans texte d'avis, c'est tout ce qui reste pour qu'un lecteur se
+  // dise « quelqu'un occupait ce poste, dans ces conditions, et voilà ce qu'il
+  // en a pensé ». En rangée de pastilles toutes identiques, on lisait un
+  // tableau de bord ; en phrase, on lit une personne.
+  const situation = [
+    review.employment_type ? (EMPLOYMENT_LABELS[review.employment_type] ?? review.employment_type) : null,
+    review.work_mode ? (WORK_MODE_LABELS[review.work_mode] ?? review.work_mode) : null,
+    review.duration_range ? (DURATION_LABELS[review.duration_range] ?? review.duration_range) : null,
+    review.is_current ? "encore en poste" : "a quitté l'entreprise",
+  ].filter(Boolean) as string[];
+
+  // Le salaire garde sa pastille : c'est l'information la plus recherchée de
+  // la fiche, et elle doit rester repérable d'un coup d'œil.
+  const salaire = Number(review.salary_chf) > 0
+    ? `CHF ${Math.round(Number(review.salary_chf) / 1000)}k / an`
+    : null;
 
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "20px 22px" }}>
@@ -152,15 +162,22 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
             <span style={{ fontSize: 17, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(review.rating_overall).toFixed(1)}</span>
             <span style={{ fontSize: 8, color: "var(--text-muted)", fontWeight: 600 }}>/ 5</span>
           </div>
-          <div>
-            <Stars rating={Number(review.rating_overall)} size={14} />
-            <div style={{ marginTop: 4, display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: rec ? rec.color : "var(--text-muted)" }}>
-                {rec ? rec.label : "Recommande : —"}
-              </span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: ret ? ret.color : "var(--text-muted)" }}>
-                {ret ? ret.label : "Reviendrait : —"}
-              </span>
+          <div style={{ minWidth: 0 }}>
+            {/* Le poste en titre. C'est la seule chose qui incarne l'auteur :
+                le reléguer au rang de pastille, à égalité avec le type de
+                contrat, effaçait la personne derrière les chiffres. */}
+            <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", lineHeight: 1.25, letterSpacing: "-0.01em" }}>
+              {review.job_title || "Un employé"}
+            </p>
+            {situation.length > 0 && (
+              <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.4 }}>
+                {situation.join(" · ")}
+              </p>
+            )}
+            <div style={{ marginTop: 7, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <Stars rating={Number(review.rating_overall)} size={13} />
+              {rec && <span style={{ fontSize: 11, fontWeight: 700, color: rec.color }}>{rec.label}</span>}
+              {ret && <span style={{ fontSize: 11, fontWeight: 700, color: ret.color }}>{ret.label}</span>}
             </div>
           </div>
           {review.is_verified_author && (
@@ -177,19 +194,15 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
         <span suppressHydrationWarning style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{age}</span>
       </div>
 
-      {puces.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-          {puces.map((c, i) => (
-            <span key={i} style={{
-              fontSize: 11, fontWeight: c.bold ? 600 : 400,
-              padding: "3px 10px", borderRadius: 50,
-              background: c.bg ?? "var(--surface2)",
-              color: c.color ?? "var(--text-muted)",
-              border: "1px solid var(--border2)",
-            }}>
-              {c.label}
-            </span>
-          ))}
+      {salaire && (
+        <div style={{ marginBottom: 14 }}>
+          <span style={{
+            fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 50,
+            background: "rgba(16,185,129,0.08)", color: "#10b981",
+            border: "1px solid rgba(16,185,129,0.25)",
+          }}>
+            {salaire}
+          </span>
         </div>
       )}
 
@@ -206,7 +219,7 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
           Les anciens avis conservent leur texte en base, seules leurs notes
           sont affichées. */}
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: sousNotes || puces.length > 0 ? 0 : 4 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: sousNotes || salaire ? 0 : 4 }}>
         <HelpfulButton reviewId={review.id} initialCount={review.helpful_count} initialVoted={initialVoted} />
         <ReportButton
           targetType="review"
