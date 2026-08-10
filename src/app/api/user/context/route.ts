@@ -28,6 +28,7 @@ export async function GET() {
     return NextResponse.json(
       {
         isLoggedIn: true,
+        compte: user.id,
         isAdmin: profileRes.data?.role === "admin",
         favIds: (favRes.data ?? []).map(r => r.company_id),
         flameIds:   (flameRes.data ?? []).filter(r => r.event_type === "flame").map(r => r.company_id),

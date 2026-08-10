@@ -26,8 +26,10 @@ export async function GET() {
 
   try {
     const companies = await getFavorites();
-    return NextResponse.json({ companies }, { headers: sansCache });
+    // Identité du destinataire : le client refuse une réponse qui ne lui
+    // appartient pas, quelle que soit la couche de cache traversée.
+    return NextResponse.json({ compte: user.id, companies }, { headers: sansCache });
   } catch {
-    return NextResponse.json({ companies: [] }, { headers: sansCache });
+    return NextResponse.json({ compte: user.id, companies: [] }, { headers: sansCache });
   }
 }

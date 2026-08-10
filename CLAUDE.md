@@ -95,3 +95,29 @@ All `position: fixed` modals must be ≥ 10002 or they are hidden behind the bot
 | avatars | `{userId}/{uuid}.{ext}` | Profile avatar |
 | covers | `covers/{companyId}/{uuid}.{ext}` | Company covers |
 | covers | `ads/{companyId}/{uuid}.{ext}` | Ad campaign images |
+
+## Cloisonnement des comptes — règle absolue
+
+Les pages personnelles (`/profile`, `/favorites`, fiches) sont des **coquilles statiques** : le HTML est partagé par tous les visiteurs et ne contient jamais de donnée personnelle. Tout ce qui est personnel arrive ensuite, par une route d'API en `private, no-store`.
+
+**Toute mise en mémoire d'une donnée personnelle côté client doit être liée à un compte.** Un cache global non marqué survit au changement de compte dans le même onglet et sert les données du compte précédent. C'est arrivé le 2026-08-09 : un nouveau compte affichait le nom d'un autre utilisateur.
+
+Trois contrôles obligatoires, indépendants (`src/lib/cacheSession.ts`) :
+
+1. l'entrée mémorisée porte l'identifiant du compte qui l'a écrite ;
+2. la réponse du serveur déclare son destinataire dans un champ `compte`, revérifié à la lecture ;
+3. rien n'est lu quand aucun compte n'est identifiable (déconnexion, cookie illisible).
+
+Toute route d'API renvoyant des données personnelles **doit** inclure `compte: user.id`.
+
+`src/__tests__/cloisonnement-comptes.test.ts` garde ces invariants. Si un de ces tests tombe, la fuite est de retour : corriger le cache, jamais le test.
+
+## Ne pas dériver un état d'une propriété avec `useState`
+
+`useState(propriete)` ne lit sa valeur qu'au premier rendu. Sur des pages statiques, où favoris, votes et notifications arrivent **après**, l'état reste alors figé sur la valeur initiale — la flamme d'une entreprise enregistrée restait éteinte, et le clic suivant la retirait.
+
+Utiliser `useEtatSynchronise` (`src/lib/useEtatSynchronise.ts`), qui ajuste pendant le rendu et ne resynchronise que lorsque la propriété change réellement, de sorte qu'un clic optimiste survit aux rendus du parent.
+
+## Une bascule n'est jamais un ajout
+
+`basculer()` appelée à la place de `poser()` produit l'inverse de l'effet voulu quand l'état existe déjà. `toggleFavorite` appelait `addFlame` pour poser une flamme : sur une entreprise déjà enflammée, enregistrer le favori la supprimait. Exposer des intentions explicites (`poserFlamme` / `retirerFlamme`) et laisser l'appelant choisir.

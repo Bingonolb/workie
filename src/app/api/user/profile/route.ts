@@ -36,6 +36,9 @@ export async function GET() {
 
     return NextResponse.json({
       authentifie: true,
+      // Identité du destinataire. Le client refuse d'afficher une réponse
+      // qui ne lui appartient pas — voir cacheSession.
+      compte: user.id,
       email: user.email ?? "",
       creeLe: user.created_at ?? null,
       profile: profile ?? null,
