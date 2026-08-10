@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
 import type { Review } from "@/lib/types";
 
-import { REVIEW_PUBLIC_COLS } from "@/lib/actions/columns";
+import { REVIEW_PUBLIC_COLS, REVIEW_FICHE_COLS } from "@/lib/actions/columns";
 
 // ── Read actions ────────────────────────────────────────────────────────────
 
@@ -38,7 +38,7 @@ export async function getReviews(companyId: string, limit = 100) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("reviews")
-    .select(REVIEW_PUBLIC_COLS)
+    .select(REVIEW_FICHE_COLS)
     .eq("company_id", companyId)
     .eq("status", "published")
     .order("created_at", { ascending: false })
@@ -51,7 +51,7 @@ export const getCachedReviews = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("reviews")
-      .select(REVIEW_PUBLIC_COLS)
+      .select(REVIEW_FICHE_COLS)
       .eq("company_id", companyId)
       .eq("status", "published")
       .order("created_at", { ascending: false })

@@ -121,3 +121,11 @@ Utiliser `useEtatSynchronise` (`src/lib/useEtatSynchronise.ts`), qui ajuste pend
 ## Une bascule n'est jamais un ajout
 
 `basculer()` appelée à la place de `poser()` produit l'inverse de l'effet voulu quand l'état existe déjà. `toggleFavorite` appelait `addFlame` pour poser une flamme : sur une entreprise déjà enflammée, enregistrer le favori la supprimait. Exposer des intentions explicites (`poserFlamme` / `retirerFlamme`) et laisser l'appelant choisir.
+
+## Ne pas afficher n'est pas ne pas transmettre
+
+Le texte des avis — `title`, `content`, `pros`, `cons` — n'est **jamais** affiché sur une fiche entreprise. Ce choix ne tient pas si les colonnes sont quand même sélectionnées : elles partent alors dans les données de la page, invisibles à l'écran mais lisibles dans le code source.
+
+La fiche publique lit `REVIEW_FICHE_COLS`, qui les exclut. `REVIEW_PUBLIC_COLS` reste réservé à ce que l'auteur peut voir de ses propres avis — son profil et son export.
+
+Même principe partout : la question n'est pas « est-ce affiché ? » mais « est-ce envoyé ? ».

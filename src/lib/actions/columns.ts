@@ -22,6 +22,20 @@ export const REVIEW_PUBLIC_COLS = [
   "status", "is_verified_author",
 ].join(",");
 
+// Colonnes envoyées à la fiche publique d'une entreprise.
+//
+// Le texte des avis — titre, contenu, points positifs et négatifs — en est
+// volontairement absent. La plateforme ne l'affiche pas, mais il partait
+// malgré tout dans les données de la page : invisible à l'écran, parfaitement
+// lisible dans le code source. Ne pas afficher n'est pas ne pas transmettre.
+//
+// Ces champs restent disponibles pour l'auteur de l'avis, via son profil et
+// son export, et pour la modération, qui passe par la clé de service.
+export const REVIEW_FICHE_COLS = REVIEW_PUBLIC_COLS
+  .split(",")
+  .filter(c => !["title", "content", "pros", "cons"].includes(c))
+  .join(",");
+
 export const GRID_PAGE_SIZE = 24;
 
 // Stripe billing, subscription internals, and claimed_by are admin-only fields
