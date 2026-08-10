@@ -79,6 +79,11 @@ export function ExploreClient({
   const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
   const [favIds, setFavIds] = useState<string[]>(initialFavIds);
   const [flameIds, setFlameIds] = useState<string[]>(initialFlameIds);
+  // Boost et pénalité repartaient de zéro à chaque chargement : le bouton
+  // s'affichait éteint alors que le geste était enregistré, et un second clic
+  // l'annulait sans que l'utilisateur l'ait voulu.
+  const [boostIds, setBoostIds] = useState<string[]>([]);
+  const [penaltyIds, setPenaltyIds] = useState<string[]>([]);
   const [squareAdsState, setSquareAdsState] = useState<PublicAdCampaign[]>(squareAds);
   const [swipeAdsState, setSwipeAdsState] = useState<PublicAdCampaign[]>(swipeAds);
 
@@ -152,6 +157,8 @@ export function ExploreClient({
       setIsAdmin(ctx.isAdmin);
       setFavIds(ctx.favIds);
       setFlameIds(ctx.flameIds);
+      setBoostIds(ctx.boostIds ?? []);
+      setPenaltyIds(ctx.penaltyIds ?? []);
       setPenaltyCredits(ctx.penaltyCredits);
       if (ads.squareAds) setSquareAdsState(ads.squareAds);
       if (ads.swipeAds) setSwipeAdsState(ads.swipeAds);
@@ -359,6 +366,8 @@ export function ExploreClient({
           companies={swipeCompanies}
           initialFavIds={favIds}
           initialFlameIds={flameIds}
+          initialBoostIds={boostIds}
+          initialPenaltyIds={penaltyIds}
           isLoggedIn={isLoggedIn}
           isAdmin={isAdmin}
           penaltyCredits={penaltyCredits}

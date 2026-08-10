@@ -11,31 +11,56 @@ async function isBusiness(supabase: any, userId: string): Promise<boolean> {
   return !!data?.claimed_company_id;
 }
 
-export async function addFlame(companyId: string): Promise<void> {
+/**
+ * Pose ou retire la flamme d'une entreprise.
+ *
+ * `pose` explicite l'intention, et ce n'est pas un détail : la fonction était
+ * auparavant une bascule, et toggleFavorite l'appelait pour *ajouter* une
+ * flamme. Si l'entreprise en portait déjà une, l'enregistrement du favori la
+ * supprimait donc — le score baissait au lieu de monter, et la flamme
+ * disparaissait de l'interface au rafraîchissement. Constaté en base : 34
+ * favoris sans flamme et 12 flammes sans favori pour un seul compte.
+ *
+ * Une bascule ne doit jamais être appelée à la place d'un ajout. Les deux
+ * intentions sont désormais distinctes et l'appelant choisit.
+ */
+async function ecrireFlamme(companyId: string, pose: boolean): Promise<void> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     if (await isBusiness(supabase, user.id)) return;
 
-    const { data: existing } = await supabase
+    const { data: existante } = await supabase
       .from("score_events").select("id")
       .eq("company_id", companyId).eq("user_id", user.id).eq("event_type", "flame")
       .maybeSingle();
 
-    if (existing) {
-      const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
-      if (error) { captureServerError(error, { action: "addFlame", step: "delete" }); return; }
-    } else {
+    if (pose && !existante) {
       const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "flame", points: 1 });
-      if (error) { captureServerError(error, { action: "addFlame", step: "insert" }); return; }
+      if (error) { captureServerError(error, { action: "poserFlamme", companyId }); return; }
+    } else if (!pose && existante) {
+      const { error } = await supabase.from("score_events").delete().eq("id", existante.id);
+      if (error) { captureServerError(error, { action: "retirerFlamme", companyId }); return; }
+    } else {
+      return; // déjà dans l'état voulu : rien à faire, et surtout rien à inverser
     }
+
+    // Le classement doit refléter le geste immédiatement.
     revalidatePath("/explore");
     revalidatePath("/ranking");
     revalidatePath(`/company/${companyId}`);
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
-  } catch (e) { captureServerError(e, { action: "addFlame" }); }
+  } catch (e) { captureServerError(e, { action: "ecrireFlamme", companyId }); }
+}
+
+export async function poserFlamme(companyId: string): Promise<void> {
+  return ecrireFlamme(companyId, true);
+}
+
+export async function retirerFlamme(companyId: string): Promise<void> {
+  return ecrireFlamme(companyId, false);
 }
 
 export async function addBoost(companyId: string): Promise<void> {

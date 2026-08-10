@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, getUser } from "@/lib/supabase/server";
-import { addFlame } from "@/lib/actions/scores";
+import { poserFlamme, retirerFlamme } from "@/lib/actions/scores";
 import { captureServerError } from "@/lib/monitoring";
 import type { Company } from "@/lib/types";
 
@@ -16,11 +16,17 @@ export async function toggleFavorite(companyId: string): Promise<void> {
       .from("favorites").select("company_id").eq("user_id", user.id).eq("company_id", companyId).maybeSingle();
 
     if (existing) {
-      await supabase.from("favorites").delete().eq("user_id", user.id).eq("company_id", companyId);
+      // La flamme suit le favori. Elle restait auparavant en place au retrait,
+      // ce qui laissait des flammes orphelines gonflant le score d'entreprises
+      // que l'utilisateur avait pourtant retirées.
+      await Promise.all([
+        supabase.from("favorites").delete().eq("user_id", user.id).eq("company_id", companyId),
+        retirerFlamme(companyId),
+      ]);
     } else {
       const [{ error }] = await Promise.all([
         supabase.from("favorites").insert({ user_id: user.id, company_id: companyId }),
-        addFlame(companyId),
+        poserFlamme(companyId),
       ]);
       if (error && error.code !== "23505") captureServerError(error, { action: "toggleFavorite", step: "insert", companyId });
     }

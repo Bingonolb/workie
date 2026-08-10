@@ -38,6 +38,8 @@ export function SwipeView({
   companies: initialCompanies,
   initialFavIds,
   initialFlameIds,
+  initialBoostIds = [],
+  initialPenaltyIds = [],
   isLoggedIn,
   isAdmin = false,
   penaltyCredits: initialPenaltyCredits = 0,
@@ -48,6 +50,8 @@ export function SwipeView({
   companies: Company[];
   initialFavIds: string[];
   initialFlameIds: string[];
+  initialBoostIds?: string[];
+  initialPenaltyIds?: string[];
   isLoggedIn: boolean;
   isAdmin?: boolean;
   penaltyCredits?: number;
@@ -88,8 +92,11 @@ export function SwipeView({
   const [index, setIndex] = useState<number>(() => sauvegarde?.index ?? 0);
   const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
-  const [penaltyIds, setPenaltyIds] = useState<Set<string>>(new Set());
-  const [boostIds, setBoostIds] = useState<Set<string>>(new Set());
+  // Même correction que pour le boost : l'état vient du serveur.
+  const [penaltyIds, setPenaltyIds] = useState<Set<string>>(new Set(initialPenaltyIds));
+  // Initialisé depuis le serveur, et non vide : sans cela le bouton oubliait
+  // le boost au moindre rafraîchissement, et le clic suivant le retirait.
+  const [boostIds, setBoostIds] = useState<Set<string>>(new Set(initialBoostIds));
   const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
   // true if user started the session with credits > 0 (i.e. has previously purchased)
   const hadCreditsOnMount = useRef(initialPenaltyCredits > 0);
