@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Briefcase, CheckCheck, MessageCircle, Trash2, MoreHorizontal, X } from "lucide-react";
 import { markAllRead, markRead, deleteNotification, getNotifications, type Notification } from "@/lib/actions/notifications";
+import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
 
 /* ── helpers ── */
 function timeAgo(date: string) {
@@ -117,7 +118,7 @@ function NotifItem({ n, onRead, onDelete, onClose }: {
 /* ── main component ── */
 export function NavBell({ initialUnread }: { initialUnread: number }) {
   const [open, setOpen] = useState(false);
-  const [unread, setUnread] = useState(initialUnread);
+  const [unread, setUnread] = useEtatSynchronise(initialUnread);
   const [notifications, setNotifications] = useState<Notification[] | null>(null);
   const [loading, setLoading] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);

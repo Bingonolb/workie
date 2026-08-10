@@ -3,9 +3,10 @@
 import { useState, useTransition } from "react";
 import { Flame } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
+import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
 
 export function SaveButton({ companyId, initialFav }: { companyId: string; initialFav: boolean }) {
-  const [fav, setFav] = useState(initialFav);
+  const [fav, setFav] = useEtatSynchronise(initialFav);
   const [pending, startTransition] = useTransition();
 
   const handleClick = () => {

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Zap, Skull } from "lucide-react";
 import { addBoost, addPenalty } from "@/lib/actions/scores";
+import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
 
 export function CompanyVoteButtons({
   companyId,
@@ -24,9 +25,12 @@ export function CompanyVoteButtons({
   initialScore?: number;
   variant?: "banner" | "card";
 }) {
-  const [boosted, setBoosted] = useState(initialBoosted);
-  const [penalized, setPenalized] = useState(initialPenalized);
-  const [credits, setCredits] = useState(initialCredits);
+  // Même correction : l'état du vote arrive après le premier rendu, via
+  // /api/company/[id]/me. Figé, le bouton s'affichait éteint et le clic
+  // suivant annulait le geste au lieu de le poser.
+  const [boosted, setBoosted] = useEtatSynchronise(initialBoosted);
+  const [penalized, setPenalized] = useEtatSynchronise(initialPenalized);
+  const [credits, setCredits] = useEtatSynchronise(initialCredits);
   const [score, setScore] = useState(initialScore ?? null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showGuest, setShowGuest] = useState(false);

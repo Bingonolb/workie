@@ -10,6 +10,7 @@ import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { CoverImage } from "@/components/CoverImage";
 import { logoAffichable } from "@/lib/logo";
+import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
 
 const SECTOR_GRADIENTS: Record<string, string> = {
   "Tech":                  "linear-gradient(135deg, #6d28d9 0%, #1e40af 100%)",
@@ -94,8 +95,11 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   loading?: "eager" | "lazy";
 }) {
   const router = useRouter();
-  const [fav, setFav] = useState(isFav);
-  const [score, setScore] = useState(Number(company.score));
+  // Suit la propriété : sur /explore, page statique, le favori n'est connu
+  // qu'après l'arrivée du contexte. Figé, l'état laissait la flamme éteinte
+  // sur une entreprise pourtant enregistrée.
+  const [fav, setFav] = useEtatSynchronise(isFav);
+  const [score, setScore] = useEtatSynchronise(Number(company.score));
   const [coverFailed, setCoverFailed] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [pending, startTransition] = useTransition();

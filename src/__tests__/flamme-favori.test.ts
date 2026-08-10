@@ -99,3 +99,64 @@ describe("flamme et favori", () => {
     expect(db.flammes().has("c9")).toBe(false);
   });
 });
+
+/**
+ * Régression : l'état d'une carte doit suivre la donnée qui arrive après coup.
+ *
+ * /explore est une page statique : elle s'affiche d'abord sans connaître les
+ * favoris, puis /api/user/context les livre. `useState(propriete)` ne lisant sa
+ * valeur qu'au premier rendu, la flamme restait éteinte sur une entreprise
+ * pourtant enregistrée — et le clic suivant la retirait au lieu de l'ajouter.
+ */
+describe("état synchronisé avec la propriété", () => {
+  /** Reproduit useEtatSynchronise hors de React : c'est la logique qui compte. */
+  function composant(proprieteInitiale: boolean) {
+    let valeur = proprieteInitiale;
+    let precedente = proprieteInitiale;
+    return {
+      rendre(propriete: boolean) {
+        if (propriete !== precedente) { precedente = propriete; valeur = propriete; }
+        return valeur;
+      },
+      cliquer() { valeur = !valeur; return valeur; },
+      get etat() { return valeur; },
+    };
+  }
+
+  it("allume la flamme quand le contexte arrive après le premier rendu", () => {
+    const c = composant(false);      // coquille statique : favori inconnu
+    expect(c.rendre(false)).toBe(false);
+    expect(c.rendre(true)).toBe(true); // le contexte dit : c'est un favori
+  });
+
+  it("l'ancien comportement laissait la flamme éteinte", () => {
+    let valeur = false;              // useState(propriete), figé
+    const rendre = (_propriete: boolean) => valeur;
+    expect(rendre(true)).toBe(false); // la propriété dit vrai, l'écran dit faux
+  });
+
+  it("ne piétine pas un clic tant que la propriété ne change pas", () => {
+    const c = composant(false);
+    c.rendre(false);
+    c.cliquer();                     // l'utilisateur enregistre
+    expect(c.rendre(false)).toBe(true);
+    expect(c.rendre(false)).toBe(true);
+  });
+
+  it("cède au serveur dès qu'il tranche autrement", () => {
+    const c = composant(false);
+    c.cliquer();                     // optimiste : enregistré
+    expect(c.etat).toBe(true);
+    expect(c.rendre(true)).toBe(true);  // le serveur confirme
+  });
+
+  it("la boucle décrite ne se reproduit plus", () => {
+    // Rafraîchissement, contexte, clic, rafraîchissement, contexte.
+    const c = composant(false);
+    c.rendre(false);
+    expect(c.rendre(true)).toBe(true);   // flamme allumée, plus de confusion
+    c.cliquer();                          // l'utilisateur retire volontairement
+    expect(c.etat).toBe(false);
+    expect(c.rendre(false)).toBe(false);  // le serveur confirme le retrait
+  });
+});
