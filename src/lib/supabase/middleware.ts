@@ -8,7 +8,6 @@ const PUBLIC_PATHS = [
   "/api",
   "/cgu", "/confidentialite",
   "/robots.txt", "/sitemap.xml", "/_next", "/favicon",
-  "/onboarding",
 ];
 
 export async function updateSession(request: NextRequest) {

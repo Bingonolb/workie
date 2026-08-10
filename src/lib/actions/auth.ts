@@ -74,7 +74,7 @@ export async function signUp(
     password,
     options: {
       data: { username, full_name: fullName, first_name: firstName, last_name: lastName, canton, birth_year: birthYear },
-      // No `next` param — callback will redirect to /onboarding for type=signup
+      // Pas de paramètre `next` : le callback envoie vers /explore?welcome=1.
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback`,
     },
   });

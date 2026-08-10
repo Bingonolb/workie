@@ -42,7 +42,6 @@ const PUBLIC_PATHS = [
   // Le manifeste PWA doit rester lisible sans session, sinon l'installation
   // « Ajouter à l'écran d'accueil » échoue pour les visiteurs non connectés.
   "/manifest.webmanifest",
-  "/onboarding",
 ];
 
 // Correspondance sur une frontière de segment : `startsWith` seul rendrait
