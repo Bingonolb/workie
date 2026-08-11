@@ -90,7 +90,10 @@ export default async function Home() {
         </h1>
 
         <p style={{ fontSize: "clamp(16px, 2.5vw, 20px)", color: "var(--text-muted)", maxWidth: 520, lineHeight: 1.7, marginBottom: 52 }}>
-          Avis d&apos;employés, salaires réels, ambiance de travail : tout ce que les offres d&apos;emploi ne disent jamais.
+          {/* Espace insécable après « tout » : sans elle, le mot restait seul
+              en fin de première ligne, coupé du groupe « ce que » auquel il
+              appartient. */}
+          Avis d&apos;employés, salaires réels, ambiance de travail&nbsp;: tout&nbsp;ce que les offres d&apos;emploi ne disent jamais.
         </p>
 
         <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 48, width: "100%", maxWidth: 480 }}>
