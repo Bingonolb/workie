@@ -12,6 +12,25 @@ import type { Company } from "@/lib/types";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 
 // Guests see the first 12 companies + 6 blurred
+/**
+ * Durée de vie de l'ordre d'affichage de l'explorateur.
+ *
+ * Trente minutes depuis la dernière visite, la même fenêtre que le swipe.
+ *
+ * Ce n'est ni « à chaque rafraîchissement » ni « à chaque connexion ». Rebattre
+ * à chaque rafraîchissement ferait perdre l'entreprise qu'on venait de repérer
+ * — on rafraîchit justement pour retrouver quelque chose. Lier l'ordre à la
+ * connexion ne rebattrait presque jamais : personne ne se déconnecte.
+ *
+ * Le compteur repart à chaque passage, donc une session de trois heures garde
+ * le même ordre du début à la fin. C'est en revenant après une pause qu'on
+ * découvre autre chose — le moment où on en a envie.
+ *
+ * Conservé dans localStorage et non sessionStorage : sur mobile l'onglet n'est
+ * jamais fermé, une mémoire liée à l'onglet ne serait donc jamais renouvelée.
+ */
+const DUREE_GRAINE_MS = 30 * 60 * 1000;
+
 const GUEST_VISIBLE = 12;
 const GUEST_BLUR = 6;
 
@@ -99,10 +118,24 @@ export function ExploreClient({
   // valeur par onglet, effacée à la fermeture.
   const [graine] = useState<number>(() => {
     if (typeof window === "undefined") return 0;
-    const memorisee = sessionStorage.getItem("workie_graine");
-    if (memorisee !== null) return Number(memorisee);
+    try {
+      const brut = localStorage.getItem("workie_graine");
+      if (brut) {
+        const { valeur, vue } = JSON.parse(brut) as { valeur: number; vue: number };
+        // Toujours valable : on reprend le même ordre. Rafraîchir la page ou
+        // passer d'un menu à l'autre ne doit rien rebattre — on rafraîchit
+        // souvent pour retrouver ce qu'on regardait, pas pour tout perdre.
+        if (Date.now() - vue < DUREE_GRAINE_MS) {
+          localStorage.setItem("workie_graine", JSON.stringify({ valeur, vue: Date.now() }));
+          return valeur;
+        }
+      }
+    } catch { /* stockage indisponible : on tire une graine sans mémoire */ }
+
     const nouvelle = Math.floor(Math.random() * 100);
-    sessionStorage.setItem("workie_graine", String(nouvelle));
+    try {
+      localStorage.setItem("workie_graine", JSON.stringify({ valeur: nouvelle, vue: Date.now() }));
+    } catch { /* sans conséquence : l'ordre sera simplement retiré au prochain chargement */ }
     return nouvelle;
   });
 
