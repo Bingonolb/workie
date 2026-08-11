@@ -288,9 +288,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           .company-stats-grid { grid-template-columns: 1fr 1fr !important; }
           .about-desktop { display: none !important; }
           .about-mobile { display: block !important; }
+          .liens-desktop { display: none !important; }
+          .liens-mobile { display: block !important; }
         }
         @media (min-width: 701px) {
           .about-mobile { display: none !important; }
+          .liens-mobile { display: none !important; }
         }
       `}</style>
       <main className="page-main-sm">
@@ -303,6 +306,26 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               <div className="about-mobile" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", marginBottom: 32, display: "none" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
+              </div>
+            )}
+
+            {/* Offres d'emploi — téléphone uniquement, juste sous À propos.
+                Sur téléphone, les colonnes s'empilent et le bloc de liens de
+                la colonne de droite se retrouvait tout en bas de la page,
+                après les avis. Or le site de l'entreprise est précisément ce
+                qu'on va chercher pour postuler : il remonte ici, seul, et le
+                bloc de droite est masqué à cette taille. */}
+            {company.website_url && (
+              <div className="liens-mobile" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", marginBottom: 32, display: "none" }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Offres d&apos;emploi</h3>
+                <a
+                  href={/^https?:\/\//.test(company.website_url) ? company.website_url : `https://${company.website_url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: "var(--text)", textDecoration: "none", background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", minHeight: 48, boxSizing: "border-box" }}
+                >
+                  <Globe size={15} aria-hidden="true" /> Site internet
+                </a>
               </div>
             )}
 
@@ -447,7 +470,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
             {/* Links */}
             {(company.website_url || company.linkedin_url || company.twitter_url || company.instagram_url) && (
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
+              <div className="liens-desktop" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Réseaux</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {company.website_url && (
