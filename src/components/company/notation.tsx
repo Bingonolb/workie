@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { partDeOui, type Synthese } from "@/lib/synthese";
 
 /**
  * Éléments d'affichage des notes, partagés entre la synthèse de la fiche
@@ -53,28 +54,53 @@ export function RatingRow({ label, value }: { label: string; value: number | nul
   );
 }
 
-// Indicateur oui/non agrégé (recommandation, retour). Toujours rendu, avec un
-// état explicite quand personne n'a encore répondu.
 /**
- * Proportion de réponses favorables, avec mention des indécis.
+ * Synthèse d'une question oui / non / nuance (recommandation, retour).
  *
- * Le nombre porte sur les seules réponses tranchées. Les hésitations sont
- * indiquées à côté plutôt que noyées dans le calcul : les compter comme des
- * refus produisait des affirmations fausses — « 0 % reviendraient » là où la
- * seule personne interrogée avait répondu « peut-être ».
+ * L'affichage prend la forme que les données autorisent, et pas une de plus :
+ * un pourcentage seulement quand il y a assez de réponses pour qu'il veuille
+ * dire quelque chose, une fraction en dessous, et le mot « partagé » quand
+ * personne n'a tranché. Le détail du raisonnement est dans `@/lib/synthese`,
+ * avec les tests qui l'exercent sur toutes les combinaisons.
  */
-export function StatPill({ label, pct, indecis = 0 }: { label: string; pct: number | null; indecis?: number }) {
-  const color = pct === null ? "var(--text-muted)" : pct >= 70 ? "#10b981" : pct >= 40 ? "#f59e0b" : "#ef4444";
+export function StatPill({ label, synthese }: { label: string; synthese: Synthese }) {
+  const part = partDeOui(synthese);
+  const color =
+    part === null ? (synthese.forme === "partagee" ? "#f59e0b" : "var(--text-muted)")
+    : part >= 0.7 ? "#10b981"
+    : part >= 0.4 ? "#f59e0b"
+    : "#ef4444";
+
+  const valeur =
+    synthese.forme === "aucune" ? "—"
+    : synthese.forme === "partagee" ? "partagé"
+    : synthese.forme === "fraction" ? `${synthese.oui}/${synthese.total}`
+    : `${synthese.pct}%`;
+
+  // Combien de personnes se cachent derrière le chiffre. La fraction le dit
+  // déjà par son dénominateur ; le pourcentage, lui, ne le dit pas.
+  const appui =
+    synthese.forme === "pourcentage" ? `sur ${synthese.total} avis`
+    : synthese.forme === "partagee" ? `${synthese.total} avis sans réponse tranchée`
+    : null;
+
+  const mitiges = synthese.forme === "fraction" && synthese.mitiges > 0
+    ? `${synthese.mitiges} mitigé${synthese.mitiges > 1 ? "s" : ""}`
+    : null;
+
   return (
     <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
-      <span style={{ fontSize: 16, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-        {pct === null ? "—" : `${pct}%`}
+      <span style={{ fontSize: synthese.forme === "partagee" ? 13 : 16, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+        {valeur}
       </span>
       <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
         {label}
-        {indecis > 0 && (
+        {(appui ?? mitiges) && (
           <span style={{ color: "var(--text-sub)" }}>
-            {" · "}{indecis} mitigé{indecis > 1 ? "s" : ""}
+            {" · "}{appui ?? mitiges}
+            {appui && synthese.forme === "pourcentage" && synthese.mitiges > 0 && (
+              <>{" · "}{synthese.mitiges} mitigé{synthese.mitiges > 1 ? "s" : ""}</>
+            )}
           </span>
         )}
       </span>

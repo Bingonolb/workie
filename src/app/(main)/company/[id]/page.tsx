@@ -9,6 +9,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
 import { Stars, RatingRow, StatPill, ratingColor, RepartitionNotes } from "@/components/company/notation";
+import { synthetiser } from "@/lib/synthese";
 import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
 import { ActionsFiche, VotesFiche, PorteInvite, FormulaireAvis } from "@/components/company/Interactions";
 import { SectionAvis } from "@/components/company/SectionAvis";
@@ -146,29 +147,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     rating_diversity:   avgDiversity,
   };
 
-  // Recommandation et retour : proportion calculée sur les seules réponses
-  // tranchées.
-  //
-  // « Peut-être » et « mitigé » comptaient auparavant comme des non. Une
-  // entreprise dont le seul avis répondait « peut-être » affichait donc
-  // « 0 % reviendraient » — une affirmation que la donnée ne soutient pas, et
-  // qui contredisait même l'avis, puisque la personne recommandait
-  // l'entreprise. Une hésitation n'est pas un refus.
-  //
-  // Les indécis sortent donc du calcul et sont comptés à part. Quand personne
-  // n'a tranché, on n'affiche pas de pourcentage du tout.
-  const proportionTranchee = (valeurs: (string | null)[], oui: string, non: string) => {
-    const tranchees = valeurs.filter(v => v === oui || v === non);
-    return {
-      pct: tranchees.length ? Math.round((tranchees.filter(v => v === oui).length / tranchees.length) * 100) : null,
-      indecis: valeurs.filter(v => v && v !== oui && v !== non).length,
-    };
-  };
-
-  const recommandation = proportionTranchee(reviews.map(r => r.would_recommend ?? null), "oui", "non");
-  const retour = proportionTranchee(reviews.map(r => r.would_return ?? null), "oui", "non");
-  const recPct = recommandation.pct;
-  const retPct = retour.pct;
+  // Recommandation et retour. Le calcul vit dans @/lib/synthese, avec les
+  // tests qui l'exercent sur toutes les combinaisons de oui, de non et de
+  // nuances : c'est un raisonnement, pas une division, et il a déjà produit
+  // deux affirmations fausses quand il tenait en une ligne ici.
+  const recommandation = synthetiser(reviews.map(r => r.would_recommend), "oui", "non");
+  const retour = synthetiser(reviews.map(r => r.would_return), "oui", "non");
 
   // Work mode breakdown — single-pass reduce
   const modeCounts = reviews.reduce((acc: Record<string, number>, r) => {
@@ -387,8 +371,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 </div>
 
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", paddingTop: 16, marginTop: 16, borderTop: "1px solid var(--border)" }}>
-                  <StatPill label="recommandent" pct={recPct} indecis={recommandation.indecis} />
-                  <StatPill label="reviendraient" pct={retPct} indecis={retour.indecis} />
+                  <StatPill label="recommandent" synthese={recommandation} />
+                  <StatPill label="reviendraient" synthese={retour} />
                   {dominantMode && (
                     <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
                       <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", textTransform: "capitalize" }}>{dominantMode}</span>
