@@ -37,7 +37,12 @@ export function CompanyVoteButtons({
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
-  const hadCreditsOnMount = useRef(initialCredits > 0);
+  // État figé au montage, pas une ref : une ref lue pendant le rendu n'est pas
+  // fiable, puisque le rendu ne se rejoue pas quand elle change. Ici la valeur
+  // sert à distinguer « crédits épuisés » de « jamais eu de crédits », donc
+  // elle doit être capturée une fois et rester stable — ce que fait useState
+  // avec un initialiseur.
+  const [avaitDesCredits] = useState(initialCredits > 0);
   const router = useRouter();
 
   useEffect(() => {
@@ -222,12 +227,12 @@ export function CompanyVoteButtons({
             <div style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.1), rgba(249,115,22,0.07))", borderBottom: "1px solid rgba(239,68,68,0.15)", padding: "28px 28px 24px", textAlign: "center" }}>
               <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px", fontSize: 24 }}>💀</div>
               <h2 style={{ fontSize: 19, fontWeight: 900, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: 6 }}>
-                {credits === 0 && hadCreditsOnMount.current
+                {credits === 0 && avaitDesCredits
                   ? <>Crédits <span style={{ color: "#ef4444" }}>-100 pts</span> épuisés</>
                   : <>Débloquer le vote <span style={{ color: "#ef4444" }}>-100 pts</span></>}
               </h2>
               <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                {credits === 0 && hadCreditsOnMount.current
+                {credits === 0 && avaitDesCredits
                   ? "Vous avez utilisé tous vos crédits. Rechargez pour continuer à signaler les entreprises toxiques."
                   : "Signalez les entreprises toxiques et impactez directement leur score sur Workie."}
               </p>

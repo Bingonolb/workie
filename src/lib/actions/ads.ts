@@ -54,8 +54,18 @@ export type AdCampaign = {
   created_at: string;
 };
 
-/** Fields returned by getActiveAds() — financial fields are stripped server-side */
-export type PublicAdCampaign = Omit<AdCampaign, "spent_chf" | "total_budget_chf" | "daily_budget_chf" | "cpm_chf">;
+/**
+ * Ce qu'une campagne expose publiquement.
+ *
+ * Les champs financiers étaient déjà retirés. user_id ne l'était pas : la
+ * réponse publique livrait donc l'identifiant de compte du propriétaire de
+ * chaque campagne, permettant de relier une personne à sa publicité et
+ * d'énumérer des comptes. Rien dans l'affichage n'en avait besoin.
+ */
+export type PublicAdCampaign = Omit<
+  AdCampaign,
+  "spent_chf" | "total_budget_chf" | "daily_budget_chf" | "cpm_chf" | "user_id"
+>;
 
 async function requireBusiness() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -277,7 +287,7 @@ export async function getActiveAds(opts?: {
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
 
-    return pool.slice(0, opts?.limit ?? 10).map(({ spent_chf: _s, total_budget_chf: _t, daily_budget_chf: _d, cpm_chf: _c, ...rest }) => rest as PublicAdCampaign);
+    return pool.slice(0, opts?.limit ?? 10).map(({ spent_chf: _s, total_budget_chf: _t, daily_budget_chf: _d, cpm_chf: _c, user_id: _u, ...rest }) => rest as PublicAdCampaign);
   } catch (e) { captureServerError(e, { action: "getActiveAds" }); return []; }
 }
 

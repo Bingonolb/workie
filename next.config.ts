@@ -23,8 +23,11 @@ const securityHeaders = [
       `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""} https://js.stripe.com https://*.sentry.io`,
       // Inline styles used throughout the app via style={{...}}
       "style-src 'self' 'unsafe-inline'",
-      // Supabase storage + external image hosts
-      "img-src 'self' data: blob: https:",
+      // Hôtes d'images limités à ceux réellement utilisés. « https: » autorisait
+      // n'importe quel domaine : une URL d'image est un canal de sortie, et un
+      // contenu injecté pouvait exfiltrer des données en la chargeant depuis un
+      // serveur tiers. La liste reprend exactement remotePatterns ci-dessous.
+      "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://images.pexels.com https://images.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://picsum.photos",
       "font-src 'self' data:",
       // Supabase realtime + Sentry + Stripe
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://api.stripe.com",
@@ -32,6 +35,12 @@ const securityHeaders = [
       "frame-src https://js.stripe.com https://checkout.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",
+      // Interdit l'inclusion du site dans une iframe tierce. X-Frame-Options le
+      // fait déjà, mais c'est la directive CSP qui fait autorité pour les
+      // navigateurs récents, et elle gère les cas que l'en-tête ancien ignore.
+      "frame-ancestors 'none'",
+      // Toute requête restante en clair est promue en HTTPS avant d'être émise.
+      "upgrade-insecure-requests",
       // Stripe checkout POST redirect
       "form-action 'self' https://checkout.stripe.com",
     ].join("; "),
