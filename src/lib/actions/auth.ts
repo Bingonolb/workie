@@ -107,6 +107,16 @@ export async function signIn(
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    // Un compte non confirmé recevait « Email ou mot de passe incorrect ».
+    // L'utilisateur cherchait alors une faute dans son mot de passe, le
+    // ressaisissait, et finissait par se croire bloqué — alors que le message
+    // à lui donner était tout autre : va ouvrir ta boîte mail.
+    const cause = `${error.code ?? ""} ${error.message}`.toLowerCase();
+    if (cause.includes("not confirmed") || cause.includes("email_not_confirmed")) {
+      return { error: "Ton adresse n'est pas encore confirmée. Ouvre le lien reçu par email, puis reconnecte-toi." };
+    }
+    // Toute autre cause reste volontairement indistincte : préciser laquelle
+    // reviendrait à indiquer si une adresse est enregistrée chez nous.
     return { error: "Email ou mot de passe incorrect." };
   }
 
