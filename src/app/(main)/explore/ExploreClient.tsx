@@ -177,6 +177,18 @@ export function ExploreClient({
         setCompanies(result.companies);
         setTotal(result.total);
       });
+    } else if (!etatMemorise) {
+      // La page arrive du cache, donc rendue sans graine : sans ce rappel, la
+      // grille afficherait éternellement le même ordre et le mélange ne
+      // servirait à rien. On ne le fait qu'en l'absence d'état mémorisé —
+      // sinon on écraserait ce que l'utilisateur était en train de regarder.
+      startTransition(async () => {
+        const result = await fetchGridPage({ graine }, 0);
+        if (result.companies.length > 0) {
+          setCompanies(result.companies);
+          setTotal(result.total);
+        }
+      });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
