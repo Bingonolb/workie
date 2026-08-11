@@ -125,6 +125,14 @@ export function ExploreClient({
   })();
 
   // Server-driven company list + total count
+  // La liste affichée provient-elle d'une requête mélangée ?
+  //
+  // Le premier rendu vient du serveur, donc d'un ordre non mélangé. Sans ce
+  // drapeau, cette liste était enregistrée comme si elle l'était, puis
+  // restituée à la visite suivante — et la suite de la pagination, elle,
+  // arrivait bien mélangée. Les deux ordres se mélangeaient : mesuré en
+  // production, 5 entreprises en double sur 144 chargées.
+  const [melangeApplique, setMelangeApplique] = useState(!!etatMemorise);
   const [companies, setCompanies] = useState<Company[]>(etatMemorise?.companies ?? initialCompanies);
   const [total, setTotal] = useState(etatMemorise?.total ?? initialTotal);
   const [page, setPage] = useState(etatMemorise?.page ?? 0);
@@ -176,6 +184,7 @@ export function ExploreClient({
         );
         setCompanies(result.companies);
         setTotal(result.total);
+        setMelangeApplique(true);
       });
     } else if (!etatMemorise) {
       // La page arrive du cache, donc rendue sans graine : sans ce rappel, la
@@ -187,6 +196,7 @@ export function ExploreClient({
         if (result.companies.length > 0) {
           setCompanies(result.companies);
           setTotal(result.total);
+          setMelangeApplique(true);
         }
       });
     }
@@ -282,6 +292,7 @@ export function ExploreClient({
       );
       setCompanies(result.companies);
       setTotal(result.total);
+      setMelangeApplique(true);
     });
   }, []);
 
@@ -379,7 +390,9 @@ export function ExploreClient({
   // autre menu rechargeait tout et replaçait l'utilisateur en haut d'une liste
   // qui n'était plus la même — on perdait ce qu'on était en train de regarder.
   useEffect(() => {
-    if (typeof window === "undefined" || companies.length === 0) return;
+    // Rien n'est enregistré tant que la liste vient du rendu serveur :
+    // la restituer plus tard produirait un ordre bâtard, et des doublons.
+    if (typeof window === "undefined" || companies.length === 0 || !melangeApplique) return;
     try {
       sessionStorage.setItem("workie_grille", JSON.stringify({
         graine, sector, canton, sort, companies, total, page,
@@ -387,9 +400,13 @@ export function ExploreClient({
     } catch {
       // Quota dépassé : le confort disparaît, la page continue de fonctionner.
     }
-  }, [graine, sector, canton, sort, companies, total, page]);
+  }, [graine, sector, canton, sort, companies, total, page, melangeApplique]);
 
-  const hasMore = (page + 1) * GRID_PAGE_SIZE < total;
+  // Le bouton n'apparaît qu'une fois le mélange appliqué. Cliquer avant
+  // aurait ajouté des pages mélangées à la suite d'une première page qui ne
+  // l'était pas — d'où des entreprises en double. L'attente est de l'ordre de
+  // la centaine de millisecondes, le temps du défilement jusqu'au bouton.
+  const hasMore = melangeApplique && (page + 1) * GRID_PAGE_SIZE < total;
 
   // Ad slot map: one ad every 7 companies starting at adOffset
   const AD_INTERVAL = 7;
