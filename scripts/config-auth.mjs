@@ -19,29 +19,50 @@
  *   node scripts/config-auth.mjs ne-pas-exiger-confirmation
  *
  * Il faut un jeton d'accès personnel Supabase, à créer une fois sur
- * https://supabase.com/dashboard/account/tokens puis à fournir ainsi :
+ * https://supabase.com/dashboard/account/tokens. Le script le demande au
+ * lancement s'il ne le trouve pas : rien à configurer, rien à retenir, et
+ * aucune syntaxe d'environnement à connaître — elle diffère entre PowerShell
+ * et un terminal Unix, ce qui est une source d'erreur inutile.
  *
- *   SUPABASE_ACCESS_TOKEN=sbp_xxx node scripts/config-auth.mjs lire
- *
- * Le jeton n'est jamais écrit sur disque ni affiché par ce script.
+ * Le jeton n'est jamais écrit sur disque, ni affiché, ni journalisé.
  */
 
+import readline from "node:readline";
+
 const REF = process.env.SUPABASE_PROJECT_REF ?? "xtbdxfzbbuedlktpqpna";
-const JETON = process.env.SUPABASE_ACCESS_TOKEN;
 const BASE = `https://api.supabase.com/v1/projects/${REF}/config/auth`;
 
-const commande = process.argv[2];
+const commande = process.argv[2] ?? "lire";
 
-if (!JETON) {
-  console.error(`
-  Jeton manquant.
+/** Demande le jeton au clavier, sans l'afficher pendant la saisie. */
+function demanderJeton() {
+  return new Promise(resolve => {
+    console.log(`
+  Il me faut un jeton d'accès Supabase.
 
   1. Ouvre https://supabase.com/dashboard/account/tokens
-  2. « Generate new token », nomme-le par exemple « workie-cli »
-  3. Relance en le fournissant :
-
-     SUPABASE_ACCESS_TOKEN=sbp_xxx node scripts/config-auth.mjs ${commande ?? "lire"}
+  2. Clique « Generate new token », nomme-le par exemple « workie »
+  3. Copie-le et colle-le ci-dessous (il ne s'affichera pas)
 `);
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    // Masque la frappe : un jeton collé ne doit pas rester lisible à l'écran
+    // ni dans l'historique visible du terminal.
+    const ecrire = rl.output.write.bind(rl.output);
+    rl.output.write = () => {};
+    ecrire("  Jeton : ");
+    rl.question("", reponse => {
+      rl.output.write = ecrire;
+      console.log("");
+      rl.close();
+      resolve(reponse.trim());
+    });
+  });
+}
+
+const JETON = process.env.SUPABASE_ACCESS_TOKEN || await demanderJeton();
+
+if (!JETON) {
+  console.error("  Aucun jeton fourni, rien n'a été fait.");
   process.exit(1);
 }
 
