@@ -52,9 +52,10 @@ const ENTREES: Entree[] = [
         même endroit pour gonfler ou descendre une note. Elle n&apos;est jamais affichée, et elle
         est effacée lorsque tu supprimes ton compte.
         <br /><br />
-        Ce que nous ne pouvons pas promettre : si tu décris ton poste avec assez de détails
-        pour être la seule personne à y correspondre, ton employeur pourra te reconnaître. Le
-        seul rempart, là, c&apos;est ce que tu choisis d&apos;écrire.
+        Ce que nous ne pouvons pas promettre : si tu occupes un poste que personne
+        d&apos;autre n&apos;occupe dans ton entreprise, l&apos;intitulé seul peut suffire à te
+        désigner. C&apos;est la raison pour laquelle un avis ne contient aucun texte
+        libre — il n&apos;y a rien à y glisser qui puisse te trahir.
       </>
     ),
   },
@@ -95,13 +96,19 @@ const ENTREES: Entree[] = [
   {
     q: "Comment luttez-vous contre les faux avis ?",
     texte:
-      "Filtrage des contenus interdits, détection des avis très similaires sur une même entreprise, repérage des envois répétés depuis une même adresse, et file de modération alimentée par les signalements.",
+      "Compte confirmé de plus de 24 heures, un seul avis par entreprise et par personne, trois avis maximum par 24 heures, repérage des publications répétées depuis une même adresse réseau, et file de modération alimentée par les signalements.",
     r: (
       <>
-        Plusieurs contrôles se cumulent, automatiques et humains :
+        Un avis Workie ne contient aucun texte libre : uniquement des notes et
+        le contexte du poste. Cela retire d&apos;emblée ce qui fait l&apos;essentiel des
+        faux avis ailleurs — les récits inventés, les règlements de comptes, les
+        messages écrits par l&apos;entreprise elle-même.
         <br /><br />
-        · un filtrage des contenus interdits — diffamation, propos haineux, discrimination ;<br />
-        · une détection des avis très ressemblants déposés sur une même entreprise ;<br />
+        S&apos;y ajoutent des contrôles sur qui peut déposer un avis :
+        <br /><br />
+        · un compte à l&apos;adresse confirmée, existant depuis plus de 24 heures ;<br />
+        · un seul avis par entreprise et par personne ;<br />
+        · trois avis au maximum sur 24 heures ;<br />
         · un repérage des publications répétées depuis une même adresse réseau ;<br />
         · une file de modération alimentée par les signalements, relue à la main.
         <br /><br />

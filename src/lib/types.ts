@@ -250,7 +250,9 @@ export type Database = {
           submitter_ip: string | null; title: string | null
           user_id: string | null; work_mode: string | null; would_recommend: string | null; would_return: string | null
         }
-        Insert: Partial<Database["public"]["Tables"]["reviews"]["Row"]> & { company_id: string; content: string; rating_overall: number }
+        // content n'est plus obligatoire : la plateforme ne collecte aucun texte
+        // d'avis, et la colonne a été rendue facultative en base.
+        Insert: Partial<Database["public"]["Tables"]["reviews"]["Row"]> & { company_id: string; rating_overall: number }
         Update: Partial<Database["public"]["Tables"]["reviews"]["Row"]>
         Relationships: [{ foreignKeyName: "reviews_company_id_fkey"; columns: ["company_id"]; isOneToOne: false; referencedRelation: "companies"; referencedColumns: ["id"] }]
       }

@@ -62,117 +62,21 @@ export const getCachedReviews = unstable_cache(
   { revalidate: 60, tags: ["reviews"] }
 );
 
-// ── Banned words (defamation, hate speech, discrimination) ───────────────────
-
-// Patterns that signal personal attacks, hate speech, or discriminatory content.
-// These flag for human review rather than auto-reject, since context matters.
-const BANNED_PATTERNS: Array<{ pattern: RegExp; reason: string }> = [
-  // Personal name attacks: "Monsieur/Madame/M. X est un" — targets an individual
-  { pattern: /\b(monsieur|madame|m\.|mme\.?)\s+\w+\s+(est\s+(un|une)|est\s+vraiment|est\s+franchement)/i, reason: "Attaque personnelle nominative détectée." },
-  // Explicit slurs — Unicode-aware boundaries (?<![a-zA-ZÀ-ÿ]) replaces \b so accented chars (enculé, pédé…) are caught
-  { pattern: /(?<![a-zA-ZÀ-ÿ])(connard|salope|enculé|fdp|va\s*te\s*faire|nique\s*(ta|sa)|pédé|pute|bâtard|batard|imbécile|débile|crétin|abruti|con(?:ne?)?)(?![a-zA-ZÀ-ÿ])/i, reason: "Le contenu contient des insultes. Exprime-toi de façon constructive." },
-  // Discrimination: race, religion, gender, orientation — bidirectional ("boîte raciste" OR "raciste dans cette boîte")
-  { pattern: /(?:\b(?:raciste|racisme|antisémite|islamophobie|homophobie|transphobie|sexiste|sexisme)\b.*\b(?:entreprise|boite|boîte|société|management|patron|rh)\b|\b(?:entreprise|boite|boîte|société|management|patron|rh)\b.*\b(?:raciste|racisme|antisémite|islamophobie|homophobie|transphobie|sexiste|sexisme)\b)/i, reason: "Mentions de discrimination détectées — avis transmis à la modération." },
-  // Direct threats
-  { pattern: /\b(je\s+vais|on\s+va|va)\s+(te|vous|lui)\s+(tuer|détruire|ruiner|attaquer|poursuivre)/i, reason: "Menace détectée." },
-  // Publishing private information (doxxing)
-  { pattern: /\b\d{2}\s?\d{3}\s?\d{2}\s?\d{2}\b|\b(\+41|0041|0)\s?[1-9]\d\s?\d{3}\s?\d{2}\s?\d{2}\b/, reason: "Numéro de téléphone détecté — ne publie pas d'informations personnelles." },
-];
-
-function checkBannedContent(content: string, pros: string, cons: string): string | null {
-  const combined = [content, pros, cons].filter(Boolean).join(" ");
-  for (const { pattern, reason } of BANNED_PATTERNS) {
-    if (pattern.test(combined)) return reason;
-  }
-  return null;
-}
-
-// ── Content quality checks ───────────────────────────────────────────────────
-
-const URL_PATTERN = /https?:\/\/|www\.|\.com|\.ch|\.net|\.org/i;
-const REPEAT_CHAR_PATTERN = /(.)\1{5,}/;
-
-function checkContentQuality(content: string, pros: string, cons: string): string | null {
-  for (const [field, text] of [["avis", content], ["points positifs", pros], ["points négatifs", cons]] as const) {
-    if (!text) continue;
-    const letters = text.replace(/[^a-zA-ZÀ-ÿ]/g, "");
-    const uppers = text.replace(/[^A-ZÀ-Ÿ]/g, "").length;
-    if (letters.length > 10 && uppers / letters.length > 0.6) {
-      return `Trop de majuscules dans les ${field}. Écris normalement.`;
-    }
-    if (URL_PATTERN.test(text)) {
-      return `Les ${field} ne peuvent pas contenir de liens.`;
-    }
-    if (REPEAT_CHAR_PATTERN.test(text)) {
-      return `Caractères répétés détectés dans les ${field}.`;
-    }
-  }
-  const words = content.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-  const unique = new Set(words);
-  if (words.length >= 5 && unique.size < 8) {
-    return "L'avis doit contenir au moins 8 mots différents.";
-  }
-  if (pros && cons && pros.trim().toLowerCase() === cons.trim().toLowerCase()) {
-    return "Les points positifs et négatifs ne peuvent pas être identiques.";
-  }
-  return null;
-}
-
-// ── Content similarity (Jaccard on word trigrams) ────────────────────────────
-
-function getWordTrigrams(text: string): Set<string> {
-  const words = text
-    .toLowerCase()
-    .replace(/[^a-zàâäéèêëîïôùûüœ\s]/g, " ")
-    .split(/\s+/)
-    .filter(w => w.length > 2);
-  const trigrams = new Set<string>();
-  for (let i = 0; i <= words.length - 3; i++) {
-    trigrams.add(`${words[i]} ${words[i + 1]} ${words[i + 2]}`);
-  }
-  return trigrams;
-}
-
-function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
-  if (a.size === 0 || b.size === 0) return 0;
-  let intersection = 0;
-  for (const item of a) {
-    if (b.has(item)) intersection++;
-  }
-  const union = a.size + b.size - intersection;
-  return union === 0 ? 0 : intersection / union;
-}
-
-const SIMILARITY_THRESHOLD = 0.45;
-
-async function findSimilarReview(
-  supabase: Awaited<ReturnType<typeof createAdminClient>>,
-  companyId: string,
-  newContent: string
-): Promise<boolean> {
-  const { data: existing } = await supabase
-    .from("reviews")
-    .select("content, pros, cons")
-    .eq("company_id", companyId)
-    .eq("status", "published")
-    .limit(50);
-
-  if (!existing || existing.length === 0) return false;
-
-  const newTrigrams = getWordTrigrams(newContent);
-  if (newTrigrams.size < 3) return false;
-
-  for (const r of existing as { content: string; pros: string | null; cons: string | null }[]) {
-    const existingText = [r.content, r.pros, r.cons].filter(Boolean).join(" ");
-    const existingTrigrams = getWordTrigrams(existingText);
-    if (jaccardSimilarity(newTrigrams, existingTrigrams) >= SIMILARITY_THRESHOLD) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// ── IP abuse detection ───────────────────────────────────────────────────────
+// ── Note sur les filtres de contenu ──────────────────────────────────────────
+//
+// Le filtrage des mots interdits, le contrôle de qualité rédactionnelle et la
+// détection d'avis dupliqués ont été retirés avec le texte des avis. Ils
+// portaient sur des champs que le formulaire ne collecte plus : ils
+// s'exécutaient sur des chaînes vides et ne détectaient plus rien. Les
+// conserver aurait entretenu l'illusion d'une protection.
+//
+// Ce qui protège réellement aujourd'hui : compte confirmé de plus de 24 h, un
+// seul avis par entreprise et par personne, trois avis par 24 h, détection des
+// publications répétées depuis une même adresse réseau, et la file de
+// signalements relue à la main.
+//
+// Attention : de la saisie libre subsiste ailleurs — titres et textes des
+// campagnes publicitaires, motifs de signalement. Elle n'a jamais été filtrée.
 
 async function isIpAbuse(
   supabase: Awaited<ReturnType<typeof createAdminClient>>,
@@ -227,10 +131,9 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   const rating_workload = Number(formData.get("rating_workload") || 0) || null;
   const rating_diversity = Number(formData.get("rating_diversity") || 0) || null;
   const would_return = String(formData.get("would_return") || "").trim() || null;
-  const title = String(formData.get("title") || "").trim() || null;
-  const content = String(formData.get("content") || "").trim();
-  const pros = String(formData.get("pros") || "").trim() || null;
-  const cons = String(formData.get("cons") || "").trim() || null;
+  // Aucun texte n'est collecté : le formulaire n'a pas de champ de saisie, la
+  // fiche n'en affiche rien, et les colonnes ont été vidées en base. Les lire
+  // ici revenait à interroger des champs qui n'existent pas.
   const job_title = String(formData.get("job_title") || "").trim() || null;
   const salary_raw = String(formData.get("salary_chf") || "");
   const salary_num = salary_raw ? Number(salary_raw) : null;
@@ -253,10 +156,6 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
   if (!duration_range) return { error: "La durée dans l'entreprise est requise." };
   if (rating_overall < 1) return { error: "La note globale est requise." };
   if (!would_recommend) return { error: "Indique si tu recommanderais cette entreprise." };
-  if (pros && pros.length > 2000) return { error: "Les points positifs ne peuvent pas dépasser 2000 caractères." };
-  if (cons && cons.length > 2000) return { error: "Les points négatifs ne peuvent pas dépasser 2000 caractères." };
-  if (content && content.length > 5000) return { error: "L'avis ne peut pas dépasser 5000 caractères." };
-  if (title && title.length > 150) return { error: "Le titre ne peut pas dépasser 150 caractères." };
   if (job_title && job_title.length > 100) return { error: "Le poste ne peut pas dépasser 100 caractères." };
 
   const currentYear = new Date().getFullYear();
@@ -274,11 +173,12 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
     }
   }
 
-  const bannedCheck = checkBannedContent(content, pros ?? "", cons ?? "");
-  if (bannedCheck) return { error: bannedCheck };
-
-  const qualityCheck = checkContentQuality(content, pros ?? "", cons ?? "");
-  if (qualityCheck) return { error: qualityCheck };
+  // Les filtres de contenu — mots interdits, qualité rédactionnelle,
+  // ressemblance entre avis — portaient sur un texte qui n'est plus saisi. Ils
+  // s'exécutaient donc sur des chaînes vides, sans jamais rien détecter. Les
+  // garde-fous qui subsistent sont réels : compte confirmé de plus de 24 h, un
+  // seul avis par entreprise, trois par jour, répétitions depuis une même
+  // adresse, et la file de signalements.
 
   // Clé de service : ces deux gardes filtrent sur user_id, dont le droit de
   // lecture a été retiré aux rôles anon et authenticated. Avec le client
@@ -312,28 +212,25 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
 
   const is_verified_author = userProfile?.identity_verified === true;
 
-  // Run abuse and similarity checks in parallel using admin client (bypasses RLS)
+  // Détection d'abus par adresse réseau. La comparaison de contenu entre avis
+  // a disparu avec le texte : il n'y a plus rien à comparer.
   const admin = createAdminClient();
-  const [ipAbuse, similarContent] = await Promise.all([
-    submitter_ip ? isIpAbuse(admin, company_id, submitter_ip, user.id) : Promise.resolve(false),
-    findSimilarReview(admin, company_id, [content, pros, cons].filter(Boolean).join(" ")),
-  ]);
+  const ipAbuse = submitter_ip
+    ? await isIpAbuse(admin, company_id, submitter_ip, user.id)
+    : false;
 
   let status: "published" | "flagged" = "published";
   let flag_reason: string | null = null;
   if (ipAbuse) {
     status = "flagged";
     flag_reason = "ip_abuse";
-  } else if (similarContent) {
-    status = "flagged";
-    flag_reason = "similar_content";
   }
 
   const { error } = await supabase.from("reviews").insert({
     company_id, user_id: user.id,
     rating_overall, rating_culture, rating_management, rating_worklife, rating_career,
     rating_flexibility, rating_recognition, rating_workload, rating_diversity,
-    title, content, pros, cons, job_title, salary_chf,
+    job_title, salary_chf,
     is_current, is_anonymous: true,
     employment_type, duration_range, work_mode, would_recommend, would_return, knew_before,
     start_year, end_year,
@@ -347,7 +244,7 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
 
   // Notify admin if flagged (fire-and-forget)
   if (status === "flagged") {
-    void notifyAdminFlaggedReview(companyExists.name, flag_reason!, content.slice(0, 200)).catch(() => {});
+    void notifyAdminFlaggedReview(companyExists.name, flag_reason!, `${job_title ?? "poste non précisé"} · note ${rating_overall}/5`).catch(() => {});
   }
 
   revalidatePath(`/company/${company_id}`);
