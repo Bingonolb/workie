@@ -10,6 +10,7 @@ import { fetchGridPage, fetchSwipePage } from "@/lib/actions/companies";
 import { GRID_PAGE_SIZE } from "@/lib/actions/columns";
 import type { Company } from "@/lib/types";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
+import { lireCache, ecrireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
 
 // Guests see the first 12 companies + 6 blurred
 /**
@@ -96,13 +97,19 @@ export function ExploreClient({
   const [isGuest, setIsGuest] = useState(false); // optimistic false until auth resolves
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
   const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
-  const [favIds, setFavIds] = useState<string[]>(initialFavIds);
-  const [flameIds, setFlameIds] = useState<string[]>(initialFlameIds);
+  // Repris de la mémoire : sans cela les flammes partaient éteintes à chaque
+  // navigation et s'allumaient une fois le réseau revenu, souvent après les
+  // images — d'où l'impression qu'elles surgissaient.
+  const memoireContexte = typeof window !== "undefined"
+    ? lireCache<{ favIds: string[]; flameIds: string[]; boostIds?: string[]; penaltyIds?: string[] }>(CLE_CONTEXTE)
+    : undefined;
+  const [favIds, setFavIds] = useState<string[]>(memoireContexte?.favIds ?? initialFavIds);
+  const [flameIds, setFlameIds] = useState<string[]>(memoireContexte?.flameIds ?? initialFlameIds);
   // Boost et pénalité repartaient de zéro à chaque chargement : le bouton
   // s'affichait éteint alors que le geste était enregistré, et un second clic
   // l'annulait sans que l'utilisateur l'ait voulu.
-  const [boostIds, setBoostIds] = useState<string[]>([]);
-  const [penaltyIds, setPenaltyIds] = useState<string[]>([]);
+  const [boostIds, setBoostIds] = useState<string[]>(memoireContexte?.boostIds ?? []);
+  const [penaltyIds, setPenaltyIds] = useState<string[]>(memoireContexte?.penaltyIds ?? []);
   const [squareAdsState, setSquareAdsState] = useState<PublicAdCampaign[]>(squareAds);
   const [swipeAdsState, setSwipeAdsState] = useState<PublicAdCampaign[]>(swipeAds);
 
@@ -247,6 +254,7 @@ export function ExploreClient({
       setIsGuest(!ctx.isLoggedIn);  // only lock after we know for sure
       setAuthReady(true);
       setIsAdmin(ctx.isAdmin);
+      ecrireCache(CLE_CONTEXTE, ctx);
       setFavIds(ctx.favIds);
       setFlameIds(ctx.flameIds);
       setBoostIds(ctx.boostIds ?? []);

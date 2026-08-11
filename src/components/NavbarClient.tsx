@@ -6,6 +6,7 @@ import { Shield } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
 import { SearchButton } from "./SearchButton";
+import { precharger, lireCache, ecrireCache, CLE_PROFIL, CLE_FAVORIS, CLE_CONTEXTE } from "@/lib/cacheSession";
 
 type UserCtx = {
   isLoggedIn: boolean;
@@ -15,18 +16,36 @@ type UserCtx = {
 };
 
 export function NavbarClient() {
-  const [ctx, setCtx] = useState<UserCtx | null>(null);
+  // Repris de la mémoire s'il y est : la barre s'affiche alors dans le bon
+  // état dès le premier rendu, sans attendre le réseau.
+  const [ctx, setCtx] = useState<UserCtx | null>(() => lireCache<UserCtx>(CLE_CONTEXTE) ?? null);
 
   useEffect(() => {
     fetch("/api/user/context")
       .then(r => r.json())
       .then((data: UserCtx) => {
         setCtx(data);
+        ecrireCache(CLE_CONTEXTE, data);
         // Mémorisé pour la fiche entreprise : rendue une fois pour tout le
         // monde, elle partait en état visiteur et affichait un flou d'une
         // fraction de seconde avant de se dévoiler. La barre de navigation
         // connaît l'état dès la première page visitée, donc bien avant.
         try { localStorage.setItem("workie_connecte", data.isLoggedIn ? "1" : "0"); } catch { /* sans conséquence */ }
+
+        // Profil et favoris chargés d'avance, dès qu'on sait qui regarde.
+        //
+        // Ces deux pages sont des coquilles statiques : leur contenu arrive
+        // après. Le préchargement n'existait qu'au survol du lien, ce qui ne
+        // laisse aucune avance sur un clic rapide — d'où le squelette puis
+        // l'apparition brutale des informations, alors même qu'elles étaient
+        // déjà connues une seconde plus tôt.
+        //
+        // Deux requêtes de plus par session, en arrière-plan, contre une
+        // arrivée instantanée à chaque visite : le compte est vite fait.
+        if (data.isLoggedIn) {
+          precharger(CLE_PROFIL, "/api/user/profile");
+          precharger(CLE_FAVORIS, "/api/user/favorites");
+        }
       })
       .catch(() => setCtx({ isLoggedIn: false, isAdmin: false, penaltyCredits: 0, unreadCount: 0 }));
   }, []);

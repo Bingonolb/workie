@@ -196,7 +196,19 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
               cursor: "pointer", transition: "all 0.18s",
             }}
           >
-            <Flame size={15} fill={fav ? "#fff" : "none"} color={fav ? "#fff" : "rgba(255,255,255,0.7)"} aria-hidden="true" />
+            {/* Deux flammes superposées dont l'opacité se croise.
+                Le cercle avait bien une transition, mais le remplissage d'un
+                SVG bascule d'un coup : l'icône claquait pendant que le fond
+                fondait. L'état arrive après l'affichage — il vient de
+                /api/user/context — donc ce changement est systématiquement
+                visible, et c'est ce qui donnait l'impression d'une apparition
+                brutale. */}
+            <span style={{ position: "relative", width: 15, height: 15, display: "block" }} aria-hidden="true">
+              <Flame size={15} fill="none" color="rgba(255,255,255,0.7)"
+                     style={{ position: "absolute", inset: 0, opacity: fav ? 0 : 1, transition: "opacity 0.18s" }} />
+              <Flame size={15} fill="#fff" color="#fff"
+                     style={{ position: "absolute", inset: 0, opacity: fav ? 1 : 0, transition: "opacity 0.18s" }} />
+            </span>
           </button>
 
           {/* Bottom: logo/initials + company name */}

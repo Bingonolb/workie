@@ -125,5 +125,15 @@ export function precharger(cle: string, url: string): void {
     .finally(() => enVol.delete(cle));
 }
 
+/**
+ * Le contexte — favoris, flammes, boosts, pénalités — était redemandé au
+ * montage de chaque page. Les flammes attendaient donc le réseau à chaque
+ * navigation et s'allumaient après coup, souvent après le chargement des
+ * images : c'est ce qui donnait l'impression qu'elles surgissaient.
+ *
+ * En mémoire seulement, comme le reste : ce sont des données personnelles, et
+ * elles ne doivent pas survivre à la fermeture de l'onglet.
+ */
+export const CLE_CONTEXTE = "contexte";
 export const CLE_PROFIL = "profil";
 export const CLE_FAVORIS = "favoris";
