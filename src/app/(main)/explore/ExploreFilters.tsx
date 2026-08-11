@@ -12,7 +12,7 @@ export function ExploreFilters({
   onFilter,
   onClear,
 }: {
-  sectors: string[];
+  sectors: readonly string[];
   cantons: { code: string; name: string }[];
   current: { sector?: string; canton?: string; view?: string; sort?: string };
   onFilter?: (key: string, value: string | undefined) => void;

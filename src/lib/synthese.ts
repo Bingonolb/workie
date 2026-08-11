@@ -84,6 +84,41 @@ export function synthetiser(
  * Sert à colorer l'affichage, jamais à produire le texte : une couleur peut
  * être approximative, une affirmation non.
  */
+/**
+ * Le texte à afficher, séparé du composant pour qu'il soit vérifiable sans
+ * navigateur. À mille réponses comme à deux, c'est ici qu'on peut lire ce qui
+ * sera écrit.
+ *
+ * Les nombres passent par `toLocaleString` : à quatre chiffres, « 1000 avis »
+ * se lit mal en français, et le séparateur de milliers n'est pas le même
+ * partout.
+ */
+export function texteSynthese(s: Synthese): { valeur: string; detail: string | null } {
+  const n = (v: number) => v.toLocaleString("fr-CH");
+  const mitiges = (v: number) => `${n(v)} mitigé${v > 1 ? "s" : ""}`;
+
+  switch (s.forme) {
+    case "aucune":
+      return { valeur: "—", detail: null };
+    case "partagee":
+      return {
+        valeur: "partagé",
+        detail: `${n(s.total)} avis sans réponse tranchée`,
+      };
+    case "fraction":
+      // Le dénominateur dit déjà combien de gens ont répondu.
+      return {
+        valeur: `${n(s.oui)}/${n(s.total)}`,
+        detail: s.mitiges > 0 ? mitiges(s.mitiges) : null,
+      };
+    case "pourcentage":
+      return {
+        valeur: `${s.pct}%`,
+        detail: `sur ${n(s.total)} avis${s.mitiges > 0 ? ` · ${mitiges(s.mitiges)}` : ""}`,
+      };
+  }
+}
+
 export function partDeOui(s: Synthese): number | null {
   switch (s.forme) {
     case "aucune": return null;

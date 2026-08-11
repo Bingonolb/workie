@@ -1,5 +1,5 @@
 import { Star } from "lucide-react";
-import { partDeOui, type Synthese } from "@/lib/synthese";
+import { partDeOui, texteSynthese, type Synthese } from "@/lib/synthese";
 
 /**
  * Éléments d'affichage des notes, partagés entre la synthèse de la fiche
@@ -71,38 +71,20 @@ export function StatPill({ label, synthese }: { label: string; synthese: Synthes
     : part >= 0.4 ? "#f59e0b"
     : "#ef4444";
 
-  const valeur =
-    synthese.forme === "aucune" ? "—"
-    : synthese.forme === "partagee" ? "partagé"
-    : synthese.forme === "fraction" ? `${synthese.oui}/${synthese.total}`
-    : `${synthese.pct}%`;
+  const { valeur, detail } = texteSynthese(synthese);
 
-  // Combien de personnes se cachent derrière le chiffre. La fraction le dit
-  // déjà par son dénominateur ; le pourcentage, lui, ne le dit pas.
-  const appui =
-    synthese.forme === "pourcentage" ? `sur ${synthese.total} avis`
-    : synthese.forme === "partagee" ? `${synthese.total} avis sans réponse tranchée`
-    : null;
-
-  const mitiges = synthese.forme === "fraction" && synthese.mitiges > 0
-    ? `${synthese.mitiges} mitigé${synthese.mitiges > 1 ? "s" : ""}`
-    : null;
-
+  // `minWidth: 0` : sans lui, une pastille refuse de descendre sous la largeur
+  // de son contenu et pousse la page en débordement horizontal. Avec, elle
+  // renvoie son texte à la ligne. C'est ce qui tient à 320 px le jour où une
+  // fiche affichera « sur 1 200 avis · 300 mitigés ».
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
-      <span style={{ fontSize: synthese.forme === "partagee" ? 13 : 16, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+    <div style={{ display: "flex", alignItems: "baseline", gap: 7, minWidth: 0, maxWidth: "100%", background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
+      <span style={{ fontSize: synthese.forme === "partagee" ? 13 : 16, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>
         {valeur}
       </span>
-      <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
+      <span style={{ fontSize: 11.5, color: "var(--text-muted)", minWidth: 0, overflowWrap: "anywhere" }}>
         {label}
-        {(appui ?? mitiges) && (
-          <span style={{ color: "var(--text-sub)" }}>
-            {" · "}{appui ?? mitiges}
-            {appui && synthese.forme === "pourcentage" && synthese.mitiges > 0 && (
-              <>{" · "}{synthese.mitiges} mitigé{synthese.mitiges > 1 ? "s" : ""}</>
-            )}
-          </span>
-        )}
+        {detail && <span style={{ color: "var(--text-sub)" }}>{" · "}{detail}</span>}
       </span>
     </div>
   );

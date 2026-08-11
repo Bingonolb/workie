@@ -8,6 +8,7 @@ import { AdSquareCard } from "@/components/AdSquareCard";
 import { SwipeView } from "./SwipeView";
 import { fetchGridPage, fetchSwipePage } from "@/lib/actions/companies";
 import { GRID_PAGE_SIZE } from "@/lib/actions/columns";
+import { SECTORS } from "@/lib/types";
 import type { Company } from "@/lib/types";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 import { lireCache, ecrireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
@@ -52,12 +53,7 @@ const CANTONS = [
   { code: "VD", name: "Vaud" }, { code: "VS", name: "Valais" }, { code: "NE", name: "Neuchâtel" },
   { code: "GE", name: "Genève" }, { code: "JU", name: "Jura" },
 ];
-const SECTORS = [
-  "Tech", "Finance", "Assurances", "Pharma", "Santé", "Conseil", "Industrie",
-  "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture",
-  "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie",
-  "Droit", "Bâtiment", "Beauté", "Administration publique",
-];
+
 
 export function ExploreClient({
   initialCompanies,

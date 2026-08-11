@@ -75,6 +75,9 @@ const SECTOR_DEFAULT_TAGS: Record<string, string[]> = {
   "Bâtiment":               ["construction", "immobilier", "ingénierie"],
   "Beauté":                 ["beauté", "cosmétiques", "bien-être"],
   "Administration publique":["service-public", "gouvernance", "suisse"],
+  "ONG":                    ["humanitaire", "impact", "terrain"],
+  "Fondation":              ["mécénat", "intérêt-général", "projets"],
+  "Association":            ["associatif", "bénévolat", "communauté"],
 };
 
 function getDisplayTags(company: Company): string[] {

@@ -305,10 +305,35 @@ export const SECTOR_COLORS: Record<string, string> = {
   "Sports & Fashion": "#ec4899",
   "Transport": "#14b8a6",
   "Énergie": "#eab308",
+  "Droit": "#7c3aed",
+  "Bâtiment": "#d97706",
+  "Beauté": "#f472b6",
+  "Administration publique": "#0891b2",
+  "ONG": "#059669",
+  "Fondation": "#0d9488",
+  "Association": "#22c55e",
   // Legacy aliases
   "Sports & Mode": "#ec4899",
   "Conseil & Services": "#f59e0b",
 };
+
+/**
+ * Les secteurs proposés au choix, dans l'ordre d'affichage.
+ *
+ * Source unique : le filtre d'exploration, le formulaire d'administration et
+ * le calcul d'audience publicitaire s'y réfèrent tous. Ils tenaient chacun
+ * leur propre copie, et elles avaient divergé.
+ *
+ * Une entreprise peut porter un secteur absent d'ici (import ancien, saisie
+ * libre) : rien ne le refuse, il hérite simplement des valeurs par défaut.
+ */
+export const SECTORS = [
+  "Tech", "Finance", "Assurances", "Pharma", "Santé", "Conseil", "Industrie",
+  "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture",
+  "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie",
+  "Droit", "Bâtiment", "Beauté", "Administration publique",
+  "ONG", "Fondation", "Association",
+] as const;
 
 export const CANTON_NAMES: Record<string, string> = {
   "ZH": "Zürich",

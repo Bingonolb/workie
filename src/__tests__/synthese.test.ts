@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { synthetiser, partDeOui, SEUIL_POURCENTAGE, type Synthese } from "@/lib/synthese";
+import { synthetiser, partDeOui, texteSynthese, SEUIL_POURCENTAGE, type Synthese } from "@/lib/synthese";
 
 /** Construit la liste de réponses correspondant à un triplet de comptes. */
 function reponses(oui: number, non: number, mitiges: number, absents = 0): (string | null)[] {
@@ -65,6 +65,48 @@ describe("synthetiser — formes", () => {
 
   it("la chaîne vide compte comme une absence de réponse", () => {
     expect(synthetiser(["", "", undefined], "oui", "non")).toEqual({ forme: "aucune" });
+  });
+});
+
+describe("texteSynthese — ce qui est réellement écrit à l'écran", () => {
+  it("les petits nombres restent lisibles", () => {
+    expect(texteSynthese(s(1, 0, 1))).toEqual({ valeur: "1/2", detail: "1 mitigé" });
+    expect(texteSynthese(s(0, 0, 1))).toEqual({ valeur: "partagé", detail: "1 avis sans réponse tranchée" });
+    expect(texteSynthese(s(0, 0, 0))).toEqual({ valeur: "—", detail: null });
+    expect(texteSynthese(s(2, 0, 0))).toEqual({ valeur: "2/2", detail: null });
+  });
+
+  it("à mille réponses, les milliers sont séparés", () => {
+    const r = texteSynthese(s(700, 50, 250));
+    expect(r.valeur).toBe("70%");
+    // Le séparateur de milliers suisse est l'apostrophe, pas l'espace : c'est
+    // « 1'000 » qu'on lit ici, et c'est déjà ce qu'affiche la page d'accueil.
+    expect(r.detail).toBe("sur 1'000 avis · 250 mitigés");
+    expect(r.detail).not.toContain("1000");
+  });
+
+  it("aucun texte ne comporte de mot assez long pour déborder d'un écran étroit", () => {
+    // Un conteneur peut renvoyer un texte à la ligne, jamais couper un mot.
+    // C'est donc le mot le plus long qui fixe la largeur minimale. Vingt-cinq
+    // caractères en 11,5 px font environ 160 px : cela tient dans 320 px.
+    for (const cas of [s(1, 0, 1), s(0, 0, 1), s(0, 0, 0), s(700, 50, 250), s(999999, 1, 0)]) {
+      const { valeur, detail } = texteSynthese(cas);
+      for (const mot of `${valeur} ${detail ?? ""}`.split(/\s+/)) {
+        expect(mot.length).toBeLessThanOrEqual(25);
+      }
+    }
+  });
+
+  it("le nombre mis en avant reste court quel que soit le volume", () => {
+    // C'est lui qui ne peut pas être renvoyé à la ligne : il doit tenir.
+    for (const cas of [s(1, 0, 1), s(3, 0, 0), s(700, 50, 250), s(999999, 1, 0), s(0, 0, 9)]) {
+      expect(texteSynthese(cas).valeur.length).toBeLessThanOrEqual(8);
+    }
+  });
+
+  it("le singulier et le pluriel suivent le compte", () => {
+    expect(texteSynthese(s(1, 0, 1)).detail).toBe("1 mitigé");
+    expect(texteSynthese(s(4, 0, 2)).detail).toContain("2 mitigés");
   });
 });
 
