@@ -222,6 +222,12 @@ export async function createUserCampaign(
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/** Une campagne telle que la lit getAdminCampaigns, relations comprises. */
+type LigneCampagneAdmin = AdCampaign & {
+  companies: { name: string | null; logo_url: string | null } | null;
+  profiles: { full_name: string | null; username: string | null } | null;
+};
+
 export async function getAdminCampaigns(): Promise<{
   campaigns?: (AdCampaign & { company_name: string; company_logo: string | null })[]; error?: string;
 }> {
@@ -234,7 +240,7 @@ export async function getAdminCampaigns(): Promise<{
       .order("created_at", { ascending: false });
     if (error) return { error: error.message };
     return {
-      campaigns: (data ?? []).map((c: any) => ({
+      campaigns: ((data ?? []) as unknown as LigneCampagneAdmin[]).map((c) => ({
         ...c,
         company_name: c.companies?.name ?? c.profiles?.full_name ?? c.profiles?.username ?? "Profil utilisateur",
         company_logo: c.companies?.logo_url ?? null,

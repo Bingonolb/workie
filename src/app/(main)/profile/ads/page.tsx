@@ -107,7 +107,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
             </div>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune campagne pour l&apos;instant</h2>
             <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 28px", lineHeight: 1.7 }}>
-              Touchez des milliers de candidats actifs en Suisse. Pas d&apos;abonnement requis — vous payez uniquement votre budget pub.
+              Touchez des milliers de candidats actifs en Suisse. Pas d&apos;abonnement requis : vous payez uniquement votre budget pub.
             </p>
             <Link href="/profile/ads/new" style={{
               display: "inline-flex", alignItems: "center", gap: 8,

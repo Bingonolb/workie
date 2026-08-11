@@ -99,7 +99,7 @@ display: "grid", gridTemplateColumns: "minmax(120px, 1fr) 90px 80px 80px 80px",
                 </div>
                 {r.title && (
                   <p style={{ fontSize: 12, color: "var(--text-sub)", marginTop: 2, fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    "{r.title}"
+                    &laquo; {r.title} &raquo;
                   </p>
                 )}
               </div>

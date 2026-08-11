@@ -44,7 +44,10 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
   const last7Clk = last7.reduce((s, d) => s + d.clicks, 0);
   const today = stats.find(d => d.day === new Date().toISOString().slice(0, 10));
 
+  // Durée écoulée : elle dépend de l'instant de lecture, elle ne peut pas
+  // être pure.
   const durationDays = campaign.start_date
+    // eslint-disable-next-line react-hooks/purity
     ? Math.max(1, Math.round(((campaign.end_date ? new Date(campaign.end_date).getTime() : Date.now()) - new Date(campaign.start_date).getTime()) / 86400000))
     : 1;
   const avgDailyImp = Math.round(impCount / durationDays);

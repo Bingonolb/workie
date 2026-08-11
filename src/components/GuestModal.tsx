@@ -73,8 +73,8 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
             </p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
               {reviewCount > 1
-                ? `Encore ${reviewCount - 1} avis à lire — salaires, retours d'expérience et conseils d'anciens employés.`
-                : "Accède aux avis complets, salaires réels et donne le tien — c'est 100% anonyme."}
+                ? `Encore ${reviewCount - 1} avis à lire : salaires, retours d'expérience et conseils d'anciens employés.`
+                : "Accède aux avis complets, salaires réels et donne le tien, c'est 100% anonyme."}
             </p>
           </div>
 
@@ -112,7 +112,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
               color: "#fff", fontWeight: 700, fontSize: 15,
               borderRadius: 14, padding: "14px 20px", textDecoration: "none",
             }}>
-              Créer un compte — gratuit
+              Créer un compte, gratuit
             </Link>
 
             {/* Login */}

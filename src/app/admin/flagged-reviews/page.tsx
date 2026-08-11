@@ -41,6 +41,9 @@ export default function FlaggedReviewsPage() {
       .finally(() => setLoading(false));
   };
 
+  // Chargement au montage : la liste vient d'une action serveur réservée aux
+  // administrateurs, elle ne peut pas être rendue côté serveur ici.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, []);
 
   const handleApprove = (id: string) => {
@@ -96,8 +99,8 @@ export default function FlaggedReviewsPage() {
       <div style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 14, padding: "16px 20px", marginBottom: 28 }}>
         <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
           Ces avis ont été soumis mais retenus automatiquement avant publication. Deux raisons possibles :<br />
-          <strong style={{ color: "var(--text)" }}>IP suspecte</strong> — même IP a déjà soumis un avis pour la même entreprise depuis un compte différent dans les 48h.<br />
-          <strong style={{ color: "var(--text)" }}>Contenu similaire</strong> — similarité Jaccard ≥ 0.45 avec un avis existant sur la même entreprise.
+          <strong style={{ color: "var(--text)" }}>IP suspecte</strong> : même IP a déjà soumis un avis pour la même entreprise depuis un compte différent dans les 48h.<br />
+          <strong style={{ color: "var(--text)" }}>Contenu similaire</strong> : similarité Jaccard ≥ 0.45 avec un avis existant sur la même entreprise.
         </p>
       </div>
 

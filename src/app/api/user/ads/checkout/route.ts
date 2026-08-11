@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         price_data: {
           currency: "chf",
           product_data: {
-            name: `Workie Ads — ${campaign.headline}`,
+            name: `Workie Ads : ${campaign.headline}`,
             description: `Budget total campagne publicitaire`,
           },
           unit_amount: totalCents,

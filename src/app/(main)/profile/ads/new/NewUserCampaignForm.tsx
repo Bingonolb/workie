@@ -54,6 +54,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
   useEffect(() => {
     if (!state?.campaignId) return;
+    // Le paiement part dès que l'action a créé la campagne : l'indicateur de
+    // chargement doit être posé avant l'appel réseau, pas après.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCheckoutLoading(true);
     fetch("/api/user/ads/checkout", {
       method: "POST",
@@ -220,10 +223,10 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: imagePreview ? "#8b5cf6" : "var(--text)", marginBottom: 3 }}>
-                    {imagePreview ? "✓ Image chargée — changer" : "Uploader une image HD"}
+                    {imagePreview ? "✓ Image chargée, changer" : "Uploader une image HD"}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                    {infoImage ?? "PNG, JPG, WebP — n'importe quelle taille, l'image est optimisée automatiquement"}
+                    {infoImage ?? "PNG, JPG, WebP : n'importe quelle taille, l'image est optimisée automatiquement"}
                   </p>
                 </div>
                 <input ref={champImageRef} type="file" name="image_file" accept="image/*" style={{ display: "none" }}
@@ -384,7 +387,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* CIBLAGE CANTON */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage géographique" subtitle="Sélectionnez les cantons ciblés — ou laissez vide pour diffuser dans toute la Suisse." />
+          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage géographique" subtitle="Sélectionnez les cantons ciblés, ou laissez vide pour diffuser dans toute la Suisse." />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</span>
             <button type="button" onClick={() => setSelectedCantons(c => c.length === CANTONS.length ? [] : CANTONS.map(x => x.code))} style={{
@@ -415,7 +418,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* BUDGET */}
         <div className="biz-form-card">
-          <SectionHeader icon={<DollarSign size={18} aria-hidden="true" />} title="Budget" subtitle="Ajustez le budget journalier et la durée — le total se calcule automatiquement." />
+          <SectionHeader icon={<DollarSign size={18} aria-hidden="true" />} title="Budget" subtitle="Ajustez le budget journalier et la durée : le total se calcule automatiquement." />
 
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
             <div>
@@ -486,7 +489,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.2)", marginBottom: 16 }}>
               <span style={{ fontSize: 15, flexShrink: 0 }}>✅</span>
               <p style={{ fontSize: 12, color: "#10b981", lineHeight: 1.5 }}>
-                <strong>Couverture maximale</strong> — votre budget atteint l&apos;intégralité de l&apos;audience ciblée chaque jour.
+                <strong>Couverture maximale</strong> : votre budget atteint l&apos;intégralité de l&apos;audience ciblée chaque jour.
               </p>
             </div>
           )}

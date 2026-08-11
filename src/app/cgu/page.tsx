@@ -41,13 +41,13 @@ export default function CGUPage() {
         <Section title="3. Règles de publication d'avis">
           <p>Les avis publiés sur Workie doivent être :</p>
           <ul>
-            <li><strong>Véridiques</strong> — basés sur une expérience professionnelle réelle</li>
-            <li><strong>Respectueux</strong> — sans propos diffamatoires, discriminatoires ou haineux</li>
-            <li><strong>Pertinents</strong> — relatifs à l&apos;entreprise et aux conditions de travail</li>
-            <li><strong>Non-confidentiels</strong> — sans divulgation d&apos;informations couvertes par un accord de confidentialité</li>
+            <li><strong>Véridiques</strong> : basés sur une expérience professionnelle réelle</li>
+            <li><strong>Respectueux</strong> : sans propos diffamatoires, discriminatoires ou haineux</li>
+            <li><strong>Pertinents</strong> : relatifs à l&apos;entreprise et aux conditions de travail</li>
+            <li><strong>Non-confidentiels</strong> : sans divulgation d&apos;informations couvertes par un accord de confidentialité</li>
           </ul>
           <p>Workie se réserve le droit de supprimer tout contenu qui violerait ces règles, sans préavis.</p>
-          <p>Chaque utilisateur peut publier <strong>un seul avis par entreprise</strong>. Les avis sont publiés anonymement — votre identité n&apos;est jamais révélée publiquement.</p>
+          <p>Chaque utilisateur peut publier <strong>un seul avis par entreprise</strong>. Les avis sont publiés anonymement, votre identité n&apos;est jamais révélée publiquement.</p>
         </Section>
 
         <Section title="4. Système de score et boutons d'évaluation">

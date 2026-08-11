@@ -123,7 +123,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   return (
     <Link
       href={`/company/${company.id}`}
-      aria-label={`Voir la fiche ${company.name}${Number(company.review_count) > 0 ? ` — ${Number(company.avg_rating).toFixed(1)}/5 (${company.review_count} avis)` : ""}`}
+      aria-label={`Voir la fiche ${company.name}${Number(company.review_count) > 0 ? `, ${Number(company.avg_rating).toFixed(1)}/5 (${company.review_count} avis)` : ""}`}
       style={{ textDecoration: "none", display: "block" }}
       // Next précharge les liens entrant dans la fenêtre, mais seulement quand
       // le navigateur est inactif : un clic juste après un défilement arrive

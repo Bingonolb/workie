@@ -26,6 +26,9 @@ export function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useLayoutEffect(() => {
+    // Le cookie n'existe que côté navigateur : le premier rendu doit rester
+    // vide pour coller au HTML servi, la décision se prend juste après.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!readConsent()) setVisible(true);
   }, []);
 

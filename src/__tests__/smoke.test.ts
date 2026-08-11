@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // ── Column-security invariants (pure static assertions, no mocking needed) ──
 
 import { REVIEW_PUBLIC_COLS, COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
+import type { createClient as ClientServeur } from "@/lib/supabase/server";
+type ClientSupabase = Awaited<ReturnType<typeof ClientServeur>>;
 import { RATING_CATEGORIES } from "@/lib/reviewCategories";
 
 describe("REVIEW_PUBLIC_COLS", () => {
@@ -171,7 +173,7 @@ describe("submitReview — per-user 24h rate limit", () => {
         }
         return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null }) }) }) };
       }),
-    } as any;
+    } as unknown as ClientSupabase;
   }
 
   it("allows submission when user has 0 reviews in the last 24h", async () => {

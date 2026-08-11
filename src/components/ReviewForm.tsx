@@ -56,7 +56,7 @@ function StarPicker({ name, label, required, value, onChange }: {
           <button key={n} type="button"
             role="radio"
             aria-checked={n === value}
-            aria-label={`${n} étoile${n > 1 ? "s" : ""}${RATING_LABELS[n] ? ` — ${RATING_LABELS[n]}` : ""}`}
+            aria-label={`${n} étoile${n > 1 ? "s" : ""}${RATING_LABELS[n] ? `, ${RATING_LABELS[n]}` : ""}`}
             onMouseEnter={() => setHover(n)} onMouseLeave={() => setHover(0)} onClick={() => onChange(n)}
             style={{ background: "none", border: "none", cursor: "pointer", padding: 2, fontSize: 28,
               filter: n <= active ? "none" : "grayscale(1) opacity(0.25)",
@@ -307,7 +307,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
                 <input id="review-salary" type="number" value={salary} onChange={e => setSalary(e.target.value)}
                   placeholder="95000" min={10000} max={500000} style={{ ...inp, paddingLeft: 46 }} />
               </div>
-              <p className="inp-hint">Jamais attribué à ton nom — aide la communauté à connaître les vrais salaires.</p>
+              <p className="inp-hint">Jamais attribué à ton nom : il aide la communauté à connaître les vrais salaires.</p>
             </div>
 
             {step1Err && <p role="alert" style={{ fontSize: 13, color: "#ef4444" }}>{step1Err}</p>}

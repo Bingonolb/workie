@@ -3,7 +3,7 @@ import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Mentions légales — Workie",
+  title: "Mentions légales | Workie",
   description: "Informations légales de la plateforme Workie, opérée en Suisse.",
 };
 
@@ -37,19 +37,19 @@ export default function MentionsLegalesPage() {
 
         <Section title="Propriété intellectuelle">
           <p>
-            L'ensemble des contenus présents sur Workie — textes, logos, interface, code source — sont la propriété exclusive de Workie
-            ou font l'objet d'une licence accordée à Workie. Toute reproduction, distribution ou utilisation sans autorisation écrite préalable est interdite.
+            L&apos;ensemble des contenus présents sur Workie (textes, logos, interface, code source) sont la propriété exclusive de Workie
+            ou font l&apos;objet d&apos;une licence accordée à Workie. Toute reproduction, distribution ou utilisation sans autorisation écrite préalable est interdite.
           </p>
           <p style={{ marginTop: 12 }}>
-            Les avis publiés par les utilisateurs restent leur propriété. En les soumettant, l'utilisateur accorde à Workie une licence
+            Les avis publiés par les utilisateurs restent leur propriété. En les soumettant, l&apos;utilisateur accorde à Workie une licence
             non exclusive, mondiale et gratuite pour les afficher sur la plateforme.
           </p>
         </Section>
 
         <Section title="Responsabilité des contenus">
           <p>
-            Workie est une plateforme d'hébergement de contenus générés par des tiers au sens de la loi fédérale suisse sur les services de communication électronique.
-            Workie n'est pas responsable des avis publiés par ses utilisateurs, mais s'engage à retirer tout contenu signalé comme illicite dans les meilleurs délais.
+            Workie est une plateforme d&apos;hébergement de contenus générés par des tiers au sens de la loi fédérale suisse sur les services de communication électronique.
+            Workie n&apos;est pas responsable des avis publiés par ses utilisateurs, mais s&apos;engage à retirer tout contenu signalé comme illicite dans les meilleurs délais.
           </p>
           <p style={{ marginTop: 12 }}>
             Pour signaler un contenu : <a href="mailto:contact@workie.ch" style={{ color: "var(--accent)", textDecoration: "none" }}>contact@workie.ch</a>
@@ -67,7 +67,7 @@ export default function MentionsLegalesPage() {
         <Section title="Droit applicable et for juridique">
           <p>
             Les présentes mentions légales sont régies par le droit suisse.
-            Tout litige est soumis à la compétence exclusive des tribunaux du canton de domicile de l'exploitant,
+            Tout litige est soumis à la compétence exclusive des tribunaux du canton de domicile de l&apos;exploitant,
             sous réserve des dispositions impératives applicables au consommateur.
           </p>
         </Section>
@@ -75,7 +75,7 @@ export default function MentionsLegalesPage() {
         <Section title="Liens externes">
           <p>
             Workie peut contenir des liens vers des sites tiers. Ces liens sont fournis à titre informatif uniquement.
-            Workie n'assume aucune responsabilité quant au contenu ou à la politique de confidentialité de ces sites.
+            Workie n&apos;assume aucune responsabilité quant au contenu ou à la politique de confidentialité de ces sites.
           </p>
         </Section>
       </main>

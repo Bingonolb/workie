@@ -23,7 +23,7 @@ export default function SentryTestPage() {
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20, padding: 24 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>Sentry — page de test</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>Sentry, page de test</h1>
       <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Ces boutons envoient des erreurs de test dans ton dashboard Sentry.</p>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
         <button

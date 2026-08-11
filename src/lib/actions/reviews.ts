@@ -11,6 +11,9 @@ import { REVIEW_PUBLIC_COLS, REVIEW_FICHE_COLS } from "@/lib/actions/columns";
 
 // ── Read actions ────────────────────────────────────────────────────────────
 
+/** Un avis accompagné du nom de son entreprise, tel que PostgREST le renvoie. */
+type LigneAvisAvecEntreprise = Review & { companies: { name: string | null } | null };
+
 export async function getUserReviews(): Promise<(Review & { company_name: string })[]> {
   // getUser() est mis en cache pour la durée de la requête ; appeler
   // supabase.auth.getUser() directement ajoutait un aller-retour réseau vers
@@ -31,7 +34,8 @@ export async function getUserReviews(): Promise<(Review & { company_name: string
     .select(`${REVIEW_PUBLIC_COLS}, companies(name)`)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
-  return (data ?? []).map((r: any) => ({ ...r, company_name: r.companies?.name ?? "Entreprise inconnue" }));
+  return ((data ?? []) as unknown as LigneAvisAvecEntreprise[])
+    .map((r) => ({ ...r, company_name: r.companies?.name ?? "Entreprise inconnue" }));
 }
 
 export async function getReviews(companyId: string, limit = 100) {
@@ -367,7 +371,8 @@ export async function getFlaggedReviews(): Promise<{ reviews?: FlaggedReview[]; 
 
   if (error) return { error: error.message };
 
-  const reviews: FlaggedReview[] = (data ?? []).map((r: any) => ({
+  type LigneSignalee = Omit<FlaggedReview, "company_name"> & { companies: { name: string | null } | null };
+  const reviews: FlaggedReview[] = ((data ?? []) as unknown as LigneSignalee[]).map((r) => ({
     id: r.id,
     company_id: r.company_id,
     company_name: r.companies?.name ?? "Entreprise inconnue",

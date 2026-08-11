@@ -657,14 +657,14 @@ export function ExploreClient({
                     {total - GUEST_VISIBLE} entreprises de plus
                   </p>
                   <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 22, maxWidth: 300, lineHeight: 1.6 }}>
-                    Avis complets, salaires réels, classements — gratuit et 100% anonyme.
+                    Avis complets, salaires réels, classements. Gratuit et 100% anonyme.
                   </p>
                   <a href="/signup" style={{
                     display: "inline-block", padding: "13px 28px", borderRadius: 12,
                     background: "linear-gradient(135deg, #8b5cf6, #f97316)",
                     color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
                   }}>
-                    Créer un compte — gratuit
+                    Créer un compte, gratuit
                   </a>
                   <a href="/login" style={{
                     marginTop: 12, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500,

@@ -31,7 +31,7 @@ const ENTREES: Entree[] = [
     r: (
       <>
         Workie est une plateforme suisse où des employés partagent anonymement leur expérience de
-        travail — ambiance, management, équilibre de vie, salaire. Les avis viennent
+        travail : ambiance, management, équilibre de vie, salaire. Les avis viennent
         exclusivement des utilisateurs. Aucune entreprise ne peut acheter, écrire ou faire
         retirer un avis parce qu&apos;il lui déplaît.
       </>
@@ -44,7 +44,7 @@ const ENTREES: Entree[] = [
     r: (
       <>
         Ton nom n&apos;est jamais publié. L&apos;identifiant de ton compte n&apos;est pas transmis au
-        navigateur avec les avis, ce qui veut dire qu&apos;aucun visiteur — ni aucune entreprise —
+        navigateur avec les avis, ce qui veut dire qu&apos;aucun visiteur, ni aucune entreprise,
         ne peut relier un avis à un profil en inspectant la page.
         <br /><br />
         Une donnée reste conservée côté serveur : ton adresse IP au moment de la publication.
@@ -55,7 +55,7 @@ const ENTREES: Entree[] = [
         Ce que nous ne pouvons pas promettre : si tu occupes un poste que personne
         d&apos;autre n&apos;occupe dans ton entreprise, l&apos;intitulé seul peut suffire à te
         désigner. C&apos;est la raison pour laquelle un avis ne contient aucun texte
-        libre — il n&apos;y a rien à y glisser qui puisse te trahir.
+        libre : il n&apos;y a rien à y glisser qui puisse te trahir.
       </>
     ),
   },
@@ -69,7 +69,7 @@ const ENTREES: Entree[] = [
         secteur, le canton, le site officiel. Rien d&apos;interne, rien de confidentiel, aucun
         document d&apos;entreprise.
         <br /><br />
-        Tout ce qui relève de l&apos;appréciation — notes, ambiance, salaires, management — provient
+        Tout ce qui relève de l&apos;appréciation (notes, ambiance, salaires, management) provient
         uniquement des avis déposés par les utilisateurs. Workie ne produit aucune évaluation
         de son côté.
         <br /><br />
@@ -101,7 +101,7 @@ const ENTREES: Entree[] = [
       <>
         Un avis Workie ne contient aucun texte libre : uniquement des notes et
         le contexte du poste. Cela retire d&apos;emblée ce qui fait l&apos;essentiel des
-        faux avis ailleurs — les récits inventés, les règlements de comptes, les
+        faux avis ailleurs : les récits inventés, les règlements de comptes, les
         messages écrits par l&apos;entreprise elle-même.
         <br /><br />
         S&apos;y ajoutent des contrôles sur qui peut déposer un avis :
@@ -120,14 +120,14 @@ const ENTREES: Entree[] = [
   {
     q: "Je représente une entreprise et un avis me paraît faux",
     texte:
-      "Signalez-le depuis la fiche : il part en modération et sera relu. Un avis n'est pas retiré parce qu'il est négatif, mais il l'est s'il enfreint nos règles — propos diffamatoires, haineux, discriminatoires, ou expérience manifestement inventée.",
+      "Signalez-le depuis la fiche : il part en modération et sera relu. Un avis n'est pas retiré parce qu'il est négatif, mais il l'est s'il enfreint nos règles : propos diffamatoires, haineux, discriminatoires, ou expérience manifestement inventée.",
     r: (
       <>
         Signalez-le depuis la fiche de l&apos;entreprise. Le signalement part en modération et
         l&apos;avis est relu.
         <br /><br />
         Soyons clairs sur la ligne : un avis n&apos;est pas retiré parce qu&apos;il est négatif, ni parce
-        qu&apos;il déplaît. Il l&apos;est s&apos;il enfreint nos règles — propos diffamatoires, haineux ou
+        qu&apos;il déplaît. Il l&apos;est s&apos;il enfreint nos règles : propos diffamatoires, haineux ou
         discriminatoires, attaque contre une personne nommée, ou expérience manifestement
         inventée. Un jugement défavorable exprimé de bonne foi sur des conditions de travail
         reste publié.
@@ -143,7 +143,7 @@ const ENTREES: Entree[] = [
       "Workie est opéré depuis la Suisse et consacré aux entreprises suisses. L'application est servie par Vercel, la base de données par Supabase sur des serveurs situés en Europe, et la messagerie par Infomaniak, en Suisse.",
     r: (
       <>
-        Workie est opéré depuis la Suisse et consacré aux entreprises suisses — 1 033
+        Workie est opéré depuis la Suisse et consacré aux entreprises suisses : 1 033
         entreprises référencées, dans les 26 cantons.
         <br /><br />
         L&apos;infrastructure est répartie entre plusieurs prestataires. L&apos;application est
@@ -181,7 +181,7 @@ const ENTREES: Entree[] = [
         <br /><br />
         La suppression détache tes avis de ton identité et efface l&apos;adresse IP conservée pour
         la détection d&apos;abus. Les avis eux-mêmes peuvent rester en ligne, sans plus aucun lien
-        avec toi — c&apos;est ce qui évite qu&apos;une entreprise puisse faire disparaître les
+        avec toi. C&apos;est ce qui évite qu&apos;une entreprise puisse faire disparaître les
         témoignages la concernant en poussant leurs auteurs à fermer leur compte.
       </>
     ),
@@ -222,7 +222,7 @@ export function LandingFaq() {
           Questions fréquentes
         </h2>
         <p style={{ textAlign: "center", fontSize: 15, color: "var(--text-muted)", marginBottom: 40 }}>
-          L&apos;anonymat, les sources, la modération — sans détour.
+          L&apos;anonymat, les sources, la modération, sans détour.
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

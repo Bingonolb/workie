@@ -158,7 +158,7 @@ function claimReceivedHtml(rawFirstName: string, rawCompanyName: string): string
   const companyName = escapeHtml(rawCompanyName);
   return `<!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Demande reçue — Workie Business</title></head>
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Demande reçue | Workie Business</title></head>
 <body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
 <tr><td align="center">
@@ -224,7 +224,7 @@ function claimApprovedHtml(rawFirstName: string, rawCompanyName: string): string
   const companyName = escapeHtml(rawCompanyName);
   return `<!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Entreprise vérifiée — Workie Business</title></head>
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Entreprise vérifiée | Workie Business</title></head>
 <body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
 <tr><td align="center">
@@ -316,7 +316,7 @@ export async function sendNewReviewEmail(email: string, companyName: string, com
   const safeCompany = escapeHtml(companyName);
   const html = `<!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Nouvel avis — Workie</title></head>
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Nouvel avis | Workie</title></head>
 <body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
 <tr><td align="center">
@@ -384,7 +384,7 @@ export async function sendAdminFlagAlert(
   const safeReason = escapeHtml(reasonLabel);
   const html = `<!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8" /><title>Avis flaggé — Workie Admin</title></head>
+<head><meta charset="UTF-8" /><title>Avis flaggé | Workie Admin</title></head>
 <body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
 <tr><td align="center">
@@ -430,7 +430,7 @@ export async function sendAdminFlagAlert(
     await resend.emails.send({
       from: FROM,
       to: "riverse3@gmail.com",
-      subject: `⚠ Avis flaggé — ${companyName} (${flagReason === "ip_abuse" ? "IP suspecte" : "contenu similaire"})`,
+      subject: `⚠ Avis flaggé : ${companyName} (${flagReason === "ip_abuse" ? "IP suspecte" : "contenu similaire"})`,
       html,
     });
   } catch { /* non-blocking */ }

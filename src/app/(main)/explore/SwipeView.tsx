@@ -768,7 +768,7 @@ export function SwipeView({
               <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: 6 }}>
                 {penaltyCredits === 0 && avaitDesCredits && !isAdmin
                   ? <>Crédits épuisés <span style={{ color: "#ef4444" }}>-100 pts</span></>
-                  : <>Bouton <span style={{ color: "#ef4444" }}>-100 pts</span> — pack 10 utilisations</>}
+                  : <>Bouton <span style={{ color: "#ef4444" }}>-100 pts</span> : pack 10 utilisations</>}
               </h2>
               <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
                 {penaltyCredits === 0 && avaitDesCredits && !isAdmin
@@ -781,7 +781,7 @@ export function SwipeView({
             <div style={{ padding: "22px 28px 28px" }}>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 22px", display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  "10 utilisations — 1 CHF par entreprise",
+                  "10 utilisations, 1 CHF par entreprise",
                   "Impact direct sur leur score de réputation",
                   "1 pénalité max par entreprise (annulable)",
                   "Paiement sécurisé via Stripe",

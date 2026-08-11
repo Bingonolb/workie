@@ -74,7 +74,7 @@ export function CompanyVoteButtons({
     } catch {
       setBoosted(prev);
       setScore(prevScore);
-      showToast("Erreur réseau — réessaie", "#ef4444");
+      showToast("Erreur réseau, réessaie", "#ef4444");
     }
   };
 
@@ -101,7 +101,7 @@ export function CompanyVoteButtons({
       setPenalized(prev);
       setScore(prevScore);
       setCredits(prevCredits);
-      showToast("Erreur réseau — réessaie", "#ef4444");
+      showToast("Erreur réseau, réessaie", "#ef4444");
     }
   };
 
@@ -151,7 +151,7 @@ export function CompanyVoteButtons({
       <button
         type="button"
         onClick={handlePenalty}
-        title={penaltyUnlocked ? (penalized ? "Retirer la pénalité" : "-100 pts — pénaliser cette entreprise") : "Acheter des crédits pénalité"}
+        title={penaltyUnlocked ? (penalized ? "Retirer la pénalité" : "-100 pts : pénaliser cette entreprise") : "Acheter des crédits pénalité"}
         aria-label={penaltyUnlocked ? (penalized ? "Retirer la pénalité (-100 pts)" : "Pénaliser cette entreprise (-100 pts)") : "Acheter des crédits pénalité"}
         aria-pressed={penalized}
         style={{
@@ -189,7 +189,7 @@ export function CompanyVoteButtons({
       <button
         type="button"
         onClick={handleBoost}
-        title={boosted ? "Retirer le boost" : "+100 pts — booster cette entreprise"}
+        title={boosted ? "Retirer le boost" : "+100 pts : booster cette entreprise"}
         aria-label={boosted ? "Retirer le boost (+100 pts)" : "Booster cette entreprise (+100 pts)"}
         aria-pressed={boosted}
         style={{
@@ -240,7 +240,7 @@ export function CompanyVoteButtons({
             <div style={{ padding: "22px 28px 28px" }}>
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px", display: "flex", flexDirection: "column", gap: 9 }}>
                 {[
-                  "10 utilisations — 1 CHF par entreprise",
+                  "10 utilisations, 1 CHF par entreprise",
                   "Impact direct sur leur score de réputation",
                   "1 pénalité max par entreprise (annulable)",
                   "Paiement sécurisé via Stripe",

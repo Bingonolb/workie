@@ -19,17 +19,17 @@ export default function ConfidentialitePage() {
           Politique de confidentialité
         </h1>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 48 }}>
-          Dernière mise à jour : 15 juillet 2026 — conforme à la LPD (loi fédérale sur la protection des données) et au RGPD
+          Dernière mise à jour : 15 juillet 2026, conforme à la LPD (loi fédérale sur la protection des données) et au RGPD
         </p>
 
         <Section title="1. Responsable du traitement">
-          <p>Workie, Suisse — <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a></p>
+          <p>Workie, Suisse. <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a></p>
         </Section>
 
         <Section title="2. Données collectées">
           <p><strong>Données de compte</strong> : adresse email, nom d&apos;utilisateur, date de création du compte.</p>
           <p><strong>Données de profil</strong> (optionnelles) : photo de profil, ville, pays, biographie.</p>
-          <p><strong>Avis et salaires</strong> : contenu publié anonymement — votre identité n&apos;est jamais affichée publiquement associée à un avis.</p>
+          <p><strong>Avis et salaires</strong> : contenu publié anonymement, votre identité n&apos;est jamais affichée publiquement associée à un avis.</p>
           <p><strong>Données techniques</strong> : adresse IP (pour la détection de fraude et la géolocalisation approximative), type de navigateur, pages visitées.</p>
           <p><strong>Données de paiement</strong> : traitées exclusivement par Stripe. Workie ne stocke aucun numéro de carte bancaire.</p>
         </Section>
@@ -91,7 +91,7 @@ export default function ConfidentialitePage() {
             <li><strong>Portabilité</strong> : recevoir vos données dans un format structuré</li>
             <li><strong>Opposition</strong> : vous opposer à certains traitements</li>
           </ul>
-          <p>Pour exercer ces droits : <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a> — réponse sous 30 jours.</p>
+          <p>Pour exercer ces droits : <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a>, réponse sous 30 jours.</p>
         </Section>
 
         <Section title="9. Sécurité">

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://www.workie.ch/salaires" },
   openGraph: {
     title: "Salaires en Suisse par secteur · Workie",
-    description: "Salaires bruts anonymes par secteur — Tech, Finance, Pharma et plus. Données réelles d'employés suisses.",
+    description: "Salaires bruts anonymes par secteur : Tech, Finance, Pharma et plus. Données réelles d'employés suisses.",
     url: "https://www.workie.ch/salaires",
     siteName: "Workie",
     type: "website",
@@ -167,7 +167,7 @@ export default async function SalairesPage() {
     {
       "@context": "https://schema.org",
       "@type": "Dataset",
-      "name": "Salaires en Suisse par secteur — Workie",
+      "name": "Salaires en Suisse par secteur | Workie",
       "description": `Données anonymes sur ${totalCount} salaires déclarés par des employés suisses, agrégés par secteur et type de poste.`,
       "url": "https://www.workie.ch/salaires",
       "creator": { "@type": "Organization", "name": "Workie", "url": "https://www.workie.ch" },

@@ -56,6 +56,9 @@ export function FournisseurEtatFiche({ companyId, children }: { companyId: strin
   useLayoutEffect(() => {
     try {
       if (localStorage.getItem(CLE_MEMOIRE) === "1") {
+        // Même raison : le serveur ignore ce marqueur, l'ajuster avant peinture
+        // est ce qui évite le clignotement.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setEtat(e => ({ ...e, isLoggedIn: true }));
       }
     } catch { /* stockage indisponible : on reste en visiteur */ }

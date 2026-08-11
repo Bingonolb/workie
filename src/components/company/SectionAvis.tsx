@@ -120,6 +120,7 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
   // sources des sursauts visibles à l'ouverture d'une fiche. On lui signale que
   // cet écart est attendu, ce qui évite le second rendu.
   const age = (() => {
+    // eslint-disable-next-line react-hooks/purity
     const jours = Math.floor((Date.now() - new Date(review.created_at).getTime()) / 86400000);
     if (jours === 0) return "Aujourd'hui";
     if (jours < 7) return `Il y a ${jours}j`;
@@ -224,7 +225,7 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
         <ReportButton
           targetType="review"
           targetId={review.id}
-          targetLabel={`[${companyName}] Avis — ${review.job_title ?? "employé"}`}
+          targetLabel={`[${companyName}] Avis : ${review.job_title ?? "employé"}`}
           isLoggedIn={isLoggedIn}
           variant="link"
         />

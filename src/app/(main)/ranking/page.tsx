@@ -8,7 +8,7 @@ import type { Company } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses · Workie",
-  description: "Le vrai classement des entreprises en Suisse — calculé sur les avis anonymes, les salaires et les votes de la communauté Workie.",
+  description: "Le vrai classement des entreprises en Suisse, calculé sur les avis anonymes, les salaires et les votes de la communauté Workie.",
   alternates: { canonical: "https://www.workie.ch/ranking" },
   openGraph: {
     title: "Classement des meilleurs employeurs suisses · Workie",

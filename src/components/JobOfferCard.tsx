@@ -41,6 +41,8 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
   }, [open]);
 
   const [mounted, setMounted] = useState(false);
+  // Portail : il n'a pas d'équivalent dans le HTML du serveur.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
 
   return (
@@ -78,7 +80,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
         {job.salary_range && (
           <p style={{ fontSize: 11, color: "#10b981", fontWeight: 700, marginTop: 6 }}>💰 {job.salary_range}</p>
         )}
-        <p style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>Voir l'offre →</p>
+        <p style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>Voir l&apos;offre →</p>
       </button>
 
       {/* Modal — portaled to document.body to escape sticky/transform stacking contexts */}
@@ -149,7 +151,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             ) : (
               <div style={{ marginBottom: 24 }}>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7 }}>
-                  Clique sur "Postuler" pour voir tous les détails et envoyer ta candidature directement à l'entreprise.
+                  Clique sur &laquo; Postuler &raquo; pour voir tous les détails et envoyer ta candidature directement à l&apos;entreprise.
                 </p>
               </div>
             )}

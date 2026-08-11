@@ -176,7 +176,7 @@ export async function getClaims() {
 
     // For each claim that has a company_id, check if it's already owned
     const companyIds = [...new Set(claims.map(c => c.company_id).filter(Boolean))] as string[];
-    let ownerMap: Record<string, string> = {};
+    const ownerMap: Record<string, string> = {};
 
     if (companyIds.length > 0) {
       // profiles.email is kept in sync with auth.users via trigger — no Auth Admin API call needed

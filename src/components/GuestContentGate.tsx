@@ -36,7 +36,7 @@ export function GuestContentGate({
           Accède aux avis complets
         </p>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, maxWidth: 300, lineHeight: 1.65 }}>
-          Salaires réels, retours d&apos;anciens employés — gratuit et 100% anonyme.
+          Salaires réels, retours d&apos;anciens employés. Gratuit et 100% anonyme.
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
           <Link href="/signup" style={{
@@ -44,7 +44,7 @@ export function GuestContentGate({
             background: "linear-gradient(135deg, #8b5cf6, #f97316)",
             color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
           }}>
-            Créer un compte — gratuit
+            Créer un compte, gratuit
           </Link>
           <Link href="/login" style={{
             display: "block", padding: "12px 20px", borderRadius: 12,

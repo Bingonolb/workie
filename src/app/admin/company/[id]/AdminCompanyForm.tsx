@@ -170,7 +170,7 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
           />
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-              {infoImage ?? "ou uploader un fichier — n'importe quelle taille, réduite automatiquement à 2560 px"}
+              {infoImage ?? "ou uploader un fichier : n'importe quelle taille, réduite automatiquement à 2560 px"}
             </span>
             <label style={{
               display: "inline-flex", alignItems: "center", gap: 6,
@@ -195,7 +195,7 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
             <div style={{ position: "relative" }}>
               {coverPreview && (
                 <div style={{ position: "absolute", top: 8, left: 8, background: "rgba(139,92,246,0.9)", borderRadius: 6, padding: "3px 10px", fontSize: 11, fontWeight: 700, color: "#fff" }}>
-                  Aperçu — non enregistré
+                  Aperçu, non enregistré
                 </div>
               )}
               {/* eslint-disable-next-line @next/next/no-img-element */}

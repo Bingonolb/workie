@@ -130,7 +130,7 @@ describe("état synchronisé avec la propriété", () => {
   });
 
   it("l'ancien comportement laissait la flamme éteinte", () => {
-    let valeur = false;              // useState(propriete), figé
+    const valeur = false;            // useState(propriete), figé
     const rendre = (_propriete: boolean) => valeur;
     expect(rendre(true)).toBe(false); // la propriété dit vrai, l'écran dit faux
   });

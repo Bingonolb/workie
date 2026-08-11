@@ -17,6 +17,8 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Portail : il n'a pas d'équivalent dans le HTML du serveur.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useLayoutEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
@@ -48,6 +50,9 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
     }, 150);
   }, []);
 
+  // La recherche est lancee par la frappe, et son resultat est un etat :
+  // c'est le seul endroit ou il peut etre pose.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { search(query); }, [query, search]);
 
   if (!mounted) return null;
@@ -163,7 +168,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
         {!query && (
           <div style={{ padding: "48px 20px", textAlign: "center" }}>
             <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Rechercher une entreprise</p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nom, ville ou secteur d'activité</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nom, ville ou secteur d&apos;activité</p>
           </div>
         )}
       </div>

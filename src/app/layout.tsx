@@ -24,10 +24,10 @@ const OG_URL = "/api/og?title=Workie+%E2%80%94+Les+entreprises+suisses%2C+sans+f
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.workie.ch"),
   title: {
-    default: "Workie — Les entreprises, sans filtre.",
+    default: "Workie : les entreprises, sans filtre.",
     template: "%s · Workie",
   },
-  description: "Découvre les vraies conditions de travail des entreprises suisses. Avis anonymes, salaires, culture — la vérité que Glassdoor ne te dit pas.",
+  description: "Découvre les vraies conditions de travail des entreprises suisses. Avis anonymes, salaires, culture : la vérité que Glassdoor ne te dit pas.",
   keywords: ["avis entreprise suisse", "salaires suisse", "conditions de travail", "glassdoor suisse", "workie"],
   authors: [{ name: "Workie", url: "https://www.workie.ch" }],
   creator: "Workie",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     locale: "fr_CH",
     type: "website",
     url: "https://www.workie.ch",
-    images: [{ url: OG_URL, width: 1200, height: 630, alt: "Workie — Les entreprises suisses, sans filtre." }],
+    images: [{ url: OG_URL, width: 1200, height: 630, alt: "Workie : les entreprises suisses, sans filtre." }],
   },
   twitter: {
     card: "summary_large_image",
@@ -57,7 +57,7 @@ const websiteSchema = {
   "@type": "WebSite",
   name: "Workie",
   url: "https://www.workie.ch",
-  description: "Avis anonymes sur les entreprises suisses — salaires, culture, management.",
+  description: "Avis anonymes sur les entreprises suisses : salaires, culture, management.",
   inLanguage: "fr-CH",
   potentialAction: {
     "@type": "SearchAction",

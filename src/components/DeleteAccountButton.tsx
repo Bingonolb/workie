@@ -78,7 +78,7 @@ export function DeleteAccountButton() {
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
                 placeholder="SUPPRIMER"
-                aria-label="Confirmer la suppression — tapez SUPPRIMER"
+                aria-label="Confirmer la suppression, tapez SUPPRIMER"
                 autoComplete="off"
                 style={{
                   width: "100%", padding: "10px 14px", borderRadius: 10,

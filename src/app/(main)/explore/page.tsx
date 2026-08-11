@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://www.workie.ch/explore" },
   openGraph: {
     title: "Explorer les entreprises suisses · Workie",
-    description: "1700+ entreprises suisses — avis anonymes, salaires réels, classement communautaire.",
+    description: "1700+ entreprises suisses : avis anonymes, salaires réels, classement communautaire.",
     url: "https://www.workie.ch/explore",
     siteName: "Workie",
     type: "website",

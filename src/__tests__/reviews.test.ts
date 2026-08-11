@@ -73,7 +73,7 @@ describe("submitReview", () => {
       auth: { getUser: async () => ({ data: { user: null } }) },
       from: mockFrom,
       rpc: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     const result = await submitReview(undefined, makeFormData(validReviewFields));
     expect(result?.error).toMatch(/connecté/);
   });
@@ -91,7 +91,7 @@ describe("submitReview", () => {
       auth: { getUser: async () => ({ data: { user: verifiedUser } }) },
       from: vi.fn(() => chain({ data: null })),
       rpc: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     const fd = makeFormData({ ...validReviewFields, company_id: "" });
     const result = await submitReview(undefined, fd);
     expect(result?.error).toMatch(/manquante/i);
@@ -107,7 +107,7 @@ describe("submitReview", () => {
         return chain({ data: null });
       }),
       rpc: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     const fd = makeFormData({ ...validReviewFields, rating_overall: "0" });
     const result = await submitReview(undefined, fd);
     expect(result?.error).toMatch(/note globale/i);
@@ -123,7 +123,7 @@ describe("submitReview", () => {
       auth: { getUser: async () => ({ data: { user: { ...verifiedUser, id: "user-biz" } } }) },
       from: vi.fn(() => chain({ data: { claimed_company_id: "company-uuid" } })),
       rpc: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     const result = await submitReview(undefined, makeFormData(validReviewFields));
     expect(result?.error).toMatch(/comptes entreprise/i);
   });
@@ -139,13 +139,13 @@ describe("submitReview", () => {
         return chain({ data: null });
       }),
       rpc: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     // La garde anti-doublon interroge reviews par la clé de service : elle
     // filtre sur user_id, colonne fermée aux rôles anon et authenticated.
     // Simuler l'ancien client validerait une garde qui ne s'exécute plus.
     vi.mocked(createAdminClient).mockReturnValueOnce({
       from: vi.fn(() => chain({ data: { id: "existing-review" } })),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     const result = await submitReview(undefined, makeFormData(validReviewFields));
     expect(result?.error).toMatch(/déjà posté/i);
   });
@@ -160,7 +160,7 @@ describe("voteHelpful", () => {
       auth: { getUser: async () => ({ data: { user: null } }) },
       from: vi.fn(),
       rpc: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     const result = await voteHelpful("review-1");
     expect(result.error).toMatch(/authentifié/i);
   });
@@ -171,7 +171,7 @@ describe("voteHelpful", () => {
       auth: { getUser: async () => ({ data: { user: { id: "user-biz" } } }) },
       from: vi.fn(() => chain({ data: { claimed_company_id: "company-uuid" } })),
       rpc: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     const result = await voteHelpful("review-1");
     expect(result.error).toMatch(/entreprise/i);
   });
@@ -186,7 +186,7 @@ describe("voteHelpful", () => {
         return chain({ data: null });
       }),
       rpc: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     const result = await voteHelpful("review-1");
     expect(result.alreadyVoted).toBe(true);
     expect(result.error).toBeUndefined();

@@ -129,3 +129,15 @@ Le texte des avis — `title`, `content`, `pros`, `cons` — n'est **jamais** af
 La fiche publique lit `REVIEW_FICHE_COLS`, qui les exclut. `REVIEW_PUBLIC_COLS` reste réservé à ce que l'auteur peut voir de ses propres avis — son profil et son export.
 
 Même principe partout : la question n'est pas « est-ce affiché ? » mais « est-ce envoyé ? ».
+
+## Pas de tiret cadratin dans le texte visible
+
+Le tiret cadratin en incise (`—`) est une ponctuation anglo-saxonne. En
+français, on écrit deux-points quand il introduit une explication, une virgule
+quand il sépare, des parenthèses quand il encadre.
+
+La règle porte sur tout ce que l'utilisateur lit : pages, composants, titres,
+descriptions, `metadata`, données structurées, libellés Stripe, sujets et
+gabarits d'e-mail, manifeste PWA. Les commentaires de code ne sont pas
+concernés, et le tiret seul comme valeur absente (`—` dans une colonne vide)
+reste : c'est une convention de tableau, pas une ponctuation de phrase.

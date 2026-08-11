@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!company) return { title: "Entreprise introuvable · Workie" };
   const desc = company.description
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
-    : `Avis anonymes sur ${company.name} — salaires, culture, management. La vérité que Glassdoor ne te dit pas.`;
+    : `Avis anonymes sur ${company.name} : salaires, culture, management. La vérité que Glassdoor ne te dit pas.`;
   const url = `${BASE_URL}/company/${id}`;
   const ogApiUrl = `${BASE_URL}/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(`${company.city} · ${company.sector}`)}${Number(company.avg_rating) > 0 ? `&rating=${Number(company.avg_rating).toFixed(1)}&reviews=${company.review_count}` : ""}`;
   const ogImage = company.cover_url
@@ -81,7 +81,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description: desc,
     alternates: { canonical: url },
     openGraph: {
-      title: `${company.name} — Avis & Salaires sur Workie`,
+      title: `${company.name} | Avis et salaires sur Workie`,
       description: desc,
       url,
       siteName: "Workie",
@@ -91,7 +91,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     },
     twitter: {
       card: "summary_large_image",
-      title: `${company.name} — Avis & Salaires sur Workie`,
+      title: `${company.name} | Avis et salaires sur Workie`,
       description: desc,
       images: ogImage.map(i => i.url),
     },
@@ -504,7 +504,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {jobs.length > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
-                  💼 Offres d'emploi
+                  💼 Offres d&apos;emploi
                   <span style={{ fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

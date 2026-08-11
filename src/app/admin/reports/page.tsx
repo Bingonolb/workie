@@ -39,6 +39,9 @@ export default function AdminReportsPage() {
       .finally(() => setLoading(false));
   };
 
+  // Chargement au montage : la liste vient d'une action serveur réservée aux
+  // administrateurs, elle ne peut pas être rendue côté serveur ici.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, []);
 
   const handle = (id: string, status: "reviewed" | "dismissed") => {

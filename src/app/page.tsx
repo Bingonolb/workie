@@ -22,20 +22,20 @@ const getLandingCounts = unstable_cache(
 );
 
 export const metadata: Metadata = {
-  title: "Workie — Avis d'employés & salaires réels en Suisse",
+  title: "Workie : avis d'employés et salaires réels en Suisse",
   description: "Découvrez les avis anonymes d'employés, les salaires réels et les offres d'emploi des entreprises suisses. Comparez, choisissez, évoluez.",
   openGraph: {
-    title: "Workie — Avis d'employés & salaires réels en Suisse",
+    title: "Workie : avis d'employés et salaires réels en Suisse",
     description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",
     url: "https://www.workie.ch",
     siteName: "Workie",
     type: "website",
     locale: "fr_CH",
-    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Workie — Avis & Salaires en Suisse" }],
+    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Workie : avis et salaires en Suisse" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Workie — Avis d'employés & salaires réels en Suisse",
+    title: "Workie : avis d'employés et salaires réels en Suisse",
     description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",
     images: ["https://www.workie.ch/og-default.png"],
   },
@@ -90,7 +90,7 @@ export default async function Home() {
         </h1>
 
         <p style={{ fontSize: "clamp(16px, 2.5vw, 20px)", color: "var(--text-muted)", maxWidth: 520, lineHeight: 1.7, marginBottom: 52 }}>
-          Avis d&apos;employés, salaires réels, ambiance de travail — tout ce que les offres d&apos;emploi ne disent jamais.
+          Avis d&apos;employés, salaires réels, ambiance de travail : tout ce que les offres d&apos;emploi ne disent jamais.
         </p>
 
         <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 48, width: "100%", maxWidth: 480 }}>
@@ -132,7 +132,7 @@ export default async function Home() {
               // dont l'argument est la fiabilité de l'information, se contredire
               // sur sa propre taille est ce qui coûte le plus cher.
               desc: "Par nom, canton ou secteur. Des PME aux multinationales, dans toute la Suisse." },
-              { n: "02", icon: "📖", title: "Explore", desc: "Management, culture, salaires, évolution de carrière — des retours d'employés actuels et anciens." },
+              { n: "02", icon: "📖", title: "Explore", desc: "Management, culture, salaires, évolution de carrière : des retours d'employés actuels et anciens." },
               { n: "03", icon: "✍️", title: "Contribue", desc: "Partage ton expérience anonymement. Chaque avis renforce la valeur de la plateforme pour tous." },
             ].map(({ n, icon, title, desc }) => (
               <div key={n} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "32px 28px", position: "relative", overflow: "hidden" }}>
@@ -158,7 +158,7 @@ export default async function Home() {
               { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" aria-hidden="true" />, bg: "rgba(245,158,11,0.1)", title: "Avis authentiques", desc: "Chaque avis est soumis à une charte de bonne foi. Aucun contenu sponsorisé, aucune intervention des entreprises." },
               { icon: <Shield size={22} color="#10b981" aria-hidden="true" />, bg: "rgba(16,185,129,0.1)", title: "Anonymat par défaut", desc: "Ton nom n'est jamais publié et ton compte n'est pas relié aux avis côté public." },
               { icon: <TrendingUp size={22} color="#8b5cf6" aria-hidden="true" />, bg: "rgba(139,92,246,0.1)", title: "Salaires réels", desc: "Des chiffres concrets, partagés anonymement par des employés en poste. Sache exactement ce que vaut ton profil." },
-              { icon: <MessageCircle size={22} color="#f97316" aria-hidden="true" />, bg: "rgba(249,115,22,0.1)", title: "Simple et direct", desc: "Une expérience pensée pour aller à l'essentiel — chercher, comparer, décider." },
+              { icon: <MessageCircle size={22} color="#f97316" aria-hidden="true" />, bg: "rgba(249,115,22,0.1)", title: "Simple et direct", desc: "Une expérience pensée pour aller à l'essentiel : chercher, comparer, décider." },
             ].map(({ icon, bg, title, desc }) => (
               <div key={title} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 20, padding: "28px 24px" }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>

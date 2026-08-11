@@ -14,7 +14,7 @@ describe("toggleFavorite", () => {
     vi.mocked(createClient).mockResolvedValueOnce({
       auth: { getUser: async () => ({ data: { user: null } }) },
       from: vi.fn(),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     await expect(toggleFavorite("company-1")).resolves.toBeUndefined();
   });
 
@@ -33,7 +33,7 @@ describe("toggleFavorite", () => {
         }
         return {};
       }),
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
     await expect(toggleFavorite("company-1")).resolves.toBeUndefined();
   });
 
@@ -46,7 +46,7 @@ describe("toggleFavorite", () => {
         select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null }) }) }) }),
         insert: async () => ({ error: { code: "42501", message: "RLS violation" } }),
       })),
-    } as any;
+    } as unknown as Awaited<ReturnType<typeof createClient>>;
     // createClient is called twice: once by toggleFavorite, once by addFlame (called in parallel)
     vi.mocked(createClient).mockResolvedValue(fakeClient);
     await expect(toggleFavorite("company-1")).resolves.toBeUndefined();

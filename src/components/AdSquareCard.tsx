@@ -28,7 +28,9 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
   const [visible, setVisible] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Runs only on client — sessionStorage not available server-side
+    // sessionStorage n'existe pas cote serveur : le premier rendu doit donc
+    // rester neutre, le plafond de frequence s'applique juste apres.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(getFreqCount(ad.id) < FREQ_CAP);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ad.id]);
