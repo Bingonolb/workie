@@ -466,6 +466,21 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* ─── Company page hero ─────────────────────────────────────────── */
 
+/* Le bouton Retour partage la géométrie du conteneur du bas : même largeur
+   maximale, mêmes marges latérales. C'est ce qui aligne son bord gauche sur
+   celui du logo, sur toutes les tailles d'écran, sans valeur en double. */
+.company-hero-retour {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+}
+.company-hero-retour > div {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
 .company-hero-logo {
   width: 76px;
   height: 76px;
@@ -485,6 +500,10 @@ main, .page-main, .page-main-sm, .page-main-md {
   }
   .company-hero-title { font-size: 22px !important; letter-spacing: "-0.02em" !important; }
   .company-hero-logo { width: 52px !important; height: 52px !important; border-radius: 10px !important; }
+  /* Mêmes marges que .company-hero-inner en mobile, pour que l'alignement
+     tienne aussi une fois le bloc du bas passé en colonne. */
+  .company-hero-retour { top: 12px !important; }
+  .company-hero-retour > div { padding: 0 14px !important; }
 .company-hero-bottom { bottom: 16px !important; }
 }
 

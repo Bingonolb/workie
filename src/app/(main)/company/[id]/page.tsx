@@ -227,6 +227,20 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         {/* Top gradient — darkens so navbar stays readable */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.65) 0%, rgba(13,13,19,0.0) 40%, rgba(13,13,19,0.0) 50%, rgba(13,13,19,0.92) 100%)" }} />
 
+        {/* Retour, en haut du hero et aligné sur le bord gauche du logo.
+            Il vivait dans la colonne de texte, à côté du logo : il héritait
+            donc de son décalage et commençait à la largeur du logo plus la
+            gouttière. Le sortir et lui donner le conteneur du bas, mêmes
+            marges comprises, aligne les deux bords gauches par construction
+            plutôt que par une valeur recopiée. */}
+        <div className="company-hero-retour">
+          <div>
+            <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
+              <ArrowLeft size={14} aria-hidden="true" /> Retour
+            </Link>
+          </div>
+        </div>
+
         <div className="company-hero-bottom" style={{ position: "absolute", bottom: 24, left: 0, right: 0 }}>
           <div className="company-hero-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "0 28px", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
@@ -240,9 +254,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 name={company.name}
               />
               <div>
-              <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", marginBottom: 10, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
-                <ArrowLeft size={14} aria-hidden="true" /> Retour
-              </Link>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <h1 className="company-hero-title" style={{ fontSize: 30, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em" }}>{company.name}</h1>
                 {company.is_verified && (
