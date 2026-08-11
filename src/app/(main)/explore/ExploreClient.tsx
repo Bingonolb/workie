@@ -30,6 +30,12 @@ import { lireCache, ecrireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
  * Conservé dans localStorage et non sessionStorage : sur mobile l'onglet n'est
  * jamais fermé, une mémoire liée à l'onglet ne serait donc jamais renouvelée.
  */
+/** Paramètre d'URL lu au tout premier rendu, sans passer par un effet. */
+function parametreUrl(nom: string, defaut: string): string {
+  if (typeof window === "undefined") return defaut;
+  return new URLSearchParams(window.location.search).get(nom) ?? defaut;
+}
+
 const DUREE_GRAINE_MS = 30 * 60 * 1000;
 
 const GUEST_VISIBLE = 12;
@@ -86,10 +92,20 @@ export function ExploreClient({
   initialSort?: string;
   squareAds: PublicAdCampaign[];
 }) {
-  const [view, setView] = useState<"grid" | "swipe">(initialView);
-  const [sector, setSector] = useState(initialSector ?? "");
-  const [canton, setCanton] = useState(initialCanton ?? "");
-  const [sort, setSort] = useState(initialSort ?? "recent");
+  // Vue lue dès l'initialisation plutôt que corrigée dans un effet.
+  //
+  // Elle était fixée sur « grille » puis basculée en « swipe » depuis un effet
+  // de montage : React peignait donc une première fois la mauvaise vue avant
+  // de la remplacer. Un rendu de trop, et un changement visible à l'écran.
+  const [view, setView] = useState<"grid" | "swipe">(() => {
+    if (typeof window === "undefined") return initialView;
+    return new URLSearchParams(window.location.search).get("view") === "swipe"
+      ? "swipe"
+      : initialView;
+  });
+  const [sector, setSector] = useState(() => parametreUrl("sector", initialSector ?? ""));
+  const [canton, setCanton] = useState(() => parametreUrl("canton", initialCanton ?? ""));
+  const [sort, setSort] = useState(() => parametreUrl("sort", initialSort ?? "recent"));
 
   // null = auth not yet resolved (loading). Avoids flash of cadenas for logged-in users.
   const [authReady, setAuthReady] = useState(false);
@@ -172,10 +188,22 @@ export function ExploreClient({
   // restituée à la visite suivante — et la suite de la pagination, elle,
   // arrivait bien mélangée. Les deux ordres se mélangeaient : mesuré en
   // production, 5 entreprises en double sur 144 chargées.
-  const [melangeApplique, setMelangeApplique] = useState(!!etatMemorise);
-  const [companies, setCompanies] = useState<Company[]>(etatMemorise?.companies ?? initialCompanies);
-  const [total, setTotal] = useState(etatMemorise?.total ?? initialTotal);
-  const [page, setPage] = useState(etatMemorise?.page ?? 0);
+  const [melangeApplique, setMelangeApplique] = useState(false);
+  // La liste part de celle du serveur, et c'est délibéré : le premier rendu du
+  // client doit reproduire le HTML reçu, sinon React détecte un écart et
+  // reconstruit l'arbre — ce qui produit justement un clignotement.
+  //
+  // Le remplacement a lieu juste après, dans un effet de disposition, donc
+  // avant que le navigateur peigne. C'est ce qui fait disparaître l'entreprise
+  // fantôme : la liste non mélangée du serveur n'est jamais affichée.
+  const [companies, setCompanies] = useState<Company[]>(initialCompanies);
+
+  // Faux tant que la liste affichée n'est pas celle qu'on veut montrer.
+  // On affiche alors des cartes grises aux mêmes dimensions plutôt que la
+  // liste du serveur, qui serait remplacée sous les yeux de l'utilisateur.
+  const [pretAAfficher, setPretAAfficher] = useState(true);
+  const [total, setTotal] = useState(initialTotal);
+  const [page, setPage] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -201,22 +229,36 @@ export function ExploreClient({
   // swipe quand l'URL le demande. Avec useEffect, la bascule survient après le
   // premier affichage — on voit donc la grille apparaître puis céder la place
   // aux cartes. Ici elle a lieu avant que le navigateur peigne, sans à-coup.
+  // Exception assumée à la règle « pas de setState dans un effet ».
+  //
+  // Le premier rendu doit reproduire le HTML du serveur, sinon React
+  // reconstruit l'arbre et l'écran clignote. La correction ne peut donc pas
+  // avoir lieu pendant le rendu — elle doit venir juste après, et avant que le
+  // navigateur peigne. C'est précisément ce que useLayoutEffect permet, et la
+  // seule façon d'éviter que la liste non mélangée du serveur soit visible.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useLayoutEffect(() => {
+    // Reprise de ce que l'utilisateur regardait, avant peinture.
+    if (etatMemorise) {
+      setCompanies(etatMemorise.companies);
+      setTotal(etatMemorise.total);
+      setPage(etatMemorise.page);
+      setMelangeApplique(true);
+      return;
+    }
+    // Sinon la liste du serveur va être remplacée : on masque la grille pour
+    // ne pas la montrer une fraction de seconde.
+    setPretAAfficher(false);
+
     const sp = new URLSearchParams(window.location.search);
     const urlSector = sp.get("sector") ?? "";
     const urlCanton = sp.get("canton") ?? "";
     const urlSort   = sp.get("sort")   ?? "recent";
-    const urlView   = sp.get("view");
-    const urlPenalty = sp.get("penalty_success") === "1";
 
-    if (urlView === "swipe") setView("swipe");
-    if (urlPenalty) {
-      // Penalty success — user will see updated credits after /api/user/context loads
-    }
+    // Les filtres et la vue sont déjà pris en compte à l'initialisation des
+    // états correspondants : les corriger ici forçait un rendu de plus, avec
+    // un affichage intermédiaire visible à l'écran.
     if (urlSector || urlCanton || urlSort !== "recent") {
-      setSector(urlSector);
-      setCanton(urlCanton);
-      setSort(urlSort);
       startTransition(async () => {
         const result = await fetchGridPage(
           { sector: urlSector || undefined, canton: urlCanton || undefined, sort: urlSort || undefined, graine },
@@ -225,6 +267,7 @@ export function ExploreClient({
         setCompanies(result.companies);
         setTotal(result.total);
         setMelangeApplique(true);
+        setPretAAfficher(true);
       });
     } else if (!etatMemorise) {
       // La page arrive du cache, donc rendue sans graine : sans ce rappel, la
@@ -238,10 +281,12 @@ export function ExploreClient({
           setTotal(result.total);
           setMelangeApplique(true);
         }
+        setPretAAfficher(true);
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Hydrate auth state + ads client-side (page is ISR/CDN-cached, no cookies in SSR)
   useEffect(() => {
@@ -407,22 +452,24 @@ export function ExploreClient({
     }
   };
 
-  // Session-stable ad offset
-  const adOffset = useRef<number>(-1);
-  if (adOffset.current === -1) {
+  // Position de la première publicité dans la grille.
+  //
+  // Elle était conservée dans une ref, lue et écrite pendant le rendu : React
+  // interdit cela — une ref n'est pas suivie, donc l'affichage peut ne pas se
+  // mettre à jour quand elle change, et l'appel à Math.random rendait le rendu
+  // non reproductible. C'est un état calculé une fois, pas une référence.
+  const [decalagePub] = useState<number>(() => {
+    if (typeof window === "undefined") return 4;
     try {
-      const stored = sessionStorage.getItem("w_ad_off");
-      if (stored !== null) {
-        adOffset.current = parseInt(stored, 10);
-      } else {
-        const v = 3 + Math.floor(Math.random() * 3);
-        sessionStorage.setItem("w_ad_off", String(v));
-        adOffset.current = v;
-      }
+      const memorise = sessionStorage.getItem("w_ad_off");
+      if (memorise !== null) return parseInt(memorise, 10);
+      const tire = 3 + Math.floor(Math.random() * 3);
+      sessionStorage.setItem("w_ad_off", String(tire));
+      return tire;
     } catch {
-      adOffset.current = 4;
+      return 4;
     }
-  }
+  });
 
   // Swipe uses its own fetched pool (random offset) — pass empty so SwipeView fetches immediately
   const swipeCompanies: Company[] = [];
@@ -453,14 +500,14 @@ export function ExploreClient({
   const AD_INTERVAL = 7;
   const adsForGrid = (authReady && isGuest) ? [] : squareAdsState;
   const adSlotMap = useMemo((): Map<number, number> => {
-    if (adsForGrid.length === 0 || companies.length < adOffset.current + 1) return new Map();
+    if (adsForGrid.length === 0 || companies.length < decalagePub + 1) return new Map();
     const map = new Map<number, number>();
     let slotNum = 0;
-    for (let idx = adOffset.current; idx < companies.length; idx += AD_INTERVAL) {
+    for (let idx = decalagePub; idx < companies.length; idx += AD_INTERVAL) {
       map.set(idx, slotNum++);
     }
     return map;
-  }, [adsForGrid.length, companies.length, adOffset]);
+  }, [adsForGrid.length, companies.length, decalagePub]);
 
   const current = {
     sector: sector || undefined,
@@ -540,7 +587,25 @@ export function ExploreClient({
         ) : (
           <>
             <div className="explore-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 28 }}>
-              {(() => {
+              {!pretAAfficher ? (
+                /* Cartes grises aux dimensions exactes des vraies : la liste
+                   du serveur va être remplacée, l'afficher la ferait
+                   disparaître sous les yeux de l'utilisateur — c'est
+                   l'entreprise « fantôme » qu'on voyait passer en haut. */
+                Array.from({ length: 6 }, (_, i) => (
+                  <div key={`attente-${i}`} className="company-card" aria-hidden="true" style={{
+                    background: "var(--surface)", border: "1px solid var(--border)",
+                    borderRadius: 20, overflow: "hidden",
+                  }}>
+                    <div className="card-cover img-placeholder" style={{ height: 210 }} />
+                    <div style={{ padding: "12px 14px 14px", display: "flex", flexDirection: "column", gap: 9 }}>
+                      <div style={{ height: 12, width: "45%", borderRadius: 4, background: "var(--surface3)" }} />
+                      <div style={{ height: 11, width: "90%", borderRadius: 4, background: "var(--surface3)" }} />
+                      <div style={{ height: 11, width: "65%", borderRadius: 4, background: "var(--surface3)" }} />
+                    </div>
+                  </div>
+                ))
+              ) : (() => {
                 const items: React.ReactNode[] = [];
                 visibleCompanies.forEach((c, i) => {
                   const slotNum = adSlotMap.get(i);
