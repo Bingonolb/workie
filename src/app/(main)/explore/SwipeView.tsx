@@ -907,7 +907,8 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
       </div>
 
       <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {Number(company.avg_rating) > 0 && (
+        {/* Même règle que sur la carte : pas d'avis, pas de note. */}
+        {Number(company.review_count) > 0 && Number(company.avg_rating) > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ display: "flex", gap: 2 }} aria-hidden="true">
               {[1,2,3,4,5].map(n => (

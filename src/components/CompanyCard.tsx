@@ -258,8 +258,12 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
 
         {/* Body */}
         <div style={{ padding: "12px 14px 14px" }}>
-          {/* Rating row */}
-          {(Number(company.avg_rating) > 0 || Number(company.review_count) > 0) && (
+          {/* Une note ne s'affiche que si des avis l'appuient.
+              La condition acceptait une note seule : 24 entreprises montraient
+              ainsi des étoiles à côté de « 0 avis », vestige d'un remplissage
+              direct de la table. Sur un site dont l'argument est la fiabilité,
+              une note que rien ne justifie coûte plus cher qu'une case vide. */}
+          {Number(company.review_count) > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               {Number(company.avg_rating) > 0 && <StarDisplay rating={Number(company.avg_rating)} />}
               {Number(company.review_count) > 0 && (

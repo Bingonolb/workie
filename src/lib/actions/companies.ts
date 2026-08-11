@@ -66,10 +66,28 @@ const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_ratin
 // All users with the same filters share one DB query per 60s instead of N.
 const _fetchGridPageCached = unstable_cache(
   async (
-    filters: { sector?: string; canton?: string; sort?: string },
+    filters: { sector?: string; canton?: string; sort?: string; graine?: number },
     page: number
   ): Promise<{ companies: Company[]; total: number }> => {
     const admin = createAdminClient();
+
+    // Mélange sur la totalité du catalogue, fait en base : trier côté client
+    // ne mélangerait que la page déjà chargée, et il est impossible de
+    // rapatrier cent mille entreprises pour les battre dans le navigateur.
+    if (!filters.sort && filters.graine !== undefined) {
+      const { data } = await admin.rpc("lister_entreprises_melangees", {
+        graine: filters.graine,
+        secteur: filters.sector ?? null,
+        canton_filtre: filters.canton ?? null,
+        decalage: page * GRID_PAGE_SIZE,
+        taille: GRID_PAGE_SIZE,
+      });
+      const lignes = (data ?? []) as unknown as (Company & { total: number })[];
+      return {
+        companies: lignes.map(({ total: _t, ...c }) => c) as Company[],
+        total: Number(lignes[0]?.total ?? 0),
+      };
+    }
 
     let q = admin
       .from("companies")
@@ -119,8 +137,21 @@ const _fetchGridPageCached = unstable_cache(
   { revalidate: 60, tags: ["companies"] }
 );
 
+/**
+ * Une page de la grille.
+ *
+ * Quand aucun tri explicite n'est demandé, l'ordre est mélangé à partir d'une
+ * graine. L'explorateur montrait sinon éternellement les mêmes entreprises en
+ * tête, ce qui le rendait inutile : on y voyait toujours la même chose.
+ *
+ * La graine appartient à la session du visiteur et ne change pas tant qu'il
+ * navigue — sans quoi la pagination répéterait ou sauterait des entreprises.
+ * Elle est bornée à cent valeurs : assez pour que deux visites successives
+ * diffèrent, assez peu pour que le cache reste partagé entre visiteurs plutôt
+ * que d'être recalculé pour chacun.
+ */
 export async function fetchGridPage(
-  filters: { sector?: string; canton?: string; sort?: string },
+  filters: { sector?: string; canton?: string; sort?: string; graine?: number },
   page: number
 ): Promise<{ companies: Company[]; total: number }> {
   return _fetchGridPageCached(filters, page);

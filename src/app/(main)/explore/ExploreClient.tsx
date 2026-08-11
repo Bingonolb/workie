@@ -87,10 +87,47 @@ export function ExploreClient({
   const [squareAdsState, setSquareAdsState] = useState<PublicAdCampaign[]>(squareAds);
   const [swipeAdsState, setSwipeAdsState] = useState<PublicAdCampaign[]>(swipeAds);
 
+  // Graine de mélange, propre à la session.
+  //
+  // L'explorateur affichait toujours les mêmes entreprises en tête : le menu
+  // paraissait inutile puisqu'on y voyait toujours la même chose. L'ordre est
+  // désormais tiré d'une graine, sur la totalité du catalogue.
+  //
+  // Elle doit rester stable tant qu'on navigue, sinon la pagination
+  // répéterait ou sauterait des entreprises ; et changer à la visite suivante,
+  // pour qu'on découvre autre chose. sessionStorage donne exactement ça : une
+  // valeur par onglet, effacée à la fermeture.
+  const [graine] = useState<number>(() => {
+    if (typeof window === "undefined") return 0;
+    const memorisee = sessionStorage.getItem("workie_graine");
+    if (memorisee !== null) return Number(memorisee);
+    const nouvelle = Math.floor(Math.random() * 100);
+    sessionStorage.setItem("workie_graine", String(nouvelle));
+    return nouvelle;
+  });
+
+  // État de la grille conservé d'un aller-retour à l'autre : revenir sur
+  // l'explorateur ne doit pas tout recharger ni replacer l'utilisateur en haut
+  // d'une liste différente.
+  const etatMemorise = (() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const brut = sessionStorage.getItem("workie_grille");
+      if (!brut) return null;
+      const e = JSON.parse(brut) as { graine: number; sector: string; canton: string; sort: string; companies: Company[]; total: number; page: number };
+      // Un état constitué avec d'autres filtres ou une autre graine n'a plus
+      // de sens : on repart du serveur plutôt que d'afficher un mélange bâtard.
+      const memeContexte = e.graine === graine
+        && e.sector === (initialSector ?? "") && e.canton === (initialCanton ?? "")
+        && e.sort === (initialSort ?? "");
+      return memeContexte && Array.isArray(e.companies) && e.companies.length > 0 ? e : null;
+    } catch { return null; }
+  })();
+
   // Server-driven company list + total count
-  const [companies, setCompanies] = useState<Company[]>(initialCompanies);
-  const [total, setTotal] = useState(initialTotal);
-  const [page, setPage] = useState(0);
+  const [companies, setCompanies] = useState<Company[]>(etatMemorise?.companies ?? initialCompanies);
+  const [total, setTotal] = useState(etatMemorise?.total ?? initialTotal);
+  const [page, setPage] = useState(etatMemorise?.page ?? 0);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -134,7 +171,7 @@ export function ExploreClient({
       setSort(urlSort);
       startTransition(async () => {
         const result = await fetchGridPage(
-          { sector: urlSector || undefined, canton: urlCanton || undefined, sort: urlSort },
+          { sector: urlSector || undefined, canton: urlCanton || undefined, sort: urlSort || undefined, graine },
           0,
         );
         setCompanies(result.companies);
@@ -228,7 +265,7 @@ export function ExploreClient({
     setPage(0);
     startTransition(async () => {
       const result = await fetchGridPage(
-        { sector: newSector || undefined, canton: newCanton || undefined, sort: newSort },
+        { sector: newSector || undefined, canton: newCanton || undefined, sort: newSort || undefined, graine },
         0,
       );
       setCompanies(result.companies);
@@ -269,7 +306,7 @@ export function ExploreClient({
     // encore en cours de chargement dans le lot visible.
     const lancer = () => {
       fetchGridPage(
-        { sector: sector || undefined, canton: canton || undefined, sort },
+        { sector: sector || undefined, canton: canton || undefined, sort: sort || undefined, graine },
         page + 1,
       )
         .then(r => prechargerCouvertures(r.companies.map(c => c.cover_url), 640))
@@ -293,7 +330,7 @@ export function ExploreClient({
     setLoadingMore(true);
     try {
       const result = await fetchGridPage(
-        { sector: sector || undefined, canton: canton || undefined, sort },
+        { sector: sector || undefined, canton: canton || undefined, sort: sort || undefined, graine },
         nextPage,
       );
       setCompanies(prev => {
@@ -325,6 +362,20 @@ export function ExploreClient({
 
   // Swipe uses its own fetched pool (random offset) — pass empty so SwipeView fetches immediately
   const swipeCompanies: Company[] = [];
+
+  // Conserve l'état pour le retour sur la page. Sans cela, revenir depuis un
+  // autre menu rechargeait tout et replaçait l'utilisateur en haut d'une liste
+  // qui n'était plus la même — on perdait ce qu'on était en train de regarder.
+  useEffect(() => {
+    if (typeof window === "undefined" || companies.length === 0) return;
+    try {
+      sessionStorage.setItem("workie_grille", JSON.stringify({
+        graine, sector, canton, sort, companies, total, page,
+      }));
+    } catch {
+      // Quota dépassé : le confort disparaît, la page continue de fonctionner.
+    }
+  }, [graine, sector, canton, sort, companies, total, page]);
 
   const hasMore = (page + 1) * GRID_PAGE_SIZE < total;
 
