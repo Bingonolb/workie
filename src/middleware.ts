@@ -146,8 +146,16 @@ export async function middleware(request: NextRequest) {
       if (pathname === "/api/user/export") {
         if (!await allowed(rl.export)) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
       }
-      if (/^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
-        if (!await allowed(rl.auth)) return NextResponse.json({ error: "Trop de requêtes. Attendez 1 minute." }, { status: 429 });
+      // Uniquement les tentatives, jamais les affichages.
+      //
+      // La condition ne regardait pas la méthode : afficher la page de
+      // connexion consommait le quota au même titre qu'un essai de mot de
+      // passe. Mesuré en production, dix chargements suffisaient à déclencher
+      // le blocage — et l'utilisateur recevait du JSON brut à la place de la
+      // page, sans avoir rien tenté. La protection contre le bourrinage doit
+      // porter sur les envois de formulaire, pas sur la navigation.
+      if (method === "POST" && /^\/(login|signup|forgot-password|reset-password)/.test(pathname)) {
+        if (!await allowed(rl.auth)) return NextResponse.json({ error: "Trop de tentatives. Attendez une minute." }, { status: 429 });
       }
     }
 
