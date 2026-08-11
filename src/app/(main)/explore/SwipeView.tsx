@@ -65,7 +65,10 @@ export function SwipeView({
 
   /** Deck en cours, s'il a été laissé récemment. Lu une fois, pas à chaque état. */
   type Sauvegarde = { deck?: SwipeItem[]; index: number; actedIds: string[]; offsetSuivant?: number; timestamp: number };
-  const sauvegarde = ((): Sauvegarde | null => {
+  // Lue une seule fois, à l'initialisation : la lire à chaque rendu appelait
+  // Date.now(), donc rendait le rendu non reproductible — deux rendus
+  // successifs pouvaient prendre des décisions différentes.
+  const [sauvegarde] = useState<Sauvegarde | null>(() => {
     if (typeof window === "undefined") return null;
     try {
       const raw = sessionStorage.getItem(stateKey);
@@ -74,7 +77,7 @@ export function SwipeView({
       if (Date.now() - s.timestamp >= STATE_TTL_MS) return null;
       return s.deck?.length ? s : null;
     } catch { return null; }
-  })();
+  });
 
   // Build the initial deck: restore from sessionStorage if recent, otherwise shuffle fresh
   const [companies, setCompanies] = useState<SwipeItem[]>(() => {
@@ -99,9 +102,15 @@ export function SwipeView({
   const [boostIds, setBoostIds] = useState<Set<string>>(new Set(initialBoostIds));
   const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
   // true if user started the session with credits > 0 (i.e. has previously purchased)
-  const hadCreditsOnMount = useRef(initialPenaltyCredits > 0);
+  // Valeur figée au montage, pas une ref : une ref lue pendant le rendu n'est
+  // pas suivie par React, donc l'affichage peut ne pas se mettre à jour.
+  const [avaitDesCredits] = useState(initialPenaltyCredits > 0);
   const [gone, setGone] = useState<"left" | "right" | null>(null);
-  const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
+  const [toast, setToast] = useState<{ msg: string; color: string } | null>(
+    penaltySuccess
+      ? { msg: "💀 Pass Pénalité activé ! Vous pouvez maintenant pénaliser les entreprises.", color: "#10b981" }
+      : null
+  );
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showPenaltyUpgrade, setShowPenaltyUpgrade] = useState(false);
   const [penaltyCheckoutLoading, setPenaltyCheckoutLoading] = useState(false);
@@ -113,15 +122,16 @@ export function SwipeView({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Le message d'activation était posé depuis un effet : React peignait donc
+  // une fois sans lui, puis une seconde fois avec. Il fait maintenant partie de
+  // l'état initial, et seul le nettoyage de l'URL reste dans un effet — c'est
+  // une action sur le navigateur, pas sur l'affichage.
   useEffect(() => {
-    if (penaltySuccess) {
-      setToast({ msg: "💀 Pass Pénalité activé ! Vous pouvez maintenant pénaliser les entreprises.", color: "#10b981" });
-      // Clean the URL without reloading
-      const url = new URL(window.location.href);
-      url.searchParams.delete("penalty_success");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, []);
+    if (!penaltySuccess) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("penalty_success");
+    window.history.replaceState({}, "", url.toString());
+  }, [penaltySuccess]);
   const [exhausted, setExhausted] = useState(false);
   // Track all companies seen/acted on this session to avoid re-showing them in new batches
   const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
@@ -135,7 +145,6 @@ export function SwipeView({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const advanceRef = useRef<(dir: "left" | "right") => void>(() => {});
   const currentRef = useRef<typeof companies[0] | undefined>(undefined);
-  goneRef.current = gone;
   // Verrou de transition et minuteurs en cours. Les seconds n'étaient jamais
   // annulés : un swipe suivi d'une navigation laissait un setState s'exécuter
   // sur un composant démonté.
@@ -149,10 +158,13 @@ export function SwipeView({
   // : 45), la requête repartait au-delà du dernier résultat et il fallait un
   // second aller-retour pour s'en remettre — d'où un écran blanc prolongé.
   const hasFilters = !!(filters?.sector || filters?.canton || filters?.search);
-  const randomStartOffset = useRef(hasFilters ? 0 : 50 + Math.floor(Math.random() * 150));
+  // Tiré une seule fois. Dans une ref, il était recalculé à chaque rendu du
+  // corps du composant : un tirage au sort pendant le rendu rend celui-ci
+  // imprévisible, ce que React interdit.
+  const [decalageDepart] = useState(() => hasFilters ? 0 : 50 + Math.floor(Math.random() * 150));
   const nextOffsetRef = useRef(
     sauvegarde?.offsetSuivant
-      ?? (initialCompanies.length > 0 ? initialCompanies.length : randomStartOffset.current)
+      ?? (initialCompanies.length > 0 ? initialCompanies.length : decalageDepart)
   );
 
   // Track impression when the ad card becomes the current card
@@ -252,7 +264,15 @@ export function SwipeView({
   }, [index, companies.length, filters, exhausted]);
 
   // Auto-reshuffle when deck is empty instead of showing an end screen
+  //
+  // Exception assumée et délimitée. Remettre le paquet à zéro touche huit
+  // valeurs d'un coup, et ce n'est pas une synchronisation avec l'affichage :
+  // c'est une remise à zéro déclenchée par une condition — le paquet est
+  // épuisé. La règle vise les effets qui recopient un état dans un autre ;
+  // ici il n'y a rien à recopier, et découper ce bloc rendrait le
+  // rechargement du paquet moins lisible sans rien gagner.
   const deckEmpty = index > 0 && index >= companies.length;
+  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/immutability */
   useEffect(() => {
     if (!deckEmpty) return;
     // Même règle qu'au démarrage : pas d'offset aléatoire quand un filtre
@@ -268,9 +288,9 @@ export function SwipeView({
     setDrag(0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deckEmpty]);
+  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/immutability */
 
   const next = companies[index + 1];
-  currentRef.current = current;
   const totalSeen = index;
 
   const showToast = (msg: string, color: string) => {
@@ -297,7 +317,6 @@ export function SwipeView({
   // que sur changement d'index : quitter la vue sans swiper, ou juste après un
   // swipe, laissait la sauvegarde en retard d'une carte.
   const instantaneRef = useRef<{ deck: SwipeItem[]; index: number } | null>(null);
-  instantaneRef.current = { deck: companies, index };
 
   useEffect(() => () => {
     minuteursRef.current.forEach(clearTimeout);
@@ -361,7 +380,23 @@ export function SwipeView({
     programmerAvance();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, gone, isLoggedIn, requireLogin]);
-  advanceRef.current = advance;
+
+  // Ces quatre références servent à retrouver la dernière valeur connue depuis
+  // un minuteur, un gestionnaire de touche ou le démontage. Elles étaient
+  // écrites pendant le rendu, ce que React interdit : une ref n'est pas une
+  // valeur d'affichage, et rien ne garantit que le rendu en cours sera
+  // conservé — React peut l'abandonner, laissant la ref en avance sur ce qui
+  // est affiché.
+  //
+  // Écrites après le rendu, elles portent exactement la valeur affichée. Le
+  // comportement ne change pas : elles ne sont jamais lues pendant le rendu,
+  // seulement dans des rappels qui surviennent après.
+  useEffect(() => {
+    goneRef.current = gone;
+    currentRef.current = current;
+    instantaneRef.current = { deck: companies, index };
+    advanceRef.current = advance;
+  });
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -731,12 +766,12 @@ export function SwipeView({
             <div style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(249,115,22,0.08))", borderBottom: "1px solid rgba(239,68,68,0.15)", padding: "28px 28px 24px", textAlign: "center" }}>
               <div style={{ width: 60, height: 60, borderRadius: 18, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 26 }}>💀</div>
               <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: 6 }}>
-                {penaltyCredits === 0 && hadCreditsOnMount.current && !isAdmin
+                {penaltyCredits === 0 && avaitDesCredits && !isAdmin
                   ? <>Crédits épuisés <span style={{ color: "#ef4444" }}>-100 pts</span></>
                   : <>Bouton <span style={{ color: "#ef4444" }}>-100 pts</span> — pack 10 utilisations</>}
               </h2>
               <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                {penaltyCredits === 0 && hadCreditsOnMount.current && !isAdmin
+                {penaltyCredits === 0 && avaitDesCredits && !isAdmin
                   ? "Vous avez utilisé tous vos crédits. Rechargez pour continuer à signaler les entreprises toxiques."
                   : "Signalez les entreprises toxiques et impactez leur classement sur Workie."}
               </p>

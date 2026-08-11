@@ -7,12 +7,13 @@ export function WelcomeModal() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [visible, setVisible] = useState(false);
+  // Tiré de l'URL, connue dès le premier rendu. Passer par un effet faisait
+  // apparaître la fenêtre après coup, en sursaut.
+  const [visible, setVisible] = useState(() => searchParams.get("welcome") === "1");
   const [firstName, setFirstName] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchParams.get("welcome") === "1") {
-      setVisible(true);
       import("@/lib/supabase/client").then(({ createClient }) => {
         const supabase = createClient();
         supabase.auth.getUser().then(({ data }) => {

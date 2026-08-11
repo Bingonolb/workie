@@ -55,14 +55,29 @@ export function RatingRow({ label, value }: { label: string; value: number | nul
 
 // Indicateur oui/non agrégé (recommandation, retour). Toujours rendu, avec un
 // état explicite quand personne n'a encore répondu.
-export function StatPill({ label, pct }: { label: string; pct: number | null }) {
+/**
+ * Proportion de réponses favorables, avec mention des indécis.
+ *
+ * Le nombre porte sur les seules réponses tranchées. Les hésitations sont
+ * indiquées à côté plutôt que noyées dans le calcul : les compter comme des
+ * refus produisait des affirmations fausses — « 0 % reviendraient » là où la
+ * seule personne interrogée avait répondu « peut-être ».
+ */
+export function StatPill({ label, pct, indecis = 0 }: { label: string; pct: number | null; indecis?: number }) {
   const color = pct === null ? "var(--text-muted)" : pct >= 70 ? "#10b981" : pct >= 40 ? "#f59e0b" : "#ef4444";
   return (
     <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
       <span style={{ fontSize: 16, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
         {pct === null ? "—" : `${pct}%`}
       </span>
-      <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>{label}</span>
+      <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
+        {label}
+        {indecis > 0 && (
+          <span style={{ color: "var(--text-sub)" }}>
+            {" · "}{indecis} mitigé{indecis > 1 ? "s" : ""}
+          </span>
+        )}
+      </span>
     </div>
   );
 }

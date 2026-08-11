@@ -146,15 +146,29 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     rating_diversity:   avgDiversity,
   };
 
-  // Would recommend stats
-  const withRecommend = reviews.filter(r => r.would_recommend);
-  const recOui = withRecommend.filter(r => r.would_recommend === "oui").length;
-  const recPct = withRecommend.length ? Math.round((recOui / withRecommend.length) * 100) : null;
+  // Recommandation et retour : proportion calculée sur les seules réponses
+  // tranchées.
+  //
+  // « Peut-être » et « mitigé » comptaient auparavant comme des non. Une
+  // entreprise dont le seul avis répondait « peut-être » affichait donc
+  // « 0 % reviendraient » — une affirmation que la donnée ne soutient pas, et
+  // qui contredisait même l'avis, puisque la personne recommandait
+  // l'entreprise. Une hésitation n'est pas un refus.
+  //
+  // Les indécis sortent donc du calcul et sont comptés à part. Quand personne
+  // n'a tranché, on n'affiche pas de pourcentage du tout.
+  const proportionTranchee = (valeurs: (string | null)[], oui: string, non: string) => {
+    const tranchees = valeurs.filter(v => v === oui || v === non);
+    return {
+      pct: tranchees.length ? Math.round((tranchees.filter(v => v === oui).length / tranchees.length) * 100) : null,
+      indecis: valeurs.filter(v => v && v !== oui && v !== non).length,
+    };
+  };
 
-  // Would return stats — « peut-être » ne compte pas comme un oui
-  const withReturn = reviews.filter(r => r.would_return);
-  const retOui = withReturn.filter(r => r.would_return === "oui").length;
-  const retPct = withReturn.length ? Math.round((retOui / withReturn.length) * 100) : null;
+  const recommandation = proportionTranchee(reviews.map(r => r.would_recommend ?? null), "oui", "non");
+  const retour = proportionTranchee(reviews.map(r => r.would_return ?? null), "oui", "non");
+  const recPct = recommandation.pct;
+  const retPct = retour.pct;
 
   // Work mode breakdown — single-pass reduce
   const modeCounts = reviews.reduce((acc: Record<string, number>, r) => {
@@ -373,8 +387,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 </div>
 
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", paddingTop: 16, marginTop: 16, borderTop: "1px solid var(--border)" }}>
-                  <StatPill label="recommandent" pct={recPct} />
-                  <StatPill label="reviendraient" pct={retPct} />
+                  <StatPill label="recommandent" pct={recPct} indecis={recommandation.indecis} />
+                  <StatPill label="reviendraient" pct={retPct} indecis={retour.indecis} />
                   {dominantMode && (
                     <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
                       <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", textTransform: "capitalize" }}>{dominantMode}</span>

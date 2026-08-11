@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import Link from "next/link";
 
 // Cookie-based consent: persists on iOS Safari even after localStorage is cleared (ITP).
@@ -16,9 +16,16 @@ function writeConsent(value: string) {
 }
 
 export function CookieBanner() {
+  // Le consentement se lit dans un cookie, disponible immédiatement. Le
+  // bandeau était masqué au premier rendu puis affiché depuis un effet : il
+  // apparaissait donc en sursaut, après que la page se soit déjà peinte.
+  //
+  // Le premier rendu reste vide pour reproduire le HTML du serveur — la page
+  // est servie depuis un cache, elle ne connaît pas ce cookie — et la décision
+  // est prise avant peinture.
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!readConsent()) setVisible(true);
   }, []);
 
