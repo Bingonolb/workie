@@ -74,7 +74,14 @@ const _fetchGridPageCached = unstable_cache(
     // Mélange sur la totalité du catalogue, fait en base : trier côté client
     // ne mélangerait que la page déjà chargée, et il est impossible de
     // rapatrier cent mille entreprises pour les battre dans le navigateur.
-    if (!filters.sort && filters.graine !== undefined) {
+    // « recent » est le nom du tri par défaut, pas un tri explicite : le
+    // traiter comme tel faisait échouer la condition et les pages suivantes
+    // revenaient dans l'ordre classique, alors que la première était mélangée.
+    // Les deux ordres se chevauchaient — mesuré, 4 entreprises en double sur
+    // 168 chargées, toutes issues du premier lot.
+    const triExplicite = filters.sort && filters.sort !== "recent" ? filters.sort : undefined;
+
+    if (!triExplicite && filters.graine !== undefined) {
       const { data } = await admin.rpc("lister_entreprises_melangees", {
         graine: filters.graine,
         secteur: filters.sector ?? null,
@@ -96,7 +103,7 @@ const _fetchGridPageCached = unstable_cache(
     if (filters.sector) q = q.eq("sector", filters.sector);
     if (filters.canton) q = q.eq("canton", filters.canton);
 
-    switch (filters.sort) {
+    switch (triExplicite) {
       case "rating":
         q = q
           .order("avg_rating",   { ascending: false, nullsFirst: false })
