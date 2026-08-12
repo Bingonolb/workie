@@ -312,6 +312,12 @@ export const SECTOR_COLORS: Record<string, string> = {
   "ONG": "#059669",
   "Fondation": "#0d9488",
   "Association": "#22c55e",
+  "Commerce de détail": "#c026d3",
+  "Hôtellerie & Restauration": "#f43f5e",
+  "Immobilier": "#a16207",
+  "Médias & Communication": "#dc2626",
+  "Chimie": "#15803d",
+  "Télécoms": "#2563eb",
   // Legacy aliases
   "Sports & Mode": "#ec4899",
   "Conseil & Services": "#f59e0b",
@@ -332,6 +338,8 @@ export const SECTORS = [
   "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture",
   "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie",
   "Droit", "Bâtiment", "Beauté", "Administration publique",
+  "Commerce de détail", "Hôtellerie & Restauration", "Immobilier",
+  "Médias & Communication", "Chimie", "Télécoms",
   "ONG", "Fondation", "Association",
 ] as const;
 

@@ -863,6 +863,12 @@ const SECTOR_DEFAULT_TAGS: Record<string, string[]> = {
   "ONG":                    ["humanitaire", "impact", "terrain"],
   "Fondation":              ["mécénat", "intérêt-général", "projets"],
   "Association":            ["associatif", "bénévolat", "communauté"],
+  "Commerce de détail":     ["retail", "grande-distribution", "vente"],
+  "Hôtellerie & Restauration": ["hôtellerie", "restauration", "accueil"],
+  "Immobilier":             ["immobilier", "gérance", "promotion"],
+  "Médias & Communication": ["médias", "communication", "édition"],
+  "Chimie":                 ["chimie", "arômes", "matériaux"],
+  "Télécoms":               ["télécoms", "réseau", "connectivité"],
 };
 function getSwipeTags(company: Company): string[] {
   const existing = (company.tags ?? []).slice(0, 4);

@@ -61,6 +61,12 @@ export const SECTOR_WEIGHTS: Record<string, number> = {
   "ONG":                     3,
   "Fondation":               2,
   "Association":             2,
+  "Commerce de détail":      8,
+  "Hôtellerie & Restauration": 6,
+  "Immobilier":              4,
+  "Médias & Communication":  4,
+  "Chimie":                  5,
+  "Télécoms":                5,
 };
 const SECTOR_TOTAL = Object.values(SECTOR_WEIGHTS).reduce((a, b) => a + b, 0);
 
