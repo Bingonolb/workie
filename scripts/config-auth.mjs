@@ -92,6 +92,7 @@ function afficher(config) {
   Longueur minimale du mot de passe ${config.password_min_length ?? "—"}
   Validité du lien de connexion     ${config.mailer_otp_exp ?? "—"} s
   Durée d'une session               ${config.jwt_exp ?? "—"} s
+  Tolérance de réutilisation        ${config.security_refresh_token_reuse_interval ?? "—"} s
   URL de redirection autorisées     ${config.uri_allow_list || "(aucune)"}
 `);
   if (config.mailer_autoconfirm) {
@@ -109,8 +110,24 @@ try {
   } else if (commande === "ne-pas-exiger-confirmation") {
     console.log("  Désactivation de la confirmation d'e-mail…");
     afficher(await appeler("PATCH", { mailer_autoconfirm: true }));
+  } else if (commande === "tolerer-renouvellement-interrompu") {
+    // Supabase fait tourner le jeton de rafraîchissement à chaque usage :
+    // l'ancien est consommé, le nouveau part dans la réponse. Si cette réponse
+    // n'arrive jamais — navigation qui coupe la requête, réseau qui lâche,
+    // deux onglets qui renouvellent en même temps — le navigateur garde un
+    // jeton mort et l'utilisateur est déconnecté sans avoir rien fait.
+    //
+    // La tolérance de réutilisation est le filet prévu pour ça : pendant ce
+    // délai, réutiliser l'ancien jeton renvoie la même session au lieu d'être
+    // refusé. Dix secondes par défaut, ce qui ne couvre pas une navigation
+    // hésitante. Une minute laisse le temps à une reprise, sans ouvrir de
+    // fenêtre exploitable : le jeton reste lié à la même session, et la
+    // détection de réutilisation continue de protéger au-delà.
+    console.log("  Passage de la tolérance de réutilisation à 60 s…");
+    afficher(await appeler("PATCH", { security_refresh_token_reuse_interval: 60 }));
+    console.log("  Fait. Une navigation qui coupe un renouvellement ne déconnecte plus.\n");
   } else {
-    console.error(`  Commande inconnue : ${commande}\n  Attendu : lire | exiger-confirmation | ne-pas-exiger-confirmation\n`);
+    console.error(`  Commande inconnue : ${commande}\n  Attendu : lire | exiger-confirmation | ne-pas-exiger-confirmation | tolerer-renouvellement-interrompu\n`);
     process.exit(1);
   }
 } catch (e) {
