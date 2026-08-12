@@ -142,14 +142,21 @@ gabarits d'e-mail, manifeste PWA. Les commentaires de code ne sont pas
 concernés, et le tiret seul comme valeur absente (`—` dans une colonne vide)
 reste : c'est une convention de tableau, pas une ponctuation de phrase.
 
-## Région d'exécution : Dublin, comme la base
+## Région d'exécution : au plus près de la base
 
-Le projet Supabase est en `eu-west-1` (Dublin). Sans configuration, Vercel
-exécute les fonctions à `iad1` (Washington) : chaque requête en base et chaque
-validation de jeton traversait alors l'Atlantique deux fois. Mesuré avant
-correction, `/api/user/favorites` répondait en 1 103 ms pour 37 lignes.
+Le projet Supabase est en `eu-west-1`, la région AWS d'Irlande. Sans
+configuration, Vercel exécute les fonctions à `iad1`, en Virginie du Nord :
+chaque requête en base et chaque validation de jeton traversait alors
+l'Atlantique deux fois. Mesuré avant correction sur une session réelle,
+`/api/user/favorites` répondait en 1 103 ms pour 37 lignes.
 
-`vercel.json` fixe `regions: ["dub1"]`. Toute nouvelle route serveur en
+Le critère est la distance à la **base**, pas aux utilisateurs. Les pages
+elles-mêmes sont servies depuis le cache du réseau de diffusion, au plus près
+du visiteur, quelle que soit la région des fonctions. Exécuter à Zurich pour
+« être près des Suisses » rallongerait chaque aller-retour vers l'Irlande sans
+rien accélérer de ce qui est déjà en cache.
+
+`vercel.json` fixe `regions: ["dub1"]`, la région Vercel de Dublin. Toute nouvelle route serveur en
 hérite ; il n'y a rien à répéter par fichier. Si la base est un jour déplacée,
 c'est ce fichier qu'il faut suivre.
 
