@@ -111,21 +111,25 @@ try {
     console.log("  Désactivation de la confirmation d'e-mail…");
     afficher(await appeler("PATCH", { mailer_autoconfirm: true }));
   } else if (commande === "tolerer-renouvellement-interrompu") {
-    // Supabase fait tourner le jeton de rafraîchissement à chaque usage :
-    // l'ancien est consommé, le nouveau part dans la réponse. Si cette réponse
-    // n'arrive jamais — navigation qui coupe la requête, réseau qui lâche,
-    // deux onglets qui renouvellent en même temps — le navigateur garde un
-    // jeton mort et l'utilisateur est déconnecté sans avoir rien fait.
+    // ⚠ Ce réglage baisse la sécurité. À n'utiliser que si des utilisateurs
+    // signalent des déconnexions inexpliquées que le code ne suffit pas à
+    // corriger.
     //
-    // La tolérance de réutilisation est le filet prévu pour ça : pendant ce
-    // délai, réutiliser l'ancien jeton renvoie la même session au lieu d'être
-    // refusé. Dix secondes par défaut, ce qui ne couvre pas une navigation
-    // hésitante. Une minute laisse le temps à une reprise, sans ouvrir de
-    // fenêtre exploitable : le jeton reste lié à la même session, et la
-    // détection de réutilisation continue de protéger au-delà.
-    console.log("  Passage de la tolérance de réutilisation à 60 s…");
-    afficher(await appeler("PATCH", { security_refresh_token_reuse_interval: 60 }));
-    console.log("  Fait. Une navigation qui coupe un renouvellement ne déconnecte plus.\n");
+    // Supabase consomme le jeton de rafraîchissement à chaque usage. La
+    // tolérance de réutilisation est la fenêtre pendant laquelle l'ancien
+    // jeton resert au lieu d'être refusé : elle rattrape un renouvellement
+    // interrompu, mais elle allonge d'autant le délai pendant lequel un jeton
+    // volé peut être rejoué sans déclencher la révocation automatique.
+    //
+    // Supabase recommande 10 secondes, et c'est la valeur en place. La cause
+    // des déconnexions constatées le 2026-08-12 était ailleurs : le
+    // renouvellement partait à chaque page et une navigation pouvait couper
+    // la requête avant que le nouveau jeton n'arrive. Corrigé dans
+    // SessionKeepAlive, sans toucher à ce réglage.
+    console.log("  ⚠ Ce réglage réduit la protection contre le rejeu d'un jeton volé.");
+    console.log("  Passage de la tolérance de réutilisation à 30 s…");
+    afficher(await appeler("PATCH", { security_refresh_token_reuse_interval: 30 }));
+    console.log("  Fait.\n");
   } else {
     console.error(`  Commande inconnue : ${commande}\n  Attendu : lire | exiger-confirmation | ne-pas-exiger-confirmation | tolerer-renouvellement-interrompu\n`);
     process.exit(1);
