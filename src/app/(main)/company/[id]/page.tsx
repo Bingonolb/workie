@@ -14,15 +14,6 @@ import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
 import { ActionsFiche, VotesFiche, PorteInvite, FormulaireAvis } from "@/components/company/Interactions";
 import { SectionAvis } from "@/components/company/SectionAvis";
 
-const LinkedinIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-);
-const TwitterIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-);
-const InstagramIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
-);
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
 // Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
@@ -97,6 +88,37 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       images: ogImage.map(i => i.url),
     },
   };
+}
+
+/**
+ * Le site de l'entreprise, sous le titre qui dit ce qu'on va y chercher.
+ *
+ * Rendu à deux endroits, jamais deux fois à la fois : dans la colonne de
+ * gauche sous « À propos » sur téléphone, dans la colonne de droite en
+ * bureau. Un seul composant pour les deux, sinon les deux versions finissent
+ * par diverger.
+ *
+ * Réduit au site officiel. Le bloc s'appelait « Réseaux » et listait aussi
+ * LinkedIn, Twitter et Instagram : sur les 1032 entreprises, 25 ont un
+ * LinkedIn et aucune n'a de Twitter ni d'Instagram, et surtout un réseau
+ * social n'est pas une offre d'emploi. C'est le site officiel qu'on ouvre
+ * pour postuler.
+ */
+function BlocOffresEmploi({ url, className, style }: { url: string; className?: string; style?: React.CSSProperties }) {
+  const href = /^https?:\/\//.test(url) ? url : `https://${url}`;
+  return (
+    <div className={className} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", ...style }}>
+      <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Offres d&apos;emploi</h3>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: "var(--text)", textDecoration: "none", background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", minHeight: 48, boxSizing: "border-box" }}
+      >
+        <Globe size={15} aria-hidden="true" /> Site internet
+      </a>
+    </div>
+  );
 }
 
 export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
@@ -309,24 +331,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Offres d'emploi — téléphone uniquement, juste sous À propos.
-                Sur téléphone, les colonnes s'empilent et le bloc de liens de
-                la colonne de droite se retrouvait tout en bas de la page,
-                après les avis. Or le site de l'entreprise est précisément ce
-                qu'on va chercher pour postuler : il remonte ici, seul, et le
-                bloc de droite est masqué à cette taille. */}
+            {/* Sur téléphone les colonnes s'empilent, et ce bloc, qui vit dans
+                la colonne de droite, se retrouvait tout en bas de la page,
+                après les avis. Or c'est ce qu'on vient y chercher : il remonte
+                donc ici, et la version de droite est masquée à cette taille. */}
             {company.website_url && (
-              <div className="liens-mobile" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", marginBottom: 32, display: "none" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Offres d&apos;emploi</h3>
-                <a
-                  href={/^https?:\/\//.test(company.website_url) ? company.website_url : `https://${company.website_url}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: "var(--text)", textDecoration: "none", background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", minHeight: 48, boxSizing: "border-box" }}
-                >
-                  <Globe size={15} aria-hidden="true" /> Site internet
-                </a>
-              </div>
+              <BlocOffresEmploi url={company.website_url} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
             )}
 
             {/* Key stats — seules les données réellement disponibles sont
@@ -468,33 +478,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Links */}
-            {(company.website_url || company.linkedin_url || company.twitter_url || company.instagram_url) && (
-              <div className="liens-desktop" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14 }}>Réseaux</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {company.website_url && (
-                    <a href={/^https?:\/\//.test(company.website_url) ? company.website_url : `https://${company.website_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
-                      <Globe size={14} aria-hidden="true" /> Site internet
-                    </a>
-                  )}
-                  {company.linkedin_url && (
-                    <a href={/^https?:\/\//.test(company.linkedin_url) ? company.linkedin_url : `https://${company.linkedin_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#0077b5", textDecoration: "none" }}>
-                      <LinkedinIcon /> LinkedIn
-                    </a>
-                  )}
-                  {company.twitter_url && (
-                    <a href={/^https?:\/\//.test(company.twitter_url) ? company.twitter_url : `https://${company.twitter_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#1da1f2", textDecoration: "none" }}>
-                      <TwitterIcon /> Twitter / X
-                    </a>
-                  )}
-                  {company.instagram_url && (
-                    <a href={/^https?:\/\//.test(company.instagram_url) ? company.instagram_url : `https://${company.instagram_url}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#ec4899", textDecoration: "none" }}>
-                      <InstagramIcon /> Instagram
-                    </a>
-                  )}
-                </div>
-              </div>
+            {company.website_url && (
+              <BlocOffresEmploi url={company.website_url} className="liens-desktop" />
             )}
 
             {/* Tags */}
