@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useRef, useTransition, useEffect, useLayoutEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CompanyCard } from "@/components/CompanyCard";
 import { prechargerCouvertures } from "@/components/CoverImage";
 import { ExploreFilters } from "./ExploreFilters";
@@ -88,17 +89,31 @@ export function ExploreClient({
   initialSort?: string;
   squareAds: PublicAdCampaign[];
 }) {
-  // Vue lue dès l'initialisation plutôt que corrigée dans un effet.
+  // La vue suit l'URL, lue auprès du routeur et non du navigateur.
   //
-  // Elle était fixée sur « grille » puis basculée en « swipe » depuis un effet
-  // de montage : React peignait donc une première fois la mauvaise vue avant
-  // de la remplacer. Un rendu de trop, et un changement visible à l'écran.
-  const [view, setView] = useState<"grid" | "swipe">(() => {
-    if (typeof window === "undefined") return initialView;
-    return new URLSearchParams(window.location.search).get("view") === "swipe"
-      ? "swipe"
-      : initialView;
-  });
+  // `window.location` ne convient pas ici. En arrivant depuis une autre page,
+  // Next met l'adresse à jour dans un effet du routeur, qui est un composant
+  // parent (`window.history.pushState`, dans app-router.js). Or les effets
+  // d'un enfant s'exécutent avant ceux de son parent : au montage de cet
+  // écran, `window.location.search` contient encore l'adresse de la page
+  // qu'on vient de quitter. Depuis /favoris, « /explore?view=swipe » se lisait
+  // donc sans paramètre, et la grille s'affichait à la place du swipe.
+  //
+  // `useSearchParams` lit l'état de rendu du routeur : il est juste dès le
+  // premier rendu, quelle que soit la provenance.
+  //
+  // L'ajustement se fait pendant le rendu et seulement quand l'URL change
+  // réellement de vue, jamais dans un effet : la bonne vue est peinte du
+  // premier coup, et la bascule instantanée de la barre de navigation, qui
+  // change l'état avant l'adresse, n'est pas écrasée au rendu suivant.
+  const parametres = useSearchParams();
+  const vueUrl: "grid" | "swipe" = parametres.get("view") === "swipe" ? "swipe" : initialView;
+  const [view, setView] = useState<"grid" | "swipe">(vueUrl);
+  const [vueUrlPrecedente, setVueUrlPrecedente] = useState<"grid" | "swipe">(vueUrl);
+  if (vueUrl !== vueUrlPrecedente) {
+    setVueUrlPrecedente(vueUrl);
+    setView(vueUrl);
+  }
   const [sector, setSector] = useState(() => parametreUrl("sector", initialSector ?? ""));
   const [canton, setCanton] = useState(() => parametreUrl("canton", initialCanton ?? ""));
   const [sort, setSort] = useState(() => parametreUrl("sort", initialSort ?? "recent"));
