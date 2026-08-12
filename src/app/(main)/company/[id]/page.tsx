@@ -109,13 +109,13 @@ function BlocOffresEmploi({ url, className, style }: { url: string; className?: 
   return (
     <div className={className} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", ...style }}>
       <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Offres d&apos;emploi</h3>
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: "var(--text)", textDecoration: "none", background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "10px 14px", minHeight: 48, boxSizing: "border-box" }}
-      >
-        <Globe size={15} aria-hidden="true" /> Site internet
+      {/* Pastille d'accent plutôt que pavé gris : c'est le vocabulaire déjà
+          employé pour le compteur d'offres et le badge de secteur. Le gris
+          plein pesait autant qu'une carte pour un simple lien. */}
+      <a href={href} target="_blank" rel="noopener noreferrer" className="lien-site">
+        <Globe size={14} aria-hidden="true" />
+        Site internet
+        <span aria-hidden="true" className="lien-site-fleche">↗</span>
       </a>
     </div>
   );

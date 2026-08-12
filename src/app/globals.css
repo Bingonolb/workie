@@ -466,6 +466,43 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* ─── Company page hero ─────────────────────────────────────────── */
 
+/* ─── Lien vers le site de l'entreprise ─────────────────────────────── */
+
+.lien-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 50px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.09);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.lien-site:hover {
+  background: rgba(139, 92, 246, 0.16);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.lien-site-fleche {
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+/* La cible tactile doit rester atteignable au doigt : sur téléphone la
+   pastille reprend de la hauteur, sans s'élargir ni s'alourdir visuellement. */
+@media (max-width: 768px) {
+  .lien-site {
+    min-height: 48px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+  }
+}
+
 /* Le bouton Retour partage la géométrie du conteneur du bas : même largeur
    maximale, mêmes marges latérales. C'est ce qui aligne son bord gauche sur
    celui du logo, sur toutes les tailles d'écran, sans valeur en double. */
