@@ -180,7 +180,7 @@ de la santé publique (OFSP) · Office fédéral de la statistique (OFS) · PUBL
 · SECO · Secrétariat d'État aux migrations (SEM) · Tribunal fédéral · Ville de
 Berne · Ville de Genève · Ville de Lausanne · Ville de Zurich · Anicom AG ·
 Agroscope · Biofarm Genossenschaft · Bio Suisse · Demeter Suisse · LANDI Suisse
-SA
+SA · Helvetia Nostra
 
 Déduire cette liste de la forme des URL ne marche pas : `Hamilton International
 Ltd` a une adresse en `jobs.` sans avoir été traitée. Seule la liste explicite
