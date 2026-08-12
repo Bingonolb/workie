@@ -269,16 +269,29 @@ export function ExploreClient({
     // Les filtres et la vue sont déjà pris en compte à l'initialisation des
     // états correspondants : les corriger ici forçait un rendu de plus, avec
     // un affichage intermédiaire visible à l'écran.
+    // Le `finally` n'est pas une précaution de principe : sans lui, un appel
+    // qui échoue laisse `pretAAfficher` à faux pour toujours, et la grille
+    // reste bloquée sur ses six cartes grises, sans erreur et sans retour
+    // possible autrement qu'en rechargeant. Or cet appel échoue vraiment :
+    // il répond 503 pendant chaque mise en production, le temps que Vercel
+    // bascule d'une version à l'autre, et à la moindre coupure réseau.
+    // En cas d'échec, la liste rendue par le serveur reste affichée : elle
+    // n'est pas mélangée, ce qui est très préférable à un écran vide.
     if (urlSector || urlCanton || urlSort !== "recent") {
       startTransition(async () => {
-        const result = await fetchGridPage(
-          { sector: urlSector || undefined, canton: urlCanton || undefined, sort: urlSort || undefined, graine },
-          0,
-        );
-        setCompanies(result.companies);
-        setTotal(result.total);
-        setMelangeApplique(true);
-        setPretAAfficher(true);
+        try {
+          const result = await fetchGridPage(
+            { sector: urlSector || undefined, canton: urlCanton || undefined, sort: urlSort || undefined, graine },
+            0,
+          );
+          setCompanies(result.companies);
+          setTotal(result.total);
+          setMelangeApplique(true);
+        } catch {
+          /* on garde la liste du serveur */
+        } finally {
+          setPretAAfficher(true);
+        }
       });
     } else if (!etatMemorise) {
       // La page arrive du cache, donc rendue sans graine : sans ce rappel, la
@@ -286,13 +299,18 @@ export function ExploreClient({
       // servirait à rien. On ne le fait qu'en l'absence d'état mémorisé —
       // sinon on écraserait ce que l'utilisateur était en train de regarder.
       startTransition(async () => {
-        const result = await fetchGridPage({ graine }, 0);
-        if (result.companies.length > 0) {
-          setCompanies(result.companies);
-          setTotal(result.total);
-          setMelangeApplique(true);
+        try {
+          const result = await fetchGridPage({ graine }, 0);
+          if (result.companies.length > 0) {
+            setCompanies(result.companies);
+            setTotal(result.total);
+            setMelangeApplique(true);
+          }
+        } catch {
+          /* on garde la liste du serveur */
+        } finally {
+          setPretAAfficher(true);
         }
-        setPretAAfficher(true);
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -383,13 +401,17 @@ export function ExploreClient({
     setSort(newSort);
     setPage(0);
     startTransition(async () => {
-      const result = await fetchGridPage(
-        { sector: newSector || undefined, canton: newCanton || undefined, sort: newSort || undefined, graine },
-        0,
-      );
-      setCompanies(result.companies);
-      setTotal(result.total);
-      setMelangeApplique(true);
+      try {
+        const result = await fetchGridPage(
+          { sector: newSector || undefined, canton: newCanton || undefined, sort: newSort || undefined, graine },
+          0,
+        );
+        setCompanies(result.companies);
+        setTotal(result.total);
+        setMelangeApplique(true);
+      } catch {
+        /* filtre non appliqué : la liste précédente reste, plutôt qu'un vide */
+      }
     });
   }, []);
 
