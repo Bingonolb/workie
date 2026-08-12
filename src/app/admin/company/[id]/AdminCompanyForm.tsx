@@ -16,6 +16,10 @@ const lbl: React.CSSProperties = {
   color: "var(--text-muted)", marginBottom: 5, letterSpacing: "0.05em", textTransform: "uppercase",
 };
 
+/** Convention pour une enseigne présente dans toute la Suisse. */
+export const VILLE_MULTI_SITES = "Multi-sites";
+export const CANTON_MULTI_SITES = "CH";
+
 export function AdminCompanyForm({ company, sectors }: { company: Company; sectors: string[] }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +28,29 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
   const [coverUrlValue, setCoverUrlValue] = useState(company.cover_url ?? "");
   const [tags, setTags] = useState<string[]>(company.tags ?? []);
   const [tagInput, setTagInput] = useState("");
+
+  // Multi-sites : une enseigne présente dans toute la Suisse n'a pas de ville
+  // ni de canton propres. La convention est celle de LANDI, la première fiche
+  // traitée ainsi, et elle est écrite ici une fois pour toutes plutôt que
+  // ressaisie à la main : « Multi-site » ou « multisites » deviendraient des
+  // valeurs distinctes de « Multi-sites », et rien ne les rejoindrait plus au
+  // moment de filtrer ou de compter.
+  const [ville, setVille] = useState(company.city);
+  const [canton, setCanton] = useState(company.canton ?? "");
+  // Mémorise la localisation réelle pour la rendre si la case est décochée.
+  const [avantMultiSites, setAvantMultiSites] = useState<{ ville: string; canton: string } | null>(null);
+  const multiSites = ville === VILLE_MULTI_SITES && canton === CANTON_MULTI_SITES;
+
+  const basculerMultiSites = (coche: boolean) => {
+    if (coche) {
+      setAvantMultiSites({ ville, canton });
+      setVille(VILLE_MULTI_SITES);
+      setCanton(CANTON_MULTI_SITES);
+    } else {
+      setVille(avantMultiSites?.ville ?? "");
+      setCanton(avantMultiSites?.canton ?? "");
+    }
+  };
   const fileRef = useRef<HTMLInputElement>(null);
   const blobRef = useRef<string | null>(null);
   const [infoImage, setInfoImage] = useState<string | null>(null);
@@ -126,13 +153,41 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
         </div>
         <div>
           <label style={lbl}>Ville</label>
-          <input name="city" defaultValue={company.city} required style={inp} />
+          {/* readOnly et non disabled : un champ désactivé n'est pas envoyé
+              avec le formulaire, et la ville est obligatoire. */}
+          <input
+            name="city"
+            value={ville}
+            onChange={e => setVille(e.target.value)}
+            readOnly={multiSites}
+            required
+            style={{ ...inp, ...(multiSites ? { opacity: 0.65, cursor: "not-allowed" } : null) }}
+          />
         </div>
         <div>
           <label style={lbl}>Canton</label>
-          <input name="canton" defaultValue={company.canton ?? ""} style={inp} />
+          <input
+            name="canton"
+            value={canton}
+            onChange={e => setCanton(e.target.value)}
+            readOnly={multiSites}
+            style={{ ...inp, ...(multiSites ? { opacity: 0.65, cursor: "not-allowed" } : null) }}
+          />
         </div>
       </div>
+
+      <label style={{ display: "flex", alignItems: "center", gap: 9, marginTop: -6, fontSize: 13, color: "var(--text-muted)", cursor: "pointer", width: "fit-content" }}>
+        <input
+          type="checkbox"
+          checked={multiSites}
+          onChange={e => basculerMultiSites(e.target.checked)}
+          style={{ width: 16, height: 16, cursor: "pointer" }}
+        />
+        Présente dans toute la Suisse
+        <span style={{ color: "var(--text-sub)" }}>
+          (inscrit « {VILLE_MULTI_SITES} » et « {CANTON_MULTI_SITES} », comme LANDI)
+        </span>
+      </label>
 
       {/* Row 3 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>

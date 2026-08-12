@@ -163,3 +163,36 @@ c'est ce fichier qu'il faut suivre.
 L'en-tête `x-vercel-id` dit où la requête a été traitée : `fra1::dub1::…`
 signifie entrée à Francfort, exécution à Dublin. Un `::iad1::` signale que le
 réglage n'est pas appliqué.
+
+## Fiches d'entreprises curées à la main : ne jamais les modifier
+
+Luc reprend les fiches une par une : nom en français et au niveau de la marque
+(une fiche = un employeur tel que les gens le nomment, pas une raison sociale),
+description factuelle, et `website_url` pointant sur la **page carrière du site
+officiel**. Jamais un site d'annonces comme jobup. Sans espace emploi sur le
+site, on laisse l'adresse officielle.
+
+Les fiches ci-dessous sont validées par lui et **ne doivent être modifiées sous
+aucun prétexte** :
+
+Administration fédérale suisse · État de Genève · État de Vaud · Office fédéral
+de la santé publique (OFSP) · Office fédéral de la statistique (OFS) · PUBLICA
+· SECO · Secrétariat d'État aux migrations (SEM) · Tribunal fédéral · Ville de
+Berne · Ville de Genève · Ville de Lausanne · Ville de Zurich · Anicom AG ·
+Agroscope · Biofarm Genossenschaft · Bio Suisse · Demeter Suisse · LANDI Suisse
+SA
+
+Déduire cette liste de la forme des URL ne marche pas : `Hamilton International
+Ltd` a une adresse en `jobs.` sans avoir été traitée. Seule la liste explicite
+fait foi.
+
+**Multi-sites.** Une enseigne présente dans tout le pays prend `Multi-sites` en
+ville et `CH` en canton. LANDI est le modèle. La case « Présente dans toute la
+Suisse » du formulaire d'administration écrit ces deux valeurs, plutôt que de
+les laisser ressaisir : « Multi-site » ou « multisites » deviendraient des
+valeurs distinctes que plus rien ne rejoindrait au moment de filtrer.
+
+**Ne pas ajouter de colonne à `companies` sans y regarder à deux fois.** Les
+droits de lecture y sont accordés colonne par colonne, sur 37 colonnes
+nommées : une colonne neuve n'est accordée à personne, et tout `select("*")`
+échoue aussitôt.
