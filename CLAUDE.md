@@ -141,3 +141,18 @@ descriptions, `metadata`, données structurées, libellés Stripe, sujets et
 gabarits d'e-mail, manifeste PWA. Les commentaires de code ne sont pas
 concernés, et le tiret seul comme valeur absente (`—` dans une colonne vide)
 reste : c'est une convention de tableau, pas une ponctuation de phrase.
+
+## Région d'exécution : Dublin, comme la base
+
+Le projet Supabase est en `eu-west-1` (Dublin). Sans configuration, Vercel
+exécute les fonctions à `iad1` (Washington) : chaque requête en base et chaque
+validation de jeton traversait alors l'Atlantique deux fois. Mesuré avant
+correction, `/api/user/favorites` répondait en 1 103 ms pour 37 lignes.
+
+`vercel.json` fixe `regions: ["dub1"]`. Toute nouvelle route serveur en
+hérite ; il n'y a rien à répéter par fichier. Si la base est un jour déplacée,
+c'est ce fichier qu'il faut suivre.
+
+L'en-tête `x-vercel-id` dit où la requête a été traitée : `fra1::dub1::…`
+signifie entrée à Francfort, exécution à Dublin. Un `::iad1::` signale que le
+réglage n'est pas appliqué.
