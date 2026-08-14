@@ -3,13 +3,21 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, X, Pencil, ExternalLink } from "lucide-react";
+import { Search, X, Pencil, ExternalLink, ChevronRight } from "lucide-react";
 import type { Company } from "@/lib/types";
+import { largeurCouverture } from "@/lib/coverUrl";
 
 export function AdminCompanyList({ companies }: { companies: Company[] }) {
   const router = useRouter();
   const [input, setInput] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [secteursOuverts, setSecteursOuverts] = useState<Set<string>>(new Set());
+  const basculerSecteur = (secteur: string) =>
+    setSecteursOuverts(prec => {
+      const suivant = new Set(prec);
+      if (suivant.has(secteur)) suivant.delete(secteur); else suivant.add(secteur);
+      return suivant;
+    });
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const q = input.trim().toLowerCase();
@@ -118,79 +126,103 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
         </p>
       )}
 
-      {/* Companies by sector */}
-      {Object.entries(bySector).sort(([a], [b]) => a.localeCompare(b)).map(([sector, sectorCompanies]) => (
-        <div key={sector} style={{ marginBottom: 32 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>
-            {sector} · {sectorCompanies.length}
-          </p>
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
+      {/* Secteurs repliés par défaut.
+          Sans recherche, la page rendait les 1032 entreprises d'un coup, et
+          autant de balises image demandant la couverture en pleine résolution
+          pour une vignette de 48 px. D'où une page lente à ouvrir et saccadée
+          au défilement, surtout au téléphone.
+          On n'ouvre qu'un secteur à la fois, et une recherche ouvre d'office
+          ceux qui contiennent un résultat. */}
+      {Object.entries(bySector).sort(([a], [b]) => a.localeCompare(b)).map(([sector, sectorCompanies]) => {
+        const ouvert = q.length > 0 || secteursOuverts.has(sector);
+        return (
+        <div key={sector} style={{ marginBottom: 14 }}>
+          <button
+            type="button"
+            onClick={() => basculerSecteur(sector)}
+            aria-expanded={ouvert}
+            style={{
+              display: "flex", alignItems: "center", gap: 10, width: "100%",
+              padding: "14px 16px", minHeight: 52,
+              background: "var(--surface)", border: "1px solid var(--border)",
+              borderRadius: ouvert ? "14px 14px 0 0" : 14,
+              cursor: "pointer", textAlign: "left", color: "var(--text)",
+            }}
+          >
+            <ChevronRight
+              size={16}
+              aria-hidden="true"
+              style={{ flexShrink: 0, color: "var(--text-muted)", transform: ouvert ? "rotate(90deg)" : "none", transition: "transform 0.18s" }}
+            />
+            <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 700, letterSpacing: "0.02em" }}>{sector}</span>
+            <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+              {sectorCompanies.length}
+            </span>
+          </button>
+
+          {ouvert && (
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderTop: "none", borderRadius: "0 0 14px 14px", overflow: "hidden" }}>
             {sectorCompanies.map((c, i) => (
               <div key={c.id} className="admin-rangee" onClick={() => router.push(`/admin/company/${c.id}`)} style={{
-                alignItems: "center",
                 borderBottom: i < sectorCompanies.length - 1 ? "1px solid var(--border)" : "none",
                 cursor: "pointer", transition: "background 0.15s",
               }}
                 onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
               >
-                {/* Cover thumbnail */}
-                <div style={{
-                  width: 48, height: 36, borderRadius: 8, overflow: "hidden", flexShrink: 0,
-                  background: "var(--surface2)",
-                }}>
+                {/* Vignette : demandée en 120 px de large, pas en pleine
+                    résolution, et chargée seulement à l'approche de l'écran. */}
+                <div className="admin-vignette">
                   {c.cover_url && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.cover_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                    <img
+                      src={largeurCouverture(c.cover_url, 120)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    />
                   )}
                 </div>
 
-                {/* Name + city */}
-                <div>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{c.name}</p>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{c.city}{c.canton ? `, ${c.canton}` : ""}{c.employee_range ? ` · ${c.employee_range} emp.` : ""}</p>
+                <div className="admin-identite">
+                  <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)", lineHeight: 1.3 }}>{c.name}</p>
+                  <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3 }}>
+                    {c.city}{c.canton ? `, ${c.canton}` : ""}{c.employee_range ? ` · ${c.employee_range} emp.` : ""}
+                  </p>
                 </div>
 
-                {/* Rating */}
-                <span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-                  ★ {Number(c.avg_rating).toFixed(1)}
-                </span>
-
-                {/* Verified badge */}
-                <span style={{
-                  fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20,
-                  background: c.is_verified ? "rgba(16,185,129,0.12)" : "var(--surface2)",
-                  color: c.is_verified ? "#10b981" : "var(--text-muted)",
-                  border: c.is_verified ? "1px solid rgba(16,185,129,0.3)" : "1px solid var(--border)",
-                  whiteSpace: "nowrap",
-                }}>
-                  {c.is_verified ? "✓ Vérifié" : "Non vérifié"}
-                </span>
-
-                {/* Actions */}
-                <div style={{ display: "flex", gap: 8 }} onClick={e => e.stopPropagation()}>
-                  <Link href={`/admin/company/${c.id}`} style={{
-                    display: "flex", alignItems: "center", gap: 5,
-                    padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600,
-                    background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)",
-                    color: "#8b5cf6", textDecoration: "none",
+                <div className="admin-etat">
+                  <span style={{ fontSize: 13, color: "#f59e0b", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
+                    ★ {Number(c.avg_rating).toFixed(1)}
+                  </span>
+                  <span style={{
+                    fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20,
+                    background: c.is_verified ? "rgba(16,185,129,0.12)" : "var(--surface2)",
+                    color: c.is_verified ? "#10b981" : "var(--text-muted)",
+                    border: c.is_verified ? "1px solid rgba(16,185,129,0.3)" : "1px solid var(--border)",
+                    whiteSpace: "nowrap",
                   }}>
-                    <Pencil size={12} aria-hidden="true" /> Modifier
+                    {c.is_verified ? "✓ Vérifié" : "Non vérifié"}
+                  </span>
+                </div>
+
+                <div className="admin-actions" onClick={e => e.stopPropagation()}>
+                  <Link href={`/admin/company/${c.id}`} className="admin-bouton-modifier">
+                    <Pencil size={13} aria-hidden="true" /> Modifier
                   </Link>
-                  <Link href={`/company/${c.id}`} target="_blank" aria-label="Voir la page entreprise" style={{
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    width: 32, height: 32, borderRadius: 8,
-                    background: "var(--surface2)", border: "1px solid var(--border)",
-                    color: "var(--text-muted)", textDecoration: "none",
-                  }}>
-                    <ExternalLink size={13} aria-hidden="true" />
+                  <Link href={`/company/${c.id}`} target="_blank" aria-label="Voir la page publique" className="admin-bouton-voir">
+                    <ExternalLink size={14} aria-hidden="true" />
                   </Link>
                 </div>
               </div>
             ))}
           </div>
+          )}
         </div>
-      ))}
+        );
+      })}
 
       {filtered.length === 0 && (
         <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-muted)", fontSize: 14 }}>

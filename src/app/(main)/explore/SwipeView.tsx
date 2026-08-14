@@ -624,8 +624,13 @@ export function SwipeView({
         {next && (
           <div style={{
             position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-            transform: gone ? "scale(1) translateY(0)" : "scale(0.95) translateY(12px)",
-            transition: gone ? "transform 0.28s cubic-bezier(0.34,1.2,0.64,1)" : "none",
+            // La carte suivante ne bouge pas. Elle était posée en retrait,
+            // scale(0.95) et douze pixels plus bas, puis remontait à sa taille
+            // pendant que celle du dessus s'en allait : le regard suivait donc
+            // deux mouvements à la fois, et le second poussait vers l'avant.
+            // Elle attend désormais à sa place définitive, déjà prête. Seule
+            // la carte de devant se déplace, et ce qu'on découvre derrière est
+            // exactement ce qui restera.
           }}>
             {isAd(next)
               ? <AdSwipeCard campaign={next.campaign} overlayDir={null} overlayOpacity={0} />

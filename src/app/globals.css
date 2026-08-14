@@ -483,11 +483,60 @@ main, .page-main, .page-main-sm, .page-main-md {
 .admin-grille-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 .admin-grille-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
+.admin-vignette {
+  width: 56px;
+  height: 42px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface2);
+}
+
+/* `min-width: 0` sur les enfants : sans lui, un élément de grille refuse de
+   descendre sous la largeur de son contenu. « Office fédéral de la santé
+   publique (OFSP) » élargissait donc la rangée entière, qui débordait de
+   l'écran et faisait sortir la carte de ses marges. */
+.admin-rangee > * { min-width: 0; }
+
 .admin-rangee {
   display: grid;
-  grid-template-columns: 48px 1fr auto auto auto;
+  grid-template-columns: 56px minmax(0, 1fr) auto auto;
+  align-items: center;
   gap: 16px;
-  padding: 12px 20px;
+  padding: 14px 18px;
+}
+.admin-identite p { overflow-wrap: anywhere; }
+.admin-etat { display: flex; align-items: center; gap: 10px; }
+.admin-actions { display: flex; align-items: center; gap: 8px; }
+
+.admin-bouton-modifier {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  min-height: 40px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  white-space: nowrap;
+}
+.admin-bouton-voir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  color: var(--text-muted);
+  text-decoration: none;
+  background: var(--surface2);
+  border: 1px solid var(--border);
 }
 
 @media (max-width: 900px) {
@@ -495,28 +544,34 @@ main, .page-main, .page-main-sm, .page-main-md {
 }
 
 @media (max-width: 768px) {
-  .admin-page { padding: 20px 14px 90px; }
+  .admin-page { padding: 18px 16px 90px; }
 
   .admin-grille-2,
   .admin-grille-3 { grid-template-columns: 1fr; gap: 14px; }
 
-  /* La rangée passe sur trois lignes : vignette et nom, puis note et statut,
-     puis les actions sur toute la largeur — un bouton qu'on atteint au pouce
-     plutôt qu'une colonne de 40 px. */
+  /* Deux lignes, pas cinq colonnes serrées : identité en haut, puis l'état et
+     l'action sur une ligne à part, chacun avec de l'air. */
   .admin-rangee {
-    grid-template-columns: 48px 1fr;
-    gap: 10px 12px;
-    padding: 14px;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px 16px 18px;
   }
-  .admin-rangee > :nth-child(5) {
+  .admin-etat {
     grid-column: 1 / -1;
     margin-top: 2px;
   }
-  .admin-rangee > :nth-child(5) > a,
-  .admin-rangee > :nth-child(5) > button {
+  .admin-actions {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+  }
+  .admin-bouton-modifier {
     flex: 1;
-    justify-content: center;
-    min-height: 44px;
+    min-height: 46px;
+    font-size: 13.5px;
+  }
+  .admin-bouton-voir {
+    width: 46px;
+    height: 46px;
   }
 }
 
