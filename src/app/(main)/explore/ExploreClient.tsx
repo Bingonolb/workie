@@ -40,6 +40,9 @@ function parametreUrl(nom: string, defaut: string): string {
 
 const DUREE_GRAINE_MS = 30 * 60 * 1000;
 
+/** Où l'on en était dans la grille, pour y revenir. */
+const CLE_DEFILEMENT = "workie_grille_defilement";
+
 const GUEST_VISIBLE = 12;
 const GUEST_BLUR = 6;
 
@@ -190,6 +193,21 @@ export function ExploreClient({
       return memeContexte && Array.isArray(e.companies) && e.companies.length > 0 ? e : null;
     } catch { return null; }
   })();
+
+  // Position de défilement, retenue à part de l'état de la grille : l'écrire
+  // dans le même enregistrement obligerait à re-sérialiser la liste entière à
+  // chaque pixel parcouru.
+  //
+  // Elle n'est reprise que si la grille elle-même l'est. Sur une liste
+  // différente — autres filtres, autre mélange — retomber au même pixel
+  // n'aurait aucun sens.
+  const [defilementInitial] = useState<number | null>(() => {
+    if (typeof window === "undefined" || !etatMemorise) return null;
+    try {
+      const v = Number(sessionStorage.getItem(CLE_DEFILEMENT));
+      return Number.isFinite(v) && v > 0 ? v : null;
+    } catch { return null; }
+  });
 
   // Server-driven company list + total count
   // La liste affichée provient-elle d'une requête mélangée ?
@@ -522,6 +540,55 @@ export function ExploreClient({
       // Quota dépassé : le confort disparaît, la page continue de fonctionner.
     }
   }, [graine, sector, canton, sort, companies, total, page, melangeApplique]);
+
+  // Retenir où l'on en est, tant qu'on est bien dans la grille. En vue swipe
+  // la page ne défile pas : y enregistrer zéro effacerait la position.
+  useEffect(() => {
+    if (view !== "grid") return;
+    let planifie = false;
+    const surDefilement = () => {
+      if (planifie) return;
+      planifie = true;
+      requestAnimationFrame(() => {
+        planifie = false;
+        try { sessionStorage.setItem(CLE_DEFILEMENT, String(Math.round(window.scrollY))); } catch { /* quota */ }
+      });
+    };
+    window.addEventListener("scroll", surDefilement, { passive: true });
+    return () => window.removeEventListener("scroll", surDefilement);
+  }, [view]);
+
+  // Y revenir. La position ne peut pas être rétablie d'un seul coup : au
+  // premier rendu la page n'a pas encore sa hauteur définitive, et le
+  // navigateur ramènerait le défilement à son maximum du moment. On réessaie
+  // donc à chaque image jusqu'à ce que la page soit assez haute, sans dépasser
+  // une quarantaine d'images.
+  //
+  // Le moindre geste annule la reprise : si la main a déjà repris le contrôle,
+  // lui arracher la page serait pire que de ne rien faire.
+  useEffect(() => {
+    if (defilementInitial === null) return;
+    let annule = false;
+    let essais = 0;
+    const abandonner = () => { annule = true; };
+
+    const tenter = () => {
+      if (annule || essais++ > 40) return;
+      window.scrollTo(0, defilementInitial);
+      if (Math.abs(window.scrollY - defilementInitial) > 4) requestAnimationFrame(tenter);
+    };
+    requestAnimationFrame(tenter);
+
+    window.addEventListener("wheel", abandonner, { once: true, passive: true });
+    window.addEventListener("touchstart", abandonner, { once: true, passive: true });
+    window.addEventListener("keydown", abandonner, { once: true });
+    return () => {
+      annule = true;
+      window.removeEventListener("wheel", abandonner);
+      window.removeEventListener("touchstart", abandonner);
+      window.removeEventListener("keydown", abandonner);
+    };
+  }, [defilementInitial]);
 
   // Le bouton n'apparaît qu'une fois le mélange appliqué. Cliquer avant
   // aurait ajouté des pages mélangées à la suite d'une première page qui ne
