@@ -96,7 +96,7 @@ const ENTREES: Entree[] = [
   {
     q: "Comment luttez-vous contre les faux avis ?",
     texte:
-      "Compte confirmé de plus de 24 heures, un seul avis par entreprise et par personne, trois avis maximum par 24 heures, repérage des publications répétées depuis une même adresse réseau, et file de modération alimentée par les signalements.",
+      "Engagement signé avant d'écrire, compte confirmé de plus de 24 heures, un seul avis par entreprise et par personne, trois avis maximum par 24 heures, repérage des publications répétées depuis une même adresse réseau, et file de modération alimentée par les signalements.",
     r: (
       <>
         Un avis Workie ne contient aucun texte libre : uniquement des notes et
@@ -106,6 +106,9 @@ const ENTREES: Entree[] = [
         <br /><br />
         S&apos;y ajoutent des contrôles sur qui peut déposer un avis :
         <br /><br />
+        · un engagement signé avant d&apos;écrire : avoir travaillé dans
+        l&apos;entreprise, et témoigner de son expérience réelle sans propos
+        diffamatoires ;<br />
         · un compte à l&apos;adresse confirmée, existant depuis plus de 24 heures ;<br />
         · un seul avis par entreprise et par personne ;<br />
         · trois avis au maximum sur 24 heures ;<br />

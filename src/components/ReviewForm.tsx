@@ -159,6 +159,13 @@ export function ReviewForm({ companyId }: { companyId: string }) {
     : 0;
   const [wouldRecommend, setWouldRecommend] = useState("");
 
+  // Engagement signé avant d'écrire quoi que ce soit.
+  //
+  // Il avait disparu du formulaire, alors que la page d'accueil continue de
+  // promettre que chaque auteur atteste avoir travaillé là. Une promesse
+  // affichée qui n'existe plus dans le produit, c'est le genre d'écart qu'un
+  // employeur mécontent trouve en premier.
+  const [engagement, setEngagement] = useState(false);
   const [step1Err, setStep1Err] = useState("");
   const [step2Err, setStep2Err] = useState("");
   const [step3Err, setStep3Err] = useState("");
@@ -172,6 +179,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
     if (step === 0) {
       if (!jobTitle.trim()) { setStep1Err("Le poste est obligatoire."); return; }
       if (!durationRange) { setStep1Err("La durée est obligatoire."); return; }
+      if (!engagement) { setStep1Err("Merci de confirmer l'engagement ci-dessus."); return; }
     }
     if (step === 1) {
       if (ratingOverall === 0) { setStep2Err("Note au moins une catégorie."); return; }
@@ -218,10 +226,27 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             résout en null (content en chaîne vide, la colonne étant NOT NULL). */}
         <input type="hidden" name="start_year" value={startYear} />
         <input type="hidden" name="end_year" value={endYear} />
+        <input type="hidden" name="engagement" value={String(engagement)} />
 
         {/* ── Step 0 : Emploi ── */}
         {step === 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Avant d'écrire quoi que ce soit, pas après : la retenue vient de
+                ce qu'on a accepté au départ, pas d'un avertissement lu une fois
+                l'avis rédigé. */}
+            <label className={`engagement${engagement ? " engagement-signe" : ""}`}>
+              <input
+                type="checkbox"
+                checked={engagement}
+                onChange={e => { setEngagement(e.target.checked); setStep1Err(""); }}
+              />
+              <span>
+                Je confirme avoir travaillé dans cette entreprise et m&apos;engage à
+                témoigner de mon expérience réelle, sans propos diffamatoires ni
+                règlement de comptes.
+              </span>
+            </label>
+
             <div>
               <label htmlFor="review-job-title" style={lbl}>Ton poste *</label>
               <input id="review-job-title" value={jobTitle} onChange={e => { setJobTitle(e.target.value); setStep1Err(""); }}
@@ -307,7 +332,10 @@ export function ReviewForm({ companyId }: { companyId: string }) {
                 <input id="review-salary" type="number" value={salary} onChange={e => setSalary(e.target.value)}
                   placeholder="95000" min={10000} max={500000} style={{ ...inp, paddingLeft: 46 }} />
               </div>
-              <p className="inp-hint">Jamais attribué à ton nom : il aide la communauté à connaître les vrais salaires.</p>
+              {/* La mention « jamais attribué à ton nom » a été retirée : rappeler
+                  qu'on pourrait rattacher un salaire à quelqu'un inquiète plus
+                  qu'elle ne rassure. L'étiquette « Anonyme » du libellé suffit,
+                  et la garantie est expliquée à froid dans la FAQ. */}
             </div>
 
             {step1Err && <p role="alert" style={{ fontSize: 13, color: "#ef4444" }}>{step1Err}</p>}
