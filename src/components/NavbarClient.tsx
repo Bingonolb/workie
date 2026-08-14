@@ -76,22 +76,26 @@ export function NavbarClient() {
         {isLoggedIn && (
           <div className="nav-links-desktop" style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <NavLinks />
-            {isAdmin && (
-              <Link href="/admin" style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "5px 12px", borderRadius: 8, marginLeft: 4,
-                fontSize: 12, fontWeight: 700, color: "#8b5cf6",
-                textDecoration: "none",
-                background: "rgba(139,92,246,0.12)",
-                border: "1px solid rgba(139,92,246,0.25)",
-              }}>
-                <Shield size={13} aria-hidden="true" /> Admin
-              </Link>
-            )}
           </div>
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {/* Accès administration, hors du groupe masqué sur téléphone.
+              Il vivait dans .nav-links-desktop, que le mobile cache en entier :
+              il n'existait donc que sur ordinateur. Ici il reste atteignable
+              partout, et le libellé s'efface sur les petits écrans pour ne
+              laisser que l'écusson, sans rien serrer.
+
+              Ce n'est qu'un raccourci : /admin redirige les non-administrateurs,
+              la page d'édition revérifie le rôle, et l'action d'écriture le
+              relit en base. `isAdmin` part de faux et ne devient vrai que si le
+              serveur l'affirme. */}
+          {isLoggedIn && isAdmin && (
+            <Link href="/admin" className="nav-admin" aria-label="Administration">
+              <Shield size={14} aria-hidden="true" />
+              <span className="nav-label">Admin</span>
+            </Link>
+          )}
           {isLoggedIn && <SearchButton />}
           {/* Cloche retirée : aucune notification n'a jamais été émise — table vide —
               et un bouton qui ne mène à rien coûte de l'attention. La page et la

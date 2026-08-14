@@ -466,6 +466,37 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* ─── Company page hero ─────────────────────────────────────────── */
 
+/* ─── Accès administration, dans la barre du haut ────────────────────── */
+
+.nav-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8b5cf6;
+  text-decoration: none;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  transition: background 0.15s ease;
+}
+.nav-admin:hover { background: rgba(139, 92, 246, 0.2); }
+
+/* Sur petit écran le libellé disparaît avec les autres (.nav-label) : la
+   pastille doit alors rester carrée et atteignable au doigt, pas se réduire
+   à un trait. */
+@media (max-width: 640px) {
+  .nav-admin {
+    gap: 0;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
 /* ─── Lien vers le site de l'entreprise ─────────────────────────────── */
 
 .lien-site {
