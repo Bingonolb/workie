@@ -187,9 +187,16 @@ export function ExploreClient({
       const e = JSON.parse(brut) as { graine: number; sector: string; canton: string; sort: string; companies: Company[]; total: number; page: number };
       // Un état constitué avec d'autres filtres ou une autre graine n'a plus
       // de sens : on repart du serveur plutôt que d'afficher un mélange bâtard.
+      //
+      // La comparaison porte sur les états, pas sur les propriétés du serveur.
+      // Elle testait `e.sort === (initialSort ?? "")`, or `sort` s'initialise à
+      // « recent » faute de paramètre d'URL : « recent » ne valant jamais « »,
+      // aucun état mémorisé n'était accepté. On rechargeait donc les 24
+      // premières entreprises à chaque retour, et l'enregistrement suivant
+      // écrasait la liste complète par ces 24. L'ordre restait le bon, la
+      // graine étant stable une demi-heure, ce qui masquait la panne.
       const memeContexte = e.graine === graine
-        && e.sector === (initialSector ?? "") && e.canton === (initialCanton ?? "")
-        && e.sort === (initialSort ?? "");
+        && e.sector === sector && e.canton === canton && e.sort === sort;
       return memeContexte && Array.isArray(e.companies) && e.companies.length > 0 ? e : null;
     } catch { return null; }
   })();
