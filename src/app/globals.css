@@ -466,6 +466,64 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* ─── Company page hero ─────────────────────────────────────────── */
 
+/* ─── Administration : utilisable depuis un téléphone ─────────────────── */
+
+/* Les grilles de l'administration étaient écrites en style en ligne, que les
+   media queries ne peuvent pas surcharger. D'où des colonnes fixes qui
+   tenaient sur un écran large et s'écrasaient sur un téléphone, jusqu'à
+   pousser le bouton « Modifier » hors de la rangée. Elles vivent ici
+   désormais, et peuvent donc respirer. */
+
+.admin-page {
+  margin: 0 auto;
+  padding: 40px 28px 100px;
+}
+
+.admin-grille-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.admin-grille-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.admin-grille-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+.admin-rangee {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto auto;
+  gap: 16px;
+  padding: 12px 20px;
+}
+
+@media (max-width: 900px) {
+  .admin-grille-4 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .admin-page { padding: 20px 14px 90px; }
+
+  .admin-grille-2,
+  .admin-grille-3 { grid-template-columns: 1fr; gap: 14px; }
+
+  /* La rangée passe sur trois lignes : vignette et nom, puis note et statut,
+     puis les actions sur toute la largeur — un bouton qu'on atteint au pouce
+     plutôt qu'une colonne de 40 px. */
+  .admin-rangee {
+    grid-template-columns: 48px 1fr;
+    gap: 10px 12px;
+    padding: 14px;
+  }
+  .admin-rangee > :nth-child(5) {
+    grid-column: 1 / -1;
+    margin-top: 2px;
+  }
+  .admin-rangee > :nth-child(5) > a,
+  .admin-rangee > :nth-child(5) > button {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 400px) {
+  .admin-grille-4 { grid-template-columns: 1fr; }
+}
+
 /* ─── Accès administration, dans la barre du haut ────────────────────── */
 
 .nav-admin {

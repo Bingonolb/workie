@@ -102,7 +102,7 @@ export default function AdminReportsPage() {
       </div>
 
       {/* KPIs */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 28 }}>
+      <div className="admin-grille-4" style={{ marginBottom: 28 }}>
         {[
           { label: "En attente",  value: counts.pending,         color: "#f59e0b" },
           { label: "Examinés",    value: counts.reviewed,        color: "#10b981" },

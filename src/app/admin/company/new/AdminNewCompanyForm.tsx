@@ -47,7 +47,7 @@ export function AdminNewCompanyForm({ sectors }: { sectors: string[] }) {
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="admin-grille-2">
         <div>
           <label style={lbl}>Nom *</label>
           <input name="name" required style={inp} />
@@ -60,7 +60,7 @@ export function AdminNewCompanyForm({ sectors }: { sectors: string[] }) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+      <div className="admin-grille-3">
         <div>
           <label style={lbl}>Sous-secteur</label>
           <input name="subsector" style={inp} />
@@ -75,7 +75,7 @@ export function AdminNewCompanyForm({ sectors }: { sectors: string[] }) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="admin-grille-2">
         <div>
           <label style={lbl}>Taille</label>
           {/* Vide par défaut : ne rien affirmer tant que la taille n'est pas connue. */}
@@ -95,7 +95,7 @@ export function AdminNewCompanyForm({ sectors }: { sectors: string[] }) {
         <textarea name="description" rows={3} style={{ ...inp, resize: "vertical" }} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="admin-grille-2">
         <div>
           <label style={lbl}>Logo URL</label>
           <input name="logo_url" placeholder="https://..." style={inp} />

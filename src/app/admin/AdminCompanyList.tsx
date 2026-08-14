@@ -126,9 +126,8 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
           </p>
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
             {sectorCompanies.map((c, i) => (
-              <div key={c.id} onClick={() => router.push(`/admin/company/${c.id}`)} style={{
-                display: "grid", gridTemplateColumns: "48px 1fr auto auto auto",
-                alignItems: "center", gap: 16, padding: "12px 20px",
+              <div key={c.id} className="admin-rangee" onClick={() => router.push(`/admin/company/${c.id}`)} style={{
+                alignItems: "center",
                 borderBottom: i < sectorCompanies.length - 1 ? "1px solid var(--border)" : "none",
                 cursor: "pointer", transition: "background 0.15s",
               }}

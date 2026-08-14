@@ -174,7 +174,7 @@ export default function FlaggedReviewsPage() {
 
                 {/* Pros / Cons */}
                 {(r.pros || r.cons) && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                  <div className="admin-grille-2" style={{ marginBottom: 10 }}>
                     {r.pros && (
                       <div style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 8, padding: "10px 12px" }}>
                         <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", marginBottom: 4 }}>👍 Points positifs</p>

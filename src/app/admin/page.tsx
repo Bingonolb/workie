@@ -47,7 +47,7 @@ export default async function AdminPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 28px 100px" }}>
+      <main className="admin-page" style={{ maxWidth: 1100 }}>
 
         {/* KPI strip */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12, marginBottom: 28 }}>

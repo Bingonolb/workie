@@ -20,7 +20,7 @@ export default async function AdminNewCompanyPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <Navbar />
-      <main style={{ maxWidth: 800, margin: "0 auto", padding: "40px 28px 100px" }}>
+      <main className="admin-page" style={{ maxWidth: 800 }}>
         <Link href="/admin" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 24 }}>
           <ArrowLeft size={14} aria-hidden="true" /> Retour au panel
         </Link>

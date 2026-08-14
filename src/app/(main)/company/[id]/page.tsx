@@ -13,6 +13,7 @@ import { synthetiser } from "@/lib/synthese";
 import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
 import { ActionsFiche, VotesFiche, PorteInvite, FormulaireAvis } from "@/components/company/Interactions";
 import { SectionAvis } from "@/components/company/SectionAvis";
+import { BoutonRetour } from "@/components/company/BoutonRetour";
 
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Review } from "@/lib/types";
@@ -257,9 +258,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             plutôt que par une valeur recopiée. */}
         <div className="company-hero-retour">
           <div>
-            <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }}>
-              <ArrowLeft size={14} aria-hidden="true" /> Retour
-            </Link>
+            <BoutonRetour style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }} />
           </div>
         </div>
 

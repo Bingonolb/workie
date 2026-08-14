@@ -138,6 +138,9 @@ export function SwipeView({
 
   const dragStart = useRef<{ x: number; y: number } | null>(null);
   const [drag, setDrag] = useState(0);
+  // Vrai pendant l'image où la carte de devant reprend sa position de repos
+  // après un swipe. Voir programmerAvance.
+  const [sautSansAnimation, setSautSansAnimation] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   // Mirror mutable values in refs so touch event closures don't go stale
@@ -290,6 +293,18 @@ export function SwipeView({
   }, [deckEmpty]);
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/immutability */
 
+  // Deux images d'attente : la première applique le transform de repos sans
+  // transition, la seconde rétablit la transition pour les gestes suivants.
+  // Une seule ne suffit pas, le navigateur n'ayant pas encore peint.
+  useEffect(() => {
+    if (!sautSansAnimation) return;
+    let second = 0;
+    const premier = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => setSautSansAnimation(false));
+    });
+    return () => { cancelAnimationFrame(premier); cancelAnimationFrame(second); };
+  }, [sautSansAnimation]);
+
   const next = companies[index + 1];
   const totalSeen = index;
 
@@ -308,6 +323,16 @@ export function SwipeView({
       setIndex(i => i + 1);
       setGone(null);
       setDrag(0);
+      // La carte de devant est un seul nœud du DOM, réutilisé d'une carte à
+      // l'autre. À cet instant il porte encore le transform de celle qui vient
+      // de partir, translateX(±650px) et sa rotation. Lui rendre sa position
+      // de repos avec la transition active revenait à rejouer le swipe à
+      // l'envers : la carte suivante rentrait en glissant depuis le bord au
+      // lieu de simplement prendre la place laissée libre.
+      //
+      // On coupe donc la transition le temps de la relève. Le saut est
+      // invisible puisque la carte qui monte occupe déjà cette position.
+      setSautSansAnimation(true);
       transitionRef.current = false;
     }, 280);
     minuteursRef.current.push(t);
@@ -615,7 +640,7 @@ export function SwipeView({
             transform: gone
               ? `translateX(${gone === "right" ? 650 : -650}px) rotate(${gone === "right" ? 22 : -22}deg)`
               : `translateX(${drag}px) rotate(${rotate}deg)`,
-            transition: isDragging
+            transition: isDragging || sautSansAnimation
               ? "none"
               : gone
                 ? "transform 0.26s cubic-bezier(0.4, 0, 1, 1)"

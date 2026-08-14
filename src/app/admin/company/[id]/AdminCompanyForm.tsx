@@ -132,7 +132,7 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
       {/* Row 1 */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="admin-grille-2">
         <div>
           <label style={lbl}>Nom</label>
           <input name="name" defaultValue={company.name} required style={inp} />
@@ -146,7 +146,7 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
       </div>
 
       {/* Row 2 */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+      <div className="admin-grille-3">
         <div>
           <label style={lbl}>Sous-secteur</label>
           <input name="subsector" defaultValue={company.subsector ?? ""} style={inp} />
@@ -190,7 +190,7 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
       </label>
 
       {/* Row 3 */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="admin-grille-2">
         <div>
           <label style={lbl}>Taille</label>
           {/* Option vide en tête : une taille non renseignée doit rester
@@ -261,7 +261,7 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
       </div>
 
       {/* Autres URLs */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="admin-grille-2">
         <div>
           <label style={lbl}>Logo URL</label>
           <input name="logo_url" defaultValue={company.logo_url ?? ""} placeholder="https://..." style={inp} />
