@@ -165,6 +165,12 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   // promettre que chaque auteur atteste avoir travaillé là. Une promesse
   // affichée qui n'existe plus dans le produit, c'est le genre d'écart qu'un
   // employeur mécontent trouve en premier.
+  //
+  // La formulation parle de nuire, pas de diffamer. Un avis Workie ne contient
+  // aucun texte libre : il ne peut pas être diffamatoire par ses mots. Ce dont
+  // on s'engage à s'abstenir, c'est de noter pour rabaisser plutôt que pour
+  // rendre compte. Promettre de ne pas tenir des propos qu'on ne peut de toute
+  // façon pas écrire aurait sonné faux, et affaibli le reste.
   const [engagement, setEngagement] = useState(false);
   const [step1Err, setStep1Err] = useState("");
   const [step2Err, setStep2Err] = useState("");
@@ -242,8 +248,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               />
               <span>
                 Je confirme avoir travaillé dans cette entreprise et m&apos;engage à
-                témoigner de mon expérience réelle, sans propos diffamatoires ni
-                règlement de comptes.
+                noter mon expérience réelle, sans chercher à nuire ni à rabaisser.
               </span>
             </label>
 

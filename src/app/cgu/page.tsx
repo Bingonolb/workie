@@ -39,10 +39,11 @@ export default function CGUPage() {
         </Section>
 
         <Section title="3. Règles de publication d'avis">
+          <p>Un avis publié sur Workie ne contient aucun texte libre : il se compose de notes et du contexte du poste. Les règles ci-dessous portent donc sur la sincérité de la démarche, et non sur des propos tenus.</p>
           <p>Les avis publiés sur Workie doivent être :</p>
           <ul>
-            <li><strong>Véridiques</strong> : basés sur une expérience professionnelle réelle</li>
-            <li><strong>Respectueux</strong> : sans propos diffamatoires, discriminatoires ou haineux</li>
+            <li><strong>Véridiques</strong> : basés sur une expérience professionnelle réelle dans l&apos;entreprise concernée</li>
+            <li><strong>Sincères</strong> : les notes rendent compte de cette expérience, sans intention de nuire ni de rabaisser</li>
             <li><strong>Pertinents</strong> : relatifs à l&apos;entreprise et aux conditions de travail</li>
             <li><strong>Non-confidentiels</strong> : sans divulgation d&apos;informations couvertes par un accord de confidentialité</li>
           </ul>

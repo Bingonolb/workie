@@ -96,7 +96,7 @@ const ENTREES: Entree[] = [
   {
     q: "Comment luttez-vous contre les faux avis ?",
     texte:
-      "Engagement signé avant d'écrire, compte confirmé de plus de 24 heures, un seul avis par entreprise et par personne, trois avis maximum par 24 heures, repérage des publications répétées depuis une même adresse réseau, et file de modération alimentée par les signalements.",
+      "Engagement signé avant de noter, compte confirmé de plus de 24 heures, un seul avis par entreprise et par personne, trois avis maximum par 24 heures, repérage des publications répétées depuis une même adresse réseau, et file de modération alimentée par les signalements.",
     r: (
       <>
         Un avis Workie ne contient aucun texte libre : uniquement des notes et
@@ -106,9 +106,9 @@ const ENTREES: Entree[] = [
         <br /><br />
         S&apos;y ajoutent des contrôles sur qui peut déposer un avis :
         <br /><br />
-        · un engagement signé avant d&apos;écrire : avoir travaillé dans
-        l&apos;entreprise, et témoigner de son expérience réelle sans propos
-        diffamatoires ;<br />
+        · un engagement signé avant de noter : avoir travaillé dans
+        l&apos;entreprise, et rendre compte de son expérience réelle sans chercher
+        à nuire ;<br />
         · un compte à l&apos;adresse confirmée, existant depuis plus de 24 heures ;<br />
         · un seul avis par entreprise et par personne ;<br />
         · trois avis au maximum sur 24 heures ;<br />
@@ -123,17 +123,20 @@ const ENTREES: Entree[] = [
   {
     q: "Je représente une entreprise et un avis me paraît faux",
     texte:
-      "Signalez-le depuis la fiche : il part en modération et sera relu. Un avis n'est pas retiré parce qu'il est négatif, mais il l'est s'il enfreint nos règles : propos diffamatoires, haineux, discriminatoires, ou expérience manifestement inventée.",
+      "Signalez-le depuis la fiche : il part en modération et sera relu. Un avis n'est pas retiré parce qu'il est négatif, mais il l'est s'il enfreint nos règles : expérience manifestement inventée, avis déposé par quelqu'un qui n'a pas travaillé là, ou notes portées pour nuire plutôt que pour rendre compte.",
     r: (
       <>
         Signalez-le depuis la fiche de l&apos;entreprise. Le signalement part en modération et
         l&apos;avis est relu.
         <br /><br />
         Soyons clairs sur la ligne : un avis n&apos;est pas retiré parce qu&apos;il est négatif, ni parce
-        qu&apos;il déplaît. Il l&apos;est s&apos;il enfreint nos règles : propos diffamatoires, haineux ou
-        discriminatoires, attaque contre une personne nommée, ou expérience manifestement
-        inventée. Un jugement défavorable exprimé de bonne foi sur des conditions de travail
-        reste publié.
+        qu&apos;il déplaît. Il l&apos;est s&apos;il enfreint nos règles : expérience manifestement inventée,
+        avis déposé par quelqu&apos;un qui n&apos;a pas travaillé là, ou notes portées pour nuire plutôt
+        que pour rendre compte. Un jugement défavorable exprimé de bonne foi sur des conditions
+        de travail reste publié.
+        <br /><br />
+        Un avis ne contenant aucun texte libre, la question n&apos;est jamais celle des mots
+        employés : elle est celle de la sincérité de la démarche.
         <br /><br />
         Les détails figurent dans les{" "}
         <Link href="/cgu" style={{ color: "#8b5cf6" }}>conditions générales</Link>.
