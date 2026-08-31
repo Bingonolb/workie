@@ -826,7 +826,7 @@ main, .page-main, .page-main-sm, .page-main-md {
 /* Page titles */
 @media (max-width: 640px) {
   .page-title { font-size: 22px !important; }
-  .page-subtitle { font-size: 13px !important; }
+  .page-subtitle { font-size: 14.5px !important; }
 }
 
 /* Carte entreprise — la photo rétrécissait à mesure que l'écran se réduit,
@@ -840,7 +840,11 @@ main, .page-main, .page-main-sm, .page-main-md {
   .card-cover { height: 250px !important; }
 }
 @media (max-width: 480px) {
-  .card-company-name { font-size: 13px !important; }
+  /* 15 px et non 13 : depuis que la description est passée à 14,5 px, un nom
+     à 13 px se retrouvait plus petit que le texte qu'il coiffe. La hiérarchie
+     était à l'envers. Il reste sous les 16 px du bureau, la place manquant
+     sur une colonne unique, mais il redevient le premier élément lu. */
+  .card-company-name { font-size: 15px !important; }
   .card-cover { height: 260px !important; }
 }
 
