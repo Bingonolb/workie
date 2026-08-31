@@ -959,7 +959,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           </div>
         )}
 
-        <div style={{ position: "absolute", top: 16, left: 16, background: `${sectorColor}33`, border: `1px solid ${sectorColor}55`, borderRadius: 50, padding: "5px 14px", fontSize: 12, fontWeight: 700, color: sectorColor, backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
+        <div style={{ position: "absolute", top: 16, left: 16, background: `${sectorColor}33`, border: `1px solid ${sectorColor}55`, borderRadius: 50, padding: "5px 14px", fontSize: 13.5, fontWeight: 700, color: sectorColor, backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
           {company.sector}
         </div>
         {isFav && (
@@ -976,7 +976,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
               </svg>
             )}
           </p>
-          {company.subsector && <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", marginTop: 3 }}>{company.subsector}</p>}
+          {company.subsector && <p style={{ fontSize: 14.5, color: "rgba(255,255,255,0.78)", marginTop: 4 }}>{company.subsector}</p>}
         </div>
       </div>
 
@@ -989,8 +989,8 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
                 <Star key={n} size={16} fill={n <= Math.round(Number(company.avg_rating)) ? "#f59e0b" : "transparent"} color={n <= Math.round(Number(company.avg_rating)) ? "#f59e0b" : "var(--border2)"} strokeWidth={1.5} />
               ))}
             </span>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#f59e0b" }} aria-label={`${Number(company.avg_rating).toFixed(1)} étoiles sur 5`}>{Number(company.avg_rating).toFixed(1)}</span>
-            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{company.review_count} avis</span>
+            <span style={{ fontSize: 15.5, fontWeight: 700, color: "#f59e0b" }} aria-label={`${Number(company.avg_rating).toFixed(1)} étoiles sur 5`}>{Number(company.avg_rating).toFixed(1)}</span>
+            <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>{company.review_count} avis</span>
           </div>
         )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -999,13 +999,13 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           {Number(company.avg_salary_chf) > 0 && <Chip icon={<TrendingUp size={12} aria-hidden="true" />} label={`CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`} color="#10b981" />}
         </div>
         {company.description && (
-          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.55, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {company.description}
           </p>
         )}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {getSwipeTags(company).map(tag => (
-            <span key={tag} style={{ fontSize: 11, padding: "3px 10px", borderRadius: 50, background: "var(--surface2)", color: "var(--text-muted)", fontWeight: 600 }}>#{tag}</span>
+            <span key={tag} style={{ fontSize: 12.5, padding: "4px 11px", borderRadius: 50, background: "var(--surface2)", color: "var(--text-muted)", fontWeight: 600 }}>#{tag}</span>
           ))}
         </div>
       </div>
@@ -1077,7 +1077,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
 
 function Chip({ icon, label, color }: { icon: React.ReactNode; label: string; color?: string }) {
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, color: color ?? "var(--text-muted)", background: "var(--surface2)", borderRadius: 8, padding: "4px 10px" }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13.5, color: color ?? "var(--text-muted)", background: "var(--surface2)", borderRadius: 8, padding: "5px 11px" }}>
       {icon} {label}
     </span>
   );

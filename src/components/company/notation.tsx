@@ -38,7 +38,7 @@ export function RatingRow({ label, value }: { label: string; value: number | nul
   const pct = value !== null ? (value / 5) * 100 : 0;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <span style={{ flex: "1 1 0", minWidth: 0, fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      <span style={{ flex: "1 1 0", minWidth: 0, fontSize: 13.5, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
         {label}
       </span>
       {/* Barre volontairement étroite : dans une carte d'avis en 2 colonnes,
@@ -47,7 +47,7 @@ export function RatingRow({ label, value }: { label: string; value: number | nul
       <div style={{ flex: "0 0 56px", height: 6, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
         <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3 }} />
       </div>
-      <span style={{ flex: "0 0 26px", textAlign: "right", fontSize: 12, fontWeight: 800, color, fontVariantNumeric: "tabular-nums" }}>
+      <span style={{ flex: "0 0 26px", textAlign: "right", fontSize: 13.5, fontWeight: 800, color, fontVariantNumeric: "tabular-nums" }}>
         {value !== null ? value.toFixed(1) : "—"}
       </span>
     </div>
@@ -82,7 +82,7 @@ export function StatPill({ label, synthese }: { label: string; synthese: Synthes
       <span style={{ fontSize: synthese.forme === "partagee" ? 13 : 16, fontWeight: 900, color, lineHeight: 1, fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>
         {valeur}
       </span>
-      <span style={{ fontSize: 11.5, color: "var(--text-muted)", minWidth: 0, overflowWrap: "anywhere" }}>
+      <span style={{ fontSize: 13, color: "var(--text-muted)", minWidth: 0, overflowWrap: "anywhere" }}>
         {label}
         {detail && <span style={{ color: "var(--text-sub)" }}>{" · "}{detail}</span>}
       </span>
@@ -116,7 +116,7 @@ export function RepartitionNotes({ notes }: { notes: number[] }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 5 }} aria-label="Répartition des notes">
       {paliers.map(({ etoile, nombre }) => (
         <div key={etoile} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ flex: "0 0 26px", fontSize: 11.5, color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+          <span style={{ flex: "0 0 26px", fontSize: 13, color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
             {etoile} ★
           </span>
           <div style={{ flex: 1, height: 8, background: "var(--surface3)", borderRadius: 4, overflow: "hidden" }}>
@@ -129,7 +129,7 @@ export function RepartitionNotes({ notes }: { notes: number[] }) {
               }}
             />
           </div>
-          <span style={{ flex: "0 0 20px", textAlign: "right", fontSize: 11.5, fontWeight: 700, color: nombre > 0 ? "var(--text)" : "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
+          <span style={{ flex: "0 0 20px", textAlign: "right", fontSize: 13, fontWeight: 700, color: nombre > 0 ? "var(--text)" : "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>
             {nombre}
           </span>
         </div>

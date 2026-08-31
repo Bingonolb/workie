@@ -258,7 +258,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             plutôt que par une valeur recopiée. */}
         <div className="company-hero-retour">
           <div>
-            <BoutonRetour style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#fff", textDecoration: "none", background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }} />
+            <BoutonRetour style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14.5, fontWeight: 600, color: "#fff", textDecoration: "none", background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.18)" }} />
           </div>
         </div>
 
@@ -285,10 +285,10 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <span style={{ padding: "3px 10px", borderRadius: 50, fontSize: 12, fontWeight: 600, color: sectorColor, background: `${sectorColor}22`, border: `1px solid ${sectorColor}44` }}>
+                <span style={{ padding: "3px 10px", borderRadius: 50, fontSize: 13.5, fontWeight: 600, color: sectorColor, background: `${sectorColor}22`, border: `1px solid ${sectorColor}44` }}>
                   {company.sector}
                 </span>
-                {company.subsector && <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{company.subsector}</span>}
+                {company.subsector && <span style={{ fontSize: 13.5, color: "rgba(255,255,255,0.5)" }}>{company.subsector}</span>}
               </div>
             </div>
             </div>
@@ -326,7 +326,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {company.description && (
               <div className="about-mobile" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", marginBottom: 32, display: "none" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
+                <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
               </div>
             )}
 
@@ -359,7 +359,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
                   <div style={{ marginBottom: 8 }}>{icon}</div>
                   <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 2 }}>{value}</p>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{label}</p>
+                  <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>{label}</p>
                 </div>
               ))}
             </div>
@@ -383,7 +383,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 borderImage: "linear-gradient(90deg, #8b5cf6, #f97316) 1",
                 borderRadius: 18, padding: "24px", marginBottom: 32,
               }}>
-                <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+                <p style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
                   Synthèse des avis
                 </p>
 
@@ -394,7 +394,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                       <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
                       <div>
                         <Stars rating={Number(company.avg_rating)} size={18} />
-                        <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                        <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginTop: 4 }}>
                           sur {company.review_count} avis
                         </p>
                       </div>
@@ -418,8 +418,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   <StatPill label="reviendraient" synthese={retour} />
                   {dominantMode && (
                     <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", textTransform: "capitalize" }}>{dominantMode}</span>
-                      <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>mode dominant</span>
+                      <span style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text)", textTransform: "capitalize" }}>{dominantMode}</span>
+                      <span style={{ fontSize: 13, color: "var(--text-muted)" }}>mode dominant</span>
                     </div>
                   )}
                 </div>
@@ -463,7 +463,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {/* Post review */}
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
               <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partage ton expérience</h3>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>Ton avis est anonyme par défaut. Aide la communauté à faire les bons choix.</p>
+              <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Ton avis est anonyme par défaut. Aide la communauté à faire les bons choix.</p>
               <FormulaireAvis companyId={company.id} />
             </div>
           </div>
@@ -473,7 +473,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {company.description && (
               <div className="about-desktop" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
+                <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
               </div>
             )}
 
@@ -487,7 +487,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Tags</h3>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {company.tags.map(tag => (
-                    <span key={tag} style={{ fontSize: 11, padding: "4px 10px", borderRadius: 50, background: "var(--surface3)", color: "var(--text-muted)" }}>
+                    <span key={tag} style={{ fontSize: 12.5, padding: "4px 10px", borderRadius: 50, background: "var(--surface3)", color: "var(--text-muted)" }}>
                       #{tag}
                     </span>
                   ))}
@@ -497,8 +497,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
             {company.founded_year && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "16px 20px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>Fondée en</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{company.founded_year}</span>
+                <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>Fondée en</span>
+                <span style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>{company.founded_year}</span>
               </div>
             )}
 
@@ -507,7 +507,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
                   💼 Offres d&apos;emploi
-                  <span style={{ fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {jobs.map((job) => (
@@ -538,7 +538,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6))" }} />
                     </div>
                     <div style={{ padding: "12px 14px" }}>
-                      <p style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                      <p style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text)", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
                         {c.name}
                         {c.is_verified && (
                           <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }} aria-label="Entreprise vérifiée">
@@ -548,11 +548,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                         )}
                       </p>
                       {c.subsector && (
-                        <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginBottom: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                           {c.subsector}
                         </p>
                       )}
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-muted)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, color: "var(--text-muted)" }}>
                         {Number(c.avg_rating) > 0 && (
                           <span style={{ color: "#f59e0b", fontWeight: 700 }}>★ {Number(c.avg_rating).toFixed(1)}</span>
                         )}

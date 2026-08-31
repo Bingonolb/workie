@@ -49,7 +49,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           { label: "Score total", cls: "" },
         ].map(({ label, cls }, i) => (
           <span key={label} className={cls} style={{
-            fontSize: 11, fontWeight: 700, color: "var(--text-muted)",
+            fontSize: 12.5, fontWeight: 700, color: "var(--text-muted)",
             letterSpacing: "0.06em", textTransform: "uppercase",
             textAlign: i >= 3 ? "right" : "left",
           }}>{label}</span>
@@ -120,13 +120,13 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                         </svg>
                       )}
                     </p>
-                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{c.city}</p>
+                    <p style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{c.city}</p>
                   </div>
                 </div>
 
                 {/* Sector */}
                 <span className="ranking-col-sector" style={{
-                  fontSize: 11, fontWeight: 600, color: sectorColor,
+                  fontSize: 12.5, fontWeight: 600, color: sectorColor,
                   background: `${sectorColor}18`, border: `1px solid ${sectorColor}30`,
                   borderRadius: 4, padding: "3px 8px",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -140,30 +140,30 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                   {avgRating > 0 ? (
                     <>
                       <Star size={11} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ fontSize: 14.5, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
                         {avgRating.toFixed(1)}
                       </span>
                       {reviewCount > 0 && (
-                        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>· {reviewCount}</span>
+                        <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>· {reviewCount}</span>
                       )}
                     </>
                   ) : (
-                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
+                    <span style={{ fontSize: 13.5, color: "var(--text-muted)" }}>—</span>
                   )}
                 </div>
 
                 {/* Score avis */}
                 <div className="ranking-col-score-avis" style={{ textAlign: "right" }}>
                   {ratingPts > 0 ? (
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
+                    <span style={{ fontSize: 14.5, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
                       +{ratingPts}
                     </span>
                   ) : (
-                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
+                    <span style={{ fontSize: 13.5, color: "var(--text-muted)" }}>—</span>
                   )}
                   {communityPts !== 0 && (
                     <span style={{
-                      marginLeft: 6, fontSize: 11, fontWeight: 600,
+                      marginLeft: 6, fontSize: 12.5, fontWeight: 600,
                       color: communityPts > 0 ? "#8b5cf6" : "#ef4444",
                       fontVariantNumeric: "tabular-nums",
                     }}>

@@ -67,7 +67,7 @@ export function ProfilClient() {
     return (
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "48px 32px", textAlign: "center" }}>
         <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger ton profil</p>
-        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>Tes données sont intactes, c&apos;est l&apos;affichage qui a échoué.</p>
+        <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 20 }}>Tes données sont intactes, c&apos;est l&apos;affichage qui a échoué.</p>
         <button
           onClick={() => window.location.reload()}
           style={{
@@ -156,13 +156,13 @@ export function ProfilClient() {
           flexDirection: "column",
           gap: 5,
         }}>
-          <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{d?.email ?? " "}</span>
+          <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>{d?.email ?? " "}</span>
           {(profile?.city || profile?.country) && (
-            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
+            <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>
               {[profile.city, profile.country].filter(Boolean).join(", ")}
             </span>
           )}
-          <span style={{ fontSize: 13, color: "var(--text-muted)" }}>Membre depuis {memberSince}</span>
+          <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>Membre depuis {memberSince}</span>
         </div>
       </div>
 
@@ -188,7 +188,7 @@ export function ProfilClient() {
               </div>
               <div>
                 <p style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
-                <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
+                <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
               </div>
             </>
           );
@@ -216,7 +216,7 @@ export function ProfilClient() {
             padding: "16px 22px", borderBottom: "1px solid var(--border)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>
+            <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>
               Mes avis · <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
                 {d ? `${reviews.length} publié${reviews.length !== 1 ? "s" : ""}` : "…"}
               </span>
@@ -234,7 +234,7 @@ export function ProfilClient() {
             borderRadius: 18, overflow: "hidden",
           }}>
             <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Modifier le profil</p>
+              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Modifier le profil</p>
             </div>
             <div style={{ padding: 22 }}>
               {/* Monté seulement une fois les valeurs connues : le formulaire
@@ -250,7 +250,7 @@ export function ProfilClient() {
             borderRadius: 18, overflow: "hidden",
           }}>
             <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Réglages</p>
+              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Réglages</p>
             </div>
             <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 16 }}>
               <ThemeToggle />
@@ -260,7 +260,7 @@ export function ProfilClient() {
                 style={{
                   display: "block", width: "100%", padding: "11px 16px", borderRadius: 10,
                   background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)",
-                  color: "#8b5cf6", fontWeight: 600, fontSize: 13, cursor: "pointer",
+                  color: "#8b5cf6", fontWeight: 600, fontSize: 14.5, cursor: "pointer",
                   textDecoration: "none", textAlign: "left",
                 }}
               >

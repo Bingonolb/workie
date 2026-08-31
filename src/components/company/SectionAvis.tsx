@@ -90,7 +90,7 @@ export function SectionAvis({ reviews, companyName }: { reviews: Review[]; compa
               onClick={() => setTri(v)}
               aria-pressed={tri === v}
               style={{
-                fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 8, cursor: "pointer",
+                fontSize: 13.5, fontWeight: 600, padding: "5px 12px", borderRadius: 8, cursor: "pointer",
                 background: tri === v ? "rgba(139,92,246,0.12)" : "var(--surface2)",
                 color: tri === v ? "#8b5cf6" : "var(--text-muted)",
                 border: `1px solid ${tri === v ? "rgba(139,92,246,0.35)" : "var(--border2)"}`,
@@ -171,20 +171,20 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
               {review.job_title || "Un employé"}
             </p>
             {situation.length > 0 && (
-              <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.4 }}>
+              <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.4 }}>
                 {situation.join(" · ")}
               </p>
             )}
             <div style={{ marginTop: 7, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <Stars rating={Number(review.rating_overall)} size={13} />
-              {rec && <span style={{ fontSize: 11, fontWeight: 700, color: rec.color }}>{rec.label}</span>}
-              {ret && <span style={{ fontSize: 11, fontWeight: 700, color: ret.color }}>{ret.label}</span>}
+              {rec && <span style={{ fontSize: 14, fontWeight: 700, color: rec.color }}>{rec.label}</span>}
+              {ret && <span style={{ fontSize: 14, fontWeight: 700, color: ret.color }}>{ret.label}</span>}
             </div>
           </div>
           {review.is_verified_author && (
             <span style={{
               display: "inline-flex", alignItems: "center", gap: 4,
-              fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 50,
+              fontSize: 11.5, fontWeight: 700, padding: "2px 8px", borderRadius: 50,
               background: "rgba(16,185,129,0.1)", color: "#10b981",
               border: "1px solid rgba(16,185,129,0.25)",
             }}>
@@ -192,13 +192,13 @@ function CarteAvis({ review, isLoggedIn, companyName, initialVoted }: {
             </span>
           )}
         </div>
-        <span suppressHydrationWarning style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{age}</span>
+        <span suppressHydrationWarning style={{ fontSize: 14, color: "var(--text-muted)", flexShrink: 0 }}>{age}</span>
       </div>
 
       {salaire && (
         <div style={{ marginBottom: 14 }}>
           <span style={{
-            fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 50,
+            fontSize: 13.5, fontWeight: 700, padding: "4px 12px", borderRadius: 50,
             background: "rgba(16,185,129,0.08)", color: "#10b981",
             border: "1px solid rgba(16,185,129,0.25)",
           }}>

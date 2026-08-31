@@ -11,6 +11,7 @@ import { SECTOR_COLORS } from "@/lib/types";
 import { CoverImage } from "@/components/CoverImage";
 import { logoAffichable } from "@/lib/logo";
 import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
+import { DescriptionRepliable } from "@/components/DescriptionRepliable";
 
 const SECTOR_GRADIENTS: Record<string, string> = {
   "Tech":                  "linear-gradient(135deg, #6d28d9 0%, #1e40af 100%)",
@@ -45,7 +46,7 @@ function StarDisplay({ rating }: { rating: number }) {
   return (
     <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
       <Star size={13} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
-      <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{Number(rating).toFixed(1)}</span>
+      <span style={{ fontSize: 14.5, fontWeight: 700, color: "#f59e0b" }}>{Number(rating).toFixed(1)}</span>
     </span>
   );
 }
@@ -167,7 +168,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             position: "absolute", top: 11, left: 11,
             background: "rgba(0,0,0,0.45)",
             backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
-            borderRadius: 50, padding: "3px 9px", fontSize: 10, fontWeight: 700,
+            borderRadius: 50, padding: "3px 10px", fontSize: 11.5, fontWeight: 700,
             color: "#fff", letterSpacing: "0.04em", textTransform: "uppercase",
             border: "1px solid rgba(255,255,255,0.12)",
           }}>
@@ -185,7 +186,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
               border: "1px solid rgba(249,115,22,0.35)",
             }}>
               <Flame size={11} fill="#f97316" color="#f97316" aria-hidden="true" />
-              <span style={{ fontSize: 11, fontWeight: 800, color: "#f97316" }}>{score}</span>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: "#f97316" }}>{score}</span>
             </div>
           )}
 
@@ -229,7 +230,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             }}>
               {/* Initials — hidden once logo loads */}
               {!logoLoaded && (
-                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em" }}>
+                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em" }}>
                   {getInitials(company.name)}
                 </div>
               )}
@@ -257,7 +258,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
 
             <div style={{ minWidth: 0 }}>
               <p className="card-company-name" style={{
-                fontSize: 14, fontWeight: 800, color: "#fff",
+                fontSize: 16, fontWeight: 800, color: "#fff",
                 letterSpacing: "-0.02em", lineHeight: 1.2,
                 display: "-webkit-box", WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical", overflow: "hidden",
@@ -271,7 +272,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
                 )}
               </p>
               {company.subsector && (
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 1 }}>{company.subsector}</p>
+                <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{company.subsector}</p>
               )}
             </div>
           </div>
@@ -288,23 +289,27 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               {Number(company.avg_rating) > 0 && <StarDisplay rating={Number(company.avg_rating)} />}
               {Number(company.review_count) > 0 && (
-                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                <span style={{ fontSize: 13.5, color: "var(--text-muted)" }}>
                   {company.review_count} avis
                 </span>
               )}
             </div>
           )}
 
-          {/* Description */}
+          {/* Description
+              14,5 px au lieu de 12,5, et trois lignes au lieu de deux. Une
+              police de douze pixels se lit mal passé quarante ans, et donne au
+              site un air d'application pour adolescents avant même qu'on ait lu
+              la phrase. Le repli rend la suite accessible sans quitter la
+              grille, puisqu'un texte plus grand tient sur moins de lignes. */}
           {company.description && (
-            <p style={{
-              fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.5,
-              marginBottom: 11,
-              display: "-webkit-box", WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical", overflow: "hidden",
-            } as React.CSSProperties}>
-              {company.description}
-            </p>
+            <div style={{ marginBottom: 11 }}>
+              <DescriptionRepliable
+                texte={company.description}
+                lignes={3}
+                style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.55 }}
+              />
+            </div>
           )}
 
           {/* Location + size + salary — chaque puce n'apparaît que si la donnée
@@ -324,7 +329,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
             {getDisplayTags(company).map(tag => (
               <span key={tag} style={{
-                fontSize: 10, padding: "2px 7px", borderRadius: 50,
+                fontSize: 11.5, padding: "3px 9px", borderRadius: 50,
                 background: "var(--surface3)", color: "var(--text-muted)",
                 fontWeight: 600,
               }}>#{tag}</span>
@@ -340,7 +345,7 @@ function InfoChip({ icon, label, color }: { icon: React.ReactNode; label: string
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 3,
-      fontSize: 11.5, color: color ?? "var(--text-muted)",
+      fontSize: 13, color: color ?? "var(--text-muted)",
     }}>
       {icon} {label}
     </span>
