@@ -3,31 +3,36 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /**
- * Un texte tronqué à quelques lignes, avec « plus » quand il en reste.
+ * Un texte tronqué à quelques lignes, avec « plus » à la fin de la dernière.
  *
- * Agrandir la police règle la lisibilité mais coupe davantage : à taille égale
- * de carte, un texte plus grand tient sur moins de lignes. D'où ce repli, qui
- * rend la fin du texte accessible sans quitter la page.
+ * ── Pourquoi à la fin, et non en dessous ────────────────────────────────────
  *
- * Le lien n'apparaît que si le texte déborde réellement. Afficher « plus » sous
- * une description de deux lignes entières promet une suite qui n'existe pas :
- * on mesure donc la hauteur réelle plutôt que de compter les caractères, seule
- * façon d'être juste quelle que soit la largeur de la carte et la police
- * effectivement chargée.
+ * La première version posait « plus » sur sa propre ligne. Trois défauts d'un
+ * coup : le mot avait le poids d'un paragraphe alors qu'il n'est qu'un
+ * contrôle, il ressemblait à un lien resté seul, et il ajoutait une ligne à
+ * certaines cartes seulement — la grille devenait irrégulière, ce qui suffit à
+ * faire amateur.
  *
- * La mesure est refaite quand la fenêtre change de taille, parce qu'une carte
- * de grille passe de trois colonnes à une seule sans que le texte change.
+ * Il est donc rendu dans le flux du texte, en fin de dernière ligne, avec un
+ * dégradé qui fond la fin du paragraphe derrière lui. C'est ce que font les
+ * fils d'actualité, et surtout ça ne change plus la hauteur de la carte.
+ *
+ * ── La mesure ───────────────────────────────────────────────────────────────
+ *
+ * Le lien n'apparaît que si le texte déborde réellement : on mesure la hauteur
+ * rendue plutôt que de compter les caractères, seule façon d'être juste quelle
+ * que soit la largeur de la carte et la police effectivement chargée. La mesure
+ * est refaite au redimensionnement, une grille passant de trois colonnes à une
+ * seule sans que le texte change.
  */
 export function DescriptionRepliable({
   texte,
   lignes = 3,
   style,
-  couleurLien = "var(--text-sub)",
 }: {
   texte: string;
   lignes?: number;
   style?: React.CSSProperties;
-  couleurLien?: string;
 }) {
   const ref = useRef<HTMLParagraphElement>(null);
   const [deploye, setDeploye] = useState(false);
@@ -36,8 +41,8 @@ export function DescriptionRepliable({
   const mesurer = useCallback(() => {
     const el = ref.current;
     if (!el || deploye) return;
-    // Une tolérance d'un pixel : les hauteurs de ligne fractionnaires font
-    // dépasser scrollHeight de moins d'un pixel sur des textes qui tiennent.
+    // Tolérance d'un pixel : les hauteurs de ligne fractionnaires font dépasser
+    // scrollHeight de moins d'un pixel sur des textes qui tiennent pourtant.
     setDeborde(el.scrollHeight > el.clientHeight + 1);
   }, [deploye]);
 
@@ -53,8 +58,16 @@ export function DescriptionRepliable({
 
   const replie = !deploye;
 
+  const basculer = (e: React.MouseEvent) => {
+    // La carte entière est un lien : sans ces deux appels, lire la suite
+    // ouvrirait la fiche.
+    e.preventDefault();
+    e.stopPropagation();
+    setDeploye(d => !d);
+  };
+
   return (
-    <div>
+    <div style={{ position: "relative" }}>
       <p
         ref={ref}
         style={{
@@ -70,30 +83,19 @@ export function DescriptionRepliable({
         } as React.CSSProperties}
       >
         {texte}
+        {deploye && (
+          <>
+            {" "}
+            <button type="button" onClick={basculer} className="lien-plus">moins</button>
+          </>
+        )}
       </p>
 
-      {(deborde || deploye) && (
-        <button
-          type="button"
-          // La carte entière est un lien : sans ces deux appels, lire la suite
-          // ouvrirait la fiche.
-          onClick={e => {
-            e.preventDefault();
-            e.stopPropagation();
-            setDeploye(d => !d);
-          }}
-          style={{
-            background: "none",
-            border: "none",
-            padding: "2px 0 0",
-            cursor: "pointer",
-            font: "inherit",
-            fontWeight: 600,
-            color: couleurLien,
-          }}
-          aria-expanded={deploye}
-        >
-          {deploye ? "moins" : "plus"}
+      {replie && deborde && (
+        // Posé par-dessus la fin de la dernière ligne, avec un dégradé qui
+        // efface le texte derrière plutôt que de le couper net.
+        <button type="button" onClick={basculer} className="lien-plus lien-plus-flottant">
+          plus
         </button>
       )}
     </div>

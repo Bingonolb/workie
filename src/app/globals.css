@@ -579,6 +579,30 @@ main, .page-main, .page-main-sm, .page-main-md {
   .admin-grille-4 { grid-template-columns: 1fr; }
 }
 
+/* ─── « plus » en fin de description ─────────────────────────────────── */
+
+.lien-plus {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+.lien-plus:hover { color: var(--brand); }
+
+/* Posé sur la fin de la dernière ligne. Le dégradé fond le texte derrière le
+   mot au lieu de le trancher : sans lui, « plus » se superposerait à des
+   lettres et donnerait l'impression d'un défaut d'affichage. */
+.lien-plus-flottant {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding-left: 30px;
+  background: linear-gradient(to right, transparent, var(--surface) 26px);
+}
+
 /* ─── Engagement de l'auteur d'un avis ───────────────────────────────── */
 
 .engagement {

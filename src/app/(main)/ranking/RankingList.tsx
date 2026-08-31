@@ -49,8 +49,14 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           { label: "Score total", cls: "" },
         ].map(({ label, cls }, i) => (
           <span key={label} className={cls} style={{
-            fontSize: 12.5, fontWeight: 700, color: "var(--text-muted)",
-            letterSpacing: "0.06em", textTransform: "uppercase",
+            // Un en-tête de tableau n'est pas du texte de lecture : il se
+            // repère, il ne se lit pas. Monté à 12,5 px avec les autres, il
+            // débordait de sa colonne et « SCORE AVIS » touchait « SCORE
+            // TOTAL ». Il redescend à 11 px, la capitale et l'interlettrage
+            // suffisant à le distinguer.
+            fontSize: 11, fontWeight: 700, color: "var(--text-muted)",
+            letterSpacing: "0.07em", textTransform: "uppercase",
+            whiteSpace: "nowrap",
             textAlign: i >= 3 ? "right" : "left",
           }}>{label}</span>
         ))}

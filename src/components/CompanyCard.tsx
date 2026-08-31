@@ -160,8 +160,12 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             priority={priority}
           />
 
-          {/* Gradient overlay */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 35%, rgba(0,0,0,0.6) 75%, rgba(0,0,0,0.82) 100%)" }} />
+          {/* Voile sombre sous la photo.
+              Il montait à 0,82 en bas, ce qui suffit sur une image sombre et
+              pas sur une image claire : le nom en blanc devenait illisible sur
+              les couvertures lumineuses. Il commence plus haut et va plus loin,
+              de sorte que le nom se lise quelle que soit la photo. */}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 30%, rgba(0,0,0,0.5) 62%, rgba(0,0,0,0.88) 100%)" }} />
 
           {/* Sector badge */}
           <div style={{
@@ -258,7 +262,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
 
             <div style={{ minWidth: 0 }}>
               <p className="card-company-name" style={{
-                fontSize: 16, fontWeight: 800, color: "#fff",
+                fontSize: 17.5, fontWeight: 700, color: "#fff",
                 letterSpacing: "-0.02em", lineHeight: 1.2,
                 display: "-webkit-box", WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical", overflow: "hidden",
@@ -272,14 +276,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
                 )}
               </p>
               {company.subsector && (
-                <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>{company.subsector}</p>
+                <p style={{ fontSize: 12.5, fontWeight: 500, color: "rgba(255,255,255,0.62)", marginTop: 3 }}>{company.subsector}</p>
               )}
             </div>
           </div>
         </div>
 
         {/* Body */}
-        <div style={{ padding: "12px 14px 14px" }}>
+        <div style={{ padding: "16px 16px 18px" }}>
           {/* Une note ne s'affiche que si des avis l'appuient.
               La condition acceptait une note seule : 24 entreprises montraient
               ainsi des étoiles à côté de « 0 avis », vestige d'un remplissage
@@ -302,12 +306,17 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
               site un air d'application pour adolescents avant même qu'on ait lu
               la phrase. Le repli rend la suite accessible sans quitter la
               grille, puisqu'un texte plus grand tient sur moins de lignes. */}
+          {/* Hauteur réservée pour trois lignes, même quand le texte en fait
+              deux. Sans elle, la ville et les étiquettes se posaient à des
+              hauteurs différentes d'une carte à l'autre : la grille paraissait
+              assemblée plutôt que composée. C'est ce décalage, plus que les
+              tailles, qui faisait amateur. */}
           {company.description && (
-            <div style={{ marginBottom: 11 }}>
+            <div style={{ marginBottom: 14, minHeight: 68 }}>
               <DescriptionRepliable
                 texte={company.description}
                 lignes={3}
-                style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.55 }}
+                style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.62 }}
               />
             </div>
           )}
@@ -315,7 +324,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           {/* Location + size + salary — chaque puce n'apparaît que si la donnée
               existe réellement. La taille d'effectif n'est plus affichée tant
               qu'elle n'est pas issue d'une source vérifiable. */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 10 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 13 }}>
             <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
             {company.employee_range && (
               <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
@@ -329,9 +338,9 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
             {getDisplayTags(company).map(tag => (
               <span key={tag} style={{
-                fontSize: 11.5, padding: "3px 9px", borderRadius: 50,
-                background: "var(--surface3)", color: "var(--text-muted)",
-                fontWeight: 600,
+                fontSize: 11, padding: "3px 9px", borderRadius: 50,
+                background: "transparent", color: "var(--text-muted)",
+                border: "1px solid var(--border2)", fontWeight: 500,
               }}>#{tag}</span>
             ))}
           </div>
