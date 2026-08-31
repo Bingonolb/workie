@@ -202,9 +202,14 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* ─── Ranking table ─────────────────────────────────────────────── */
 
+/* Colonnes élargies : la police du tableau est montée d'un cran et les
+   largeurs d'origine ne suivaient plus. Le secteur tronquait « Éducation &
+   Recherche » en « Éducation & Rec… », et les deux colonnes de score se
+   touchaient. Une largeur fixe doit être révisée en même temps que la taille
+   du texte qu'elle contient. */
 .ranking-row {
   display: grid;
-  grid-template-columns: 48px 1fr 120px 110px 110px 90px;
+  grid-template-columns: 48px 1fr 185px 112px 118px 100px;
   align-items: center;
   padding: 14px 20px;
   border-bottom: 1px solid var(--border);
@@ -215,7 +220,7 @@ main, .page-main, .page-main-sm, .page-main-md {
 }
 .ranking-header {
   display: grid;
-  grid-template-columns: 48px 1fr 120px 110px 110px 90px;
+  grid-template-columns: 48px 1fr 185px 112px 118px 100px;
   padding: 8px 20px 10px;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -577,30 +582,6 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 @media (max-width: 400px) {
   .admin-grille-4 { grid-template-columns: 1fr; }
-}
-
-/* ─── « plus » en fin de description ─────────────────────────────────── */
-
-.lien-plus {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 600;
-  color: var(--text-sub);
-}
-.lien-plus:hover { color: var(--brand); }
-
-/* Posé sur la fin de la dernière ligne. Le dégradé fond le texte derrière le
-   mot au lieu de le trancher : sans lui, « plus » se superposerait à des
-   lettres et donnerait l'impression d'un défaut d'affichage. */
-.lien-plus-flottant {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  padding-left: 30px;
-  background: linear-gradient(to right, transparent, var(--surface) 26px);
 }
 
 /* ─── Engagement de l'auteur d'un avis ───────────────────────────────── */

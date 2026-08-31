@@ -132,11 +132,16 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
                 {/* Sector */}
                 <span className="ranking-col-sector" style={{
-                  fontSize: 12.5, fontWeight: 600, color: sectorColor,
+                  // La largeur maximale était fixée à 120 px indépendamment de
+                  // la colonne, si bien que « Éducation & Recherche » sortait
+                  // toujours en « Éducation & Rec… ». Elle suit désormais la
+                  // colonne, et le calibre tient compte du secteur le plus
+                  // long du catalogue, « Hôtellerie & Restauration ».
+                  fontSize: 11.5, fontWeight: 600, color: sectorColor,
                   background: `${sectorColor}18`, border: `1px solid ${sectorColor}30`,
                   borderRadius: 4, padding: "3px 8px",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  display: "inline-block", maxWidth: 120,
+                  display: "inline-block", maxWidth: 172,
                 }}>
                   {c.sector}
                 </span>

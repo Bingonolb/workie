@@ -11,7 +11,6 @@ import { SECTOR_COLORS } from "@/lib/types";
 import { CoverImage } from "@/components/CoverImage";
 import { logoAffichable } from "@/lib/logo";
 import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
-import { DescriptionRepliable } from "@/components/DescriptionRepliable";
 
 const SECTOR_GRADIENTS: Record<string, string> = {
   "Tech":                  "linear-gradient(135deg, #6d28d9 0%, #1e40af 100%)",
@@ -306,19 +305,26 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
               site un air d'application pour adolescents avant même qu'on ait lu
               la phrase. Le repli rend la suite accessible sans quitter la
               grille, puisqu'un texte plus grand tient sur moins de lignes. */}
-          {/* Hauteur réservée pour trois lignes, même quand le texte en fait
-              deux. Sans elle, la ville et les étiquettes se posaient à des
-              hauteurs différentes d'une carte à l'autre : la grille paraissait
-              assemblée plutôt que composée. C'est ce décalage, plus que les
-              tailles, qui faisait amateur. */}
+          {/* Description : trois lignes, coupées net, sans bouton.
+              La carte entière est déjà un lien vers la fiche. Y ajouter un
+              « plus » créait deux cibles concurrentes dans le même bloc, et le
+              mot se retrouvait détaché du texte, flottant après un blanc. Les
+              annuaires professionnels tronquent en silence : le texte entier
+              est à un clic, sur la fiche.
+
+              La hauteur est réservée même quand le texte fait deux lignes,
+              sans quoi la ville et les étiquettes se posent à des hauteurs
+              différentes d'une carte à l'autre et la grille paraît assemblée
+              plutôt que composée. */}
           {company.description && (
-            <div style={{ marginBottom: 14, minHeight: 68 }}>
-              <DescriptionRepliable
-                texte={company.description}
-                lignes={3}
-                style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.62 }}
-              />
-            </div>
+            <p style={{
+              fontSize: 14, color: "var(--text-sub)", lineHeight: 1.62,
+              marginBottom: 14, minHeight: 68,
+              display: "-webkit-box", WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical", overflow: "hidden",
+            } as React.CSSProperties}>
+              {company.description}
+            </p>
           )}
 
           {/* Location + size + salary — chaque puce n'apparaît que si la donnée
