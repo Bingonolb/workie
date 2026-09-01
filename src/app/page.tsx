@@ -74,9 +74,9 @@ export default async function Home() {
         }
         .landing-chiffres {
           display: grid;
-          grid-template-columns: repeat(4, auto);
-          gap: 30px;
-          justify-content: start;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 26px;
+          max-width: 540px;
           padding-top: 30px;
           border-top: 1px solid var(--border);
         }
@@ -190,20 +190,28 @@ export default async function Home() {
           </div>
 
           {/* Les chiffres qui portent la crédibilité.
-              Le nombre d'avis a disparu du bandeau : il est de dix-huit, et
-              l'annoncer en grand sur la première page dit surtout que le site
-              est vide. « Aucun texte libre » le remplace, et c'est l'argument
-              le plus fort de la plateforme : il n'était nulle part. */}
+              Le nombre d'avis n'y figure pas : il est de dix-huit, et l'annoncer
+              en grand sur la première page dit surtout que le site est vide.
+
+              « 0 texte libre » y a figuré un temps et se lisait comme un manque
+              au premier coup d'œil : un bandeau de chiffres doit dire ce qu'on
+              a, pas ce qu'on n'a pas. L'argument garde toute sa force, mais à
+              sa place, dans « Des garanties vérifiables ». */}
           <div className="landing-chiffres">
             {[
               { valeur: nCompanies.toLocaleString("fr-CH"), libelle: "entreprises référencées" },
               { valeur: "26", libelle: "cantons couverts" },
               { valeur: "8", libelle: "critères notés" },
-              { valeur: "0", libelle: "texte libre" },
-            ].map(({ valeur, libelle }) => (
-              <div key={libelle}>
-                <p style={{ fontSize: 25, fontWeight: 750, letterSpacing: "-0.03em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{valeur}</p>
-                <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, lineHeight: 1.35 }}>{libelle}</p>
+              { valeur: "100%", libelle: "anonyme" },
+            ].map(({ valeur, libelle }, i) => (
+              <div key={libelle} style={{
+                // Filets verticaux plutôt que quatre blocs posés côte à côte :
+                // ils font lire la rangée comme un ensemble.
+                paddingLeft: i === 0 ? 0 : 26,
+                borderLeft: i === 0 ? "none" : "1px solid var(--border)",
+              }}>
+                <p style={{ fontSize: 27, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{valeur}</p>
+                <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 7, lineHeight: 1.4 }}>{libelle}</p>
               </div>
             ))}
           </div>

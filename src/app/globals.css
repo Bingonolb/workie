@@ -52,16 +52,29 @@ body {
 
 /* ─── CSS variables ─────────────────────────────────────────────── */
 
+/* ─── Palette ───────────────────────────────────────────────────────────
+   Les gris n'en étaient pas : le texte secondaire était violet (#7070a0 en
+   sombre, #6060a0 en clair) et le teintait partout. Un gris franchement
+   coloré donne un air d'application grand public ; les interfaces
+   professionnelles emploient des neutres à peine biaisés vers l'accent.
+
+   Les neutres passent donc en ardoise, avec un soupçon de bleu qui les
+   empêche d'être ternes. L'accent reste violet, pour rester cohérent avec le
+   logo, mais descend d'un cran en clair : le violet vif de Tailwind est un
+   ton de produit grand public, le même assombri se lit comme une décision.
+
+   Contraste vérifié : 5,6 pour le texte secondaire sur blanc, 5,7 sur le
+   fond sombre. Au-dessus du seuil AA dans les deux thèmes. */
 :root {
-  --bg: #0d0d13;
-  --surface: #16161f;
-  --surface2: #1e1e2a;
-  --surface3: #242433;
+  --bg: #0c0d12;
+  --surface: #14151c;
+  --surface2: #1b1c25;
+  --surface3: #22242e;
   --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #f0f0f8;
-  --text-muted: #7070a0;
-  --text-sub: #a0a0c0;
+  --border2: rgba(255,255,255,0.13);
+  --text: #eceef4;
+  --text-muted: #8b90a3;
+  --text-sub: #b2b7c6;
   --brand: #8b5cf6;
   --brand-dark: #7c3aed;
   --brand-2: #f97316;
@@ -70,24 +83,28 @@ body {
   --gold: #f59e0b;
   --green: #10b981;
   --red: #ef4444;
-  --nav-bg: rgb(13,13,19);
+  --nav-bg: rgb(12,13,18);
   --nav-border: rgba(255,255,255,0.06);
-  --scrollbar-thumb: #242433;
+  --scrollbar-thumb: #22242e;
 }
 
 html.light {
-  --bg: #f2f2f7;
+  --bg: #f7f7f9;
   --surface: #ffffff;
-  --surface2: #e8e8f0;
-  --surface3: #dcdce8;
-  --border: rgba(0,0,0,0.08);
-  --border2: rgba(0,0,0,0.13);
-  --text: #18182e;
-  --text-muted: #6060a0;
-  --text-sub: #5050a0;
-  --nav-bg: rgb(242,242,247);
-  --nav-border: rgba(0,0,0,0.08);
-  --scrollbar-thumb: #dcdce8;
+  --surface2: #f0f0f3;
+  --surface3: #e4e5ea;
+  --border: rgba(16,18,32,0.08);
+  --border2: rgba(16,18,32,0.14);
+  --text: #12131a;
+  --text-muted: #62667a;
+  --text-sub: #454959;
+  /* Accent assombri en clair : le violet vif tenait sur fond sombre, il
+     paraissait juvénile sur fond blanc. */
+  --brand: #5b3fd6;
+  --brand-dark: #4c33bd;
+  --nav-bg: rgb(247,247,249);
+  --nav-border: rgba(16,18,32,0.08);
+  --scrollbar-thumb: #e4e5ea;
 }
 
 ::selection { background: rgba(139,92,246,0.3); }
