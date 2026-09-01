@@ -53,6 +53,98 @@ export default async function Home() {
           complet, sur toutes les pages. Deux entités WebSite pour une même
           URL obligent Google à choisir laquelle décrit le site. */}
 
+      {/* Styles de la page, posés ici plutôt que dans la feuille globale.
+          Constaté en production : le paquet CSS restait figé d'un déploiement
+          à l'autre alors que le JavaScript et le HTML se mettaient bien à
+          jour. La page arrivait donc avec son nouveau balisage et sans les
+          règles qui le mettent en forme, ce qui la laissait en une colonne
+          collée au bord. Ces règles voyagent désormais avec la page, comme
+          celles de la fiche entreprise, et ne peuvent plus se désynchroniser
+          de leur balisage. */}
+      <style>{`
+        .landing-hero-deux-col {
+          display: grid;
+          grid-template-columns: 1.05fr 0.95fr;
+          gap: 56px;
+          align-items: center;
+          max-width: 1120px;
+          margin: 0 auto;
+          padding: 76px 24px 84px;
+          width: 100%;
+        }
+        .landing-chiffres {
+          display: grid;
+          grid-template-columns: repeat(4, auto);
+          gap: 30px;
+          justify-content: start;
+          padding-top: 30px;
+          border-top: 1px solid var(--border);
+        }
+        .landing-eyebrow {
+          text-align: center;
+          font-size: 11.5px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: var(--text-muted);
+          margin-bottom: 14px;
+        }
+        .landing-h2 {
+          text-align: center;
+          font-size: clamp(23px, 3.4vw, 34px);
+          font-weight: 750;
+          letter-spacing: -0.032em;
+          margin-bottom: 46px;
+        }
+        .landing-bande {
+          position: relative;
+          min-height: 420px;
+          display: flex;
+          align-items: center;
+          background-image: url("https://images.pexels.com/photos/33754554/pexels-photo-33754554.jpeg?auto=compress&cs=tinysrgb&w=1880");
+          background-size: cover;
+          background-position: center 58%;
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+        }
+        .landing-bande-voile {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, rgba(10,10,18,0.88) 0%, rgba(10,10,18,0.72) 46%, rgba(10,10,18,0.34) 100%);
+        }
+        .landing-bande-texte {
+          position: relative;
+          max-width: 1120px;
+          margin: 0 auto;
+          padding: 64px 24px;
+          width: 100%;
+        }
+        .landing-pourqui {
+          display: grid;
+          grid-template-columns: 0.72fr 1.28fr;
+          gap: 56px;
+          max-width: 1000px;
+          margin: 0 auto;
+          align-items: start;
+        }
+        @media (max-width: 900px) {
+          .landing-hero-deux-col {
+            grid-template-columns: 1fr;
+            gap: 40px;
+            padding: 44px 20px 56px;
+          }
+          .landing-apercu { order: 2; }
+          .landing-chiffres { grid-template-columns: repeat(2, 1fr); gap: 22px 28px; }
+        }
+        @media (max-width: 820px) {
+          .landing-pourqui { grid-template-columns: 1fr; gap: 26px; }
+          .landing-bande { min-height: 340px; background-position: center; }
+          .landing-bande-voile {
+            background: linear-gradient(180deg, rgba(10,10,18,0.72) 0%, rgba(10,10,18,0.86) 100%);
+          }
+        }
+      `}</style>
+
       {/* ── Navbar ── */}
       <nav className="landing-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
         <span style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
