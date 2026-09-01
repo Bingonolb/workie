@@ -101,16 +101,20 @@ export default async function Home() {
           min-height: 420px;
           display: flex;
           align-items: center;
-          background-image: url("https://images.pexels.com/photos/33754554/pexels-photo-33754554.jpeg?auto=compress&cs=tinysrgb&w=1880");
+          background-image: url("https://images.pexels.com/photos/303335/pexels-photo-303335.jpeg?auto=compress&cs=tinysrgb&w=1880");
           background-size: cover;
-          background-position: center 58%;
+          background-position: center 42%;
           border-top: 1px solid var(--border);
           border-bottom: 1px solid var(--border);
         }
         .landing-bande-voile {
           position: absolute;
           inset: 0;
-          background: linear-gradient(90deg, rgba(10,10,18,0.88) 0%, rgba(10,10,18,0.72) 46%, rgba(10,10,18,0.34) 100%);
+          /* Assombrissement uniforme plutôt qu'un dégradé latéral. L'ancien
+             laissait la droite en pleine lumière : sur un thème sombre, la
+             bande s'y déchirait, et les détails de la photo se battaient avec
+             le texte. */
+          background: linear-gradient(90deg, rgba(8,10,16,0.86) 0%, rgba(8,10,16,0.74) 60%, rgba(8,10,16,0.62) 100%);
         }
         .landing-bande-texte {
           position: relative;
@@ -118,6 +122,15 @@ export default async function Home() {
           margin: 0 auto;
           padding: 64px 24px;
           width: 100%;
+        }
+        .landing-photo-pourqui {
+          border-radius: 14px;
+          aspect-ratio: 4 / 5;
+          max-width: 340px;
+          background-image: url("https://images.pexels.com/photos/8348967/pexels-photo-8348967.jpeg?auto=compress&cs=tinysrgb&w=900");
+          background-size: cover;
+          background-position: center;
+          border: 1px solid var(--border);
         }
         .landing-pourqui {
           display: grid;
@@ -138,9 +151,10 @@ export default async function Home() {
         }
         @media (max-width: 820px) {
           .landing-pourqui { grid-template-columns: 1fr; gap: 26px; }
+          .landing-photo-pourqui { aspect-ratio: 16 / 9; max-width: none; }
           .landing-bande { min-height: 340px; background-position: center; }
           .landing-bande-voile {
-            background: linear-gradient(180deg, rgba(10,10,18,0.72) 0%, rgba(10,10,18,0.86) 100%);
+            background: linear-gradient(180deg, rgba(8,10,16,0.7) 0%, rgba(8,10,16,0.88) 100%);
           }
         }
       `}</style>
@@ -321,9 +335,14 @@ export default async function Home() {
         <div className="landing-pourqui">
           <div>
             <p className="landing-eyebrow" style={{ textAlign: "left" }}>Pour qui</p>
-            <h2 style={{ fontSize: "clamp(24px, 3.4vw, 36px)", fontWeight: 750, letterSpacing: "-0.032em", lineHeight: 1.18, maxWidth: 380 }}>
+            <h2 style={{ fontSize: "clamp(24px, 3.4vw, 36px)", fontWeight: 700, letterSpacing: "-0.032em", lineHeight: 1.18, maxWidth: 380, marginBottom: 26 }}>
               Quatre façons de s&apos;en servir.
             </h2>
+            {/* Seconde image. La colonne de gauche n'avait qu'un titre et
+                laissait un grand vide sous lui. Une photographie de travail
+                réel, sans sourire de catalogue ni poignée de main. */}
+            <div className="landing-photo-pourqui" role="img"
+                 aria-label="Une personne au travail devant un ordinateur portable, près d'une fenêtre." />
           </div>
 
           {/* Une liste, pas une quatrième grille de cartes. Le filet fin et le

@@ -46,7 +46,10 @@ body > * { max-width: 100vw; overflow-x: clip; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  /* La variable est posée par next/font sur <html>. Le repli système ne
+     sert que le temps du chargement, ou si la police échoue. */
+  font-family: var(--police), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-feature-settings: "cv05" 1, "ss03" 1;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -89,22 +92,25 @@ body {
 }
 
 html.light {
-  --bg: #f7f7f9;
+  /* Neutres légèrement bleutés : un gris strictement neutre paraît terne et
+     bon marché sur grande surface. Les fonds se séparent aussi davantage, de
+     sorte qu'une carte blanche se détache du fond sans avoir besoin d'ombre. */
+  --bg: #f5f6f8;
   --surface: #ffffff;
-  --surface2: #f0f0f3;
-  --surface3: #e4e5ea;
-  --border: rgba(16,18,32,0.08);
-  --border2: rgba(16,18,32,0.14);
-  --text: #12131a;
-  --text-muted: #62667a;
-  --text-sub: #454959;
+  --surface2: #eff1f4;
+  --surface3: #e3e6eb;
+  --border: rgba(16,20,34,0.075);
+  --border2: rgba(16,20,34,0.13);
+  --text: #101319;
+  --text-muted: #5f6575;
+  --text-sub: #414755;
   /* Accent assombri en clair : le violet vif tenait sur fond sombre, il
      paraissait juvénile sur fond blanc. */
   --brand: #5b3fd6;
   --brand-dark: #4c33bd;
-  --nav-bg: rgb(247,247,249);
+  --nav-bg: rgb(245,246,248);
   --nav-border: rgba(16,18,32,0.08);
-  --scrollbar-thumb: #e4e5ea;
+  --scrollbar-thumb: #e3e6eb;
 }
 
 ::selection { background: rgba(139,92,246,0.3); }

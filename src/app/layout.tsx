@@ -11,6 +11,7 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
   ],
 };
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import { QueryProvider } from "@/providers/QueryProvider";
@@ -18,6 +19,27 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { CookieBanner } from "@/components/CookieBanner";
 import { WelcomeModal } from "@/components/WelcomeModal";
 import { SessionKeepAlive } from "@/components/SessionKeepAlive";
+
+/**
+ * Une seule police, servie depuis notre propre domaine.
+ *
+ * Le site s'en remettait à la police du système : Segoe UI sous Windows, San
+ * Francisco sur Mac, autre chose ailleurs. Le site n'avait donc pas le même
+ * visage selon la machine, ce qu'aucune plateforme sérieuse ne se permet.
+ *
+ * Inter est la grotesque libre la plus proche de la tradition helvétique, ce
+ * qui tombe bien pour un service suisse : la neutralité y est un parti pris,
+ * pas une absence de choix. `next/font` la télécharge à la compilation et la
+ * sert depuis notre origine, ce qui satisfait `font-src 'self'` sans ouvrir
+ * la politique de sécurité à un hébergeur tiers, et supprime le clignotement
+ * d'une police chargée après coup.
+ */
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--police",
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 const OG_URL = "/api/og?title=Workie+%E2%80%94+Les+entreprises+suisses%2C+sans+filtre.&sub=Avis+anonymes+%C2%B7+Salaires+%C2%B7+Culture";
 
@@ -78,7 +100,7 @@ const orgSchema = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={inter.variable}>
       <head>
         <link rel="preconnect" href="https://xtbdxfzbbuedlktpqpna.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://xtbdxfzbbuedlktpqpna.supabase.co" />
