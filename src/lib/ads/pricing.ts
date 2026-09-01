@@ -21,7 +21,14 @@ export const BASE_CPM_CHF = 4.0;
 export const AD_FORMATS = ["square", "swipe"] as const;
 export type AdFormat = (typeof AD_FORMATS)[number];
 
-const FORMAT_MULT: Record<AdFormat, number> = { square: 1.0, swipe: 1.5 };
+// Les deux formats sont au même tarif.
+//
+// Le swipe était facturé une fois et demie le carré, au motif qu'il occupe
+// tout l'écran. Rien ne l'établit : personne n'a mesuré qu'une impression y
+// vaille davantage, et deux prix pour un service dont on ignore encore le
+// rendement se défend mal auprès d'un annonceur. On repart d'un tarif unique ;
+// il sera temps de les distinguer quand les chiffres le justifieront.
+const FORMAT_MULT: Record<AdFormat, number> = { square: 1.0, swipe: 1.0 };
 
 // ── Swiss workforce distribution by canton (OFS 2022) ─────────────────────────
 // Proportional weights — need not sum to 100; reach normalises by CANTON_TOTAL.

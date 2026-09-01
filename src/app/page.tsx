@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ArrowRight, Star, Shield, Zap, Eye, TrendingUp, MessageCircle } from "lucide-react";
+import { ArrowRight, Search, BarChart3, PenLine, ShieldCheck, Lock, FileText,
+         GraduationCap, Briefcase, Landmark, Home as IconeMaison, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingFaq } from "@/components/LandingFaq";
 
@@ -45,7 +46,6 @@ export const metadata: Metadata = {
 export default async function Home() {
   const counts = await getLandingCounts();
   const nCompanies = counts.companies;
-  const nReviews = counts.reviews;
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
@@ -63,185 +63,289 @@ export default async function Home() {
           <Link href="/login" className="nav-login-link" style={{ padding: "9px 16px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
             Connexion
           </Link>
-          <Link href="/signup" style={{ padding: "9px 18px", borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: "none", background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff" }}>
+          {/* Accent plein, pas le dégradé : le dégradé est celui du logo et il
+              perd sa valeur d'emblème s'il habille aussi les boutons. */}
+          <Link href="/signup" style={{ padding: "9px 18px", borderRadius: 8, fontWeight: 650, fontSize: 14, textDecoration: "none", background: "var(--brand)", color: "#fff" }}>
             S&apos;inscrire
           </Link>
         </div>
       </nav>
 
-      {/* ── Hero ── */}
-      <section className="landing-hero" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 24px 48px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: "5%", left: "10%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: "5%", right: "8%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(249,115,22,0.10) 0%, transparent 70%)", pointerEvents: "none" }} />
+      {/* ── Hero ──
+          Aligné à gauche et non centré : un texte centré sur toute la largeur
+          n'a pas de point d'entrée pour l'œil, et c'est la mise en page qu'on
+          obtient quand aucune décision n'a été prise. Plus de dégradé sur le
+          titre ni sur les boutons, plus de taches colorées en fond : un seul
+          accent, employé avec parcimonie. Le logo garde le sien. */}
+      <section className="landing-hero-deux-col">
+        <div>
+          <h1 style={{ fontSize: "clamp(34px, 5.2vw, 58px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 22, maxWidth: 620 }}>
+            Ce que vaut vraiment un employeur suisse.
+          </h1>
 
-        {/* Badge */}
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "linear-gradient(135deg, rgba(139,92,246,0.12), rgba(249,115,22,0.12))", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 50, padding: "6px 16px", marginBottom: 40, fontSize: 13, fontWeight: 600 } as React.CSSProperties}>
-          <Zap size={13} color="#8b5cf6" fill="#8b5cf6" aria-hidden="true" />
-          <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            Avis 100% anonymes · Salaires réels · 🇨🇭
-          </span>
+          <p style={{ fontSize: "clamp(16px, 1.6vw, 19px)", color: "var(--text-sub)", maxWidth: 560, lineHeight: 1.65, marginBottom: 34 }}>
+            Notes détaillées, salaires réels et conditions de travail, publiés
+            anonymement par celles et ceux qui y travaillent.
+          </p>
+
+          <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
+            <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
+              Consulter les entreprises <ArrowRight size={17} aria-hidden="true" />
+            </Link>
+            <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", padding: "14px 24px", borderRadius: 10, border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 15.5, textDecoration: "none" }}>
+              Créer un compte
+            </Link>
+          </div>
+
+          {/* Les chiffres qui portent la crédibilité.
+              Le nombre d'avis a disparu du bandeau : il est de dix-huit, et
+              l'annoncer en grand sur la première page dit surtout que le site
+              est vide. « Aucun texte libre » le remplace, et c'est l'argument
+              le plus fort de la plateforme : il n'était nulle part. */}
+          <div className="landing-chiffres">
+            {[
+              { valeur: nCompanies.toLocaleString("fr-CH"), libelle: "entreprises référencées" },
+              { valeur: "26", libelle: "cantons couverts" },
+              { valeur: "8", libelle: "critères notés" },
+              { valeur: "0", libelle: "texte libre" },
+            ].map(({ valeur, libelle }) => (
+              <div key={libelle}>
+                <p style={{ fontSize: 25, fontWeight: 750, letterSpacing: "-0.03em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{valeur}</p>
+                <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, lineHeight: 1.35 }}>{libelle}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <h1 style={{ fontSize: "clamp(38px, 8vw, 72px)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", marginBottom: 28, maxWidth: 820 }}>
-          Les entreprises suisses,{" "}
-          <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            sans filtre.
-          </span>
-        </h1>
+        {/* Aperçu du produit.
+            Construit en balisage plutôt qu'en image : net à toute résolution,
+            suit le thème clair comme sombre, et ne se périme pas quand la
+            fiche évolue. Rien ne crédibilise autant que de montrer ce qu'on
+            vend, et la page n'en montrait rien. */}
+        <div className="landing-apercu" aria-hidden="true">
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 16, padding: 22, boxShadow: "0 18px 50px rgba(0,0,0,0.13)" }}>
+            <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+              Synthèse des avis
+            </p>
 
-        <p style={{ fontSize: "clamp(16px, 2.5vw, 20px)", color: "var(--text-muted)", maxWidth: 520, lineHeight: 1.7, marginBottom: 52 }}>
-          {/* Deux phrases, la coupure au point plutôt qu'au milieu d'un
-              groupe de mots. */}
-          Avis d&apos;employés, salaires réels et ambiance de travail.<br />
-          Tout ce que les offres d&apos;emploi ne disent jamais.
-        </p>
-
-        <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 48, width: "100%", maxWidth: 480 }}>
-          <Link href="/signup" style={{ display: "flex", alignItems: "center", gap: 10, padding: "15px 32px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.3)" }}>
-            Commencer gratuitement <ArrowRight size={18} aria-hidden="true" />
-          </Link>
-          <Link href="/explore" style={{ display: "flex", alignItems: "center", gap: 8, padding: "15px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
-            <Eye size={18} aria-hidden="true" /> Voir sans compte
-          </Link>
-        </div>
-
-        {/* Stats */}
-        <div style={{ display: "flex", alignItems: "center", gap: 0, background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 18, overflow: "hidden", width: "100%", maxWidth: 520 }}>
-          {[
-            { value: nCompanies.toLocaleString("fr-CH"), label: "entreprises", color: "#8b5cf6" },
-            { value: nReviews > 0 ? nReviews.toLocaleString("fr-CH") : "bientôt", label: "avis", color: "#f97316" },
-            { value: "100%", label: "anonyme", color: "#10b981" },
-          ].map(({ value, label, color }, i) => (
-            <div key={label} style={{ flex: 1, padding: "18px 12px", textAlign: "center", borderRight: i < 2 ? "1px solid var(--border)" : "none" }}>
-              <p style={{ fontSize: "clamp(18px, 4vw, 26px)", fontWeight: 900, color, letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
-              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 18 }}>
+              <span style={{ fontSize: 42, fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 0.9 }}>4.2</span>
+              <span style={{ fontSize: 12.5, color: "var(--text-muted)", paddingBottom: 4 }}>sur 34 avis</span>
             </div>
-          ))}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 18 }}>
+              {[
+                { l: "Management", v: 78 },
+                { l: "Vie pro / perso", v: 86 },
+                { l: "Rémunération", v: 64 },
+                { l: "Évolution", v: 71 },
+              ].map(({ l, v }) => (
+                <div key={l} style={{ display: "flex", alignItems: "center", gap: 11 }}>
+                  <span style={{ flex: "1 1 0", fontSize: 12.5, color: "var(--text-muted)" }}>{l}</span>
+                  <div style={{ flex: "0 0 92px", height: 5, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{ width: `${v}%`, height: "100%", background: "var(--brand)", borderRadius: 3 }} />
+                  </div>
+                  <span style={{ flex: "0 0 26px", textAlign: "right", fontSize: 12.5, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
+                    {(v / 20).toFixed(1)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 15, borderTop: "1px solid var(--border)" }}>
+              {[
+                { g: "82%", p: "recommandent" },
+                { g: "CHF 96k", p: "salaire médian" },
+              ].map(({ g, p }) => (
+                <div key={p} style={{ display: "flex", alignItems: "baseline", gap: 6, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 9, padding: "7px 12px" }}>
+                  <span style={{ fontSize: 14.5, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{g}</span>
+                  <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>{p}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ── Comment ça marche ── */}
-      <section className="landing-section" style={{ padding: "60px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <p style={{ textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>Comment ça marche</p>
-          <h2 style={{ textAlign: "center", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 52 }}>
-            Trois étapes, zéro compromis.
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 24 }}>
+      <section className="landing-section" style={{ padding: "72px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ maxWidth: 940, margin: "0 auto" }}>
+          <p className="landing-eyebrow">Comment ça marche</p>
+          <h2 className="landing-h2">Trois étapes, aucune concession.</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 22 }}>
             {[
-              { n: "01", icon: "🔍", title: "Recherche", // Pas de nombre en dur ici : le bandeau juste au-dessus affiche le
-              // compte réel, et il annonçait 1 033 quand cette ligne promettait
-              // « plus de 1 500 » — les deux à l'écran en même temps. Sur un site
-              // dont l'argument est la fiabilité de l'information, se contredire
-              // sur sa propre taille est ce qui coûte le plus cher.
-              desc: "Par nom, canton ou secteur. Des PME aux multinationales, dans toute la Suisse." },
-              { n: "02", icon: "📖", title: "Explore", desc: "Management, culture, salaires, évolution de carrière : des retours d'employés actuels et anciens." },
-              { n: "03", icon: "✍️", title: "Contribue", desc: "Partage ton expérience anonymement. Chaque avis renforce la valeur de la plateforme pour tous." },
-            ].map(({ n, icon, title, desc }) => (
-              <div key={n} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "32px 28px", position: "relative", overflow: "hidden" }}>
-                <span style={{ position: "absolute", top: 20, right: 20, fontSize: 12, fontWeight: 800, color: "var(--border2)", letterSpacing: "0.05em" }}>{n}</span>
-                <div style={{ fontSize: 36, marginBottom: 16 }}>{icon}</div>
-                <h3 style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>{title}</h3>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.65 }}>{desc}</p>
+              { n: "01", Icone: Search, titre: "Chercher",
+                desc: "Par nom, canton ou secteur. Des PME aux multinationales, dans toute la Suisse." },
+              { n: "02", Icone: BarChart3, titre: "Comparer",
+                desc: "Management, culture, rémunération, évolution : huit critères notés par des employés en poste et d'anciens collaborateurs." },
+              { n: "03", Icone: PenLine, titre: "Contribuer",
+                desc: "Vous notez votre expérience anonymement. Chaque contribution rend la suivante plus utile." },
+            ].map(({ n, Icone, titre, desc }) => (
+              <div key={n} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "26px 24px", position: "relative" }}>
+                <span style={{ position: "absolute", top: 22, right: 22, fontSize: 11.5, fontWeight: 700, color: "var(--border2)", letterSpacing: "0.06em", fontVariantNumeric: "tabular-nums" }}>{n}</span>
+                <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
+                <h3 style={{ fontSize: 16.5, fontWeight: 700, color: "var(--text)", margin: "15px 0 9px" }}>{titre}</h3>
+                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.62 }}>{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Features ── */}
-      <section className="landing-section" style={{ padding: "60px 24px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <p style={{ textAlign: "center", fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>Pourquoi Workie</p>
-          <h2 style={{ textAlign: "center", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 52 }}>
-            L&apos;information que tu mérites.
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
+      {/* ── Bande photographique ──
+          Trois sections de cartes se suivaient, avec le même chapeau centré et
+          le même titre : cette monotonie est la signature d'un gabarit. Une
+          image pleine largeur donne à la page un moment, et une respiration.
+
+          Un lieu plutôt que des personnes : la photographie de bureau avec des
+          collaborateurs souriants est le cliché qui déclasse une page. Zurich
+          sur la Limmat situe la plateforme sans rien prétendre. */}
+      <section className="landing-bande" aria-hidden="false">
+        <div className="landing-bande-voile" />
+        <div className="landing-bande-texte">
+          <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 760 }}>
+            Un employeur se choisit sur des faits, pas sur une réputation.
+          </p>
+          <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
+            {nCompanies.toLocaleString("fr-CH")} entreprises suisses, notées sur huit
+            critères par celles et ceux qui y travaillent.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Pour qui ──
+          Section absente jusqu'ici. Une page qui parle à tout le monde en
+          général ne parle à personne en particulier : nommer les situations
+          permet à chacun de se reconnaître, de l'étudiant au cadre confirmé. */}
+      <section className="landing-section" style={{ padding: "84px 24px" }}>
+        <div className="landing-pourqui">
+          <div>
+            <p className="landing-eyebrow" style={{ textAlign: "left" }}>Pour qui</p>
+            <h2 style={{ fontSize: "clamp(24px, 3.4vw, 36px)", fontWeight: 750, letterSpacing: "-0.032em", lineHeight: 1.18, maxWidth: 380 }}>
+              Quatre façons de s&apos;en servir.
+            </h2>
+          </div>
+
+          {/* Une liste, pas une quatrième grille de cartes. Le filet fin et le
+              retrait suffisent à séparer les entrées, et le texte respire. */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
             {[
-              { icon: <Star size={22} color="#f59e0b" fill="#f59e0b" aria-hidden="true" />, bg: "rgba(245,158,11,0.1)", title: "Avis authentiques", desc: "Chaque avis est soumis à une charte de bonne foi. Aucun contenu sponsorisé, aucune intervention des entreprises." },
-              { icon: <Shield size={22} color="#10b981" aria-hidden="true" />, bg: "rgba(16,185,129,0.1)", title: "Anonymat par défaut", desc: "Ton nom n'est jamais publié et ton compte n'est pas relié aux avis côté public." },
-              { icon: <TrendingUp size={22} color="#8b5cf6" aria-hidden="true" />, bg: "rgba(139,92,246,0.1)", title: "Salaires réels", desc: "Des chiffres concrets, partagés anonymement par des employés en poste. Sache exactement ce que vaut ton profil." },
-              { icon: <MessageCircle size={22} color="#f97316" aria-hidden="true" />, bg: "rgba(249,115,22,0.1)", title: "Simple et direct", desc: "Une expérience pensée pour aller à l'essentiel : chercher, comparer, décider." },
-            ].map(({ icon, bg, title, desc }) => (
-              <div key={title} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 20, padding: "28px 24px" }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                  {icon}
+              { Icone: GraduationCap, titre: "Vous terminez vos études",
+                desc: "Savoir ce que paie réellement un premier poste dans votre domaine, et chez qui l'on apprend." },
+              { Icone: Briefcase, titre: "Vous envisagez de changer",
+                desc: "Comparer votre employeur actuel à ceux qui recrutent, sur des critères précis plutôt que sur une réputation." },
+              { Icone: Landmark, titre: "Vous êtes dans le public",
+                desc: "Mesurer l'écart réel avec le privé, rémunération, charge et flexibilité comprises." },
+              { Icone: IconeMaison, titre: "Vous reprenez une activité",
+                desc: "Repérer les employeurs dont les anciens saluent la souplesse d'horaires et l'accueil des retours." },
+            ].map(({ Icone, titre, desc }, i) => (
+              <div key={titre} style={{
+                display: "flex", gap: 18, padding: "22px 0",
+                borderTop: i === 0 ? "none" : "1px solid var(--border)",
+              }}>
+                <Icone size={19} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" style={{ flexShrink: 0, marginTop: 3 }} />
+                <div>
+                  <h3 style={{ fontSize: 16.5, fontWeight: 700, color: "var(--text)", marginBottom: 7 }}>{titre}</h3>
+                  <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65, maxWidth: 520 }}>{desc}</p>
                 </div>
-                <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>{title}</h3>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.65 }}>{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA employés ── */}
-      <section className="landing-section" style={{ padding: "60px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", textAlign: "center" }}>
+      {/* ── Ce qui rend l'information fiable ──
+          Ces garanties n'existaient que dans la foire aux questions, tout en
+          bas. Ce sont pourtant elles qui distinguent la plateforme, et la
+          première d'entre elles, l'absence de texte libre, est aussi ce qui la
+          protège juridiquement. */}
+      <section className="landing-section" style={{ padding: "72px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ maxWidth: 940, margin: "0 auto" }}>
+          <p className="landing-eyebrow">Ce qui rend l&apos;information fiable</p>
+          <h2 className="landing-h2">Des garanties vérifiables.</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 22 }}>
+            {[
+              { Icone: FileText, titre: "Aucun texte libre",
+                desc: "Un avis ne contient que des notes et le contexte du poste. Ni récit inventé, ni règlement de comptes, ni message écrit par l'entreprise elle-même." },
+              { Icone: Lock, titre: "Anonymat par construction",
+                desc: "Votre nom n'est jamais publié, et aucune page ne relie un compte à un avis. Ce n'est pas un réglage, c'est la façon dont les données sont servies." },
+              { Icone: ShieldCheck, titre: "Contrôles à la publication",
+                desc: "Adresse confirmée, compte de plus de vingt-quatre heures, un seul avis par entreprise, et une modération alimentée par les signalements." },
+            ].map(({ Icone, titre, desc }) => (
+              <div key={titre} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "26px 24px" }}>
+                <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", margin: "15px 0 9px" }}>{titre}</h3>
+                <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.62 }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Appel à l'action ── */}
+      <section className="landing-section" style={{ padding: "76px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <div style={{ fontSize: 48, marginBottom: 24 }}>✦</div>
-          <h2 style={{ fontSize: "clamp(26px, 5vw, 42px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 16 }}>
-            Commence à explorer.
+          <h2 style={{ fontSize: "clamp(24px, 3.6vw, 34px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 14 }}>
+            Commencez par votre secteur.
           </h2>
-          <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 40 }}>
-            Gratuit, anonyme, et entièrement dédié au marché du travail suisse.
+          <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 32 }}>
+            La consultation est libre et ne demande pas de compte.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 36px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 16, textDecoration: "none", boxShadow: "0 8px 32px rgba(139,92,246,0.25)" }}>
-              Créer mon compte gratuit <ArrowRight size={18} aria-hidden="true" />
+            <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 30px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
+              Consulter les entreprises <ArrowRight size={17} aria-hidden="true" />
             </Link>
-            <Link href="/ranking" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 28px", borderRadius: 14, border: "1px solid var(--border2)", color: "var(--text-muted)", fontWeight: 600, fontSize: 15, textDecoration: "none" }}>
+            <Link href="/ranking" style={{ display: "inline-flex", alignItems: "center", padding: "14px 26px", borderRadius: 10, border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 15.5, textDecoration: "none" }}>
               Voir le classement
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Section Publicité ── */}
-      <section style={{ padding: "64px 24px", borderTop: "1px solid var(--border)" }}>
-        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      {/* ── Publicité ── */}
+      <section style={{ padding: "68px 24px", borderTop: "1px solid var(--border)" }}>
+        <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <div className="landing-ads-grid">
             <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: 50, padding: "4px 12px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#f97316" }}>
-                📣 Faire de la publicité
-              </div>
-              <h2 style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 12 }}>
-                Touchez des milliers de candidats actifs en Suisse.
+              <p className="landing-eyebrow" style={{ textAlign: "left" }}>Annonceurs</p>
+              <h2 style={{ fontSize: "clamp(21px, 2.8vw, 28px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 13 }}>
+                Touchez des candidats actifs en Suisse.
               </h2>
-              <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.75, marginBottom: 20, maxWidth: 520 }}>
-                Que vous ayez une entreprise ou un projet personnel, vous pouvez diffuser une annonce sur Workie sans abonnement.
-                Vous définissez votre budget, votre ciblage, et vous ne payez que ce que vous consommez.
+              <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 520 }}>
+                Que vous représentiez une entreprise ou un projet personnel, vous
+                diffusez une annonce sans abonnement. Vous fixez votre budget et
+                votre ciblage, et vous ne payez que ce que vous consommez.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
                 {[
-                  "À partir de CHF 5/jour",
-                  "Paiement unique via Stripe",
-                  "Ciblage par canton & secteur",
-                  "Stats en temps réel",
+                  "À partir de CHF 5 par jour",
+                  "Paiement unique",
+                  "Ciblage par canton et secteur",
+                  "Statistiques en temps réel",
                   "Sans abonnement",
                 ].map(f => (
-                  <span key={f} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 50, background: "var(--surface)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
-                    ✓ {f}
+                  <span key={f} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 550, padding: "5px 12px", borderRadius: 50, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
+                    <Check size={12} color="var(--brand)" strokeWidth={2.5} aria-hidden="true" /> {f}
                   </span>
                 ))}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
-                  Créer une campagne →
-                </Link>
-              </div>
+              <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 14.5, textDecoration: "none" }}>
+                Créer une campagne <ArrowRight size={16} aria-hidden="true" />
+              </Link>
             </div>
-            <div className="landing-ads-aside" style={{ flexDirection: "column", gap: 10, minWidth: 200 }}>
+            {/* Même tarif pour les deux formats : rien n'établit qu'une
+                impression en plein écran vaille davantage, et deux prix pour
+                un service dont on ignore encore le rendement se défendent mal
+                auprès d'un annonceur. */}
+            <div className="landing-ads-aside" style={{ flexDirection: "column", gap: 10, minWidth: 210 }}>
               {[
-                { label: "Format Carré", desc: "Dans la grille Explore", price: "dès CHF 4/CPM", emoji: "⬛" },
-                { label: "Format Swipe", desc: "Plein écran, tous les 10 swipes", price: "dès CHF 6/CPM", emoji: "📱" },
-              ].map(({ label, desc, price, emoji }) => (
-                <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 24 }}>{emoji}</span>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{label}</p>
-                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{desc}</p>
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "#8b5cf6", marginTop: 2 }}>{price}</p>
-                  </div>
+                { label: "Format carré", desc: "Dans la grille des entreprises" },
+                { label: "Format plein écran", desc: "Dans le swipe, toutes les dix cartes" },
+              ].map(({ label, desc }) => (
+                <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 18px" }}>
+                  <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{label}</p>
+                  <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.5 }}>{desc}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)", marginTop: 7 }}>dès CHF 4 pour mille affichages</p>
                 </div>
               ))}
             </div>
@@ -258,7 +362,7 @@ export default async function Home() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 32, marginBottom: 32 }}>
             <div>
               <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", display: "block", marginBottom: 8 }}>workie</span>
-              <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>La plateforme de transparence du marché du travail suisse.</p>
+              <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.6 }}>La transparence du marché du travail suisse.</p>
             </div>
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Explorer</p>
@@ -278,8 +382,8 @@ export default async function Home() {
             </div>
           </div>
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>© 2026 Workie · 🇨🇭 Suisse</span>
-            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Fait avec ♥ pour le marché du travail suisse</span>
+            <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>© 2026 Workie</span>
+            <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>Plateforme suisse, données hébergées en Europe</span>
           </div>
         </div>
       </footer>
