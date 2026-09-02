@@ -30,9 +30,28 @@ export function Logo({ taille = 26, className }: Props) {
 
   return (
     <span
-      className={className}
+      className={`logo-empile${className ? ` ${className}` : ""}`}
       style={{ display: "inline-flex", alignItems: "center", lineHeight: 0 }}
     >
+      {/* Les règles de bascule voyagent avec le composant plutôt que dans la
+          feuille globale.
+
+          Constaté en production, et pour la troisième fois sur ce projet : le
+          paquet CSS reste figé d'un déploiement à l'autre alors que le HTML se
+          met bien à jour. Le balisage arrive donc avec ses deux images et sans
+          les règles qui en cachent une, et le logotype s'affiche en double.
+          Ici la règle ne peut plus se désynchroniser de ce qu'elle habille.
+
+          Une position absolue plutôt qu'un simple display: none : la seconde
+          image sort du flux, si bien que les deux occupent exactement la même
+          place et que rien ne bouge si l'une manque. */}
+      <style>{`
+        .logo-empile { position: relative; }
+        .logo-empile .logo-encre-sombre { position: absolute; inset: 0; opacity: 0; }
+        .logo-empile .logo-encre-claire { opacity: 1; }
+        html.light .logo-empile .logo-encre-sombre { opacity: 1; }
+        html.light .logo-empile .logo-encre-claire { opacity: 0; }
+      `}</style>
       <Image
         className="logo-encre-sombre"
         src="/workie-logo.png"

@@ -91,17 +91,10 @@ body {
   --scrollbar-thumb: #22242e;
 }
 
-/* Le logotype est fourni en deux versions dessinees, encre sombre pour les
-   fonds clairs et encre claire pour les fonds sombres. Le theme etant porte
-   par une classe sur <html>, la bascule se fait en CSS : choisir en
-   JavaScript ferait clignoter le logo a chaque chargement, le temps que le
-   script s'execute. Le theme sombre est celui par defaut. */
-.logo-encre-sombre { display: none; }
-.logo-encre-claire { display: block; }
-html.light .logo-encre-sombre { display: block; }
-html.light .logo-encre-claire { display: none; }
-/* La hauteur est portee par le composant, la largeur suit le rapport. */
-.logo-encre-sombre, .logo-encre-claire { width: auto; }
+/* La bascule entre les deux versions du logotype vit dans le composant
+   lui-meme : voir Logo.tsx. Posee ici, elle voyageait dans le paquet CSS, qui
+   reste parfois fige d'un deploiement a l'autre alors que le HTML se met a
+   jour, et le logotype s'affichait alors en double. */
 
 html.light {
   /* Neutres légèrement bleutés : un gris strictement neutre paraît terne et
