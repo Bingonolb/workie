@@ -30,7 +30,7 @@ export function ShareCopyButton({ url }: { url: string }) {
       aria-live="polite"
       style={{
         width: "100%", padding: "10px 0", borderRadius: 9,
-        background: copied ? "#10b981" : "linear-gradient(135deg, #8b5cf6, #f97316)",
+        background: copied ? "#10b981" : "var(--brand)",
         color: "#fff", border: "none", fontWeight: 700, fontSize: 13, cursor: "pointer",
         transition: "background 0.2s",
       }}

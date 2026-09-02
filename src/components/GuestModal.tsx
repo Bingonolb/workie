@@ -108,7 +108,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
             {/* Email signup */}
             <Link href="/signup" style={{
               display: "flex", alignItems: "center", justifyContent: "center",
-              background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+              background: "var(--brand)",
               color: "#fff", fontWeight: 700, fontSize: 15,
               borderRadius: 14, padding: "14px 20px", textDecoration: "none",
             }}>

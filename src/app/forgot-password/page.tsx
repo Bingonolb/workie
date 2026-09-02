@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 disabled={pending}
                 style={{
-                  width: "100%", background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                  width: "100%", background: "var(--brand)",
                   color: "#fff", fontWeight: 700, fontSize: 15, border: "none",
                   borderRadius: 10, padding: "13px 0", cursor: "pointer", opacity: pending ? 0.6 : 1,
                 }}

@@ -122,7 +122,7 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
             marginTop: 4,
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "9px 16px", borderRadius: 10,
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+            background: "var(--brand)",
             color: "#fff", fontWeight: 700, fontSize: 13,
             alignSelf: "flex-start",
           }}

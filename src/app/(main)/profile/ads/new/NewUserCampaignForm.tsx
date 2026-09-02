@@ -291,7 +291,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                     <div style={{ padding: "8px 10px 10px" }}>
                       <p style={{ fontSize: 11, fontWeight: 800, color: "var(--text)", marginBottom: 5, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
                       {bodyText && <p style={{ fontSize: 9, color: "var(--text-muted)", marginBottom: 6, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{bodyText}</p>}
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 9, fontWeight: 800, color: "#fff" }}>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 7, background: "var(--brand)", fontSize: 9, fontWeight: 800, color: "#fff" }}>
                         {ctaLabel || "En savoir plus"} →
                       </div>
                     </div>
@@ -337,7 +337,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                           <p style={{ fontSize: 10, fontWeight: 900, color: "#fff", marginBottom: 4, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
                           {bodyText && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.65)", marginBottom: 8, lineHeight: 1.4 }}>{bodyText.slice(0, 60)}{bodyText.length > 60 ? "…" : ""}</p>}
                           <div style={{ display: "flex", gap: 5 }}>
-                            <div style={{ flex: 1, padding: "5px 8px", borderRadius: 7, background: "linear-gradient(135deg, #8b5cf6, #f97316)", fontSize: 8, fontWeight: 800, color: "#fff", textAlign: "center" }}>
+                            <div style={{ flex: 1, padding: "5px 8px", borderRadius: 7, background: "var(--brand)", fontSize: 8, fontWeight: 800, color: "#fff", textAlign: "center" }}>
                               {ctaLabel || "En savoir plus"}
                             </div>
                             <div style={{ padding: "5px 8px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.2)", fontSize: 8, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Ignorer</div>
@@ -524,7 +524,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
           <button type="submit" disabled={pending} style={{
             flex: 1, padding: "16px", borderRadius: 14,
-            background: pending ? "rgba(255,255,255,0.08)" : "linear-gradient(135deg, #8b5cf6, #f97316)",
+            background: pending ? "rgba(255,255,255,0.08)" : "var(--brand)",
             color: "#fff", fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", border: "none",
             cursor: pending ? "not-allowed" : "pointer", opacity: pending ? 0.7 : 1, transition: "opacity 0.2s",
           }}>

@@ -36,7 +36,7 @@ export function Pagination({ page, pageCount, total, params }: {
 
   const activeBtnStyle: React.CSSProperties = {
     ...btnBase,
-    background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+    background: "var(--brand)",
     border: "none",
     color: "#fff",
   };

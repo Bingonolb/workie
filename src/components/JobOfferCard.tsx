@@ -170,7 +170,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                   padding: "14px 0", borderRadius: 12,
-                  background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                  background: "var(--brand)",
                   color: "#fff", fontWeight: 800, fontSize: 15, textDecoration: "none",
                   boxShadow: "0 4px 20px rgba(139,92,246,0.35)",
                   transition: "opacity 0.15s",

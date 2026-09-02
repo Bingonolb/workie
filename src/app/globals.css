@@ -82,7 +82,7 @@ body {
   --brand-dark: #7c3aed;
   --brand-2: #f97316;
   --brand-3: #ec4899;
-  --gradient: linear-gradient(135deg, #8b5cf6 0%, #f97316 100%);
+  --gradient: var(--brand);
   --gold: #f59e0b;
   --green: #10b981;
   --red: #ef4444;

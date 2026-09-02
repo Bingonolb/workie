@@ -76,7 +76,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
           <Link href="/profile/ads/new" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "11px 22px", borderRadius: 12,
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+            background: "var(--brand)",
             color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
             boxShadow: "0 4px 20px rgba(139,92,246,0.3)",
           }}>
@@ -112,7 +112,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
             <Link href="/profile/ads/new" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "13px 26px", borderRadius: 12,
-              background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+              background: "var(--brand)",
               color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
             }}>
               <Plus size={16} aria-hidden="true" /> Créer ma première pub
@@ -218,7 +218,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
                         </div>
                         <div>
                           <div style={{ height: 4, borderRadius: 50, background: "var(--surface2)", overflow: "hidden", marginBottom: 4 }}>
-                            <div style={{ height: "100%", width: `${pct}%`, background: pct >= 90 ? "#ef4444" : "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 50 }} />
+                            <div style={{ height: "100%", width: `${pct}%`, background: pct >= 90 ? "#ef4444" : "var(--brand)", borderRadius: 50 }} />
                           </div>
                           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)" }}>
                             <span>CHF {Number(c.spent_chf).toFixed(2)} dépensé · {pct}%</span>

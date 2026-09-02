@@ -107,7 +107,7 @@ export default async function AdminPage() {
             <Link href="/admin/ads" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid rgba(236,72,153,0.3)", color: "#ec4899", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
               📣 Publicités
             </Link>
-            <Link href="/admin/company/new" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
+            <Link href="/admin/company/new" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
               <Plus size={15} aria-hidden="true" /> Ajouter une entreprise
             </Link>
           </div>

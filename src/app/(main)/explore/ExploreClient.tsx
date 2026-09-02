@@ -768,7 +768,7 @@ export function ExploreClient({
                   </p>
                   <a href="/signup" style={{
                     display: "inline-block", padding: "13px 28px", borderRadius: 12,
-                    background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                    background: "var(--brand)",
                     color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
                   }}>
                     Créer un compte, gratuit

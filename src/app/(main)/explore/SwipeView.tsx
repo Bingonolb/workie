@@ -1024,7 +1024,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
       <div style={{ height: "55%", position: "relative", overflow: "hidden", flexShrink: 0,
         background: campaign.image_url
           ? `url(${campaign.image_url}) center / cover no-repeat`
-          : "linear-gradient(135deg, #8b5cf6, #f97316)",
+          : "var(--brand)",
       }}>
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.0) 20%, rgba(0,0,0,0.75))" }} />
 
@@ -1045,7 +1045,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
         )}
 
         {/* Sponsored badge — gradient, more visible */}
-        <div style={{ position: "absolute", top: 14, left: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", borderRadius: 50, padding: "4px 12px", display: "flex", alignItems: "center", gap: 5 }}>
+        <div style={{ position: "absolute", top: 14, left: 14, background: "var(--brand)", borderRadius: 50, padding: "4px 12px", display: "flex", alignItems: "center", gap: 5 }}>
           <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", textTransform: "uppercase", letterSpacing: "0.12em" }}>⚡ Sponsorisé</span>
         </div>
 
@@ -1065,7 +1065,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
           </p>
         )}
         {/* CTA button */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderRadius: 14, background: "linear-gradient(135deg, #8b5cf6, #f97316)", boxShadow: "0 4px 16px rgba(139,92,246,0.35)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderRadius: 14, background: "var(--brand)", boxShadow: "0 4px 16px rgba(139,92,246,0.35)" }}>
           <ExternalLink size={15} color="#fff" aria-hidden="true" />
           <span style={{ fontSize: 14, fontWeight: 800, color: "#fff", flex: 1, letterSpacing: "-0.01em" }}>{campaign.cta_label}</span>
           <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>Ouvrir →</span>

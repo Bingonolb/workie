@@ -82,7 +82,7 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
       )}
 
       <button type="submit" disabled={pending} style={{
-        background: pending ? "var(--surface3)" : "linear-gradient(135deg, #8b5cf6, #f97316)",
+        background: pending ? "var(--surface3)" : "var(--brand)",
         color: "#fff", fontWeight: 700, fontSize: 14, border: "none",
         borderRadius: 10, padding: "13px 0", cursor: pending ? "not-allowed" : "pointer",
         transition: "opacity 0.2s", opacity: pending ? 0.7 : 1,

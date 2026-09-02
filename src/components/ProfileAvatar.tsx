@@ -7,7 +7,7 @@ export function ProfileAvatar({ src, initial }: { src: string | null; initial: s
   return (
     <div style={{
       width: 80, height: 80, borderRadius: 20, flexShrink: 0,
-      background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+      background: "var(--brand)",
       display: "flex", alignItems: "center", justifyContent: "center",
       overflow: "hidden",
     }}>

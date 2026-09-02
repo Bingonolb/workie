@@ -57,7 +57,7 @@ export function FavorisClient() {
         <button
           onClick={() => window.location.reload()}
           style={{
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff",
+            background: "var(--brand)", color: "#fff",
             fontWeight: 700, border: "none", borderRadius: 10, padding: "11px 26px",
             fontSize: 14, cursor: "pointer",
           }}
@@ -79,7 +79,7 @@ export function FavorisClient() {
         <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Aucun favori pour l&apos;instant</p>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>Clique sur 🔥 sur une entreprise pour la sauvegarder ici.</p>
         <Link href="/explore" style={{
-          display: "inline-block", background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+          display: "inline-block", background: "var(--brand)",
           color: "#fff", fontWeight: 700, borderRadius: 10, padding: "12px 28px", textDecoration: "none", fontSize: 14,
         }}>
           Explorer les entreprises

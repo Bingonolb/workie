@@ -449,7 +449,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 padding: "13px 0", borderRadius: 10, fontSize: 14, fontWeight: 700,
-                background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                background: "var(--brand)",
                 border: "none", color: "#fff", cursor: "pointer",
               }}>
               Continuer <ChevronRight size={16} aria-hidden="true" />
@@ -459,7 +459,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               disabled={pending || !canSubmit}
               style={{
                 flex: 1, padding: "13px 0", borderRadius: 10, fontSize: 14, fontWeight: 700,
-                background: canSubmit ? "linear-gradient(135deg, #8b5cf6, #f97316)" : "var(--surface3)",
+                background: canSubmit ? "var(--brand)" : "var(--surface3)",
                 border: "none",
                 color: canSubmit ? "#fff" : "var(--text-muted)",
                 cursor: canSubmit ? "pointer" : "not-allowed",

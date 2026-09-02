@@ -380,7 +380,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 background: "linear-gradient(180deg, rgba(139,92,246,0.06), transparent 60%), var(--surface)",
                 border: "1px solid var(--border)",
                 borderTop: "3px solid transparent",
-                borderImage: "linear-gradient(90deg, #8b5cf6, #f97316) 1",
+                borderColor: "var(--brand)",
                 borderRadius: 18, padding: "24px", marginBottom: 32,
               }}>
                 <p style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
@@ -447,7 +447,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 </p>
                 <span style={{
                   display: "inline-block",
-                  background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+                  background: "var(--brand)",
                   color: "#fff", fontWeight: 700, borderRadius: 12,
                   padding: "10px 24px", fontSize: 14,
                 }}>

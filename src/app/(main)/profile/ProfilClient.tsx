@@ -76,7 +76,7 @@ export function ProfilClient() {
         <button
           onClick={() => window.location.reload()}
           style={{
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff",
+            background: "var(--brand)", color: "#fff",
             fontWeight: 700, border: "none", borderRadius: 10, padding: "11px 26px",
             fontSize: 14, cursor: "pointer",
           }}
@@ -136,7 +136,7 @@ export function ProfilClient() {
           {/* Accent line */}
           <div style={{
             width: 32, height: 3, borderRadius: 2,
-            background: "linear-gradient(90deg, #8b5cf6, #f97316)",
+            background: "var(--brand)",
             marginBottom: 14,
           }} />
           <h1 style={{

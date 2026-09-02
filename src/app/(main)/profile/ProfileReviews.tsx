@@ -31,7 +31,7 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
         <p style={{ fontSize: 13, marginBottom: 24 }}>Partagez votre expérience pour aider la communauté.</p>
         <Link href="/explore" style={{
           display: "inline-block", padding: "10px 24px", borderRadius: 6,
-          background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+          background: "var(--brand)",
           color: "#fff", fontWeight: 700, textDecoration: "none", fontSize: 13,
         }}>
           Explorer les entreprises

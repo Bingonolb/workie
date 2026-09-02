@@ -63,7 +63,7 @@ export function WelcomeModal() {
         }}>
 
         {/* Top gradient band */}
-        <div style={{ height: 200, background: "linear-gradient(135deg, #8b5cf6 0%, #f97316 100%)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ height: 200, background: "var(--brand)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
           {/* Decorative circles */}
           <div style={{ position: "absolute", width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,0.08)", top: -40, right: -40 }} />
           <div style={{ position: "absolute", width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.08)", bottom: -20, left: 30 }} />
@@ -104,7 +104,7 @@ export function WelcomeModal() {
 
           <button type="button" onClick={close} style={{
             width: "100%",
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+            background: "var(--brand)",
             color: "#fff", fontWeight: 800, fontSize: 15, border: "none",
             borderRadius: 14, padding: "15px 0", cursor: "pointer",
             letterSpacing: "-0.01em",

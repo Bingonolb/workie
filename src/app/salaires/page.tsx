@@ -272,7 +272,7 @@ export default async function SalairesPage() {
                       width: `${((overallP75 - overallP25) / (overallP75 * 1.1)) * 100}%`,
                       maxWidth: "100%",
                       height: "100%",
-                      background: "linear-gradient(90deg, #8b5cf6, #f97316)",
+                      background: "var(--brand)",
                       borderRadius: 4,
                     }} />
                   </div>
@@ -410,7 +410,7 @@ export default async function SalairesPage() {
               <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.7 }}>
                 Partagez votre salaire anonymement et aidez les autres à négocier en connaissance de cause.
               </p>
-              <a href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 28px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+              <a href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 28px", borderRadius: 12, background: "var(--brand)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
                 Trouver mon entreprise et laisser un avis
               </a>
             </div>

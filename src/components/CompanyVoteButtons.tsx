@@ -213,7 +213,7 @@ export function CompanyVoteButtons({
             <div style={{ fontSize: 36, marginBottom: 12 }}>👋</div>
             <h2 style={{ fontSize: 18, fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>Connectez-vous pour voter</h2>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.6 }}>Les votes +100 et -100 pts impactent le classement des entreprises. Créez un compte gratuitement pour participer.</p>
-            <a href="/login" style={{ display: "block", padding: "13px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 800, fontSize: 15, textDecoration: "none", marginBottom: 10 }}>Se connecter</a>
+            <a href="/login" style={{ display: "block", padding: "13px 0", borderRadius: 12, background: "var(--brand)", color: "#fff", fontWeight: 800, fontSize: 15, textDecoration: "none", marginBottom: 10 }}>Se connecter</a>
             <button type="button" onClick={() => setShowGuest(false)} style={{ background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "6px 0" }}>Fermer</button>
           </div>
         </>

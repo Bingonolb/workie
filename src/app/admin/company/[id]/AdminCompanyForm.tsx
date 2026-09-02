@@ -328,7 +328,7 @@ export function AdminCompanyForm({ company, sectors }: { company: Company; secto
       <div style={{ display: "flex", gap: 12, paddingTop: 4 }}>
         <button type="submit" disabled={pending} style={{
           flex: 1, padding: "13px 0", borderRadius: 10, border: "none", cursor: pending ? "not-allowed" : "pointer",
-          background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+          background: "var(--brand)",
           color: "#fff", fontWeight: 700, fontSize: 14, opacity: pending ? 0.7 : 1,
         }}>
           {pending ? "Enregistrement..." : "Enregistrer les modifications"}

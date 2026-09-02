@@ -125,7 +125,7 @@ export function RepartitionNotes({ notes }: { notes: number[] }) {
                 width: `${(nombre / maximum) * 100}%`,
                 height: "100%",
                 borderRadius: 4,
-                background: nombre > 0 ? "linear-gradient(90deg, #8b5cf6, #f97316)" : "transparent",
+                background: nombre > 0 ? "var(--brand)" : "transparent",
               }}
             />
           </div>

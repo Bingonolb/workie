@@ -58,7 +58,7 @@ export async function Navbar() {
           {!user && (
             <Link href="/signup" style={{
               fontSize: 13, fontWeight: 700, textDecoration: "none",
-              background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+              background: "var(--brand)",
               color: "#fff", borderRadius: 8, padding: "7px 14px",
             }}>
               S&apos;inscrire

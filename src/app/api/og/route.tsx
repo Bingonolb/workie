@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
         }}>
           <div style={{
             width: 56, height: 56, borderRadius: 14,
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)",
+            background: "var(--brand)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 32, fontWeight: 900, color: "#fff",
           }}>W</div>
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
         {/* Separator */}
         <div style={{
           width: 60, height: 4, borderRadius: 2,
-          background: "linear-gradient(90deg, #8b5cf6, #f97316)",
+          background: "var(--brand)",
           marginBottom: 24,
         }} />
 

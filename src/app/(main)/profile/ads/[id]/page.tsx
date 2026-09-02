@@ -180,7 +180,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                 <span style={{ fontWeight: 800, color: "var(--text)" }}>CHF {totalBudget.toFixed(2)}</span>
               </div>
               <div style={{ height: 8, borderRadius: 50, background: "var(--surface2)", overflow: "hidden", marginBottom: 6 }}>
-                <div style={{ height: "100%", width: `${budgetPct}%`, background: budgetPct >= 90 ? "#ef4444" : "linear-gradient(90deg, #8b5cf6, #f97316)", borderRadius: 50 }} />
+                <div style={{ height: "100%", width: `${budgetPct}%`, background: budgetPct >= 90 ? "#ef4444" : "var(--brand)", borderRadius: 50 }} />
               </div>
               <p style={{ fontSize: 12, color: budgetPct >= 90 ? "#ef4444" : "var(--text-muted)", textAlign: "right" }}>{budgetPct}% utilisé</p>
             </div>
@@ -226,7 +226,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                       <div key={canton} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <span style={{ fontSize: 12, fontWeight: 800, color: isTargeted ? "var(--text)" : "var(--text-muted)", width: 28, flexShrink: 0 }}>{canton}</span>
                         <div style={{ flex: 1, height: 7, borderRadius: 50, background: "var(--surface2)", overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${pct}%`, borderRadius: 50, background: isTargeted ? "linear-gradient(90deg, #8b5cf6, #f97316)" : "rgba(107,114,128,0.3)" }} />
+                          <div style={{ height: "100%", width: `${pct}%`, borderRadius: 50, background: isTargeted ? "var(--brand)" : "rgba(107,114,128,0.3)" }} />
                         </div>
                         <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", width: 40, textAlign: "right", flexShrink: 0 }}>{impressions.toLocaleString("fr-CH")}</span>
                         <span style={{ fontSize: 11, color: "#10b981", width: 42, textAlign: "right", flexShrink: 0 }}>{ctrVal}%</span>

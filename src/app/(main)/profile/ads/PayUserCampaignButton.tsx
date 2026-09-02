@@ -31,7 +31,7 @@ export function PayUserCampaignButton({ campaignId, total }: { campaignId: strin
         display: "inline-flex", alignItems: "center", gap: 6,
         fontSize: 12, fontWeight: 700, color: "#fff",
         padding: "6px 14px", borderRadius: 8, border: "none",
-        background: loading ? "rgba(139,92,246,0.5)" : "linear-gradient(135deg, #8b5cf6, #f97316)",
+        background: loading ? "rgba(139,92,246,0.5)" : "var(--brand)",
         cursor: loading ? "not-allowed" : "pointer",
       }}>
         <CreditCard size={12} aria-hidden="true" /> {loading ? "…" : `Payer CHF ${Number(total).toFixed(2)}`}
