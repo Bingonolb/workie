@@ -705,7 +705,7 @@ export default async function Home() {
                   </span>
                 ))}
               </div>
-              <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 14.5, textDecoration: "none" }}>
+              <Link href="/annonceurs" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 14.5, textDecoration: "none" }}>
                 Créer une campagne <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </div>
@@ -757,7 +757,7 @@ export default async function Home() {
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Explorer</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }, { href: "/profile/ads", label: "Faire de la publicité" }].map(({ href, label }) => (
+                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }, { href: "/annonceurs", label: "Faire de la publicité" }].map(({ href, label }) => (
                   <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
                 ))}
               </div>

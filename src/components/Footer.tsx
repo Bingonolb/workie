@@ -18,6 +18,7 @@ export function Footer() {
           {/* /salaires n'était liée depuis aucune navigation : page publique,
               indexée, mais introuvable depuis l'interface. */}
           <Link href="/salaires" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Salaires</Link>
+          <Link href="/annonceurs" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Annonceurs</Link>
           <Link href="/cgu" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>CGU</Link>
           <Link href="/confidentialite" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Confidentialité</Link>
           <Link href="/mentions-legales" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Mentions légales</Link>
