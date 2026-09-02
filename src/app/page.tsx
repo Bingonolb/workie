@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ArrowRight, Search, BarChart3, PenLine, ShieldCheck, Lock, FileText,
+import { ArrowRight, Search, BarChart3, PenLine, ShieldCheck, Lock, Gauge,
          GraduationCap, Briefcase, Landmark, Home as IconeMaison, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingFaq } from "@/components/LandingFaq";
@@ -448,11 +448,13 @@ export default async function Home() {
             Comparer un employeur sur des critères précis.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
-            {/* Cette phrase reprenait trois éléments déjà lus plus haut : le
-                nombre d'entreprises, les huit critères et « celles et ceux qui
-                y travaillent ». Elle argumente maintenant au lieu de répéter. */}
-            Une moyenne ne dit pas si la difficulté vient du management ou de la
-            rémunération. Le détail, lui, le dit.
+            {/* Cette phrase a d'abord répété trois éléments déjà lus plus haut,
+                puis énoncé une évidence (« une moyenne ne dit pas… »). Elle
+                donne maintenant le cas concret qui justifie le titre : c'est
+                l'écart entre deux notes globales identiques qui rend le détail
+                utile, et ça, une généralité ne peut pas le montrer. */}
+            Deux employeurs notés 3.8 ne se ressemblent pas : chez l&apos;un la note
+            tient à la rémunération, chez l&apos;autre à l&apos;encadrement.
           </p>
         </div>
       </section>
@@ -507,16 +509,21 @@ export default async function Home() {
       {/* ── Ce qui rend l'information fiable ──
           Ces garanties n'existaient que dans la foire aux questions, tout en
           bas. Ce sont pourtant elles qui distinguent la plateforme, et la
-          première d'entre elles, l'absence de texte libre, est aussi ce qui la
-          protège juridiquement. */}
+          première d'entre elles, le format entièrement chiffré des avis, est aussi
+          ce qui la protège juridiquement. */}
       <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Ce qui rend l&apos;information fiable</p>
           <h2 className="landing-h2">Des garanties vérifiables.</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 22 }}>
             {[
-              { Icone: FileText, titre: "Aucun texte libre",
-                desc: "Un avis ne contient que des notes et le contexte du poste. Ce format écarte d'emblée les récits inventés comme les règlements de comptes, dans l'intérêt des employés autant que des entreprises." },
+              // « Aucun texte libre » énonçait une interdiction, et la suite
+              // parlait de récits inventés et de règlements de comptes : trois
+              // tournures négatives pour décrire un choix qui est positif. Le
+              // fait est que les avis sont chiffrés, donc comparables. C'est ce
+              // que la carte dit maintenant.
+              { Icone: Gauge, titre: "Uniquement des données chiffrées",
+                desc: "Chaque avis est un ensemble de notes, accompagné du contexte du poste. Des valeurs comparables d'une entreprise à l'autre, lisibles d'un coup d'oeil." },
               { Icone: Lock, titre: "Anonymat par construction",
                 desc: "Votre nom n'est jamais publié, et aucune page ne relie un compte à un avis. Ce n'est pas un réglage, c'est la façon dont les données sont servies." },
               { Icone: ShieldCheck, titre: "Contrôles à la publication",

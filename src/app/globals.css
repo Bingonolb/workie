@@ -183,7 +183,7 @@ main, .page-main, .page-main-sm, .page-main-md {
   /* Sur une colonne unique, la carte occupe toute la largeur et se distingue
      deja d'elle-meme de la suivante : les 38 px qui separent deux rangees sur
      grand ecran deviennent du vide a faire defiler. */
-  .explore-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+  .explore-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
 }
 
 /* Ads campaign card — hide per-card stats on small mobile (KPI row at top shows aggregates) */
@@ -1148,11 +1148,12 @@ select:focus-visible {
 .company-card {
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
-.company-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
-  border-color: rgba(139,92,246,0.25) !important;
-}
+/* Sans panneau, il n'y a plus ni bordure a teinter ni ombre a porter :
+   l'ombre se detacherait dans le vide autour de la photo. Le survol souleve
+   la carte et eclaircit legerement la photo, comme dans les grilles qui se
+   passent de cadre. */
+.company-card:hover { transform: translateY(-4px); }
+.company-card:hover .card-cover { box-shadow: 0 14px 34px rgba(0,0,0,0.4); }
 
 /* ─── Guest blur gate ───────────────────────────────────────────── */
 

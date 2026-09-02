@@ -143,15 +143,19 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
       onPointerEnter={() => router.prefetch(`/company/${company.id}`)}
       onTouchStart={() => router.prefetch(`/company/${company.id}`)}
     >
-      <div className="company-card" style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-        borderRadius: 20,
-        overflow: "hidden",
-        cursor: "pointer",
-      }}>
+      {/* Plus de panneau autour de la carte.
+          Chaque fiche etait un rectangle plein, cercle d'un trait et arrondi,
+          pose sur le fond de la page. A trois par rangee et six a l'ecran, ce
+          sont dix-huit cadres que l'oeil doit delimiter avant meme de lire, et
+          c'est ce qui donnait cette impression de grille compacte : le remede
+          n'etait pas d'ecarter les cadres, mais de les retirer.
+
+          Ne subsiste que la photo, arrondie pour elle-meme, et le texte pose
+          directement sur le fond. C'est la structure des grilles d'Airbnb et
+          de Pinterest, et elle respire sans rien demander a l'espacement. */}
+      <div className="company-card" style={{ cursor: "pointer" }}>
         {/* Cover */}
-        <div className="card-cover" style={{ height: 210, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
+        <div className="card-cover" style={{ height: 210, position: "relative", overflow: "hidden", borderRadius: 16, background: "var(--surface2)" }}>
           <CoverImage
             src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
             color={company.cover_color}
@@ -282,7 +286,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
         </div>
 
         {/* Body */}
-        <div style={{ padding: "16px 16px 18px" }}>
+        <div style={{ padding: "15px 2px 0" }}>
           {/* Une note ne s'affiche que si des avis l'appuient.
               La condition acceptait une note seule : 24 entreprises montraient
               ainsi des étoiles à côté de « 0 avis », vestige d'un remplissage
@@ -319,8 +323,8 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           {company.description && (
             <p style={{
               fontSize: 14, color: "var(--text-sub)", lineHeight: 1.62,
-              marginBottom: 20, minHeight: 68,
-              display: "-webkit-box", WebkitLineClamp: 3,
+              marginBottom: 18, minHeight: 45,
+              display: "-webkit-box", WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical", overflow: "hidden",
             } as React.CSSProperties}>
               {company.description}
@@ -330,7 +334,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           {/* Location + size + salary — chaque puce n'apparaît que si la donnée
               existe réellement. La taille d'effectif n'est plus affichée tant
               qu'elle n'est pas issue d'une source vérifiable. */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 9 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 11 }}>
             <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
             {company.employee_range && (
               <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
