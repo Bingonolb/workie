@@ -58,7 +58,10 @@ const poppins = Poppins({
   subsets: ["latin"],
   display: "swap",
   variable: "--police-logo",
-  weight: ["400"],
+  // Light, pas Regular. Les traits du mot fourni sont fins par rapport a la
+  // hauteur des lettres ; en Regular le mot s'epaissit et perd l'elegance qui
+  // fait tout le dessin.
+  weight: ["300"],
 });
 
 const OG_URL = "/api/og?title=Workie&sub=Avis+et+salaires+des+entreprises+suisses";

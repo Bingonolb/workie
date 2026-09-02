@@ -25,7 +25,9 @@ export function Logo({ taille = 22, symboleSeul = false, className }: Props) {
   return (
     <span
       className={className}
-      style={{ display: "inline-flex", alignItems: "center", gap: taille * 0.42, color: "inherit" }}
+      // Ecart mesure sur le logotype fourni : 80 unites pour un symbole de 330,
+      // soit 0,24 fois sa hauteur.
+      style={{ display: "inline-flex", alignItems: "center", gap: taille * 0.24, color: "inherit" }}
     >
       <svg
         viewBox="0 0 70 100"
@@ -47,11 +49,16 @@ export function Logo({ taille = 22, symboleSeul = false, className }: Props) {
         <span
           style={{
             fontFamily: "var(--police-logo), var(--police), sans-serif",
-            fontSize: taille * 1.16,
-            fontWeight: 400,
+            // Sur le logotype fourni, la hampe du k monte a 212 unites pour un
+            // symbole de 330 : le mot est donc nettement plus bas que le
+            // symbole. La hampe de Poppins valant 0,73 em, le corps du texte
+            // vaut 0,88 fois la hauteur du symbole. A 1,16 il depassait le
+            // symbole et ecrasait le dessin.
+            fontSize: taille * 0.88,
+            fontWeight: 300,
             // La géométrique respire d'elle-même : l'interlettrage négatif
             // qu'on donne aux grotesques la referme et casse ses cercles.
-            letterSpacing: "-0.005em",
+            letterSpacing: "normal",
             lineHeight: 1,
           }}
         >
