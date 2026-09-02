@@ -102,6 +102,18 @@ export default async function AnnonceursPage() {
           border-radius: 14px;
           padding: 26px 24px;
         }
+        .ann-ouverture {
+          display: grid;
+          grid-template-columns: 1fr 420px;
+          gap: 56px;
+          align-items: center;
+        }
+        @media (max-width: 860px) {
+          /* L'image passe sous le bouton : sur une colonne, la poser avant le
+             titre repousserait la promesse sous la ligne de flottaison. */
+          .ann-ouverture { grid-template-columns: 1fr; gap: 32px; }
+        }
+
         .ann-exemple {
           display: grid;
           grid-template-columns: 300px 1fr;
@@ -136,9 +148,13 @@ export default async function AnnonceursPage() {
 
       <main className="ann-tons" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
-        {/* ── Ouverture ── */}
+        {/* ── Ouverture ──
+            Deux colonnes : le texte tenait seul la gauche et laissait la
+            droite vide sur toute la hauteur. Une page qui vend de l'espace
+            d'affichage ne peut pas s'ouvrir sur du vide. */}
         <section className="ann-section">
-          <div className="ann-large">
+          <div className="ann-large ann-ouverture">
+            <div>
             <p className="ann-eyebrow">Annonceurs</p>
             <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
               Là où les candidats choisissent leur employeur.
@@ -149,6 +165,18 @@ export default async function AnnonceursPage() {
             <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
               Créer une campagne <ArrowRight size={17} aria-hidden="true" />
             </Link>
+            </div>
+
+            <div style={{ position: "relative", aspectRatio: "4 / 3", borderRadius: 16, overflow: "hidden", border: "1px solid var(--border)" }}>
+              <Image
+                src="https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1000"
+                alt=""
+                fill
+                sizes="(max-width: 860px) 100vw, 420px"
+                style={{ objectFit: "cover" }}
+                priority
+              />
+            </div>
           </div>
         </section>
 
