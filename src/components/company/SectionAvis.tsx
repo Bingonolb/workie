@@ -90,7 +90,9 @@ export function SectionAvis({ reviews, companyName }: { reviews: Review[]; compa
               onClick={() => setTri(v)}
               aria-pressed={tri === v}
               style={{
-                fontSize: 13.5, fontWeight: 600, padding: "5px 12px", borderRadius: 8, cursor: "pointer",
+                // 40 px de haut : ces onglets se touchent au pouce, et cinq
+                // pixels de rembourrage vertical n'en faisaient que 32.
+                fontSize: 13.5, fontWeight: 600, padding: "0 14px", minHeight: 40, borderRadius: 8, cursor: "pointer",
                 background: tri === v ? "rgba(139,92,246,0.12)" : "var(--surface2)",
                 color: tri === v ? "#8b5cf6" : "var(--text-muted)",
                 border: `1px solid ${tri === v ? "rgba(139,92,246,0.35)" : "var(--border2)"}`,

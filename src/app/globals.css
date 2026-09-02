@@ -607,6 +607,38 @@ main, .page-main, .page-main-sm, .page-main-md {
   .admin-grille-4 { grid-template-columns: 1fr; }
 }
 
+/* ─── Cibles tactiles sur téléphone ──────────────────────────────────── */
+
+/* Mesuré sur la production : les liens de pied de page faisaient 17 à 20 px
+   de haut, les boutons de la barre du haut 34, le bouton « Retour » 36. La
+   règle du projet demande 48 px, et personne ne vise juste en dessous de 40.
+
+   On agit sur la hauteur de la zone cliquable, pas sur la taille du texte :
+   le rendu ne bouge pas, seule la surface atteignable grandit. */
+@media (max-width: 768px) {
+  footer a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .landing-nav a,
+  .landing-nav button {
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* L'en-tête « Score total » du classement était coupé : la colonne fait 64 px
+   et le libellé en capitales espacées en demande près de 85. Il se replie sur
+   deux lignes plutôt que d'être tronqué. */
+@media (max-width: 640px) {
+  .ranking-row,
+  .ranking-header { grid-template-columns: 40px 1fr 76px; }
+  .ranking-header span { white-space: normal !important; line-height: 1.25; }
+}
+
 /* ─── Engagement de l'auteur d'un avis ───────────────────────────────── */
 
 .engagement {
