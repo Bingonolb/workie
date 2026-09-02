@@ -25,7 +25,7 @@ const getLandingCounts = unstable_cache(
 
 export const metadata: Metadata = {
   title: "Workie : avis d'employés et salaires réels en Suisse",
-  description: "Découvrez les avis anonymes d'employés, les salaires réels et les offres d'emploi des entreprises suisses. Comparez, choisissez, évoluez.",
+  description: "Comparez les entreprises suisses sur les avis anonymes de leurs employés et les salaires réels, puis allez voir les postes ouverts de celle que vous choisissez.",
   openGraph: {
     title: "Workie : avis d'employés et salaires réels en Suisse",
     description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",
@@ -180,6 +180,34 @@ export default async function Home() {
           position: relative;
         }
 
+        /* Les deux etapes du parcours, reliees par une fleche. Sur telephone
+           elles s'empilent et la fleche pivote d'un quart de tour : une fleche
+           horizontale entre deux blocs empiles designerait le vide a droite. */
+        .landing-parcours {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          gap: 32px;
+          align-items: center;
+        }
+        .landing-parcours-etape {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 14px;
+          padding: 28px 26px;
+        }
+        .landing-parcours-fleche { flex-shrink: 0; }
+        @media (max-width: 760px) {
+          .landing-parcours {
+            grid-template-columns: 1fr;
+            gap: 18px;
+            justify-items: stretch;
+          }
+          .landing-parcours-fleche {
+            transform: rotate(90deg);
+            justify-self: center;
+          }
+        }
+
         .landing-pourqui {
           display: grid;
           grid-template-columns: 0.72fr 1.28fr;
@@ -269,12 +297,16 @@ export default async function Home() {
       <section className="landing-hero-deux-col">
         <div className="hero-texte">
           <h1 className="hero-titre" style={{ fontSize: "clamp(34px, 5.2vw, 58px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 22, maxWidth: 620 }}>
-            Les entreprises suisses, vues de l&apos;intérieur.
+            Les entreprises suisses vues de l&apos;intérieur, avant d&apos;y postuler.
           </h1>
 
           <p className="hero-accroche" style={{ fontSize: "clamp(16px, 1.6vw, 19px)", color: "var(--text-sub)", maxWidth: 560, lineHeight: 1.65, marginBottom: 34 }}>
+            {/* La phrase s'arrêtait sur les données. Un lecteur en concluait
+                que Workie renseigne sur les entreprises et rien d'autre. Elle
+                nomme maintenant le parcours entier, dont la candidature. */}
             Notes détaillées, salaires réels et conditions de travail, publiés
-            anonymement par celles et ceux qui y travaillent.
+            anonymement par celles et ceux qui y travaillent. Comparez,
+            choisissez, et notez le vôtre à votre tour.
           </p>
 
           <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
@@ -407,7 +439,7 @@ export default async function Home() {
           voyait posé sur l'image comme un défaut. */}
       <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
-          <p className="landing-eyebrow">Comment ça marche</p>
+          <p className="landing-eyebrow">Ce que vous faites ici</p>
           {/* Le titre reprenait mot pour mot les trois cartes qu'il annonce :
               on lisait « Chercher, comparer, contribuer » puis « Chercher »,
               « Comparer », « Contribuer ». Il se contente maintenant de
@@ -445,7 +477,7 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 760 }}>
-            Comparer un employeur sur des critères précis.
+            Choisir son employeur, pas seulement son poste.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
             {/* Cette phrase a d'abord répété trois éléments déjà lus plus haut,
@@ -456,6 +488,76 @@ export default async function Home() {
             Deux employeurs notés 3.8 ne se ressemblent pas : chez l&apos;un la note
             tient à la rémunération, chez l&apos;autre à l&apos;encadrement.
           </p>
+        </div>
+      </section>
+
+      {/* ── Postuler ──
+          Traitement volontairement different des autres sections : ni cartes
+          en grille, ni colonnes reglees, mais les deux etapes du parcours
+          posees cote a cote avec la fleche qui les relie. La page montre ici
+          le chemin au lieu de le decrire.
+
+          Aucun chiffre : les offres ne sont pas hebergees sur Workie, elles
+          sont chez l'employeur. Annoncer un nombre reviendrait a compter ce
+          qui ne nous appartient pas, et a promettre un volume qui varie
+          chaque semaine. */}
+      <section className="landing-section" style={{ padding: "96px 24px" }}>
+        <div style={{ maxWidth: 940, margin: "0 auto" }}>
+          <p className="landing-eyebrow">Postuler</p>
+          {/* Le vrai écart avec un site d'annonces, et donc la raison d'être de
+              cette section. Un site d'annonces ne peut montrer que ce qu'on lui
+              a confié : son catalogue s'arrête aux employeurs qui ont choisi de
+              publier chez lui. Workie part de l'employeur, pas de l'annonce, et
+              atteint donc aussi ceux qui recrutent uniquement sur leur propre
+              site.
+
+              Aucun concurrent n'est nommé : le fait suffit, et une plateforme
+              qui prend ses concurrents à partie sur sa page d'accueil se
+              disqualifie avant d'avoir convaincu. */}
+          {/* Le titre faisait deux lignes la ou tous les autres h2 de la page
+              tiennent en trois ou quatre mots. La phrase entiere est passee
+              juste en dessous, ou elle a la place de s'expliquer. */}
+          <h2 className="landing-h2">Tous les employeurs, pas une sélection.</h2>
+
+          <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.7, maxWidth: 640, margin: "0 auto 44px", textAlign: "center" }}>
+            Un site d&apos;annonces ne montre que les offres qu&apos;on lui a confiées.
+            Workie référence les employeurs eux-mêmes : chaque fiche mène à leur
+            page emploi, y compris celle des entreprises qui recrutent sans
+            passer par une plateforme.
+          </p>
+
+          <div className="landing-parcours">
+            <div className="landing-parcours-etape">
+              <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
+                Sur Workie
+              </p>
+              <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
+                Vous jugez l&apos;employeur
+              </h3>
+              {/* Cette phrase reprenait presque mot pour mot l'accroche du
+                  haut de page : « Notes détaillées, salaires... et conditions
+                  de travail, par celles et ceux qui y travaillent ». */}
+              <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
+                Sa note globale, le détail critère par critère, et les salaires
+                déclarés pour le poste que vous visez.
+              </p>
+            </div>
+
+            <ArrowRight className="landing-parcours-fleche" size={26} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
+
+            <div className="landing-parcours-etape">
+              <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
+                Chez l&apos;employeur
+              </p>
+              <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
+                Vous voyez tous ses postes
+              </h3>
+              <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
+                Le lien de la fiche mène à sa page emploi, tenue par ses propres
+                équipes : tous les postes ouverts, et aucun qui ne le soit plus.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -546,7 +648,7 @@ export default async function Home() {
             Commencez par votre secteur.
           </h2>
           <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 32 }}>
-            La consultation est libre et ne demande pas de compte.
+            La consultation est libre et ne demande pas de compte. Chaque fiche mène à l'employeur et à ses postes ouverts.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 30px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
@@ -634,7 +736,7 @@ export default async function Home() {
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Explorer</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }, { href: "/jobs", label: "Offres d'emploi" }, { href: "/profile/ads", label: "Faire de la publicité" }].map(({ href, label }) => (
+                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/salaires", label: "Salaires" }, { href: "/profile/ads", label: "Faire de la publicité" }].map(({ href, label }) => (
                   <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
                 ))}
               </div>

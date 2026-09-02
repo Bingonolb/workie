@@ -56,6 +56,15 @@ const nextConfig: NextConfig = {
     // Cache dynamic pages 5s client-side — eliminates nav lag, stale window short enough for score freshness
     staleTimes: { dynamic: 30, static: 300 },
   },
+  // /jobs a été supprimée. Elle était publique et indexée : sans règle, le
+  // middleware l'intercepte avant le routage et envoie ses visiteurs sur
+  // l'écran de connexion, ce qui est le pire des trois sorties possibles. Une
+  // redirection permanente les mène aux entreprises, d'où partent les liens
+  // vers les pages emploi des employeurs, et dit aux moteurs que l'adresse a
+  // définitivement changé.
+  async redirects() {
+    return [{ source: "/jobs", destination: "/explore", permanent: true }];
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

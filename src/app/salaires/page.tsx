@@ -218,10 +218,7 @@ export default async function SalairesPage() {
             100% anonyme · données issues d&apos;avis vérifiés
           </div>
           <h1 style={{ fontSize: "clamp(28px, 5vw, 44px)", fontWeight: 900, letterSpacing: "-0.04em", color: "var(--text)", marginBottom: 12, lineHeight: 1.1 }}>
-            Salaires en Suisse,{" "}
-            <span style={{ background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              par les employés.
-            </span>
+            Salaires en Suisse, par les employés.
           </h1>
           <p style={{ fontSize: 15, color: "var(--text-muted)", maxWidth: 540, lineHeight: 1.7 }}>
             Des chiffres réels partagés anonymement. Situez votre profil avant d'entrer en négociation.

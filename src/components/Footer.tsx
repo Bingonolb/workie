@@ -14,10 +14,9 @@ export function Footer() {
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>· Avis et salaires des entreprises suisses</span>
         </div>
         <nav style={{ display: "flex", flexWrap: "wrap", gap: "8px 20px", alignItems: "center" }}>
-          {/* /salaires et /jobs n'étaient liés depuis aucune navigation : pages
-              publiques, indexées, mais introuvables depuis l'interface. */}
+          {/* /salaires n'était liée depuis aucune navigation : page publique,
+              indexée, mais introuvable depuis l'interface. */}
           <Link href="/salaires" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Salaires</Link>
-          <Link href="/jobs" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Offres d&apos;emploi</Link>
           <Link href="/cgu" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>CGU</Link>
           <Link href="/confidentialite" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Confidentialité</Link>
           <Link href="/mentions-legales" style={{ fontSize: 12, color: "var(--text-muted)", textDecoration: "none" }}>Mentions légales</Link>
