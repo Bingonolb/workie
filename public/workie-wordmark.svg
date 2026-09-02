@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 644 146" fill="none" stroke="currentColor" stroke-width="17" stroke-linecap="butt" role="img" aria-label="workie">
+  <!-- Logotype Workie, dessiné.
+       Ce n'est pas une police du commerce : les six lettres sont tracées, donc
+       elles appartiennent à la marque et personne ne peut composer le même mot
+       ailleurs.
+
+       Repères relevés sur le dessin d'origine et ramenés à une hauteur d'x de
+       100 : hampes 146, graisse 17, largeur totale 636 (le rapport largeur sur
+       hauteur d'x vaut 6,36 sur l'original), o circulaire débordant légèrement
+       la ligne d'x comme le veut tout cercle posé entre deux horizontales, et
+       chasses séparées de 20 partout, ce qui donne au mot son air aéré. -->
+
+  <!-- w : quatre diagonales à sommets vifs, apex central à pleine hauteur.
+       Le tracé monte au-dessus de la ligne d'x et se fait couper à l'équerre :
+       une terminaison en bout de diagonale serait sinon coupée
+       perpendiculairement au trait, et non à l'horizontale. -->
+  <clipPath id="hx"><rect x="-30" y="46" width="700" height="120"/></clipPath>
+  <polyline points="-8,28 39,146 78,28 117,146 165,28" clip-path="url(#hx)" stroke-linejoin="miter" stroke-miterlimit="12"/>
+
+  <!-- o -->
+  <circle cx="238" cy="96" r="44.2"/>
+
+  <!-- r : hampe, puis une épaule courte qui s'arrête net -->
+  <path d="M319 146 V 74 Q 319 46 358 46"/>
+
+  <!-- k : bras et jambe partent d'un même point, pris contre la hampe.
+       Ils gagnent tous deux 70 en abscisse, l'un montant jusqu'à la ligne
+       d'x, l'autre descendant jusqu'à la ligne de pied. -->
+  <path d="M395 0 V 146"/>
+  <path d="M473 46 L 403 89 L 473 146"/>
+
+  <!-- i -->
+  <path d="M502 46 V 146"/>
+  <circle cx="502" cy="18" r="12" fill="currentColor" stroke="none"/>
+
+  <!-- e : cercle ouvert en bas à droite, barre à mi-hauteur -->
+  <path d="M627 96 A 44.2 44.2 0 1 0 620 119"/>
+  <path d="M539 96 H 627"/>
+</svg>

@@ -1,16 +1,20 @@
 /*
  * Le logotype Workie, en un seul endroit.
  *
- * Il était jusqu'ici recopié dans neuf fichiers, sous la forme d'un <span> au
- * dégradé violet-orange. Neuf copies d'une marque, c'est neuf occasions de la
- * voir diverger : la taille variait déjà d'un écran à l'autre.
+ * Il était recopié dans neuf fichiers sous la forme d'un <span> au dégradé
+ * violet-orange. Neuf copies d'une marque, c'est neuf occasions de la voir
+ * diverger : la taille variait déjà d'un écran à l'autre.
  *
- * Le dégradé disparaît. Le symbole et le mot sont tracés en `currentColor`,
- * donc noirs sur fond clair, blancs sur fond sombre, et gris quand ils sont
- * posés dans un texte secondaire. C'est le parti pris de LinkedIn et de
- * Stripe : une marque sobre, et une seule couleur d'accent réservée à ce sur
- * quoi on peut cliquer. Un logo bicolore qui côtoie des boutons violets fait
- * deux emblèmes concurrents, et l'accent perd sa fonction de signal.
+ * Le mot est dessiné, pas composé. Une police du commerce appartient à sa
+ * fonderie et à tous ceux qui l'achètent : n'importe qui pourrait écrire
+ * « workie » à l'identique. Les six lettres sont donc tracées, et ce dessin
+ * n'appartient qu'à la marque.
+ *
+ * Symbole et mot sont en `currentColor` : noirs sur fond clair, blancs sur
+ * fond sombre, sans seconde version du fichier. Le dégradé a disparu, et le
+ * violet reste réservé à ce sur quoi on peut cliquer. C'est le parti pris de
+ * LinkedIn : un logo bicolore qui côtoie des boutons violets fait deux
+ * emblèmes concurrents, et l'accent perd sa fonction de signal.
  */
 
 type Props = {
@@ -22,11 +26,14 @@ type Props = {
 };
 
 export function Logo({ taille = 22, symboleSeul = false, className }: Props) {
+  // Rapports relevés sur le logotype d'origine. Le symbole y mesure 330 pour
+  // une hampe de mot à 212, et l'écart entre les deux vaut 80.
+  const hauteurMot = taille * 0.642;
+  const largeurMot = hauteurMot * (644 / 146);
+
   return (
     <span
       className={className}
-      // Ecart mesure sur le logotype fourni : 80 unites pour un symbole de 330,
-      // soit 0,24 fois sa hauteur.
       style={{ display: "inline-flex", alignItems: "center", gap: taille * 0.24, color: "inherit" }}
     >
       <svg
@@ -46,24 +53,41 @@ export function Logo({ taille = 22, symboleSeul = false, className }: Props) {
       </svg>
 
       {!symboleSeul && (
-        <span
-          style={{
-            fontFamily: "var(--police-logo), var(--police), sans-serif",
-            // Sur le logotype fourni, la hampe du k monte a 212 unites pour un
-            // symbole de 330 : le mot est donc nettement plus bas que le
-            // symbole. La hampe de Poppins valant 0,73 em, le corps du texte
-            // vaut 0,88 fois la hauteur du symbole. A 1,16 il depassait le
-            // symbole et ecrasait le dessin.
-            fontSize: taille * 0.88,
-            fontWeight: 300,
-            // La géométrique respire d'elle-même : l'interlettrage négatif
-            // qu'on donne aux grotesques la referme et casse ses cercles.
-            letterSpacing: "normal",
-            lineHeight: 1,
-          }}
+        <svg
+          viewBox="0 0 644 146"
+          height={hauteurMot}
+          width={largeurMot}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={17}
+          strokeLinecap="butt"
+          role="img"
+          aria-label="workie"
+          style={{ flexShrink: 0, display: "block", overflow: "visible" }}
         >
-          workie
-        </span>
+          {/* Le w monte au-dessus de la ligne d'x et se fait couper à
+              l'équerre : une terminaison en bout de diagonale serait sinon
+              coupée perpendiculairement au trait, et non à l'horizontale. */}
+          <clipPath id="workie-hx">
+            <rect x="-30" y="46" width="700" height="120" />
+          </clipPath>
+          <polyline
+            points="-8,28 39,146 78,28 117,146 165,28"
+            clipPath="url(#workie-hx)"
+            strokeLinejoin="miter"
+            strokeMiterlimit={12}
+          />
+          <circle cx="238" cy="96" r="44.2" />
+          <path d="M319 146 V 74 Q 319 46 358 46" />
+          {/* Bras et jambe du k partent d'un même point, pris contre la hampe,
+              et gagnent tous deux 70 en abscisse. */}
+          <path d="M395 0 V 146" />
+          <path d="M473 46 L 403 89 L 473 146" />
+          <path d="M502 46 V 146" />
+          <circle cx="502" cy="18" r="12" fill="currentColor" stroke="none" />
+          <path d="M627 96 A 44.2 44.2 0 1 0 620 119" />
+          <path d="M539 96 H 627" />
+        </svg>
       )}
     </span>
   );
