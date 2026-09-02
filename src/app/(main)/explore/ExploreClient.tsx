@@ -693,7 +693,7 @@ export function ExploreClient({
           </div>
         ) : (
           <>
-            <div className="explore-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "56px 40px" }}>
+            <div className="explore-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "44px 30px" }}>
               {!pretAAfficher ? (
                 /* Cartes grises aux dimensions exactes des vraies : la liste
                    du serveur va être remplacée, l'afficher la ferait

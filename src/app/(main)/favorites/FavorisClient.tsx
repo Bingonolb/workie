@@ -97,7 +97,7 @@ export function FavorisClient() {
       <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
         {companies.length} entreprise{companies.length > 1 ? "s" : ""}
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "44px 30px" }}>
         {companies.map((c, i) => (
           <CompanyCard key={c.id} company={c} isFav isLoggedIn priority={i < 4} />
         ))}
@@ -109,7 +109,7 @@ export function FavorisClient() {
 /** Mêmes dimensions que les vraies cartes, pour que rien ne bouge à l'arrivée. */
 function GrilleAttente() {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "44px 30px" }}>
       {Array.from({ length: 6 }, (_, i) => (
         <div key={i} className="company-card" aria-hidden="true" style={{
           background: "var(--surface)", border: "1px solid var(--border)",

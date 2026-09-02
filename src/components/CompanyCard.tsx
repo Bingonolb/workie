@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useTransition } from "react";
-import { Flame, Star, Users, MapPin, TrendingUp } from "lucide-react";
+import { Flame, Star } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
@@ -54,44 +54,6 @@ function getOgCover(company: Company): string {
   return `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`;
 }
 
-const SECTOR_DEFAULT_TAGS: Record<string, string[]> = {
-  "Tech":                   ["innovation", "digital", "remote"],
-  "Finance":                ["finance", "banking", "investment"],
-  "Assurances":             ["assurances", "risk", "courtage"],
-  "Pharma":                 ["life-sciences", "r&d", "biotech"],
-  "Santé":                  ["healthcare", "médecine", "bien-être"],
-  "Conseil":                ["consulting", "stratégie", "management"],
-  "Industrie":              ["manufacturing", "industrie", "engineering"],
-  "Automobile":             ["automotive", "mobilité", "engineering"],
-  "Horlogerie":             ["luxury", "swiss-made", "savoir-faire"],
-  "Commerce":               ["retail", "distribution", "vente"],
-  "Alimentation":           ["food", "nutrition", "fmcg"],
-  "Agriculture":            ["agriculture", "durabilité", "nature"],
-  "Éducation & Recherche":  ["éducation", "recherche", "innovation"],
-  "Sports & Fashion":       ["sport", "mode", "lifestyle"],
-  "Transport":              ["logistique", "mobilité", "transport"],
-  "Énergie":                ["énergie", "cleantech", "durabilité"],
-  "Droit":                  ["legal", "compliance", "droit"],
-  "Bâtiment":               ["construction", "immobilier", "ingénierie"],
-  "Beauté":                 ["beauté", "cosmétiques", "bien-être"],
-  "Administration publique":["service-public", "gouvernance", "suisse"],
-  "ONG":                    ["humanitaire", "impact", "terrain"],
-  "Fondation":              ["mécénat", "intérêt-général", "projets"],
-  "Association":            ["associatif", "bénévolat", "communauté"],
-  "Commerce de détail":     ["retail", "grande-distribution", "vente"],
-  "Hôtellerie & Restauration": ["hôtellerie", "restauration", "accueil"],
-  "Immobilier":             ["immobilier", "gérance", "promotion"],
-  "Médias & Communication": ["médias", "communication", "édition"],
-  "Chimie":                 ["chimie", "arômes", "matériaux"],
-  "Télécoms":               ["télécoms", "réseau", "connectivité"],
-};
-
-function getDisplayTags(company: Company): string[] {
-  const existing = (company.tags ?? []).slice(0, 3);
-  if (existing.length >= 3) return existing;
-  const defaults = SECTOR_DEFAULT_TAGS[company.sector] ?? ["swiss", "professionnel", "équipe"];
-  return [...existing, ...defaults.filter(t => !existing.includes(t))].slice(0, 3);
-}
 
 // Neutral blur placeholder — shows instantly before the real image loads
 const BLUR_DATA_URL = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMyMDIwMzAiLz48L3N2Zz4=";
@@ -143,19 +105,25 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
       onPointerEnter={() => router.prefetch(`/company/${company.id}`)}
       onTouchStart={() => router.prefetch(`/company/${company.id}`)}
     >
-      {/* Plus de panneau autour de la carte.
-          Chaque fiche etait un rectangle plein, cercle d'un trait et arrondi,
-          pose sur le fond de la page. A trois par rangee et six a l'ecran, ce
-          sont dix-huit cadres que l'oeil doit delimiter avant meme de lire, et
-          c'est ce qui donnait cette impression de grille compacte : le remede
-          n'etait pas d'ecarter les cadres, mais de les retirer.
+      {/* Le panneau reste.
+          Il a ete retire un temps, au profit d'une photo flottante et d'un
+          texte pose sur le fond, a la maniere d'Airbnb. Sans bordure, les
+          fiches n'avaient plus de limite : la ou s'arretait l'une et ou
+          commencait l'autre ne se lisait plus, et la grille donnait des carres
+          en suspens plutot qu'un ensemble ordonne. Le cadre n'etait pas le
+          probleme, c'est lui qui tient la grille.
 
-          Ne subsiste que la photo, arrondie pour elle-meme, et le texte pose
-          directement sur le fond. C'est la structure des grilles d'Airbnb et
-          de Pinterest, et elle respire sans rien demander a l'espacement. */}
-      <div className="company-card" style={{ cursor: "pointer" }}>
+          Ce qui manquait etait l'espace entre les fiches, traite dans la
+          grille, et le poids de la description, ramenee a deux lignes. */}
+      <div className="company-card" style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: 20,
+        overflow: "hidden",
+        cursor: "pointer",
+      }}>
         {/* Cover */}
-        <div className="card-cover" style={{ height: 210, position: "relative", overflow: "hidden", borderRadius: 16, background: "var(--surface2)" }}>
+        <div className="card-cover" style={{ height: 210, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
           <CoverImage
             src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
             color={company.cover_color}
@@ -170,7 +138,13 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
               de sorte que le nom se lise quelle que soit la photo. */}
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 30%, rgba(0,0,0,0.5) 62%, rgba(0,0,0,0.88) 100%)" }} />
 
-          {/* Sector badge */}
+          {/* Le secteur, seulement quand rien de plus precis ne le dit.
+              « COMMERCE » en haut, « Distribution et mode » en bas de la meme
+              photo, « #commerce » sous la description : la carte nommait trois
+              fois l'activite, dont deux fois au meme endroit. Le sous-secteur
+              est le plus precis des trois, c'est lui qu'on garde ; le badge ne
+              sert plus que de repli. */}
+          {!company.subsector && company.sector && (
           <div style={{
             position: "absolute", top: 11, left: 11,
             background: "rgba(0,0,0,0.45)",
@@ -181,21 +155,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           }}>
             {company.sector}
           </div>
-
-          {/* Score badge on cover */}
-          {score > 0 && (
-            <div style={{
-              position: "absolute", top: 11, right: 62,
-              background: "rgba(0,0,0,0.45)",
-              backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
-              borderRadius: 50, padding: "3px 8px",
-              display: "flex", alignItems: "center", gap: 4,
-              border: "1px solid rgba(249,115,22,0.35)",
-            }}>
-              <Flame size={11} fill="#f97316" color="#f97316" aria-hidden="true" />
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: "#f97316" }}>{score}</span>
-            </div>
           )}
+
+          {/* Le compteur de flammes est descendu avec les autres chiffres.
+              Il occupait le coin superieur droit, colle au bouton favori, qui
+              est lui aussi une flamme : deux flammes voisines dont l'une
+              compte et l'autre agit. On ne savait pas laquelle cliquer.
+
+              Le coin ne porte plus qu'une seule chose, et c'est la commande. */}
 
           {/* Flame / Favorite */}
           <button
@@ -285,45 +252,27 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           </div>
         </div>
 
-        {/* Body */}
-        <div style={{ padding: "15px 2px 0" }}>
-          {/* Une note ne s'affiche que si des avis l'appuient.
-              La condition acceptait une note seule : 24 entreprises montraient
-              ainsi des étoiles à côté de « 0 avis », vestige d'un remplissage
-              direct de la table. Sur un site dont l'argument est la fiabilité,
-              une note que rien ne justifie coûte plus cher qu'une case vide. */}
-          {Number(company.review_count) > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              {Number(company.avg_rating) > 0 && <StarDisplay rating={Number(company.avg_rating)} />}
-              {Number(company.review_count) > 0 && (
-                <span style={{ fontSize: 13.5, color: "var(--text-muted)" }}>
-                  {company.review_count} avis
-                </span>
-              )}
-            </div>
-          )}
+        {/* Corps de la carte.
+            Il empilait quatre blocs : la note, la description, une rangee de
+            puces a icones, puis trois etiquettes. Les etiquettes redisaient le
+            secteur en minuscules et n'ont jamais decide d'un clic ; la fiche
+            les porte deja. Le reste tenait sur une ligne.
 
-          {/* Description
-              14,5 px au lieu de 12,5, et trois lignes au lieu de deux. Une
-              police de douze pixels se lit mal passé quarante ans, et donne au
-              site un air d'application pour adolescents avant même qu'on ait lu
-              la phrase. Le repli rend la suite accessible sans quitter la
-              grille, puisqu'un texte plus grand tient sur moins de lignes. */}
-          {/* Description : trois lignes, coupées net, sans bouton.
-              La carte entière est déjà un lien vers la fiche. Y ajouter un
-              « plus » créait deux cibles concurrentes dans le même bloc, et le
-              mot se retrouvait détaché du texte, flottant après un blanc. Les
-              annuaires professionnels tronquent en silence : le texte entier
-              est à un clic, sur la fiche.
+            Ne restent donc que deux choses : ce que fait l'entreprise, et les
+            chiffres qui la situent. */}
+        <div style={{ padding: "16px 16px 18px" }}>
+          {/* Description : deux lignes, coupees net, sans bouton.
+              La carte entiere est deja un lien vers la fiche. Y ajouter un
+              « plus » creait deux cibles concurrentes dans le meme bloc.
 
-              La hauteur est réservée même quand le texte fait deux lignes,
-              sans quoi la ville et les étiquettes se posent à des hauteurs
-              différentes d'une carte à l'autre et la grille paraît assemblée
-              plutôt que composée. */}
+              La hauteur est reservee meme quand le texte tient sur une ligne,
+              sans quoi la ligne de chiffres se pose a des hauteurs
+              differentes d'une carte a l'autre et la rangee parait assemblee
+              plutot que composee. */}
           {company.description && (
             <p style={{
               fontSize: 14, color: "var(--text-sub)", lineHeight: 1.62,
-              marginBottom: 18, minHeight: 45,
+              marginBottom: 14, minHeight: 45,
               display: "-webkit-box", WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical", overflow: "hidden",
             } as React.CSSProperties}>
@@ -331,32 +280,44 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             </p>
           )}
 
-          {/* Location + size + salary — chaque puce n'apparaît que si la donnée
-              existe réellement. La taille d'effectif n'est plus affichée tant
-              qu'elle n'est pas issue d'une source vérifiable. */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 11 }}>
-            <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
-            {company.employee_range && (
-              <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
-            )}
-            {Number(company.avg_salary_chf) > 0 && (
-              <InfoChip icon={<TrendingUp size={11} aria-hidden="true" />} label={`CHF ${(Number(company.avg_salary_chf) / 1000).toFixed(0)}k`} color="#10b981" />
-            )}
-          </div>
+          {/* Une seule ligne de chiffres, separes par des points mediant.
+              Chaque donnee avait sa puce, son icone et son cadre : la ville
+              seule mobilisait une epingle et une rangee entiere pour un mot.
+              Une ligne de texte suffit, et les points laissent voir d'un coup
+              d'oeil combien on en sait sur cette entreprise.
 
-          {/* Étiquettes : un fond léger plutôt qu'un contour.
-              Six cartes visibles portent dix-huit étiquettes. Cerclées, ce
-              sont dix-huit tracés que l'œil doit suivre avant d'atteindre le
-              texte, et c'est ce qui rendait la grille fatigante. Un aplat
-              porte la même information sans dessiner d'arête. */}
-          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-            {getDisplayTags(company).map(tag => (
-              <span key={tag} style={{
-                fontSize: 11, padding: "3px 9px", borderRadius: 50,
-                background: "var(--surface2)", color: "var(--text-muted)",
-                border: "1px solid transparent", fontWeight: 500,
-              }}>#{tag}</span>
-            ))}
+              Une note ne s'affiche que si des avis l'appuient : la condition
+              acceptait une note seule, et 24 entreprises montraient des
+              etoiles a cote de « 0 avis ». */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
+            fontSize: 13.5, color: "var(--text-muted)", minHeight: 20,
+          }}>
+            {Number(company.review_count) > 0 && Number(company.avg_rating) > 0 && (
+              <>
+                <StarDisplay rating={Number(company.avg_rating)} />
+                <span>{company.review_count} avis</span>
+                <Separateur />
+              </>
+            )}
+            <span>{company.city}</span>
+            {Number(company.avg_salary_chf) > 0 && (
+              <>
+                <Separateur />
+                <span style={{ color: "#10b981", fontWeight: 600 }}>
+                  CHF {(Number(company.avg_salary_chf) / 1000).toFixed(0)}k
+                </span>
+              </>
+            )}
+            {score > 0 && (
+              <>
+                <Separateur />
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <Flame size={12} fill="#f97316" color="#f97316" aria-hidden="true" />
+                  <span style={{ color: "#f97316", fontWeight: 700 }}>{score}</span>
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -364,13 +325,10 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   );
 }
 
-function InfoChip({ icon, label, color }: { icon: React.ReactNode; label: string; color?: string }) {
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 3,
-      fontSize: 13, color: color ?? "var(--text-muted)",
-    }}>
-      {icon} {label}
-    </span>
-  );
+function Separateur() {
+  // En var(--border2) le point disparaissait : c'est la couleur d'un trait de
+  // cadre, pensee pour s'effacer. Un separateur doit se voir juste assez pour
+  // qu'on sente ou une donnee s'arrete, sans peser autant que les donnees.
+  return <span aria-hidden="true" style={{ color: "var(--text-muted)", opacity: 0.45 }}>&middot;</span>;
 }
+
