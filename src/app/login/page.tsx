@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 40 }}>
-        <Logo taille={28} />
+        <Logo taille={40} />
       </Link>
 
       <div className="auth-card" style={{ width: "100%", maxWidth: 400, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20 }}>

@@ -273,7 +273,7 @@ export default async function Home() {
 
       {/* ── Navbar ── */}
       <nav className="landing-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
-        <Logo taille={24} />
+        <Logo taille={30} />
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <ThemeToggle />
           <Link href="/login" className="nav-login-link" style={{ padding: "9px 16px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
@@ -729,7 +729,7 @@ export default async function Home() {
         <div style={{ maxWidth: 860, margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 32, marginBottom: 32 }}>
             <div>
-              <Logo taille={20} className="logo-pied" />
+              <Logo taille={26} className="logo-pied" />
               <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.6 }}>La transparence du marché du travail suisse.</p>
             </div>
             <div>

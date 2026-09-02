@@ -11,7 +11,7 @@ export function Footer() {
     }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Logo taille={17} />
+          <Logo taille={24} />
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>· Avis et salaires des entreprises suisses</span>
         </div>
         <nav style={{ display: "flex", flexWrap: "wrap", gap: "8px 20px", alignItems: "center" }}>

@@ -65,7 +65,7 @@ export function NavbarClient() {
         gap: 8,
       }}>
         <Link href={isLoggedIn ? "/explore" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-          <Logo taille={20} />
+          <Logo taille={28} />
         </Link>
 
         {isLoggedIn && (

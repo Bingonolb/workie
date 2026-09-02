@@ -26,7 +26,7 @@ export async function Navbar() {
       }}>
         {/* Logo */}
         <Link href={user ? "/explore" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-          <Logo taille={20} />
+          <Logo taille={28} />
         </Link>
 
         {/* Desktop nav links */}
