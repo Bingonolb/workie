@@ -319,7 +319,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           {company.description && (
             <p style={{
               fontSize: 14, color: "var(--text-sub)", lineHeight: 1.62,
-              marginBottom: 14, minHeight: 68,
+              marginBottom: 20, minHeight: 68,
               display: "-webkit-box", WebkitLineClamp: 3,
               WebkitBoxOrient: "vertical", overflow: "hidden",
             } as React.CSSProperties}>
@@ -330,7 +330,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
           {/* Location + size + salary — chaque puce n'apparaît que si la donnée
               existe réellement. La taille d'effectif n'est plus affichée tant
               qu'elle n'est pas issue d'une source vérifiable. */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 13 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 9 }}>
             <InfoChip icon={<MapPin size={11} aria-hidden="true" />} label={company.city} />
             {company.employee_range && (
               <InfoChip icon={<Users size={11} aria-hidden="true" />} label={company.employee_range} />
@@ -340,13 +340,17 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             )}
           </div>
 
-          {/* Tags — toujours affichés */}
+          {/* Étiquettes : un fond léger plutôt qu'un contour.
+              Six cartes visibles portent dix-huit étiquettes. Cerclées, ce
+              sont dix-huit tracés que l'œil doit suivre avant d'atteindre le
+              texte, et c'est ce qui rendait la grille fatigante. Un aplat
+              porte la même information sans dessiner d'arête. */}
           <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
             {getDisplayTags(company).map(tag => (
               <span key={tag} style={{
                 fontSize: 11, padding: "3px 9px", borderRadius: 50,
-                background: "transparent", color: "var(--text-muted)",
-                border: "1px solid var(--border2)", fontWeight: 500,
+                background: "var(--surface2)", color: "var(--text-muted)",
+                border: "1px solid transparent", fontWeight: 500,
               }}>#{tag}</span>
             ))}
           </div>

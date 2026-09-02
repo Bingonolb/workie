@@ -180,7 +180,10 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* Company cards grid — force 1 col on small mobile */
 @media (max-width: 480px) {
-  .explore-grid { grid-template-columns: 1fr !important; }
+  /* Sur une colonne unique, la carte occupe toute la largeur et se distingue
+     deja d'elle-meme de la suivante : les 38 px qui separent deux rangees sur
+     grand ecran deviennent du vide a faire defiler. */
+  .explore-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
 }
 
 /* Ads campaign card — hide per-card stats on small mobile (KPI row at top shows aggregates) */

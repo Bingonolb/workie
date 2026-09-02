@@ -94,9 +94,9 @@ export default async function Home() {
         }
         .landing-chiffres {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 26px;
-          max-width: 540px;
+          max-width: 430px;
           padding-top: 30px;
           border-top: 1px solid var(--border);
         }
@@ -209,11 +209,28 @@ export default async function Home() {
           .landing-apercu { order: 3; margin-bottom: 30px; }
           .hero-cta-row  { order: 4; margin-bottom: 30px; }
           .landing-chiffres { order: 5; }
-          .landing-chiffres { grid-template-columns: repeat(2, 1fr); gap: 20px 24px; max-width: none; }
+          .landing-chiffres { grid-template-columns: repeat(3, 1fr); gap: 0 16px; max-width: none; }
         }
         @media (max-width: 900px) {
           .landing-apercu > div { padding: 18px; border-radius: 14px; }
           .landing-apercu .landing-apercu-note { font-size: 34px; }
+        }
+
+        /* Sur téléphone, on retire ce qui n'aide pas à lire.
+           Les chapeaux en capitales (« COMMENT ÇA MARCHE », « POUR QUI »)
+           étiquettent une section qu'on voit d'un coup d'œil sur grand écran.
+           Sur une colonne unique, où l'on découvre la page section par
+           section, ils ajoutent une ligne et un temps de lecture sans rien
+           apprendre : le titre juste en dessous dit déjà de quoi il s'agit.
+
+           Et les sections passent de 88 à 56 pixels de marge verticale : la
+           respiration d'un grand écran devient du vide sur un téléphone, où
+           chaque écran de défilement compte. */
+        @media (max-width: 768px) {
+          .landing-eyebrow { display: none; }
+          .landing-section { padding-top: 56px !important; padding-bottom: 56px !important; }
+          .landing-h2 { margin-bottom: 30px; font-size: clamp(22px, 6.5vw, 27px); }
+          .landing-bande-texte { padding: 48px 20px; }
         }
 
         @media (max-width: 820px) {
@@ -279,9 +296,12 @@ export default async function Home() {
               sa place, dans « Des garanties vérifiables ». */}
           <div className="landing-chiffres">
             {[
+              // Trois chiffres, pas quatre : « 8 critères notés » relève du
+              // fonctionnement, pas de ce qui décide quelqu'un à entrer. Le
+              // détail reste dans « Chercher, comparer, contribuer », où il est
+              // à sa place.
               { valeur: nCompanies.toLocaleString("fr-CH"), libelle: "entreprises référencées" },
               { valeur: "26", libelle: "cantons couverts" },
-              { valeur: "8", libelle: "critères notés" },
               { valeur: "100%", libelle: "anonyme" },
             ].map(({ valeur, libelle }, i) => (
               <div key={libelle} style={{
@@ -388,7 +408,11 @@ export default async function Home() {
       <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Comment ça marche</p>
-          <h2 className="landing-h2">Chercher, comparer, contribuer.</h2>
+          {/* Le titre reprenait mot pour mot les trois cartes qu'il annonce :
+              on lisait « Chercher, comparer, contribuer » puis « Chercher »,
+              « Comparer », « Contribuer ». Il se contente maintenant de
+              compter les étapes, ce que les cartes ne disent pas. */}
+          <h2 className="landing-h2">En trois étapes.</h2>
           <div className="landing-cartes" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
             {[
               { n: "01", Icone: Search, titre: "Chercher",
@@ -424,8 +448,11 @@ export default async function Home() {
             Comparer un employeur sur des critères précis.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
-            {nCompanies.toLocaleString("fr-CH")} entreprises suisses, notées sur huit
-            critères par celles et ceux qui y travaillent.
+            {/* Cette phrase reprenait trois éléments déjà lus plus haut : le
+                nombre d'entreprises, les huit critères et « celles et ceux qui
+                y travaillent ». Elle argumente maintenant au lieu de répéter. */}
+            Une moyenne ne dit pas si la difficulté vient du management ou de la
+            rémunération. Le détail, lui, le dit.
           </p>
         </div>
       </section>
