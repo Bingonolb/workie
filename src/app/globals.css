@@ -247,13 +247,6 @@ main, .page-main, .page-main-sm, .page-main-md {
   text-decoration: none;
 }
 .ranking-row:hover { background: var(--surface2); }
-.ranking-sans-secteur .ranking-row,
-.ranking-sans-secteur .ranking-header { grid-template-columns: 48px 1fr 92px; }
-/* !important, comme la regle mobile : la pastille porte display: inline-block
-   en style inline, et un style inline bat toujours un selecteur de feuille.
-   Sans cela elle restait affichee, occupait la troisieme colonne d'une grille
-   qui n'en compte plus que trois, et le score basculait a la ligne suivante. */
-.ranking-sans-secteur .ranking-col-sector { display: none !important; }
 .ranking-header {
   display: grid;
   grid-template-columns: 48px 1fr 185px 92px;

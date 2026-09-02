@@ -38,10 +38,12 @@ export function RankingTable({ companies }: { companies: Company[] }) {
   const isFiltered = q.length > 0 || secteur !== "";
 
   return (
-    // Filtre sur un secteur, la colonne « Secteur » repete la meme valeur a
-    // chaque ligne : elle ne distingue plus rien et ne fait qu'occuper le
-    // tiers de la largeur. Elle s'efface, et la ligne se redistribue.
-    <div className={secteur ? "ranking-sans-secteur" : undefined}>
+    // La colonne « Secteur » reste affichee, filtre compris.
+    // Elle avait ete escamotee au motif qu'elle repete alors la meme valeur a
+    // chaque ligne. Mais la pastille n'est pas seulement du texte : c'est le
+    // repere colore qui ancre la ligne, et sans elle le tableau filtre ne dit
+    // plus a l'oeil ce qu'il montre, meme quand le titre le nomme.
+    <div>
       <div style={{ padding: "20px 20px 16px" }}>
         {/* Le titre dit ce qu'on regarde.
             Filtre sur un secteur, il annoncait « Top 200 » au-dessus de trois
