@@ -148,6 +148,20 @@ export default async function Home() {
           color: var(--text-muted);
           margin-bottom: 14px;
         }
+        /* Un titre suivi d'un chapeau resserre sa marge basse : les 46 px
+           prevus pour un titre qui precede directement le contenu s'ajoutaient
+           aux 44 px du chapeau, et titre, phrase et cartes flottaient a egale
+           distance sans que rien ne dise lequel appartenait a lequel. */
+        .landing-h2.avec-chapo { margin-bottom: 14px; }
+        .landing-chapo {
+          font-size: 15.5px;
+          color: var(--text-muted);
+          line-height: 1.65;
+          max-width: 560px;
+          margin: 0 auto 40px;
+          text-align: center;
+        }
+
         .landing-h2 {
           text-align: center;
           font-size: clamp(23px, 3.4vw, 34px);
@@ -519,9 +533,9 @@ export default async function Home() {
           {/* Le titre faisait deux lignes la ou tous les autres h2 de la page
               tiennent en trois ou quatre mots. La phrase entiere est passee
               juste en dessous, ou elle a la place de s'expliquer. */}
-          <h2 className="landing-h2">Tous les employeurs, pas une sélection.</h2>
+          <h2 className="landing-h2 avec-chapo">Tous les employeurs, pas une sélection.</h2>
 
-          <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.7, maxWidth: 640, margin: "0 auto 44px", textAlign: "center" }}>
+          <p className="landing-chapo">
             Un site d&apos;annonces ne montre que les offres qu&apos;on lui a confiées.
             Ici, chaque fiche mène à la page emploi de l&apos;employeur.
           </p>
@@ -670,16 +684,21 @@ export default async function Home() {
                 Touchez des candidats actifs en Suisse.
               </h2>
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 520 }}>
-                Sans abonnement. Vous fixez votre budget et votre ciblage, et
-                vous ne payez que ce que vous consommez.
+                {/* « Vous ne payez que ce que vous consommez » decrivait
+                    l'inverse du fonctionnement : la route de paiement facture
+                    le budget total en une fois, avant diffusion, et la
+                    campagne reste en attente tant que Stripe n'a pas
+                    confirme. Le budget s'epuise ensuite, il n'est pas
+                    preleve au fil de l'eau. */}
+                CHF 4 les mille affichages. Vous fixez un budget, vous le réglez
+                une fois, et la campagne s&apos;arrête quand il est épuisé.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
                 {[
-                  "À partir de CHF 5 par jour",
+                  "Budget minimum : CHF 5 par jour",
                   "Paiement unique",
                   "Ciblage par canton et secteur",
                   "Statistiques en temps réel",
-                  "Sans abonnement",
                 ].map(f => (
                   <span key={f} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 550, padding: "5px 12px", borderRadius: 50, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
                     <Check size={12} color="var(--brand)" strokeWidth={2.5} aria-hidden="true" /> {f}
@@ -710,8 +729,12 @@ export default async function Home() {
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{label}</p>
+                    {/* Le prix ne figure plus ici. Les deux formats sont au
+                        meme tarif : l'afficher sur chacun le repetait deux
+                        fois, et laissait croire qu'ils different par le prix
+                        alors qu'ils different par l'emplacement. Il est dit
+                        une fois, dans la phrase d'introduction. */}
                     <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.5 }}>{desc}</p>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)", marginTop: 7 }}>dès CHF 4 pour mille affichages</p>
                   </div>
                 </div>
               ))}
