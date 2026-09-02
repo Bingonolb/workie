@@ -6,6 +6,7 @@ import { ArrowRight, Search, BarChart3, PenLine, ShieldCheck, Lock, FileText,
          GraduationCap, Briefcase, Landmark, Home as IconeMaison, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingFaq } from "@/components/LandingFaq";
+import { largeurCouverture } from "@/lib/coverUrl";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
@@ -20,6 +21,29 @@ const getLandingCounts = unstable_cache(
   },
   ["landing-counts"],
   { revalidate: 300, tags: ["landing-counts"] }
+);
+
+/**
+ * Trois entreprises réelles, pour l'éventail de la page d'accueil.
+ *
+ * De vraies fiches plutôt qu'une photographie d'illustration : elles montrent
+ * le swipe, qui est la signature du produit, et leurs couvertures apportent
+ * les images qui manquaient. Prises parmi les mieux notées et pourvues d'une
+ * couverture, sans quoi l'éventail afficherait des rectangles vides.
+ */
+const getFichesVitrine = unstable_cache(
+  async () => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("companies")
+      .select("id, name, sector, city, cover_url, avg_rating, review_count")
+      .not("cover_url", "is", null)
+      .order("score", { ascending: false })
+      .limit(3);
+    return data ?? [];
+  },
+  ["landing-vitrine"],
+  { revalidate: 900, tags: ["landing-vitrine"] }
 );
 
 export const metadata: Metadata = {
@@ -43,8 +67,38 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://www.workie.ch" },
 };
 
+/**
+ * Trois entreprises réelles, en panneaux décalés qui se chevauchent.
+ *
+ * Rendu à deux endroits, jamais visible deux fois : en tête du hero sur
+ * téléphone, où il faut une image avant tout texte, et dans « Pour qui » en
+ * bureau, où la colonne de gauche serait sinon vide sous son titre.
+ */
+function PanneauxVitrine({ fiches, className }: {
+  fiches: { id: string; name: string; sector: string; cover_url: string | null }[];
+  className?: string;
+}) {
+  return (
+    <div className={`landing-eventail ${className ?? ""}`} aria-hidden="true">
+      {fiches.map((c, i) => (
+        <article
+          key={c.id}
+          className={`landing-panneau landing-panneau-${i}`}
+          style={c.cover_url ? { backgroundImage: `url(${largeurCouverture(c.cover_url, 640)})` } : undefined}
+        >
+          <div className="landing-panneau-voile" />
+          <div className="landing-panneau-pied">
+            <p className="landing-panneau-nom">{c.name}</p>
+            <p className="landing-panneau-meta">{c.sector}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export default async function Home() {
-  const counts = await getLandingCounts();
+  const [counts, vitrine] = await Promise.all([getLandingCounts(), getFichesVitrine()]);
   const nCompanies = counts.companies;
 
   return (
@@ -104,8 +158,6 @@ export default async function Home() {
           background-image: url("https://images.pexels.com/photos/303335/pexels-photo-303335.jpeg?auto=compress&cs=tinysrgb&w=1880");
           background-size: cover;
           background-position: center 42%;
-          border-top: 1px solid var(--border);
-          border-bottom: 1px solid var(--border);
         }
         .landing-bande-voile {
           position: absolute;
@@ -123,14 +175,70 @@ export default async function Home() {
           padding: 64px 24px;
           width: 100%;
         }
-        .landing-photo-pourqui {
+        /* Trois panneaux verticaux décalés, qui se chevauchent légèrement.
+           Une première version les inclinait, à la manière d'un paquet de
+           cartes : c'était ludique là où il faut être éditorial. Sans
+           rotation, avec des hauteurs différentes, la composition se lit comme
+           une vitrine plutôt que comme un jeu.
+
+           Les entreprises viennent de la base et leurs couvertures fournissent
+           les images : rien n'y est illustratif, tout y est vrai. */
+        .eventail-mobile { display: none; }
+        .landing-eventail {
+          position: relative;
+          height: 400px;
+          display: flex;
+          align-items: flex-start;
+        }
+        .landing-panneau {
+          position: relative;
+          flex: 0 0 146px;
           border-radius: 14px;
-          aspect-ratio: 4 / 5;
-          max-width: 340px;
-          background-image: url("https://images.pexels.com/photos/8348967/pexels-photo-8348967.jpeg?auto=compress&cs=tinysrgb&w=900");
+          overflow: hidden;
+          background-color: var(--surface3);
           background-size: cover;
           background-position: center;
-          border: 1px solid var(--border);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+        }
+        /* Chevauchement plutôt qu'espacement : trois panneaux séparés se
+           lisent comme trois vignettes, trois panneaux qui se recouvrent se
+           lisent comme une composition. Le plus haut passe devant. */
+        .landing-panneau-0 { height: 296px; margin-top: 44px; z-index: 1; }
+        .landing-panneau-1 { height: 344px; margin-top: 0; margin-left: -22px; z-index: 3; }
+        .landing-panneau-2 { height: 252px; margin-top: 78px; margin-left: -22px; z-index: 2; }
+        .landing-panneau-voile {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.78) 100%);
+        }
+        .landing-panneau-pied {
+          position: absolute;
+          left: 12px;
+          right: 12px;
+          bottom: 12px;
+        }
+        /* Les panneaux se recouvrent de 22 px : sans ce décalage, le voisin
+           mange le début du nom du panneau de droite et la fin de celui de
+           gauche. On écarte le texte de la zone couverte plutôt que de
+           renoncer au chevauchement, qui est ce qui fait la composition. */
+        .landing-panneau-0 .landing-panneau-pied { right: 30px; }
+        .landing-panneau-2 .landing-panneau-pied { left: 30px; }
+        .landing-panneau-nom {
+          font-size: 13px;
+          font-weight: 650;
+          color: #fff;
+          line-height: 1.25;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .landing-panneau-meta {
+          font-size: 11px;
+          color: rgba(255,255,255,0.72);
+          margin-top: 3px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
         .landing-pourqui {
           display: grid;
@@ -143,15 +251,35 @@ export default async function Home() {
         @media (max-width: 900px) {
           .landing-hero-deux-col {
             grid-template-columns: 1fr;
-            gap: 40px;
-            padding: 44px 20px 56px;
+            gap: 28px;
+            padding: 26px 20px 48px;
           }
-          .landing-apercu { order: 2; }
-          .landing-chiffres { grid-template-columns: repeat(2, 1fr); gap: 22px 28px; }
+          /* L'aperçu passe en tête.
+             Le téléphone n'affichait qu'une pile de blocs de texte : titre,
+             paragraphe, deux boutons pleine largeur, puis des chiffres. Rien
+             ne se voyait avant d'avoir défilé, et c'est ce qui faisait
+             élémentaire. La preuve du produit vient donc en premier, et le
+             titre se lit juste en dessous, encore dans l'écran. */
+          .landing-apercu { order: -1; }
+          .landing-chiffres { grid-template-columns: repeat(2, 1fr); gap: 20px 24px; max-width: none; }
         }
+        @media (max-width: 900px) {
+          .landing-apercu > div { padding: 18px; border-radius: 14px; }
+          .landing-apercu .landing-apercu-note { font-size: 34px; }
+        }
+
         @media (max-width: 820px) {
-          .landing-pourqui { grid-template-columns: 1fr; gap: 26px; }
-          .landing-photo-pourqui { aspect-ratio: 16 / 9; max-width: none; }
+          .landing-pourqui { grid-template-columns: 1fr; gap: 34px; }
+          .eventail-mobile { display: flex; order: -2; margin-bottom: 4px; }
+          .eventail-bureau { display: none; }
+          .landing-eventail { height: 320px; justify-content: center; }
+          /* 118 px : trois panneaux moins deux recouvrements de 22 px font
+             310 px, ce qui tient dans un écran de 390 px moins ses marges.
+             À 132 px le troisième sortait du cadre et son nom se coupait. */
+          .landing-panneau { flex: 0 0 118px; }
+          .landing-panneau-0 { height: 240px; margin-top: 36px; }
+          .landing-panneau-1 { height: 280px; }
+          .landing-panneau-2 { height: 206px; margin-top: 64px; }
           .landing-bande { min-height: 340px; background-position: center; }
           .landing-bande-voile {
             background: linear-gradient(180deg, rgba(8,10,16,0.7) 0%, rgba(8,10,16,0.88) 100%);
@@ -231,6 +359,10 @@ export default async function Home() {
           </div>
         </div>
 
+        {/* Sur téléphone, une image avant tout texte : la page ouvrait sur
+            une pile de blocs écrits, ce qui faisait élémentaire. */}
+        <PanneauxVitrine fiches={vitrine} className="eventail-mobile" />
+
         {/* Aperçu du produit.
             Construit en balisage plutôt qu'en image : net à toute résolution,
             suit le thème clair comme sombre, et ne se périme pas quand la
@@ -243,7 +375,7 @@ export default async function Home() {
             </p>
 
             <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 18 }}>
-              <span style={{ fontSize: 42, fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 0.9 }}>4.2</span>
+              <span className="landing-apercu-note" style={{ fontSize: 42, fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 0.9 }}>4.2</span>
               <span style={{ fontSize: 12.5, color: "var(--text-muted)", paddingBottom: 4 }}>sur 34 avis</span>
             </div>
 
@@ -338,11 +470,13 @@ export default async function Home() {
             <h2 style={{ fontSize: "clamp(24px, 3.4vw, 36px)", fontWeight: 700, letterSpacing: "-0.032em", lineHeight: 1.18, maxWidth: 380, marginBottom: 26 }}>
               Quatre façons de s&apos;en servir.
             </h2>
-            {/* Seconde image. La colonne de gauche n'avait qu'un titre et
-                laissait un grand vide sous lui. Une photographie de travail
-                réel, sans sourire de catalogue ni poignée de main. */}
-            <div className="landing-photo-pourqui" role="img"
-                 aria-label="Une personne au travail devant un ordinateur portable, près d'une fenêtre." />
+            {/* Éventail de trois fiches réelles.
+                Une photographie d'illustration occupait cette place : elle
+                remplissait le vide sans rien dire du produit. Trois cartes en
+                éventail montrent le swipe, qui est la signature de Workie, et
+                leurs couvertures apportent les images. Les entreprises sont
+                tirées de la base, donc elles ne peuvent pas mentir. */}
+            <PanneauxVitrine fiches={vitrine} className="eventail-bureau" />
           </div>
 
           {/* Une liste, pas une quatrième grille de cartes. Le filet fin et le
