@@ -1146,12 +1146,16 @@ select:focus-visible {
 
 /* Company card — hover lift effect */
 .company-card {
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease;
 }
+/* Le survol souleve la carte et eclaircit sa bordure, sans ombre portee.
+   L'ombre s'etalait sur quarante pixels sous la carte, donc par-dessus la
+   description de la carte voisine : ce qu'on lisait se voilait au moment ou
+   la souris passait a cote. Le deplacement suffit a dire que l'element
+   repond, et la bordure le confirme sans rien recouvrir. */
 .company-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
-  border-color: rgba(139,92,246,0.25) !important;
+  border-color: rgba(139,92,246,0.35) !important;
 }
 
 /* ─── Guest blur gate ───────────────────────────────────────────── */
