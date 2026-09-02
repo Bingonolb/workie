@@ -9,6 +9,11 @@ import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { SignOutButton } from "@/components/SignOutButton";
 import type { Profile, Review } from "@/lib/types";
 import { lireCache, ecrireCache, CLE_PROFIL } from "@/lib/cacheSession";
+// Les tuiles portaient des emojis dans un carre teinte. Le dessin d'un emoji
+// appartient au systeme d'exploitation : il change d'un appareil a l'autre,
+// n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
+// le site, et se colore tout seul en travers de la teinte de la tuile.
+import { Flame, FileText, Megaphone } from "lucide-react";
 
 type Donnees = {
   authentifie: boolean;
@@ -89,10 +94,6 @@ export function ProfilClient() {
   const memberSince = d?.creeLe
     ? new Date(d.creeLe).toLocaleDateString("fr-CH", { month: "long", year: "numeric" })
     : "—";
-  const avgRating = reviews.length
-    ? (reviews.reduce((s, r) => s + Number(r.rating_overall), 0) / reviews.length).toFixed(1)
-    : null;
-
   // Le fondu ne se joue que si les données ont dû être attendues. Il se jouait
   // auparavant à chaque visite, mémoire comprise : la classe était présente dès
   // le premier rendu, donc l'animation partait même quand le contenu était déjà
@@ -167,24 +168,25 @@ export function ProfilClient() {
       </div>
 
       {/* ── KPI strip ── */}
-      <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+      {/* Trois tuiles, trois nombres, trois destinations.
+
+          Il y en avait quatre. « Note moyenne donnee » affichait la moyenne des
+          notes que l'utilisateur attribue : un chiffre sur lequel il ne peut
+          rien faire, et qui laisse entendre qu'on mesure sa severite. La
+          quatrieme portait le mot « Pub » a la place d'un chiffre, la ou ses
+          voisines alignaient des nombres : une invitation deguisee en
+          statistique. Elle compte desormais les campagnes, zero compris, ce
+          qui est honnete et garde le lien vers la regie. */}
+      <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
         {([
-          { emoji: "⭐", value: avgRating ?? "—", label: "Note moyenne donnée", color: "#f59e0b", href: null },
-          { emoji: "🔥", value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
-          { emoji: "📊", value: d ? String(reviews.length) : "—", label: "Avis publiés", color: "#10b981", href: null },
-          // Dès qu'une campagne tourne, la tuile affiche le compte comme ses
-          // trois voisines : un nombre, un libellé. Le mot « Pub » à la place
-          // du chiffre cassait l'alignement de lecture et, surtout, ne disait
-          // pas qu'une campagne était en cours. Sans campagne, elle redevient
-          // une invitation.
-          adsActives > 0
-            ? { emoji: "📣", value: String(adsActives), label: `Pub${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" }
-            : { emoji: "📣", value: "Pub", label: "Faire de la publicité", color: "#8b5cf6", href: "/profile/ads" },
-        ] as { emoji: string; value: string; label: string; color: string; href: string | null }[]).map(({ emoji, value, label, color, href }) => {
+          { Icone: Flame, value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
+          { Icone: FileText, value: d ? String(reviews.length) : "—", label: `Avis publié${reviews.length > 1 ? "s" : ""}`, color: "#10b981", href: null },
+          { Icone: Megaphone, value: d ? String(adsActives) : "—", label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" },
+        ] as { Icone: typeof Flame; value: string; label: string; color: string; href: string | null }[]).map(({ Icone, value, label, color, href }) => {
           const inner = (
             <>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
-                {emoji}
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icone size={20} color={color} strokeWidth={1.9} aria-hidden="true" />
               </div>
               <div>
                 <p style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
@@ -216,11 +218,9 @@ export function ProfilClient() {
             padding: "16px 22px", borderBottom: "1px solid var(--border)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}>
-            <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>
-              Mes avis · <span style={{ color: "var(--text-muted)", fontWeight: 500 }}>
-                {d ? `${reviews.length} publié${reviews.length !== 1 ? "s" : ""}` : "…"}
-              </span>
-            </p>
+            {/* Le decompte figurait ici et dans la tuile « Avis publies », a
+                deux cents pixels l'un de l'autre. */}
+            <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Mes avis</p>
           </div>
           {d ? <ProfileReviews reviews={reviews} /> : <div style={{ height: 180 }} aria-hidden="true" />}
         </div>
