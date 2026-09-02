@@ -70,7 +70,7 @@ export default async function RankingPage() {
           {companies.length === 0 ? (
             <div style={{ padding: "80px 24px", textAlign: "center", color: "var(--text-muted)" }}>
               <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Pas encore de données</p>
-              <p style={{ fontSize: 13 }}>Explore les entreprises et dépose des avis pour alimenter le classement.</p>
+              <p style={{ fontSize: 13 }}>Explorez les entreprises et déposez un avis pour alimenter le classement.</p>
             </div>
           ) : (
             <RankingTable companies={typedCompanies} />

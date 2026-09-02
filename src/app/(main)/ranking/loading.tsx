@@ -17,8 +17,12 @@ export default function Loading() {
             <div style={{ width: 32, height: 16, borderRadius: 4, background: "var(--surface2)" }} />
             <div style={{ width: 36, height: 36, borderRadius: 8, background: "var(--surface2)", flexShrink: 0 }} />
             <div style={{ flex: 1, height: 14, borderRadius: 4, background: "var(--surface2)", maxWidth: 200 }} />
-            <div style={{ width: 80, height: 20, borderRadius: 4, background: "var(--surface2)", marginLeft: "auto" }} />
-            <div style={{ width: 60, height: 22, borderRadius: 4, background: "var(--surface2)" }} />
+            {/* Deux blocs a droite, pas trois : la ligne portait une colonne de
+                note et une colonne de points de calcul qui ont disparu. Un
+                squelette qui annonce des colonnes inexistantes fait bouger la
+                page au moment ou le contenu arrive. */}
+            <div style={{ width: 110, height: 20, borderRadius: 5, background: "var(--surface2)", marginLeft: "auto" }} />
+            <div style={{ width: 44, height: 20, borderRadius: 4, background: "var(--surface2)" }} />
           </div>
         ))}
       </div>

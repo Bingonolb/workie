@@ -233,30 +233,34 @@ main, .page-main, .page-main-sm, .page-main-md {
    Recherche » en « Éducation & Rec… », et les deux colonnes de score se
    touchaient. Une largeur fixe doit être révisée en même temps que la taille
    du texte qu'elle contient. */
+/* Quatre colonnes, contre six auparavant : « Note · Avis » a rejoint la ligne
+   sous le nom, et « Score avis » exposait des points de calcul internes. Le
+   tiers droit de la ligne, occupe par trois colonnes de chiffres, revient a
+   l'entreprise. */
 .ranking-row {
   display: grid;
-  grid-template-columns: 48px 1fr 185px 112px 118px 100px;
+  grid-template-columns: 48px 1fr 185px 92px;
   align-items: center;
   padding: 14px 20px;
   border-bottom: 1px solid var(--border);
   transition: background 0.12s;
-  position: relative;
-  overflow: hidden;
   text-decoration: none;
 }
+.ranking-row:hover { background: var(--surface2); }
 .ranking-header {
   display: grid;
-  grid-template-columns: 48px 1fr 185px 112px 118px 100px;
+  grid-template-columns: 48px 1fr 185px 92px;
   padding: 8px 20px 10px;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
 @media (max-width: 640px) {
-  .ranking-row   { grid-template-columns: 40px 1fr 64px; padding: 12px 14px; }
-  .ranking-header { grid-template-columns: 40px 1fr 64px; padding: 8px 14px; }
-  .ranking-col-sector    { display: none !important; }
-  .ranking-col-note      { display: none !important; }
-  .ranking-col-score-avis { display: none !important; }
+  /* Sur telephone il ne reste que le rang, l'entreprise et le score. La note
+     n'est plus masquee comme avant : elle vit desormais sous le nom, donc
+     l'ecran etroit ne perd plus la seule donnee qu'un lecteur comprenne. */
+  .ranking-row    { grid-template-columns: 34px 1fr 58px; padding: 12px 14px; }
+  .ranking-header { grid-template-columns: 34px 1fr 58px; padding: 8px 14px; }
+  .ranking-col-sector { display: none !important; }
 }
 
 /* ─── Table horizontal scroll ───────────────────────────────────── */
@@ -633,14 +637,9 @@ main, .page-main, .page-main-sm, .page-main-md {
   }
 }
 
-/* L'en-tête « Score total » du classement était coupé : la colonne fait 64 px
-   et le libellé en capitales espacées en demande près de 85. Il se replie sur
-   deux lignes plutôt que d'être tronqué. */
-@media (max-width: 640px) {
-  .ranking-row,
-  .ranking-header { grid-template-columns: 40px 1fr 76px; }
-  .ranking-header span { white-space: normal !important; line-height: 1.25; }
-}
+/* Le repli sur deux lignes de l'en-tete mobile n'a plus lieu d'etre : il
+   existait pour « Score total », qui demandait 85 px en capitales espacees
+   dans une colonne de 64. Le libelle est maintenant « Score ». */
 
 /* ─── Engagement de l'auteur d'un avis ───────────────────────────────── */
 
