@@ -58,14 +58,12 @@ export default async function RankingPage() {
 
         {/* Table */}
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden" }}>
-          <div style={{ padding: "20px 20px 0" }}>
-            <div style={{ marginBottom: 16 }}>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 2 }}>
-                Top {companies.length}
-              </h1>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500 }}>Trié par score communautaire</p>
-            </div>
-          </div>
+          {/* Le titre et son sous-titre sont rendus par la table.
+              Ils annoncaient « Top 200 » et « Trie par score communautaire »
+              depuis le serveur, donc immuables : des qu'un filtre reduisait la
+              liste a vingt-quatre lignes, la page continuait d'annoncer deux
+              cents. Le sous-titre suit maintenant ce qui est reellement
+              affiche. */}
 
           {companies.length === 0 ? (
             <div style={{ padding: "80px 24px", textAlign: "center", color: "var(--text-muted)" }}>

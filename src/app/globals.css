@@ -247,6 +247,13 @@ main, .page-main, .page-main-sm, .page-main-md {
   text-decoration: none;
 }
 .ranking-row:hover { background: var(--surface2); }
+.ranking-sans-secteur .ranking-row,
+.ranking-sans-secteur .ranking-header { grid-template-columns: 48px 1fr 92px; }
+/* !important, comme la regle mobile : la pastille porte display: inline-block
+   en style inline, et un style inline bat toujours un selecteur de feuille.
+   Sans cela elle restait affichee, occupait la troisieme colonne d'une grille
+   qui n'en compte plus que trois, et le score basculait a la ligne suivante. */
+.ranking-sans-secteur .ranking-col-sector { display: none !important; }
 .ranking-header {
   display: grid;
   grid-template-columns: 48px 1fr 185px 92px;
@@ -943,18 +950,16 @@ main, .page-main, .page-main-sm, .page-main-md {
   }
 }
 
-/* Ranking sector filters — horizontal scroll on mobile */
-@media (max-width: 640px) {
-  .ranking-sectors {
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 4px;
-    overscroll-behavior-x: contain; /* prevent horizontal scroll from triggering vertical page scroll */
-  }
-  .ranking-sectors::-webkit-scrollbar { display: none; }
-  .ranking-sectors button { flex-shrink: 0; }
+/* Les filtres du classement etaient une bande de pastilles defilantes. Avec
+   vingt-neuf secteurs, la bande devenait une seconde liste a parcourir avant
+   d'atteindre la premiere. Le filtre est un selecteur, et ces regles n'avaient
+   plus d'element a styler. */
+
+/* Recherche et filtre du classement : sur une ligne, puis empiles quand la
+   largeur ne suffit plus a garder le selecteur lisible. */
+.ranking-controles { display: flex; gap: 10px; align-items: center; }
+@media (max-width: 560px) {
+  .ranking-controles { flex-direction: column; align-items: stretch; }
 }
 
 /* ─── Jobs page — mobile card layout ───────────────────────────── */

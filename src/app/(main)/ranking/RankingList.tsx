@@ -14,30 +14,83 @@ const COULEURS_PODIUM = ["#d4a017", "#94a3b8", "#b45309"];
 
 export function RankingTable({ companies }: { companies: Company[] }) {
   const [search, setSearch] = useState("");
+  const [secteur, setSecteur] = useState("");
+
+  // Les secteurs sont tires des entreprises presentes, pas du catalogue.
+  // Le catalogue en compte vingt-neuf ; proposer un secteur dont le classement
+  // ne contient aucune ligne, c'est offrir un filtre qui ne peut que vider la
+  // liste.
+  const secteurs = [...new Set(companies.map(c => c.sector).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "fr"));
 
   const q = search.trim().toLowerCase();
-  const filtered = companies
-    .filter(c => !q || c.name.toLowerCase().includes(q) || c.city?.toLowerCase().includes(q));
+  const filtered = companies.filter(c =>
+    (!secteur || c.sector === secteur) &&
+    (!q || c.name.toLowerCase().includes(q) || c.city?.toLowerCase().includes(q))
+  );
+  // Le rang est une position dans le classement, pas un numero de ligne.
+  // Il etait recalcule sur la liste filtree : chercher « Roche » affichait
+  // « 01 », et filtrer sur Tech renumerotait le secteur de un a vingt-quatre.
+  // Un nombre qui change selon ce qu'on a tape ne mesure plus rien. Il vient
+  // desormais toujours du classement complet, quitte a ce que la liste filtree
+  // saute de 03 a 07, ce que le sous-titre explique.
   const globalRankMap = new Map(companies.map((c, i) => [c.id, i]));
-  const isFiltered = q.length > 0;
+  const isFiltered = q.length > 0 || secteur !== "";
 
   return (
-    <div>
-      {/* Recherche */}
-      <div style={{ padding: "0 20px 16px" }}>
-        <div style={{ position: "relative" }}>
-          <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            aria-label="Chercher une entreprise ou une ville"
-            placeholder="Chercher une entreprise ou une ville..."
+    // Filtre sur un secteur, la colonne « Secteur » repete la meme valeur a
+    // chaque ligne : elle ne distingue plus rien et ne fait qu'occuper le
+    // tiers de la largeur. Elle s'efface, et la ligne se redistribue.
+    <div className={secteur ? "ranking-sans-secteur" : undefined}>
+      <div style={{ padding: "20px 20px 16px" }}>
+        {/* Le titre reste l'identite de la page, le sous-titre dit ce qui est
+            reellement affiche. Annoncer « Top 200 » au-dessus de vingt-quatre
+            lignes filtrees ferait douter du reste des chiffres. */}
+        <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 2 }}>
+          Top {companies.length}
+        </h1>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500, marginBottom: 16 }}>
+          {isFiltered
+            ? `${filtered.length} sur ${companies.length}${secteur ? ` · ${secteur}` : ""}`
+            : "Trié par score communautaire"}
+        </p>
+
+        {/* Chercher et filtrer sont deux intentions distinctes : on cherche une
+            entreprise qu'on a en tete, on filtre pour parcourir un domaine.
+            Deux commandes, mais une seule ligne, et aucune couche visuelle
+            supplementaire au-dessus du tableau. */}
+        <div className="ranking-controles">
+          <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
+            <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              aria-label="Chercher une entreprise ou une ville"
+              placeholder="Chercher une entreprise ou une ville..."
+              style={{
+                width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
+                borderRadius: 10, padding: "9px 12px 9px 34px", fontSize: 16, color: "var(--text)",
+                outline: "none", boxSizing: "border-box",
+              }}
+            />
+          </div>
+          <select
+            value={secteur}
+            onChange={e => setSecteur(e.target.value)}
+            aria-label="Filtrer par secteur"
             style={{
-              width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
-              borderRadius: 10, padding: "9px 12px 9px 34px", fontSize: 16, color: "var(--text)",
-              outline: "none", boxSizing: "border-box",
+              background: "var(--surface2)", border: "1px solid var(--border2)",
+              borderRadius: 10, padding: "9px 12px", fontSize: 16,
+              color: secteur ? "var(--text)" : "var(--text-muted)",
+              outline: "none", boxSizing: "border-box", cursor: "pointer",
+              maxWidth: "100%",
             }}
-          />
+          >
+            <option value="">Tous les secteurs</option>
+            {secteurs.map(sect => (
+              <option key={sect} value={sect}>{sect}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -72,9 +125,8 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
       {/* Lignes */}
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {filtered.map((c, filteredIdx) => {
-          const globalRank = globalRankMap.get(c.id) ?? 0;
-          const displayRank = isFiltered ? filteredIdx : globalRank;
+        {filtered.map(c => {
+          const displayRank = globalRankMap.get(c.id) ?? 0;
           const sectorColor = SECTOR_COLORS[c.sector] ?? "#8b5cf6";
           const score = Number(c.score ?? 0);
           const avgRating = Number(c.avg_rating ?? 0);
@@ -180,7 +232,11 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
         {filtered.length === 0 && (
           <div style={{ padding: "48px 16px", textAlign: "center", color: "var(--text-muted)" }}>
-            <p style={{ fontSize: 14 }}>Aucune entreprise ne correspond à cette recherche.</p>
+            <p style={{ fontSize: 14 }}>
+              {secteur && !q
+                ? `Aucune entreprise du secteur ${secteur} dans ce classement.`
+                : "Aucune entreprise ne correspond à cette recherche."}
+            </p>
           </div>
         )}
       </div>
