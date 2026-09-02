@@ -30,8 +30,30 @@ export default function ProfilePage() {
            il disparaissait complètement. La variante compacte du tableau ne
            prenait le relais qu'à 600 px : toute la bande 600–900 affichait
            des lignes sans nom d'entreprise. */
+        /* Sur telephone, les trois tuiles passaient en colonne unique : trois
+           cartes pleine largeur, soit pres de trois cents pixels de hauteur
+           avant d'atteindre « Mes avis », pour trois nombres a un ou deux
+           chiffres. Elles reprennent le traitement des chiffres de la page
+           d'accueil : une ligne, pas de cadre, pas d'icone, des filets pour
+           separer. Le carre d'icone porte la couleur du theme, qui ne manque
+           pas a la lecture d'un nombre. */
         @media (max-width: 900px) {
-          .profile-kpi { grid-template-columns: 1fr !important; }
+          .profile-kpi {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 0 14px !important;
+          }
+          .profile-kpi > * {
+            background: transparent !important;
+            border: none !important;
+            border-left: 1px solid var(--border) !important;
+            border-radius: 0 !important;
+            padding: 2px 0 2px 14px !important;
+            gap: 5px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+          .profile-kpi > *:first-child { border-left: none !important; padding-left: 0 !important; }
+          .profile-kpi .kpi-icone { display: none !important; }
           .profile-grid { grid-template-columns: 1fr !important; }
           .profile-sidebar { position: static !important; }
         }

@@ -185,7 +185,7 @@ export function ProfilClient() {
         ] as { Icone: typeof Flame; value: string; label: string; color: string; href: string | null }[]).map(({ Icone, value, label, color, href }) => {
           const inner = (
             <>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div className="kpi-icone" style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <Icone size={20} color={color} strokeWidth={1.9} aria-hidden="true" />
               </div>
               <div>
