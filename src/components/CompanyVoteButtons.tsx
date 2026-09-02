@@ -2,7 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Zap, Skull } from "lucide-react";
+// Une tete de mort et un eclair pour noter un employeur : le registre est
+// celui du jeu video, pas d'un service ou des entreprises sont aussi clientes.
+// Les deux fleches disent la meme chose, et disent en plus dans quel sens le
+// score bouge.
+import { TrendingUp, TrendingDown, Lock } from "lucide-react";
 import { addBoost, addPenalty } from "@/lib/actions/scores";
 import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
 
@@ -67,7 +71,7 @@ export function CompanyVoteButtons({
     const next = !boosted;
     setBoosted(next);
     if (score !== null) setScore(s => (s ?? 0) + (next ? 100 : -100));
-    showToast(next ? "⚡ +100 pts ajoutés !" : "⚡ Boost retiré", "#8b5cf6");
+    showToast(next ? "Boost appliqué, +100 pts" : "Boost retiré", "#8b5cf6");
     try {
       await addBoost(companyId);
       router.refresh();
@@ -93,7 +97,7 @@ export function CompanyVoteButtons({
       setCredits(newCredits);
       if (newCredits === 0 && next) setTimeout(() => setShowUpgrade(true), 1800);
     }
-    showToast(next ? "💀 -100 pts appliqués" : "💀 Pénalité retirée", "#ef4444");
+    showToast(next ? "Pénalité appliquée, -100 pts" : "Pénalité retirée", "#ef4444");
     try {
       await addPenalty(companyId);
       router.refresh();
@@ -163,7 +167,7 @@ export function CompanyVoteButtons({
           ...penaltyStyle,
         }}
       >
-        <Skull size={14} aria-hidden="true" />
+        <TrendingDown size={14} aria-hidden="true" />
         -100 pts
         {!isAdmin && credits > 0 && (
           <span style={{
@@ -181,7 +185,7 @@ export function CompanyVoteButtons({
             background: "rgba(15,15,20,0.85)", border: "1px solid rgba(255,255,255,0.2)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 9,
-          }}>🔒</span>
+          }}><Lock size={11} strokeWidth={2.4} aria-hidden="true" /></span>
         )}
       </button>
 
@@ -201,7 +205,7 @@ export function CompanyVoteButtons({
           ...boostStyle,
         }}
       >
-        <Zap size={14} fill={boosted ? (variant === "card" ? "#8b5cf6" : "#a78bfa") : "none"} />
+        <TrendingUp size={14} aria-hidden="true" />
         +100 pts
       </button>
 
@@ -210,8 +214,7 @@ export function CompanyVoteButtons({
         <>
           <div onClick={() => setShowGuest(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 10010 }} />
           <div role="dialog" aria-modal="true" aria-label="Connexion requise" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(380px, 92vw)", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "32px 28px", textAlign: "center" }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>👋</div>
-            <h2 style={{ fontSize: 18, fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>Connectez-vous pour voter</h2>
+                        <h2 style={{ fontSize: 18, fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>Connectez-vous pour voter</h2>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.6 }}>Les votes +100 et -100 pts impactent le classement des entreprises. Créez un compte gratuitement pour participer.</p>
             <a href="/login" style={{ display: "block", padding: "13px 0", borderRadius: 12, background: "var(--brand)", color: "#fff", fontWeight: 800, fontSize: 15, textDecoration: "none", marginBottom: 10 }}>Se connecter</a>
             <button type="button" onClick={() => setShowGuest(false)} style={{ background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "6px 0" }}>Fermer</button>

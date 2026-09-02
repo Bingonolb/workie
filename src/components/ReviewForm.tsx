@@ -19,15 +19,15 @@ const DURATION_RANGES = [
 ];
 
 const WORK_MODES = [
-  { value: "présentiel", label: "🏢 Présentiel" },
-  { value: "hybride", label: "🔀 Hybride" },
-  { value: "remote", label: "🏠 Remote" },
+  { value: "présentiel", label: "Présentiel" },
+  { value: "hybride", label: "Hybride" },
+  { value: "remote", label: "Remote" },
 ];
 
 const RECOMMEND = [
-  { value: "oui", label: "👍 Oui" },
-  { value: "non", label: "👎 Non" },
-  { value: "ca_depend", label: "🤔 Ça dépend" },
+  { value: "oui", label: "Oui" },
+  { value: "non", label: "Non" },
+  { value: "ca_depend", label: "Ça dépend" },
 ];
 
 const WOULD_RETURN = [

@@ -93,7 +93,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
             <div className="ads-visuel" style={{ width: 100, height: 100, borderRadius: 14, overflow: "hidden", flexShrink: 0, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {campaign.image_url
                 ? <Image src={campaign.image_url} alt="" width={100} height={100} style={{ objectFit: "cover", width: "100%", height: "100%" }} />
-                : <span style={{ fontSize: 36 }}>📣</span>
+                : null
               }
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -103,7 +103,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                   {st.icon} {st.label}
                 </span>
                 <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>
-                  {campaign.format === "square" ? "⬛ Carré" : "📱 Swipe"}
+                  {campaign.format === "square" ? "Carré" : "Plein écran"}
                 </span>
                 {(campaign.status === "active" || campaign.status === "pending") && (
                   <CancelCampaignButton campaignId={campaign.id} onCancel={pauseUserCampaign} redirectAfter="/profile/ads" />
@@ -111,9 +111,9 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
               </div>
               {campaign.body_text && <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>{campaign.body_text}</p>}
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 13, color: "var(--text-muted)" }}>
-                <span>🗓 Début : {campaign.start_date}</span>
+                <span>Début : {campaign.start_date}</span>
                 {campaign.end_date && <span>→ Fin : {campaign.end_date}</span>}
-                {campaign.target_cantons.length > 0 && <span>📍 {campaign.target_cantons.join(", ")}</span>}
+                {campaign.target_cantons.length > 0 && <span>{campaign.target_cantons.join(", ")}</span>}
                 {campaign.target_sectors.length > 0 && <span>🏭 {campaign.target_sectors.join(", ")}</span>}
               </div>
               <a href={campaign.cta_url} target="_blank" rel="noopener noreferrer" className="ads-lien"

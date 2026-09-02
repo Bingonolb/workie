@@ -77,7 +77,7 @@ export function FavorisClient() {
           <Flame size={28} color="#f97316" aria-hidden="true" />
         </div>
         <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Aucun favori pour l&apos;instant</p>
-        <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>Clique sur 🔥 sur une entreprise pour la sauvegarder ici.</p>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>Touchez la flamme d&apos;une entreprise pour la sauvegarder ici.</p>
         <Link href="/explore" style={{
           display: "inline-block", background: "var(--brand)",
           color: "#fff", fontWeight: 700, borderRadius: 10, padding: "12px 28px", textDecoration: "none", fontSize: 14,

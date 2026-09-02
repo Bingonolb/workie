@@ -185,7 +185,7 @@ export function ExploreFilters({
           )}
           {activeCanton && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.3)", color: "#f97316" }}>
-              📍 {activeCanton.name}
+              {activeCanton.name}
               <button type="button" aria-label="Retirer le canton" onClick={() => push("canton", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
             </span>
           )}

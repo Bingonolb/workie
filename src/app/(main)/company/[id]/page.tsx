@@ -440,10 +440,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 border: "1px solid rgba(139,92,246,0.15)",
                 borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
               }}>
-                <p style={{ fontSize: 32, marginBottom: 12 }}>🌟</p>
-                <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
+                                <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
-                  Tu as travaillé ici ? Ton avis anonyme aide des centaines de candidats à faire le bon choix.
+                  Vous avez travaillé ici ? Votre avis anonyme aide les candidats à choisir.
                 </p>
                 <span style={{
                   display: "inline-block",
@@ -506,7 +505,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {jobs.length > 0 && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
-                  💼 Offres d&apos;emploi
+                  Offres d&apos;emploi
                   <span style={{ fontSize: 12.5, fontWeight: 700, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

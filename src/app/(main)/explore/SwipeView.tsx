@@ -108,7 +108,7 @@ export function SwipeView({
   const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(
     penaltySuccess
-      ? { msg: "💀 Pass Pénalité activé ! Vous pouvez maintenant pénaliser les entreprises.", color: "#10b981" }
+      ? { msg: "Pass pénalité activé. Vous pouvez maintenant pénaliser une entreprise.", color: "#10b981" }
       : null
   );
   const [showGuestModal, setShowGuestModal] = useState(false);
@@ -396,11 +396,11 @@ export function SwipeView({
       // toggleFavorite now internally calls addFlame when saving — no separate addFlame call needed
       toggleFavorite((current as Company).id);
       setFlameIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
-      showToast("🔥 Enregistré !", "#f97316");
+      showToast("Enregistré", "#f97316");
     } else if (dir === "right") {
-      showToast("👀 Découverte !", "#6b7280");
+      showToast("Découverte", "#6b7280");
     } else {
-      showToast("✕ Passé", "#ef4444");
+      showToast("Passé", "#ef4444");
     }
     programmerAvance();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -442,7 +442,7 @@ export function SwipeView({
     setBoostIds(prev => { const n = new Set(prev); toggled ? n.delete(id) : n.add(id); return n; });
     markActed(id);
     addBoost(id);
-    showToast(toggled ? "⚡ Boost retiré" : "⚡ +100 pts !", "#8b5cf6");
+    showToast(toggled ? "Boost retiré" : "Boost appliqué, +100 pts", "#8b5cf6");
   };
 
   const handlePenalty = (e: React.MouseEvent) => {
@@ -464,7 +464,7 @@ export function SwipeView({
     }
     markActed(id);
     addPenalty(id);
-    showToast(toggled ? "💀 Pénalité retirée" : "💀 -100 pts", "#ef4444");
+    showToast(toggled ? "Pénalité retirée" : "Pénalité appliquée, -100 pts", "#ef4444");
   };
 
   // Native touch handlers — React touch events are passive by default on iOS,
@@ -773,10 +773,10 @@ export function SwipeView({
       {/* Legend — hidden on mobile */}
       <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
-          {isLoggedIn && <span>💀 <span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
+          {isLoggedIn && <span><span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
           <span>✕ passer</span>
           <span>ℹ détail</span>
-          <span>🔥 sauvegarder</span>
+          <span>Sauvegarder</span>
           <span>⚡ <span style={{ color: "#8b5cf6", fontWeight: 700 }}>+100</span> boost</span>
         </div>
         <p style={{ fontSize: 11, color: "var(--text-muted)" }}>

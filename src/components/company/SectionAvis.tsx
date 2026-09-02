@@ -27,7 +27,7 @@ const DURATION_LABELS: Record<string, string> = {
   moins_6mois: "< 6 mois", "6mois_2ans": "6 mois – 2 ans", plus_2ans: "+ 2 ans",
 };
 const WORK_MODE_LABELS: Record<string, string> = {
-  "présentiel": "🏢 Présentiel", hybride: "🔀 Hybride", remote: "🏠 Remote",
+  "présentiel": "Présentiel", hybride: "Hybride", remote: "Remote",
 };
 const RECOMMEND_LABELS: Record<string, { label: string; color: string }> = {
   oui:       { label: "Recommande",          color: "#10b981" },

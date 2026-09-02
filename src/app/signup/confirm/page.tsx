@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { Mail } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Confirmez votre adresse · Workie",
@@ -18,7 +19,7 @@ export default function ConfirmPage({
       </Link>
 
       <div style={{ width: "100%", maxWidth: 420, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "36px 32px", textAlign: "center" }}>
-        <div style={{ fontSize: 52, marginBottom: 20 }}>📬</div>
+        <Mail size={40} color="var(--brand)" strokeWidth={1.6} aria-hidden="true" style={{ marginBottom: 20 }} />
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>
           Vérifiez votre boîte mail
         </h1>

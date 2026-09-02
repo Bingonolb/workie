@@ -78,7 +78,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
           )}
         </div>
         {job.salary_range && (
-          <p style={{ fontSize: 11, color: "#10b981", fontWeight: 700, marginTop: 6 }}>💰 {job.salary_range}</p>
+          <p style={{ fontSize: 11, color: "#10b981", fontWeight: 700, marginTop: 6 }}>{job.salary_range}</p>
         )}
         <p style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>Voir l&apos;offre →</p>
       </button>

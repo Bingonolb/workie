@@ -187,7 +187,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                     <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7L10 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                 )}
-                <div style={{ fontSize: 28, marginBottom: 10 }}>{f === "square" ? "⬛" : "📱"}</div>
+                <div style={{ fontSize: 28, marginBottom: 10 }}>{f === "square" ? "Carré" : "Plein écran"}</div>
                 <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>{f === "square" ? "Carré" : "Swipe"}</p>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
                   {f === "square"

@@ -103,7 +103,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
         {campaigns.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px 60px" }}>
             <div style={{ width: 72, height: 72, borderRadius: 22, background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(249,115,22,0.1))", border: "1px solid rgba(139,92,246,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", fontSize: 32 }}>
-              📣
+              
             </div>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune campagne pour l&apos;instant</h2>
             <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 28px", lineHeight: 1.7 }}>
@@ -187,7 +187,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
                       <div style={{ width: 80, flexShrink: 0, background: "var(--surface2)", position: "relative", overflow: "hidden" }}>
                         <Image src={c.image_url} alt="" fill sizes="80px" style={{ objectFit: "cover" }} />
                         <div style={{ position: "absolute", bottom: 6, left: 6, fontSize: 9, fontWeight: 800, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, textTransform: "uppercase" }}>
-                          {c.format === "square" ? "⬛" : "📱"}
+                          {c.format === "square" ? "Carré" : "Plein écran"}
                         </div>
                       </div>
 
