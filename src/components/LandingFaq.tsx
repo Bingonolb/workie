@@ -197,8 +197,8 @@ const ENTREES: Entree[] = [
 export function LandingFaq() {
   return (
     <section
-      className="landing-section"
-      style={{ padding: "60px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)" }}
+      className="landing-section landing-ton"
+      style={{ padding: "60px 24px" }}
       aria-labelledby="faq-titre"
     >
       {/* Données structurées : elles décrivent à un moteur de recherche ce que

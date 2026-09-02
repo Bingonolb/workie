@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ArrowRight, Search, BarChart3, PenLine, ShieldCheck, Lock, Gauge,
+import { ArrowRight, ShieldCheck, Lock, Gauge,
          GraduationCap, Briefcase, Landmark, Home as IconeMaison, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingFaq } from "@/components/LandingFaq";
@@ -69,7 +69,7 @@ export default async function Home() {
   };
 
   return (
-    <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
+    <main className="landing-tons" style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
       {/* Pas de WebSite déclaré ici : le layout en publie déjà un, plus
           complet, sur toutes les pages. Deux entités WebSite pour une même
           URL obligent Google à choisir laquelle décrit le site. */}
@@ -83,6 +83,44 @@ export default async function Home() {
           celles de la fiche entreprise, et ne peuvent plus se désynchroniser
           de leur balisage. */}
       <style>{`
+        /* Rythme des fonds.
+
+           Les sections alternaient entre --bg et --surface2 : 2 % d'ecart,
+           invisible. Ces deux tons creusent l'ecart jusqu'a ce qu'il se voie,
+           et le ton d'accent donne a la page un moment colore la ou l'on veut
+           que l'oeil s'arrete.
+
+           En theme sombre, le ton souleve va vers le clair : sur un fond
+           sombre, une surface qui s'eclaircit se lit comme un panneau pose au
+           dessus, alors qu'une surface qui s'assombrit se lit comme un trou. */
+        .landing-tons {
+          --ton: #1e2129;
+          --ton-carte: #2a2e3a;
+          --ton-accent: #1a1338;
+          --ton-accent-bord: rgba(139,92,246,0.22);
+        }
+        html.light .landing-tons {
+          --ton: #e5e9f0;
+          --ton-carte: #ffffff;
+          --ton-accent: #ebe6fb;
+          --ton-accent-bord: rgba(91,63,214,0.16);
+        }
+        .landing-ton {
+          background: var(--ton);
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+        }
+        /* Une carte posee sur le ton souleve doit se souleve a son tour :
+           laissee sur --surface, elle devient plus sombre que la section qui
+           la porte en theme sombre, et le rapport s'inverse. */
+        .landing-ton .landing-parcours-etape,
+        .landing-ton .faq-item { background: var(--ton-carte); }
+        .landing-accent {
+          background: var(--ton-accent);
+          border-top: 1px solid var(--ton-accent-bord);
+          border-bottom: 1px solid var(--ton-accent-bord);
+        }
+
         .landing-hero-deux-col {
           display: grid;
           grid-template-columns: 1.05fr 0.95fr;
@@ -165,21 +203,6 @@ export default async function Home() {
         }
         .apercu-plein span:nth-child(2) { background: var(--brand); }
 
-        /* Les cartes d'une même rangée finissent à la même hauteur. Sans
-           cela, la plus courte laisse un blanc sous elle et la rangée paraît
-           bancale. */
-        .landing-cartes {
-          display: grid;
-          gap: 22px;
-          align-items: stretch;
-        }
-        .landing-cartes > * {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 14px;
-          padding: 26px 24px;
-          position: relative;
-        }
 
         /* Les deux etapes du parcours, reliees par une fleche. Sur telephone
            elles s'empilent et la fleche pivote d'un quart de tour : une fleche
@@ -432,37 +455,13 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── Comment ça marche ──
-          Pas de bordure basse : la bande photographique suit immédiatement, et
-          son fond sombre sépare les deux à lui seul. Le trait d'un pixel se
-          voyait posé sur l'image comme un défaut. */}
-      <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)" }}>
-        <div style={{ maxWidth: 940, margin: "0 auto" }}>
-          <p className="landing-eyebrow">Ce que vous faites ici</p>
-          {/* Le titre reprenait mot pour mot les trois cartes qu'il annonce :
-              on lisait « Chercher, comparer, contribuer » puis « Chercher »,
-              « Comparer », « Contribuer ». Il se contente maintenant de
-              compter les étapes, ce que les cartes ne disent pas. */}
-          <h2 className="landing-h2">En trois étapes.</h2>
-          <div className="landing-cartes" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
-            {[
-              { n: "01", Icone: Search, titre: "Chercher",
-                desc: "Par nom, canton ou secteur. Des PME aux multinationales, dans toute la Suisse." },
-              { n: "02", Icone: BarChart3, titre: "Comparer",
-                desc: "Management, culture, rémunération, évolution : huit critères notés par des employés en poste et d'anciens collaborateurs." },
-              { n: "03", Icone: PenLine, titre: "Contribuer",
-                desc: "Vous notez votre expérience anonymement. Chaque contribution rend la suivante plus utile." },
-            ].map(({ n, Icone, titre, desc }) => (
-              <div key={n} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "26px 24px", position: "relative" }}>
-                <span style={{ position: "absolute", top: 22, right: 22, fontSize: 11.5, fontWeight: 700, color: "var(--border2)", letterSpacing: "0.06em", fontVariantNumeric: "tabular-nums" }}>{n}</span>
-                <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
-                <h3 style={{ fontSize: 16.5, fontWeight: 700, color: "var(--text)", margin: "15px 0 9px" }}>{titre}</h3>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.62 }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* La section « En trois étapes » a été retirée d'ici.
+
+          Elle annonçait Chercher, Comparer, Contribuer, alors que l'accroche
+          du hero dit déjà « Comparez, choisissez, et notez le vôtre à votre
+          tour » : les mêmes trois verbes, à deux écrans d'intervalle. C'est le
+          genre de section que toute page d'accueil possède et que personne ne
+          lit, et son départ rend au hero la place qu'il avait perdue. */}
 
       {/* ── Bande photographique ──
           Trois sections de cartes se suivaient, avec le même chapeau centré et
@@ -500,7 +499,7 @@ export default async function Home() {
           sont chez l'employeur. Annoncer un nombre reviendrait a compter ce
           qui ne nous appartient pas, et a promettre un volume qui varie
           chaque semaine. */}
-      <section className="landing-section" style={{ padding: "96px 24px" }}>
+      <section className="landing-section landing-ton" style={{ padding: "96px 24px" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Postuler</p>
           {/* Le vrai écart avec un site d'annonces, et donc la raison d'être de
@@ -612,7 +611,7 @@ export default async function Home() {
           bas. Ce sont pourtant elles qui distinguent la plateforme, et la
           première d'entre elles, le format entièrement chiffré des avis, est aussi
           ce qui la protège juridiquement. */}
-      <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+      <section className="landing-section landing-ton" style={{ padding: "88px 24px" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Ce qui rend l&apos;information fiable</p>
           <h2 className="landing-h2">Des garanties vérifiables.</h2>
@@ -641,7 +640,7 @@ export default async function Home() {
       </section>
 
       {/* ── Appel à l'action ── */}
-      <section className="landing-section" style={{ padding: "92px 24px", textAlign: "center" }}>
+      <section className="landing-section landing-accent" style={{ padding: "92px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
           <h2 style={{ fontSize: "clamp(24px, 3.6vw, 34px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 14 }}>
             Commencez par votre secteur.
