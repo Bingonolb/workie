@@ -67,39 +67,10 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://www.workie.ch" },
 };
 
-/**
- * Trois entreprises réelles, en panneaux décalés qui se chevauchent.
- *
- * Rendu à deux endroits, jamais visible deux fois : en tête du hero sur
- * téléphone, où il faut une image avant tout texte, et dans « Pour qui » en
- * bureau, où la colonne de gauche serait sinon vide sous son titre.
- */
-function PanneauxVitrine({ fiches, className }: {
-  fiches: { id: string; name: string; sector: string; cover_url: string | null }[];
-  className?: string;
-}) {
-  return (
-    <div className={`landing-eventail ${className ?? ""}`} aria-hidden="true">
-      {fiches.map((c, i) => (
-        <article
-          key={c.id}
-          className={`landing-panneau landing-panneau-${i}`}
-          style={c.cover_url ? { backgroundImage: `url(${largeurCouverture(c.cover_url, 640)})` } : undefined}
-        >
-          <div className="landing-panneau-voile" />
-          <div className="landing-panneau-pied">
-            <p className="landing-panneau-nom">{c.name}</p>
-            <p className="landing-panneau-meta">{c.sector}</p>
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-}
-
 export default async function Home() {
   const [counts, vitrine] = await Promise.all([getLandingCounts(), getFichesVitrine()]);
   const nCompanies = counts.companies;
+  const vedette = vitrine[0];
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
@@ -175,71 +146,45 @@ export default async function Home() {
           padding: 64px 24px;
           width: 100%;
         }
-        /* Trois panneaux verticaux décalés, qui se chevauchent légèrement.
-           Une première version les inclinait, à la manière d'un paquet de
-           cartes : c'était ludique là où il faut être éditorial. Sans
-           rotation, avec des hauteurs différentes, la composition se lit comme
-           une vitrine plutôt que comme un jeu.
+        /* Silhouettes des deux emplacements publicitaires. Le trait plein
+           marque l'annonce, les traits creux le contenu autour. */
+        .apercu-format {
+          flex-shrink: 0;
+          width: 46px;
+          display: grid;
+          gap: 3px;
+          padding: 5px;
+          border: 1px solid var(--border2);
+          border-radius: 7px;
+          background: var(--surface);
+        }
+        .apercu-format span { border-radius: 2px; background: var(--surface3); display: block; }
+        .apercu-carre {
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: 15px 15px;
+        }
+        .apercu-carre span:nth-child(1) { background: var(--brand); }
+        .apercu-plein {
+          grid-template-rows: 8px 20px 5px;
+        }
+        .apercu-plein span:nth-child(2) { background: var(--brand); }
 
-           Les entreprises viennent de la base et leurs couvertures fournissent
-           les images : rien n'y est illustratif, tout y est vrai. */
-        .eventail-mobile { display: none; }
-        .landing-eventail {
-          position: relative;
-          height: 400px;
-          display: flex;
-          align-items: flex-start;
+        /* Les cartes d'une même rangée finissent à la même hauteur. Sans
+           cela, la plus courte laisse un blanc sous elle et la rangée paraît
+           bancale. */
+        .landing-cartes {
+          display: grid;
+          gap: 22px;
+          align-items: stretch;
         }
-        .landing-panneau {
-          position: relative;
-          flex: 0 0 146px;
+        .landing-cartes > * {
+          background: var(--surface);
+          border: 1px solid var(--border);
           border-radius: 14px;
-          overflow: hidden;
-          background-color: var(--surface3);
-          background-size: cover;
-          background-position: center;
-          box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+          padding: 26px 24px;
+          position: relative;
         }
-        /* Chevauchement plutôt qu'espacement : trois panneaux séparés se
-           lisent comme trois vignettes, trois panneaux qui se recouvrent se
-           lisent comme une composition. Le plus haut passe devant. */
-        .landing-panneau-0 { height: 296px; margin-top: 44px; z-index: 1; }
-        .landing-panneau-1 { height: 344px; margin-top: 0; margin-left: -22px; z-index: 3; }
-        .landing-panneau-2 { height: 252px; margin-top: 78px; margin-left: -22px; z-index: 2; }
-        .landing-panneau-voile {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to bottom, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.78) 100%);
-        }
-        .landing-panneau-pied {
-          position: absolute;
-          left: 12px;
-          right: 12px;
-          bottom: 12px;
-        }
-        /* Les panneaux se recouvrent de 22 px : sans ce décalage, le voisin
-           mange le début du nom du panneau de droite et la fin de celui de
-           gauche. On écarte le texte de la zone couverte plutôt que de
-           renoncer au chevauchement, qui est ce qui fait la composition. */
-        .landing-panneau-0 .landing-panneau-pied { right: 30px; }
-        .landing-panneau-2 .landing-panneau-pied { left: 30px; }
-        .landing-panneau-nom {
-          font-size: 13px;
-          font-weight: 650;
-          color: #fff;
-          line-height: 1.25;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        .landing-panneau-meta {
-          font-size: 11px;
-          color: rgba(255,255,255,0.72);
-          margin-top: 3px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+
         .landing-pourqui {
           display: grid;
           grid-template-columns: 0.72fr 1.28fr;
@@ -270,16 +215,6 @@ export default async function Home() {
 
         @media (max-width: 820px) {
           .landing-pourqui { grid-template-columns: 1fr; gap: 34px; }
-          .eventail-mobile { display: flex; order: -2; margin-bottom: 4px; }
-          .eventail-bureau { display: none; }
-          .landing-eventail { height: 320px; justify-content: center; }
-          /* 118 px : trois panneaux moins deux recouvrements de 22 px font
-             310 px, ce qui tient dans un écran de 390 px moins ses marges.
-             À 132 px le troisième sortait du cadre et son nom se coupait. */
-          .landing-panneau { flex: 0 0 118px; }
-          .landing-panneau-0 { height: 240px; margin-top: 36px; }
-          .landing-panneau-1 { height: 280px; }
-          .landing-panneau-2 { height: 206px; margin-top: 64px; }
           .landing-bande { min-height: 340px; background-position: center; }
           .landing-bande-voile {
             background: linear-gradient(180deg, rgba(8,10,16,0.7) 0%, rgba(8,10,16,0.88) 100%);
@@ -359,17 +294,38 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* Sur téléphone, une image avant tout texte : la page ouvrait sur
-            une pile de blocs écrits, ce qui faisait élémentaire. */}
-        <PanneauxVitrine fiches={vitrine} className="eventail-mobile" />
-
         {/* Aperçu du produit.
             Construit en balisage plutôt qu'en image : net à toute résolution,
             suit le thème clair comme sombre, et ne se périme pas quand la
             fiche évolue. Rien ne crédibilise autant que de montrer ce qu'on
             vend, et la page n'en montrait rien. */}
         <div className="landing-apercu" aria-hidden="true">
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 16, padding: 22, boxShadow: "0 18px 50px rgba(0,0,0,0.13)" }}>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 16, overflow: "hidden", boxShadow: "0 18px 50px rgba(0,0,0,0.13)" }}>
+            {/* En-tête d'une entreprise réelle, couverture comprise.
+                Le visuel du hero ne montrait que des barres de notes : juste,
+                mais sec, et sans image. Les meilleures pages d'accueil n'ont
+                qu'un visuel principal, et il porte à la fois le produit et
+                l'image. Celui-ci fait les deux, ce qui a permis de retirer la
+                composition qui faisait double emploi plus bas. */}
+            {vedette && (
+              <div style={{ position: "relative", height: 132 }}>
+                <div style={{
+                  position: "absolute", inset: 0,
+                  backgroundColor: "var(--surface3)",
+                  backgroundImage: vedette.cover_url ? `url(${largeurCouverture(vedette.cover_url, 940)})` : undefined,
+                  backgroundSize: "cover", backgroundPosition: "center",
+                }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.86) 100%)" }} />
+                <div style={{ position: "absolute", left: 20, right: 20, bottom: 14 }}>
+                  <p style={{ fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2 }}>{vedette.name}</p>
+                  <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.72)", marginTop: 3 }}>
+                    {vedette.sector}{vedette.city ? ` · ${vedette.city}` : ""}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div style={{ padding: 22 }}>
             <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
               Synthèse des avis
             </p>
@@ -409,16 +365,17 @@ export default async function Home() {
                 </div>
               ))}
             </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── Comment ça marche ── */}
-      <section className="landing-section" style={{ padding: "72px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+      <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Comment ça marche</p>
           <h2 className="landing-h2">Trois étapes, aucune concession.</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 22 }}>
+          <div className="landing-cartes" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
             {[
               { n: "01", Icone: Search, titre: "Chercher",
                 desc: "Par nom, canton ou secteur. Des PME aux multinationales, dans toute la Suisse." },
@@ -463,7 +420,7 @@ export default async function Home() {
           Section absente jusqu'ici. Une page qui parle à tout le monde en
           général ne parle à personne en particulier : nommer les situations
           permet à chacun de se reconnaître, de l'étudiant au cadre confirmé. */}
-      <section className="landing-section" style={{ padding: "84px 24px" }}>
+      <section className="landing-section" style={{ padding: "96px 24px" }}>
         <div className="landing-pourqui">
           <div>
             <p className="landing-eyebrow" style={{ textAlign: "left" }}>Pour qui</p>
@@ -476,7 +433,6 @@ export default async function Home() {
                 éventail montrent le swipe, qui est la signature de Workie, et
                 leurs couvertures apportent les images. Les entreprises sont
                 tirées de la base, donc elles ne peuvent pas mentir. */}
-            <PanneauxVitrine fiches={vitrine} className="eventail-bureau" />
           </div>
 
           {/* Une liste, pas une quatrième grille de cartes. Le filet fin et le
@@ -512,7 +468,7 @@ export default async function Home() {
           bas. Ce sont pourtant elles qui distinguent la plateforme, et la
           première d'entre elles, l'absence de texte libre, est aussi ce qui la
           protège juridiquement. */}
-      <section className="landing-section" style={{ padding: "72px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+      <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Ce qui rend l&apos;information fiable</p>
           <h2 className="landing-h2">Des garanties vérifiables.</h2>
@@ -525,9 +481,9 @@ export default async function Home() {
               { Icone: ShieldCheck, titre: "Contrôles à la publication",
                 desc: "Adresse confirmée, compte de plus de vingt-quatre heures, un seul avis par entreprise, et une modération alimentée par les signalements." },
             ].map(({ Icone, titre, desc }) => (
-              <div key={titre} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "26px 24px" }}>
+              <div key={titre} style={{ borderTop: "2px solid var(--brand)", paddingTop: 20 }}>
                 <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", margin: "15px 0 9px" }}>{titre}</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", margin: "14px 0 9px" }}>{titre}</h3>
                 <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.62 }}>{desc}</p>
               </div>
             ))}
@@ -536,7 +492,7 @@ export default async function Home() {
       </section>
 
       {/* ── Appel à l'action ── */}
-      <section className="landing-section" style={{ padding: "76px 24px", textAlign: "center" }}>
+      <section className="landing-section" style={{ padding: "92px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
           <h2 style={{ fontSize: "clamp(24px, 3.6vw, 34px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 14 }}>
             Commencez par votre secteur.
@@ -591,14 +547,24 @@ export default async function Home() {
                 un service dont on ignore encore le rendement se défendent mal
                 auprès d'un annonceur. */}
             <div className="landing-ads-aside" style={{ flexDirection: "column", gap: 10, minWidth: 210 }}>
+              {/* Un aperçu de chaque format plutôt que son seul nom.
+                  Le bloc n'était que du texte : on lisait « format carré » sans
+                  voir de quoi il s'agit. Deux silhouettes dessinées en CSS
+                  valent mieux qu'une description, et se comprennent d'un coup
+                  d'œil. */}
               {[
-                { label: "Format carré", desc: "Dans la grille des entreprises" },
-                { label: "Format plein écran", desc: "Dans le swipe, toutes les dix cartes" },
-              ].map(({ label, desc }) => (
-                <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 18px" }}>
-                  <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{label}</p>
-                  <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.5 }}>{desc}</p>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)", marginTop: 7 }}>dès CHF 4 pour mille affichages</p>
+                { label: "Format carré", desc: "Dans la grille des entreprises", forme: "carre" },
+                { label: "Format plein écran", desc: "Dans le swipe, toutes les dix cartes", forme: "plein" },
+              ].map(({ label, desc, forme }) => (
+                <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 16px", display: "flex", gap: 14, alignItems: "flex-start" }}>
+                  <div className={`apercu-format apercu-${forme}`} aria-hidden="true">
+                    <span /><span /><span />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{label}</p>
+                    <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.5 }}>{desc}</p>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)", marginTop: 7 }}>dès CHF 4 pour mille affichages</p>
+                  </div>
                 </div>
               ))}
             </div>
