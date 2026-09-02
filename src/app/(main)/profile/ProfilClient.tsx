@@ -138,19 +138,24 @@ export function ProfilClient() {
               d'opacite : un filigrane se devine, il ne se lit pas, sinon il
               entre en concurrence avec le nom qu'il accompagne.
 
-              Il deborde volontairement a droite : un logotype entier, pose au
-              milieu du vide, redevient un logo affiche. Coupe par le bord, il
-              n'est plus qu'une texture. */}
+              Le mot seul, sans le symbole. Le lockup complet figure deja dans
+              la barre de navigation, soixante pixels plus haut : le reprendre
+              ici montrerait deux fois la meme marque sur un meme ecran. Le mot
+              seul se lit comme une signature.
+
+              Ce n'est pas un second dessin mais le meme trace, cadre autrement
+              par son viewBox : aucune divergence ne peut s'installer entre les
+              deux fichiers. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/workie-logo.svg"
+            src="/workie-mot.svg"
             alt=""
             aria-hidden="true"
             style={{
               position: "absolute",
-              right: -40, top: "50%",
+              right: 32, top: "50%",
               transform: "translateY(-50%)",
-              height: 96, width: "auto",
+              height: 76, width: "auto",
               opacity: 0.08,
               pointerEvents: "none",
               userSelect: "none",
