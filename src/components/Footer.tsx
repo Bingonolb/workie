@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 export function Footer() {
   return (
@@ -10,7 +11,7 @@ export function Footer() {
     }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontWeight: 900, fontSize: 16, color: "var(--text)" }}>workie</span>
+          <Logo taille={17} />
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>· Avis et salaires des entreprises suisses</span>
         </div>
         <nav style={{ display: "flex", flexWrap: "wrap", gap: "8px 20px", alignItems: "center" }}>

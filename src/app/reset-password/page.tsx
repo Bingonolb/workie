@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { resetPassword } from "@/lib/actions/auth";
+import { Logo } from "@/components/Logo";
 
 export default function ResetPasswordPage() {
   const [state, action, pending] = useActionState(resetPassword, undefined);
@@ -10,9 +11,7 @@ export default function ResetPasswordPage() {
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 40 }}>
-        <span style={{ fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em", background: "linear-gradient(135deg, #8b5cf6, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          workie
-        </span>
+        <Logo taille={28} />
       </Link>
 
       <div style={{ width: "100%", maxWidth: 400, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "36px 32px" }}>

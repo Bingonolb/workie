@@ -11,7 +11,7 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
   ],
 };
-import { Inter } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import { QueryProvider } from "@/providers/QueryProvider";
@@ -39,6 +39,26 @@ const inter = Inter({
   display: "swap",
   variable: "--police",
   weight: ["400", "500", "600", "700", "800"],
+});
+
+/*
+ * Le logotype seul, dans une geometrique.
+ *
+ * Le mot « workie » du nouveau logo est dessine dans une lineale geometrique :
+ * o et e parfaitement circulaires, w a sommets pointus, point du i rond et
+ * large. Inter, grotesque a l'axe vertical et aux terminaisons coupees, ne
+ * peut pas rendre ce dessin. Poppins en est la plus proche parmi les polices
+ * libres, et une seule graisse suffit puisque le mot n'apparait qu'a une
+ * taille et une intensite.
+ *
+ * Elle ne sert qu'au logotype : le corps du site reste en Inter, qui se lit
+ * mieux en petit et en paragraphe.
+ */
+const poppins = Poppins({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--police-logo",
+  weight: ["400"],
 });
 
 const OG_URL = "/api/og?title=Workie&sub=Avis+et+salaires+des+entreprises+suisses";
@@ -100,7 +120,7 @@ const orgSchema = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={inter.variable}>
+    <html lang="fr" className={`${inter.variable} ${poppins.variable}`}>
       <head>
         <link rel="preconnect" href="https://xtbdxfzbbuedlktpqpna.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://xtbdxfzbbuedlktpqpna.supabase.co" />

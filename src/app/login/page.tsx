@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { signIn, signInWithGoogle } from "@/lib/actions/auth";
 import { AuthFormWorkie } from "@/components/AuthFormWorkie";
+import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "Connexion · Workie",
@@ -15,13 +16,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 40 }}>
-        <span style={{
-          fontSize: 28, fontWeight: 900, letterSpacing: "-0.03em",
-          background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>
-          workie
-        </span>
+        <Logo taille={28} />
       </Link>
 
       <div className="auth-card" style={{ width: "100%", maxWidth: 400, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20 }}>

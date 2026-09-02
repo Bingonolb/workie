@@ -1,11 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#8b5cf6"/>
-      <stop offset="100%" stop-color="#f97316"/>
-    </linearGradient>
-  </defs>
-  <rect width="32" height="32" fill="url(#g)"/>
-  <circle cx="16" cy="16" r="12" fill="none" stroke="#fff" stroke-width="1.5"/>
-  <text x="16" y="21.5" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="14" fill="#fff" text-anchor="middle">W</text>
+  <!-- L'icône portait un « W » dans un cercle sur un aplat dégradé, dessiné en
+       Arial Black : trois éléments empruntés, aucun lié à la marque. Elle
+       porte maintenant le symbole, seul, sur fond noir. À seize pixels dans un
+       onglet, une lettre et un cercle concentrique se confondent ; deux plans
+       contrastés restent lisibles. -->
+  <rect width="32" height="32" rx="7" fill="#101319"/>
+  <g transform="translate(9.4 6.5) scale(0.19)" fill="#ffffff">
+    <path d="M0 22.5 L20.4 9.3 L20.4 87.9 L0 77.9 Z"/>
+    <rect x="29.4" y="28.6" width="40.6" height="83.4" rx="7" transform="skewY(-22.2)"/>
+  </g>
 </svg>

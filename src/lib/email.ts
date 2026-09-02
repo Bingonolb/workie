@@ -32,7 +32,7 @@ function welcomeHtml(rawUsername: string): string {
   <!-- Header gradient -->
   <tr>
     <td style="background:linear-gradient(135deg,#8b5cf6 0%,#f97316 100%);padding:48px 40px 40px;text-align:center;">
-      <h1 style="margin:0;font-size:36px;font-weight:900;letter-spacing:-0.03em;color:#ffffff;">workie</h1>
+      <h1 style="margin:0;font-size:36px;font-weight:400;letter-spacing:-0.005em;color:#ffffff;">workie</h1>
       <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.85);letter-spacing:0.01em;">Avis et salaires des entreprises suisses</p>
     </td>
   </tr>
@@ -166,7 +166,7 @@ function claimReceivedHtml(rawFirstName: string, rawCompanyName: string): string
 
   <tr>
     <td style="background:linear-gradient(135deg,#111827 0%,#1f2937 100%);padding:48px 40px 40px;text-align:center;">
-      <h1 style="margin:0 0 4px;font-size:32px;font-weight:900;letter-spacing:-0.03em;color:#ffffff;">workie</h1>
+      <h1 style="margin:0 0 4px;font-size:32px;font-weight:400;letter-spacing:-0.005em;color:#ffffff;">workie</h1>
       <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:0.05em;text-transform:uppercase;">Business</p>
     </td>
   </tr>
@@ -233,7 +233,7 @@ function claimApprovedHtml(rawFirstName: string, rawCompanyName: string): string
   <tr>
     <td style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);padding:48px 40px 40px;text-align:center;">
       <div style="font-size:48px;margin-bottom:12px;">🏆</div>
-      <h1 style="margin:0 0 4px;font-size:32px;font-weight:900;letter-spacing:-0.03em;color:#ffffff;">workie</h1>
+      <h1 style="margin:0 0 4px;font-size:32px;font-weight:400;letter-spacing:-0.005em;color:#ffffff;">workie</h1>
       <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.85);">Entreprise vérifiée ✓</p>
     </td>
   </tr>
@@ -323,7 +323,7 @@ export async function sendNewReviewEmail(email: string, companyName: string, com
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
   <tr>
     <td style="background:linear-gradient(135deg,#8b5cf6 0%,#f97316 100%);padding:32px 40px;text-align:center;">
-      <h1 style="margin:0;font-size:28px;font-weight:900;letter-spacing:-0.03em;color:#ffffff;">workie</h1>
+      <h1 style="margin:0;font-size:28px;font-weight:400;letter-spacing:-0.005em;color:#ffffff;">workie</h1>
     </td>
   </tr>
   <tr>

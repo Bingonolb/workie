@@ -7,6 +7,7 @@ import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
 import { SearchButton } from "./SearchButton";
 import { precharger, lireCache, ecrireCache, CLE_PROFIL, CLE_FAVORIS, CLE_CONTEXTE } from "@/lib/cacheSession";
+import { Logo } from "@/components/Logo";
 
 type UserCtx = {
   isLoggedIn: boolean;
@@ -64,13 +65,7 @@ export function NavbarClient() {
         gap: 8,
       }}>
         <Link href={isLoggedIn ? "/explore" : "/"} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{
-            fontSize: 20, fontWeight: 900, letterSpacing: "-0.03em",
-            background: "linear-gradient(135deg, #8b5cf6, #f97316)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>
-            workie
-          </span>
+          <Logo taille={20} />
         </Link>
 
         {isLoggedIn && (
