@@ -33,7 +33,7 @@ export function GuestContentGate({
       {/* CTA — normal flow, no empty space, always visible */}
       <div className="guest-gate-cta">
         <p style={{ fontSize: 21, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.025em" }}>
-          Accède aux avis complets
+          Accédez aux avis complets
         </p>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, maxWidth: 300, lineHeight: 1.65 }}>
           Salaires réels, retours d&apos;anciens employés. Gratuit et 100% anonyme.

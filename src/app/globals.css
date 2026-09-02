@@ -955,11 +955,56 @@ main, .page-main, .page-main-sm, .page-main-md {
    d'atteindre la premiere. Le filtre est un selecteur, et ces regles n'avaient
    plus d'element a styler. */
 
-/* Recherche et filtre du classement : sur une ligne, puis empiles quand la
-   largeur ne suffit plus a garder le selecteur lisible. */
-.ranking-controles { display: flex; gap: 10px; align-items: center; }
+/* Recherche et filtre du classement.
+
+   Les deux commandes partagent une seule definition de champ, sans quoi elles
+   ne se ressemblent qu'a peu pres : le selecteur natif se dessine par le
+   systeme, avec sa propre hauteur, son propre rayon et sa propre fleche, et
+   posait a cote de la recherche une boite manifestement etrangere au reste de
+   la page. appearance: none le rend au CSS, et la fleche devient un chevron
+   dessine, aligne sur celui qu'on mettrait partout ailleurs. */
+.ranking-controles { display: flex; gap: 10px; align-items: stretch; }
 @media (max-width: 560px) {
-  .ranking-controles { flex-direction: column; align-items: stretch; }
+  .ranking-controles { flex-direction: column; }
+}
+
+.ranking-champ {
+  height: 42px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  font-size: 16px;
+  color: var(--text);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.ranking-champ:focus-visible { border-color: var(--brand); }
+
+.ranking-recherche { width: 100%; padding: 0 12px 0 34px; }
+
+.ranking-filtre {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 200px;
+  padding: 0 36px 0 13px;
+  cursor: pointer;
+  font-weight: 500;
+  /* Chevron dessine plutot que la fleche du systeme. Le gris est choisi pour
+     tenir sur le fond clair comme sur le fond sombre : une url() ne peut pas
+     lire currentColor, donc la couleur ne suit pas le theme. */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%238b90a3' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 15px;
+}
+/* Un filtre actif se voit : sans cela, rien ne distingue « Alimentation »
+   de « Tous les secteurs » au premier coup d'oeil, et on cherche pourquoi la
+   liste est courte. */
+.ranking-filtre--actif {
+  border-color: color-mix(in srgb, var(--brand) 55%, transparent);
+  color: var(--brand);
+  font-weight: 650;
 }
 
 /* ─── Jobs page — mobile card layout ───────────────────────────── */

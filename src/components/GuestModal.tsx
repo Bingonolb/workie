@@ -74,7 +74,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
               {reviewCount > 1
                 ? `Encore ${reviewCount - 1} avis à lire : salaires, retours d'expérience et conseils d'anciens employés.`
-                : "Accède aux avis complets, salaires réels et donne le tien, c'est 100% anonyme."}
+                : "Accédez aux avis complets et aux salaires réels, et déposez le vôtre. C'est 100% anonyme."}
             </p>
           </div>
 

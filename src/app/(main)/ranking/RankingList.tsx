@@ -63,28 +63,18 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
             <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
             <input
+              className="ranking-champ ranking-recherche"
               value={search}
               onChange={e => setSearch(e.target.value)}
               aria-label="Chercher une entreprise ou une ville"
               placeholder="Chercher une entreprise ou une ville..."
-              style={{
-                width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
-                borderRadius: 10, padding: "9px 12px 9px 34px", fontSize: 16, color: "var(--text)",
-                outline: "none", boxSizing: "border-box",
-              }}
             />
           </div>
           <select
+            className={`ranking-champ ranking-filtre${secteur ? " ranking-filtre--actif" : ""}`}
             value={secteur}
             onChange={e => setSecteur(e.target.value)}
             aria-label="Filtrer par secteur"
-            style={{
-              background: "var(--surface2)", border: "1px solid var(--border2)",
-              borderRadius: 10, padding: "9px 12px", fontSize: 16,
-              color: secteur ? "var(--text)" : "var(--text-muted)",
-              outline: "none", boxSizing: "border-box", cursor: "pointer",
-              maxWidth: "100%",
-            }}
           >
             <option value="">Tous les secteurs</option>
             {secteurs.map(sect => (
