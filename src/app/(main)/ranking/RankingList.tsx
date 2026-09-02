@@ -43,16 +43,24 @@ export function RankingTable({ companies }: { companies: Company[] }) {
     // tiers de la largeur. Elle s'efface, et la ligne se redistribue.
     <div className={secteur ? "ranking-sans-secteur" : undefined}>
       <div style={{ padding: "20px 20px 16px" }}>
-        {/* Le titre reste l'identite de la page, le sous-titre dit ce qui est
-            reellement affiche. Annoncer « Top 200 » au-dessus de vingt-quatre
-            lignes filtrees ferait douter du reste des chiffres. */}
+        {/* Le titre dit ce qu'on regarde.
+            Filtre sur un secteur, il annoncait « Top 200 » au-dessus de trois
+            lignes de cabinets d'avocats, et le mot « Droit » n'apparaissait
+            qu'en petit dans le sous-titre. La colonne « Secteur » ayant ete
+            retiree parce qu'elle repetait la meme valeur a chaque ligne, plus
+            rien ne nommait franchement ce qu'on avait sous les yeux.
+
+            Le secteur devient donc le titre : dit une fois, en grand, plutot
+            que trois fois en petit. Le decompte descend d'un cran. */}
         <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 2 }}>
-          Top {companies.length}
+          {secteur || `Top ${companies.length}`}
         </h1>
         <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500, marginBottom: 16 }}>
-          {isFiltered
-            ? `${filtered.length} sur ${companies.length}${secteur ? ` · ${secteur}` : ""}`
-            : "Trié par score communautaire"}
+          {secteur
+            ? `${filtered.length} entreprise${filtered.length > 1 ? "s" : ""} sur ${companies.length}`
+            : q
+              ? `${filtered.length} résultat${filtered.length > 1 ? "s" : ""} sur ${companies.length}`
+              : "Trié par score communautaire"}
         </p>
 
         {/* Chercher et filtrer sont deux intentions distinctes : on cherche une
