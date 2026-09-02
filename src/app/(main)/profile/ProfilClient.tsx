@@ -178,20 +178,36 @@ export function ProfilClient() {
           </h1>
         </div>
 
-        {/* Info row */}
+        {/* Ligne d'informations.
+
+            Courriel, canton et ancienneté étaient empilés à l'identique,
+            en trois lignes de même taille et de même couleur, dans une
+            carte pleine largeur : trois faits de nature différente
+            présentés comme une liste à puces sans les puces, et beaucoup
+            de vide à droite.
+
+            Ils tiennent sur une ligne, séparés par des points médians,
+            comme les chiffres des cartes d'entreprise et du classement. Le
+            retour à la ligne reste possible sur écran étroit, où une
+            adresse électronique est longue. */}
         <div style={{
           padding: "16px 32px 20px",
           display: "flex",
-          flexDirection: "column",
-          gap: 5,
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 9,
+          fontSize: 14.5,
+          color: "var(--text-muted)",
         }}>
-          <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>{d?.email ?? " "}</span>
+          <span>{d?.email ?? " "}</span>
           {(profile?.city || profile?.country) && (
-            <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>
-              {[profile.city, profile.country].filter(Boolean).join(", ")}
-            </span>
+            <>
+              <span aria-hidden="true" style={{ opacity: 0.45 }}>&middot;</span>
+              <span>{[profile.city, profile.country].filter(Boolean).join(", ")}</span>
+            </>
           )}
-          <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>Membre depuis {memberSince}</span>
+          <span aria-hidden="true" style={{ opacity: 0.45 }}>&middot;</span>
+          <span>Membre depuis {memberSince}</span>
         </div>
       </div>
 

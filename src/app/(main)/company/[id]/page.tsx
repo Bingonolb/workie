@@ -480,19 +480,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               <BlocOffresEmploi url={company.website_url} className="liens-desktop" />
             )}
 
-            {/* Tags */}
-            {company.tags?.length > 0 && (
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Tags</h3>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {company.tags.map(tag => (
-                    <span key={tag} style={{ fontSize: 12.5, padding: "4px 10px", borderRadius: 50, background: "var(--surface3)", color: "var(--text-muted)" }}>
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Le bloc « Tags » a été retiré.
+
+                Il redisait le secteur en minuscules : « Alimentation »
+                devenait « #food #nutrition #agroalimentaire ». Ces mots
+                n'aidaient à choisir en rien, et le secteur figure déjà en
+                pastille en haut de la fiche. */}
 
             {company.founded_year && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "16px 20px", display: "flex", justifyContent: "space-between" }}>

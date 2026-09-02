@@ -872,43 +872,6 @@ export function SwipeView({
   );
 }
 
-const SECTOR_DEFAULT_TAGS: Record<string, string[]> = {
-  "Tech":                   ["innovation", "digital", "remote"],
-  "Finance":                ["finance", "banking", "investment"],
-  "Assurances":             ["assurances", "risk", "courtage"],
-  "Pharma":                 ["life-sciences", "r&d", "biotech"],
-  "Santé":                  ["healthcare", "médecine", "bien-être"],
-  "Conseil":                ["consulting", "stratégie", "management"],
-  "Industrie":              ["manufacturing", "industrie", "engineering"],
-  "Automobile":             ["automotive", "mobilité", "engineering"],
-  "Horlogerie":             ["luxury", "swiss-made", "savoir-faire"],
-  "Commerce":               ["retail", "distribution", "vente"],
-  "Alimentation":           ["food", "nutrition", "fmcg"],
-  "Agriculture":            ["agriculture", "durabilité", "nature"],
-  "Éducation & Recherche":  ["éducation", "recherche", "innovation"],
-  "Sports & Fashion":       ["sport", "mode", "lifestyle"],
-  "Transport":              ["logistique", "mobilité", "transport"],
-  "Énergie":                ["énergie", "cleantech", "durabilité"],
-  "Droit":                  ["legal", "compliance", "droit"],
-  "Bâtiment":               ["construction", "immobilier", "ingénierie"],
-  "Beauté":                 ["beauté", "cosmétiques", "bien-être"],
-  "Administration publique":["service-public", "gouvernance", "suisse"],
-  "ONG":                    ["humanitaire", "impact", "terrain"],
-  "Fondation":              ["mécénat", "intérêt-général", "projets"],
-  "Association":            ["associatif", "bénévolat", "communauté"],
-  "Commerce de détail":     ["retail", "grande-distribution", "vente"],
-  "Hôtellerie & Restauration": ["hôtellerie", "restauration", "accueil"],
-  "Immobilier":             ["immobilier", "gérance", "promotion"],
-  "Médias & Communication": ["médias", "communication", "édition"],
-  "Chimie":                 ["chimie", "arômes", "matériaux"],
-  "Télécoms":               ["télécoms", "réseau", "connectivité"],
-};
-function getSwipeTags(company: Company): string[] {
-  const existing = (company.tags ?? []).slice(0, 4);
-  if (existing.length >= 4) return existing;
-  const defaults = SECTOR_DEFAULT_TAGS[company.sector] ?? ["swiss", "professionnel", "équipe"];
-  return [...existing, ...defaults.filter(t => !existing.includes(t))].slice(0, 4);
-}
 
 function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
   company: Company; flameIds: Set<string>;
@@ -1006,11 +969,12 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
             {company.description}
           </p>
         )}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {getSwipeTags(company).map(tag => (
-            <span key={tag} style={{ fontSize: 12, padding: "3px 10px", borderRadius: 50, background: "var(--surface2)", color: "var(--text-muted)", fontWeight: 600 }}>#{tag}</span>
-          ))}
-        </div>
+        {/* Les étiquettes ont été retirées.
+
+            Elles redisaient le secteur en minuscules, et surtout elles
+            étaient inventées : faute d'étiquettes en base, la carte
+            piochait dans une table de valeurs par défaut par secteur, et
+            affichait donc des mots que personne n'avait saisis. */}
       </div>
     </div>
   );
