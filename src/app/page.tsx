@@ -318,17 +318,21 @@ export default async function Home() {
           accent, employé avec parcimonie. Le logo garde le sien. */}
       <section className="landing-hero-deux-col">
         <div className="hero-texte">
-          <h1 className="hero-titre" style={{ fontSize: "clamp(34px, 5.2vw, 58px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 22, maxWidth: 620 }}>
-            Les entreprises suisses vues de l&apos;intérieur, avant d&apos;y postuler.
+          {/* Six mots, pas dix. A 58 px, dix mots donnaient quatre lignes :
+              le titre remplissait l'écran à lui seul et plus rien ne se lisait
+              après lui. Un titre de page d'accueil se saisit d'un coup d'œil,
+              il ne se lit pas. Le corps redescend de 58 à 50 px. */}
+          <h1 className="hero-titre" style={{ fontSize: "clamp(32px, 4.4vw, 50px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 20, maxWidth: 560 }}>
+            Les entreprises suisses, avant d&apos;y postuler.
           </h1>
 
-          <p className="hero-accroche" style={{ fontSize: "clamp(16px, 1.6vw, 19px)", color: "var(--text-sub)", maxWidth: 560, lineHeight: 1.65, marginBottom: 34 }}>
-            {/* La phrase s'arrêtait sur les données. Un lecteur en concluait
-                que Workie renseigne sur les entreprises et rien d'autre. Elle
-                nomme maintenant le parcours entier, dont la candidature. */}
-            Notes détaillées, salaires réels et conditions de travail, publiés
-            anonymement par celles et ceux qui y travaillent. Comparez,
-            choisissez, et notez le vôtre à votre tour.
+          {/* Douze mots, pas vingt-sept. La phrase enumérait les données puis
+              les trois verbes du parcours : deux phrases pour ce qui en
+              demande une. Elle dit maintenant d'où viennent les notes, ce qui
+              est la seule chose qu'un titre ne peut pas porter. */}
+          <p className="hero-accroche" style={{ fontSize: "clamp(15.5px, 1.4vw, 17.5px)", color: "var(--text-sub)", maxWidth: 470, lineHeight: 1.6, marginBottom: 32 }}>
+            Notes, salaires et conditions de travail, publiés anonymement par
+            celles et ceux qui y travaillent.
           </p>
 
           <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
@@ -483,8 +487,8 @@ export default async function Home() {
                 donne maintenant le cas concret qui justifie le titre : c'est
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
-            Deux employeurs notés 3.8 ne se ressemblent pas : chez l&apos;un la note
-            tient à la rémunération, chez l&apos;autre à l&apos;encadrement.
+            Deux employeurs notés 3.8 ne se ressemblent pas : chez l&apos;un c&apos;est
+            la rémunération, chez l&apos;autre l&apos;encadrement.
           </p>
         </div>
       </section>
@@ -519,9 +523,7 @@ export default async function Home() {
 
           <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.7, maxWidth: 640, margin: "0 auto 44px", textAlign: "center" }}>
             Un site d&apos;annonces ne montre que les offres qu&apos;on lui a confiées.
-            Workie référence les employeurs eux-mêmes : chaque fiche mène à leur
-            page emploi, y compris celle des entreprises qui recrutent sans
-            passer par une plateforme.
+            Ici, chaque fiche mène à la page emploi de l&apos;employeur.
           </p>
 
           <div className="landing-parcours">
@@ -536,8 +538,7 @@ export default async function Home() {
                   haut de page : « Notes détaillées, salaires... et conditions
                   de travail, par celles et ceux qui y travaillent ». */}
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
-                Sa note globale, le détail critère par critère, et les salaires
-                déclarés pour le poste que vous visez.
+                Sa note, le détail par critère, et les salaires déclarés.
               </p>
             </div>
 
@@ -551,8 +552,8 @@ export default async function Home() {
                 Vous voyez tous ses postes
               </h3>
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
-                Le lien de la fiche mène à sa page emploi, tenue par ses propres
-                équipes : tous les postes ouverts, et aucun qui ne le soit plus.
+                Sa page emploi, tenue par ses équipes : tous les postes ouverts,
+                et rien de périmé.
               </p>
             </div>
           </div>
@@ -583,13 +584,13 @@ export default async function Home() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
               { Icone: GraduationCap, titre: "Vous terminez vos études",
-                desc: "Situer le salaire d'un premier poste dans votre domaine, et repérer les employeurs qui encadrent réellement leurs débutants." },
+                desc: "Le salaire d'un premier poste, et les employeurs qui encadrent vraiment leurs débutants." },
               { Icone: Briefcase, titre: "Vous envisagez de changer",
-                desc: "Comparer votre employeur actuel à ceux qui recrutent, sur des critères précis plutôt que sur une réputation." },
+                desc: "Comparer votre employeur à ceux qui recrutent, sur des critères plutôt qu'une réputation." },
               { Icone: Landmark, titre: "Vous êtes dans le public",
-                desc: "Comparer avec le privé sur des bases concrètes : rémunération, charge de travail et flexibilité." },
+                desc: "Le privé sur des bases concrètes : rémunération, charge de travail, flexibilité." },
               { Icone: IconeMaison, titre: "Vous reprenez une activité",
-                desc: "Identifier les employeurs que leurs équipes jugent souples sur les horaires et attentifs aux parcours interrompus." },
+                desc: "Les employeurs que leurs équipes jugent souples sur les horaires." },
             ].map(({ Icone, titre, desc }, i) => (
               <div key={titre} style={{
                 display: "flex", gap: 18, padding: "22px 0",
@@ -623,11 +624,11 @@ export default async function Home() {
               // fait est que les avis sont chiffrés, donc comparables. C'est ce
               // que la carte dit maintenant.
               { Icone: Gauge, titre: "Uniquement des données chiffrées",
-                desc: "Chaque avis est un ensemble de notes, accompagné du contexte du poste. Des valeurs comparables d'une entreprise à l'autre, lisibles d'un coup d'oeil." },
+                desc: "Des notes et le contexte du poste, comparables d'une entreprise à l'autre." },
               { Icone: Lock, titre: "Anonymat par construction",
-                desc: "Votre nom n'est jamais publié, et aucune page ne relie un compte à un avis. Ce n'est pas un réglage, c'est la façon dont les données sont servies." },
+                desc: "Votre nom n'est jamais publié, et aucune page ne relie un compte à un avis." },
               { Icone: ShieldCheck, titre: "Contrôles à la publication",
-                desc: "Adresse confirmée, compte de plus de vingt-quatre heures, un seul avis par entreprise, et une modération alimentée par les signalements." },
+                desc: "Adresse confirmée, un seul avis par entreprise, et une modération sur signalement." },
             ].map(({ Icone, titre, desc }) => (
               <div key={titre}>
                 <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
@@ -646,7 +647,7 @@ export default async function Home() {
             Commencez par votre secteur.
           </h2>
           <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 32 }}>
-            La consultation est libre et ne demande pas de compte. Chaque fiche mène à l'employeur et à ses postes ouverts.
+            La consultation est libre et ne demande pas de compte.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 30px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
@@ -669,9 +670,8 @@ export default async function Home() {
                 Touchez des candidats actifs en Suisse.
               </h2>
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 520 }}>
-                Que vous représentiez une entreprise ou un projet personnel, vous
-                diffusez une annonce sans abonnement. Vous fixez votre budget et
-                votre ciblage, et vous ne payez que ce que vous consommez.
+                Sans abonnement. Vous fixez votre budget et votre ciblage, et
+                vous ne payez que ce que vous consommez.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
                 {[
