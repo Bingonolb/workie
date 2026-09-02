@@ -112,27 +112,24 @@ export function ProfilClient() {
         border: "1px solid var(--border)",
         background: "var(--surface)",
       }}>
-        {/* Name zone — dark panel with "Workie" watermark text */}
+        {/* Panneau sombre du nom.
+
+            Le mot « Workie » y figurait en filigrane, sur quatre-vingt-seize
+            pixels et dans l'ancien logotype en gras extreme. Deux raisons de
+            le retirer : ce lettrage n'est plus celui de la marque, et cette
+            carte porte l'identite de l'utilisateur, pas la notre. Signer le
+            profil de quelqu'un de son propre nom est un reflexe de
+            plateforme.
+
+            Le fond degrade cede aussi : il allait de #0d0d14 a #131320, un
+            ecart qu'on ne voit pas, et un degrade invisible est un aplat qui
+            coute un calcul. */}
         <div style={{
           position: "relative",
           padding: "32px 32px 28px",
-          background: "linear-gradient(160deg, #0d0d14 0%, #131320 100%)",
+          background: "#101319",
           overflow: "hidden",
         }}>
-          {/* Watermark */}
-          <span aria-hidden="true" style={{
-            position: "absolute",
-            right: -8, top: "50%",
-            transform: "translateY(-50%)",
-            fontSize: 96, fontWeight: 900,
-            color: "rgba(255,255,255,0.04)",
-            letterSpacing: "-0.05em",
-            userSelect: "none",
-            lineHeight: 1,
-            pointerEvents: "none",
-          }}>
-            Workie
-          </span>
           {/* Accent line */}
           <div style={{
             width: 32, height: 3, borderRadius: 2,

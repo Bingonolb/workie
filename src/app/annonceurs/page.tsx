@@ -102,6 +102,25 @@ export default async function AnnonceursPage() {
           border-radius: 14px;
           padding: 26px 24px;
         }
+        /* Les chiffres courent sur toute la largeur du contenu, cales sur les
+           cartes qui les suivent. Le filet precedent s'arretait a 520 px, au
+           tiers de la page, et pendait dans le vide. */
+        .ann-chiffres {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 0;
+          padding: 30px 0;
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+          margin-bottom: 48px;
+        }
+        @media (max-width: 620px) {
+          /* Sur telephone, trois colonnes rendraient les libelles illisibles :
+             « employeurs references » tiendrait sur quatre lignes. */
+          .ann-chiffres { grid-template-columns: 1fr; gap: 22px; }
+          .ann-chiffres > * { padding-left: 0 !important; border-left: none !important; }
+        }
+
         .ann-ouverture {
           display: grid;
           grid-template-columns: 1fr 420px;
@@ -188,7 +207,7 @@ export default async function AnnonceursPage() {
           <div className="ann-large">
             <p className="ann-eyebrow">L&apos;audience</p>
             <h2 className="ann-h2">Des gens en train de décider.</h2>
-            <p className="ann-chapo" style={{ marginBottom: 0 }}>
+            <p className="ann-chapo">
               {/* Aucun chiffre d'audience : le site est jeune, et un annonceur
                   qui decouvre l'ecart sur son tableau de bord ne revient pas.
                   L'intention se decrit, elle n'a pas besoin d'etre chiffree. */}
@@ -199,11 +218,11 @@ export default async function AnnonceursPage() {
             {/* Le terrain, en valeur absolue. Les cantons et les secteurs sont
                 comptes dans le module de tarification, donc ces nombres sont
                 exactement ceux que le formulaire de ciblage propose. */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 24, maxWidth: 520, padding: "26px 0 0", borderTop: "1px solid var(--border)", marginBottom: 44 }}>
-              {chiffres.map(({ valeur, libelle }) => (
-                <div key={libelle}>
-                  <p style={{ fontSize: "clamp(24px, 3.4vw, 32px)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1 }}>{valeur}</p>
-                  <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 7, lineHeight: 1.4 }}>{libelle}</p>
+            <div className="ann-chiffres">
+              {chiffres.map(({ valeur, libelle }, i) => (
+                <div key={libelle} style={{ paddingLeft: i === 0 ? 0 : 28, borderLeft: i === 0 ? "none" : "1px solid var(--border)" }}>
+                  <p style={{ fontSize: "clamp(26px, 3.6vw, 36px)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1 }}>{valeur}</p>
+                  <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 9, lineHeight: 1.4 }}>{libelle}</p>
                 </div>
               ))}
             </div>

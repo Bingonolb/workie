@@ -2,7 +2,11 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Star, MapPin, Users, TrendingUp, X, Flame, Info, Zap, Skull, ExternalLink } from "lucide-react";
+// Une tete de mort et un eclair pour noter un employeur : le registre est
+// celui du jeu video, pas d'un service ou les entreprises sont aussi
+// clientes. Les fleches de tendance disent la meme chose, et disent en plus
+// dans quel sens le score bouge.
+import { Star, MapPin, Users, TrendingUp, TrendingDown, X, Flame, Info, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { addBoost, addPenalty } from "@/lib/actions/scores";
 import { fetchSwipePage } from "@/lib/actions/companies";
@@ -685,7 +689,7 @@ export function SwipeView({
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
             >
-              <Skull size={15} aria-hidden="true" />
+              <TrendingDown size={15} aria-hidden="true" />
               <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
               {!isAdmin && penaltyCredits > 0 && (
                 <span style={{ position: "absolute", top: -5, right: -5, minWidth: 16, height: 16, borderRadius: 8, background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 900, padding: "0 3px" }}>{penaltyCredits}</span>
@@ -763,24 +767,23 @@ export function SwipeView({
               onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
             >
-              <Zap size={15} fill="#8b5cf6" aria-hidden="true" />
+              <TrendingUp size={15} aria-hidden="true" />
               <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>+100</span>
             </button>
           );
         })()}
       </div>
 
-      {/* Legend — hidden on mobile */}
+      {/* Legende, masquee sur telephone.
+
+          Elle nommait les cinq boutons un par un, juste sous les cinq
+          boutons, puis une phrase reexpliquait le geste : trois fois la
+          meme chose. Ne reste que ce que les boutons ne peuvent pas dire,
+          c'est-a-dire qu'on peut aussi glisser la carte et se servir des
+          fleches du clavier. */}
       <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
-        <div style={{ display: "flex", gap: 20, fontSize: 12, color: "var(--text-muted)" }}>
-          {isLoggedIn && <span><span style={{ color: "#ef4444", fontWeight: 700 }}>-100</span> pénalité</span>}
-          <span>✕ passer</span>
-          <span>ℹ détail</span>
-          <span>Sauvegarder</span>
-          <span>⚡ <span style={{ color: "#8b5cf6", fontWeight: 700 }}>+100</span> boost</span>
-        </div>
-        <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
-          Swipe <span style={{ color: "#f97316", fontWeight: 700 }}>🔥 droite</span> pour sauvegarder · <span style={{ color: "#ef4444", fontWeight: 700 }}>✕ gauche</span> pour passer
+        <p style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
+          Glissez la carte à droite pour sauvegarder, à gauche pour passer
           {" "}&nbsp;·{" "}<kbd style={{ fontSize: 10, padding: "1px 5px", borderRadius: 4, background: "var(--surface3)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontFamily: "monospace" }}>←</kbd>{" "}<kbd style={{ fontSize: 10, padding: "1px 5px", borderRadius: 4, background: "var(--surface3)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontFamily: "monospace" }}>→</kbd>
         </p>
       </div>
