@@ -267,6 +267,26 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+/* Salaires : sur telephone, les chiffres passent avant les barres.
+
+   Les lignes de secteur et de poste imposaient 380 px de large et defilaient
+   donc horizontalement dans leur cadre. Sur un ecran de 375 px, le montant se
+   retrouvait coupe en plein milieu : on lisait « CHI » au lieu de
+   « CHF 135k ». La barre sert a comparer les secteurs entre eux ; reduite a
+   quarante pixels elle ne compare plus rien, alors que la fourchette est deja
+   ecrite en toutes lettres sous chaque ligne. Elle sort, et tout tient. */
+@media (max-width: 600px) {
+  .salaire-barre { display: none !important; }
+  .salaire-liste { min-width: 0 !important; }
+  /* Les largeurs fixes du nom (155 et 190 px) et du compte additionnaient plus
+     que la place disponible sur un ecran de 375 px : « 3 avis » se lisait
+     « 3 av ». Le nom prend ce qui reste, le compte sa propre largeur. */
+  .salaire-nom { width: auto !important; flex: 1 1 auto; min-width: 0; }
+  .salaire-compte { width: auto !important; }
+  /* La fourchette etait indentee de 165 px pour se poser sous la barre. */
+  .salaire-fourchette { padding-left: 0 !important; }
+}
+
 /* Horizontal scroll without visible scrollbar — for inline charts */
 .scroll-x {
   overflow-x: auto;

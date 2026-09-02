@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
-import { TrendingUp, Users, Briefcase } from "lucide-react";
+import { TrendingUp, Users, Briefcase, Lock } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
 
 export const revalidate = 300;
@@ -32,9 +32,15 @@ type SectorStat = {
   count: number;
 };
 
+// Les postes etaient decrits par leur moyenne quand les secteurs l'etaient par
+// leur mediane, sur la meme page et sans que rien ne le signale. Deux mesures
+// differentes ne se comparent pas : un lecteur qui lit « Conseil : 135k » puis
+// « Technical Lead : 128k » croit lire deux fois la meme chose. La mediane
+// s'impose pour des salaires, ou quelques tres hauts revenus tirent la moyenne
+// vers le haut sans decrire ce que touche la plupart des gens.
 type JobStat = {
   job_title: string;
-  avg: number;
+  median: number;
   p25: number;
   p75: number;
   count: number;
@@ -42,7 +48,7 @@ type JobStat = {
 
 type ContractStat = {
   type: string;
-  avg: number;
+  median: number;
   count: number;
   pct: number;
 };
@@ -123,13 +129,13 @@ export default async function SalairesPage() {
       const sorted = [...salaries].sort((a, b) => a - b);
       return {
         job_title,
-        avg: Math.round(salaries.reduce((a, b) => a + b, 0) / salaries.length),
+        median: Math.round(median(sorted)),
         p25: Math.round(percentile(sorted, 25)),
         p75: Math.round(percentile(sorted, 75)),
         count: salaries.length,
       };
     })
-    .sort((a, b) => b.avg - a.avg)
+    .sort((a, b) => b.median - a.median)
     .slice(0, 20);
 
   // Employment type breakdown
@@ -140,10 +146,13 @@ export default async function SalairesPage() {
     contractMap[t].push(Number(r.salary_chf));
   });
 
+  // Derniere section encore en moyenne alors que les secteurs et les postes
+  // sont passes en mediane : sur une meme page, deux mesures qui ne se
+  // comparent pas.
   const contractStats: ContractStat[] = Object.entries(contractMap)
     .map(([type, salaries]) => ({
       type,
-      avg: Math.round(salaries.reduce((a, b) => a + b, 0) / salaries.length),
+      median: Math.round(median([...salaries].sort((a, b) => a - b))),
       count: salaries.length,
       pct: Math.round((salaries.length / totalCount) * 100),
     }))
@@ -158,9 +167,6 @@ export default async function SalairesPage() {
   const overallMedian = allSalaries.length > 0 ? Math.round(median(allSalaries)) : 0;
   const overallP25 = allSalaries.length > 0 ? Math.round(percentile(allSalaries, 25)) : 0;
   const overallP75 = allSalaries.length > 0 ? Math.round(percentile(allSalaries, 75)) : 0;
-
-  const maxSectorMedian = Math.max(...sectorStats.map(s => s.median), 1);
-  const maxJobAvg = Math.max(...jobStats.map(j => j.avg), 1);
 
   // JSON-LD: Dataset for salary data + FAQ
   const salairesJsonLd = [
@@ -208,7 +214,8 @@ export default async function SalairesPage() {
       <section style={{ background: "var(--surface2)", borderBottom: "1px solid var(--border)", padding: "52px 24px 40px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 50, padding: "5px 14px", marginBottom: 20, fontSize: 12, fontWeight: 700, color: "#10b981" } as React.CSSProperties}>
-            🔒 100% anonyme · données issues d&apos;avis vérifiés
+            <Lock size={12} strokeWidth={2.4} aria-hidden="true" />
+            100% anonyme · données issues d&apos;avis vérifiés
           </div>
           <h1 style={{ fontSize: "clamp(28px, 5vw, 44px)", fontWeight: 900, letterSpacing: "-0.04em", color: "var(--text)", marginBottom: 12, lineHeight: 1.1 }}>
             Salaires en Suisse,{" "}
@@ -234,43 +241,56 @@ export default async function SalairesPage() {
           </div>
         ) : (
           <>
-            {/* KPIs globaux */}
-            <div className="stat-grid-3" style={{ marginBottom: 28 }}>
-              {[
-                { label: "Salaire médian CH", value: formatSalary(overallMedian), color: "#8b5cf6", icon: "🇨🇭" },
-                { label: "Salaire moyen CH", value: formatSalary(overallAvg), color: "#f97316", icon: "📊" },
-                { label: "Avis avec salaire", value: `${totalCount}`, color: "#10b981", icon: "🔒" },
-              ].map(({ label, value, color, icon }) => (
-                <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px", textAlign: "center" }}>
-                  <p style={{ fontSize: 24, marginBottom: 6 }}>{icon}</p>
-                  <p style={{ fontSize: "clamp(18px, 3vw, 28px)", fontWeight: 900, color, letterSpacing: "-0.03em", marginBottom: 4 }}>{value}</p>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>{label}</p>
-                </div>
-              ))}
-            </div>
+            {/* Un seul bloc, une seule phrase chiffree.
 
-            {/* Fourchette nationale P25–P75 */}
-            {overallP25 > 0 && (
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 24px", marginBottom: 28 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>Fourchette nationale (50% des salaires)</p>
-                <div style={{ position: "relative", height: 8, background: "var(--border)", borderRadius: 4, marginBottom: 10 }}>
-                  <div style={{
-                    position: "absolute",
-                    left: `${(overallP25 / (overallP75 * 1.1)) * 100}%`,
-                    width: `${((overallP75 - overallP25) / (overallP75 * 1.1)) * 100}%`,
-                    maxWidth: "100%",
-                    height: "100%",
-                    background: "linear-gradient(90deg, #8b5cf6, #f97316)",
-                    borderRadius: 4,
-                  }} />
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-muted)" }}>
-                  <span>P25 : <strong style={{ color: "var(--text)" }}>{formatSalary(overallP25)}</strong></span>
-                  <span>Médiane : <strong style={{ color: "#8b5cf6" }}>{formatSalary(overallMedian)}</strong></span>
-                  <span>P75 : <strong style={{ color: "var(--text)" }}>{formatSalary(overallP75)}</strong></span>
-                </div>
-              </div>
-            )}
+                Il y avait trois cartes et une barre, soit cinq nombres pour
+                dire une chose. « Salaire median CH » et « Salaire moyen CH »
+                s'affichaient cote a cote, a six mille francs d'ecart, sans que
+                rien n'indique lequel regarder : l'ecart entre les deux est une
+                subtilite statistique, pas une information pour qui prepare une
+                negociation. La mediane reste, parce que quelques tres hauts
+                revenus tirent une moyenne de salaires sans decrire ce que
+                touche la plupart des gens. La moyenne continue d'alimenter les
+                donnees structurees, ou elle a sa place.
+
+                La mediane etait ensuite repetee sous la barre, et les bornes
+                s'annoncaient « P25 » et « P75 » : c'est la notation d'un
+                statisticien, elle se dit en francais. La phrase remplace du
+                meme coup le libelle en capitales qui tentait de la traduire. */}
+
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "26px 26px 22px", marginBottom: 28 }}>
+              <p style={{ fontSize: 12.5, color: "var(--text-muted)", fontWeight: 600, marginBottom: 6 }}>
+                Salaire médian en Suisse
+              </p>
+              <p style={{ fontSize: "clamp(30px, 6vw, 44px)", fontWeight: 900, color: "var(--text)", letterSpacing: "-0.04em", lineHeight: 1, marginBottom: overallP25 > 0 ? 22 : 12 }}>
+                {formatSalary(overallMedian)}
+              </p>
+
+              {overallP25 > 0 && (
+                <>
+                  <div style={{ position: "relative", height: 8, background: "var(--border)", borderRadius: 4, marginBottom: 12 }}>
+                    <div style={{
+                      position: "absolute",
+                      left: `${(overallP25 / (overallP75 * 1.1)) * 100}%`,
+                      width: `${((overallP75 - overallP25) / (overallP75 * 1.1)) * 100}%`,
+                      maxWidth: "100%",
+                      height: "100%",
+                      background: "linear-gradient(90deg, #8b5cf6, #f97316)",
+                      borderRadius: 4,
+                    }} />
+                  </div>
+                  <p style={{ fontSize: 13.5, color: "var(--text-sub)", lineHeight: 1.6 }}>
+                    La moitié des salaires déclarés se situent entre{" "}
+                    <strong style={{ color: "var(--text)" }}>{formatSalary(overallP25)}</strong> et{" "}
+                    <strong style={{ color: "var(--text)" }}>{formatSalary(overallP75)}</strong>.
+                  </p>
+                </>
+              )}
+
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 18, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+                Sur {totalCount} salaire{totalCount > 1 ? "s" : ""} déclaré{totalCount > 1 ? "s" : ""} anonymement, en brut annuel.
+              </p>
+            </div>
 
             {/* Salaires par secteur */}
             {sectorStats.length > 0 && (
@@ -279,9 +299,9 @@ export default async function SalairesPage() {
                   <TrendingUp size={18} color="#8b5cf6" aria-hidden="true" />
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaires par secteur</h2>
                 </div>
-                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>Médiane · la barre montre la fourchette P25–P75 (50% des salaires du secteur)</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>Médiane du secteur, et la fourchette qui couvre la moitié des salaires.</p>
 
-                <div className="table-scroll"><div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 380 }}>
+                <div className="table-scroll"><div className="salaire-liste" style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 380 }}>
                   {sectorStats.map(({ sector, median: med, p25, p75, count }) => {
                     const color = SECTOR_COLORS[sector] ?? "#8b5cf6";
                     // normalize against max p75 for a consistent scale
@@ -292,9 +312,9 @@ export default async function SalairesPage() {
                     return (
                       <div key={sector}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color, width: 155, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sector}</span>
+                          <span className="salaire-nom" style={{ fontSize: 12, fontWeight: 700, color, width: 155, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sector}</span>
                           {/* Range bar */}
-                          <div style={{ flex: 1, height: 10, background: "var(--border)", borderRadius: 5, position: "relative", overflow: "visible" }}>
+                          <div className="salaire-barre" style={{ flex: 1, height: 10, background: "var(--border)", borderRadius: 5, position: "relative", overflow: "visible" }}>
                             {/* P25–P75 band */}
                             <div style={{ position: "absolute", left: `${p25Pct}%`, width: `${bandPct}%`, height: "100%", background: `${color}33`, borderRadius: 5 }} />
                             {/* Median tick */}
@@ -303,11 +323,11 @@ export default async function SalairesPage() {
                           <span style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", width: 76, textAlign: "right", flexShrink: 0 }}>
                             {formatSalary(med)}
                           </span>
-                          <span style={{ fontSize: 11, color: "var(--text-muted)", width: 44, textAlign: "right", flexShrink: 0 }}>
+                          <span className="salaire-compte" style={{ fontSize: 11, color: "var(--text-muted)", width: 44, textAlign: "right", flexShrink: 0 }}>
                             {count} avis
                           </span>
                         </div>
-                        <div style={{ paddingLeft: 165, fontSize: 11, color: "var(--text-muted)" }}>
+                        <div className="salaire-fourchette" style={{ paddingLeft: 165, fontSize: 11, color: "var(--text-muted)" }}>
                           {formatSalary(p25)} – {formatSalary(p75)}
                         </div>
                       </div>
@@ -325,29 +345,31 @@ export default async function SalairesPage() {
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px", marginBottom: 28 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                   <Users size={18} color="#f97316" aria-hidden="true" />
-                  <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaires moyens par poste</h2>
+                  <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaires par poste</h2>
                 </div>
-                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>Moyenne · la barre montre la fourchette P25–P75</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>Médiane du poste, et la fourchette qui couvre la moitié des salaires.</p>
 
-                <div className="table-scroll"><div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 380 }}>
-                  {jobStats.map(({ job_title, avg, p25, p75, count }, i) => {
+                <div className="table-scroll"><div className="salaire-liste" style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 380 }}>
+                  {jobStats.map(({ job_title, median: med, p25, p75, count }, i) => {
                     const scale = Math.max(...jobStats.map(j => j.p75), 1);
                     const p25Pct = (p25 / scale) * 100;
                     const bandPct = ((p75 - p25) / scale) * 100;
-                    const avgPct = (avg / scale) * 100;
+                    const medPct = (med / scale) * 100;
                     return (
                       <div key={job_title} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <span style={{ fontSize: 11, color: "var(--text-muted)", width: 18, textAlign: "right", flexShrink: 0, fontWeight: 700 }}>{i + 1}</span>
-                        <span style={{ fontSize: 13, color: "var(--text)", fontWeight: 600, width: 190, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{job_title}</span>
-                        <div style={{ flex: 1, height: 10, background: "var(--border)", borderRadius: 5, position: "relative" }}>
+                        <span className="salaire-nom" style={{ fontSize: 13, color: "var(--text)", fontWeight: 600, width: 190, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{job_title}</span>
+                        <div className="salaire-barre" style={{ flex: 1, height: 10, background: "var(--border)", borderRadius: 5, position: "relative" }}>
                           <div style={{ position: "absolute", left: `${p25Pct}%`, width: `${bandPct}%`, height: "100%", background: "rgba(249,115,22,0.2)", borderRadius: 5 }} />
-                          <div style={{ position: "absolute", left: `${avgPct}%`, transform: "translateX(-50%)", width: 3, height: "100%", background: "#f97316", borderRadius: 2 }} />
+                          <div style={{ position: "absolute", left: `${medPct}%`, transform: "translateX(-50%)", width: 3, height: "100%", background: "#f97316", borderRadius: 2 }} />
                         </div>
                         <span style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", width: 72, textAlign: "right", flexShrink: 0 }}>
-                          {formatSalary(avg)}
+                          {formatSalary(med)}
                         </span>
-                        <span style={{ fontSize: 11, color: "var(--text-muted)", width: 36, textAlign: "right", flexShrink: 0 }}>
-                          {count}x
+                        {/* « 4x » se lisait comme une multiplication. Les
+                            secteurs, juste au-dessus, comptent en « avis ». */}
+                        <span className="salaire-compte" style={{ fontSize: 11, color: "var(--text-muted)", width: 44, textAlign: "right", flexShrink: 0 }}>
+                          {count} avis
                         </span>
                       </div>
                     );
@@ -367,13 +389,15 @@ export default async function SalairesPage() {
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Salaire par type de contrat</h2>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {contractStats.map(({ type, avg, count, pct }) => (
+                  {contractStats.map(({ type, median: med, count, pct }) => (
                     <div key={type} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", width: 140, flexShrink: 0 }}>{type}</span>
+                      {/* Le type sort de la base en minuscules : la page affichait « cdi »
+                          et « cdd » la ou le reste du site ecrit ces sigles en capitales. */}
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", width: 140, flexShrink: 0 }}>{type.toUpperCase()}</span>
                       <div style={{ flex: 1, height: 8, background: "var(--border)", borderRadius: 4, overflow: "hidden" }}>
                         <div style={{ height: "100%", width: `${pct}%`, background: "linear-gradient(90deg, #10b981, #8b5cf6)", borderRadius: 4 }} />
                       </div>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", width: 76, textAlign: "right", flexShrink: 0 }}>{formatSalary(avg)}</span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", width: 76, textAlign: "right", flexShrink: 0 }}>{formatSalary(med)}</span>
                       <span style={{ fontSize: 11, color: "var(--text-muted)", width: 52, textAlign: "right", flexShrink: 0 }}>{pct}% · {count}</span>
                     </div>
                   ))}
