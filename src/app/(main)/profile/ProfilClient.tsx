@@ -130,6 +130,32 @@ export function ProfilClient() {
           background: "#101319",
           overflow: "hidden",
         }}>
+          {/* Filigrane du logotype.
+
+              Il y figurait en toutes lettres dans l'ancien lettrage en gras
+              extreme. C'est le nouveau trace qui reprend sa place, a encre
+              claire puisque le bandeau est sombre, et a huit pour cent
+              d'opacite : un filigrane se devine, il ne se lit pas, sinon il
+              entre en concurrence avec le nom qu'il accompagne.
+
+              Il deborde volontairement a droite : un logotype entier, pose au
+              milieu du vide, redevient un logo affiche. Coupe par le bord, il
+              n'est plus qu'une texture. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/workie-logo.svg"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              right: -40, top: "50%",
+              transform: "translateY(-50%)",
+              height: 96, width: "auto",
+              opacity: 0.08,
+              pointerEvents: "none",
+              userSelect: "none",
+            }}
+          />
           {/* Accent line */}
           <div style={{
             width: 32, height: 3, borderRadius: 2,
