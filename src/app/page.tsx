@@ -23,29 +23,6 @@ const getLandingCounts = unstable_cache(
   { revalidate: 300, tags: ["landing-counts"] }
 );
 
-/**
- * Trois entreprises réelles, pour l'éventail de la page d'accueil.
- *
- * De vraies fiches plutôt qu'une photographie d'illustration : elles montrent
- * le swipe, qui est la signature du produit, et leurs couvertures apportent
- * les images qui manquaient. Prises parmi les mieux notées et pourvues d'une
- * couverture, sans quoi l'éventail afficherait des rectangles vides.
- */
-const getFichesVitrine = unstable_cache(
-  async () => {
-    const admin = createAdminClient();
-    const { data } = await admin
-      .from("companies")
-      .select("id, name, sector, city, cover_url, avg_rating, review_count")
-      .not("cover_url", "is", null)
-      .order("score", { ascending: false })
-      .limit(3);
-    return data ?? [];
-  },
-  ["landing-vitrine"],
-  { revalidate: 900, tags: ["landing-vitrine"] }
-);
-
 export const metadata: Metadata = {
   title: "Workie : avis d'employés et salaires réels en Suisse",
   description: "Découvrez les avis anonymes d'employés, les salaires réels et les offres d'emploi des entreprises suisses. Comparez, choisissez, évoluez.",
@@ -68,9 +45,27 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [counts, vitrine] = await Promise.all([getLandingCounts(), getFichesVitrine()]);
+  const counts = await getLandingCounts();
   const nCompanies = counts.companies;
-  const vedette = vitrine[0];
+
+  // Vitrine fixe plutôt que tirée du classement.
+  //
+  // Elle affichait l'entreprise la mieux notée du moment : vivant, mais la
+  // qualité de la page d'accueil dépendait alors d'une photographie qu'on ne
+  // choisit pas, et le jour où la première du classement a une couverture
+  // médiocre, l'accueil l'a aussi.
+  //
+  // Les chiffres sont illustratifs et le disent. UBS a deux avis réels et une
+  // moyenne de 3,5 : publier « 4.2 sur 34 avis » sous le nom d'une banque
+  // nommée serait une évaluation fausse d'une institution réelle, ce qui
+  // contredit frontalement l'argument de fiabilité du site. La mention
+  // « Exemple » lève l'ambiguïté sans rien retirer à la démonstration.
+  const vedette = {
+    name: "UBS",
+    sector: "Finance",
+    city: "Zurich",
+    cover_url: "https://images.pexels.com/photos/35599425/pexels-photo-35599425.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  };
 
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
@@ -196,16 +191,24 @@ export default async function Home() {
         @media (max-width: 900px) {
           .landing-hero-deux-col {
             grid-template-columns: 1fr;
-            gap: 28px;
-            padding: 26px 20px 48px;
+            gap: 0;
+            padding: 30px 20px 48px;
           }
-          /* L'aperçu passe en tête.
-             Le téléphone n'affichait qu'une pile de blocs de texte : titre,
-             paragraphe, deux boutons pleine largeur, puis des chiffres. Rien
-             ne se voyait avant d'avoir défilé, et c'est ce qui faisait
-             élémentaire. La preuve du produit vient donc en premier, et le
-             titre se lit juste en dessous, encore dans l'écran. */
-          .landing-apercu { order: -1; }
+          /* Sur téléphone, l'ordre suit le raisonnement plutôt que l'effet.
+             Une version précédente mettait l'aperçu tout en haut : on voyait
+             une carte de notes sans savoir de quoi il s'agissait. On annonce
+             d'abord ce qu'on fait, on le prouve ensuite, on propose d'agir en
+             dernier.
+
+             La règle display:contents dissout la colonne de texte pour que ses
+             enfants deviennent des cases de la grille et puissent être
+             ordonnés un à un. */
+          .hero-texte { display: contents; }
+          .hero-titre    { order: 1; margin-bottom: 14px; }
+          .hero-accroche { order: 2; margin-bottom: 26px; }
+          .landing-apercu { order: 3; margin-bottom: 30px; }
+          .hero-cta-row  { order: 4; margin-bottom: 30px; }
+          .landing-chiffres { order: 5; }
           .landing-chiffres { grid-template-columns: repeat(2, 1fr); gap: 20px 24px; max-width: none; }
         }
         @media (max-width: 900px) {
@@ -247,12 +250,12 @@ export default async function Home() {
           titre ni sur les boutons, plus de taches colorées en fond : un seul
           accent, employé avec parcimonie. Le logo garde le sien. */}
       <section className="landing-hero-deux-col">
-        <div>
-          <h1 style={{ fontSize: "clamp(34px, 5.2vw, 58px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 22, maxWidth: 620 }}>
-            Ce que vaut vraiment un employeur suisse.
+        <div className="hero-texte">
+          <h1 className="hero-titre" style={{ fontSize: "clamp(34px, 5.2vw, 58px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 22, maxWidth: 620 }}>
+            Les entreprises suisses, vues de l&apos;intérieur.
           </h1>
 
-          <p style={{ fontSize: "clamp(16px, 1.6vw, 19px)", color: "var(--text-sub)", maxWidth: 560, lineHeight: 1.65, marginBottom: 34 }}>
+          <p className="hero-accroche" style={{ fontSize: "clamp(16px, 1.6vw, 19px)", color: "var(--text-sub)", maxWidth: 560, lineHeight: 1.65, marginBottom: 34 }}>
             Notes détaillées, salaires réels et conditions de travail, publiés
             anonymement par celles et ceux qui y travaillent.
           </p>
@@ -326,9 +329,17 @@ export default async function Home() {
             )}
 
             <div style={{ padding: 22 }}>
-            <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-              Synthèse des avis
-            </p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 16 }}>
+              <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                Synthèse des avis
+              </p>
+              {/* Les chiffres ci-dessous illustrent la mise en forme ; ils ne
+                  sont pas ceux d'UBS. Le dire est la moindre des choses sur un
+                  site dont l'argument est l'exactitude. */}
+              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-muted)", border: "1px solid var(--border2)", borderRadius: 5, padding: "2px 7px" }}>
+                Exemple
+              </span>
+            </div>
 
             <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 18 }}>
               <span className="landing-apercu-note" style={{ fontSize: 42, fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 0.9 }}>4.2</span>
@@ -377,7 +388,7 @@ export default async function Home() {
       <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Comment ça marche</p>
-          <h2 className="landing-h2">Trois étapes, aucune concession.</h2>
+          <h2 className="landing-h2">Chercher, comparer, contribuer.</h2>
           <div className="landing-cartes" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
             {[
               { n: "01", Icone: Search, titre: "Chercher",
@@ -410,7 +421,7 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 760 }}>
-            Un employeur se choisit sur des faits, pas sur une réputation.
+            Comparer un employeur sur des critères précis.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
             {nCompanies.toLocaleString("fr-CH")} entreprises suisses, notées sur huit
@@ -443,13 +454,13 @@ export default async function Home() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
               { Icone: GraduationCap, titre: "Vous terminez vos études",
-                desc: "Savoir ce que paie réellement un premier poste dans votre domaine, et chez qui l'on apprend." },
+                desc: "Situer le salaire d'un premier poste dans votre domaine, et repérer les employeurs qui encadrent réellement leurs débutants." },
               { Icone: Briefcase, titre: "Vous envisagez de changer",
                 desc: "Comparer votre employeur actuel à ceux qui recrutent, sur des critères précis plutôt que sur une réputation." },
               { Icone: Landmark, titre: "Vous êtes dans le public",
-                desc: "Mesurer l'écart réel avec le privé, rémunération, charge et flexibilité comprises." },
+                desc: "Comparer avec le privé sur des bases concrètes : rémunération, charge de travail et flexibilité." },
               { Icone: IconeMaison, titre: "Vous reprenez une activité",
-                desc: "Repérer les employeurs dont les anciens saluent la souplesse d'horaires et l'accueil des retours." },
+                desc: "Identifier les employeurs que leurs équipes jugent souples sur les horaires et attentifs aux parcours interrompus." },
             ].map(({ Icone, titre, desc }, i) => (
               <div key={titre} style={{
                 display: "flex", gap: 18, padding: "22px 0",
@@ -478,13 +489,13 @@ export default async function Home() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 22 }}>
             {[
               { Icone: FileText, titre: "Aucun texte libre",
-                desc: "Un avis ne contient que des notes et le contexte du poste. Ni récit inventé, ni règlement de comptes, ni message écrit par l'entreprise elle-même." },
+                desc: "Un avis ne contient que des notes et le contexte du poste. Ce format écarte d'emblée les récits inventés comme les règlements de comptes, dans l'intérêt des employés autant que des entreprises." },
               { Icone: Lock, titre: "Anonymat par construction",
                 desc: "Votre nom n'est jamais publié, et aucune page ne relie un compte à un avis. Ce n'est pas un réglage, c'est la façon dont les données sont servies." },
               { Icone: ShieldCheck, titre: "Contrôles à la publication",
                 desc: "Adresse confirmée, compte de plus de vingt-quatre heures, un seul avis par entreprise, et une modération alimentée par les signalements." },
             ].map(({ Icone, titre, desc }) => (
-              <div key={titre} style={{ borderTop: "2px solid var(--brand)", paddingTop: 20 }}>
+              <div key={titre}>
                 <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", margin: "14px 0 9px" }}>{titre}</h3>
                 <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.62 }}>{desc}</p>

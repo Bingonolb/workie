@@ -211,7 +211,7 @@ export function CompanyVoteButtons({
           <div onClick={() => setShowGuest(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 10010 }} />
           <div role="dialog" aria-modal="true" aria-label="Connexion requise" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(380px, 92vw)", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "32px 28px", textAlign: "center" }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>👋</div>
-            <h2 style={{ fontSize: 18, fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>Connecte-toi pour voter</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>Connectez-vous pour voter</h2>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.6 }}>Les votes +100 et -100 pts impactent le classement des entreprises. Crée un compte gratuitement pour participer.</p>
             <a href="/login" style={{ display: "block", padding: "13px 0", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 800, fontSize: 15, textDecoration: "none", marginBottom: 10 }}>Se connecter</a>
             <button type="button" onClick={() => setShowGuest(false)} style={{ background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "6px 0" }}>Fermer</button>

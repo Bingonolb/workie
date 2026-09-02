@@ -151,7 +151,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             ) : (
               <div style={{ marginBottom: 24 }}>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7 }}>
-                  Clique sur &laquo; Postuler &raquo; pour voir tous les détails et envoyer ta candidature directement à l&apos;entreprise.
+                  Clique sur &laquo; Postuler &raquo; pour voir tous les détails et envoyer votre candidature directement à l&apos;entreprise.
                 </p>
               </div>
             )}

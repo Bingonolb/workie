@@ -40,22 +40,22 @@ const ENTREES: Entree[] = [
   {
     q: "Les avis sont-ils vraiment anonymes ?",
     texte:
-      "Ton nom n'est jamais publié et ton identifiant de compte n'est pas transmis au navigateur avec les avis. Ton adresse IP est conservée côté serveur pour la seule détection d'abus, et effacée lorsque tu supprimes ton compte.",
+      "Votre nom n'est jamais publié et l'identifiant de votre compte n'est pas transmis au navigateur avec les avis. Votre adresse IP est conservée côté serveur pour la seule détection d'abus, et effacée lorsque vous supprimez votre compte.",
     r: (
       <>
-        Ton nom n&apos;est jamais publié. L&apos;identifiant de ton compte n&apos;est pas transmis au
+        Votre nom n&apos;est jamais publié. L&apos;identifiant de votre compte n&apos;est pas transmis au
         navigateur avec les avis, ce qui veut dire qu&apos;aucun visiteur, ni aucune entreprise,
         ne peut relier un avis à un profil en inspectant la page.
         <br /><br />
-        Une donnée reste conservée côté serveur : ton adresse IP au moment de la publication.
+        Une donnée reste conservée côté serveur : votre adresse IP au moment de la publication.
         Elle sert uniquement à repérer les abus, par exemple plusieurs avis rédigés depuis le
         même endroit pour gonfler ou descendre une note. Elle n&apos;est jamais affichée, et elle
-        est effacée lorsque tu supprimes ton compte.
+        est effacée lorsque vous supprimez votre compte.
         <br /><br />
-        Ce que nous ne pouvons pas promettre : si tu occupes un poste que personne
-        d&apos;autre n&apos;occupe dans ton entreprise, l&apos;intitulé seul peut suffire à te
+        Ce que nous ne pouvons pas promettre : si vous occupez un poste que personne
+        d&apos;autre n&apos;occupe dans votre entreprise, l&apos;intitulé seul peut suffire à vous
         désigner. C&apos;est la raison pour laquelle un avis ne contient aucun texte
-        libre : il n&apos;y a rien à y glisser qui puisse te trahir.
+        libre : il n&apos;y a rien à y glisser qui puisse vous trahir.
       </>
     ),
   },
@@ -179,15 +179,15 @@ const ENTREES: Entree[] = [
   {
     q: "Comment récupérer ou supprimer mes données ?",
     texte:
-      "Depuis ton profil, tu peux télécharger l'ensemble de tes données et supprimer ton compte. La suppression détache tes avis de ton identité et efface l'adresse IP conservée pour la détection d'abus.",
+      "Depuis votre profil, vous pouvez télécharger l'ensemble de vos données et supprimer votre compte. La suppression détache vos avis de votre identité et efface l'adresse IP conservée pour la détection d'abus.",
     r: (
       <>
-        Depuis ton profil, deux boutons : télécharger l&apos;ensemble de tes données, et supprimer
-        ton compte.
+        Depuis votre profil, deux boutons : télécharger l&apos;ensemble de vos données, et supprimer
+        votre compte.
         <br /><br />
-        La suppression détache tes avis de ton identité et efface l&apos;adresse IP conservée pour
+        La suppression détache vos avis de votre identité et efface l&apos;adresse IP conservée pour
         la détection d&apos;abus. Les avis eux-mêmes peuvent rester en ligne, sans plus aucun lien
-        avec toi. C&apos;est ce qui évite qu&apos;une entreprise puisse faire disparaître les
+        avec vous. C&apos;est ce qui évite qu&apos;une entreprise puisse faire disparaître les
         témoignages la concernant en poussant leurs auteurs à fermer leur compte.
       </>
     ),

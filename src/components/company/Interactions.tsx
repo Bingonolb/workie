@@ -89,7 +89,7 @@ export function FormulaireAvis({ companyId }: { companyId: string }) {
   return (
     <div style={{ textAlign: "center", padding: "24px" }}>
       <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Connecte-toi pour partager un avis anonyme.
+        Connectez-vous pour publier un avis anonyme.
       </p>
       <Link href="/login" style={{
         display: "inline-block", background: "linear-gradient(135deg, #8b5cf6, #f97316)",

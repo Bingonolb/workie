@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   // /signup, qui portaient déjà cette directive.
   robots: { index: false, follow: false },
   title: "Nouveau mot de passe · Workie",
-  description: "Choisis un nouveau mot de passe pour ton compte Workie.",
+  description: "Choisissez un nouveau mot de passe pour votre compte Workie.",
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

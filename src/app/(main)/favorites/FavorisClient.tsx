@@ -52,7 +52,7 @@ export function FavorisClient() {
   if (echec) {
     return (
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "48px 32px", textAlign: "center" }}>
-        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger tes favoris</p>
+        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger vos favoris</p>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>Ils sont toujours là, c&apos;est l&apos;affichage qui a échoué.</p>
         <button
           onClick={() => window.location.reload()}

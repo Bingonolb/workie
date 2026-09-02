@@ -28,7 +28,7 @@ export function ProfileReviews({ reviews }: { reviews: ReviewRow[] }) {
     return (
       <div style={{ padding: "56px 24px", textAlign: "center", color: "var(--text-muted)" }}>
         <p style={{ fontSize: 15, fontWeight: 600, color: "var(--text)", marginBottom: 8 }}>Aucun avis posté</p>
-        <p style={{ fontSize: 13, marginBottom: 24 }}>Partage ton expérience pour aider la communauté.</p>
+        <p style={{ fontSize: 13, marginBottom: 24 }}>Partagez votre expérience pour aider la communauté.</p>
         <Link href="/explore" style={{
           display: "inline-block", padding: "10px 24px", borderRadius: 6,
           background: "linear-gradient(135deg, #8b5cf6, #f97316)",

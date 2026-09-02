@@ -81,7 +81,7 @@ export function AuthFormWorkie({
               <div style={{ flex: 1 }}>
                 <label htmlFor="canton" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
                 <select id="canton" name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
-                  <option value="">Sélectionne ton canton</option>
+                  <option value="">Sélectionnez votre canton</option>
                   {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
@@ -98,7 +98,7 @@ export function AuthFormWorkie({
         <div>
           <label htmlFor="email" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email {mode === "signup" ? "*" : ""}</label>
           <input
-            id="email" type="email" name="email" required placeholder="toi@email.com"
+            id="email" type="email" name="email" required placeholder="vous@exemple.ch"
             style={inp} autoComplete="email"
             value={mode === "signup" ? email : undefined}
             onChange={mode === "signup" ? e => setEmail(e.target.value) : undefined}
@@ -106,9 +106,9 @@ export function AuthFormWorkie({
         </div>
         {mode === "signup" && (
           <div>
-            <label htmlFor="email_confirm" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Confirme ton email *</label>
+            <label htmlFor="email_confirm" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Confirmez votre adresse *</label>
             <input
-              id="email_confirm" type="email" name="email_confirm" required placeholder="toi@email.com"
+              id="email_confirm" type="email" name="email_confirm" required placeholder="vous@exemple.ch"
               style={{ ...inp, border: `1px solid ${emailMismatch ? "#ef4444" : "var(--border2)"}` }}
               autoComplete="off"
               value={emailConfirm}

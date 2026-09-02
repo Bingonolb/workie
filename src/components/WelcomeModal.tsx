@@ -83,7 +83,7 @@ export function WelcomeModal() {
           </h2>
 
           <p style={{ margin: "0 0 24px", fontSize: 15, color: "#6b7280", lineHeight: 1.65 }}>
-            Ton compte est prêt. Explore les vraies conditions de travail des entreprises suisses : avis anonymes, salaires réels, culture d&apos;entreprise sans filtre.
+            Votre compte est prêt. Vous pouvez consulter les conditions de travail des entreprises suisses : notes détaillées, salaires réels et retours d&apos;employés, publiés anonymement.
           </p>
 
           {/* Features list */}

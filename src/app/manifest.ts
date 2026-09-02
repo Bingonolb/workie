@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Workie : les entreprises suisses, sans filtre.",
+    name: "Workie : avis et salaires des entreprises suisses",
     short_name: "Workie",
     description: "Avis anonymes, salaires et culture des entreprises suisses.",
     start_url: "/explore",

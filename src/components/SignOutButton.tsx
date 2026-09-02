@@ -72,7 +72,7 @@ export function SignOutButton() {
               Se déconnecter ?
             </p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 24 }}>
-              Tu devras te reconnecter pour accéder à ton profil et tes favoris.
+              Vous devrez vous reconnecter pour accéder à votre profil et à vos favoris.
             </p>
 
             <div style={{ display: "flex", gap: 10 }}>

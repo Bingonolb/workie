@@ -44,7 +44,7 @@ export function AuthForm({
           type="email"
           name="email"
           required
-          placeholder="toi@email.com"
+          placeholder="vous@exemple.ch"
           className="w-full rounded-xl border border-neutral-300 px-4 py-2.5 outline-none focus:border-brand"
         />
       </div>
@@ -87,14 +87,14 @@ export function AuthForm({
           <>
             Pas encore de compte ?{" "}
             <Link href="/signup" className="font-medium text-brand">
-              Inscris-toi
+              Inscrivez-vous
             </Link>
           </>
         ) : (
           <>
             Déjà un compte ?{" "}
             <Link href="/login" className="font-medium text-brand">
-              Connecte-toi
+              Connectez-vous
             </Link>
           </>
         )}

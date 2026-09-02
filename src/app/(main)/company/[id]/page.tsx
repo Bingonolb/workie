@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!company) return { title: "Entreprise introuvable · Workie" };
   const desc = company.description
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
-    : `Avis anonymes sur ${company.name} : salaires, culture, management. La vérité que Glassdoor ne te dit pas.`;
+    : `Avis anonymes sur ${company.name} : rémunération, management, équilibre et évolution, notés par ses employés.`;
   const url = `${BASE_URL}/company/${id}`;
   const ogApiUrl = `${BASE_URL}/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(`${company.city} · ${company.sector}`)}${Number(company.avg_rating) > 0 ? `&rating=${Number(company.avg_rating).toFixed(1)}&reviews=${company.review_count}` : ""}`;
   const ogImage = company.cover_url
@@ -462,7 +462,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
             {/* Post review */}
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partage ton expérience</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Ton avis est anonyme par défaut. Aide la communauté à faire les bons choix.</p>
               <FormulaireAvis companyId={company.id} />
             </div>

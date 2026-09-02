@@ -189,7 +189,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
     }
     if (step === 1) {
       if (ratingOverall === 0) { setStep2Err("Note au moins une catégorie."); return; }
-      if (!wouldRecommend) { setStep2Err("Indiquer si tu recommanderais est obligatoire."); return; }
+      if (!wouldRecommend) { setStep2Err("Indiquer si vous recommanderiez est obligatoire."); return; }
     }
     setStep(s => s + 1);
   };
@@ -375,7 +375,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             )}
 
             <div>
-              <label style={lbl}>Recommanderais-tu cette entreprise ? *</label>
+              <label style={lbl}>Recommanderiez-vous cette entreprise ? *</label>
               <div style={{ display: "flex", gap: 10 }}>
                 {RECOMMEND.map(r => (
                   <button key={r.value} type="button" onClick={() => { setWouldRecommend(r.value); setStep2Err(""); }}
@@ -408,7 +408,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </div>
 
             <div>
-              <label style={lbl}>Reviendrais-tu travailler ici ? *</label>
+              <label style={lbl}>Reviendriez-vous travailler ici ? *</label>
               <div style={{ display: "flex", gap: 10 }}>
                 {WOULD_RETURN.map(r => (
                   <button key={r.value} type="button" onClick={() => { setWouldReturn(r.value); setStep3Err(""); }}

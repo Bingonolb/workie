@@ -5,7 +5,7 @@ export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const title   = searchParams.get("title")   ?? "Workie : les entreprises suisses, sans filtre.";
+  const title   = searchParams.get("title")   ?? "Workie";
   const sub     = searchParams.get("sub")     ?? "Avis anonymes · Salaires · Culture";
   const rating  = searchParams.get("rating");
   const reviews = searchParams.get("reviews");

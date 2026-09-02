@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
                   type="email"
                   name="email"
                   required
-                  placeholder="toi@email.com"
+                  placeholder="vous@exemple.ch"
                   autoComplete="email"
                   style={{
                     width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",

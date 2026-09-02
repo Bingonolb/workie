@@ -217,7 +217,7 @@ export default async function SalairesPage() {
             </span>
           </h1>
           <p style={{ fontSize: 15, color: "var(--text-muted)", maxWidth: 540, lineHeight: 1.7 }}>
-            Des chiffres réels partagés anonymement. Sache ce que vaut vraiment ton profil avant de négocier.
+            Des chiffres réels partagés anonymement. Situez votre profil avant d'entrer en négociation.
           </p>
         </div>
       </section>
@@ -384,10 +384,10 @@ export default async function SalairesPage() {
             {/* CTA */}
             <div style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))", border: "1px solid rgba(139,92,246,0.15)", borderRadius: 18, padding: "28px 32px", textAlign: "center" }}>
               <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>
-                Ces données viennent d&apos;employés comme toi.
+                Ces données viennent d&apos;employés en poste.
               </p>
               <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.7 }}>
-                Partage ton salaire anonymement et aide les autres à négocier en connaissance de cause.
+                Partagez votre salaire anonymement et aidez les autres à négocier en connaissance de cause.
               </p>
               <a href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 28px", borderRadius: 12, background: "linear-gradient(135deg, #8b5cf6, #f97316)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
                 Trouver mon entreprise et laisser un avis

@@ -5,7 +5,7 @@ import { AuthFormWorkie } from "@/components/AuthFormWorkie";
 
 export const metadata: Metadata = {
   title: "Connexion · Workie",
-  description: "Connecte-toi à Workie pour accéder aux avis d'employés, salaires réels et offres d'emploi des entreprises suisses.",
+  description: "Connectez-vous à Workie pour accéder aux avis d'employés, salaires réels et offres d'emploi des entreprises suisses.",
   robots: { index: false, follow: false },
 };
 

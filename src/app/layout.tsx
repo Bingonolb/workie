@@ -41,16 +41,16 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const OG_URL = "/api/og?title=Workie+%E2%80%94+Les+entreprises+suisses%2C+sans+filtre.&sub=Avis+anonymes+%C2%B7+Salaires+%C2%B7+Culture";
+const OG_URL = "/api/og?title=Workie&sub=Avis+et+salaires+des+entreprises+suisses";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.workie.ch"),
   title: {
-    default: "Workie : les entreprises, sans filtre.",
+    default: "Workie : avis et salaires des entreprises suisses",
     template: "%s · Workie",
   },
-  description: "Découvre les vraies conditions de travail des entreprises suisses. Avis anonymes, salaires, culture : la vérité que Glassdoor ne te dit pas.",
-  keywords: ["avis entreprise suisse", "salaires suisse", "conditions de travail", "glassdoor suisse", "workie"],
+  description: "Les conditions de travail des entreprises suisses, notées anonymement par leurs employés. Rémunération, management, équilibre et évolution, sur huit critères.",
+  keywords: ["avis entreprise suisse", "salaires suisse", "conditions de travail", "employeurs suisses", "workie"],
   authors: [{ name: "Workie", url: "https://www.workie.ch" }],
   creator: "Workie",
   publisher: "Workie",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     locale: "fr_CH",
     type: "website",
     url: "https://www.workie.ch",
-    images: [{ url: OG_URL, width: 1200, height: 630, alt: "Workie : les entreprises suisses, sans filtre." }],
+    images: [{ url: OG_URL, width: 1200, height: 630, alt: "Workie : avis et salaires des entreprises suisses" }],
   },
   twitter: {
     card: "summary_large_image",

@@ -61,7 +61,7 @@ export function DeleteAccountButton() {
               <div>
                 <p style={{ fontSize: 18, fontWeight: 900, color: "#ef4444", marginBottom: 4 }}>Supprimer le compte</p>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                  Cette action est <strong style={{ color: "var(--text)" }}>irréversible</strong>. Tous tes avis, favoris et données seront définitivement supprimés.
+                  Cette action est <strong style={{ color: "var(--text)" }}>irréversible</strong>. Tous vos avis, favoris et données seront définitivement supprimés.
                 </p>
               </div>
               <button type="button" onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}>

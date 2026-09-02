@@ -69,7 +69,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
               fontSize: 22, fontWeight: 900, color: "var(--text)",
               letterSpacing: "-0.03em", marginBottom: 8,
             }}>
-              Connecte-toi pour continuer
+              Connectez-vous pour continuer
             </p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
               {reviewCount > 1
