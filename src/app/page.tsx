@@ -370,8 +370,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── Comment ça marche ── */}
-      <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+      {/* ── Comment ça marche ──
+          Pas de bordure basse : la bande photographique suit immédiatement, et
+          son fond sombre sépare les deux à lui seul. Le trait d'un pixel se
+          voyait posé sur l'image comme un défaut. */}
+      <section className="landing-section" style={{ padding: "88px 24px", background: "var(--surface2)", borderTop: "1px solid var(--border)" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Comment ça marche</p>
           <h2 className="landing-h2">Trois étapes, aucune concession.</h2>
