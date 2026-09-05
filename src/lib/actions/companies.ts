@@ -42,14 +42,19 @@ export async function fetchSwipePage(
   if (filters?.sector) q = q.eq("sector", filters.sector);
   if (filters?.canton) q = q.eq("canton", filters.canton);
   if (filters?.search) {
+    // Le nom et le sous-secteur, chacun dans la forme saisie et dans sa forme
+    // sans accents. Chercher « brasserie » ne renvoyait rien alors que huit
+    // fiches le portent en sous-secteur : le champ n'etait lu par aucune
+    // recherche, et tout le travail de curation y restait invisible.
     const raw = filters.search.trim();
     const stripped = escapeLike(stripAccents(raw));
     const original = escapeLike(raw);
-    if (stripped !== original) {
-      q = q.or(`name.ilike.%${original}%,name.ilike.%${stripped}%`);
-    } else {
-      q = q.ilike("name", `%${original}%`);
-    }
+    const motifs = stripped !== original ? [original, stripped] : [original];
+    q = q.or(
+      motifs
+        .flatMap(m => [`name.ilike.%${m}%`, `subsector.ilike.%${m}%`])
+        .join(",")
+    );
   }
 
   const { data } = await q;
