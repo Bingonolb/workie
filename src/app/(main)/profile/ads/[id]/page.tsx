@@ -6,21 +6,36 @@ import { getUserCampaignById, getUserCampaignDailyStats, getUserCampaignCantonSt
 import { AdStatsChart } from "@/components/AdStatsChart";
 import { CancelCampaignButton } from "@/components/CancelCampaignButton";
 import Image from "next/image";
-import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, Clock, CheckCircle, XCircle, PauseCircle, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, AlertTriangle } from "lucide-react";
 
-const STATUS_CONFIG = {
-  payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.12)", icon: <XCircle size={14} aria-hidden="true" /> },
-  pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.12)", icon: <Clock size={14} aria-hidden="true" /> },
-  active:          { label: "Active",           color: "#10b981", bg: "rgba(16,185,129,0.12)", icon: <CheckCircle size={14} aria-hidden="true" /> },
-  paused:          { label: "Pausée",           color: "#8b5cf6", bg: "rgba(139,92,246,0.12)", icon: <PauseCircle size={14} aria-hidden="true" /> },
-  completed:       { label: "Terminée",         color: "#6b7280", bg: "rgba(107,114,128,0.12)", icon: <CheckCircle size={14} aria-hidden="true" /> },
-  rejected:        { label: "Rejetée",          color: "#ef4444", bg: "rgba(239,68,68,0.12)", icon: <XCircle size={14} aria-hidden="true" /> },
-} as const;
 
 function ctr(imp: number, clk: number) { return imp ? `${((clk / imp) * 100).toFixed(2)}%` : "0.0%"; }
 function cpc(clk: number, spent: number) { return clk ? `CHF ${(spent / clk).toFixed(2)}` : "–"; }
 
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
+import { etat, jour } from "../etat";
+import { SECTORS } from "@/lib/types";
+
+
+/** Les vingt-six cantons : au complet, la liste ne dit rien de plus que le pays. */
+const CANTONS_SUISSES = 26;
+
+/**
+ * Une liste de cibles, ou le mot qui la resume.
+ *
+ * Enumerer les vingt-six cantons pour dire « toute la Suisse » demande au
+ * lecteur de compter avant de comprendre. Au-dela de cinq entrees, la liste
+ * cesse elle aussi d'etre lisible : vingt et un noms de secteurs forment un
+ * paragraphe qu'on saute. Le compte, lui, se lit d'un coup.
+ *
+ * En dessous de cinq, la liste est l'information : ce sont les cantons qu'on a
+ * choisis, et il y a une raison de les nommer.
+ */
+function listeCourte(valeurs: string[], total: number, tout: string, nom: string): string {
+  if (valeurs.length === 0 || valeurs.length >= total) return tout;
+  if (valeurs.length > 5) return `${valeurs.length} ${nom} sur ${total}`;
+  return valeurs.join(", ");
+}
 
 export default async function UserCampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,7 +49,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
   ]);
   if (!campaign) notFound();
 
-  const st = STATUS_CONFIG[campaign.status] ?? STATUS_CONFIG.pending;
+  const e = etat(campaign);
   const totalBudget = Number(campaign.total_budget_chf);
   const spentBudget = Number(campaign.spent_chf);
   const impCount = Number(campaign.impression_count);
@@ -101,8 +116,8 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
                 <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", margin: 0 }}>{campaign.headline}</h1>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 50, background: st.bg, color: st.color }}>
-                  {st.icon} {st.label}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 50, background: e.bg, color: e.color }}>
+                  {e.icon} {e.label}
                 </span>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>
                   <SilhouetteFormat format={campaign.format === "square" ? "square" : "swipe"} taille={11} />
@@ -114,10 +129,9 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
               </div>
               {campaign.body_text && <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>{campaign.body_text}</p>}
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 13, color: "var(--text-muted)" }}>
-                <span>Début : {campaign.start_date}</span>
-                {campaign.end_date && <span>→ Fin : {campaign.end_date}</span>}
-                {campaign.target_cantons.length > 0 && <span>{campaign.target_cantons.join(", ")}</span>}
-                {campaign.target_sectors.length > 0 && <span>{campaign.target_sectors.join(", ")}</span>}
+                <span>{jour(campaign.start_date)}{campaign.end_date ? ` au ${jour(campaign.end_date)}` : ""}</span>
+                <span>{listeCourte(campaign.target_cantons, CANTONS_SUISSES, "Toute la Suisse", "cantons")}</span>
+                <span>{listeCourte(campaign.target_sectors, SECTORS.length, "Tous les secteurs", "secteurs")}</span>
               </div>
               <a href={campaign.cta_url} target="_blank" rel="noopener noreferrer" className="ads-lien"
                 style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 10, fontSize: 13, color: "#8b5cf6", textDecoration: "none" }}>
