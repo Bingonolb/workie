@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     siteName: "Workie",
     type: "website",
     locale: "fr_CH",
-    images: [{ url: "https://www.workie.ch/og-default.png", width: 1200, height: 630, alt: "Salaires en Suisse · Workie" }],
+    images: [{ url: "https://www.workie.ch/opengraph-image.png", width: 1200, height: 630, alt: "Salaires en Suisse par secteur · Workie" }],
   },
-  twitter: { card: "summary_large_image", title: "Salaires en Suisse · Workie", images: ["https://www.workie.ch/og-default.png"] },
+  twitter: { card: "summary_large_image", title: "Salaires en Suisse · Workie", images: ["https://www.workie.ch/opengraph-image.png"] },
 };
 
 type SectorStat = {

@@ -50,6 +50,14 @@ const PUBLIC_PATHS = [
 // chemin exact et ses sous-chemins comptent.
 function isPublicPath(pathname: string): boolean {
   if (pathname === "/") return true;
+  // Les fichiers que Next fabrique pour les métadonnées : image de partage,
+  // icônes. Ils sont demandés par les robots de WhatsApp, LinkedIn ou Slack,
+  // qui n'ont évidemment pas de session : sans cette ligne, l'aperçu d'un lien
+  // Workie recevait la page de connexion à la place de l'image.
+  //
+  // Le motif porte sur la fin du chemin, car ces fichiers vivent aussi sous une
+  // route : « /explore/opengraph-image » le jour où une page en déclare une.
+  if (/\/(opengraph-image|twitter-image|icon|apple-icon)(-\w+)?$/.test(pathname)) return true;
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 

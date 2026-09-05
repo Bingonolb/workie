@@ -35,6 +35,7 @@ export const metadata: Metadata = {
     siteName: "Workie",
     type: "website",
     locale: "fr_CH",
+    images: [{ url: "https://www.workie.ch/opengraph-image.png", width: 1200, height: 630, alt: "Annoncer sur Workie" }],
   },
 };
 
