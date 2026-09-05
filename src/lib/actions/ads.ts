@@ -353,6 +353,34 @@ export async function pauseUserCampaign(id: string): Promise<{ error?: string }>
   } catch (e) { return { error: (e as Error).message }; }
 }
 
+/**
+ * Supprime une campagne restée impayée.
+ *
+ * La condition sur le statut est répétée ici alors que la politique de la base
+ * la porte déjà. Ce n'est pas une garde de sécurité, la base s'en charge, mais
+ * la seule façon de distinguer un refus d'un succès : une suppression bloquée
+ * par la politique n'efface aucune ligne et ne lève aucune erreur. Sans ce
+ * comptage, l'interface annoncerait « supprimée » à chaque fois.
+ */
+export async function deleteUserCampaign(id: string): Promise<{ error?: string }> {
+  try {
+    const { supabase, user } = await requireUser();
+    const { data, error } = await supabase
+      .from("ad_campaigns")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .eq("status", "payment_pending")
+      .select("id");
+    if (error) return { error: error.message };
+    if (!data?.length) {
+      return { error: "Cette campagne ne peut plus être supprimée : elle a été payée." };
+    }
+    revalidatePath("/profile/ads");
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
 export async function pauseBusinessCampaign(id: string): Promise<{ error?: string }> {
   try {
     const { supabase, companyId } = await requireBusiness();
