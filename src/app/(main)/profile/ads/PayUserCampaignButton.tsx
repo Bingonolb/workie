@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { CreditCard } from "lucide-react";
 
+function montant(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2);
+}
+
 export function PayUserCampaignButton({ campaignId, total }: { campaignId: string; total: number }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -34,7 +38,11 @@ export function PayUserCampaignButton({ campaignId, total }: { campaignId: strin
         background: loading ? "rgba(139,92,246,0.5)" : "var(--brand)",
         cursor: loading ? "not-allowed" : "pointer",
       }}>
-        <CreditCard size={12} aria-hidden="true" /> {loading ? "…" : `Payer CHF ${Number(total).toFixed(2)}`}
+        {/* « Payer CHF 71.00 » : les deux décimales ne portent aucune
+            information quand le budget tombe juste, et sur trois cent
+            soixante-quinze pixels elles suffisaient à pousser le bouton
+            suivant à la ligne. */}
+        <CreditCard size={12} aria-hidden="true" /> {loading ? "…" : `Payer CHF ${montant(Number(total))}`}
       </button>
       {error && <p role="alert" style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>{error}</p>}
     </div>

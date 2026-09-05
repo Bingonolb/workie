@@ -31,7 +31,22 @@ export function CarteCampagne({
     const clics = Number(c.click_count);
 
     return (
-      <div key={c.id} style={{ position: "relative", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
+      <div key={c.id} className="pub-carte" style={{ position: "relative", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
+      <style>{`
+        @media (max-width: 560px) {
+          /* La vignette cede la largeur au texte : soixante-douze pixels
+             suffisent a reconnaitre un visuel deja choisi par son auteur. */
+          .pub-carte-vignette { width: 72px !important; }
+          .pub-carte-corps { padding: 12px 13px !important; }
+          .pub-carte-meta { font-size: 11.5px !important; line-height: 1.55 !important; }
+          .pub-carte-titre { font-size: 14px !important; max-width: 100% !important; }
+          /* Les libelles raccourcissent avant que la rangee ne se casse. */
+          .pub-carte-actions { padding: 9px 13px !important; gap: 6px !important; }
+          .pub-carte-actions a, .pub-carte-actions button {
+            padding-left: 10px !important; padding-right: 10px !important;
+          }
+        }
+      `}</style>
         {/* La carte entière mène à la campagne.
             Le lien était déjà là, mais posé sous le contenu : tous
             les clics atterrissaient sur le texte, et la carte
@@ -40,18 +55,18 @@ export function CarteCampagne({
         <Link href={`/profile/ads/${c.id}`} style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-label={`Voir la campagne ${c.headline}`} />
 
         <div style={{ display: "flex" }}>
-          <div style={{ width: 96, flexShrink: 0, background: "var(--surface2)", position: "relative", overflow: "hidden" }}>
+          <div className="pub-carte-vignette" style={{ width: 96, flexShrink: 0, background: "var(--surface2)", position: "relative", overflow: "hidden" }}>
             <Image src={c.image_url} alt="" fill sizes="96px" style={{ objectFit: "cover" }} />
             <div style={{ position: "absolute", bottom: 6, left: 6, display: "flex", background: "rgba(0,0,0,0.7)", color: "#fff", padding: "3px 6px", borderRadius: 5 }}>
               <SilhouetteFormat format={c.format === "square" ? "square" : "swipe"} taille={11} />
             </div>
           </div>
 
-          <div style={{ flex: 1, padding: "14px 16px", minWidth: 0 }}>
+          <div className="pub-carte-corps" style={{ flex: 1, padding: "14px 16px", minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}>
-                  <h2 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 260 }}>{c.headline}</h2>
+                  <h2 className="pub-carte-titre" style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 260 }}>{c.headline}</h2>
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 50, background: e.bg, color: e.color, flexShrink: 0 }}>
                     {e.icon} {e.label}
                   </span>
@@ -60,7 +75,7 @@ export function CarteCampagne({
                     médians, comme les cartes d'entreprise. Le CPM
                     n'y figure plus : c'est un prix unitaire qu'on
                     ne décide pas, il a sa place dans le détail. */}
-                <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                <p className="pub-carte-meta" style={{ fontSize: 12, color: "var(--text-muted)" }}>
                   CHF {Number(c.total_budget_chf).toFixed(0)} de budget
                   {" · "}CHF {Number(c.daily_budget_chf).toFixed(0)}/jour
                   {c.start_date && <>{" · "}{jour(c.start_date)}{c.end_date ? ` au ${jour(c.end_date)}` : ""}</>}
@@ -105,7 +120,7 @@ export function CarteCampagne({
           </div>
         </div>
 
-        <div style={{ borderTop: "1px solid var(--border)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", position: "relative", zIndex: 2 }}>
+        <div className="pub-carte-actions" style={{ borderTop: "1px solid var(--border)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", position: "relative", zIndex: 2 }}>
           {/* Payer une campagne dont les dates sont passées
               n'achèterait rien : le bouton cède la place à ce qui
               reste possible, relancer ou supprimer. */}
@@ -131,8 +146,13 @@ export function CarteCampagne({
               ? <><RotateCcw size={11} aria-hidden="true" /> Relancer</>
               : <><Copy size={11} aria-hidden="true" /> Dupliquer</>}
           </Link>
+          {/* La suppression s'écarte du bouton de paiement plutôt que de le
+              jouxter : ce sont les deux actions les plus opposées de la carte,
+              et sur téléphone le pouce vise large. */}
           {c.status === "payment_pending" && (
-            <DeleteCampaignButton campaignId={c.id} onDelete={onDelete} />
+            <span style={{ marginLeft: "auto" }}>
+              <DeleteCampaignButton campaignId={c.id} onDelete={onDelete} />
+            </span>
           )}
         </div>
       </div>
