@@ -53,14 +53,23 @@ export async function fetchSwipePage(
   }
 
   const { data } = await q;
-  // Exclude companies without city or tags — they render as empty cards in the swipe
-  return (data ?? []).filter(c => c.city?.trim() && (c.tags?.length ?? 0) > 0) as Company[];
+  // Une entreprise sans ville rendrait une pastille vide sur la carte : elle
+  // reste ecartee.
+  //
+  // L'absence d'etiquettes, elle, n'ecarte plus rien. Ce filtre datait du
+  // temps ou la carte du swipe les affichait ; elle montre desormais le nom,
+  // le metier, la ville et la description, et aucun de ces champs n'en depend.
+  // La consequence etait severe et silencieuse : nettoyer une fiche, donc lui
+  // retirer ses etiquettes, la faisait disparaitre du swipe. Sur quarante
+  // entreprises en Alimentation, trente-cinq etaient invisibles, precisement
+  // les mieux tenues.
+  return (data ?? []).filter(c => c.city?.trim()) as Company[];
 }
 
 
 import { GRID_PAGE_SIZE, COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
 
-const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,cover_color,logo_url,score,is_verified,tags,description,profile_score";
+const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,cover_color,logo_url,score,is_verified,description,profile_score";
 
 // Cached grid fetcher — no cookies(), uses adminClient, safe to cache across requests.
 // All users with the same filters share one DB query per 60s instead of N.

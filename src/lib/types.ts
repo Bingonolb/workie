@@ -21,7 +21,15 @@ export interface Company {
   avg_salary_chf: number | null;
   avg_rating: number;
   review_count: number;
-  tags: string[];
+  /**
+   * Les etiquettes ne sont plus ni saisies, ni lues, ni affichees.
+   *
+   * Elles redisaient le secteur en minuscules, sans jamais aider a choisir, et
+   * celles du swipe etaient meme inventees a partir d'une table de valeurs par
+   * defaut. La colonne reste en base, les valeurs deja saisies avec, mais
+   * aucune requete ne la selectionne : le champ est donc absent a l'execution.
+   */
+  tags?: string[];
   is_verified: boolean;
   is_subscribed: boolean;
   score: number;
