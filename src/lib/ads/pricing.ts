@@ -56,7 +56,8 @@ export const SECTOR_WEIGHTS: Record<string, number> = {
   "Horlogerie":              4,
   "Automobile":              4,
   "Énergie":                 4,
-  "Sports & Fashion":        4,
+  "Sport":                   4,
+  "Mode":                    3,
   "Agriculture":             3,
   // Ajoutés en même temps que leur arrivée au catalogue. Sans poids, une
   // campagne qui ne visait qu'eux calculait une audience nulle, donc un prix
