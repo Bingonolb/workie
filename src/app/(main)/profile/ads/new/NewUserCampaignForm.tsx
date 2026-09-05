@@ -2,7 +2,7 @@
 
 import { useState, useActionState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock } from "lucide-react";
+import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock, AlertTriangle, Check, CreditCard } from "lucide-react";
 // ExternalLink used for CTA URL field only
 import { createUserCampaign } from "@/lib/actions/ads";
 import { audienceReach, calculateCPM, estimateDailyImpressions, estimateDailyReach, isBudgetCapped } from "@/lib/ads/pricing";
@@ -130,7 +130,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
       <div style={{ maxWidth: 560, margin: "0 auto", textAlign: "center", padding: "80px 24px" }}>
         {checkoutError ? (
           <>
-            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 24px" }}>⚠️</div>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}><AlertTriangle size={30} strokeWidth={1.7} color="#ef4444" aria-hidden="true" /></div>
             <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>Erreur de paiement</h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>{checkoutError}</p>
             <Link href="/profile/ads" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
@@ -139,7 +139,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </>
         ) : (
           <>
-            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(249,115,22,0.15))", border: "1px solid rgba(139,92,246,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 28px" }}>💳</div>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}><CreditCard size={30} strokeWidth={1.7} color="var(--brand)" aria-hidden="true" /></div>
             <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>Campagne créée !</h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 8 }}>
               {checkoutLoading ? "Redirection vers le paiement sécurisé…" : "Traitement en cours…"}
@@ -487,7 +487,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
           {budgetCapped && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.2)", marginBottom: 16 }}>
-              <span style={{ fontSize: 15, flexShrink: 0 }}>✅</span>
+              <Check size={15} strokeWidth={2.6} color="var(--green)" aria-hidden="true" style={{ flexShrink: 0 }} />
               <p style={{ fontSize: 12, color: "#10b981", lineHeight: 1.5 }}>
                 <strong>Couverture maximale</strong> : votre budget atteint l&apos;intégralité de l&apos;audience ciblée chaque jour.
               </p>
@@ -517,7 +517,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {state?.error && (
           <div style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 14, padding: "14px 18px", color: "#ef4444", fontSize: 14, marginBottom: 16 }}>
-            ⚠ {state.error}
+            <AlertTriangle size={14} strokeWidth={2.2} aria-hidden="true" style={{ flexShrink: 0 }} /> {state.error}
           </div>
         )}
 

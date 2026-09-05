@@ -4,7 +4,7 @@ import { getUser } from "@/lib/supabase/server";
 import { getUserCampaigns } from "@/lib/actions/ads";
 
 import Image from "next/image";
-import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft, Megaphone, CreditCard } from "lucide-react";
+import { Plus, Eye, MousePointer, TrendingUp, Clock, CheckCircle, XCircle, PauseCircle, Copy, ArrowLeft, Megaphone, CreditCard, AlertTriangle } from "lucide-react";
 import type { AdCampaign } from "@/lib/actions/ads";
 import { PayUserCampaignButton } from "./PayUserCampaignButton";
 
@@ -226,7 +226,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
                           </div>
                         </div>
                         {c.admin_note && c.status === "rejected" && (
-                          <p style={{ fontSize: 11, color: "#ef4444", marginTop: 8, background: "rgba(239,68,68,0.06)", padding: "5px 10px", borderRadius: 7 }}>⚠ {c.admin_note}</p>
+                          <p style={{ fontSize: 11, color: "#ef4444", marginTop: 8, background: "rgba(239,68,68,0.06)", padding: "5px 10px", borderRadius: 7, display: "flex", alignItems: "flex-start", gap: 6 }}><AlertTriangle size={12} strokeWidth={2.2} aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }} /> {c.admin_note}</p>
                         )}
                       </div>
                     </div>

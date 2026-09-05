@@ -57,6 +57,23 @@ export default function ProfilePage() {
           .profile-grid { grid-template-columns: 1fr !important; }
           .profile-sidebar { position: static !important; }
         }
+        /* Le bandeau du nom, sur telephone.
+
+           Le filigrane « workie » passait derriere le nom : a soixante-seize
+           pixels de haut, le mot en fait deux cent dix de large, pour un
+           bandeau qui en offre deux cent quatre-vingts entre ses marges. Il se
+           retire plutot que de retrecir, et les marges se resserrent pour
+           rendre au nom la largeur qu'elles lui prenaient. */
+        @media (max-width: 700px) {
+          .profil-filigrane { display: none !important; }
+          .profil-bandeau { padding: 24px 20px 22px !important; }
+          .profil-bandeau h1 { font-size: 23px !important; }
+          .profil-infos {
+            padding: 14px 20px 18px !important;
+            font-size: 13.5px !important;
+            gap: 7px !important;
+          }
+        }
       `}</style>
       <main className="page-main-md">
         <ProfilClient />

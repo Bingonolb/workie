@@ -13,7 +13,7 @@ import { lireCache, ecrireCache, CLE_PROFIL } from "@/lib/cacheSession";
 // appartient au systeme d'exploitation : il change d'un appareil a l'autre,
 // n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
 // le site, et se colore tout seul en travers de la teinte de la tuile.
-import { Flame, FileText, Megaphone } from "lucide-react";
+import { Flame, FileText, Megaphone, Download } from "lucide-react";
 
 type Donnees = {
   authentifie: boolean;
@@ -124,7 +124,7 @@ export function ProfilClient() {
             Le fond degrade cede aussi : il allait de #0d0d14 a #131320, un
             ecart qu'on ne voit pas, et un degrade invisible est un aplat qui
             coute un calcul. */}
-        <div style={{
+        <div className="profil-bandeau" style={{
           position: "relative",
           padding: "32px 32px 28px",
           background: "#101319",
@@ -145,9 +145,17 @@ export function ProfilClient() {
 
               Ce n'est pas un second dessin mais le meme trace, cadre autrement
               par son viewBox : aucune divergence ne peut s'installer entre les
-              deux fichiers. */}
+              deux fichiers.
+
+              Il disparait sous 700 px. Le mot mesure environ deux cent dix
+              pixels de large a cette hauteur ; sur un bandeau qui en fait
+              deux cent quatre-vingts, il passait derriere le nom au lieu de
+              l'accompagner. Le reduire assez pour l'eviter en ferait une
+              vignette illisible, et la barre de navigation porte deja la
+              marque soixante pixels plus haut. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            className="profil-filigrane"
             src="/workie-mot.svg"
             alt=""
             aria-hidden="true"
@@ -190,7 +198,7 @@ export function ProfilClient() {
             comme les chiffres des cartes d'entreprise et du classement. Le
             retour à la ligne reste possible sur écran étroit, où une
             adresse électronique est longue. */}
-        <div style={{
+        <div className="profil-infos" style={{
           padding: "16px 32px 20px",
           display: "flex",
           flexWrap: "wrap",
@@ -302,13 +310,13 @@ export function ProfilClient() {
                 href="/api/user/export"
                 download
                 style={{
-                  display: "block", width: "100%", padding: "11px 16px", borderRadius: 10,
+                  display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "11px 16px", borderRadius: 10,
                   background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)",
                   color: "#8b5cf6", fontWeight: 600, fontSize: 14.5, cursor: "pointer",
                   textDecoration: "none", textAlign: "left",
                 }}
               >
-                ⬇ Télécharger mes données (RGPD)
+                <Download size={15} strokeWidth={2} aria-hidden="true" /> Télécharger mes données (RGPD)
               </a>
               <SignOutButton />
               <DeleteAccountButton />

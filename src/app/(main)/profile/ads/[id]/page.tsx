@@ -6,7 +6,7 @@ import { getUserCampaignById, getUserCampaignDailyStats, getUserCampaignCantonSt
 import { AdStatsChart } from "@/components/AdStatsChart";
 import { CancelCampaignButton } from "@/components/CancelCampaignButton";
 import Image from "next/image";
-import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, Clock, CheckCircle, XCircle, PauseCircle } from "lucide-react";
+import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, Clock, CheckCircle, XCircle, PauseCircle, AlertTriangle } from "lucide-react";
 
 const STATUS_CONFIG = {
   payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.12)", icon: <XCircle size={14} aria-hidden="true" /> },
@@ -114,7 +114,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                 <span>Début : {campaign.start_date}</span>
                 {campaign.end_date && <span>→ Fin : {campaign.end_date}</span>}
                 {campaign.target_cantons.length > 0 && <span>{campaign.target_cantons.join(", ")}</span>}
-                {campaign.target_sectors.length > 0 && <span>🏭 {campaign.target_sectors.join(", ")}</span>}
+                {campaign.target_sectors.length > 0 && <span>{campaign.target_sectors.join(", ")}</span>}
               </div>
               <a href={campaign.cta_url} target="_blank" rel="noopener noreferrer" className="ads-lien"
                 style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 10, fontSize: 13, color: "#8b5cf6", textDecoration: "none" }}>
@@ -123,8 +123,8 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
             </div>
           </div>
           {campaign.admin_note && campaign.status === "rejected" && (
-            <div style={{ margin: "0 24px 16px", padding: "10px 14px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 10, fontSize: 13, color: "#ef4444" }}>
-              ⚠ Raison du rejet : {campaign.admin_note}
+            <div style={{ margin: "0 24px 16px", padding: "10px 14px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 10, fontSize: 13, color: "#ef4444", display: "flex", alignItems: "center", gap: 7 }}>
+              <AlertTriangle size={13} strokeWidth={2.2} aria-hidden="true" style={{ flexShrink: 0 }} /> Raison du rejet : {campaign.admin_note}
             </div>
           )}
         </div>

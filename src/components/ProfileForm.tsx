@@ -4,6 +4,7 @@ import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile } from "@/lib/actions/profile";
 import type { Profile } from "@/lib/types";
+import { AlertTriangle, Check } from "lucide-react";
 
 const inp: React.CSSProperties = {
   width: "100%", background: "var(--surface2)", border: "1px solid var(--border2, var(--border))",
@@ -71,13 +72,13 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
       </div>
 
       {saveError && (
-        <div role="alert" style={{ padding: "12px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, fontSize: 14, fontWeight: 600, color: "#ef4444" }}>
-          ⚠ {saveError}
+        <div role="alert" style={{ padding: "12px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, fontSize: 14, fontWeight: 600, color: "#ef4444", display: "flex", alignItems: "center", gap: 8 }}>
+          <AlertTriangle size={14} strokeWidth={2.2} aria-hidden="true" style={{ flexShrink: 0 }} /> {saveError}
         </div>
       )}
       {success && (
-        <div role="status" style={{ padding: "12px 16px", background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 10, fontSize: 14, fontWeight: 600, color: "#10b981", textAlign: "center" }}>
-          ✓ Profil mis à jour !
+        <div role="status" style={{ padding: "12px 16px", background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 10, fontSize: 14, fontWeight: 600, color: "#10b981", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <Check size={14} strokeWidth={2.6} aria-hidden="true" style={{ flexShrink: 0 }} /> Profil mis à jour
         </div>
       )}
 
