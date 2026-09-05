@@ -316,7 +316,14 @@ export function ProfilClient() {
                   textDecoration: "none", textAlign: "left",
                 }}
               >
-                <Download size={15} strokeWidth={2} aria-hidden="true" /> Télécharger mes données (RGPD)
+                <Download size={15} strokeWidth={2} aria-hidden="true" />
+                {/* La mention « (RGPD) » est tombée : l'icône a pris la largeur
+                    qu'elle occupait, et le libellé passait sur deux lignes dans
+                    une colonne de trois cent quarante pixels. C'est le sigle qui
+                    part, parce qu'il nomme le règlement plutot que l'action. Ce
+                    qu'on veut, c'est ses données ; sous quelle loi on y a droit
+                    ne change pas le geste. */}
+                Télécharger mes données
               </a>
               <SignOutButton />
               <DeleteAccountButton />
