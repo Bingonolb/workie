@@ -20,6 +20,8 @@ const STATUS_CONFIG = {
 function ctr(imp: number, clk: number) { return imp ? `${((clk / imp) * 100).toFixed(2)}%` : "0.0%"; }
 function cpc(clk: number, spent: number) { return clk ? `CHF ${(spent / clk).toFixed(2)}` : "–"; }
 
+import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
+
 export default async function UserCampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getUser();
@@ -102,7 +104,8 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 50, background: st.bg, color: st.color }}>
                   {st.icon} {st.label}
                 </span>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>
+                  <SilhouetteFormat format={campaign.format === "square" ? "square" : "swipe"} taille={11} />
                   {campaign.format === "square" ? "Carré" : "Plein écran"}
                 </span>
                 {(campaign.status === "active" || campaign.status === "pending") && (

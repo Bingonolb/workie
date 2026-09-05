@@ -6,6 +6,7 @@ import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSi
 // ExternalLink used for CTA URL field only
 import { createUserCampaign } from "@/lib/actions/ads";
 import { audienceReach, calculateCPM, estimateDailyImpressions, estimateDailyReach, isBudgetCapped } from "@/lib/ads/pricing";
+import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
 
 const CANTONS = [
   { code: "GE", name: "Genève" }, { code: "VD", name: "Vaud" }, { code: "ZH", name: "Zürich" },
@@ -187,7 +188,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                     <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7L10 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                 )}
-                <div style={{ fontSize: 28, marginBottom: 10 }}>{f === "square" ? "Carré" : "Plein écran"}</div>
+                <div style={{ marginBottom: 12, color: "var(--text-muted)" }}>
+                    <SilhouetteFormat format={f} taille={40} variante="illustration" />
+                  </div>
                 <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>{f === "square" ? "Carré" : "Swipe"}</p>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
                   {f === "square"

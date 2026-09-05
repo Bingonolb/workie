@@ -32,6 +32,8 @@ function daysRemaining(endDate: string | null) {
   return { label: `${diff}j restants`, urgent: diff <= 3 };
 }
 
+import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
+
 export default async function UserAdsPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const [user, sp] = await Promise.all([getUser(), searchParams]);
   if (!user) redirect("/login?next=/profile/ads");
@@ -186,9 +188,9 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
                       {/* Thumbnail */}
                       <div style={{ width: 80, flexShrink: 0, background: "var(--surface2)", position: "relative", overflow: "hidden" }}>
                         <Image src={c.image_url} alt="" fill sizes="80px" style={{ objectFit: "cover" }} />
-                        <div style={{ position: "absolute", bottom: 6, left: 6, fontSize: 9, fontWeight: 800, background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, textTransform: "uppercase" }}>
-                          {c.format === "square" ? "Carré" : "Plein écran"}
-                        </div>
+                        <div style={{ position: "absolute", bottom: 6, left: 6, display: "flex", background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", borderRadius: 4, textTransform: "uppercase" }}>
+                            <SilhouetteFormat format={c.format === "square" ? "square" : "swipe"} taille={11} />
+                          </div>
                       </div>
 
                       {/* Content */}
