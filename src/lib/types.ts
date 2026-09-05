@@ -318,13 +318,21 @@ export const SECTOR_COLORS: Record<string, string> = {
   "Médias & Communication": "#dc2626",
   "Chimie": "#15803d",
   "Télécoms": "#2563eb",
+  "Biens de consommation": "#d946ef",
+  "Logistique & Supply Chain": "#0284c7",
+  "Aéronautique & Spatial": "#4f46e5",
+  "Défense & Sécurité": "#475569",
   // Legacy aliases
   "Sports & Mode": "#ec4899",
   "Conseil & Services": "#f59e0b",
 };
 
 /**
- * Les secteurs proposés au choix, dans l'ordre d'affichage.
+ * Les secteurs proposés au choix, en ordre alphabétique français.
+ *
+ * L'ordre était historique, donc indevinable : sur trente-trois entrées, on ne
+ * retrouvait une catégorie qu'en parcourant toute la liste. Un test garde
+ * l'ordre, sinon la prochaine addition se posera en fin de liste.
  *
  * Source unique : le filtre d'exploration, le formulaire d'administration et
  * le calcul d'audience publicitaire s'y réfèrent tous. Ils tenaient chacun
@@ -334,13 +342,39 @@ export const SECTOR_COLORS: Record<string, string> = {
  * libre) : rien ne le refuse, il hérite simplement des valeurs par défaut.
  */
 export const SECTORS = [
-  "Tech", "Finance", "Assurances", "Pharma", "Santé", "Conseil", "Industrie",
-  "Automobile", "Horlogerie", "Commerce", "Alimentation", "Agriculture",
-  "Éducation & Recherche", "Sports & Fashion", "Transport", "Énergie",
-  "Droit", "Bâtiment", "Beauté", "Administration publique",
-  "Commerce de détail", "Hôtellerie & Restauration", "Immobilier",
-  "Médias & Communication", "Chimie", "Télécoms",
-  "ONG", "Fondation", "Association",
+  "Administration publique",
+  "Aéronautique & Spatial",
+  "Agriculture",
+  "Alimentation",
+  "Association",
+  "Assurances",
+  "Automobile",
+  "Bâtiment",
+  "Beauté",
+  "Biens de consommation",
+  "Chimie",
+  "Commerce",
+  "Commerce de détail",
+  "Conseil",
+  "Défense & Sécurité",
+  "Droit",
+  "Éducation & Recherche",
+  "Énergie",
+  "Finance",
+  "Fondation",
+  "Horlogerie",
+  "Hôtellerie & Restauration",
+  "Immobilier",
+  "Industrie",
+  "Logistique & Supply Chain",
+  "Médias & Communication",
+  "ONG",
+  "Pharma",
+  "Santé",
+  "Sports & Fashion",
+  "Tech",
+  "Télécoms",
+  "Transport",
 ] as const;
 
 export const CANTON_NAMES: Record<string, string> = {

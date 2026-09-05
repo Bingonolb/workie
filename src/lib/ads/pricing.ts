@@ -74,6 +74,13 @@ export const SECTOR_WEIGHTS: Record<string, number> = {
   "Médias & Communication":  4,
   "Chimie":                  5,
   "Télécoms":                5,
+  // Ajoutes en meme temps que leur arrivee au catalogue. Sans poids, une
+  // campagne qui ne visait qu'eux calculait une audience nulle, donc un prix
+  // et une portee faux.
+  "Biens de consommation":     5,
+  "Logistique & Supply Chain": 6,
+  "Aéronautique & Spatial":    1,
+  "Défense & Sécurité":        2,
 };
 const SECTOR_TOTAL = Object.values(SECTOR_WEIGHTS).reduce((a, b) => a + b, 0);
 

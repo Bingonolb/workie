@@ -46,17 +46,40 @@ const CLE_DEFILEMENT = "workie_grille_defilement";
 const GUEST_VISIBLE = 12;
 const GUEST_BLUR = 6;
 
+// Les cantons, en ordre alphabetique de leur nom affiche.
+//
+// Ils suivaient l'ordre federal, celui du protocole, que personne ne connait
+// hors des institutions : Zurich, Berne, Lucerne, Uri, Schwytz. Un visiteur
+// qui cherche Geneve la trouvait en avant-derniere position.
 const CANTONS = [
-  { code: "ZH", name: "Zürich" }, { code: "BE", name: "Bern" }, { code: "LU", name: "Lucerne" },
-  { code: "UR", name: "Uri" }, { code: "SZ", name: "Schwyz" }, { code: "OW", name: "Obwald" },
-  { code: "NW", name: "Nidwald" }, { code: "GL", name: "Glaris" }, { code: "ZG", name: "Zug" },
-  { code: "FR", name: "Fribourg" }, { code: "SO", name: "Soleure" }, { code: "BS", name: "Bâle-Ville" },
-  { code: "BL", name: "Bâle-Camp." }, { code: "SH", name: "Schaffhouse" }, { code: "AR", name: "Appenzell A.Rh." },
-  { code: "AI", name: "Appenzell I.Rh." }, { code: "SG", name: "St-Gallen" }, { code: "GR", name: "Grisons" },
-  { code: "AG", name: "Argovie" }, { code: "TG", name: "Thurgovie" }, { code: "TI", name: "Tessin" },
-  { code: "VD", name: "Vaud" }, { code: "VS", name: "Valais" }, { code: "NE", name: "Neuchâtel" },
-  { code: "GE", name: "Genève" }, { code: "JU", name: "Jura" },
+  { code: "AG", name: "Argovie" },
+  { code: "AI", name: "Appenzell I.Rh." },
+  { code: "AR", name: "Appenzell A.Rh." },
+  { code: "BL", name: "Bâle-Camp." },
+  { code: "BS", name: "Bâle-Ville" },
+  { code: "BE", name: "Bern" },
+  { code: "FR", name: "Fribourg" },
+  { code: "GE", name: "Genève" },
+  { code: "GL", name: "Glaris" },
+  { code: "GR", name: "Grisons" },
+  { code: "JU", name: "Jura" },
+  { code: "LU", name: "Lucerne" },
+  { code: "NE", name: "Neuchâtel" },
+  { code: "NW", name: "Nidwald" },
+  { code: "OW", name: "Obwald" },
+  { code: "SH", name: "Schaffhouse" },
+  { code: "SZ", name: "Schwyz" },
+  { code: "SO", name: "Soleure" },
+  { code: "SG", name: "St-Gallen" },
+  { code: "TG", name: "Thurgovie" },
+  { code: "TI", name: "Tessin" },
+  { code: "UR", name: "Uri" },
+  { code: "VS", name: "Valais" },
+  { code: "VD", name: "Vaud" },
+  { code: "ZG", name: "Zug" },
+  { code: "ZH", name: "Zürich" },
 ];
+
 
 
 export function ExploreClient({

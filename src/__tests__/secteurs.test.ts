@@ -23,6 +23,17 @@ describe("secteurs", () => {
     expect(sans).toEqual([]);
   });
 
+  /*
+   * L'ordre de la liste est celui de l'affichage : filtre d'exploration,
+   * formulaire d'administration et ciblage publicitaire la parcourent telle
+   * quelle. Sans ce test, la prochaine addition se posera en fin de liste,
+   * comme les vingt-neuf precedentes, et le tri se defera silencieusement.
+   */
+  it("la liste est en ordre alphabétique français", () => {
+    const trie = [...SECTORS].sort((a, b) => a.localeCompare(b, "fr"));
+    expect([...SECTORS]).toEqual(trie);
+  });
+
   it("aucun poids ne porte sur un secteur qui n'existe plus", () => {
     const orphelins = Object.keys(SECTOR_WEIGHTS).filter(s => !(SECTORS as readonly string[]).includes(s));
     expect(orphelins).toEqual([]);
