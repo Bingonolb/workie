@@ -6,9 +6,9 @@
 //      → No filter on a dimension means 100% reach for that dimension.
 //      → Selecting all cantons = selecting none = 100% reach (same thing).
 //
-//   2. CPM = BASE × formatMult × (1 + 0.4 × (1 − reach))
-//      → Narrow targeting: slightly higher CPM (more relevant audience = more valuable)
-//      → Broad / no targeting: base CPM (no premium)
+//   2. CPM = BASE × formatMult. Plat, quel que soit le ciblage.
+//      → Le territoire ne se paie pas au mille, il se paie par le budget
+//        minimum qu'il exige (voir budgetJournalierMinimum).
 //
 //   3. dailyImpressions = min(budget÷CPM × 1000, DAILY_POOL × reach)
 //      → Audience size caps impressions: a micro-segment can't absorb an unlimited budget.
@@ -112,12 +112,47 @@ export function audienceReach(cantons: string[], sectors: string[]): number {
 }
 
 // ── CPM ───────────────────────────────────────────────────────────────────────
-// Precision premium: 0% for broad targeting, up to +40% for the narrowest segment.
-// This mirrors Facebook/LinkedIn Ads: a specific, high-intent audience costs more per view.
-export function calculateCPM(format: AdFormat, cantons: string[], sectors: string[]): number {
+/**
+ * Le prix des mille affichages. Le même pour tout le monde.
+ *
+ * Une « prime de précision » le faisait monter jusqu'à quarante pour cent sur
+ * les segments étroits, à l'imitation des plateformes à enchères. Le résultat
+ * était l'inverse de ce qu'on voulait : à budget journalier égal, mesuré à
+ * CHF 20, Genève seule donnait neuf cent quarante affichages par jour et toute
+ * la Suisse cinq mille, pour le même prix. Élargir son ciblage rapportait donc
+ * cinq fois plus sans rien coûter, et personne n'avait de raison de cibler.
+ *
+ * Cette prime a un sens là où plusieurs annonceurs se disputent une audience
+ * rare : le prix y monte parce qu'ils surenchérissent, pas parce que la
+ * plateforme le décide. Workie ne tient pas d'enchères ; la copier revenait à
+ * inventer une rareté qui n'existe pas.
+ *
+ * Le territoire se paie ailleurs, par le budget minimum qu'il exige.
+ */
+export function calculateCPM(format: AdFormat, _cantons?: string[], _sectors?: string[]): number {
+  return +(BASE_CPM_CHF * FORMAT_MULT[format]).toFixed(4);
+}
+
+/**
+ * Le budget journalier minimum, selon le territoire revendiqué.
+ *
+ * Rien n'empêchait de revendiquer les vingt-six cantons pour cinq francs par
+ * jour : le prix ne dépendait que du budget et de la durée, jamais de
+ * l'étendue. Une campagne nationale à ce tarif n'atteint personne, et laisse
+ * l'annonceur juger la plateforme sur un essai qui ne pouvait pas marcher.
+ *
+ * Le minimum est donc la moitié de l'inventaire du segment visé : la campagne
+ * a de quoi se voir, ou elle n'existe pas. Il reste borné en bas par
+ * BUDGET_JOURNALIER_PLANCHER, pour qu'un canton peu peuplé reste abordable.
+ */
+export const BUDGET_JOURNALIER_PLANCHER = 5;
+const PART_MINIMALE_INVENTAIRE = 0.5;
+
+export function budgetJournalierMinimum(cantons: string[], sectors: string[]): number {
   const reach = audienceReach(cantons, sectors);
-  const precisionPremium = 1 + 0.4 * (1 - reach);
-  return +(BASE_CPM_CHF * FORMAT_MULT[format] * precisionPremium).toFixed(4);
+  const inventaire = DAILY_IMPRESSION_POOL * reach;
+  const cout = (inventaire * PART_MINIMALE_INVENTAIRE / 1000) * BASE_CPM_CHF;
+  return Math.max(BUDGET_JOURNALIER_PLANCHER, Math.ceil(cout));
 }
 
 // ── Impression estimates ──────────────────────────────────────────────────────

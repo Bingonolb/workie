@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock, AlertTriangle, Check, CreditCard } from "lucide-react";
 // ExternalLink used for CTA URL field only
 import { createUserCampaign } from "@/lib/actions/ads";
-import { audienceReach, calculateCPM, estimateDailyImpressions, estimateDailyReach, isBudgetCapped } from "@/lib/ads/pricing";
+import { audienceReach, calculateCPM, estimateDailyImpressions, estimateDailyReach, isBudgetCapped, budgetJournalierMinimum } from "@/lib/ads/pricing";
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
 
 const CANTONS = [
@@ -75,8 +75,14 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   const [format, setFormat] = useState<"square" | "swipe">(prefillFormat ?? "square");
   const [selectedCantons, setSelectedCantons] = useState<string[]>([]);
   const [dailyBudget, setDailyBudget] = useState(prefillDaily ?? 20);
+  // Le minimum suit le territoire revendiqué : on ne couvre pas vingt-six
+  // cantons pour cinq francs par jour. Le curseur remonte tout seul quand le
+  // ciblage s'élargit, sinon le formulaire garderait une valeur que l'action
+  // refuserait à l'envoi.
+  const minimumJournalier = budgetJournalierMinimum(selectedCantons, []);
+  const budgetApplique = Math.max(dailyBudget, minimumJournalier);
   const [durationDays, setDurationDays] = useState(14);
-  const totalBudget = dailyBudget * durationDays;
+  const totalBudget = budgetApplique * durationDays;
 
   const today = new Date().toISOString().slice(0, 10);
   const [startDate, setStartDate] = useState(today);
@@ -114,10 +120,11 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
   const reach = audienceReach(selectedCantons, []);
   const cpm = calculateCPM(format, selectedCantons, []);
-  const dailyImpressions = estimateDailyImpressions(dailyBudget, cpm, reach);
-  const dailyReach = estimateDailyReach(dailyBudget, cpm, reach);
+  const dailyImpressions = estimateDailyImpressions(budgetApplique, cpm, reach);
+  const dailyReach = estimateDailyReach(budgetApplique, cpm, reach);
   const totalImpressions = dailyImpressions * durationDays;
-  const budgetCapped = isBudgetCapped(dailyBudget, cpm, reach);
+  const budgetCapped = isBudgetCapped(budgetApplique, cpm, reach);
+
 
   const toggleCanton = useCallback((code: string) =>
     setSelectedCantons(p => p.includes(code) ? p.filter(c => c !== code) : [...p, code]), []);
@@ -166,7 +173,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
       <form action={action}>
         <input type="hidden" name="target_cantons" value={JSON.stringify(selectedCantons)} />
         <input type="hidden" name="target_sectors" value="[]" />
-        <input type="hidden" name="daily_budget_chf" value={dailyBudget} />
+        <input type="hidden" name="daily_budget_chf" value={budgetApplique} />
         <input type="hidden" name="total_budget_chf" value={totalBudget} />
         <input type="hidden" name="format" value={format} />
         <input type="hidden" name="image_url" value={imageUrl} />
@@ -426,13 +433,19 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 4 }}>Par jour</label>
-              <div style={{ fontSize: 26, fontWeight: 900, color: "#8b5cf6", letterSpacing: "-0.02em", marginBottom: 10 }}>CHF {dailyBudget}</div>
-              <input type="range" min={5} max={500} step={5} value={dailyBudget}
+              <div style={{ fontSize: 26, fontWeight: 900, color: "#8b5cf6", letterSpacing: "-0.02em", marginBottom: 10 }}>CHF {budgetApplique}</div>
+              <input type="range" min={minimumJournalier} max={500} step={5} value={budgetApplique}
                 onChange={e => setDailyBudget(Number(e.target.value))}
                 style={{ width: "100%", accentColor: "#8b5cf6" }} />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-                <span>CHF 5</span><span>CHF 500</span>
+                <span>CHF {minimumJournalier}</span><span>CHF 500</span>
               </div>
+              {minimumJournalier > 5 && (
+                <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.5 }}>
+                  Minimum porté à CHF {minimumJournalier} par le territoire visé : une
+                  campagne doit acheter de quoi se voir sur la zone qu&apos;elle revendique.
+                </p>
+              )}
             </div>
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 4 }}>Durée</label>
@@ -449,7 +462,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           <div style={{ padding: "14px 16px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 24, textAlign: "center" }}>
             <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Budget total</div>
             <div style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>CHF {totalBudget.toLocaleString("fr-CH")}</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {dailyBudget} × {durationDays} jours</div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {budgetApplique} × {durationDays} jours</div>
           </div>
 
           {/* Dates — overflow:hidden évite le débordement iOS */}

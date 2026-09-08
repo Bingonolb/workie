@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { calculateCPM } from "@/lib/ads/pricing";
+import { calculateCPM, budgetJournalierMinimum } from "@/lib/ads/pricing";
 import type { AdFormat } from "@/lib/ads/pricing";
 import { captureServerError } from "@/lib/monitoring";
 
@@ -164,7 +164,6 @@ export async function createUserCampaign(
     const cta_url = /^https?:\/\//i.test(rawCta) ? rawCta : `https://${rawCta}`;
 
     const daily_budget_chf = Number(formData.get("daily_budget_chf") || 0);
-    if (daily_budget_chf < 5) return { error: "Budget journalier minimum : CHF 5." };
 
     const total_budget_chf = Number(formData.get("total_budget_chf") || 0);
     if (total_budget_chf < daily_budget_chf) return { error: "Budget total doit être ≥ budget journalier." };
@@ -173,6 +172,14 @@ export async function createUserCampaign(
     let target_sectors: string[] = [];
     try { target_cantons = JSON.parse(String(formData.get("target_cantons") || "[]")); } catch { target_cantons = []; }
     try { target_sectors = JSON.parse(String(formData.get("target_sectors") || "[]")); } catch { target_sectors = []; }
+
+    // Le minimum dépend du territoire visé : cinq francs par jour ne couvrent
+    // pas vingt-six cantons. La vérification est refaite ici parce qu'un
+    // formulaire se contourne, et le calcul est le même des deux côtés.
+    const minimumJournalier = budgetJournalierMinimum(target_cantons, target_sectors);
+    if (daily_budget_chf < minimumJournalier) {
+      return { error: `Budget journalier minimum pour ce ciblage : CHF ${minimumJournalier}.` };
+    }
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
     const end_date = String(formData.get("end_date") || "") || null;
     if (end_date && end_date <= start_date) return { error: "La date de fin doit être après la date de début." };
@@ -416,7 +423,6 @@ export async function createCampaign(
     const cta_url = /^https?:\/\//i.test(rawCta) ? rawCta : `https://${rawCta}`;
 
     const daily_budget_chf = Number(formData.get("daily_budget_chf") || 0);
-    if (daily_budget_chf < 5) return { error: "Budget journalier minimum : CHF 5." };
 
     const total_budget_chf = Number(formData.get("total_budget_chf") || 0);
     if (total_budget_chf < daily_budget_chf) return { error: "Budget total doit être ≥ budget journalier." };
@@ -425,6 +431,14 @@ export async function createCampaign(
     let target_sectors: string[] = [];
     try { target_cantons = JSON.parse(String(formData.get("target_cantons") || "[]")); } catch { target_cantons = []; }
     try { target_sectors = JSON.parse(String(formData.get("target_sectors") || "[]")); } catch { target_sectors = []; }
+
+    // Le minimum dépend du territoire visé : cinq francs par jour ne couvrent
+    // pas vingt-six cantons. La vérification est refaite ici parce qu'un
+    // formulaire se contourne, et le calcul est le même des deux côtés.
+    const minimumJournalier = budgetJournalierMinimum(target_cantons, target_sectors);
+    if (daily_budget_chf < minimumJournalier) {
+      return { error: `Budget journalier minimum pour ce ciblage : CHF ${minimumJournalier}.` };
+    }
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
     const end_date = String(formData.get("end_date") || "") || null;
     if (end_date && end_date <= start_date) return { error: "La date de fin doit être après la date de début." };
