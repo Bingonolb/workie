@@ -64,7 +64,12 @@ export async function GET(req: NextRequest) {
               background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.35)",
               borderRadius: 50, padding: "10px 22px",
             }}>
-              <span style={{ fontSize: 26, color: "#f59e0b" }}>★</span>
+              {/* L'etoile en caractere s'affichait en carre vide : la police
+                  par defaut de cette image ne contient pas ce signe. Dessinee,
+                  elle ne depend d'aucune police. */}
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#f59e0b">
+                <path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z" />
+              </svg>
               <span style={{ fontSize: 24, fontWeight: 800, color: "#f59e0b" }}>{rating}</span>
               <span style={{ fontSize: 17, color: "rgba(255,255,255,0.5)" }}>· {reviews} avis</span>
             </div>
