@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Target, CreditCard, ShieldCheck, BarChart3, Building2, MapPin, ExternalLink, Check } from "lucide-react";
+import { ArrowRight, Target, CreditCard, ShieldCheck, BarChart3, MapPin, ExternalLink, Check, CalendarClock } from "lucide-react";
 import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 import { unstable_cache } from "next/cache";
@@ -177,10 +177,11 @@ export default async function AnnonceursPage() {
             <div>
             <p className="ann-eyebrow">Annonceurs</p>
             <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
-              Là où les candidats choisissent leur employeur.
+              Ici, on décide pour les années qui viennent.
             </h1>
             <p style={{ fontSize: 16.5, color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 500, marginBottom: 30 }}>
-              Votre annonce s&apos;affiche pendant qu&apos;ils comparent.
+              Choisir un employeur, c&apos;est engager plusieurs années.
+              Votre annonce paraît pendant qu&apos;on y réfléchit.
             </p>
             <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
               Créer une campagne <ArrowRight size={17} aria-hidden="true" />
@@ -207,14 +208,18 @@ export default async function AnnonceursPage() {
         <section className="ann-section ann-ton">
           <div className="ann-large">
             <p className="ann-eyebrow">L&apos;audience</p>
-            <h2 className="ann-h2">Des gens en train de décider.</h2>
+            <h2 className="ann-h2">Des gens qui regardent loin.</h2>
             <p className="ann-chapo">
               {/* Aucun chiffre d'audience : le site est jeune, et un annonceur
                   qui decouvre l'ecart sur son tableau de bord ne revient pas.
                   L'intention se decrit, elle n'a pas besoin d'etre chiffree. */}
-              On ne vient pas sur Workie passer le temps. On y compare des
-              employeurs et on y lit des salaires, c&apos;est-à-dire qu&apos;on prépare
-              un changement.
+              On y compare des employeurs et on y lit des salaires,
+              c&apos;est-à-dire qu&apos;on décide de plusieurs années de sa vie.
+              Et une décision pareille en entraîne d&apos;autres, qui engagent
+              tout autant : reprendre une formation, changer de trajet,
+              s&apos;assurer, emprunter.
+
+
             </p>
             {/* Le terrain, en valeur absolue. Les cantons et les secteurs sont
                 comptes dans le module de tarification, donc ces nombres sont
@@ -232,18 +237,18 @@ export default async function AnnonceursPage() {
               {[
                 {
                   Icone: Target,
-                  titre: "Une intention, pas une audience",
-                  desc: "Ils sont venus choisir un employeur. Vous leur parlez pendant qu\u2019ils choisissent, pas six mois plus tôt.",
+                  titre: "Un moment de projection",
+                  desc: "On ne compare pas des employeurs pour passer le temps. Ceux qui lisent ces pages pensent en années, pas en minutes.",
                 },
                 {
-                  Icone: Building2,
-                  titre: "Au milieu de vos concurrents",
-                  desc: "Votre annonce paraît dans la grille des entreprises, à côté de celles qui visent les mêmes candidats que vous.",
+                  Icone: CalendarClock,
+                  titre: "Pas seulement des recruteurs",
+                  desc: "Un changement de poste entraîne une formation, un trajet, une assurance, parfois un crédit. Tout ce qui se décide sur la durée a sa place ici.",
                 },
                 {
                   Icone: MapPin,
-                  titre: "Le marché suisse, découpé comme vous le pensez",
-                  desc: "Par canton et par secteur. Vous ne payez pas pour une audience que vous n\u2019embaucherez jamais.",
+                  titre: "Par canton et par secteur",
+                  desc: "Vous choisissez où et à qui votre annonce paraît, et vous ne payez que pour ce périmètre.",
                 },
               ].map(({ Icone, titre, desc }) => (
                 <div key={titre} className="ann-carte">
@@ -299,8 +304,9 @@ export default async function AnnonceursPage() {
             <p className="ann-eyebrow">Un exemple</p>
             <h2 className="ann-h2">À quoi ressemble une annonce.</h2>
             <p className="ann-chapo">
-              Une école de langues qui vise des candidats en train de préparer
-              un changement de poste.
+              Une école de langues, c&apos;est-à-dire exactement le genre de
+              décision qu&apos;on prend en même temps qu&apos;un changement de poste.
+
             </p>
 
             <div className="ann-exemple">
@@ -448,11 +454,12 @@ export default async function AnnonceursPage() {
         <section className="ann-section ann-accent" style={{ textAlign: "center" }}>
           <div style={{ maxWidth: 560, margin: "0 auto" }}>
             <h2 style={{ fontSize: "clamp(24px, 3.6vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 12 }}>
-              Essayez avec CHF 5.
+              À partir de CHF 5 par jour.
             </h2>
             <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 28 }}>
-              C&apos;est le budget minimum d&apos;une journée, et il suffit à voir ce que
-              votre annonce donne.
+              C&apos;est le budget minimum, et il suffit à mesurer ce que
+              donne une annonce avant d&apos;aller plus loin.
+
             </p>
             <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 28px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
               Créer une campagne <ArrowRight size={17} aria-hidden="true" />

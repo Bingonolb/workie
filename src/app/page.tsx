@@ -543,8 +543,12 @@ export default async function Home() {
               <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
                 Sur Workie
               </p>
+              {/* « Vous jugez l'employeur » : ce n'est pas le rapport qu'on
+                  entretient avec un futur employeur, et Workie n'est pas un
+                  tribunal. Le titre dit ce qu'on y gagne, savoir où l'on met
+                  les pieds, plutôt que le verdict qu'on rendrait. */}
               <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-                Vous jugez l&apos;employeur
+                Vous savez à qui vous postulez
               </h3>
               {/* Cette phrase reprenait presque mot pour mot l'accroche du
                   haut de page : « Notes détaillées, salaires... et conditions
@@ -596,13 +600,13 @@ export default async function Home() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
               { Icone: GraduationCap, titre: "Vous terminez vos études",
-                desc: "Le salaire d'un premier poste, et les employeurs qui encadrent vraiment leurs débutants." },
+                desc: "Le salaire d'un premier poste, et la façon dont chaque employeur encadre ses débutants." },
               { Icone: Briefcase, titre: "Vous envisagez de changer",
                 desc: "Comparer votre employeur à ceux qui recrutent, sur des critères plutôt qu'une réputation." },
               { Icone: Landmark, titre: "Vous êtes dans le public",
                 desc: "Le privé sur des bases concrètes : rémunération, charge de travail, flexibilité." },
               { Icone: IconeMaison, titre: "Vous reprenez une activité",
-                desc: "Les employeurs que leurs équipes jugent souples sur les horaires." },
+                desc: "Les notes d'équilibre et de flexibilité, données par les équipes en place." },
             ].map(({ Icone, titre, desc }, i) => (
               <div key={titre} style={{
                 display: "flex", gap: 18, padding: "22px 0",
