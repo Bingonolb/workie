@@ -880,21 +880,27 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
   const isFav = flameIds.has(company.id);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const coverSrc = company.cover_url || `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`;
+  // Meme regle que la grille : sans photo, la couleur du secteur, pas une
+  // image fabriquee a la demande qui revenait vide.
+  const coverSrc = company.cover_url;
 
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
       {/* Fond à la couleur dominante de la photo : la carte est colorée dès le
           premier rendu, donc pas de shimmer ni d'aplat gris même hors ligne. */}
       <div
-        className={imgLoaded || company.cover_color ? undefined : "img-placeholder"}
+        // L'animation de chargement ne s'applique que s'il y a une image a
+        // attendre : sans photo, elle balayait le degrade du secteur d'une
+        // bande claire figee.
+        className={coverSrc && !imgLoaded && !company.cover_color ? "img-placeholder" : undefined}
         style={{
           height: "55%", position: "relative", overflow: "hidden",
-          background: company.cover_color || "var(--surface2)",
+          background: company.cover_color
+            || (coverSrc ? "var(--surface2)" : `linear-gradient(135deg, ${sectorColor} 0%, #0f172a 100%)`),
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+          {coverSrc && <img
           src={largeurCouverture(coverSrc, 940)}
           alt=""
           loading="eager"
@@ -907,7 +913,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
             transition: "opacity 0.25s ease-out",
           }}
           onLoad={() => setImgLoaded(true)}
-        />
+          />}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.8))" }} />
 
         {overlayDir === "right" && (

@@ -42,7 +42,10 @@ const inter = Inter({
 });
 
 
-const OG_URL = "/api/og?title=Workie&sub=Avis+et+salaires+des+entreprises+suisses";
+// L'image de secours du site entier. Les pages qui ne déclarent pas de bloc
+// `openGraph` reçoivent de toute façon `src/app/opengraph-image.png`, câblé par
+// Next ; cette adresse sert aux autres.
+const OG_URL = "https://www.workie.ch/opengraph-image.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.workie.ch"),

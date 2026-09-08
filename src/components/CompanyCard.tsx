@@ -53,9 +53,6 @@ function StarDisplay({ rating }: { rating: number }) {
   );
 }
 
-function getOgCover(company: Company): string {
-  return `/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(company.sector ?? "")}`;
-}
 
 
 // Neutral blur placeholder — shows instantly before the real image loads
@@ -78,6 +75,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [pending, startTransition] = useTransition();
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
+  const aUnePhoto = Boolean(company.cover_url) && !coverFailed;
 
   const handleFav = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -126,13 +124,22 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
         cursor: "pointer",
       }}>
         {/* Cover */}
-        <div className="card-cover" style={{ height: 210, position: "relative", overflow: "hidden", background: "var(--surface2)" }}>
-          <CoverImage
-            src={(company.cover_url && !coverFailed) ? company.cover_url : getOgCover(company)}
-            color={company.cover_color}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-            priority={priority}
-          />
+        <div className="card-cover" style={{
+          height: 210, position: "relative", overflow: "hidden",
+          // Sans photo, le dégradé du secteur tient lieu de couverture. La
+          // carte allait chercher une image fabriquée à la demande, qui
+          // revenait vide : un aplat gris à la place de la photo. Le dégradé
+          // est immédiat, ne demande aucune requête et ne peut pas échouer.
+          background: aUnePhoto ? "var(--surface2)" : getCoverGradient(company.sector, sectorColor),
+        }}>
+          {aUnePhoto && (
+            <CoverImage
+              src={company.cover_url!}
+              color={company.cover_color}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+              priority={priority}
+            />
+          )}
 
           {/* Voile sombre sous la photo.
               Il montait à 0,82 en bas, ce qui suffit sur une image sombre et

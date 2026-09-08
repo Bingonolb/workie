@@ -57,6 +57,8 @@ export async function generateStaticParams() {
   }
 }
 
+const OG_STATIQUE = "https://www.workie.ch/opengraph-image.png";
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const company = await getCachedCompany(id);
@@ -65,10 +67,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
     : `Avis anonymes sur ${company.name} : rémunération, management, équilibre et évolution, notés par ses employés.`;
   const url = `${BASE_URL}/company/${id}`;
-  const ogApiUrl = `${BASE_URL}/api/og?title=${encodeURIComponent(company.name)}&sub=${encodeURIComponent(`${company.city} · ${company.sector}`)}${Number(company.avg_rating) > 0 ? `&rating=${Number(company.avg_rating).toFixed(1)}&reviews=${company.review_count}` : ""}`;
+  // Trente-cinq fiches sur mille quarante n'ont pas de photo. Elles tombaient
+  // sur `/api/og`, qui renvoyait une image vide : leur lien partagé arrivait nu.
+  // Elles prennent l'image statique le temps que la route réparée fasse ses
+  // preuves en production, où seule elle peut être vérifiée.
   const ogImage = company.cover_url
     ? [{ url: company.cover_url, width: 1200, height: 630, alt: company.name }]
-    : [{ url: ogApiUrl, width: 1200, height: 630, alt: company.name }];
+    : [{ url: OG_STATIQUE, width: 1200, height: 630, alt: company.name }];
   return {
     title: `${company.name} · Avis & Salaires · Workie`,
     description: desc,
