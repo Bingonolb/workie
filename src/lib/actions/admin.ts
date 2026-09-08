@@ -20,41 +20,10 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     await requireAdmin();
     const admin = createAdminClient();
 
-    const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-    const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
-    // 7 Mo, et non 10 : la requête elle-même est plafonnée à 8 Mo. Annoncer
-    // une limite que la plateforme n'accorde pas produisait un échec sans
-    // message, avant même d'arriver ici.
-    const MAX_IMG = 7 * 1024 * 1024;
-
-    // Un problème d'image n'annule plus l'enregistrement.
-    //
-    // Auparavant, un format inattendu ou un envoi en échec interrompait toute
-    // l'action : le texte saisi était perdu et il fallait tout ressaisir, sans
-    // savoir pourquoi. Les deux sujets sont maintenant séparés — le texte est
-    // enregistré, et l'image signalée à part.
-    let avertissement: string | null = null;
     let cover_url: string | null = String(formData.get("cover_url") || "") || null;
-    const coverFile = formData.get("cover_file");
-    if (coverFile instanceof File && coverFile.size > 0) {
-      if (!ALLOWED_IMG.includes(coverFile.type)) {
-        avertissement = "Le texte est enregistré. L'image a été ignorée : format non supporté (JPG, PNG, WebP, GIF).";
-      } else if (coverFile.size > MAX_IMG) {
-        avertissement = "Le texte est enregistré. L'image a été ignorée : trop lourde (7 Mo maximum).";
-      } else {
-        const ext = EXT_MAP[coverFile.type] ?? "jpg";
-        const path = `covers/${id}/${randomUUID()}.${ext}`;
-        const { error: upErr } = await admin.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
-        if (upErr) {
-          // L'échec était jusqu'ici parfaitement silencieux : l'ancienne image
-          // restait en place sans que personne ne sache pourquoi.
-          avertissement = "Le texte est enregistré. L'envoi de l'image a échoué, l'ancienne est conservée.";
-        } else {
-          const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
-          cover_url = pub.publicUrl;
-        }
-      }
-    }
+    const depot = await televerserCouverture(admin, id, formData.get("cover_file"));
+    if (depot.url) cover_url = depot.url;
+    const avertissement = depot.avertissement ?? null;
 
     const fields = {
       name: String(formData.get("name") || ""),
@@ -89,7 +58,50 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
   }
 }
 
-export async function adminAddCompany(formData: FormData): Promise<{ error?: string }> {
+/**
+ * Dépose la bannière envoyée et renvoie son adresse publique.
+ *
+ * Un problème d'image n'annule jamais l'enregistrement du texte. Auparavant un
+ * format inattendu ou un envoi en échec interrompait toute l'action : la
+ * saisie était perdue et il fallait tout recommencer, sans savoir pourquoi.
+ * Les deux sujets restent séparés, ici comme à la création.
+ *
+ * Le chemin porte l'identifiant de la fiche, donc à la création cette fonction
+ * n'est appelée qu'une fois la ligne insérée.
+ */
+async function televerserCouverture(
+  admin: ReturnType<typeof createAdminClient>,
+  companyId: string,
+  coverFile: FormDataEntryValue | null,
+): Promise<{ url?: string; avertissement?: string }> {
+  const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+  // 7 Mo, et non 10 : la requête elle-même est plafonnée à 8 Mo. Annoncer une
+  // limite que la plateforme n'accorde pas produisait un échec sans message,
+  // avant même d'arriver ici.
+  const MAX_IMG = 7 * 1024 * 1024;
+
+  if (!(coverFile instanceof File) || coverFile.size === 0) return {};
+  if (!ALLOWED_IMG.includes(coverFile.type)) {
+    return { avertissement: "Le texte est enregistré. L'image a été ignorée : format non supporté (JPG, PNG, WebP, GIF)." };
+  }
+  if (coverFile.size > MAX_IMG) {
+    return { avertissement: "Le texte est enregistré. L'image a été ignorée : trop lourde (7 Mo maximum)." };
+  }
+
+  const ext = EXT_MAP[coverFile.type] ?? "jpg";
+  const path = `covers/${companyId}/${randomUUID()}.${ext}`;
+  const { error } = await admin.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
+  if (error) {
+    // L'échec était jusqu'ici parfaitement silencieux : l'ancienne image
+    // restait en place sans que personne ne sache pourquoi.
+    return { avertissement: "Le texte est enregistré. L'envoi de l'image a échoué." };
+  }
+  const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
+  return { url: pub.publicUrl };
+}
+
+export async function adminAddCompany(formData: FormData): Promise<{ error?: string; avertissement?: string }> {
   try {
     await requireAdmin();
     const supabase = createAdminClient();
@@ -115,7 +127,10 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       twitter_url: String(formData.get("twitter_url") || "") || null,
       instagram_url: String(formData.get("instagram_url") || "") || null,
       avg_salary_chf: formData.get("avg_salary_chf") ? (Number(formData.get("avg_salary_chf")) || null) : null,
-      is_verified: false,
+      // Le statut était forcé à faux : le champ existait dans le formulaire de
+      // modification, pas dans celui de création, et une fiche créée comme
+      // vérifiée ne l'était pas.
+      is_verified: formData.get("is_verified") === "true",
       avg_rating: 0, review_count: 0, score: 0,
     };
 
@@ -125,6 +140,21 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       .select("id")
       .single();
     if (error) return { error: error.message };
+
+    // La bannière ne peut partir qu'après l'insertion : son chemin de stockage
+    // porte l'identifiant de la fiche, qui n'existe pas avant.
+    let avertissement: string | null = null;
+    if (created?.id) {
+      const depot = await televerserCouverture(supabase, created.id, formData.get("cover_file"));
+      avertissement = depot.avertissement ?? null;
+      if (depot.url) {
+        const { error: majErr } = await supabase
+          .from("companies")
+          .update({ cover_url: depot.url })
+          .eq("id", created.id);
+        if (majErr) avertissement = "La fiche est créée. L'image a été envoyée mais n'a pas pu y être rattachée.";
+      }
+    }
 
     // Annonce aux membres. Regroupé côté DB : ajouter plusieurs entreprises
     // d'affilée ne produit qu'une notification listant les nouveautés.
@@ -136,7 +166,8 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
     revalidatePath("/admin/companies");
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
-    return {};
+    // La fiche est créée ; l'avertissement ne concerne que l'image.
+    return avertissement ? { avertissement } : {};
   } catch (e) {
     return { error: (e as Error).message };
   }
