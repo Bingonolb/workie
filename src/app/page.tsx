@@ -500,7 +500,7 @@ export default async function Home() {
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
             Deux employeurs notés 3.8 ne se ressemblent pas : chez l&apos;un c&apos;est
-            la rémunération, chez l&apos;autre l&apos;encadrement.
+            la rémunération, chez l&apos;autre le management.
           </p>
         </div>
       </section>
