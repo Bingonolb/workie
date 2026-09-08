@@ -531,7 +531,13 @@ export default async function Home() {
           {/* Le titre faisait deux lignes la ou tous les autres h2 de la page
               tiennent en trois ou quatre mots. La phrase entiere est passee
               juste en dessous, ou elle a la place de s'expliquer. */}
-          <h2 className="landing-h2 avec-chapo">Tous les employeurs, pas une sélection.</h2>
+          {/* « Tous les employeurs » etait faux : le catalogue en compte un
+              millier, pas la totalite des employeurs suisses, et il ne les aura
+              jamais tous. L'exhaustivite promise n'est pas la : elle porte sur
+              les offres d'un employeur donne, dont on voit la totalite parce
+              qu'on va les lire chez lui. C'est ce que dit le chapeau, et c'est
+              ce que le titre annonce maintenant. */}
+          <h2 className="landing-h2 avec-chapo">Toutes les offres d&apos;un employeur, pas une sélection.</h2>
 
           <p className="landing-chapo">
             Un site d&apos;annonces ne montre que les offres qu&apos;on lui a confiées.
@@ -548,7 +554,7 @@ export default async function Home() {
                   tribunal. Le titre dit ce qu'on y gagne, savoir où l'on met
                   les pieds, plutôt que le verdict qu'on rendrait. */}
               <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-                Vous savez à qui vous postulez
+                Vous savez chez qui vous postulez
               </h3>
               {/* Cette phrase reprenait presque mot pour mot l'accroche du
                   haut de page : « Notes détaillées, salaires... et conditions
