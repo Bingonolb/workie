@@ -177,11 +177,12 @@ export default async function AnnonceursPage() {
             <div>
             <p className="ann-eyebrow">Annonceurs</p>
             <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
-              Ici, on décide pour les années qui viennent.
+              Vos clients y préparent les années qui viennent.
             </h1>
             <p style={{ fontSize: 16.5, color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 500, marginBottom: 30 }}>
-              Choisir un employeur, c&apos;est engager plusieurs années.
-              Votre annonce paraît pendant qu&apos;on y réfléchit.
+              Votre annonce paraît au moment où ils engagent plusieurs années
+              de leur vie.
+
             </p>
             <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
               Créer une campagne <ArrowRight size={17} aria-hidden="true" />
@@ -213,11 +214,11 @@ export default async function AnnonceursPage() {
               {/* Aucun chiffre d'audience : le site est jeune, et un annonceur
                   qui decouvre l'ecart sur son tableau de bord ne revient pas.
                   L'intention se decrit, elle n'a pas besoin d'etre chiffree. */}
-              On y compare des employeurs et on y lit des salaires,
-              c&apos;est-à-dire qu&apos;on décide de plusieurs années de sa vie.
-              Et une décision pareille en entraîne d&apos;autres, qui engagent
-              tout autant : reprendre une formation, changer de trajet,
-              s&apos;assurer, emprunter.
+              Ils comparent des employeurs et lisent des salaires : ils décident
+              de plusieurs années de leur vie. Et une décision pareille en
+              entraîne d&apos;autres, qui engagent tout autant : reprendre une
+              formation, changer de trajet, s&apos;assurer, emprunter.
+
 
 
             </p>
@@ -238,7 +239,7 @@ export default async function AnnonceursPage() {
                 {
                   Icone: Target,
                   titre: "Un moment de projection",
-                  desc: "On ne compare pas des employeurs pour passer le temps. Ceux qui lisent ces pages pensent en années, pas en minutes.",
+                  desc: "Personne ne compare des employeurs pour passer le temps. Vos lecteurs pensent ici en années, pas en minutes.",
                 },
                 {
                   Icone: CalendarClock,
@@ -305,7 +306,7 @@ export default async function AnnonceursPage() {
             <h2 className="ann-h2">À quoi ressemble une annonce.</h2>
             <p className="ann-chapo">
               Une école de langues, c&apos;est-à-dire exactement le genre de
-              décision qu&apos;on prend en même temps qu&apos;un changement de poste.
+              décision qu&apos;ils prennent en même temps qu&apos;un changement de poste.
 
             </p>
 
@@ -429,15 +430,16 @@ export default async function AnnonceursPage() {
             <p className="ann-eyebrow">Déroulement</p>
             <h2 className="ann-h2">En quatre étapes.</h2>
             <p className="ann-chapo">
-              La relecture n&apos;est pas une formalité : une annonce payée reste en
-              attente tant qu&apos;elle n&apos;a pas été validée.
+              Comptez une relecture entre votre paiement et la première
+              diffusion : une annonce payée reste en attente tant qu&apos;elle
+              n&apos;a pas été validée.
             </p>
             <div className="ann-grille ann-quatre">
               {[
                 { n: "01", Icone: BarChart3, titre: "Vous composez", desc: "Visuel, titre, texte et lien de destination." },
                 { n: "02", Icone: Target, titre: "Vous ciblez", desc: "Cantons et secteurs. Le prix et la portée estimée s'affichent devant vous." },
                 { n: "03", Icone: CreditCard, titre: "Vous réglez", desc: "Paiement unique par carte, du budget total que vous avez fixé." },
-                { n: "04", Icone: ShieldCheck, titre: "Nous relisons", desc: "Puis la campagne part, et le compte des affichages et des clics commence." },
+                { n: "04", Icone: ShieldCheck, titre: "Votre annonce est relue", desc: "Puis elle part, et le compte des affichages et des clics commence." },
               ].map(({ n, Icone, titre, desc }) => (
                 <div key={n} className="ann-carte" style={{ position: "relative" }}>
                   <span style={{ position: "absolute", top: 22, right: 22, fontSize: 11.5, fontWeight: 700, color: "var(--border2)", letterSpacing: "0.06em", fontVariantNumeric: "tabular-nums" }}>{n}</span>
