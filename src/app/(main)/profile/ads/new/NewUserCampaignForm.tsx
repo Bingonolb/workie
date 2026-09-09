@@ -194,7 +194,11 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
       </div>
 
       <form action={action}>
-        <input type="hidden" name="target_cantons" value={JSON.stringify(selectedCantons)} />
+        {/* Vingt-six cantons cochés valent aucune restriction, et c'est ainsi
+            qu'on l'enregistre. La liste complète exclurait un visiteur dont la
+            géolocalisation ne rend pas un code cantonal suisse, par exemple
+            depuis l'étranger ; une liste vide ne filtre personne. */}
+        <input type="hidden" name="target_cantons" value={JSON.stringify(couvreToutLePays ? [] : selectedCantons)} />
         <input type="hidden" name="target_sectors" value="[]" />
         <input type="hidden" name="duree_jours" value={durationDays} />
         <input type="hidden" name="format" value={format} />
@@ -433,9 +437,13 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               dix-neuf. C'est pourtant le découpage qu'un annonceur suisse a en
               tête avant de penser au canton. */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 14 }}>
+            {/* Elle coche les vingt-six, elle ne vide pas.
+                Vider revenait au même pour le prix et pour la diffusion, mais
+                l'écran montrait alors zéro canton allumé sous un bouton qui
+                annonce tout le pays. Ce que l'on voit doit dire ce que l'on a. */}
             <button
               type="button"
-              onClick={() => setSelectedCantons([])}
+              onClick={() => setSelectedCantons(CANTONS.map(c => c.code))}
               aria-pressed={couvreToutLePays}
               style={styleRegion(couvreToutLePays)}
             >
