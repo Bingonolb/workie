@@ -146,8 +146,13 @@ export default async function AnnonceursPage() {
         .ann-grille { display: grid; gap: 20px; align-items: stretch; }
         .ann-deux { grid-template-columns: repeat(2, 1fr); }
         .ann-quatre { grid-template-columns: repeat(4, 1fr); }
+        /* Trois cartes, et non quatre : la section d'audience en compte trois.
+           Elle imposait ses colonnes en style en ligne, ce qu'aucune règle de
+           média ne peut dépasser. Mesuré à 375 px : trois colonnes de 130 px
+           qui débordaient de soixante-six pixels à droite. */
+        .ann-trois { grid-template-columns: repeat(3, 1fr); }
         @media (max-width: 860px) {
-          .ann-deux, .ann-quatre { grid-template-columns: 1fr; }
+          .ann-deux, .ann-trois, .ann-quatre { grid-template-columns: 1fr; }
           .ann-section { padding: 56px 24px; }
         }
         /* Silhouettes des deux emplacements : un trait plein marque l'annonce,
@@ -234,7 +239,7 @@ export default async function AnnonceursPage() {
               ))}
             </div>
 
-            <div className="ann-grille ann-quatre" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+            <div className="ann-grille ann-trois">
               {[
                 {
                   Icone: Target,
