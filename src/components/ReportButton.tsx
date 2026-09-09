@@ -21,6 +21,14 @@ const CATEGORIES: Record<ReportTargetType, string[]> = {
     "Spam",
     "Autre",
   ],
+  ad_campaign: [
+    "Contenu à caractère sexuel",
+    "Violence ou haine",
+    "Arnaque ou publicité mensongère",
+    "Contenu illégal",
+    "Sans rapport avec le travail",
+    "Autre",
+  ],
   profile: [
     "Faux profil",
     "Usurpation d'identité",
@@ -34,6 +42,7 @@ const TYPE_LABELS: Record<ReportTargetType, string> = {
   review: "cet avis",
   company: "cette entreprise",
   profile: "ce profil",
+  ad_campaign: "cette annonce",
 };
 
 interface ReportButtonProps {

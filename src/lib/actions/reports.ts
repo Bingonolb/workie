@@ -5,7 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/supabase/server";
 
-export type ReportTargetType = "review" | "company" | "profile";
+// « ad_campaign » : les annonces sont désormais diffusées dès le paiement,
+// sans relecture préalable. Le signalement est ce qui remplace ce blocage, et
+// deux signalements distincts mettent l'annonce en pause automatiquement.
+export type ReportTargetType = "review" | "company" | "profile" | "ad_campaign";
 export type ReportStatus = "pending" | "reviewed" | "dismissed" | "content_deleted";
 
 export interface Report {

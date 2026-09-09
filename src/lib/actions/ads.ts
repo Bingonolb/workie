@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { tarifJournalier, dureeValide, dateDeFin } from "@/lib/ads/pricing";
+import { verifierAnnonce } from "@/lib/ads/moderation";
 import type { AdFormat } from "@/lib/ads/pricing";
 import { captureServerError } from "@/lib/monitoring";
 
@@ -200,6 +201,19 @@ export async function createUserCampaign(
       }
     }
     if (!image_url) return { error: "Une image est requise (upload ou URL)." };
+
+    // Le filtre automatique passe avant l'insertion, donc avant tout paiement :
+    // une annonce refusée ne doit pas laisser derrière elle une campagne à
+    // payer. Sans clé configurée, il laisse passer et le signalement prend le
+    // relais.
+    const verdict = await verifierAnnonce({
+      headline,
+      bodyText: String(formData.get("body_text") || "") || null,
+      imageUrl: image_url || null,
+    });
+    if (verdict.refusee) {
+      return { error: `Cette annonce ne peut pas être diffusée : ${verdict.motif}.` };
+    }
 
     const { data: inserted, error } = await supabase.from("ad_campaigns").insert({
       user_id: user.id,

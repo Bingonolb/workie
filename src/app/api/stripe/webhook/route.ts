@@ -49,13 +49,20 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        // Ad campaign payment — activate for admin review
+        // Paiement d'une campagne : elle part en diffusion immédiatement.
+        //
+        // Elle passait auparavant en « pending », c'est-à-dire en attente d'une
+        // relecture humaine sans date annoncée. L'annonceur payait puis
+        // attendait, ce qui est le meilleur moyen de le perdre. Le risque qui
+        // justifiait ce blocage, une image inacceptable, se traite après coup :
+        // deux signalements distincts mettent l'annonce en pause et préviennent
+        // l'administration.
         if (session.mode === "payment" && session.metadata?.type === "ad_campaign") {
           const campaignId = session.metadata.campaign_id ?? session.client_reference_id;
           if (campaignId) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const { error } = await (supabase.from("ad_campaigns") as any).update({
-              status: "pending",
+              status: "active",
               stripe_session_id: session.id,
               paid_at: new Date().toISOString(),
             }).eq("id", campaignId).eq("status", "payment_pending");

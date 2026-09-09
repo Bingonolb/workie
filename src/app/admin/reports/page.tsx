@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2, User, ExternalLink, Trash2, Mail, ShieldOff } from "lucide-react";
+import { ArrowLeft, Flag, CheckCircle, XCircle, Clock, MessageSquare, Building2, User, ExternalLink, Trash2, Mail, ShieldOff, Megaphone } from "lucide-react";
 import { getReports, updateReportStatus, deleteReportedContent, type Report, type ReportStatus } from "@/lib/actions/reports";
 
 const TYPE_CONFIG = {
   review:  { label: "Avis",       icon: <MessageSquare size={13} aria-hidden="true" />, bg: "rgba(139,92,246,0.1)",  color: "#8b5cf6" },
   company: { label: "Entreprise", icon: <Building2 size={13} aria-hidden="true" />,     bg: "rgba(249,115,22,0.1)",  color: "#f97316" },
   profile: { label: "Profil",     icon: <User size={13} aria-hidden="true" />,          bg: "rgba(16,185,129,0.1)",  color: "#10b981" },
+  ad_campaign: { label: "Annonce", icon: <Megaphone size={13} aria-hidden="true" />,   bg: "rgba(239,68,68,0.1)",   color: "#ef4444" },
 } as const;
 
 const STATUS_CONFIG = {

@@ -46,7 +46,7 @@ export const metadata: Metadata = {
  * prix affiché en dur diverge de celui qui est facturé le jour où le module
  * change, et c'est le genre d'écart qu'un annonceur découvre sur sa facture.
  *
- * Le parcours décrit est celui du code, relecture comprise. Une campagne payée
+ * Le parcours décrit est celui du code. Une campagne payée
  * passe en attente et n'est diffusée qu'après validation : le taire ferait
  * croire à une mise en ligne immédiate.
  */
@@ -433,16 +433,16 @@ export default async function AnnonceursPage() {
             <p className="ann-eyebrow">Déroulement</p>
             <h2 className="ann-h2">En quatre étapes.</h2>
             <p className="ann-chapo">
-              Comptez une relecture entre votre paiement et la première
-              diffusion : une annonce payée reste en attente tant qu&apos;elle
-              n&apos;a pas été validée.
+              Aucune attente entre le paiement et la diffusion. Un filtre
+              automatique refuse à la création ce qui n&apos;a rien à faire ici, et
+              deux signalements suffisent ensuite à retirer une annonce.
             </p>
             <div className="ann-grille ann-quatre">
               {[
                 { n: "01", Icone: BarChart3, titre: "Vous composez", desc: "Visuel, titre, texte et lien de destination." },
                 { n: "02", Icone: Target, titre: "Vous ciblez", desc: "Cantons et secteurs. Le prix et la portée estimée s'affichent devant vous." },
                 { n: "03", Icone: CreditCard, titre: "Vous réglez", desc: "Paiement unique par carte, du budget total que vous avez fixé." },
-                { n: "04", Icone: ShieldCheck, titre: "Votre annonce est relue", desc: "Puis elle part, et le compte des affichages et des clics commence." },
+                { n: "04", Icone: ShieldCheck, titre: "Elle part aussitôt", desc: "Le compte des affichages et des clics commence, et vous recevez le bilan à la fin." },
               ].map(({ n, Icone, titre, desc }) => (
                 <div key={n} className="ann-carte" style={{ position: "relative" }}>
                   <span style={{ position: "absolute", top: 22, right: 22, fontSize: 11.5, fontWeight: 700, color: "var(--border2)", letterSpacing: "0.06em", fontVariantNumeric: "tabular-nums" }}>{n}</span>

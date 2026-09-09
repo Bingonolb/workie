@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
+import { ReportButton } from "@/components/ReportButton";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 
 // Max times a given ad can appear per session before hiding itself entirely
@@ -58,6 +59,7 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
   if (!visible) return null;
 
   return (
+    <div style={{ position: "relative", display: "flex" }}>
     <a
       ref={cardRef}
       href={ad.cta_url}
@@ -66,6 +68,7 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
       aria-label={`Publicité : ${ad.headline}`}
       onClick={() => trackAdClick(ad.id)}
       style={{
+        flex: 1, minWidth: 0,
         background: "var(--surface)",
         border: "1px solid rgba(139,92,246,0.25)",
         borderRadius: 20,
@@ -131,5 +134,19 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
         </div>
       </div>
     </a>
+
+      {/* Le signalement, posé sur la carte sans être dedans.
+          La carte est un lien : un bouton imbriqué dans un lien est du
+          balisage invalide, et son clic partirait aussi vers le site de
+          l'annonceur. */}
+      <div style={{ position: "absolute", top: 8, right: 8, zIndex: 3, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", borderRadius: 8 }}>
+        <ReportButton
+          targetType="ad_campaign"
+          targetId={ad.id}
+          targetLabel={ad.headline}
+          variant="icon"
+        />
+      </div>
+    </div>
   );
 }

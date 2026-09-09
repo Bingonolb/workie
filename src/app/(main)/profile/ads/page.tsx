@@ -83,7 +83,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
 
         {paymentSuccess && (
           <div role="status" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "14px 18px", color: "#10b981", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
-            <CheckCircle size={16} aria-hidden="true" /> Paiement reçu. Votre campagne est en cours de vérification (24 h ouvrées).
+            <CheckCircle size={16} aria-hidden="true" /> Paiement reçu. Votre annonce est en ligne.
           </div>
         )}
         {paymentCanceled && (
@@ -197,9 +197,9 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
             {[
               { step: "1", text: "Créez votre campagne : visuel, canton et budget" },
-              { step: "2", text: "Payez le budget total par Stripe" },
-              { step: "3", text: "Notre équipe valide sous 24 h ouvrées" },
-              { step: "4", text: "Votre pub tourne jusqu'à épuisement du budget" },
+              { step: "2", text: "Réglez le forfait par Stripe" },
+              { step: "3", text: "Votre annonce part en diffusion aussitôt" },
+              { step: "4", text: "À la fin, vous recevez le bilan et pouvez relancer" },
             ].map(({ step, text }) => (
               <div key={step} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(139,92,246,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 900, color: "#8b5cf6", flexShrink: 0 }}>{step}</div>
