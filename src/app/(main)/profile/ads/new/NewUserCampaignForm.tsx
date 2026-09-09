@@ -155,9 +155,15 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   const memeEnsemble = (a: string[], b: string[]) =>
     a.length === b.length && a.every(x => b.includes(x));
 
-  // Cocher les vingt-six revient au même que n'en cocher aucun : la portée est
-  // entière dans les deux cas, donc le bouton doit s'allumer pour les deux.
-  const couvreToutLePays = selectedCantons.length === 0 || selectedCantons.length === CANTONS.length;
+  // « Tout le pays » veut dire vingt-six cantons cochés, et rien d'autre.
+  // Zéro canton signifiait la même chose, ce qui rendait les boutons
+  // impossibles à éteindre : les remettre à zéro rallumait « Toute la Suisse ».
+  const couvreToutLePays = selectedCantons.length === CANTONS.length;
+  const sansCiblage = selectedCantons.length === 0;
+
+  /** Coche la région, ou la décoche si elle l'est déjà. */
+  const basculerRegion = (cantons: string[]) =>
+    setSelectedCantons(actuels => (memeEnsemble(actuels, cantons) ? [] : cantons));
 
   const toggleCanton = useCallback((code: string) =>
     setSelectedCantons(p => p.includes(code) ? p.filter(c => c !== code) : [...p, code]), []);
@@ -439,7 +445,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
               {couvreToutLePays
                 ? `${CANTONS.length} cantons`
-                : `${selectedCantons.length} sélectionné${selectedCantons.length > 1 ? "s" : ""}`}
+                : sansCiblage
+                  ? "Aucun canton choisi"
+                  : `${selectedCantons.length} sélectionné${selectedCantons.length > 1 ? "s" : ""}`}
             </span>
           </div>
           {/* Les raccourcis de région, au-dessus des cantons.
@@ -453,7 +461,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 annonce tout le pays. Ce que l'on voit doit dire ce que l'on a. */}
             <button
               type="button"
-              onClick={() => setSelectedCantons(CANTONS.map(c => c.code))}
+              onClick={() => basculerRegion(CANTONS.map(c => c.code))}
               aria-pressed={couvreToutLePays}
               style={styleRegion(couvreToutLePays)}
             >
@@ -466,7 +474,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 <button
                   key={nom}
                   type="button"
-                  onClick={() => setSelectedCantons(cantons)}
+                  onClick={() => basculerRegion(cantons)}
                   aria-pressed={active}
                   style={styleRegion(active)}
                 >
@@ -571,14 +579,33 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
 
           <div style={{ padding: "16px 18px", borderRadius: 14, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Prix, payé une fois</div>
-            <div style={{ fontSize: 30, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>CHF {prix}</div>
-            <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.55 }}>
-              CHF {tarifJour} par jour pendant {durationDays} jours.
-              {selectedCantons.length === 0
-                ? " Le tarif couvre toute la Suisse ; viser quelques cantons le réduit."
-                : ` Le tarif suit le territoire visé : ${selectedCantons.length} canton${selectedCantons.length > 1 ? "s" : ""} sur 26.`}
-            </p>
+            {/* Sans territoire, pas de montant.
+                Un prix affiché ici serait celui de toute la Suisse, puisque
+                c'est ainsi que le calcul lit une liste vide. Le montrer
+                reviendrait à chiffrer un choix que personne n'a fait. */}
+            {sansCiblage ? (
+              <>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Prix</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "-0.02em" }}>
+                  Choisissez un territoire
+                </div>
+                <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.55 }}>
+                  Une région, quelques cantons, ou toute la Suisse. Le prix
+                  s&apos;affiche dès que le territoire est choisi.
+                </p>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Prix, payé une fois</div>
+                <div style={{ fontSize: 30, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>CHF {prix}</div>
+                <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.55 }}>
+                  CHF {tarifJour} par jour pendant {durationDays} jours.
+                  {couvreToutLePays
+                    ? " Le tarif couvre toute la Suisse ; viser quelques cantons le réduit."
+                    : ` Le tarif suit le territoire visé : ${selectedCantons.length} canton${selectedCantons.length > 1 ? "s" : ""} sur ${CANTONS.length}.`}
+                </p>
+              </>
+            )}
             {/* Aucune estimation de vues. Elle venait d'un réservoir quotidien
                 écrit en dur et jamais mesuré, sur un site qui n'a jamais servi
                 une impression publicitaire : le premier tableau de bord
@@ -595,13 +622,21 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         )}
 
         <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-          <button type="submit" disabled={pending} style={{
+          {/* Sans territoire, l'envoi est fermé.
+              Une liste vide vaut « toute la Suisse » côté serveur : laisser
+              partir ce formulaire facturerait le tarif national à quelqu'un qui
+              n'a rien choisi. */}
+          <button type="submit" disabled={pending || sansCiblage} style={{
             flex: 1, padding: "16px", borderRadius: 14,
-            background: pending ? "rgba(255,255,255,0.08)" : "var(--brand)",
+            background: pending || sansCiblage ? "rgba(139,92,246,0.35)" : "var(--brand)",
             color: "#fff", fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", border: "none",
-            cursor: pending ? "not-allowed" : "pointer", opacity: pending ? 0.7 : 1, transition: "opacity 0.2s",
+            cursor: pending || sansCiblage ? "not-allowed" : "pointer", opacity: pending ? 0.7 : 1, transition: "opacity 0.2s",
           }}>
-            {pending ? "Envoi en cours…" : `Payer CHF ${prix}`}
+            {pending
+              ? "Envoi en cours…"
+              : sansCiblage
+                ? "Choisissez un territoire"
+                : `Payer CHF ${prix}`}
           </button>
           <Link href="/profile/ads" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
             Annuler
