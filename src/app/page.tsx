@@ -698,12 +698,12 @@ export default async function Home() {
                     campagne reste en attente tant que Stripe n'a pas
                     confirme. Le budget s'epuise ensuite, il n'est pas
                     preleve au fil de l'eau. */}
-                CHF 4 les mille affichages. Vous fixez un budget, vous le réglez
-                une fois, et la campagne s&apos;arrête quand il est épuisé.
+                Un forfait de 7, 14 ou 30 jours, payé une fois. Le prix suit le
+                nombre de cantons visés.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
                 {[
-                  "Budget minimum : CHF 5 par jour",
+                  "Dès CHF 21",
                   "Paiement unique",
                   "Ciblage par canton et secteur",
                   "Statistiques en temps réel",

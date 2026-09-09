@@ -26,7 +26,10 @@ export function CarteCampagne({
     const pct = budgetPct(depense, Number(c.total_budget_chf));
     const expiree = estExpiree(c.end_date);
     const restants = joursRestants(c.end_date);
-    const morte = expiree && c.status === "payment_pending";
+    // Relancer : une campagne jamais payée dont les dates sont passées, et une
+  // campagne qui a fini sa diffusion. Dans les deux cas il n'y a plus rien à
+  // faire sur celle-ci, et tout à refaire sur la suivante.
+  const aRelancer = c.status === "completed" || (expiree && c.status === "payment_pending");
     const vues = Number(c.impression_count);
     const clics = Number(c.click_count);
 
@@ -76,8 +79,7 @@ export function CarteCampagne({
                     n'y figure plus : c'est un prix unitaire qu'on
                     ne décide pas, il a sa place dans le détail. */}
                 <p className="pub-carte-meta" style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                  CHF {Number(c.total_budget_chf).toFixed(0)} de budget
-                  {" · "}CHF {Number(c.daily_budget_chf).toFixed(0)}/jour
+                  CHF {Number(c.total_budget_chf).toFixed(0)}
                   {c.start_date && <>{" · "}{jour(c.start_date)}{c.end_date ? ` au ${jour(c.end_date)}` : ""}</>}
                   {restants && <>{" · "}<span style={{ color: restants.urgent ? "#ef4444" : "var(--text-muted)", fontWeight: restants.urgent ? 700 : 400 }}>{restants.label}</span></>}
                 </p>
@@ -133,16 +135,16 @@ export function CarteCampagne({
             </Link>
           )}
           <Link
-            href={`/profile/ads/new?headline=${encodeURIComponent(c.headline)}&format=${c.format}&cta_label=${encodeURIComponent(c.cta_label)}&cta_url=${encodeURIComponent(c.cta_url)}&daily=${c.daily_budget_chf}&image=${encodeURIComponent(c.image_url)}`}
+            href={`/profile/ads/new?headline=${encodeURIComponent(c.headline)}&format=${c.format}&cta_label=${encodeURIComponent(c.cta_label)}&cta_url=${encodeURIComponent(c.cta_url)}&image=${encodeURIComponent(c.image_url)}`}
             style={{
               display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700,
               textDecoration: "none", padding: "5px 12px", borderRadius: 8,
-              color: morte ? "#8b5cf6" : "var(--text-muted)",
-              border: morte ? "1px solid rgba(139,92,246,0.25)" : "1px solid var(--border2)",
-              background: morte ? "rgba(139,92,246,0.06)" : "transparent",
+              color: aRelancer ? "#8b5cf6" : "var(--text-muted)",
+              border: aRelancer ? "1px solid rgba(139,92,246,0.25)" : "1px solid var(--border2)",
+              background: aRelancer ? "rgba(139,92,246,0.06)" : "transparent",
             }}
           >
-            {morte
+            {aRelancer
               ? <><RotateCcw size={11} aria-hidden="true" /> Relancer</>
               : <><Copy size={11} aria-hidden="true" /> Dupliquer</>}
           </Link>

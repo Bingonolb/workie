@@ -6,7 +6,7 @@ import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { BASE_CPM_CHF, CANTON_WEIGHTS, SECTOR_WEIGHTS } from "@/lib/ads/pricing";
+import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREES_FORFAIT, prixForfait } from "@/lib/ads/pricing";
 
 export const revalidate = 300;
 
@@ -26,7 +26,7 @@ const compterEmployeurs = unstable_cache(
 
 export const metadata: Metadata = {
   title: "Annoncer sur Workie",
-  description: "Diffusez vos annonces auprès de candidats suisses, ciblées par canton et par secteur. CHF 4 les mille affichages, budget fixe et payé une fois, sans abonnement.",
+  description: "Diffusez vos annonces auprès de candidats suisses, ciblées par canton et par secteur. Un forfait de 7, 14 ou 30 jours, payé une fois, sans abonnement.",
   alternates: { canonical: "https://www.workie.ch/annonceurs" },
   openGraph: {
     title: "Annoncer sur Workie",
@@ -385,21 +385,24 @@ export default async function AnnonceursPage() {
             <p className="ann-eyebrow">Tarif</p>
             <h2 className="ann-h2">Ce que vous payez, et quand.</h2>
 
+            {/* Un prix, pas un tarif au mille.
+                Le modèle précédent vendait des affichages : l'annonceur fixait
+                un budget, on lui annonçait un volume, et le budget se
+                consommait. Ce volume n'existait pas, il venait d'un réservoir
+                écrit en dur. On vend donc ce qu'on peut tenir, une durée. */}
             <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap", marginBottom: 10 }}>
               <span style={{ fontSize: "clamp(36px, 6vw, 54px)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1 }}>
-                CHF {BASE_CPM_CHF.toFixed(0)}
+                CHF {prixForfait(["GE"], [], DUREES_FORFAIT[0])}
               </span>
               <span style={{ fontSize: 16, color: "var(--text-muted)", fontWeight: 550 }}>
-                les mille affichages
+                pour {DUREES_FORFAIT[0]} jours sur un canton
               </span>
             </div>
             <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65, maxWidth: 560, marginBottom: 34 }}>
-              {/* La majoration est reelle et calculee a la creation : la taire
-                  reviendrait a annoncer un prix que personne ne paie des qu'il
-                  cible quelque chose. */}
-              Un ciblage étroit majore ce tarif, jusqu&apos;à 40 % pour un segment
-              très resserré. Une audience précise coûte plus cher parce
-              qu&apos;elle est plus rare, et le prix vous est montré avant de payer.
+              Vous choisissez une durée, {DUREES_FORFAIT.join(", ").replace(/, ([^,]*)$/, " ou $1")} jours,
+              et le territoire. Le prix monte avec le nombre de cantons visés,
+              jusqu&apos;à CHF {prixForfait([], [], DUREES_FORFAIT.at(-1)!)} pour un mois
+              sur toute la Suisse. Il vous est montré avant de payer.
             </p>
 
             <div className="ann-grille ann-deux">
@@ -407,17 +410,17 @@ export default async function AnnonceursPage() {
                 <CreditCard size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
                 <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>Un paiement, pas un abonnement</h3>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.62 }}>
-                  Vous fixez un budget total, vous le réglez une fois par carte,
-                  et la campagne s&apos;arrête quand il est épuisé. Rien ne se
-                  reconduit.
+                  Vous réglez le forfait une fois par carte. Rien ne se
+                  reconduit : à la fin, on vous propose de relancer, ou pas.
                 </p>
               </div>
               <div className="ann-carte">
                 <Target size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>Budget minimum : CHF 5 par jour</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>Aucun volume promis</h3>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.62 }}>
-                  Le budget journalier plafonne la dépense quotidienne. Le budget
-                  total ne peut pas lui être inférieur.
+                  Nous vendons une durée d&apos;affichage, pas un nombre de vues.
+                  Vous voyez ensuite les vues et les clics réels, jour par jour
+                  et par canton.
                 </p>
               </div>
             </div>
@@ -456,7 +459,7 @@ export default async function AnnonceursPage() {
         <section className="ann-section ann-accent" style={{ textAlign: "center" }}>
           <div style={{ maxWidth: 560, margin: "0 auto" }}>
             <h2 style={{ fontSize: "clamp(24px, 3.6vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 12 }}>
-              À partir de CHF 5 par jour.
+              À partir de CHF 21.
             </h2>
             <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 28 }}>
               C&apos;est le budget minimum, et il suffit à mesurer ce que

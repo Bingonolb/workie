@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { calculateCPM, budgetJournalierMinimum } from "@/lib/ads/pricing";
+import { tarifJournalier, dureeValide, dateDeFin } from "@/lib/ads/pricing";
 import type { AdFormat } from "@/lib/ads/pricing";
 import { captureServerError } from "@/lib/monitoring";
 
@@ -163,27 +163,25 @@ export async function createUserCampaign(
     if (!rawCta) return { error: "L'URL de destination est requise." };
     const cta_url = /^https?:\/\//i.test(rawCta) ? rawCta : `https://${rawCta}`;
 
-    const daily_budget_chf = Number(formData.get("daily_budget_chf") || 0);
-
-    const total_budget_chf = Number(formData.get("total_budget_chf") || 0);
-    if (total_budget_chf < daily_budget_chf) return { error: "Budget total doit être ≥ budget journalier." };
-
     let target_cantons: string[] = [];
     let target_sectors: string[] = [];
     try { target_cantons = JSON.parse(String(formData.get("target_cantons") || "[]")); } catch { target_cantons = []; }
     try { target_sectors = JSON.parse(String(formData.get("target_sectors") || "[]")); } catch { target_sectors = []; }
 
-    // Le minimum dépend du territoire visé : cinq francs par jour ne couvrent
-    // pas vingt-six cantons. La vérification est refaite ici parce qu'un
-    // formulaire se contourne, et le calcul est le même des deux côtés.
-    const minimumJournalier = budgetJournalierMinimum(target_cantons, target_sectors);
-    if (daily_budget_chf < minimumJournalier) {
-      return { error: `Budget journalier minimum pour ce ciblage : CHF ${minimumJournalier}.` };
-    }
+    // Le prix est calculé ici, jamais lu dans le formulaire : un champ caché se
+    // modifie, et celui-là dit combien on encaisse.
+    const duree_jours = Number(formData.get("duree_jours") || 0);
+    if (!dureeValide(duree_jours)) return { error: "Durée invalide." };
+
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
-    const end_date = String(formData.get("end_date") || "") || null;
-    if (end_date && end_date <= start_date) return { error: "La date de fin doit être après la date de début." };
-    const cpm_chf = calculateCPM(format, target_cantons, target_sectors);
+    const end_date = dateDeFin(start_date, duree_jours);
+
+    const daily_budget_chf = tarifJournalier(target_cantons, target_sectors);
+    const total_budget_chf = daily_budget_chf * duree_jours;
+
+    // Aucun coût par affichage : on vend du temps, pas du volume. La campagne
+    // s'arrête à sa date de fin, jamais par épuisement d'un budget.
+    const cpm_chf = 0;
 
     let image_url = String(formData.get("image_url") || "").trim();
     const imageFile = formData.get("image_file");
@@ -422,27 +420,25 @@ export async function createCampaign(
     if (!rawCta) return { error: "L'URL de destination est requise." };
     const cta_url = /^https?:\/\//i.test(rawCta) ? rawCta : `https://${rawCta}`;
 
-    const daily_budget_chf = Number(formData.get("daily_budget_chf") || 0);
-
-    const total_budget_chf = Number(formData.get("total_budget_chf") || 0);
-    if (total_budget_chf < daily_budget_chf) return { error: "Budget total doit être ≥ budget journalier." };
-
     let target_cantons: string[] = [];
     let target_sectors: string[] = [];
     try { target_cantons = JSON.parse(String(formData.get("target_cantons") || "[]")); } catch { target_cantons = []; }
     try { target_sectors = JSON.parse(String(formData.get("target_sectors") || "[]")); } catch { target_sectors = []; }
 
-    // Le minimum dépend du territoire visé : cinq francs par jour ne couvrent
-    // pas vingt-six cantons. La vérification est refaite ici parce qu'un
-    // formulaire se contourne, et le calcul est le même des deux côtés.
-    const minimumJournalier = budgetJournalierMinimum(target_cantons, target_sectors);
-    if (daily_budget_chf < minimumJournalier) {
-      return { error: `Budget journalier minimum pour ce ciblage : CHF ${minimumJournalier}.` };
-    }
+    // Le prix est calculé ici, jamais lu dans le formulaire : un champ caché se
+    // modifie, et celui-là dit combien on encaisse.
+    const duree_jours = Number(formData.get("duree_jours") || 0);
+    if (!dureeValide(duree_jours)) return { error: "Durée invalide." };
+
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
-    const end_date = String(formData.get("end_date") || "") || null;
-    if (end_date && end_date <= start_date) return { error: "La date de fin doit être après la date de début." };
-    const cpm_chf = calculateCPM(format, target_cantons, target_sectors);
+    const end_date = dateDeFin(start_date, duree_jours);
+
+    const daily_budget_chf = tarifJournalier(target_cantons, target_sectors);
+    const total_budget_chf = daily_budget_chf * duree_jours;
+
+    // Aucun coût par affichage : on vend du temps, pas du volume. La campagne
+    // s'arrête à sa date de fin, jamais par épuisement d'un budget.
+    const cpm_chf = 0;
 
     // Image: file upload or URL
     let image_url = String(formData.get("image_url") || "").trim();

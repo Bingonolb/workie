@@ -1,20 +1,19 @@
-// ── Workie Ads Pricing Engine ─────────────────────────────────────────────────
+// ── Tarification publicitaire de Workie ───────────────────────────────────────
 //
-// Model: audience-reach CPM with precision premium.
+// On vend une durée d'affichage, pas un volume.
 //
-//   1. audienceReach = fraction of Workie user base that matches the targeting.
-//      → No filter on a dimension means 100% reach for that dimension.
-//      → Selecting all cantons = selecting none = 100% reach (same thing).
+//   1. couverture = part de l'audience visée par le ciblage (cantons × secteurs).
+//      → Aucun filtre sur une dimension = 100 % sur cette dimension.
 //
-//   2. CPM = BASE × formatMult. Plat, quel que soit le ciblage.
-//      → Le territoire ne se paie pas au mille, il se paie par le budget
-//        minimum qu'il exige (voir budgetJournalierMinimum).
+//   2. tarif journalier = PRIX_JOUR_NATIONAL × (part fixe + part variable × couverture)
+//      → Une part reste fixe : relire une annonce genevoise coûte autant qu'une
+//        annonce nationale, et la servir aussi.
 //
-//   3. dailyImpressions = min(budget÷CPM × 1000, DAILY_POOL × reach)
-//      → Audience size caps impressions: a micro-segment can't absorb an unlimited budget.
+//   3. prix = tarif journalier × durée choisie (7, 14 ou 30 jours).
+//      → Rien à consommer, rien à rembourser : c'est du temps qui s'écoule.
 //
-// Source for canton weights: OFS statistique des actifs occupés par canton (2022).
-// Sector weights: approximate distribution of Swiss working population.
+// Poids des cantons : OFS, actifs occupés par canton (2022).
+// Poids des secteurs : répartition approximative de la population active.
 
 export const BASE_CPM_CHF = 4.0;
 
@@ -105,79 +104,53 @@ function sectorReach(sectors: string[]): number {
   return Math.min(selected / SECTOR_TOTAL, 1.0);
 }
 
-// Combined reach: fraction of Workie's audience that matches both canton AND sector filters.
-// Minimum 0.5% to keep CPM and impression estimates sensible for micro-segments.
+// La part d'audience visée par les deux filtres à la fois.
+// Plancher à 0,5 % : sans lui, un croisement très étroit ferait tomber le
+// tarif journalier sur sa seule part fixe, et deux ciblages très différents
+// se retrouveraient au même prix.
 export function audienceReach(cantons: string[], sectors: string[]): number {
   return Math.max(cantonReach(cantons) * sectorReach(sectors), 0.005);
 }
 
-// ── CPM ───────────────────────────────────────────────────────────────────────
-/**
- * Le prix des mille affichages. Le même pour tout le monde.
- *
- * Une « prime de précision » le faisait monter jusqu'à quarante pour cent sur
- * les segments étroits, à l'imitation des plateformes à enchères. Le résultat
- * était l'inverse de ce qu'on voulait : à budget journalier égal, mesuré à
- * CHF 20, Genève seule donnait neuf cent quarante affichages par jour et toute
- * la Suisse cinq mille, pour le même prix. Élargir son ciblage rapportait donc
- * cinq fois plus sans rien coûter, et personne n'avait de raison de cibler.
- *
- * Cette prime a un sens là où plusieurs annonceurs se disputent une audience
- * rare : le prix y monte parce qu'ils surenchérissent, pas parce que la
- * plateforme le décide. Workie ne tient pas d'enchères ; la copier revenait à
- * inventer une rareté qui n'existe pas.
- *
- * Le territoire se paie ailleurs, par le budget minimum qu'il exige.
- */
-export function calculateCPM(format: AdFormat, _cantons?: string[], _sectors?: string[]): number {
-  return +(BASE_CPM_CHF * FORMAT_MULT[format]).toFixed(4);
-}
+// ── Le prix ───────────────────────────────────────────────────────────────────
+
+/** Les durées proposées, en jours. */
+export const DUREES_FORFAIT = [7, 14, 30] as const;
+export type DureeForfait = (typeof DUREES_FORFAIT)[number];
+
+/** Le tarif journalier d'une campagne qui vise toute la Suisse. */
+export const PRIX_JOUR_NATIONAL = 8;
+
+// Part du tarif qui ne dépend pas du territoire. Relire une annonce, la
+// stocker et la servir coûtent la même chose qu'elle vise un canton ou vingt-six.
+const PART_FIXE = 0.3;
 
 /**
- * Le budget journalier minimum, selon le territoire revendiqué.
+ * Ce que coûte une journée d'affichage, selon le territoire visé.
  *
- * Rien n'empêchait de revendiquer les vingt-six cantons pour cinq francs par
- * jour : le prix ne dépendait que du budget et de la durée, jamais de
- * l'étendue. Une campagne nationale à ce tarif n'atteint personne, et laisse
- * l'annonceur juger la plateforme sur un essai qui ne pouvait pas marcher.
- *
- * Le minimum est donc la moitié de l'inventaire du segment visé : la campagne
- * a de quoi se voir, ou elle n'existe pas. Il reste borné en bas par
- * BUDGET_JOURNALIER_PLANCHER, pour qu'un canton peu peuplé reste abordable.
+ * Entre un canton et le pays entier, le rapport est d'environ un à trois.
+ * L'inventaire, lui, varie d'un à seize : facturer proportionnellement
+ * rendrait les ciblages étroits presque gratuits, alors qu'ils demandent le
+ * même travail.
  */
-export const BUDGET_JOURNALIER_PLANCHER = 5;
-const PART_MINIMALE_INVENTAIRE = 0.5;
-
-export function budgetJournalierMinimum(cantons: string[], sectors: string[]): number {
-  const reach = audienceReach(cantons, sectors);
-  const inventaire = DAILY_IMPRESSION_POOL * reach;
-  const cout = (inventaire * PART_MINIMALE_INVENTAIRE / 1000) * BASE_CPM_CHF;
-  return Math.max(BUDGET_JOURNALIER_PLANCHER, Math.ceil(cout));
+export function tarifJournalier(cantons: string[], sectors: string[]): number {
+  const couverture = audienceReach(cantons, sectors);
+  return Math.ceil(PRIX_JOUR_NATIONAL * (PART_FIXE + (1 - PART_FIXE) * couverture));
 }
 
-// ── Impression estimates ──────────────────────────────────────────────────────
-
-// Daily impressions = the lower of:
-//   - What the budget can buy (budget ÷ CPM × 1000)
-//   - What the targeted audience pool can absorb (DAILY_POOL × reach)
-export function estimateDailyImpressions(dailyBudget: number, cpm: number, reach: number): number {
-  if (!cpm || !reach) return 0;
-  const fromBudget = Math.floor((dailyBudget / cpm) * 1000);
-  const segmentPool = Math.floor(DAILY_IMPRESSION_POOL * reach);
-  return Math.min(fromBudget, segmentPool);
+/** Le prix d'une campagne : un tarif journalier, une durée. */
+export function prixForfait(cantons: string[], sectors: string[], jours: number): number {
+  return tarifJournalier(cantons, sectors) * jours;
 }
 
-// Estimated unique people reached per day.
-// Frequency factor: 1 / 0.72 ≈ 1.39 impressions per unique person on average.
-export function estimateDailyReach(dailyBudget: number, cpm: number, reach: number): number {
-  return Math.floor(estimateDailyImpressions(dailyBudget, cpm, reach) * 0.72);
+/** Vrai si la durée fait partie de celles qu'on propose. */
+export function dureeValide(jours: number): jours is DureeForfait {
+  return (DUREES_FORFAIT as readonly number[]).includes(jours);
 }
 
-// True when the daily budget exceeds what the audience pool can absorb.
-// Used to display a "budget dépasse l'audience ciblée" warning in the form.
-export function isBudgetCapped(dailyBudget: number, cpm: number, reach: number): boolean {
-  if (!cpm || !reach) return false;
-  const fromBudget = Math.floor((dailyBudget / cpm) * 1000);
-  const segmentPool = Math.floor(DAILY_IMPRESSION_POOL * reach);
-  return fromBudget > segmentPool;
+/** La date de fin d'une campagne qui démarre le jour donné. */
+export function dateDeFin(debut: string, jours: number): string {
+  const d = new Date(`${debut}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + jours);
+  return d.toISOString().slice(0, 10);
 }

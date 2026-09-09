@@ -15,7 +15,6 @@ export default async function NewUserAdPage({ searchParams }: { searchParams: Pr
           prefillFormat={sp.format as "square" | "swipe" | undefined}
           prefillCtaLabel={sp.cta_label}
           prefillCtaUrl={sp.cta_url}
-          prefillDaily={sp.daily ? Number(sp.daily) : undefined}
           prefillImage={sp.image}
         />
       </main>

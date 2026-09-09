@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock, AlertTriangle, Check, CreditCard } from "lucide-react";
 // ExternalLink used for CTA URL field only
 import { createUserCampaign } from "@/lib/actions/ads";
-import { audienceReach, calculateCPM, estimateDailyImpressions, estimateDailyReach, isBudgetCapped, budgetJournalierMinimum } from "@/lib/ads/pricing";
+import { tarifJournalier, prixForfait, DUREES_FORFAIT, dateDeFin } from "@/lib/ads/pricing";
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
 
 const CANTONS = [
@@ -41,12 +41,11 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
 }
 
 
-export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCtaLabel, prefillCtaUrl, prefillDaily, prefillImage }: {
+export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCtaLabel, prefillCtaUrl, prefillImage }: {
   prefillHeadline?: string;
   prefillFormat?: "square" | "swipe";
   prefillCtaLabel?: string;
   prefillCtaUrl?: string;
-  prefillDaily?: number;
   prefillImage?: string;
 }) {
   const [state, action, pending] = useActionState(createUserCampaign, undefined);
@@ -74,38 +73,21 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
   const [format, setFormat] = useState<"square" | "swipe">(prefillFormat ?? "square");
   const [selectedCantons, setSelectedCantons] = useState<string[]>([]);
-  const [dailyBudget, setDailyBudget] = useState(prefillDaily ?? 20);
-  // Le minimum suit le territoire revendiqué : on ne couvre pas vingt-six
-  // cantons pour cinq francs par jour. Le curseur remonte tout seul quand le
-  // ciblage s'élargit, sinon le formulaire garderait une valeur que l'action
-  // refuserait à l'envoi.
-  const minimumJournalier = budgetJournalierMinimum(selectedCantons, []);
-  const budgetApplique = Math.max(dailyBudget, minimumJournalier);
-  const [durationDays, setDurationDays] = useState(14);
-  const totalBudget = budgetApplique * durationDays;
+  const [durationDays, setDurationDays] = useState<number>(14);
+
+  // Le prix est reconstruit ici pour être montré, et recalculé par l'action
+  // avant l'encaissement : ce qui vient du navigateur ne décide pas d'un
+  // montant.
+  const tarifJour = tarifJournalier(selectedCantons, []);
+  const prix = prixForfait(selectedCantons, [], durationDays);
 
   const today = new Date().toISOString().slice(0, 10);
   const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(() => {
-    const d = new Date(); d.setDate(d.getDate() + 14);
-    return d.toISOString().slice(0, 10);
-  });
+  const endDate = dateDeFin(startDate, durationDays);
 
-  const handleDurationChange = (days: number) => {
-    setDurationDays(days);
-    const d = new Date(startDate); d.setDate(d.getDate() + days);
-    setEndDate(d.toISOString().slice(0, 10));
-  };
-  const handleStartDateChange = (val: string) => {
-    setStartDate(val);
-    const d = new Date(val); d.setDate(d.getDate() + durationDays);
-    setEndDate(d.toISOString().slice(0, 10));
-  };
-  const handleEndDateChange = (val: string) => {
-    setEndDate(val);
-    const diff = Math.round((new Date(val).getTime() - new Date(startDate).getTime()) / 86400000);
-    if (diff > 0 && diff <= 90) setDurationDays(diff);
-  };
+  // La fin se déduit du début et de la durée : elle n'est plus saisissable.
+  // Deux champs de date qui se recalculaient l'un l'autre laissaient passer
+  // des durées que le tarif ne connaît pas.
 
   const [imagePreview, setImagePreview] = useState<string>(prefillImage ?? "");
   const [imageUrl, setImageUrl] = useState(prefillImage ?? "");
@@ -118,12 +100,6 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   const [bodyText, setBodyText] = useState("");
   const [ctaLabel, setCtaLabel] = useState(prefillCtaLabel ?? "En savoir plus");
 
-  const reach = audienceReach(selectedCantons, []);
-  const cpm = calculateCPM(format, selectedCantons, []);
-  const dailyImpressions = estimateDailyImpressions(budgetApplique, cpm, reach);
-  const dailyReach = estimateDailyReach(budgetApplique, cpm, reach);
-  const totalImpressions = dailyImpressions * durationDays;
-  const budgetCapped = isBudgetCapped(budgetApplique, cpm, reach);
 
 
   const toggleCanton = useCallback((code: string) =>
@@ -173,8 +149,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
       <form action={action}>
         <input type="hidden" name="target_cantons" value={JSON.stringify(selectedCantons)} />
         <input type="hidden" name="target_sectors" value="[]" />
-        <input type="hidden" name="daily_budget_chf" value={budgetApplique} />
-        <input type="hidden" name="total_budget_chf" value={totalBudget} />
+        <input type="hidden" name="duree_jours" value={durationDays} />
         <input type="hidden" name="format" value={format} />
         <input type="hidden" name="image_url" value={imageUrl} />
 
@@ -426,110 +401,63 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           </div>
         </div>
 
-        {/* BUDGET */}
+        {/* DURÉE */}
         <div className="biz-form-card">
-          <SectionHeader icon={<DollarSign size={18} aria-hidden="true" />} title="Budget" subtitle="Ajustez le budget journalier et la durée : le total se calcule automatiquement." />
+          <SectionHeader icon={<Clock size={18} aria-hidden="true" />} title="Durée" subtitle="Choisissez combien de temps votre annonce reste affichée" />
 
-          <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 4 }}>Par jour</label>
-              <div style={{ fontSize: 26, fontWeight: 900, color: "#8b5cf6", letterSpacing: "-0.02em", marginBottom: 10 }}>CHF {budgetApplique}</div>
-              <input type="range" min={minimumJournalier} max={500} step={5} value={budgetApplique}
-                onChange={e => setDailyBudget(Number(e.target.value))}
-                style={{ width: "100%", accentColor: "#8b5cf6" }} />
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-                <span>CHF {minimumJournalier}</span><span>CHF 500</span>
-              </div>
-              {minimumJournalier > 5 && (
-                <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.5 }}>
-                  Minimum porté à CHF {minimumJournalier} par le territoire visé : une
-                  campagne doit acheter de quoi se voir sur la zone qu&apos;elle revendique.
-                </p>
-              )}
-            </div>
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 4 }}>Durée</label>
-              <div style={{ fontSize: 26, fontWeight: 900, color: "#f97316", letterSpacing: "-0.02em", marginBottom: 10 }}>{durationLabel}</div>
-              <input type="range" min={1} max={90} step={1} value={durationDays}
-                onChange={e => handleDurationChange(Number(e.target.value))}
-                style={{ width: "100%", accentColor: "#f97316" }} />
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-                <span>1 jour</span><span>3 mois</span>
-              </div>
-            </div>
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${DUREES_FORFAIT.length}, 1fr)`, gap: 10, marginBottom: 20 }}>
+            {DUREES_FORFAIT.map(jours => {
+              const choisie = durationDays === jours;
+              return (
+                <button key={jours} type="button" onClick={() => setDurationDays(jours)} style={{
+                  padding: "16px 12px", borderRadius: 14, cursor: "pointer", textAlign: "center",
+                  border: choisie ? "2px solid #8b5cf6" : "1.5px solid var(--border)",
+                  background: choisie ? "rgba(139,92,246,0.1)" : "transparent",
+                }}>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>{jours}</div>
+                  <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 2 }}>jours</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: choisie ? "#8b5cf6" : "var(--text-muted)", marginTop: 8 }}>
+                    CHF {prixForfait(selectedCantons, [], jours)}
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
-          <div style={{ padding: "14px 16px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 24, textAlign: "center" }}>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Budget total</div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>CHF {totalBudget.toLocaleString("fr-CH")}</div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>CHF {budgetApplique} × {durationDays} jours</div>
-          </div>
-
-          {/* Dates — overflow:hidden évite le débordement iOS */}
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
-              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Début</label>
+              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Début</label>
               <div style={{ overflow: "hidden", borderRadius: 12 }}>
-                <input name="start_date" type="date" min={today} style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} value={startDate}
-                  onChange={e => handleStartDateChange(e.target.value)} />
+                <input name="start_date" type="date" min={today} value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
+                  style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} />
               </div>
             </div>
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
-              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                Fin <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, fontSize: 10 }}>· auto</span>
-              </label>
-              <div style={{ overflow: "hidden", borderRadius: 12 }}>
-                <input name="end_date" type="date" style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }} value={endDate}
-                  onChange={e => handleEndDateChange(e.target.value)} />
+              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Fin</label>
+              <div style={{ height: 40, display: "flex", alignItems: "center", padding: "0 12px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border)", fontSize: 13, color: "var(--text-muted)" }}>
+                {endDate}
               </div>
             </div>
           </div>
+
+          <div style={{ padding: "16px 18px", borderRadius: 14, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Prix, payé une fois</div>
+            <div style={{ fontSize: 30, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>CHF {prix}</div>
+            <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.55 }}>
+              CHF {tarifJour} par jour pendant {durationDays} jours.
+              {selectedCantons.length === 0
+                ? " Le tarif couvre toute la Suisse ; viser quelques cantons le réduit."
+                : ` Le tarif suit le territoire visé : ${selectedCantons.length} canton${selectedCantons.length > 1 ? "s" : ""} sur 26.`}
+            </p>
+            {/* Aucune estimation de vues. Elle venait d'un réservoir quotidien
+                écrit en dur et jamais mesuré, sur un site qui n'a jamais servi
+                une impression publicitaire : le premier tableau de bord
+                l'aurait démentie. Ce qui est vendu est une durée d'affichage,
+                et c'est ce qui est annoncé. */}
+          </div>
         </div>
 
-        {/* ESTIMATION */}
-        <div className="biz-form-card" style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(249,115,22,0.05) 100%)", border: "1px solid rgba(139,92,246,0.25)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Info size={16} color="#8b5cf6" aria-hidden="true" />
-              <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>Estimation de performance</p>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 50, background: reach < 0.15 ? "rgba(249,115,22,0.12)" : "rgba(16,185,129,0.10)", border: `1px solid ${reach < 0.15 ? "rgba(249,115,22,0.3)" : "rgba(16,185,129,0.25)"}` }}>
-              <Target size={11} color={reach < 0.15 ? "#f97316" : "#10b981"} aria-hidden="true" />
-              <span style={{ fontSize: 11, fontWeight: 800, color: reach < 0.15 ? "#f97316" : "#10b981" }}>
-                {(reach * 100).toFixed(1)}% de l&apos;audience Workie ciblée
-              </span>
-            </div>
-          </div>
-
-          {budgetCapped && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, background: "rgba(16,185,129,0.07)", border: "1px solid rgba(16,185,129,0.2)", marginBottom: 16 }}>
-              <Check size={15} strokeWidth={2.6} color="var(--green)" aria-hidden="true" style={{ flexShrink: 0 }} />
-              <p style={{ fontSize: 12, color: "#10b981", lineHeight: 1.5 }}>
-                <strong>Couverture maximale</strong> : votre budget atteint l&apos;intégralité de l&apos;audience ciblée chaque jour.
-              </p>
-            </div>
-          )}
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 1 }}>
-            {[
-              { label: "CPM", value: `CHF ${cpm.toFixed(2)}`, sub: "/ 1 000 vues", icon: <DollarSign size={14} aria-hidden="true" />, color: "#8b5cf6" },
-              { label: "Vues / jour", value: dailyImpressions.toLocaleString("fr-CH"), sub: "impressions", icon: <Eye size={14} aria-hidden="true" />, color: "#6366f1" },
-              { label: "Portée / jour", value: dailyReach.toLocaleString("fr-CH"), sub: "personnes", icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
-              { label: "Total vues", value: totalImpressions.toLocaleString("fr-CH"), sub: `sur ${durationLabel}`, icon: <Clock size={14} aria-hidden="true" />, color: "#10b981" },
-            ].map(({ label, value, sub, icon, color }) => (
-              <div key={label} style={{ textAlign: "center", padding: "14px 8px", borderLeft: "1px solid rgba(255,255,255,0.07)" }}>
-                <div style={{ display: "flex", justifyContent: "center", marginBottom: 6, color }}>{icon}</div>
-                <p style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
-                <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 3 }}>{value}</p>
-                <p style={{ fontSize: 10, color: "var(--text-muted)" }}>{sub}</p>
-              </div>
-            ))}
-          </div>
-
-          <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 14, lineHeight: 1.5, borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 12 }}>
-            Estimations indicatives. Les résultats réels peuvent varier selon l&apos;activité de la plateforme.
-          </p>
-        </div>
 
         {state?.error && (
           <div style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 14, padding: "14px 18px", color: "#ef4444", fontSize: 14, marginBottom: 16 }}>
@@ -544,7 +472,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             color: "#fff", fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", border: "none",
             cursor: pending ? "not-allowed" : "pointer", opacity: pending ? 0.7 : 1, transition: "opacity 0.2s",
           }}>
-            {pending ? "Envoi en cours…" : `Soumettre · CHF ${totalBudget.toLocaleString("fr-CH")}`}
+            {pending ? "Envoi en cours…" : `Payer CHF ${prix}`}
           </button>
           <Link href="/profile/ads" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
             Annuler

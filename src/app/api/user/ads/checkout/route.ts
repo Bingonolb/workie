@@ -32,7 +32,9 @@ export async function POST(request: Request) {
 
     const totalCents = Math.round(Number(campaign.total_budget_chf) * 100);
     if (totalCents < 500) {
-      return NextResponse.json({ error: "Budget minimum CHF 5" }, { status: 400 });
+      // Garde-fou : Stripe refuse les montants dérisoires, et un forfait
+      // valide vaut au moins vingt et un francs.
+      return NextResponse.json({ error: "Montant invalide" }, { status: 400 });
     }
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
