@@ -129,6 +129,20 @@ function BlocOffresEmploi({ url, className, style }: { url: string; className?: 
   );
 }
 
+/**
+ * Le mode de travail, dit en français.
+ *
+ * La valeur enregistrée vient du formulaire d'avis, où « remote » a été retenu
+ * par habitude. Elle reste telle quelle en base, les avis déjà donnés la
+ * portant, mais elle ne s'affiche plus ainsi : le reste de la fiche est en
+ * français, et « travail remote » y détonne.
+ */
+const MODE_EN_MOTS: Record<string, string> = {
+  "présentiel": "sur site",
+  "hybride": "hybride",
+  "remote": "à distance",
+};
+
 export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -425,8 +439,19 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   <StatPill label="reviendraient" synthese={retour} />
                   {dominantMode && (
                     <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
-                      <span style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text)", textTransform: "capitalize" }}>{dominantMode}</span>
-                      <span style={{ fontSize: 13, color: "var(--text-muted)" }}>mode dominant</span>
+                    {/* Le mode de travail n'est pas une proportion.
+                        Il portait la même forme que les deux pastilles
+                        voisines, une valeur en gras suivie d'un libellé, si
+                        bien que l'œil le lisait comme une troisième
+                        statistique. C'est une catégorie : elle se dit d'un
+                        trait.
+
+                        « Mode dominant » disait par ailleurs comment le chiffre
+                        avait été calculé, pas ce qu'il signifie. Personne ne
+                        parle ainsi de son travail. */}
+                    <span style={{ fontSize: 13.5, color: "var(--text)" }}>
+                      Travail <strong style={{ fontWeight: 700 }}>{MODE_EN_MOTS[dominantMode] ?? dominantMode}</strong> le plus souvent
+                    </span>
                     </div>
                   )}
                 </div>
@@ -469,7 +494,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {/* Post review */}
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
               <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
-              <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Ton avis est anonyme par défaut. Aide la communauté à faire les bons choix.</p>
+              <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Votre avis est anonyme par défaut, et il aide les candidats à savoir où ils mettent les pieds.</p>
               <FormulaireAvis companyId={company.id} />
             </div>
           </div>

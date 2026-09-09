@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { submitReview } from "@/lib/actions/reviews";
-import { ChevronRight, ChevronLeft, Briefcase, Star, CheckCircle } from "lucide-react";
+import { ChevronRight, ChevronLeft, Briefcase, Star, CheckCircle, Check } from "lucide-react";
 
 const EMPLOYMENT_TYPES = [
   { value: "cdi", label: "CDI" },
@@ -31,9 +31,9 @@ const RECOMMEND = [
 ];
 
 const WOULD_RETURN = [
-  { value: "oui", label: "❤️ Oui" },
-  { value: "peut_etre", label: "🤷 Peut-être" },
-  { value: "non", label: "❌ Non" },
+  { value: "oui", label: "Oui" },
+  { value: "peut_etre", label: "Peut-être" },
+  { value: "non", label: "Non" },
 ];
 
 const RATING_LABELS: Record<number, string> = {
@@ -58,10 +58,19 @@ function StarPicker({ name, label, required, value, onChange }: {
             aria-checked={n === value}
             aria-label={`${n} étoile${n > 1 ? "s" : ""}${RATING_LABELS[n] ? `, ${RATING_LABELS[n]}` : ""}`}
             onMouseEnter={() => setHover(n)} onMouseLeave={() => setHover(0)} onClick={() => onChange(n)}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 2, fontSize: 28,
-              filter: n <= active ? "none" : "grayscale(1) opacity(0.25)",
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 2,
+              display: "inline-flex", lineHeight: 0,
               transform: n <= active ? "scale(1.05)" : "scale(1)", transition: "all 0.1s" }}>
-            ⭐
+            {/* Étoile dessinée plutôt qu'emoji : le pictogramme du système
+                arrive dans ses propres couleurs, qu'aucun filtre ne rattrape
+                proprement, et change de forme selon l'appareil. */}
+            <Star
+              size={30}
+              strokeWidth={1.6}
+              fill={n <= active ? "#f59e0b" : "transparent"}
+              color={n <= active ? "#f59e0b" : "var(--border2)"}
+              aria-hidden="true"
+            />
           </button>
         ))}
       </div>
@@ -197,9 +206,14 @@ export function ReviewForm({ companyId }: { companyId: string }) {
   if (state?.success) {
     return (
       <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 16, padding: "32px 24px", textAlign: "center" }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>🙏</div>
-        <p style={{ fontSize: 17, fontWeight: 800, color: "#10b981", marginBottom: 6 }}>Avis publié !</p>
-        <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Ton expérience aide des milliers de personnes à faire les bons choix professionnels.</p>
+        {/* Les mains jointes sont parties, et la phrase avec.
+            « Des milliers de personnes » n'est pas vrai : le site en compte
+            quelques dizaines. Un remerciement qui exagère se retourne contre
+            celui qui le fait, surtout auprès de quelqu'un qui vient de donner
+            quelque chose. */}
+        <Check size={30} strokeWidth={2.4} color="#10b981" aria-hidden="true" style={{ marginBottom: 10 }} />
+        <p style={{ fontSize: 17, fontWeight: 800, color: "#10b981", marginBottom: 6 }}>Avis publié</p>
+        <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Merci. Votre expérience est désormais visible sur la fiche de l’entreprise.</p>
       </div>
     );
   }
@@ -253,7 +267,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
             </label>
 
             <div>
-              <label htmlFor="review-job-title" style={lbl}>Ton poste *</label>
+              <label htmlFor="review-job-title" style={lbl}>Votre poste *</label>
               <input id="review-job-title" value={jobTitle} onChange={e => { setJobTitle(e.target.value); setStep1Err(""); }}
                 placeholder="Ex : Software Engineer, Stage Marketing, CDI Finance..."
                 style={inp} />
@@ -352,13 +366,13 @@ export function ReviewForm({ companyId }: { companyId: string }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 0 }}>Notes par catégorie *</p>
-              <StarPicker name="rating_management" label="👔 Management direct" value={ratingMgmt} onChange={v => { setRatingMgmt(v); setStep2Err(""); }} />
+              <StarPicker name="rating_management" label="Management direct" value={ratingMgmt} onChange={v => { setRatingMgmt(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_worklife" label="🏡 Équilibre vie pro / perso" value={ratingWl} onChange={v => { setRatingWl(v); setStep2Err(""); }} />
+              <StarPicker name="rating_worklife" label="Équilibre vie pro / perso" value={ratingWl} onChange={v => { setRatingWl(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_culture" label="🌍 Ambiance & culture" value={ratingCulture} onChange={v => { setRatingCulture(v); setStep2Err(""); }} />
+              <StarPicker name="rating_culture" label="Ambiance et culture" value={ratingCulture} onChange={v => { setRatingCulture(v); setStep2Err(""); }} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_career" label="🚀 Perspectives d'évolution" value={ratingCareer} onChange={v => { setRatingCareer(v); setStep2Err(""); }} />
+              <StarPicker name="rating_career" label="Perspectives d'évolution" value={ratingCareer} onChange={v => { setRatingCareer(v); setStep2Err(""); }} />
             </div>
 
             {/* Auto-computed overall */}
@@ -367,7 +381,9 @@ export function ReviewForm({ companyId }: { companyId: string }) {
                 <span style={{ fontSize: 13, color: "var(--text-muted)" }}>Note globale calculée</span>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {[1,2,3,4,5].map(n => (
-                    <span key={n} style={{ fontSize: 20, color: n <= ratingOverall ? "#f59e0b" : "var(--border2)" }}>★</span>
+                    <Star key={n} size={18} strokeWidth={1.8} aria-hidden="true"
+                      fill={n <= ratingOverall ? "#f59e0b" : "transparent"}
+                      color={n <= ratingOverall ? "#f59e0b" : "var(--border2)"} />
                   ))}
                   <span style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginLeft: 4 }}>{ratingOverall}/5</span>
                 </div>
@@ -398,13 +414,13 @@ export function ReviewForm({ companyId }: { companyId: string }) {
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 0 }}>
                 Encore quelques catégories <span className="badge-optional">Optionnel</span>
               </p>
-              <StarPicker name="rating_flexibility" label="🕐 Flexibilité (horaires, télétravail)" value={ratingFlexibility} onChange={setRatingFlexibility} />
+              <StarPicker name="rating_flexibility" label="Flexibilité (horaires, télétravail)" value={ratingFlexibility} onChange={setRatingFlexibility} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_recognition" label="🏆 Reconnaissance du travail" value={ratingRecognition} onChange={setRatingRecognition} />
+              <StarPicker name="rating_recognition" label="Reconnaissance du travail" value={ratingRecognition} onChange={setRatingRecognition} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_workload" label="📊 Charge de travail" value={ratingWorkload} onChange={setRatingWorkload} />
+              <StarPicker name="rating_workload" label="Charge de travail" value={ratingWorkload} onChange={setRatingWorkload} />
               <div style={{ height: 1, background: "var(--border)" }} />
-              <StarPicker name="rating_diversity" label="🤝 Diversité & inclusion" value={ratingDiversity} onChange={setRatingDiversity} />
+              <StarPicker name="rating_diversity" label="Diversité et inclusion" value={ratingDiversity} onChange={setRatingDiversity} />
             </div>
 
             <div>
@@ -465,7 +481,7 @@ export function ReviewForm({ companyId }: { companyId: string }) {
                 cursor: canSubmit ? "pointer" : "not-allowed",
                 opacity: pending ? 0.6 : 1,
               }}>
-              {pending ? "Publication..." : "Publier mon avis 🚀"}
+              {pending ? "Publication..." : "Publier mon avis"}
             </button>
           )}
         </div>
