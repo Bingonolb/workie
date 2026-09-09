@@ -703,7 +703,7 @@ export default async function Home() {
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
                 {[
-                  "Dès CHF 21",
+                  "Durée au choix",
                   "Paiement unique",
                   "Ciblage par canton et secteur",
                   "Statistiques en temps réel",

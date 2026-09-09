@@ -6,7 +6,7 @@ import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREE_MIN, DUREE_MAX, prixForfait } from "@/lib/ads/pricing";
+import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREE_MIN, DUREE_MAX } from "@/lib/ads/pricing";
 
 export const revalidate = 300;
 
@@ -390,23 +390,19 @@ export default async function AnnonceursPage() {
             <p className="ann-eyebrow">Tarif</p>
             <h2 className="ann-h2">Ce que vous payez, et quand.</h2>
 
-            {/* Un prix, pas un tarif au mille.
-                Le modèle précédent vendait des affichages : l'annonceur fixait
-                un budget, on lui annonçait un volume, et le budget se
-                consommait. Ce volume n'existait pas, il venait d'un réservoir
-                écrit en dur. On vend donc ce qu'on peut tenir, une durée. */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap", marginBottom: 10 }}>
-              <span style={{ fontSize: "clamp(36px, 6vw, 54px)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1 }}>
-                CHF {prixForfait(["GE"], [], DUREE_MIN)}
-              </span>
-              <span style={{ fontSize: 16, color: "var(--text-muted)", fontWeight: 550 }}>
-                pour {DUREE_MIN} jours sur un canton
-              </span>
-            </div>
-            <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65, maxWidth: 560, marginBottom: 34 }}>
-              Vous choisissez une durée, de {DUREE_MIN} à {DUREE_MAX} jours, et le
-              territoire. Le prix suit les deux : il monte avec la durée et avec
-              le nombre de cantons visés, et vous est montré avant de payer.
+            {/* Aucun montant sur cette page.
+                Un prix posé ici ancre le lecteur sur le plus petit chiffre
+                possible, sept jours sur le plus petit canton, qui n'est pas ce
+                qu'il achètera. Il invite à l'objection avant qu'on ait expliqué
+                ce qu'on vend, et il se périme à chaque changement de tarif : le
+                précédent annonçait vingt et un francs pour un minimum réel de
+                septante-sept. Le prix a un seul bon endroit, le formulaire, où
+                il découle des choix faits. */}
+            <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, maxWidth: 580, marginBottom: 34 }}>
+              Deux choses déterminent le prix : la durée, de {DUREE_MIN} à {DUREE_MAX} jours,
+              et le nombre de cantons visés. Vous les réglez tous les deux au
+              moment de composer votre annonce, et le montant s&apos;affiche avant
+              que vous ne payiez quoi que ce soit.
             </p>
 
             <div className="ann-grille ann-deux">
@@ -420,11 +416,11 @@ export default async function AnnonceursPage() {
               </div>
               <div className="ann-carte">
                 <Target size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>Aucun volume promis</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>Les chiffres réels, jour par jour</h3>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.62 }}>
-                  Nous vendons une durée d&apos;affichage, pas un nombre de vues.
-                  Vous voyez ensuite les vues et les clics réels, jour par jour
-                  et par canton.
+                  Vues, clics et répartition par canton pendant toute la
+                  diffusion. Vous mesurez ce qui s&apos;est passé, pas une
+                  estimation faite d&apos;avance.
                 </p>
               </div>
             </div>
@@ -463,12 +459,11 @@ export default async function AnnonceursPage() {
         <section className="ann-section ann-accent" style={{ textAlign: "center" }}>
           <div style={{ maxWidth: 560, margin: "0 auto" }}>
             <h2 style={{ fontSize: "clamp(24px, 3.6vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 12 }}>
-              À partir de CHF 21.
+              Lancez votre première annonce.
             </h2>
             <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 28 }}>
-              C&apos;est le budget minimum, et il suffit à mesurer ce que
-              donne une annonce avant d&apos;aller plus loin.
-
+              Une semaine sur un seul canton suffit à voir ce que ça donne, et
+              le montant s&apos;affiche avant le paiement.
             </p>
             <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 28px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
               Créer une campagne <ArrowRight size={17} aria-hidden="true" />

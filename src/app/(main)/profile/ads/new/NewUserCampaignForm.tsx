@@ -133,13 +133,23 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
 
 
-  // Les régions linguistiques. Les cantons bilingues suivent la convention
-  // usuelle, celle de la majorité : Berne et les Grisons du côté alémanique,
-  // le Valais et Fribourg du côté romand.
+  // Les régions linguistiques. Elles se chevauchent, et c'est voulu.
+  //
+  // Fribourg et le Valais sont officiellement bilingues : vingt et un pour cent
+  // de germanophones dans le premier, vingt-huit dans le second. Les ranger
+  // d'un seul côté reviendrait à dire qu'une campagne alémanique n'a rien à y
+  // faire, ce qui est faux pour un habitant sur quatre. Ils figurent donc dans
+  // les deux.
+  //
+  // Berne l'est aussi et reste pourtant du seul côté alémanique : ses
+  // francophones sont onze pour cent, concentrés dans le Jura bernois.
+  // L'ajouter à la romande facturerait un million de germanophones pour en
+  // atteindre cent mille. Les Grisons rejoignent en revanche le Tessin, les
+  // vallées de Poschiavo et de Bregaglia étant italophones.
   const REGIONS: { nom: string; cantons: string[] }[] = [
     { nom: "Suisse romande", cantons: ["GE", "VD", "VS", "FR", "NE", "JU"] },
-    { nom: "Suisse alémanique", cantons: ["ZH", "BE", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG", "SO", "BS", "BL", "SH", "AR", "AI", "SG", "GR", "AG", "TG"] },
-    { nom: "Tessin", cantons: ["TI"] },
+    { nom: "Suisse alémanique", cantons: ["ZH", "BE", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG", "SO", "BS", "BL", "SH", "AR", "AI", "SG", "GR", "AG", "TG", "FR", "VS"] },
+    { nom: "Suisse italienne", cantons: ["TI", "GR"] },
   ];
 
   const memeEnsemble = (a: string[], b: string[]) =>
