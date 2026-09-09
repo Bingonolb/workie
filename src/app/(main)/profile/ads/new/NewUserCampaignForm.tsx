@@ -417,9 +417,27 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 CHF {tarifJour} par jour
               </div>
             </div>
-            <input type="range" min={DUREE_MIN} max={DUREE_MAX} step={1} value={durationDays}
+            {/* Curseur non contrôlé, volontairement.
+                Contrôlé, sa position est réécrite par React à chaque rendu. Ce
+                formulaire est lourd, vingt-six boutons de canton et un prix
+                recalculé : si un rendu traîne, le pouce revient en arrière
+                pendant qu'on tire, et le glissement paraît ne rien faire. En
+                non contrôlé, le navigateur tient le pouce et React ne fait que
+                suivre.
+                  Deux gestionnaires plutôt qu'un : le premier se déclenche à
+                  chaque pixel du glissement, le second seulement au
+                  relâchement dans certains navigateurs. */}
+            <input
+              type="range"
+              name="duree_curseur"
+              min={DUREE_MIN}
+              max={DUREE_MAX}
+              step={1}
+              defaultValue={durationDays}
+              onInput={e => setDurationDays(Number((e.target as HTMLInputElement).value))}
               onChange={e => setDurationDays(Number(e.target.value))}
-              style={{ width: "100%", accentColor: "#8b5cf6" }} />
+              style={{ width: "100%", accentColor: "#8b5cf6", height: 28, cursor: "pointer" }}
+            />
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
               <span>{DUREE_MIN} jours</span><span>{DUREE_MAX} jours</span>
             </div>
