@@ -41,12 +41,14 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
 }
 
 
-export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCtaLabel, prefillCtaUrl, prefillImage }: {
+export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCtaLabel, prefillCtaUrl, prefillImage, cantonProfil }: {
   prefillHeadline?: string;
   prefillFormat?: "square" | "swipe";
   prefillCtaLabel?: string;
   prefillCtaUrl?: string;
   prefillImage?: string;
+  /** Le canton du profil, pour ouvrir le formulaire sur un ciblage lisible. */
+  cantonProfil?: string | null;
 }) {
   const [state, action, pending] = useActionState(createUserCampaign, undefined);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -72,8 +74,24 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   }, [state?.campaignId]);
 
   const [format, setFormat] = useState<"square" | "swipe">(prefillFormat ?? "square");
-  const [selectedCantons, setSelectedCantons] = useState<string[]>([]);
+  // Un formulaire qui s'ouvre sans aucun canton coché affiche « toute la
+  // Suisse » : c'est exact et illisible, rien n'est sélectionné et pourtant
+  // tout l'est. Il s'ouvre donc sur le canton du profil. Genève à défaut,
+  // plutôt que rien : un ciblage visible se corrige, un ciblage implicite se
+  // découvre à la facture.
+  const [selectedCantons, setSelectedCantons] = useState<string[]>(
+    () => (cantonProfil && CANTONS.some(c => c.code === cantonProfil) ? [cantonProfil] : ["GE"]),
+  );
   const [durationDays, setDurationDays] = useState<number>(30);
+
+  // Le curseur n'est pas contrôlé : quand la durée change par un autre chemin,
+  // la date de fin, il faut lui reposer sa valeur à la main.
+  const curseurRef = useRef<HTMLInputElement>(null);
+  const poserDuree = (jours: number) => {
+    const borne = Math.min(DUREE_MAX, Math.max(DUREE_MIN, jours));
+    setDurationDays(borne);
+    if (curseurRef.current) curseurRef.current.value = String(borne);
+  };
 
   // Le prix est reconstruit ici pour être montré, et recalculé par l'action
   // avant l'encaissement : ce qui vient du navigateur ne décide pas d'un
@@ -428,8 +446,8 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                   chaque pixel du glissement, le second seulement au
                   relâchement dans certains navigateurs. */}
             <input
+              ref={curseurRef}
               type="range"
-              name="duree_curseur"
               min={DUREE_MIN}
               max={DUREE_MAX}
               step={1}
@@ -455,8 +473,26 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             </div>
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
               <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Fin</label>
-              <div style={{ height: 40, display: "flex", alignItems: "center", padding: "0 12px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border)", fontSize: 13, color: "var(--text-muted)" }}>
-                {endDate}
+              {/* La fin se choisit aussi. Elle ne pilote pas une grandeur à
+                  elle : elle fixe la même durée que le curseur, par l'autre
+                  bout. Une date hors des bornes est ramenée dedans plutôt que
+                  refusée, sans quoi le champ se bloquerait en cours de saisie. */}
+              <div style={{ overflow: "hidden", borderRadius: 12 }}>
+                <input
+                  type="date"
+                  value={endDate}
+                  min={dateDeFin(startDate, DUREE_MIN)}
+                  max={dateDeFin(startDate, DUREE_MAX)}
+                  onChange={e => {
+                    const choisie = e.target.value;
+                    if (!choisie) return;
+                    const jours = Math.round(
+                      (new Date(`${choisie}T00:00:00Z`).getTime() - new Date(`${startDate}T00:00:00Z`).getTime()) / 86400000,
+                    );
+                    if (Number.isFinite(jours)) poserDuree(jours);
+                  }}
+                  style={{ ...inp, width: "100%", height: 40, fontSize: 13, padding: "0 10px", borderRadius: 12 }}
+                />
               </div>
             </div>
           </div>
