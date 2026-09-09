@@ -41,6 +41,19 @@ function SectionHeader({ icon, title, subtitle }: { icon: React.ReactNode; title
 }
 
 
+/** Un bouton de région : allumé quand la sélection lui correspond exactement. */
+function styleRegion(active: boolean): React.CSSProperties {
+  return {
+    display: "inline-flex", alignItems: "center", gap: 5,
+    fontSize: 12, padding: "7px 14px", borderRadius: 50,
+    cursor: "pointer", fontWeight: 700,
+    border: active ? "1.5px solid #f97316" : "1px solid var(--border2)",
+    background: active ? "rgba(249,115,22,0.12)" : "transparent",
+    color: active ? "#f97316" : "var(--text-muted)",
+    transition: "all 0.12s",
+  };
+}
+
 export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCtaLabel, prefillCtaUrl, prefillImage, cantonProfil }: {
   prefillHeadline?: string;
   prefillFormat?: "square" | "swipe";
@@ -119,6 +132,22 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   const [ctaLabel, setCtaLabel] = useState(prefillCtaLabel ?? "En savoir plus");
 
 
+
+  // Les régions linguistiques. Les cantons bilingues suivent la convention
+  // usuelle, celle de la majorité : Berne et les Grisons du côté alémanique,
+  // le Valais et Fribourg du côté romand.
+  const REGIONS: { nom: string; cantons: string[] }[] = [
+    { nom: "Suisse romande", cantons: ["GE", "VD", "VS", "FR", "NE", "JU"] },
+    { nom: "Suisse alémanique", cantons: ["ZH", "BE", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG", "SO", "BS", "BL", "SH", "AR", "AI", "SG", "GR", "AG", "TG"] },
+    { nom: "Tessin", cantons: ["TI"] },
+  ];
+
+  const memeEnsemble = (a: string[], b: string[]) =>
+    a.length === b.length && a.every(x => b.includes(x));
+
+  // Cocher les vingt-six revient au même que n'en cocher aucun : la portée est
+  // entière dans les deux cas, donc le bouton doit s'allumer pour les deux.
+  const couvreToutLePays = selectedCantons.length === 0 || selectedCantons.length === CANTONS.length;
 
   const toggleCanton = useCallback((code: string) =>
     setSelectedCantons(p => p.includes(code) ? p.filter(c => c !== code) : [...p, code]), []);
@@ -390,20 +419,46 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* CIBLAGE CANTON */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage géographique" subtitle="Sélectionnez les cantons ciblés, ou laissez vide pour diffuser dans toute la Suisse." />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage géographique" subtitle="Choisissez les cantons visés, ou tout le pays d'un bouton." />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</span>
-            <button type="button" onClick={() => setSelectedCantons(c => c.length === CANTONS.length ? [] : CANTONS.map(x => x.code))} style={{
-              fontSize: 11, padding: "2px 9px", borderRadius: 50, cursor: "pointer", fontWeight: 700,
-              border: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "1px solid rgba(249,115,22,0.4)" : "1px solid rgba(255,255,255,0.1)",
-              background: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "rgba(249,115,22,0.1)" : "rgba(255,255,255,0.06)",
-              color: selectedCantons.length === 0 || selectedCantons.length === CANTONS.length ? "#f97316" : "var(--text-muted)",
-            }}>
-              {selectedCantons.length === 0 || selectedCantons.length === CANTONS.length
-                ? "✓ Toute la Suisse"
+            <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
+              {couvreToutLePays
+                ? `${CANTONS.length} cantons`
                 : `${selectedCantons.length} sélectionné${selectedCantons.length > 1 ? "s" : ""}`}
-            </button>
+            </span>
           </div>
+          {/* Les raccourcis de région, au-dessus des cantons.
+              Viser la Suisse romande demandait six clics, l'alémanique
+              dix-neuf. C'est pourtant le découpage qu'un annonceur suisse a en
+              tête avant de penser au canton. */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 14 }}>
+            <button
+              type="button"
+              onClick={() => setSelectedCantons([])}
+              aria-pressed={couvreToutLePays}
+              style={styleRegion(couvreToutLePays)}
+            >
+              {couvreToutLePays && <Check size={11} strokeWidth={2.8} aria-hidden="true" />}
+              Toute la Suisse
+            </button>
+            {REGIONS.map(({ nom, cantons }) => {
+              const active = !couvreToutLePays && memeEnsemble(selectedCantons, cantons);
+              return (
+                <button
+                  key={nom}
+                  type="button"
+                  onClick={() => setSelectedCantons(cantons)}
+                  aria-pressed={active}
+                  style={styleRegion(active)}
+                >
+                  {active && <Check size={11} strokeWidth={2.8} aria-hidden="true" />}
+                  {nom}
+                </button>
+              );
+            })}
+          </div>
+
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
             {CANTONS.map(c => {
               const sel = selectedCantons.includes(c.code);
