@@ -6,7 +6,7 @@ import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREES_FORFAIT, prixForfait } from "@/lib/ads/pricing";
+import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREE_MIN, DUREE_MAX, prixForfait } from "@/lib/ads/pricing";
 
 export const revalidate = 300;
 
@@ -397,17 +397,16 @@ export default async function AnnonceursPage() {
                 écrit en dur. On vend donc ce qu'on peut tenir, une durée. */}
             <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap", marginBottom: 10 }}>
               <span style={{ fontSize: "clamp(36px, 6vw, 54px)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1 }}>
-                CHF {prixForfait(["GE"], [], DUREES_FORFAIT[0])}
+                CHF {prixForfait(["GE"], [], DUREE_MIN)}
               </span>
               <span style={{ fontSize: 16, color: "var(--text-muted)", fontWeight: 550 }}>
-                pour {DUREES_FORFAIT[0]} jours sur un canton
+                pour {DUREE_MIN} jours sur un canton
               </span>
             </div>
             <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65, maxWidth: 560, marginBottom: 34 }}>
-              Vous choisissez une durée, {DUREES_FORFAIT.join(", ").replace(/, ([^,]*)$/, " ou $1")} jours,
-              et le territoire. Le prix monte avec le nombre de cantons visés,
-              jusqu&apos;à CHF {prixForfait([], [], DUREES_FORFAIT.at(-1)!)} pour un mois
-              sur toute la Suisse. Il vous est montré avant de payer.
+              Vous choisissez une durée, de {DUREE_MIN} à {DUREE_MAX} jours, et le
+              territoire. Le prix suit les deux : il monte avec la durée et avec
+              le nombre de cantons visés, et vous est montré avant de payer.
             </p>
 
             <div className="ann-grille ann-deux">

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
-  DUREES_FORFAIT,
+  DUREE_MIN,
+  DUREE_MAX,
   PRIX_JOUR_NATIONAL,
   audienceReach,
   tarifJournalier,
@@ -39,8 +40,15 @@ describe("le tarif journalier", () => {
 
   it("plafonne au tarif national quand aucun canton n'est coché", () => {
     expect(tarifJournalier([], [])).toBe(PRIX_JOUR_NATIONAL);
-    // Cocher les vingt-six revient au même que n'en cocher aucun.
-    expect(tarifJournalier(Object.keys({ ZH: 0 }), [])).toBeLessThanOrEqual(PRIX_JOUR_NATIONAL);
+  });
+
+  it("différencie vraiment les régions", () => {
+    // Le défaut d'origine : une part fixe trop lourde écrasait les écarts, et
+    // Zurich ne coûtait qu'une fois et demie Uri alors qu'il pèse soixante
+    // fois plus. Le rapport doit rester net.
+    const zurich = tarifJournalier(["ZH"], []);
+    const uri = tarifJournalier(["UR"], []);
+    expect(zurich).toBeGreaterThan(uri * 2);
   });
 
   it("garde une part fixe : viser un canton minuscule n'est pas gratuit", () => {
@@ -56,25 +64,27 @@ describe("le tarif journalier", () => {
 
 describe("le prix du forfait", () => {
   it("est le tarif journalier multiplié par la durée", () => {
-    for (const jours of DUREES_FORFAIT) {
+    for (const jours of [DUREE_MIN, 30, DUREE_MAX]) {
       expect(prixForfait(["GE"], [], jours)).toBe(tarifJournalier(["GE"], []) * jours);
     }
   });
 
   it("monte avec la durée", () => {
-    const prix = DUREES_FORFAIT.map(j => prixForfait(["GE"], [], j));
+    const prix = [DUREE_MIN, 14, 30, 60, DUREE_MAX].map(j => prixForfait(["GE"], [], j));
     for (let i = 1; i < prix.length; i++) {
       expect(prix[i]).toBeGreaterThan(prix[i - 1]);
     }
   });
 });
 
-describe("les durées proposées", () => {
-  it("sont les seules acceptées", () => {
-    for (const jours of DUREES_FORFAIT) expect(dureeValide(jours)).toBe(true);
-    // Une durée arbitraire envoyée à la main ne passe pas : le prix ne serait
-    // plus celui qu'on a montré.
-    for (const jours of [0, 1, 13, 45, 365, -7]) expect(dureeValide(jours)).toBe(false);
+describe("les durées acceptées", () => {
+  it("tiennent dans les bornes du curseur", () => {
+    for (const jours of [DUREE_MIN, 14, 30, 60, DUREE_MAX]) expect(dureeValide(jours)).toBe(true);
+    // Hors bornes ou non entière : refusée. Le curseur ne peut pas les
+    // produire, mais un champ caché s'édite.
+    for (const jours of [0, 1, DUREE_MIN - 1, DUREE_MAX + 1, 365, -7, 12.5]) {
+      expect(dureeValide(jours)).toBe(false);
+    }
   });
 });
 

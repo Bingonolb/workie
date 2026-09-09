@@ -9,7 +9,7 @@
 //      → Une part reste fixe : relire une annonce genevoise coûte autant qu'une
 //        annonce nationale, et la servir aussi.
 //
-//   3. prix = tarif journalier × durée choisie (7, 14 ou 30 jours).
+//   3. prix = tarif journalier × durée choisie, de 7 à 90 jours.
 //      → Rien à consommer, rien à rembourser : c'est du temps qui s'écoule.
 //
 // Poids des cantons : OFS, actifs occupés par canton (2022).
@@ -114,28 +114,46 @@ export function audienceReach(cantons: string[], sectors: string[]): number {
 
 // ── Le prix ───────────────────────────────────────────────────────────────────
 
-/** Les durées proposées, en jours. */
-export const DUREES_FORFAIT = [7, 14, 30] as const;
-export type DureeForfait = (typeof DUREES_FORFAIT)[number];
+/**
+ * Les bornes de la durée, en jours.
+ *
+ * Trois durées fermées les remplaçaient. Le client qui voulait acheter plus
+ * n'avait aucun moyen de le faire : la borne du panier devenait celle de la
+ * commande. Un curseur laisse le haut ouvert.
+ *
+ * Sept jours en bas, parce qu'une campagne plus courte n'a pas le temps d'être
+ * vue par une audience qui ne revient pas tous les jours.
+ */
+export const DUREE_MIN = 7;
+export const DUREE_MAX = 90;
 
 /** Le tarif journalier d'une campagne qui vise toute la Suisse. */
-export const PRIX_JOUR_NATIONAL = 8;
+export const PRIX_JOUR_NATIONAL = 50;
 
-// Part du tarif qui ne dépend pas du territoire. Relire une annonce, la
-// stocker et la servir coûtent la même chose qu'elle vise un canton ou vingt-six.
-const PART_FIXE = 0.3;
+// Part du tarif qui ne dépend pas du territoire. Stocker une annonce et la
+// servir coûtent la même chose qu'elle vise un canton ou vingt-six.
+//
+// Elle valait trois dixièmes, ce qui écrasait les écarts entre régions :
+// Zurich ne coûtait qu'une fois et demie Uri alors qu'il pèse soixante fois
+// plus. Ramenée à 0,15, elle laisse la place au territoire sans rendre les
+// petits cantons gratuits.
+const PART_FIXE = 0.15;
 
 /**
  * Ce que coûte une journée d'affichage, selon le territoire visé.
  *
- * Entre un canton et le pays entier, le rapport est d'environ un à trois.
- * L'inventaire, lui, varie d'un à seize : facturer proportionnellement
- * rendrait les ciblages étroits presque gratuits, alors qu'ils demandent le
- * même travail.
+ * Entre le plus petit canton et le pays entier, le rapport est d'environ un à
+ * cinq. L'audience, elle, varie d'un à deux cents : facturer
+ * proportionnellement rendrait les ciblages étroits dérisoires, alors qu'ils
+ * demandent le même travail et occupent la même place.
  */
 export function tarifJournalier(cantons: string[], sectors: string[]): number {
   const couverture = audienceReach(cantons, sectors);
-  return Math.ceil(PRIX_JOUR_NATIONAL * (PART_FIXE + (1 - PART_FIXE) * couverture));
+  // Racine carrée et non proportion directe. Une proportion directe alignerait
+  // le prix sur la population, ce qui rendrait les petits cantons dérisoires
+  // et le pays entier hors de prix. La racine garde l'ordre des régions tout
+  // en resserrant l'échelle : Zurich vaut deux fois et demie Uri, pas soixante.
+  return Math.ceil(PRIX_JOUR_NATIONAL * (PART_FIXE + (1 - PART_FIXE) * Math.sqrt(couverture)));
 }
 
 /** Le prix d'une campagne : un tarif journalier, une durée. */
@@ -143,9 +161,9 @@ export function prixForfait(cantons: string[], sectors: string[], jours: number)
   return tarifJournalier(cantons, sectors) * jours;
 }
 
-/** Vrai si la durée fait partie de celles qu'on propose. */
-export function dureeValide(jours: number): jours is DureeForfait {
-  return (DUREES_FORFAIT as readonly number[]).includes(jours);
+/** Vrai si la durée tient dans les bornes proposées. */
+export function dureeValide(jours: number): boolean {
+  return Number.isInteger(jours) && jours >= DUREE_MIN && jours <= DUREE_MAX;
 }
 
 /** La date de fin d'une campagne qui démarre le jour donné. */

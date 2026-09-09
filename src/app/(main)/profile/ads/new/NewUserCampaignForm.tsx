@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock, AlertTriangle, Check, CreditCard } from "lucide-react";
 // ExternalLink used for CTA URL field only
 import { createUserCampaign } from "@/lib/actions/ads";
-import { tarifJournalier, prixForfait, DUREES_FORFAIT, dateDeFin } from "@/lib/ads/pricing";
+import { tarifJournalier, prixForfait, DUREE_MIN, DUREE_MAX, dateDeFin } from "@/lib/ads/pricing";
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
 
 const CANTONS = [
@@ -73,7 +73,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
   const [format, setFormat] = useState<"square" | "swipe">(prefillFormat ?? "square");
   const [selectedCantons, setSelectedCantons] = useState<string[]>([]);
-  const [durationDays, setDurationDays] = useState<number>(14);
+  const [durationDays, setDurationDays] = useState<number>(30);
 
   // Le prix est reconstruit ici pour être montré, et recalculé par l'action
   // avant l'encaissement : ce qui vient du navigateur ne décide pas d'un
@@ -405,24 +405,26 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         <div className="biz-form-card">
           <SectionHeader icon={<Clock size={18} aria-hidden="true" />} title="Durée" subtitle="Choisissez combien de temps votre annonce reste affichée" />
 
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${DUREES_FORFAIT.length}, 1fr)`, gap: 10, marginBottom: 20 }}>
-            {DUREES_FORFAIT.map(jours => {
-              const choisie = durationDays === jours;
-              return (
-                <button key={jours} type="button" onClick={() => setDurationDays(jours)} style={{
-                  padding: "16px 12px", borderRadius: 14, cursor: "pointer", textAlign: "center",
-                  border: choisie ? "2px solid #8b5cf6" : "1.5px solid var(--border)",
-                  background: choisie ? "rgba(139,92,246,0.1)" : "transparent",
-                }}>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>{jours}</div>
-                  <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 2 }}>jours</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: choisie ? "#8b5cf6" : "var(--text-muted)", marginTop: 8 }}>
-                    CHF {prixForfait(selectedCantons, [], jours)}
-                  </div>
-                </button>
-              );
-            })}
+          {/* Un curseur, et non trois durées fermées.
+              Le client qui voulait acheter plus n'avait aucun moyen de le
+              faire : la borne du panier devenait celle de la commande. */}
+          <div style={{ marginBottom: 22 }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
+              <div style={{ fontSize: 26, fontWeight: 900, color: "#8b5cf6", letterSpacing: "-0.02em" }}>
+                {durationDays} jours
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
+                CHF {tarifJour} par jour
+              </div>
+            </div>
+            <input type="range" min={DUREE_MIN} max={DUREE_MAX} step={1} value={durationDays}
+              onChange={e => setDurationDays(Number(e.target.value))}
+              style={{ width: "100%", accentColor: "#8b5cf6" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+              <span>{DUREE_MIN} jours</span><span>{DUREE_MAX} jours</span>
+            </div>
           </div>
+
 
           <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
