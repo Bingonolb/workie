@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { randomUUID } from "crypto";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
@@ -52,6 +52,8 @@ export type AdCampaign = {
 
   stripe_session_id: string | null;
   paid_at: string | null;
+  /** Instant de la mise en pause. La reprise décale la fin d'autant. */
+  paused_at?: string | null;
   created_at: string;
 };
 
@@ -241,10 +243,9 @@ export async function createUserCampaign(
   } catch (e) { return { error: (e as Error).message }; }
 }
 
-/** Une campagne telle que la lit getAdminCampaigns, relations comprises. */
+/** Une campagne telle que la lit getAdminCampaigns, relation entreprise comprise. */
 type LigneCampagneAdmin = AdCampaign & {
   companies: { name: string | null; logo_url: string | null } | null;
-  profiles: { full_name: string | null; username: string | null } | null;
 };
 
 export async function getAdminCampaigns(): Promise<{
@@ -253,17 +254,38 @@ export async function getAdminCampaigns(): Promise<{
   try {
     await requireAdmin();
     const admin = createAdminClient();
+    // Les profils sont lus a part, et non joints.
+    // ad_campaigns.user_id pointe sur auth.users, pas sur profiles : PostgREST
+    // ne voit aucune cle etrangere entre les deux tables et refuse la jointure
+    // ("Could not find a relationship"), ce qui vidait toute la page.
     const { data, error } = await admin
       .from("ad_campaigns")
-      .select("*, companies(name, logo_url), profiles(full_name, username)")
+      .select("*, companies(name, logo_url)")
       .order("created_at", { ascending: false });
     if (error) return { error: error.message };
+    const lignes = (data ?? []) as unknown as LigneCampagneAdmin[];
+
+    const idsAuteurs = [...new Set(lignes.map(c => c.user_id).filter(Boolean))] as string[];
+    const auteurs = new Map<string, { full_name: string | null; username: string | null }>();
+    if (idsAuteurs.length) {
+      const { data: profils } = await admin
+        .from("profiles")
+        .select("id, full_name, username")
+        .in("id", idsAuteurs);
+      for (const p of (profils ?? []) as { id: string; full_name: string | null; username: string | null }[]) {
+        auteurs.set(p.id, { full_name: p.full_name, username: p.username });
+      }
+    }
+
     return {
-      campaigns: ((data ?? []) as unknown as LigneCampagneAdmin[]).map((c) => ({
-        ...c,
-        company_name: c.companies?.name ?? c.profiles?.full_name ?? c.profiles?.username ?? "Profil utilisateur",
-        company_logo: c.companies?.logo_url ?? null,
-      })),
+      campaigns: lignes.map((c) => {
+        const auteur = c.user_id ? auteurs.get(c.user_id) : undefined;
+        return {
+          ...c,
+          company_name: c.companies?.name ?? auteur?.full_name ?? auteur?.username ?? "Profil utilisateur",
+          company_logo: c.companies?.logo_url ?? null,
+        };
+      }),
     };
   } catch (e) { return { error: (e as Error).message }; }
 }
@@ -357,17 +379,74 @@ export async function getBusinessCampaignById(id: string): Promise<AdCampaign | 
   } catch { return null; }
 }
 
+/**
+ * Met une campagne en pause, et retient quand.
+ *
+ * Depuis qu'on vend une durée d'affichage et non un budget, une pause sans
+ * date était une destruction : les jours continuaient de courir, aucune
+ * reprise n'existait, et la clôture nocturne ne regarde que les campagnes
+ * actives. L'annonceur perdait ce qu'il avait payé, sans retour possible et
+ * sans même recevoir son bilan.
+ */
 export async function pauseUserCampaign(id: string): Promise<{ error?: string }> {
   try {
     const { supabase, user } = await requireUser();
-    const { error } = await supabase
-      .from("ad_campaigns")
-      .update({ status: "paused" })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("ad_campaigns") as any)
+      .update({ status: "paused", paused_at: new Date().toISOString() })
       .eq("id", id)
       .eq("user_id", user.id)
       .in("status", ["active", "pending"]);
     if (error) return { error: error.message };
     revalidatePath("/profile/ads");
+    revalidateTag("ad-campaigns", {});
+    return {};
+  } catch (e) { return { error: (e as Error).message }; }
+}
+
+/**
+ * Reprend une campagne en pause, et lui rend ses jours.
+ *
+ * La fin est repoussée d'autant de jours que la pause a duré : c'est ce qu'un
+ * forfait de durée promet, sept jours d'affichage et non sept jours de
+ * calendrier. Sans ce décalage, une pause d'une semaine sur une campagne d'une
+ * semaine ne laisserait rien à reprendre.
+ */
+export async function reprendreCampagne(id: string): Promise<{ error?: string }> {
+  try {
+    const { supabase, user } = await requireUser();
+    const { data: campagne } = await supabase
+      .from("ad_campaigns")
+      .select("end_date, paused_at")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .eq("status", "paused")
+      .maybeSingle();
+    if (!campagne) return { error: "Cette campagne n'est pas en pause." };
+
+    // Les types générés depuis la base ne connaissent pas encore paused_at :
+    // la colonne vient d'être ajoutée et le fichier de types n'a pas été
+    // régénéré. Le passage par unknown dit que la conversion est voulue.
+    const c = campagne as unknown as { end_date: string | null; paused_at: string | null };
+    let end_date = c.end_date;
+    if (end_date && c.paused_at) {
+      const jours = Math.max(0, Math.floor(
+        (Date.now() - new Date(c.paused_at).getTime()) / 86400000,
+      ));
+      const fin = new Date(`${end_date}T00:00:00Z`);
+      fin.setUTCDate(fin.getUTCDate() + jours);
+      end_date = fin.toISOString().slice(0, 10);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("ad_campaigns") as any)
+      .update({ status: "active", paused_at: null, end_date })
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .eq("status", "paused");
+    if (error) return { error: error.message };
+    revalidatePath("/profile/ads");
+    revalidateTag("ad-campaigns", {});
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }

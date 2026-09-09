@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Flame } from "lucide-react";
 import { CompanyCard } from "@/components/CompanyCard";
 import type { Company } from "@/lib/types";
-import { lireCache, ecrireCache, CLE_FAVORIS } from "@/lib/cacheSession";
+import { lireCache, obtenir, CLE_FAVORIS } from "@/lib/cacheSession";
 
 /**
  * Liste des favoris, chargée après affichage.
@@ -33,16 +33,19 @@ export function FavorisClient() {
 
   useEffect(() => {
     let annule = false;
-    fetch("/api/user/favorites")
-      .then(async r => {
+    // Même appel que celui lancé d'avance par la barre de navigation :
+    // `obtenir` le partage au lieu d'en ouvrir un second.
+    obtenir<{ companies?: Company[] }>(CLE_FAVORIS, "/api/user/favorites")
+      .then(({ statut, donnees }) => {
         // Session expirée entre le service de la coquille (en cache) et cet
         // appel. On repasse par la déconnexion, qui purge les cookies avant
         // d'envoyer vers la connexion — afficher « aucun favori » ferait
         // croire à une perte de données.
-        if (r.status === 401) { window.location.href = "/api/auth/signout?next=/login"; return null; }
-        return r.json();
+        if (statut === 401) { window.location.href = "/api/auth/signout?next=/login"; return; }
+        if (annule) return;
+        if (donnees) setCompanies(Array.isArray(donnees.companies) ? donnees.companies : []);
+        else setEchec(true);
       })
-      .then(d => { if (d && !annule) { ecrireCache(CLE_FAVORIS, d); setCompanies(Array.isArray(d.companies) ? d.companies : []); } })
       // Un échec réseau affichait « Aucun favori pour l'instant » — un message
       // faux, qui laisse croire à une perte. On distingue les deux cas.
       .catch(() => { if (!annule) setEchec(true); });

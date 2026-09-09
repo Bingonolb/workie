@@ -98,21 +98,32 @@ export function viderCache(): void {
 }
 
 /**
- * Va chercher la donnée et la range, sans rien afficher.
+ * Une seule requête par donnée, quel que soit le nombre de demandeurs.
  *
- * Déclenché au survol ou au premier contact du lien : le temps que le doigt
- * se lève et que la page s'affiche, la réponse est déjà là. Une requête déjà
- * en vol n'est pas relancée.
+ * La barre de navigation précharge le profil dès qu'elle sait qui regarde, et
+ * la page de profil le demandait de son côté : deux appels identiques pour un
+ * même écran, deux fois les mêmes requêtes en base. Mesuré sur /profile, les
+ * deux partaient bien, à quatre cents millisecondes d'écart.
+ *
+ * Les demandeurs partagent désormais la promesse en cours. Le premier arrivé
+ * lance l'appel, les suivants attendent le même.
  */
-const enVol = new Set<string>();
+const enVol = new Map<string, Promise<Reponse<unknown>>>();
 
-export function precharger(cle: string, url: string): void {
-  if (enVol.has(cle) || lireCache(cle) !== undefined) return;
-  enVol.add(cle);
+export type Reponse<T> = { statut: number; donnees: T | null };
+
+export function obtenir<T>(cle: string, url: string): Promise<Reponse<T>> {
+  const memorise = lireCache<T>(cle);
+  if (memorise !== undefined) return Promise.resolve({ statut: 200, donnees: memorise });
+
+  const encours = enVol.get(cle);
+  if (encours) return encours as Promise<Reponse<T>>;
+
   const compte = compteCourant();
-  fetch(url)
-    .then(r => (r.ok ? r.json() : null))
-    .then(j => {
+  const p: Promise<Reponse<unknown>> = fetch(url)
+    .then(async r => {
+      if (!r.ok) return { statut: r.status, donnees: null };
+      const j = await r.json();
       // Le compte a pu changer pendant la requête — déconnexion, bascule de
       // compte. Trois conditions avant de ranger : identité connue, inchangée,
       // et réponse adressée à ce compte.
@@ -120,9 +131,25 @@ export function precharger(cle: string, url: string): void {
           && (typeof j.compte !== "string" || j.compte === compte)) {
         memoire.set(cle, { compte, valeur: j });
       }
+      return { statut: r.status, donnees: j };
     })
-    .catch(() => { /* le préchargement est un confort, jamais une dépendance */ })
-    .finally(() => enVol.delete(cle));
+    .finally(() => { enVol.delete(cle); });
+
+  enVol.set(cle, p);
+  return p as Promise<Reponse<T>>;
+}
+
+/**
+ * Va chercher la donnée et la range, sans rien afficher.
+ *
+ * Déclenché au survol ou au premier contact du lien : le temps que le doigt
+ * se lève et que la page s'affiche, la réponse est déjà là.
+ */
+export function precharger(cle: string, url: string): void {
+  // Le préchargement est un confort, jamais une dépendance : un échec ici ne
+  // doit rien interrompre, et la page qui a vraiment besoin de la donnée la
+  // redemandera.
+  void obtenir(cle, url).catch(() => { /* sans conséquence */ });
 }
 
 /**

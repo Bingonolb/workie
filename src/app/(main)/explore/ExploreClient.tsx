@@ -539,16 +539,28 @@ export function ExploreClient({
   // interdit cela — une ref n'est pas suivie, donc l'affichage peut ne pas se
   // mettre à jour quand elle change, et l'appel à Math.random rendait le rendu
   // non reproductible. C'est un état calculé une fois, pas une référence.
+  //
+  // Le premier emplacement est placé sous la ligne de flottaison, et non à la
+  // quatrieme carte. Le serveur ne rend aucune publicite : la page est mise en
+  // cache pour tout le monde, la liste arrive ensuite par un appel qui aboutit
+  // vers 1,6 seconde. Inserer alors une carte au milieu de ce qui est deja
+  // affiche pousse tout le reste vers le bas, sous les yeux du lecteur. Mesure
+  // avant correction sur /explore : 0,053 de decalage cumule, une seule
+  // secousse, et zero des que les publicites etaient retirees.
+  //
+  // Plus bas, l'insertion ne deplace que des cartes que personne n'a encore
+  // vues. Rien n'est perdu cote recettes : l'impression est comptee quand la
+  // carte entre dans l'ecran, pas quand elle est posee dans la page.
   const [decalagePub] = useState<number>(() => {
-    if (typeof window === "undefined") return 4;
+    if (typeof window === "undefined") return 9;
     try {
       const memorise = sessionStorage.getItem("w_ad_off");
       if (memorise !== null) return parseInt(memorise, 10);
-      const tire = 3 + Math.floor(Math.random() * 3);
+      const tire = 8 + Math.floor(Math.random() * 3);
       sessionStorage.setItem("w_ad_off", String(tire));
       return tire;
     } catch {
-      return 4;
+      return 9;
     }
   });
 

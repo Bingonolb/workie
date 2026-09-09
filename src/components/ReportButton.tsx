@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Flag, X, ChevronRight, CheckCircle } from "lucide-react";
 import { submitReport, type ReportTargetType } from "@/lib/actions/reports";
 
@@ -49,16 +50,23 @@ interface ReportButtonProps {
   targetType: ReportTargetType;
   targetId: string;
   targetLabel: string;
+  /**
+   * Renseigné seulement là où la page connaît déjà l'état de la session.
+   * Laissé de côté, la fenêtre s'ouvre et c'est le serveur qui tranche.
+   */
   isLoggedIn?: boolean;
   variant?: "icon" | "link" | "button";
+  /** Appelé une fois le signalement parti, pour retirer le contenu de la vue. */
+  onReported?: () => void;
 }
 
 export function ReportButton({
   targetType,
   targetId,
   targetLabel,
-  isLoggedIn = false,
+  isLoggedIn,
   variant = "link",
+  onReported,
 }: ReportButtonProps) {
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState("");
@@ -67,10 +75,22 @@ export function ReportButton({
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
+  // La fenêtre est posée sur le corps du document, et non là où le bouton se
+  // trouve. Une carte publicitaire vit dans une grille dont les ancêtres
+  // portent des transformations et des découpes : un enfant en position fixe y
+  // est rattaché au parent transformé, donc rogné aux dimensions de la carte.
+  const [monte, setMonte] = useState(false);
+  useEffect(() => { setMonte(true); }, []);
+
   const categories = CATEGORIES[targetType];
 
   function openModal() {
-    if (!isLoggedIn) {
+    // On ne quitte la page que si l'appelant affirme que personne n'est
+    // connecté. Sans information, la fenêtre s'ouvre : le défaut précédent
+    // valait « déconnecté », si bien que le drapeau des annonces, qui ne
+    // transmet rien, renvoyait toujours vers la connexion. À l'écran, cela
+    // ressemblait à un rafraîchissement de la page.
+    if (isLoggedIn === false) {
       window.location.href = "/login?next=" + encodeURIComponent(window.location.pathname);
       return;
     }
@@ -84,6 +104,7 @@ export function ReportButton({
   function close() {
     if (isPending) return;
     setOpen(false);
+    if (done) onReported?.();
   }
 
   useEffect(() => {
@@ -143,7 +164,7 @@ export function ReportButton({
     <>
       {trigger}
 
-      {open && (
+      {open && monte && createPortal(
         <div
           onClick={e => { if (e.target === e.currentTarget) close(); }}
           style={{
@@ -212,7 +233,9 @@ export function ReportButton({
                     Signalement envoyé
                   </p>
                   <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 20 }}>
-                    Merci. Notre équipe examinera ce signalement et prendra les mesures appropriées.
+                    {onReported
+                      ? "Merci. Nous examinons ce contenu, et vous ne le reverrez pas sur cette page."
+                      : "Merci. Notre équipe examinera ce signalement et prendra les mesures appropriées."}
                   </p>
                   <button type="button" onClick={close} style={{
                     padding: "10px 28px", borderRadius: 10,
@@ -316,7 +339,8 @@ export function ReportButton({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

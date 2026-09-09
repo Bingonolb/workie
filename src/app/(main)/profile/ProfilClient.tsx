@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { SignOutButton } from "@/components/SignOutButton";
 import type { Profile, Review } from "@/lib/types";
-import { lireCache, ecrireCache, CLE_PROFIL } from "@/lib/cacheSession";
+import { lireCache, obtenir, CLE_PROFIL } from "@/lib/cacheSession";
 // Les tuiles portaient des emojis dans un carre teinte. Le dessin d'un emoji
 // appartient au systeme d'exploitation : il change d'un appareil a l'autre,
 // n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
@@ -51,16 +51,18 @@ export function ProfilClient() {
 
   useEffect(() => {
     let annule = false;
-    fetch("/api/user/profile")
-      .then(async r => {
+    // La barre de navigation a souvent déjà lancé cet appel : `obtenir`
+    // partage la requête en cours au lieu d'en ouvrir une seconde.
+    obtenir<Donnees>(CLE_PROFIL, "/api/user/profile")
+      .then(({ statut, donnees }) => {
         // Session expirée entre le service de la coquille et cet appel : la
         // page est en cache, elle a donc pu être servie à quelqu'un qui n'a
         // plus de session valide. On repasse par la déconnexion, qui purge
         // les cookies avant d'envoyer vers la connexion.
-        if (r.status === 401) { window.location.href = "/api/auth/signout?next=/login"; return null; }
-        return r.json();
+        if (statut === 401) { window.location.href = "/api/auth/signout?next=/login"; return; }
+        if (donnees && !annule) setD(donnees);
+        else if (!donnees && !annule) setEchec(true);
       })
-      .then(j => { if (j && !annule) { ecrireCache(CLE_PROFIL, j); setD(j); } })
       // Sans cet état, un échec laissait la page sur son squelette
       // indéfiniment, sans un mot : constaté en production pendant une
       // interruption de l'API. Un écran figé n'apprend rien à personne.

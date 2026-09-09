@@ -22,19 +22,31 @@ function incrementFreqCap(campaignId: string) {
   } catch { /* */ }
 }
 
+/**
+ * Retire l'annonce pour le reste de la session.
+ *
+ * Le plafond de fréquence sert déjà à ne plus montrer une annonce vue deux
+ * fois : le signalement s'y branche plutôt que d'inventer un second mécanisme.
+ * Le geste vaut donc aussi pour les autres pages, et pas seulement pour la
+ * carte qu'on avait sous les yeux.
+ */
+function masquerPourLaSession(campaignId: string) {
+  try { sessionStorage.setItem(`ad_freq_${campaignId}`, String(FREQ_CAP + 1)); }
+  catch { /* */ }
+}
+
 export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
-  // null = not yet determined (avoids SSR/client hydration mismatch)
-  // true = show, false = hide (freq cap hit)
-  const [visible, setVisible] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    // sessionStorage n'existe pas cote serveur : le premier rendu doit donc
-    // rester neutre, le plafond de frequence s'applique juste apres.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setVisible(getFreqCount(ad.id) < FREQ_CAP);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ad.id]);
+  // Le plafond de frequence est lu au premier rendu, et non dans un effet.
+  //
+  // Dans un effet, la carte n'existait pas au premier rendu puis apparaissait
+  // juste apres, ce qui poussait vers le bas toutes les cartes suivantes de la
+  // grille. La lecture peut se faire tout de suite : la page ne rend aucune
+  // publicite cote serveur, donc ce composant n'est monte que dans le
+  // navigateur, ou sessionStorage est disponible.
+  const [visible, setVisible] = useState<boolean>(
+    () => (typeof window === "undefined" ? true : getFreqCount(ad.id) < FREQ_CAP),
+  );
 
   useEffect(() => {
     if (!visible) return;
@@ -55,7 +67,7 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, ad.id]);
 
-  // null = not yet hydrated, false = freq cap hit — both render nothing
+  // Plafond atteint, ou annonce signalée : la carte ne prend aucune place.
   if (!visible) return null;
 
   return (
@@ -139,12 +151,22 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
           La carte est un lien : un bouton imbriqué dans un lien est du
           balisage invalide, et son clic partirait aussi vers le site de
           l'annonceur. */}
-      <div style={{ position: "absolute", top: 8, right: 8, zIndex: 3, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", borderRadius: 8 }}>
+      {/* Le drapeau seul, sans pastille sombre derrière.
+          Le carré noir se voyait plus que l'annonce et coupait la photo dans
+          son angle. La lisibilité sur un fond clair vient d'une ombre portée
+          sur le trait, qui ne dessine aucune forme. */}
+      <style>{`
+        .pub-signaler svg { color: #fff !important; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)); }
+        .pub-signaler button { background: transparent !important; }
+        .pub-signaler button:hover svg { color: #fca5a5 !important; }
+      `}</style>
+      <div className="pub-signaler" style={{ position: "absolute", top: 6, right: 6, zIndex: 3 }}>
         <ReportButton
           targetType="ad_campaign"
           targetId={ad.id}
           targetLabel={ad.headline}
           variant="icon"
+          onReported={() => { masquerPourLaSession(ad.id); setVisible(false); }}
         />
       </div>
     </div>
