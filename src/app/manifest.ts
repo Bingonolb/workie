@@ -11,8 +11,13 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#8b5cf6",
     lang: "fr-CH",
     icons: [
-      { src: "/icon.svg",       sizes: "any",         type: "image/svg+xml", purpose: "maskable" },
-      { src: "/apple-icon.svg", sizes: "180x180",     type: "image/svg+xml" },
+      // Les deux fichiers déclarés ici étaient des SVG qui n'existent pas :
+      // l'icône du site est un PNG, servi par Next à /icon.png. Un manifeste
+      // qui pointe dans le vide ne produit aucune erreur visible, seulement
+      // une icône grise au moment d'installer le site sur un téléphone.
+      { src: "/icon.png",       sizes: "512x512",     type: "image/png", purpose: "any" },
+      { src: "/icon.png",       sizes: "512x512",     type: "image/png", purpose: "maskable" },
+      { src: "/apple-icon.png", sizes: "180x180",     type: "image/png" },
     ],
     categories: ["business", "social"],
   };

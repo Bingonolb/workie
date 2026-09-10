@@ -97,7 +97,11 @@ const orgSchema = {
   "@type": "Organization",
   name: "Workie",
   url: "https://www.workie.ch",
-  logo: "https://www.workie.ch/icon.svg",
+  // Le fichier déclaré ici n'a jamais existé : /icon.svg répond 404, et
+  // l'icône du site est servie par Next à /icon.png. Google lit ce champ pour
+  // le logo du panneau de connaissance ; une adresse morte lui donnait donc
+  // une image de moins, sans erreur visible nulle part.
+  logo: "https://www.workie.ch/icon.png",
   sameAs: [],
   contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "contact@workie.ch", availableLanguage: ["French", "German"] },
 };
