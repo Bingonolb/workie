@@ -82,6 +82,9 @@ export const SECTOR_WEIGHTS: Record<string, number> = {
   "Logistique & Supply Chain": 6,
   "Aéronautique & Spatial":    1,
   "Défense & Sécurité":        2,
+  // Les bureaux d'ingénieurs et d'architectes emploient largement en
+  // Suisse, autant que les entreprises de construction elles-mêmes.
+  "Ingénierie":                4,
 };
 const SECTOR_TOTAL = Object.values(SECTOR_WEIGHTS).reduce((a, b) => a + b, 0);
 

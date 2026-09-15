@@ -316,6 +316,9 @@ export const SECTOR_COLORS: Record<string, string> = {
   "Énergie": "#eab308",
   "Droit": "#7c3aed",
   "Bâtiment": "#d97706",
+  // Volontairement dans la famille de Bâtiment : les deux se lisent
+  // ensemble, l'un conçoit ce que l'autre construit.
+  "Ingénierie": "#92400e",
   "Beauté": "#f472b6",
   "Administration publique": "#0891b2",
   "ONG": "#059669",
@@ -377,6 +380,7 @@ export const SECTORS = [
   "Hôtellerie & Restauration",
   "Immobilier",
   "Industrie",
+  "Ingénierie",
   "Logistique & Supply Chain",
   "Médias & Communication",
   "Mode",
