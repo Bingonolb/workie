@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { EMPLOYEE_RANGES } from "@/lib/types";
+import { EMPLOYEE_RANGES, CANTONS_SAISIE, CANTON_TOUTE_LA_SUISSE, CANTON_LIECHTENSTEIN } from "@/lib/types";
 import type { Company } from "@/lib/types";
 import { ImageIcon } from "lucide-react";
 
@@ -144,13 +144,24 @@ export function ChampsEntreprise({
         </div>
         <div>
           <label style={lbl}>Canton</label>
-          <input
+          {/* Un menu, et non un champ libre : on pouvait y écrire « XX ».
+              Pendant le mode multi-sites, le menu reste envoyé (pas de
+              disabled, qui le retirerait du formulaire) mais ne se modifie
+              plus : la case le pilote. */}
+          <select
             name="canton"
             value={canton}
-            onChange={e => setCanton(e.target.value)}
-            readOnly={multiSites}
-            style={{ ...inp, ...(multiSites ? { opacity: 0.65, cursor: "not-allowed" } : null) }}
-          />
+            onChange={e => { if (!multiSites) setCanton(e.target.value); }}
+            required
+            style={{ ...inp, cursor: multiSites ? "not-allowed" : "pointer", ...(multiSites ? { opacity: 0.65 } : null) }}
+          >
+            <option value="" disabled>Choisir un canton</option>
+            {CANTONS_SAISIE.map(c => (
+              <option key={c.code} value={c.code}>{c.nom} ({c.code})</option>
+            ))}
+            <option value={CANTON_TOUTE_LA_SUISSE.code}>{CANTON_TOUTE_LA_SUISSE.nom}</option>
+            <option value={CANTON_LIECHTENSTEIN.code}>{CANTON_LIECHTENSTEIN.nom} ({CANTON_LIECHTENSTEIN.code})</option>
+          </select>
         </div>
       </div>
 

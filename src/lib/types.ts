@@ -423,4 +423,56 @@ export const CANTON_NAMES: Record<string, string> = {
   "JU": "Jura",
 };
 
+/**
+ * Les cantons proposés à la saisie d'une fiche, nom complet et code.
+ *
+ * Le canton se tapait à la main : rien n'empêchait d'écrire « XX », « Ge » ou
+ * « Genève », trois valeurs qu'aucun filtre ne rejoint. La saisie passe par
+ * cette liste, et le serveur refuse tout code qui n'y figure pas.
+ *
+ * Le code à deux lettres reste ce qui est enregistré et affiché sur les
+ * fiches : il est court et tout le monde en Suisse le lit.
+ *
+ * Deux valeurs hors des vingt-six : « CH » pour une enseigne présente dans
+ * tout le pays (convention LANDI), et « FL » pour le Liechtenstein, où une
+ * fiche est déjà enregistrée (Oerlikon Balzers, à Balzers).
+ */
+export const CANTONS_SAISIE: { code: string; nom: string }[] = [
+  { code: "AG", nom: "Argovie" },
+  { code: "AI", nom: "Appenzell Rhodes-Intérieures" },
+  { code: "AR", nom: "Appenzell Rhodes-Extérieures" },
+  { code: "BE", nom: "Berne" },
+  { code: "BL", nom: "Bâle-Campagne" },
+  { code: "BS", nom: "Bâle-Ville" },
+  { code: "FR", nom: "Fribourg" },
+  { code: "GE", nom: "Genève" },
+  { code: "GL", nom: "Glaris" },
+  { code: "GR", nom: "Grisons" },
+  { code: "JU", nom: "Jura" },
+  { code: "LU", nom: "Lucerne" },
+  { code: "NE", nom: "Neuchâtel" },
+  { code: "NW", nom: "Nidwald" },
+  { code: "OW", nom: "Obwald" },
+  { code: "SG", nom: "Saint-Gall" },
+  { code: "SH", nom: "Schaffhouse" },
+  { code: "SO", nom: "Soleure" },
+  { code: "SZ", nom: "Schwytz" },
+  { code: "TG", nom: "Thurgovie" },
+  { code: "TI", nom: "Tessin" },
+  { code: "UR", nom: "Uri" },
+  { code: "VD", nom: "Vaud" },
+  { code: "VS", nom: "Valais" },
+  { code: "ZG", nom: "Zoug" },
+  { code: "ZH", nom: "Zurich" },
+];
+export const CANTON_TOUTE_LA_SUISSE = { code: "CH", nom: "Toute la Suisse (multi-sites)" };
+export const CANTON_LIECHTENSTEIN = { code: "FL", nom: "Liechtenstein" };
+
+/** Vrai pour un code accepté à l'enregistrement d'une fiche. */
+export function cantonValide(code: string): boolean {
+  return code === CANTON_TOUTE_LA_SUISSE.code
+    || code === CANTON_LIECHTENSTEIN.code
+    || CANTONS_SAISIE.some(c => c.code === code);
+}
+
 export const EMPLOYEE_RANGES = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10000", "10001+"];

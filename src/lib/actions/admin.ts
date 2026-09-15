@@ -6,6 +6,7 @@ import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
 import { notifyNewCompany } from "@/lib/actions/notifications";
+import { cantonValide } from "@/lib/types";
 
 async function requireAdmin() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -30,7 +31,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
       sector: String(formData.get("sector") || ""),
       subsector: String(formData.get("subsector") || "") || null,
       city: String(formData.get("city") || ""),
-      canton: String(formData.get("canton") || "") || null,
+      canton: String(formData.get("canton") || "").trim().toUpperCase() || null,
       employee_range: String(formData.get("employee_range") || "") || null,
       description: String(formData.get("description") || "").slice(0, 3000) || null,
       cover_url,
@@ -42,6 +43,12 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
       avg_salary_chf: formData.get("avg_salary_chf") ? (Number(formData.get("avg_salary_chf")) || null) : null,
       is_verified: formData.get("is_verified") === "true",
     };
+    // Le menu ne propose que des codes valides, mais une requête peut être
+    // forgée sans passer par lui : le serveur ne se fie pas au formulaire.
+    if (!fields.canton || !cantonValide(fields.canton)) {
+      return { error: "Canton invalide : choisissez-le dans la liste." };
+    }
+
 
     const { error } = await admin.from("companies").update(fields).eq("id", id);
     if (error) return { error: error.message };
@@ -111,7 +118,7 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       sector: String(formData.get("sector") || ""),
       subsector: String(formData.get("subsector") || "") || null,
       city: String(formData.get("city") || ""),
-      canton: String(formData.get("canton") || "") || null,
+      canton: String(formData.get("canton") || "").trim().toUpperCase() || null,
       // Pas de valeur par défaut : une taille non saisie reste inconnue plutôt
       // que d'affirmer « 11-50 » sans source.
       employee_range: String(formData.get("employee_range") || "") || null,
@@ -133,6 +140,12 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       is_verified: formData.get("is_verified") === "true",
       avg_rating: 0, review_count: 0, score: 0,
     };
+    // Le menu ne propose que des codes valides, mais une requête peut être
+    // forgée sans passer par lui : le serveur ne se fie pas au formulaire.
+    if (!fields.canton || !cantonValide(fields.canton)) {
+      return { error: "Canton invalide : choisissez-le dans la liste." };
+    }
+
 
     const { data: created, error } = await supabase
       .from("companies")
