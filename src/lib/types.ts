@@ -438,12 +438,12 @@ export const CANTON_NAMES: Record<string, string> = {
  * fiche est déjà enregistrée (Oerlikon Balzers, à Balzers).
  */
 export const CANTONS_SAISIE: { code: string; nom: string }[] = [
-  { code: "AG", nom: "Argovie" },
-  { code: "AI", nom: "Appenzell Rhodes-Intérieures" },
   { code: "AR", nom: "Appenzell Rhodes-Extérieures" },
-  { code: "BE", nom: "Berne" },
+  { code: "AI", nom: "Appenzell Rhodes-Intérieures" },
+  { code: "AG", nom: "Argovie" },
   { code: "BL", nom: "Bâle-Campagne" },
   { code: "BS", nom: "Bâle-Ville" },
+  { code: "BE", nom: "Berne" },
   { code: "FR", nom: "Fribourg" },
   { code: "GE", nom: "Genève" },
   { code: "GL", nom: "Glaris" },
@@ -455,13 +455,13 @@ export const CANTONS_SAISIE: { code: string; nom: string }[] = [
   { code: "OW", nom: "Obwald" },
   { code: "SG", nom: "Saint-Gall" },
   { code: "SH", nom: "Schaffhouse" },
-  { code: "SO", nom: "Soleure" },
   { code: "SZ", nom: "Schwytz" },
-  { code: "TG", nom: "Thurgovie" },
+  { code: "SO", nom: "Soleure" },
   { code: "TI", nom: "Tessin" },
+  { code: "TG", nom: "Thurgovie" },
   { code: "UR", nom: "Uri" },
-  { code: "VD", nom: "Vaud" },
   { code: "VS", nom: "Valais" },
+  { code: "VD", nom: "Vaud" },
   { code: "ZG", nom: "Zoug" },
   { code: "ZH", nom: "Zurich" },
 ];

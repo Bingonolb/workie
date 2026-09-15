@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { SECTORS, SECTOR_COLORS } from "@/lib/types";
+import { SECTORS, SECTOR_COLORS, CANTONS_SAISIE } from "@/lib/types";
 import { SECTOR_WEIGHTS } from "@/lib/ads/pricing";
 
 /**
@@ -47,5 +47,13 @@ describe("secteurs", () => {
     expect(SECTORS).toContain("ONG");
     expect(SECTORS).toContain("Fondation");
     expect(SECTORS).toContain("Association");
+  });
+
+  // Le menu des cantons suivait l'ordre des codes, pas celui des noms :
+  // « Argovie » s'affichait avant « Appenzell ». Relevé sur la fiche d'Erne.
+  it("les cantons du formulaire sont en ordre alphabétique de leur nom", () => {
+    const noms = CANTONS_SAISIE.map(c => c.nom);
+    expect(noms).toEqual([...noms].sort((a, b) => a.localeCompare(b, "fr")));
+    expect(CANTONS_SAISIE).toHaveLength(26);
   });
 });
