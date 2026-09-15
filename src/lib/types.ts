@@ -465,7 +465,7 @@ export const CANTONS_SAISIE: { code: string; nom: string }[] = [
   { code: "ZG", nom: "Zoug" },
   { code: "ZH", nom: "Zurich" },
 ];
-export const CANTON_TOUTE_LA_SUISSE = { code: "CH", nom: "Toute la Suisse (multi-sites)" };
+export const CANTON_TOUTE_LA_SUISSE = { code: "CH", nom: "Toute la Suisse, multi-sites" };
 export const CANTON_LIECHTENSTEIN = { code: "FL", nom: "Liechtenstein" };
 
 /** Vrai pour un code accepté à l'enregistrement d'une fiche. */

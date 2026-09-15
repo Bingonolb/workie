@@ -56,18 +56,23 @@ export function ChampsEntreprise({
   // moment de filtrer ou de compter.
   const [ville, setVille] = useState(company?.city ?? "");
   const [canton, setCanton] = useState(company?.canton ?? "");
-  const [avantMultiSites, setAvantMultiSites] = useState<{ ville: string; canton: string } | null>(null);
-  const multiSites = ville === VILLE_MULTI_SITES && canton === CANTON_MULTI_SITES;
+  // La ville saisie avant de passer en multi-sites, rendue si l'on revient à
+  // un canton : changer d'avis ne doit pas obliger à la retaper.
+  const [villeAvant, setVilleAvant] = useState("");
+  const multiSites = canton === CANTON_MULTI_SITES;
 
-  const basculerMultiSites = (coche: boolean) => {
-    if (coche) {
-      setAvantMultiSites({ ville, canton });
+  // « Toute la Suisse » était une case à cocher à côté du menu, et aussi une
+  // option du menu : deux commandes pour le même état, dont une qui n'écrivait
+  // pas la ville. Le menu est désormais la seule, et il fait ce que faisait la
+  // case : « CH » en canton, « Multi-sites » en ville, ville verrouillée.
+  const choisirCanton = (code: string) => {
+    if (code === CANTON_MULTI_SITES && !multiSites) {
+      setVilleAvant(ville === VILLE_MULTI_SITES ? "" : ville);
       setVille(VILLE_MULTI_SITES);
-      setCanton(CANTON_MULTI_SITES);
-    } else {
-      setVille(avantMultiSites?.ville ?? "");
-      setCanton(avantMultiSites?.canton ?? "");
+    } else if (code !== CANTON_MULTI_SITES && multiSites) {
+      setVille(villeAvant);
     }
+    setCanton(code);
   };
 
   const fileRef = useRef<HTMLInputElement>(null);
@@ -139,44 +144,29 @@ export function ChampsEntreprise({
             onChange={e => setVille(e.target.value)}
             readOnly={multiSites}
             required
+            title={multiSites ? "Une enseigne présente dans toute la Suisse n'a pas de ville propre" : undefined}
             style={{ ...inp, ...(multiSites ? { opacity: 0.65, cursor: "not-allowed" } : null) }}
           />
         </div>
         <div>
           <label style={lbl}>Canton</label>
-          {/* Un menu, et non un champ libre : on pouvait y écrire « XX ».
-              Pendant le mode multi-sites, le menu reste envoyé (pas de
-              disabled, qui le retirerait du formulaire) mais ne se modifie
-              plus : la case le pilote. */}
+          {/* Un menu, et non un champ libre : on pouvait y écrire « XX ». */}
           <select
             name="canton"
             value={canton}
-            onChange={e => { if (!multiSites) setCanton(e.target.value); }}
+            onChange={e => choisirCanton(e.target.value)}
             required
-            style={{ ...inp, cursor: multiSites ? "not-allowed" : "pointer", ...(multiSites ? { opacity: 0.65 } : null) }}
+            style={{ ...inp, cursor: "pointer" }}
           >
             <option value="" disabled>Choisir un canton</option>
             {CANTONS_SAISIE.map(c => (
               <option key={c.code} value={c.code}>{c.nom} ({c.code})</option>
             ))}
-            <option value={CANTON_TOUTE_LA_SUISSE.code}>{CANTON_TOUTE_LA_SUISSE.nom}</option>
+            <option value={CANTON_TOUTE_LA_SUISSE.code}>{CANTON_TOUTE_LA_SUISSE.nom} ({CANTON_TOUTE_LA_SUISSE.code})</option>
             <option value={CANTON_LIECHTENSTEIN.code}>{CANTON_LIECHTENSTEIN.nom} ({CANTON_LIECHTENSTEIN.code})</option>
           </select>
         </div>
       </div>
-
-      <label style={{ display: "flex", alignItems: "center", gap: 9, marginTop: -6, fontSize: 13, color: "var(--text-muted)", cursor: "pointer", width: "fit-content" }}>
-        <input
-          type="checkbox"
-          checked={multiSites}
-          onChange={e => basculerMultiSites(e.target.checked)}
-          style={{ width: 16, height: 16, cursor: "pointer" }}
-        />
-        Présente dans toute la Suisse
-        <span style={{ color: "var(--text-sub)" }}>
-          (inscrit « {VILLE_MULTI_SITES} » et « {CANTON_MULTI_SITES} », comme LANDI)
-        </span>
-      </label>
 
       <div className="admin-grille-2">
         <div>
