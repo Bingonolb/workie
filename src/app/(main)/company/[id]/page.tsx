@@ -156,6 +156,33 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
   if (!company) notFound();
 
+  // Essai demandé par Luc, sur une seule fiche, la sienne, qui est fictive.
+  // Les avis d'employés exposent l'entreprise et n'engagent qu'elle ; ce qui
+  // suit est l'inverse : l'entreprise publie son propre processus de
+  // recrutement, et c'est elle qui s'engage. Retirer cette constante remet la
+  // fiche dans le rang.
+  const essaiRecrutement = company.id === "87d31750-9816-45bb-bbf4-34549cf19405";
+  let recrutement: {
+    etapes: { titre: string; detail: string; duree: string }[];
+    delai_reponse_jours: number | null;
+    salaire_min_chf: number | null;
+    salaire_max_chf: number | null;
+    contact_nom: string | null;
+    contact_role: string | null;
+    mis_a_jour: string;
+  } | null = null;
+  if (essaiRecrutement) {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    // La table vient d'être créée : les types générés depuis la base ne la
+    // connaissent pas encore.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await ((createAdminClient() as any).from("processus_recrutement"))
+      .select("etapes, delai_reponse_jours, salaire_min_chf, salaire_max_chf, contact_nom, contact_role, mis_a_jour")
+      .eq("company_id", company.id)
+      .maybeSingle();
+    recrutement = data ?? null;
+  }
+
   // Tous les avis sont affichés, notes uniquement. Les anciens avis rédigés
   // étaient auparavant masqués alors qu'ils comptaient dans la moyenne — leur
   // texte n'est simplement plus rendu (voir SectionAvis). Le tri est appliqué
@@ -459,44 +486,125 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Reviews header + sort tabs */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
-                Avis des employés ({company.review_count})
-              </h2>
-            </div>
-
-            {reviews.length === 0 ? (
-              <div style={{
-                background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))",
-                border: "1px solid rgba(139,92,246,0.15)",
-                borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
-              }}>
-                                <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
-                  Vous avez travaillé ici ? Votre avis anonyme aide les candidats à choisir.
+            {essaiRecrutement && recrutement ? (
+              /* Ce que l'entreprise publie sur son propre recrutement.
+                 À la place des avis : même surface, sens inverse. Un avis dit
+                 ce qu'une entreprise a été pour quelqu'un qui est parti ; ceci
+                 dit ce qu'elle promet à quelqu'un qui arrive. Elle l'écrit,
+                 elle le signe, et elle peut en être fière au lieu de le subir. */
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px", marginBottom: 32 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 6 }}>
+                  Comment on recrute ici
+                </h2>
+                <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 22, maxWidth: "56ch", lineHeight: 1.6 }}>
+                  Publié par l&apos;entreprise. Ce qui suit est ce à quoi elle s&apos;engage
+                  envers les personnes qui postulent.
                 </p>
-                <span style={{
-                  display: "inline-block",
-                  background: "var(--brand)",
-                  color: "#fff", fontWeight: 700, borderRadius: 12,
-                  padding: "10px 24px", fontSize: 14,
-                }}>
-                  Laisser le premier avis ↓
-                </span>
+
+                {/* Les deux chiffres qui décident d'un clic sur « postuler ».
+                    Ils sont devant, parce que le reste ne se lit que si ces
+                    deux-là tiennent. */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12, marginBottom: 26 }}>
+                  {recrutement.delai_reponse_jours !== null && (
+                    <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
+                      <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 3 }}>
+                        {recrutement.delai_reponse_jours} jours
+                      </p>
+                      <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                        pour vous répondre, que ce soit oui ou non
+                      </p>
+                    </div>
+                  )}
+                  {recrutement.salaire_min_chf !== null && recrutement.salaire_max_chf !== null && (
+                    <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
+                      <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", color: "var(--text)", marginBottom: 3 }}>
+                        {Math.round(recrutement.salaire_min_chf / 1000)}k &ndash; {Math.round(recrutement.salaire_max_chf / 1000)}k
+                      </p>
+                      <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                        fourchette annoncée avant l&apos;entretien
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Numérotées parce que c'est vraiment une suite : l'ordre est
+                    l'information, et savoir qu'on en est à la troisième sur
+                    cinq est exactement ce qu'un candidat n'a jamais. */}
+                <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column" }}>
+                  {recrutement.etapes.map((e, i) => (
+                    <li key={e.titre} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 14, alignItems: "start" }}>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", alignSelf: "stretch" }}>
+                        <span style={{
+                          width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+                          background: "var(--brand)", color: "#fff",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 13, fontWeight: 800,
+                        }}>{i + 1}</span>
+                        {i < recrutement.etapes.length - 1 && (
+                          <span style={{ flex: 1, width: 2, background: "var(--border2)", marginTop: 4 }} />
+                        )}
+                      </div>
+                      <div style={{ paddingBottom: i < recrutement.etapes.length - 1 ? 20 : 0 }}>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>
+                          {e.titre}
+                          <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text-muted)", marginLeft: 8 }}>{e.duree}</span>
+                        </p>
+                        <p style={{ fontSize: 14, color: "var(--text-sub)", lineHeight: 1.6 }}>{e.detail}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+
+                {recrutement.contact_nom && (
+                  <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginTop: 22, paddingTop: 18, borderTop: "1px solid var(--border)", lineHeight: 1.6 }}>
+                    Votre candidature est lue par <strong style={{ color: "var(--text)", fontWeight: 700 }}>{recrutement.contact_nom}</strong>
+                    {recrutement.contact_role ? `, ${recrutement.contact_role}` : ""}.
+                    Mis à jour le {new Date(recrutement.mis_a_jour).toLocaleDateString("fr-CH", { day: "numeric", month: "long", year: "numeric" })}.
+                  </p>
+                )}
               </div>
             ) : (
-              <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
-                <SectionAvis reviews={reviews} companyName={company.name} />
+              <>
+              {/* Reviews header + sort tabs */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+                <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
+                  Avis des employés ({company.review_count})
+                </h2>
               </div>
-            )}
 
-            {/* Post review */}
-            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
-              <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Votre avis est anonyme par défaut, et il aide les candidats à savoir où ils mettent les pieds.</p>
-              <FormulaireAvis companyId={company.id} />
-            </div>
+              {reviews.length === 0 ? (
+                <div style={{
+                  background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))",
+                  border: "1px solid rgba(139,92,246,0.15)",
+                  borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
+                }}>
+                                  <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
+                  <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
+                    Vous avez travaillé ici ? Votre avis anonyme aide les candidats à choisir.
+                  </p>
+                  <span style={{
+                    display: "inline-block",
+                    background: "var(--brand)",
+                    color: "#fff", fontWeight: 700, borderRadius: 12,
+                    padding: "10px 24px", fontSize: 14,
+                  }}>
+                    Laisser le premier avis ↓
+                  </span>
+                </div>
+              ) : (
+                <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
+                  <SectionAvis reviews={reviews} companyName={company.name} />
+                </div>
+              )}
+
+              {/* Post review */}
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
+                <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Votre avis est anonyme par défaut, et il aide les candidats à savoir où ils mettent les pieds.</p>
+                <FormulaireAvis companyId={company.id} />
+              </div>
+              </>
+            )}
           </div>
 
           {/* Right sidebar */}
