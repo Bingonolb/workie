@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCachedCompany, getCachedJobOffers, getCachedSimilarCompanies } from "@/lib/actions/companies";
 import { getCachedReviews } from "@/lib/actions/reviews";
-import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle } from "lucide-react";
+import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle, Flame, Eye } from "lucide-react";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
@@ -155,6 +155,23 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   ]);
 
   if (!company) notFound();
+
+  // Aperçu demandé par Luc : à quoi ressemble une fiche sans les avis ?
+  // La question vient d'un avis juridique, et la réponse se regarde mieux en
+  // ligne que sur une maquette. Une seule fiche est concernée, la sienne, et
+  // elle est fictive. Retirer cette constante remet la fiche dans le rang.
+  const apercuSansAvis = company.id === "87d31750-9816-45bb-bbf4-34549cf19405";
+  let flammes = 0, visites = 0;
+  if (apercuSansAvis) {
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const admin = createAdminClient();
+    const [f, v] = await Promise.all([
+      admin.from("favorites").select("company_id", { count: "exact", head: true }).eq("company_id", company.id),
+      admin.from("company_views").select("company_id", { count: "exact", head: true }).eq("company_id", company.id),
+    ]);
+    flammes = f.count ?? 0;
+    visites = v.count ?? 0;
+  }
 
   // Tous les avis sont affichés, notes uniquement. Les anciens avis rédigés
   // étaient auparavant masqués alors qu'ils comptaient dans la moyenne — leur
@@ -375,7 +392,16 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 Number(company.avg_salary_chf) > 0
                   ? { icon: <TrendingUp size={18} color="#10b981" aria-hidden="true" />, value: `CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`, label: "Salaire moyen déclaré" }
                   : null,
-                { icon: <Star size={18} color="#f59e0b" aria-hidden="true" />, value: Number(company.review_count) > 0 ? `${Number(company.avg_rating).toFixed(1)} / 5` : "Aucun avis", label: `${company.review_count} avis` },
+                // Sans les avis, la note n'a plus de source : ce qui reste
+                // mesurable est ce que les visiteurs font de la fiche.
+                ...(apercuSansAvis
+                  ? [
+                      { icon: <Flame size={18} color="#f97316" aria-hidden="true" />, value: String(flammes), label: flammes > 1 ? "Flammes" : "Flamme" },
+                      { icon: <Eye size={18} color="#06b6d4" aria-hidden="true" />, value: String(visites), label: visites > 1 ? "Visites" : "Visite" },
+                    ]
+                  : [
+                      { icon: <Star size={18} color="#f59e0b" aria-hidden="true" />, value: Number(company.review_count) > 0 ? `${Number(company.avg_rating).toFixed(1)} / 5` : "Aucun avis", label: `${company.review_count} avis` },
+                    ]),
               ].filter(Boolean) as { icon: React.ReactNode; value: string; label: string }[]).map(({ icon, value, label }) => (
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
                   <div style={{ marginBottom: 8 }}>{icon}</div>
@@ -396,7 +422,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 l'entreprise d'un témoignage isolé. La synthèse porte donc un
                 liseré coloré, un fond légèrement teinté, et surtout la
                 répartition des notes — qu'un avis seul ne peut pas montrer. */}
-            {Number(company.review_count) > 0 && (
+            {!apercuSansAvis && Number(company.review_count) > 0 && (
               <div style={{
                 background: "linear-gradient(180deg, rgba(139,92,246,0.06), transparent 60%), var(--surface)",
                 border: "1px solid var(--border)",
@@ -459,44 +485,48 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Reviews header + sort tabs */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
-                Avis des employés ({company.review_count})
-              </h2>
-            </div>
+            {!apercuSansAvis && (
+              <>
+              {/* Reviews header + sort tabs */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+                <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
+                  Avis des employés ({company.review_count})
+                </h2>
+              </div>
 
-            {reviews.length === 0 ? (
-              <div style={{
-                background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))",
-                border: "1px solid rgba(139,92,246,0.15)",
-                borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
-              }}>
-                                <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
-                  Vous avez travaillé ici ? Votre avis anonyme aide les candidats à choisir.
-                </p>
-                <span style={{
-                  display: "inline-block",
-                  background: "var(--brand)",
-                  color: "#fff", fontWeight: 700, borderRadius: 12,
-                  padding: "10px 24px", fontSize: 14,
+              {reviews.length === 0 ? (
+                <div style={{
+                  background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))",
+                  border: "1px solid rgba(139,92,246,0.15)",
+                  borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
                 }}>
-                  Laisser le premier avis ↓
-                </span>
-              </div>
-            ) : (
-              <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
-                <SectionAvis reviews={reviews} companyName={company.name} />
-              </div>
-            )}
+                                  <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
+                  <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
+                    Vous avez travaillé ici ? Votre avis anonyme aide les candidats à choisir.
+                  </p>
+                  <span style={{
+                    display: "inline-block",
+                    background: "var(--brand)",
+                    color: "#fff", fontWeight: 700, borderRadius: 12,
+                    padding: "10px 24px", fontSize: 14,
+                  }}>
+                    Laisser le premier avis ↓
+                  </span>
+                </div>
+              ) : (
+                <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
+                  <SectionAvis reviews={reviews} companyName={company.name} />
+                </div>
+              )}
 
-            {/* Post review */}
-            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
-              <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Votre avis est anonyme par défaut, et il aide les candidats à savoir où ils mettent les pieds.</p>
-              <FormulaireAvis companyId={company.id} />
-            </div>
+              {/* Post review */}
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
+                <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Votre avis est anonyme par défaut, et il aide les candidats à savoir où ils mettent les pieds.</p>
+                <FormulaireAvis companyId={company.id} />
+              </div>
+              </>
+            )}
           </div>
 
           {/* Right sidebar */}
