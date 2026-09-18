@@ -162,6 +162,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   // elle est fictive. Retirer cette constante remet la fiche dans le rang.
   const apercuSansAvis = company.id === "87d31750-9816-45bb-bbf4-34549cf19405";
   let flammes = 0, visites = 0;
+  let rang: { rang: number; points: number; total: number } | null = null;
+  let parJour: { jour: string; n: number }[] = [];
+  let cantons: string[] = [];
   if (apercuSansAvis) {
     const { createAdminClient } = await import("@/lib/supabase/admin");
     const admin = createAdminClient();
@@ -171,6 +174,29 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     ]);
     flammes = f.count ?? 0;
     visites = v.count ?? 0;
+
+    // Les types générés ne connaissent pas encore cette fonction, ajoutée
+    // avec l'aperçu. Le passage par unknown dit que l'appel est voulu.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: rangs } = await (admin.rpc as any)("classement_entreprise", { p_company_id: company.id });
+    rang = (rangs as { rang: number; points: number; total: number }[] | null)?.[0] ?? null;
+
+    // Les visites des quatorze derniers jours, pour la courbe. Une fiche en
+    // compte quelques dizaines au plus : la lecture est sans conséquence.
+    const depuis = new Date(Date.now() - 13 * 86400000);
+    depuis.setHours(0, 0, 0, 0);
+    const { data: vues } = await admin
+      .from("company_views")
+      .select("viewed_at, viewer_canton")
+      .eq("company_id", company.id)
+      .gte("viewed_at", depuis.toISOString());
+    const lignes = (vues ?? []) as { viewed_at: string; viewer_canton: string | null }[];
+    parJour = Array.from({ length: 14 }, (_, i) => {
+      const j = new Date(depuis.getTime() + i * 86400000);
+      const cle = j.toISOString().slice(0, 10);
+      return { jour: cle, n: lignes.filter(l => l.viewed_at.slice(0, 10) === cle).length };
+    });
+    cantons = [...new Set(lignes.map(l => l.viewer_canton).filter(Boolean) as string[])];
   }
 
   // Tous les avis sont affichés, notes uniquement. Les anciens avis rédigés
@@ -376,6 +402,78 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               <BlocOffresEmploi url={company.website_url} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
             )}
 
+            {/* Le top chart, à la place qu'occupait la note.
+                Une fiche sans avis n'a plus rien à montrer de haut de page :
+                le rang donne une mesure, une échelle (sur mille vingt fiches)
+                et une raison de revenir, ce qu'un compteur à zéro ne fait pas. */}
+            {apercuSansAvis && rang && (
+              <div style={{
+                background: "linear-gradient(180deg, rgba(139,92,246,0.07), transparent 65%), var(--surface)",
+                border: "1px solid var(--border)", borderTop: "3px solid var(--brand)",
+                borderRadius: 18, padding: 24, marginBottom: 32,
+              }}>
+                <p style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+                  Sa place cette semaine
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 28, alignItems: "flex-end" }}>
+                  <div>
+                    <p style={{ fontSize: 44, fontWeight: 900, letterSpacing: "-0.045em", lineHeight: 1, color: "var(--text)" }}>
+                      <span style={{ color: "var(--brand)" }}>#</span>{rang.rang}
+                    </p>
+                    <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginTop: 6 }}>
+                      sur {rang.total.toLocaleString("fr-CH")} entreprises
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 26, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1, color: "var(--text)" }}>{rang.points}</p>
+                    <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginTop: 6 }}>points</p>
+                  </div>
+                  {rang.rang <= 200 && (
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 13px", borderRadius: 50,
+                      background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.35)",
+                      color: "#10b981", fontSize: 12.5, fontWeight: 700,
+                    }}>
+                      Dans le top 200
+                    </span>
+                  )}
+                </div>
+
+                <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 18, lineHeight: 1.6 }}>
+                  Trois points par flamme, un point par visite. Le classement se recalcule chaque semaine.
+                </p>
+
+                {/* Les quatorze derniers jours. Pas de bibliothèque : quatorze
+                    barres valent moins cher qu'un graphique importé. */}
+                <div style={{ marginTop: 20 }}>
+                  <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
+                    Visites, 14 derniers jours
+                  </p>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 54 }}>
+                    {parJour.map(({ jour, n }) => {
+                      const max = Math.max(1, ...parJour.map(d => d.n));
+                      return (
+                        <div
+                          key={jour}
+                          title={`${n} visite${n > 1 ? "s" : ""} le ${new Date(jour).toLocaleDateString("fr-CH", { day: "numeric", month: "short" })}`}
+                          style={{
+                            flex: 1, minWidth: 0, borderRadius: 3,
+                            height: `${Math.max(4, (n / max) * 100)}%`,
+                            background: n > 0 ? "var(--brand)" : "var(--surface3)",
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                  {cantons.length > 0 && (
+                    <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 12 }}>
+                      Consultée depuis {cantons.length > 1 ? "les cantons" : "le canton"} de {cantons.join(", ")}.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Key stats — seules les données réellement disponibles sont
                 affichées. Le salaire moyen ne provient que des avis publiés ;
                 tant que personne n'en a déclaré, la tuile n'apparaît pas
@@ -411,10 +509,16 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               ))}
             </div>
 
-            {/* Vote buttons */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-              <VotesFiche companyId={company.id} initialScore={Number(company.score ?? 0)} />
-            </div>
+            {/* Vote buttons.
+                Retirés de l'aperçu : « +100 / -100 » est un jugement de plus,
+                moins argumenté qu'un avis, et c'est justement ce dont on
+                cherche à se passer. La flamme dit « ça m'intéresse », ce qui
+                est vrai sans juger personne. */}
+            {!apercuSansAvis && (
+              <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
+                <VotesFiche companyId={company.id} initialScore={Number(company.score ?? 0)} />
+              </div>
+            )}
 
             {/* Synthèse — traitement distinct des cartes d'avis.
                 Les deux blocs affichaient les mêmes lignes avec les mêmes
