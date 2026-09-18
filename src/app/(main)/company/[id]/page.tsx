@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCachedCompany, getCachedJobOffers, getCachedSimilarCompanies } from "@/lib/actions/companies";
 import { getCachedReviews } from "@/lib/actions/reviews";
-import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle } from "lucide-react";
+import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle, ChevronRight } from "lucide-react";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
@@ -155,6 +155,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   ]);
 
   if (!company) notFound();
+
+  // Essai sur une seule fiche, fictive : les entreprises suggérées remontent
+  // à la place du formulaire d'avis, en liste. Retirer cette constante remet
+  // la fiche dans le rang.
+  const essaiSuggestions = company.id === "87d31750-9816-45bb-bbf4-34549cf19405";
 
   // Tous les avis sont affichés, notes uniquement. Les anciens avis rédigés
   // étaient auparavant masqués alors qu'ils comptaient dans la moyenne — leur
@@ -324,6 +329,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       </div>
 
       <style>{`
+        .suggestion-ligne { transition: background 0.15s; }
+        .suggestion-ligne:hover { background: var(--surface2); }
         @media (max-width: 700px) {
           .company-grid { grid-template-columns: 1fr !important; }
           .company-sidebar { position: static !important; }
@@ -459,44 +466,99 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               </div>
             )}
 
-            {/* Reviews header + sort tabs */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
-                Avis des employés ({company.review_count})
-              </h2>
-            </div>
-
-            {reviews.length === 0 ? (
-              <div style={{
-                background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))",
-                border: "1px solid rgba(139,92,246,0.15)",
-                borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
-              }}>
-                                <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
-                  Vous avez travaillé ici ? Votre avis anonyme aide les candidats à choisir.
-                </p>
-                <span style={{
-                  display: "inline-block",
-                  background: "var(--brand)",
-                  color: "#fff", fontWeight: 700, borderRadius: 12,
-                  padding: "10px 24px", fontSize: 14,
-                }}>
-                  Laisser le premier avis ↓
-                </span>
+            {essaiSuggestions ? (
+              /* Les entreprises voisines, en liste et non en grille.
+                 En grille, quatre vignettes se regardent en même temps et
+                 aucune ne se lit. En liste, on descend, un nom après l'autre,
+                 comme on lit des titres. C'est la même donnée : moins de
+                 décor, plus de noms. */
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden", marginBottom: 32 }}>
+                <div style={{ padding: "22px 24px 16px" }}>
+                  <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 4 }}>
+                    À voir aussi
+                  </h2>
+                  <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{company.sector}, en Suisse</p>
+                </div>
+                {similarCompaniesData.map((c: { id: string; name: string; city: string; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; subsector: string | null }) => (
+                  <Link
+                    key={c.id}
+                    href={`/company/${c.id}`}
+                    className="suggestion-ligne"
+                    style={{
+                      display: "grid", gridTemplateColumns: "56px 1fr 16px", gap: 14, alignItems: "center",
+                      padding: "14px 24px", borderTop: "1px solid var(--border)", textDecoration: "none",
+                    }}
+                  >
+                    <div style={{
+                      width: 56, height: 56, borderRadius: 13, overflow: "hidden", position: "relative",
+                      background: c.cover_color ?? "var(--surface3)", flexShrink: 0,
+                    }}>
+                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="56px" />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{
+                        fontSize: 15.5, fontWeight: 700, color: "var(--text)", marginBottom: 2,
+                        display: "flex", alignItems: "center", gap: 5,
+                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                      }}>
+                        {c.name}
+                        {c.is_verified && (
+                          <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                            <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
+                            <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
+                          </svg>
+                        )}
+                      </p>
+                      <p style={{ fontSize: 13.5, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {c.subsector ? `${c.subsector} · ` : ""}{c.city}
+                      </p>
+                    </div>
+                    <ChevronRight size={16} color="var(--text-muted)" aria-hidden="true" />
+                  </Link>
+                ))}
               </div>
             ) : (
-              <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
-                <SectionAvis reviews={reviews} companyName={company.name} />
+              <>
+              {/* Reviews header + sort tabs */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+                <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
+                  Avis des employés ({company.review_count})
+                </h2>
               </div>
-            )}
 
-            {/* Post review */}
-            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
-              <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Votre avis est anonyme par défaut, et il aide les candidats à savoir où ils mettent les pieds.</p>
-              <FormulaireAvis companyId={company.id} />
-            </div>
+              {reviews.length === 0 ? (
+                <div style={{
+                  background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))",
+                  border: "1px solid rgba(139,92,246,0.15)",
+                  borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
+                }}>
+                                  <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
+                  <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
+                    Vous avez travaillé ici ? Votre avis anonyme aide les candidats à choisir.
+                  </p>
+                  <span style={{
+                    display: "inline-block",
+                    background: "var(--brand)",
+                    color: "#fff", fontWeight: 700, borderRadius: 12,
+                    padding: "10px 24px", fontSize: 14,
+                  }}>
+                    Laisser le premier avis ↓
+                  </span>
+                </div>
+              ) : (
+                <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
+                  <SectionAvis reviews={reviews} companyName={company.name} />
+                </div>
+              )}
+
+              {/* Post review */}
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
+                <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Votre avis est anonyme par défaut, et il aide les candidats à savoir où ils mettent les pieds.</p>
+                <FormulaireAvis companyId={company.id} />
+              </div>
+              </>
+            )}
           </div>
 
           {/* Right sidebar */}
@@ -545,7 +607,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Similar companies */}
-        {similarCompaniesData.length > 0 && (
+        {!essaiSuggestions && similarCompaniesData.length > 0 && (
           <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
             <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 20 }}>
               Autres entreprises · {company.sector}
