@@ -329,38 +329,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       </div>
 
       <style>{`
-        /* Les tailles vivent ici et non en style d'attribut : un style
-           d'attribut l'emporte sur toute règle de média, et le téléphone
-           garderait alors les dimensions du bureau. */
-        .suggestion-tete { padding: 28px 28px 20px; }
-        .suggestion-tete h2 { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.025em; margin-bottom: 5px; }
-        .suggestion-tete p { font-size: 15px; color: var(--text-muted); }
-        .suggestion-ligne {
-          display: grid; grid-template-columns: 76px 1fr 18px; gap: 18px; align-items: center;
-          padding: 18px 28px; transition: background 0.15s;
-        }
+        .suggestion-ligne { transition: background 0.15s; }
         .suggestion-ligne:hover { background: var(--surface2); }
-        .suggestion-ligne:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
-        .suggestion-vignette { width: 76px; height: 76px; border-radius: 16px; overflow: hidden; position: relative; flex-shrink: 0; }
-        .suggestion-nom {
-          font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 3px;
-          display: flex; align-items: center; gap: 6px;
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .suggestion-verifie { width: 15px; height: 15px; flex-shrink: 0; }
-        .suggestion-lieu { font-size: 14.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        /* Sur téléphone la ligne garde sa hauteur de doigt, mais les marges
-           latérales se resserrent : la vignette et le nom gagnent la place que
-           le décor rendait. */
-        @media (max-width: 700px) {
-          .suggestion-tete { padding: 22px 18px 16px; }
-          .suggestion-tete h2 { font-size: 21px; }
-          .suggestion-tete p { font-size: 14px; }
-          .suggestion-ligne { grid-template-columns: 64px 1fr 16px; gap: 14px; padding: 15px 18px; }
-          .suggestion-vignette { width: 64px; height: 64px; border-radius: 14px; }
-          .suggestion-nom { font-size: 16.5px; }
-          .suggestion-lieu { font-size: 13.5px; }
-        }
         @media (max-width: 700px) {
           .company-grid { grid-template-columns: 1fr !important; }
           .company-sidebar { position: static !important; }
@@ -503,35 +473,47 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                  comme on lit des titres. C'est la même donnée : moins de
                  décor, plus de noms. */
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden", marginBottom: 32 }}>
-                <div className="suggestion-tete">
-                  <h2>À voir aussi</h2>
-                  <p>{company.sector}, en Suisse</p>
+                <div style={{ padding: "22px 24px 16px" }}>
+                  <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 4 }}>
+                    À voir aussi
+                  </h2>
+                  <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{company.sector}, en Suisse</p>
                 </div>
                 {similarCompaniesData.map((c: { id: string; name: string; city: string; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; subsector: string | null }) => (
                   <Link
                     key={c.id}
                     href={`/company/${c.id}`}
                     className="suggestion-ligne"
-                    style={{ borderTop: "1px solid var(--border)", textDecoration: "none" }}
+                    style={{
+                      display: "grid", gridTemplateColumns: "56px 1fr 16px", gap: 14, alignItems: "center",
+                      padding: "14px 24px", borderTop: "1px solid var(--border)", textDecoration: "none",
+                    }}
                   >
-                    <div className="suggestion-vignette" style={{ background: c.cover_color ?? "var(--surface3)" }}>
-                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="96px" />
+                    <div style={{
+                      width: 56, height: 56, borderRadius: 13, overflow: "hidden", position: "relative",
+                      background: c.cover_color ?? "var(--surface3)", flexShrink: 0,
+                    }}>
+                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="56px" />
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <p className="suggestion-nom">
+                      <p style={{
+                        fontSize: 15.5, fontWeight: 700, color: "var(--text)", marginBottom: 2,
+                        display: "flex", alignItems: "center", gap: 5,
+                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                      }}>
                         {c.name}
                         {c.is_verified && (
-                          <svg viewBox="0 0 22 22" className="suggestion-verifie" aria-label="Entreprise vérifiée">
+                          <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }} aria-label="Entreprise vérifiée">
                             <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                             <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
                           </svg>
                         )}
                       </p>
-                      <p className="suggestion-lieu">
+                      <p style={{ fontSize: 13.5, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {c.subsector ? `${c.subsector} · ` : ""}{c.city}
                       </p>
                     </div>
-                    <ChevronRight size={18} color="var(--text-muted)" aria-hidden="true" className="suggestion-chevron" />
+                    <ChevronRight size={16} color="var(--text-muted)" aria-hidden="true" />
                   </Link>
                 ))}
               </div>
