@@ -72,7 +72,7 @@ export function ExploreFilters({
               display: "flex", alignItems: "center", gap: 7,
               height: 42, padding: "0 16px", borderRadius: 12,
               border: showPanel || activeCount > 0 ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
-              background: showPanel || activeCount > 0 ? "rgba(139,92,246,0.12)" : "var(--surface)",
+              background: showPanel || activeCount > 0 ? "var(--surface2)" : "var(--surface)",
               color: activeCount > 0 ? "#8b5cf6" : "var(--text-muted)",
               cursor: "pointer", fontSize: 13, fontWeight: 600, transition: "all 0.15s",
             }}
@@ -147,7 +147,7 @@ export function ExploreFilters({
                           style={{
                             padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
                             border: sort === v ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
-                            background: sort === v ? "rgba(139,92,246,0.15)" : "transparent",
+                            background: sort === v ? "var(--surface2)" : "transparent",
                             color: sort === v ? "#8b5cf6" : "var(--text-muted)", transition: "all 0.1s",
                           }}>
                           {label}
@@ -190,7 +190,7 @@ export function ExploreFilters({
             </span>
           )}
           {sort !== "recent" && view !== "swipe" && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.3)", color: "#8b5cf6" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 7, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)" }}>
               ↑ {sort === "score" ? "Score" : sort === "rating" ? "Meilleure note" : sort === "reviews" ? "Plus d'avis" : "A→Z"}
               <button type="button" aria-label="Retirer le tri" onClick={() => push("sort", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
             </span>

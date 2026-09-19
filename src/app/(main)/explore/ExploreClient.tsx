@@ -826,12 +826,12 @@ export function ExploreClient({
                   onClick={loadMore}
                   disabled={loadingMore}
                   style={{
-                    padding: "12px 32px", borderRadius: 50, border: "1.5px solid rgba(139,92,246,0.4)",
-                    background: "rgba(139,92,246,0.08)", color: "#8b5cf6", cursor: loadingMore ? "not-allowed" : "pointer",
+                    padding: "12px 32px", borderRadius: 12, border: "1px solid var(--border2)",
+                    background: "var(--surface)", color: "var(--text)", cursor: loadingMore ? "not-allowed" : "pointer",
                     fontSize: 14, fontWeight: 700, opacity: loadingMore ? 0.6 : 1, transition: "all 0.15s",
                   }}
-                  onMouseEnter={e => { if (!loadingMore) { (e.currentTarget as HTMLButtonElement).style.background = "rgba(139,92,246,0.16)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "#8b5cf6"; }}}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(139,92,246,0.08)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(139,92,246,0.4)"; }}
+                  onMouseEnter={e => { if (!loadingMore) { (e.currentTarget as HTMLButtonElement).style.background = "var(--surface2)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--text-muted)"; }}}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "var(--surface)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border2)"; }}
                 >
                   {loadingMore ? "Chargement…" : `Voir ${Math.min(GRID_PAGE_SIZE, total - companies.length)} de plus`}
                 </button>

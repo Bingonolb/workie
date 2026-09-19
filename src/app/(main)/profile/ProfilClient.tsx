@@ -74,7 +74,7 @@ export function ProfilClient() {
 
   if (echec) {
     return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "48px 32px", textAlign: "center" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "48px 32px", textAlign: "center" }}>
         <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger votre profil</p>
         <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 20 }}>Tes données sont intactes, c&apos;est l&apos;affichage qui a échoué.</p>
         <button
@@ -121,7 +121,7 @@ export function ProfilClient() {
       {/* ── Header ── */}
       <div className="profile-header" style={{
         position: "relative",
-        borderRadius: 20,
+        borderRadius: 16,
         overflow: "hidden",
         marginBottom: 20,
         border: "1px solid var(--border)",
@@ -258,11 +258,11 @@ export function ProfilClient() {
             </>
           );
           return href ? (
-            <Link key={label} href={href} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14, textDecoration: "none" }}>
+            <Link key={label} href={href} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14, textDecoration: "none" }}>
               {inner}
             </Link>
           ) : (
-            <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14 }}>
+            <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14 }}>
               {inner}
             </div>
           );
@@ -279,7 +279,7 @@ export function ProfilClient() {
             ouvertes, avec de quoi y retourner d'un clic. */}
         <div style={{
           background: "var(--surface)", border: "1px solid var(--border)",
-          borderRadius: 18, overflow: "hidden",
+          borderRadius: 14, overflow: "hidden",
         }}>
           <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
             <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Reprendre où vous en étiez</p>
@@ -338,7 +338,7 @@ export function ProfilClient() {
           {/* Edit form */}
           <div style={{
             background: "var(--surface)", border: "1px solid var(--border)",
-            borderRadius: 18, overflow: "hidden",
+            borderRadius: 14, overflow: "hidden",
           }}>
             <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
               <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Modifier le profil</p>
@@ -354,7 +354,7 @@ export function ProfilClient() {
           {/* Réglages */}
           <div style={{
             background: "var(--surface)", border: "1px solid var(--border)",
-            borderRadius: 18, overflow: "hidden",
+            borderRadius: 14, overflow: "hidden",
           }}>
             <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
               <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Réglages</p>
@@ -366,7 +366,7 @@ export function ProfilClient() {
                 download
                 style={{
                   display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "11px 16px", borderRadius: 10,
-                  background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+                  background: "var(--surface2)", border: "1px solid var(--border2)",
                   color: "#8b5cf6", fontWeight: 600, fontSize: 14.5, cursor: "pointer",
                   textDecoration: "none", textAlign: "left",
                 }}

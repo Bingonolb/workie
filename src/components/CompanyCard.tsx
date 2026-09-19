@@ -119,7 +119,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
       <div className="company-card" style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
-        borderRadius: 20,
+        borderRadius: 16,
         overflow: "hidden",
         cursor: "pointer",
       }}>

@@ -332,7 +332,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 Et les groupes vont du plus proche au plus large, pour qu'une
                 fiche isolée dans son secteur ne soit jamais un cul-de-sac. */}
             {groupesSuggestions.map(groupe => (
-              <div key={groupe.titre} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden", marginBottom: 20 }}>
+              <div key={groupe.titre} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", marginBottom: 20 }}>
                 <div style={{ padding: "22px 24px 16px" }}>
                   <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em" }}>
                     {groupe.titre}

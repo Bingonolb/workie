@@ -78,8 +78,10 @@ body {
   --text: #eceef4;
   --text-muted: #8b90a3;
   --text-sub: #b2b7c6;
-  --brand: #8b5cf6;
-  --brand-dark: #7c3aed;
+  /* Violet d'encre et non de bonbon : meme famille, moins de saturation,
+     il tient a cote du noir sans l'eclabousser. */
+  --brand: #6e56cf;
+  --brand-dark: #5b46b8;
   --brand-2: #f97316;
   --brand-3: #ec4899;
   --gradient: var(--brand);
@@ -111,14 +113,14 @@ html.light {
   --text-sub: #414755;
   /* Accent assombri en clair : le violet vif tenait sur fond sombre, il
      paraissait juvénile sur fond blanc. */
-  --brand: #5b3fd6;
-  --brand-dark: #4c33bd;
+  --brand: #4f3cc9;
+  --brand-dark: #41309f;
   --nav-bg: rgb(245,246,248);
   --nav-border: rgba(16,18,32,0.08);
   --scrollbar-thumb: #e3e6eb;
 }
 
-::selection { background: rgba(139,92,246,0.3); }
+::selection { background: rgba(110,86,207,0.22); }
 /* Hide scrollbars everywhere */
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; }
@@ -312,7 +314,7 @@ main, .page-main, .page-main-sm, .page-main-md {
   left: 0;
   background: var(--surface);
   border: 1px solid var(--border2);
-  border-radius: 18px;
+  border-radius: 14px;
   padding: 20px;
   z-index: 500;
   box-shadow: 0 16px 48px rgba(0,0,0,0.5);
