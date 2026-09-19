@@ -47,14 +47,7 @@ export function ShareButton({ name, url, companyId }: { name: string; url: strin
       type="button"
       onClick={handleShare}
       title="Partager"
-      style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "10px 16px", borderRadius: 12,
-        background: "rgba(255,255,255,0.1)",
-        border: "1px solid rgba(255,255,255,0.15)",
-        color: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer",
-        backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", transition: "all 0.2s",
-      }}
+      className="btn btn-photo"
     >
       {copied ? <Check size={15} aria-hidden="true" /> : <Share2 size={15} aria-hidden="true" />}
       {copied ? "Copié !" : "Partager"}

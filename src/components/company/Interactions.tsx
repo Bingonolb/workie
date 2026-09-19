@@ -36,15 +36,7 @@ export function ActionsFiche({ companyId, companyName }: { companyId: string; co
         <Link
           href={`/admin/company/${companyId}`}
           aria-label="Modifier cette fiche"
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 7,
-            padding: "10px 16px", minHeight: 44, boxSizing: "border-box",
-            borderRadius: 10, fontSize: 13.5, fontWeight: 700,
-            color: "#fff", textDecoration: "none",
-            background: "rgba(139,92,246,0.85)",
-            border: "1px solid rgba(255,255,255,0.22)",
-            backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-          }}
+          className="btn btn-photo"
         >
           <Pencil size={15} aria-hidden="true" /> Modifier
         </Link>

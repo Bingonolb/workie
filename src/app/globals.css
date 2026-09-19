@@ -1454,3 +1454,94 @@ input[type="range"]:active { transform: none; }
 /* Le rebond en fin de liste laisse voir le fond du navigateur, qui n'est pas
    le notre. */
 body { overscroll-behavior-y: none; }
+
+/* ─── Boutons ───────────────────────────────────────────────────────
+   Un jeu de classes, et non des valeurs recopiees.
+
+   Les boutons portaient chacun leurs propres mesures, ecrites sur place :
+   onze pixels de haut ici, treize la, un rayon de dix, de douze, de cinquante,
+   et six gris differents pour une meme bordure. Rien ne les tenait ensemble,
+   donc rien ne pouvait les corriger ensemble.
+
+   Trois roles, et un seul par ecran :
+     .btn-encre    ce qu'on veut qu'on fasse
+     .btn-clair    ce qu'on peut faire aussi
+     .btn-fantome  ce qui se retire (annuler, fermer)
+     .btn-photo    les memes, poses sur une image
+
+   La taille se dit a part (.btn-sm, .btn-lg, .btn-bloc), jamais dans le role :
+   un bouton principal peut etre petit. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 18px;
+  min-height: 44px;            /* la cible minimale du doigt, partout */
+  border-radius: 11px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+
+/* Ce qu'on veut qu'on fasse. Encre pleine : sombre sur fond clair, claire sur
+   fond sombre. Le fond de survol se calcule a partir de l'encre plutot que
+   d'etre choisi a la main, donc il suit le theme tout seul. */
+.btn-encre {
+  background: var(--encre);
+  color: var(--encre-texte);
+  border-color: var(--encre);
+}
+.btn-encre:hover:not(:disabled) { background: color-mix(in srgb, var(--encre) 88%, var(--bg)); border-color: color-mix(in srgb, var(--encre) 88%, var(--bg)); }
+
+/* Ce qu'on peut faire aussi. */
+.btn-clair {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border2);
+}
+.btn-clair:hover:not(:disabled) { background: var(--surface2); border-color: var(--text-muted); }
+
+/* Ce qui se retire. Pas de fond, pas de bordure, jusqu'au survol. */
+.btn-fantome {
+  background: transparent;
+  color: var(--text-muted);
+}
+.btn-fantome:hover:not(:disabled) { background: var(--surface2); color: var(--text); }
+
+/* Poses sur une photo : le verre depoli est le seul fond qui tienne sur
+   n'importe quelle image. */
+.btn-photo {
+  background: rgba(0,0,0,0.42);
+  color: #fff;
+  border-color: rgba(255,255,255,0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.btn-photo:hover:not(:disabled) { background: rgba(0,0,0,0.58); }
+
+/* La couleur de marque, reservee a ce qui doit etre reconnu comme venant de
+   Workie : une inscription, une mise en avant. Pas un bouton de formulaire. */
+.btn-marque {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+.btn-marque:hover:not(:disabled) { background: var(--brand-dark); border-color: var(--brand-dark); }
+
+.btn-sm  { min-height: 36px; padding: 0 13px; font-size: 13px; border-radius: 9px; gap: 6px; }
+.btn-lg  { min-height: 50px; padding: 0 26px; font-size: 15px; border-radius: 13px; }
+.btn-bloc { display: flex; width: 100%; }
+/* Un bouton qui n'est qu'une icone est carre : sa largeur suit sa hauteur. */
+.btn-icone { padding: 0; width: 44px; }
+.btn-icone.btn-sm { width: 36px; }

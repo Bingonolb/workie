@@ -132,13 +132,7 @@ export function AuthFormWorkie({
           </p>
         )}
 
-        <button type="submit" disabled={pending || emailMismatch} style={{
-          width: "100%", background: "var(--encre)",
-          color: "var(--encre-texte)", fontWeight: 700, fontSize: 15, border: "none",
-          borderRadius: 10, padding: "13px 0", cursor: (pending || emailMismatch) ? "not-allowed" : "pointer",
-          opacity: (pending || emailMismatch) ? 0.5 : 1,
-          marginTop: 4,
-        }}>
+        <button type="submit" disabled={pending || emailMismatch} className="btn btn-encre btn-lg btn-bloc" style={{ marginTop: 4 }}>
           {pending ? "..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
         </button>
       </form>

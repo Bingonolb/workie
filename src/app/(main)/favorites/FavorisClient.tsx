@@ -81,12 +81,7 @@ export function FavorisClient() {
         </div>
         <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Aucun favori pour l&apos;instant</p>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>Touchez la flamme d&apos;une entreprise pour la sauvegarder ici.</p>
-        <Link href="/explore" style={{
-          display: "inline-block", background: "var(--encre)",
-          color: "var(--encre-texte)", fontWeight: 700, borderRadius: 10, padding: "12px 28px", textDecoration: "none", fontSize: 14,
-        }}>
-          Explorer les entreprises
-        </Link>
+        <Link href="/explore" className="btn btn-encre">Explorer les entreprises</Link>
       </div>
     );
   }
