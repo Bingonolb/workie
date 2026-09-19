@@ -2,20 +2,17 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { getCachedCompany, getCachedJobOffers, getCachedSimilarCompanies } from "@/lib/actions/companies";
-import { getCachedReviews } from "@/lib/actions/reviews";
-import { Star, MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle, ChevronRight } from "lucide-react";
+import { getCachedCompany, getCachedJobOffers, getCachedSuggestions } from "@/lib/actions/companies";
+import { MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle, ChevronRight, Languages } from "lucide-react";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
-import { Stars, RatingRow, StatPill, ratingColor, RepartitionNotes } from "@/components/company/notation";
-import { synthetiser } from "@/lib/synthese";
 import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
-import { ActionsFiche, VotesFiche, PorteInvite, FormulaireAvis } from "@/components/company/Interactions";
-import { SectionAvis } from "@/components/company/SectionAvis";
+import { ActionsFiche, VotesFiche, PorteInvite } from "@/components/company/Interactions";
 import { BoutonRetour } from "@/components/company/BoutonRetour";
 
 import { SECTOR_COLORS } from "@/lib/types";
+import { languesDeTravail } from "@/lib/langues";
 import type { Review } from "@/lib/types";
 // Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
 // d'avis et les tests de colonnes s'appuient sur la même liste.
@@ -63,25 +60,21 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!company) return { title: "Entreprise introuvable · Workie" };
   const desc = company.description
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
-    : `Avis anonymes sur ${company.name} : rémunération, management, équilibre et évolution, notés par ses employés.`;
+    : `${company.name}, ${company.sector} à ${company.city}. Offres d'emploi, langues de travail et entreprises voisines.`;
   const url = `${BASE_URL}/company/${id}`;
-  // Sans photo de couverture, l'aperçu est dessiné à la demande avec le nom de
-  // l'entreprise et sa note. Cette route renvoyait une image vide ; elle est
-  // réparée et vérifiée en production, seul endroit où son moteur tourne.
+  // Sans photo de couverture, l'aperçu est dessiné à la demande, avec le nom
+  // de l'entreprise, sa ville et son secteur.
   const apercuDessine = `${BASE_URL}/api/og?title=${encodeURIComponent(company.name)}`
-    + `&sub=${encodeURIComponent([company.city, company.sector].filter(Boolean).join(" · "))}`
-    + (Number(company.avg_rating) > 0
-        ? `&rating=${Number(company.avg_rating).toFixed(1)}&reviews=${company.review_count}`
-        : "");
+    + `&sub=${encodeURIComponent([company.city, company.sector].filter(Boolean).join(" · "))}`;
   const ogImage = company.cover_url
     ? [{ url: company.cover_url, width: 1200, height: 630, alt: company.name }]
     : [{ url: apercuDessine, width: 1200, height: 630, alt: company.name }];
   return {
-    title: `${company.name} · Avis & Salaires · Workie`,
+    title: `${company.name} · Emploi et entreprise · Workie`,
     description: desc,
     alternates: { canonical: url },
     openGraph: {
-      title: `${company.name} | Avis et salaires sur Workie`,
+      title: `${company.name} sur Workie`,
       description: desc,
       url,
       siteName: "Workie",
@@ -91,7 +84,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     },
     twitter: {
       card: "summary_large_image",
-      title: `${company.name} | Avis et salaires sur Workie`,
+      title: `${company.name} sur Workie`,
       description: desc,
       images: ogImage.map(i => i.url),
     },
@@ -129,87 +122,31 @@ function BlocOffresEmploi({ url, className, style }: { url: string; className?: 
   );
 }
 
-/**
- * Le mode de travail, dit en français.
- *
- * La valeur enregistrée vient du formulaire d'avis, où « remote » a été retenu
- * par habitude. Elle reste telle quelle en base, les avis déjà donnés la
- * portant, mais elle ne s'affiche plus ainsi : le reste de la fiche est en
- * français, et « travail remote » y détonne.
- */
-const MODE_EN_MOTS: Record<string, string> = {
-  "présentiel": "sur site",
-  "hybride": "hybride",
-  "remote": "à distance",
-};
-
 export default async function CompanyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   // Aucune lecture de cookie ni de searchParams ici : c'est ce qui permet à
   // Next de rendre la fiche une fois pour tout le monde et de la servir depuis
   // le cache. Ce qui dépend du visiteur est chargé par FournisseurEtatFiche.
-  const [company, reviews] = await Promise.all([
-    getCachedCompany(id).catch(() => null),
-    getCachedReviews(id).catch(() => [] as Review[]),
-  ]);
+  // Les avis ne sont plus lus : ils ne sont ni affichés ni résumés, et une
+  // donnée qu'on ne montre pas ne doit pas être envoyée avec la page.
+  const company = await getCachedCompany(id).catch(() => null);
 
   if (!company) notFound();
 
-  // Essai sur une seule fiche, fictive : les entreprises suggérées remontent
-  // à la place du formulaire d'avis, en liste. Retirer cette constante remet
-  // la fiche dans le rang.
-  const essaiSuggestions = company.id === "87d31750-9816-45bb-bbf4-34549cf19405";
 
   // Tous les avis sont affichés, notes uniquement. Les anciens avis rédigés
   // étaient auparavant masqués alors qu'ils comptaient dans la moyenne — leur
   // texte n'est simplement plus rendu (voir SectionAvis). Le tri est appliqué
   // côté client, pour qu'il ne coûte plus une navigation.
-  const [jobs, similarCompaniesData] = await Promise.all([
+  const [jobs, groupesSuggestions] = await Promise.all([
     getCachedJobOffers(id).catch(() => [] as never[]),
-    getCachedSimilarCompanies(company.sector, id).catch(() => []),
+    getCachedSuggestions(company.id, company.sector, company.subsector ?? null, company.canton ?? null).catch(() => []),
   ]);
 
+  const langues = languesDeTravail(company.canton ?? null, company.website_url ?? null, company.employee_range ?? null);
+
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
-
-  // Sub-ratings averages — each computed independently to avoid null-as-zero bias
-  const subAvg = (field: "rating_culture" | "rating_management" | "rating_worklife" | "rating_career" | "rating_flexibility" | "rating_recognition" | "rating_workload" | "rating_diversity") => {
-    const subset = reviews.filter(r => r[field]);
-    return subset.length ? subset.reduce((s, r) => s + Number(r[field]), 0) / subset.length : null;
-  };
-  const avgCulture = subAvg("rating_culture");
-  const avgMgmt = subAvg("rating_management");
-  const avgWl = subAvg("rating_worklife");
-  const avgCareer = subAvg("rating_career");
-  const avgFlexibility = subAvg("rating_flexibility");
-  const avgRecognition = subAvg("rating_recognition");
-  const avgWorkload = subAvg("rating_workload");
-  const avgDiversity = subAvg("rating_diversity");
-  const avgByCategory: Record<string, number | null> = {
-    rating_management:  avgMgmt,
-    rating_worklife:    avgWl,
-    rating_culture:     avgCulture,
-    rating_career:      avgCareer,
-    rating_flexibility: avgFlexibility,
-    rating_recognition: avgRecognition,
-    rating_workload:    avgWorkload,
-    rating_diversity:   avgDiversity,
-  };
-
-  // Recommandation et retour. Le calcul vit dans @/lib/synthese, avec les
-  // tests qui l'exercent sur toutes les combinaisons de oui, de non et de
-  // nuances : c'est un raisonnement, pas une division, et il a déjà produit
-  // deux affirmations fausses quand il tenait en une ligne ici.
-  const recommandation = synthetiser(reviews.map(r => r.would_recommend), "oui", "non");
-  const retour = synthetiser(reviews.map(r => r.would_return), "oui", "non");
-
-  // Work mode breakdown — single-pass reduce
-  const modeCounts = reviews.reduce((acc: Record<string, number>, r) => {
-    if (r.work_mode) acc[r.work_mode] = (acc[r.work_mode] ?? 0) + 1;
-    return acc;
-  }, {});
-  const dominantMode = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-
 
   const jsonLd = [
     {
@@ -222,15 +159,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       "logo": logoAffichable(company.logo_url) ?? undefined,
       "description": company.description ?? undefined,
       "address": { "@type": "PostalAddress", "addressLocality": company.city, "addressCountry": "CH" },
-      ...(Number(company.avg_rating) > 0 && Number(company.review_count) > 0 ? {
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": Number(company.avg_rating).toFixed(1),
-          "bestRating": "5",
-          "worstRating": "1",
-          "ratingCount": Number(company.review_count),
-        }
-      } : {}),
+      // Pas d'aggregateRating : plus aucune note n'est affichée sur la page,
+      // et Google refuse une donnée structurée qui ne correspond à rien de
+      // visible.
     },
     {
       "@context": "https://schema.org",
@@ -382,7 +313,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 Number(company.avg_salary_chf) > 0
                   ? { icon: <TrendingUp size={18} color="#10b981" aria-hidden="true" />, value: `CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`, label: "Salaire moyen déclaré" }
                   : null,
-                { icon: <Star size={18} color="#f59e0b" aria-hidden="true" />, value: Number(company.review_count) > 0 ? `${Number(company.avg_rating).toFixed(1)} / 5` : "Aucun avis", label: `${company.review_count} avis` },
+                // Les langues remplacent la note : on ne postule pas dans une
+                // langue qu'on ne parle pas, et c'est la première chose qu'un
+                // candidat romand veut savoir d'une entreprise alémanique.
+                langues.length > 0
+                  ? { icon: <Languages size={18} color="#06b6d4" aria-hidden="true" />, value: langues.join(" · "), label: "Langues de travail" }
+                  : null,
               ].filter(Boolean) as { icon: React.ReactNode; value: string; label: string }[]).map(({ icon, value, label }) => (
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
                   <div style={{ marginBottom: 8 }}>{icon}</div>
@@ -397,89 +333,19 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               <VotesFiche companyId={company.id} initialScore={Number(company.score ?? 0)} />
             </div>
 
-            {/* Synthèse — traitement distinct des cartes d'avis.
-                Les deux blocs affichaient les mêmes lignes avec les mêmes
-                barres : rien ne permettait à l'œil de séparer la moyenne de
-                l'entreprise d'un témoignage isolé. La synthèse porte donc un
-                liseré coloré, un fond légèrement teinté, et surtout la
-                répartition des notes — qu'un avis seul ne peut pas montrer. */}
-            {Number(company.review_count) > 0 && (
-              <div style={{
-                background: "linear-gradient(180deg, rgba(139,92,246,0.06), transparent 60%), var(--surface)",
-                border: "1px solid var(--border)",
-                borderTop: "3px solid transparent",
-                borderColor: "var(--brand)",
-                borderRadius: 18, padding: "24px", marginBottom: 32,
-              }}>
-                <p style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-                  Synthèse des avis
-                </p>
-
-                <div className="fiche-synthese">
-                  {/* Colonne gauche : la note et sa répartition */}
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16, flexWrap: "wrap" }}>
-                      <p style={{ fontSize: 52, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{Number(company.avg_rating).toFixed(1)}</p>
-                      <div>
-                        <Stars rating={Number(company.avg_rating)} size={18} />
-                        <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginTop: 4 }}>
-                          sur {company.review_count} avis
-                        </p>
-                      </div>
-                    </div>
-                    <RepartitionNotes notes={reviews.map(r => Number(r.rating_overall))} />
-                  </div>
-
-                  {/* Colonne droite : le détail par catégorie.
-                      Les huit sont toujours listées, y compris celles sans
-                      donnée, pour que l'étendue du questionnaire reste visible
-                      quelle que soit l'ancienneté des avis. */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                    {RATING_CATEGORIES.map(({ key, label }) => (
-                      <RatingRow key={key} label={label} value={avgByCategory[key]} />
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", paddingTop: 16, marginTop: 16, borderTop: "1px solid var(--border)" }}>
-                  <StatPill label="recommandent" synthese={recommandation} />
-                  <StatPill label="reviendraient" synthese={retour} />
-                  {dominantMode && (
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 7, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 10, padding: "8px 13px" }}>
-                    {/* Le mode de travail n'est pas une proportion.
-                        Il portait la même forme que les deux pastilles
-                        voisines, une valeur en gras suivie d'un libellé, si
-                        bien que l'œil le lisait comme une troisième
-                        statistique. C'est une catégorie : elle se dit d'un
-                        trait.
-
-                        « Mode dominant » disait par ailleurs comment le chiffre
-                        avait été calculé, pas ce qu'il signifie. Personne ne
-                        parle ainsi de son travail. */}
-                    <span style={{ fontSize: 13.5, color: "var(--text)" }}>
-                      Travail <strong style={{ fontWeight: 700 }}>{MODE_EN_MOTS[dominantMode] ?? dominantMode}</strong> le plus souvent
-                    </span>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            )}
-
-            {essaiSuggestions ? (
-              /* Les entreprises voisines, en liste et non en grille.
-                 En grille, quatre vignettes se regardent en même temps et
-                 aucune ne se lit. En liste, on descend, un nom après l'autre,
-                 comme on lit des titres. C'est la même donnée : moins de
-                 décor, plus de noms. */
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden", marginBottom: 32 }}>
+            {/* Les entreprises voisines, en liste et par groupes.
+                En grille, quatre vignettes se regardent en même temps et
+                aucune ne se lit. En liste, on descend, un nom après l'autre.
+                Et les groupes vont du plus proche au plus large, pour qu'une
+                fiche isolée dans son secteur ne soit jamais un cul-de-sac. */}
+            {groupesSuggestions.map(groupe => (
+              <div key={groupe.titre} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, overflow: "hidden", marginBottom: 20 }}>
                 <div style={{ padding: "22px 24px 16px" }}>
-                  <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 4 }}>
-                    À voir aussi
+                  <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em" }}>
+                    {groupe.titre}
                   </h2>
-                  <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{company.sector}, en Suisse</p>
                 </div>
-                {similarCompaniesData.map((c: { id: string; name: string; city: string; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; subsector: string | null }) => (
+                {groupe.entreprises.map(c => (
                   <Link
                     key={c.id}
                     href={`/company/${c.id}`}
@@ -517,48 +383,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   </Link>
                 ))}
               </div>
-            ) : (
-              <>
-              {/* Reviews header + sort tabs */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-                <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
-                  Avis des employés ({company.review_count})
-                </h2>
-              </div>
-
-              {reviews.length === 0 ? (
-                <div style={{
-                  background: "linear-gradient(135deg, rgba(139,92,246,0.06), rgba(249,115,22,0.04))",
-                  border: "1px solid rgba(139,92,246,0.15)",
-                  borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 32,
-                }}>
-                                  <p style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Aucun avis pour l&apos;instant</p>
-                  <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 340, margin: "0 auto 20px" }}>
-                    Vous avez travaillé ici ? Votre avis anonyme aide les candidats à choisir.
-                  </p>
-                  <span style={{
-                    display: "inline-block",
-                    background: "var(--brand)",
-                    color: "#fff", fontWeight: 700, borderRadius: 12,
-                    padding: "10px 24px", fontSize: 14,
-                  }}>
-                    Laisser le premier avis ↓
-                  </span>
-                </div>
-              ) : (
-                <div style={{ marginBottom: 32, display: "flex", flexDirection: "column", gap: 16 }}>
-                  <SectionAvis reviews={reviews} companyName={company.name} />
-                </div>
-              )}
-
-              {/* Post review */}
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px" }}>
-                <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Partagez votre expérience</h3>
-                <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 24 }}>Votre avis est anonyme par défaut, et il aide les candidats à savoir où ils mettent les pieds.</p>
-                <FormulaireAvis companyId={company.id} />
-              </div>
-              </>
-            )}
+            ))}
           </div>
 
           {/* Right sidebar */}
@@ -606,52 +431,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        {/* Similar companies */}
-        {!essaiSuggestions && similarCompaniesData.length > 0 && (
-          <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 20 }}>
-              Autres entreprises · {company.sector}
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: 16 }}>
-              {similarCompaniesData.map((c: { id: string; name: string; city: string; avg_rating: number | string | null; review_count: number | string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; sector: string; subsector: string | null }) => (
-                <Link key={c.id} href={`/company/${c.id}`} style={{ textDecoration: "none" }}>
-                  <div className="company-card" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}>
-                    <div style={{ height: 130, background: c.cover_color ?? "linear-gradient(135deg, #8b5cf6, #3b82f6)", position: "relative" }}>
-                      {/* Servi en direct par le CDN : ces 4 vignettes passaient
-                          par l'optimiseur, soit 4 transformations d'image
-                          déclenchées à chaque affichage de fiche. */}
-                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="250px" />
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6))" }} />
-                    </div>
-                    <div style={{ padding: "12px 14px" }}>
-                      <p style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text)", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
-                        {c.name}
-                        {c.is_verified && (
-                          <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }} aria-label="Entreprise vérifiée">
-                            <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
-                            <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
-                          </svg>
-                        )}
-                      </p>
-                      {c.subsector && (
-                        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {c.subsector}
-                        </p>
-                      )}
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, color: "var(--text-muted)" }}>
-                        {Number(c.avg_rating) > 0 && (
-                          <span style={{ color: "#f59e0b", fontWeight: 700 }}>★ {Number(c.avg_rating).toFixed(1)}</span>
-                        )}
-                        <span>{c.city}</span>
-                        {Number(c.review_count) > 0 && <span>· {c.review_count} avis</span>}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </PorteInvite>
       </main>
     </div>

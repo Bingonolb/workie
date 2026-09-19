@@ -224,3 +224,74 @@ export const getCachedSimilarCompanies = unstable_cache(
   ["similar-companies"],
   { revalidate: 300, tags: ["companies"] }
 );
+
+/** Une entreprise telle qu'elle apparaît dans une suggestion. */
+export type Suggestion = {
+  id: string; name: string; city: string; canton: string | null;
+  cover_url: string | null; cover_color: string | null;
+  is_verified: boolean | null; sector: string; subsector: string | null;
+};
+
+const COLONNES_SUGGESTION = "id, name, city, canton, cover_url, cover_color, is_verified, sector, subsector";
+
+/**
+ * De quoi cliquer, toujours, quelle que soit la fiche.
+ *
+ * Les suggestions ne venaient que du secteur, et quatre au plus. Une fiche
+ * dont le secteur ne compte que deux entreprises se retrouvait donc en cul-de-
+ * sac : on la lisait, et il n'y avait nulle part où aller. Or c'est là que se
+ * décide la visite suivante.
+ *
+ * Quatre sources, de la plus proche à la plus large, et on s'arrête dès qu'il
+ * y a de quoi remplir. Chaque groupe dit d'où il vient : « le même métier »
+ * n'est pas « à côté », et le lecteur doit pouvoir faire la différence.
+ */
+export const getCachedSuggestions = unstable_cache(
+  async (
+    companyId: string,
+    sector: string,
+    subsector: string | null,
+    canton: string | null,
+  ): Promise<{ titre: string; entreprises: Suggestion[] }[]> => {
+    const admin = createAdminClient();
+    const req = (colonne: "subsector" | "sector" | "canton", valeur: string) =>
+      admin.from("companies")
+        .select(COLONNES_SUGGESTION)
+        .eq(colonne, valeur)
+        .neq("id", companyId)
+        .order("score", { ascending: false })
+        .limit(8);
+
+    const [memeMetier, memeSecteur, memeCanton, lesPlusVues] = await Promise.all([
+      subsector ? req("subsector", subsector) : Promise.resolve({ data: [] }),
+      req("sector", sector),
+      canton ? req("canton", canton) : Promise.resolve({ data: [] }),
+      admin.from("companies").select(COLONNES_SUGGESTION).neq("id", companyId)
+        .order("score", { ascending: false }).limit(8),
+    ]);
+
+    // Une entreprise ne se propose qu'une fois, dans le groupe le plus proche
+    // où elle apparaît : la revoir plus bas ferait croire à un catalogue court.
+    const dejaVues = new Set<string>([companyId]);
+    const garder = (lignes: unknown, max: number): Suggestion[] => {
+      const out: Suggestion[] = [];
+      for (const c of ((lignes ?? []) as Suggestion[])) {
+        if (dejaVues.has(c.id)) continue;
+        dejaVues.add(c.id);
+        out.push(c);
+        if (out.length === max) break;
+      }
+      return out;
+    };
+
+    const groupes = [
+      { titre: subsector ? `Aussi dans « ${subsector} »` : "", entreprises: garder(memeMetier.data, 4) },
+      { titre: `Dans ${sector}`, entreprises: garder(memeSecteur.data, 4) },
+      { titre: canton ? `Près de là` : "", entreprises: garder(memeCanton.data, 4) },
+      { titre: "Beaucoup regardées en ce moment", entreprises: garder(lesPlusVues.data, 4) },
+    ];
+    return groupes.filter(g => g.titre && g.entreprises.length > 0);
+  },
+  ["suggestions-entreprise"],
+  { revalidate: 300, tags: ["companies"] }
+);
