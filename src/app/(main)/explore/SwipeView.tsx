@@ -906,7 +906,10 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         </div>
       </div>
 
-      <div style={{ padding: "14px 18px 16px", display: "flex", flexDirection: "column", gap: 10, flexShrink: 0 }}>
+      {/* Le bas de carte porte autant de marge que les cotes, et une de plus
+          sous la derniere ligne : un texte colle au bord se lit comme une
+          erreur de mise en page. */}
+      <div style={{ padding: "16px 18px 20px", display: "flex", flexDirection: "column", gap: 10, flexShrink: 0 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <Chip icon={<MapPin size={12} aria-hidden="true" />} label={`${company.city}${company.canton ? `, ${company.canton}` : ""}`} />
           {company.employee_range && <Chip icon={<Users size={12} aria-hidden="true" />} label={`${company.employee_range} emp.`} />}

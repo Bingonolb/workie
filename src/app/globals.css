@@ -82,6 +82,13 @@ body {
      il tient a cote du noir sans l'eclabousser. */
   --brand: #6e56cf;
   --brand-dark: #5b46b8;
+  /* L'encre : la couleur des actions principales.
+     Un bouton plein noir sur fond clair, plein clair sur fond noir. C'est ce
+     que font les interfaces qui veulent qu'on les prenne au serieux : la
+     couleur de marque est reservee a ce qui doit etre reconnu, pas a tout ce
+     sur quoi on peut cliquer. */
+  --encre: #eceef4;
+  --encre-texte: #0c0d12;
   --brand-2: #f97316;
   --brand-3: #ec4899;
   --gradient: var(--brand);
@@ -115,6 +122,8 @@ html.light {
      paraissait juvénile sur fond blanc. */
   --brand: #4f3cc9;
   --brand-dark: #41309f;
+  --encre: #101319;
+  --encre-texte: #ffffff;
   --nav-bg: rgb(245,246,248);
   --nav-border: rgba(16,18,32,0.08);
   --scrollbar-thumb: #e3e6eb;
@@ -472,7 +481,7 @@ main, .page-main, .page-main-sm, .page-main-md {
     white-space: nowrap;
     max-width: 100%;
   }
-  .bottom-nav-item.active { color: var(--brand); }
+  .bottom-nav-item.active { color: var(--text); }
 
   /* Hide desktop nav links on mobile */
   .nav-links-desktop { display: none !important; }

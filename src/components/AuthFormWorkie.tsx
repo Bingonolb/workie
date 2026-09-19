@@ -133,8 +133,8 @@ export function AuthFormWorkie({
         )}
 
         <button type="submit" disabled={pending || emailMismatch} style={{
-          width: "100%", background: "var(--brand)",
-          color: "#fff", fontWeight: 700, fontSize: 15, border: "none",
+          width: "100%", background: "var(--encre)",
+          color: "var(--encre-texte)", fontWeight: 700, fontSize: 15, border: "none",
           borderRadius: 10, padding: "13px 0", cursor: (pending || emailMismatch) ? "not-allowed" : "pointer",
           opacity: (pending || emailMismatch) ? 0.5 : 1,
           marginTop: 4,

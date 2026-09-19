@@ -13,7 +13,7 @@ import { CoverImage } from "@/components/CoverImage";
 // appartient au systeme d'exploitation : il change d'un appareil a l'autre,
 // n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
 // le site, et se colore tout seul en travers de la teinte de la tuile.
-import { Flame, Eye, Megaphone, Download, ChevronRight } from "lucide-react";
+import { Flame, Megaphone, Download, ChevronRight } from "lucide-react";
 
 type Donnees = {
   authentifie: boolean;
@@ -80,7 +80,7 @@ export function ProfilClient() {
         <button
           onClick={() => window.location.reload()}
           style={{
-            background: "var(--brand)", color: "#fff",
+            background: "var(--encre)", color: "var(--encre-texte)",
             fontWeight: 700, border: "none", borderRadius: 10, padding: "11px 26px",
             fontSize: 14, cursor: "pointer",
           }}
@@ -105,12 +105,17 @@ export function ProfilClient() {
   // précisément l'impression qu'on cherchait à supprimer.
   const anime = d !== null && depuisMemoire === null;
 
-  // La tuile de régie publicitaire n'apparaît que pour qui a déjà créé une
-  // campagne. Un « 0 campagne active » sur le profil de tout le monde n'est
-  // pas une statistique, c'est une réclame qui en prend la place.
+  // Deux tuiles au plus, et seulement ce sur quoi on peut agir.
+  //
+  // « 176 entreprises consultées » est un chiffre qui ne mène à rien : on ne
+  // le vise pas, on n'en fait rien, il ne dit même pas lesquelles. La liste
+  // juste en dessous, elle, les nomme et y ramène.
+  //
+  // La tuile de régie n'apparaît que pour qui a déjà créé une campagne : un
+  // « 0 campagne active » sur le profil de tout le monde n'est pas une
+  // statistique, c'est une réclame qui en prend la place.
   const tuiles: { Icone: typeof Flame; value: string; label: string; color: string; href: string | null }[] = [
     { Icone: Flame, value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
-    { Icone: Eye, value: d ? String(d.vuesTotal) : "—", label: `Entreprise${(d?.vuesTotal ?? 0) > 1 ? "s" : ""} consultée${(d?.vuesTotal ?? 0) > 1 ? "s" : ""}`, color: "#06b6d4", href: "/explore" },
   ];
   if ((d?.adsTotal ?? 0) > 0) {
     tuiles.push({ Icone: Megaphone, value: String(adsActives), label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" });
@@ -192,7 +197,7 @@ export function ProfilClient() {
           }} />
           <h1 style={{
             fontSize: 28, fontWeight: 900,
-            color: "#fff",
+            color: "var(--encre-texte)",
             letterSpacing: "-0.035em",
             lineHeight: 1.1,
             margin: 0,
@@ -295,7 +300,7 @@ export function ProfilClient() {
               </p>
               <Link href="/explore" style={{
                 display: "inline-block", padding: "10px 22px", borderRadius: 11,
-                background: "var(--brand)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
+                background: "var(--encre)", color: "var(--encre-texte)", fontWeight: 700, fontSize: 14, textDecoration: "none",
               }}>
                 Explorer
               </Link>
