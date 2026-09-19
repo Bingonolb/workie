@@ -3,24 +3,25 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ProfileForm } from "@/components/ProfileForm";
-import { ProfileReviews } from "./ProfileReviews";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { SignOutButton } from "@/components/SignOutButton";
-import type { Profile, Review } from "@/lib/types";
+import type { Profile } from "@/lib/types";
 import { lireCache, obtenir, CLE_PROFIL } from "@/lib/cacheSession";
+import { CoverImage } from "@/components/CoverImage";
 // Les tuiles portaient des emojis dans un carre teinte. Le dessin d'un emoji
 // appartient au systeme d'exploitation : il change d'un appareil a l'autre,
 // n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
 // le site, et se colore tout seul en travers de la teinte de la tuile.
-import { Flame, FileText, Megaphone, Download } from "lucide-react";
+import { Flame, Eye, Megaphone, Download, ChevronRight } from "lucide-react";
 
 type Donnees = {
   authentifie: boolean;
   email: string;
   creeLe: string | null;
   profile: Profile | null;
-  reviews: (Review & { company_name: string })[];
+  recentes: { id: string; name: string; city: string; subsector: string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null }[];
+  vuesTotal: number;
   favCount: number;
   adsActives: number;
 };
@@ -44,7 +45,7 @@ export function ProfilClient() {
   // jamais faire tomber la page, elle doit simplement être ignorée.
   const [depuisMemoire] = useState(() => {
     const c = lireCache<Donnees>(CLE_PROFIL);
-    return c && Array.isArray(c.reviews) ? c : null;
+    return c && Array.isArray(c.recentes) ? c : null;
   });
   const [d, setD] = useState<Donnees | null>(depuisMemoire);
   const [echec, setEchec] = useState(false);
@@ -90,7 +91,7 @@ export function ProfilClient() {
   }
 
   const profile = d?.profile ?? null;
-  const reviews = d?.reviews ?? [];
+  const recentes = d?.recentes ?? [];
   const adsActives = d?.adsActives ?? 0;
   const displayName = profile?.full_name || profile?.username || (d ? "Workie User" : " ");
   const memberSince = d?.creeLe
@@ -234,7 +235,7 @@ export function ProfilClient() {
       <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
         {([
           { Icone: Flame, value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
-          { Icone: FileText, value: d ? String(reviews.length) : "—", label: `Avis publié${reviews.length > 1 ? "s" : ""}`, color: "#10b981", href: null },
+          { Icone: Eye, value: d ? String(d.vuesTotal) : "—", label: `Entreprise${(d?.vuesTotal ?? 0) > 1 ? "s" : ""} consultée${(d?.vuesTotal ?? 0) > 1 ? "s" : ""}`, color: "#06b6d4", href: "/explore" },
           { Icone: Megaphone, value: d ? String(adsActives) : "—", label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" },
         ] as { Icone: typeof Flame; value: string; label: string; color: string; href: string | null }[]).map(({ Icone, value, label, color, href }) => {
           const inner = (
@@ -263,20 +264,64 @@ export function ProfilClient() {
       {/* ── Main grid ── */}
       <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16, alignItems: "start" }}>
 
-        {/* Reviews table */}
+        {/* Reprendre où l'on en était.
+            « Mes avis » occupait cette place. En retirant les avis, la page se
+            vidait de sa seule colonne de gauche : elle porte désormais ce que
+            la personne a réellement fait sur le site, ses dernières fiches
+            ouvertes, avec de quoi y retourner d'un clic. */}
         <div style={{
           background: "var(--surface)", border: "1px solid var(--border)",
           borderRadius: 18, overflow: "hidden",
         }}>
-          <div style={{
-            padding: "16px 22px", borderBottom: "1px solid var(--border)",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-          }}>
-            {/* Le decompte figurait ici et dans la tuile « Avis publies », a
-                deux cents pixels l'un de l'autre. */}
-            <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Mes avis</p>
+          <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
+            <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Reprendre où vous en étiez</p>
           </div>
-          {d ? <ProfileReviews reviews={reviews} /> : <div style={{ height: 180 }} aria-hidden="true" />}
+
+          {!d ? (
+            <div style={{ height: 180 }} aria-hidden="true" />
+          ) : recentes.length === 0 ? (
+            <div style={{ padding: "36px 24px", textAlign: "center" }}>
+              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Rien encore</p>
+              <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
+                Les entreprises que vous ouvrez se retrouvent ici.
+              </p>
+              <Link href="/explore" style={{
+                display: "inline-block", padding: "10px 22px", borderRadius: 11,
+                background: "var(--brand)", color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
+              }}>
+                Explorer
+              </Link>
+            </div>
+          ) : (
+            recentes.map(c => (
+              <Link
+                key={c.id}
+                href={`/company/${c.id}`}
+                className="suggestion-ligne"
+                style={{
+                  display: "grid", gridTemplateColumns: "56px 1fr 16px", gap: 14, alignItems: "center",
+                  padding: "14px 22px", borderTop: "1px solid var(--border)", textDecoration: "none",
+                }}
+              >
+                <div style={{
+                  width: 56, height: 56, borderRadius: 13, overflow: "hidden", position: "relative",
+                  background: c.cover_color ?? "var(--surface3)", flexShrink: 0,
+                }}>
+                  <CoverImage src={c.cover_url} color={c.cover_color} sizes="56px" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{
+                    fontSize: 15.5, fontWeight: 700, color: "var(--text)", marginBottom: 2,
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}>{c.name}</p>
+                  <p style={{ fontSize: 13.5, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {c.subsector ? `${c.subsector} · ` : ""}{c.city}
+                  </p>
+                </div>
+                <ChevronRight size={16} color="var(--text-muted)" aria-hidden="true" />
+              </Link>
+            ))
+          )}
         </div>
 
         {/* Right column */}

@@ -8,7 +8,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
 import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
-import { ActionsFiche, VotesFiche, PorteInvite } from "@/components/company/Interactions";
+import { ActionsFiche, PorteInvite } from "@/components/company/Interactions";
 import { BoutonRetour } from "@/components/company/BoutonRetour";
 
 import { SECTOR_COLORS } from "@/lib/types";
@@ -252,7 +252,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
             {/* Actions */}
             <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
-              <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} />
+              <ShareButton name={company.name} url={`${BASE_URL}/company/${company.id}`} companyId={company.id} />
               <ActionsFiche companyId={company.id} companyName={company.name} />
             </div>
           </div>
@@ -260,8 +260,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       </div>
 
       <style>{`
-        .suggestion-ligne { transition: background 0.15s; }
-        .suggestion-ligne:hover { background: var(--surface2); }
         @media (max-width: 700px) {
           .company-grid { grid-template-columns: 1fr !important; }
           .company-sidebar { position: static !important; }
@@ -326,11 +324,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                   <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>{label}</p>
                 </div>
               ))}
-            </div>
-
-            {/* Vote buttons */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
-              <VotesFiche companyId={company.id} initialScore={Number(company.score ?? 0)} />
             </div>
 
             {/* Les entreprises voisines, en liste et par groupes.

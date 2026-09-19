@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getUser, createClient } from "@/lib/supabase/server";
-import { getUserReviews } from "@/lib/actions/reviews";
 import { getUserFavoriteIds } from "@/lib/actions/favorites";
 
 /**
@@ -23,16 +22,36 @@ export async function GET() {
       return NextResponse.json({ authentifie: false }, { status: 401, headers: sansCache });
     }
 
-    const [{ data: profile }, reviews, favIds, { count: adsActives }] = await Promise.all([
+    const [{ data: profile }, favIds, { count: adsActives }, { data: vues }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-      getUserReviews().catch(() => []),
       getUserFavoriteIds().catch(() => [] as string[]),
       // Compte seul, sans ramener les lignes : la tuile n'affiche qu'un nombre.
       supabase.from("ad_campaigns")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("status", "active"),
+      // Les dernières fiches ouvertes, pour reprendre où l'on en était.
+      // Les avis occupaient cette place ; ils ne sont plus affichés nulle part.
+      supabase.from("company_views")
+        .select("company_id, viewed_at, companies(id, name, city, subsector, cover_url, cover_color, is_verified)")
+        .eq("user_id", user.id)
+        .order("viewed_at", { ascending: false })
+        .limit(30),
     ]);
+
+    // Une entreprise ne se répète pas : on garde sa visite la plus récente.
+    type LigneVue = {
+      company_id: string;
+      companies: { id: string; name: string; city: string; subsector: string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null } | null;
+    };
+    const vuesUniques: NonNullable<LigneVue["companies"]>[] = [];
+    const dejaVue = new Set<string>();
+    for (const ligne of ((vues ?? []) as unknown as LigneVue[])) {
+      if (!ligne.companies || dejaVue.has(ligne.company_id)) continue;
+      dejaVue.add(ligne.company_id);
+      vuesUniques.push(ligne.companies);
+      if (vuesUniques.length === 8) break;
+    }
 
     return NextResponse.json({
       authentifie: true,
@@ -42,7 +61,8 @@ export async function GET() {
       email: user.email ?? "",
       creeLe: user.created_at ?? null,
       profile: profile ?? null,
-      reviews,
+      recentes: vuesUniques,
+      vuesTotal: dejaVue.size,
       favCount: favIds.length,
       adsActives: adsActives ?? 0,
     }, { headers: sansCache });

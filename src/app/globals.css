@@ -1395,3 +1395,10 @@ body.mode-swipe .page-root {
 @media (max-width: 700px) {
   .fiche-synthese { grid-template-columns: 1fr; gap: 22px; }
 }
+
+/* Ligne d'entreprise suggérée : fiche, profil, et partout où l'on propose
+   d'aller ailleurs. La règle vivait dans le style de la fiche entreprise, donc
+   le profil héritait du balisage sans le survol. */
+.suggestion-ligne { transition: background 0.15s; }
+.suggestion-ligne:hover { background: var(--surface2); }
+.suggestion-ligne:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }

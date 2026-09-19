@@ -671,35 +671,6 @@ export function SwipeView({
 
       {/* Action buttons */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-        {isLoggedIn && !isAd(current) && (() => {
-          const unlocked = isAdmin || penaltyCredits > 0;
-          const applied = !isAd(current) && penaltyIds.has((current as Company).id);
-          return (
-            <button type="button" onClick={handlePenalty} title={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} aria-label={unlocked ? "Pénaliser -100 pts" : "Acheter 10 utilisations"} style={{
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
-              width: 52, height: 52, borderRadius: "50%",
-              background: applied ? "rgba(239,68,68,0.12)" : "var(--surface)",
-              border: `2px solid ${unlocked ? (applied ? "rgba(239,68,68,0.9)" : "rgba(239,68,68,0.5)") : "rgba(107,114,128,0.3)"}`,
-              color: unlocked ? "#ef4444" : "var(--text-muted)",
-              cursor: "pointer",
-              boxShadow: unlocked ? "0 4px 20px rgba(239,68,68,0.15)" : "none",
-              transition: "all 0.18s",
-              position: "relative",
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-            >
-              <TrendingDown size={15} aria-hidden="true" />
-              <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>-100</span>
-              {!isAdmin && penaltyCredits > 0 && (
-                <span style={{ position: "absolute", top: -5, right: -5, minWidth: 16, height: 16, borderRadius: 8, background: "#ef4444", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 900, padding: "0 3px" }}>{penaltyCredits}</span>
-              )}
-              {!unlocked && (
-                <span style={{ position: "absolute", top: -4, right: -4, width: 16, height: 16, borderRadius: "50%", background: "var(--surface2)", border: "1px solid var(--border2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9 }}>🔒</span>
-              )}
-            </button>
-          );
-        })()}
 
         <button type="button" onClick={() => advance("left")} disabled={!!gone} aria-label="Passer cette entreprise"
           style={{
@@ -752,26 +723,6 @@ export function SwipeView({
           <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} aria-hidden="true" />
         </button>
 
-        {isLoggedIn && !isAd(current) && (() => {
-          const boosted = boostIds.has((current as Company).id);
-          return (
-            <button type="button" onClick={handleBoost} title={boosted ? "Retirer le boost" : "Booster +100 pts"} aria-label={boosted ? "Retirer le boost" : "Booster +100 pts"} style={{
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
-              width: 52, height: 52, borderRadius: "50%",
-              background: boosted ? "rgba(139,92,246,0.12)" : "var(--surface)",
-              border: `2px solid ${boosted ? "rgba(139,92,246,0.9)" : "rgba(139,92,246,0.5)"}`,
-              color: "#8b5cf6", cursor: "pointer",
-              boxShadow: "0 4px 20px rgba(139,92,246,0.15)",
-              transition: "all 0.18s",
-            }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.12)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-            >
-              <TrendingUp size={15} aria-hidden="true" />
-              <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.02em" }}>+100</span>
-            </button>
-          );
-        })()}
       </div>
 
       {/* Legende, masquee sur telephone.
