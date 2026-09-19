@@ -711,19 +711,12 @@ export function ExploreClient({
         onClear={handleClear}
       />
 
-      {guestActive && total > 0 && (
-        <div style={{
-          background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(249,115,22,0.06))",
-          border: "1px solid rgba(139,92,246,0.2)",
-          borderRadius: 16, padding: "16px 20px", marginBottom: 20,
-          display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
-        }}>
-          <p style={{ fontSize: 14, color: "var(--text-muted)", flex: 1 }}>
-            <strong style={{ color: "var(--text)" }}>{total} entreprises disponibles.</strong>{" "}
-            <a href="/signup" style={{ color: "#8b5cf6", fontWeight: 700, textDecoration: "none" }}>Créer un compte gratuit</a> pour tout voir.
-          </p>
-        </div>
-      )}
+      {/* Le bandeau « 1020 entreprises disponibles » a été retiré.
+          Il disait au visiteur ce que le bas de page lui dit déjà, et il
+          arrivait une seconde après l'affichage, une fois connue la réponse à
+          « qui regarde ? » : la grille descendait alors de soixante-quinze
+          pixels sous les yeux du lecteur. Mesuré à 0,079 de décalage cumulé
+          sur /explore, la seule secousse de la page. */}
 
       {/* Pending overlay — fades the grid while new results load */}
       <div style={{ opacity: isPending ? 0.5 : 1, transition: "opacity 0.15s" }}>
