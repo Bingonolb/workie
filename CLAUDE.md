@@ -199,6 +199,33 @@ nommées : une colonne neuve n'est accordée à personne, et tout `select("*")`
 
 <!-- BEGIN:nextjs-agent-rules -->
 
+## Deux adresses : l'essai et le site
+
+Le site a longtemps eu une seule adresse. Chaque correction partait donc
+directement en production, et la seule façon de juger un changement était de le
+montrer à tout le monde. C'est intenable dès qu'on essaie une idée de design.
+
+| Adresse | Branche | Qui la voit |
+|---|---|---|
+| `workie.ch` | `main` | tout le monde |
+| `workie-test.vercel.app` | `staging` | Luc, connecté à Vercel |
+
+**Le travail va sur `staging`.** Rien ne part sur `main` sans que Luc ait vu et
+dit oui. La mise en production se fait ensuite d'un seul geste, au choix :
+
+- le bouton **Promote to Production** sur le déploiement, dans le tableau de
+  bord Vercel ;
+- ou `npx vercel deploy --prod` ;
+- ou la fusion de `staging` dans `main`, qui déclenche la production.
+
+L'adresse d'essai demande une connexion Vercel : c'est voulu, un site d'essai
+ne doit pas être indexé ni lisible par un visiteur de passage.
+
+**La base de données est la même des deux côtés.** Une maquette, une couleur,
+une mise en page ne risquent rien. Une migration, une suppression de colonne ou
+une écriture massive touchent les vraies données depuis l'essai comme depuis la
+production : ces changements-là se traitent avec les mêmes précautions qu'avant.
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
