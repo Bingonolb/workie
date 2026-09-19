@@ -33,10 +33,10 @@ export function GuestContentGate({
       {/* CTA — normal flow, no empty space, always visible */}
       <div className="guest-gate-cta">
         <p style={{ fontSize: 21, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.025em" }}>
-          Accédez aux avis complets
+          Gardez ce que vous trouvez
         </p>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, maxWidth: 300, lineHeight: 1.65 }}>
-          Salaires réels, retours d&apos;anciens employés. Gratuit et 100% anonyme.
+          Vos entreprises, leurs offres et le fil de vos découvertes. Gratuit.
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
           <Link href="/signup" style={{

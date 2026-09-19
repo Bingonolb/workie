@@ -4,6 +4,7 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Company } from "@/lib/types";
+import { CANTON_NAMES } from "@/lib/types";
 
 function stripAccents(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -287,7 +288,7 @@ export const getCachedSuggestions = unstable_cache(
     const groupes = [
       { titre: subsector ? `Aussi dans « ${subsector} »` : "", entreprises: garder(memeMetier.data, 4) },
       { titre: `Dans ${sector}`, entreprises: garder(memeSecteur.data, 4) },
-      { titre: canton ? `Près de là` : "", entreprises: garder(memeCanton.data, 4) },
+      { titre: canton ? `Dans le canton de ${CANTON_NAMES[canton] ?? canton}` : "", entreprises: garder(memeCanton.data, 4) },
       { titre: "Beaucoup regardées en ce moment", entreprises: garder(lesPlusVues.data, 4) },
     ];
     return groupes.filter(g => g.titre && g.entreprises.length > 0);
