@@ -24,6 +24,7 @@ type Donnees = {
   vuesTotal: number;
   favCount: number;
   adsActives: number;
+  adsTotal: number;
 };
 
 /**
@@ -103,6 +104,17 @@ export function ProfilClient() {
   // là. La page paraissait charger alors qu'elle n'avait rien à charger — c'est
   // précisément l'impression qu'on cherchait à supprimer.
   const anime = d !== null && depuisMemoire === null;
+
+  // La tuile de régie publicitaire n'apparaît que pour qui a déjà créé une
+  // campagne. Un « 0 campagne active » sur le profil de tout le monde n'est
+  // pas une statistique, c'est une réclame qui en prend la place.
+  const tuiles: { Icone: typeof Flame; value: string; label: string; color: string; href: string | null }[] = [
+    { Icone: Flame, value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
+    { Icone: Eye, value: d ? String(d.vuesTotal) : "—", label: `Entreprise${(d?.vuesTotal ?? 0) > 1 ? "s" : ""} consultée${(d?.vuesTotal ?? 0) > 1 ? "s" : ""}`, color: "#06b6d4", href: "/explore" },
+  ];
+  if ((d?.adsTotal ?? 0) > 0) {
+    tuiles.push({ Icone: Megaphone, value: String(adsActives), label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" });
+  }
 
   return (
     <div className={anime ? "apparition" : undefined}>
@@ -232,12 +244,8 @@ export function ProfilClient() {
           voisines alignaient des nombres : une invitation deguisee en
           statistique. Elle compte desormais les campagnes, zero compris, ce
           qui est honnete et garde le lien vers la regie. */}
-      <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
-        {([
-          { Icone: Flame, value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
-          { Icone: Eye, value: d ? String(d.vuesTotal) : "—", label: `Entreprise${(d?.vuesTotal ?? 0) > 1 ? "s" : ""} consultée${(d?.vuesTotal ?? 0) > 1 ? "s" : ""}`, color: "#06b6d4", href: "/explore" },
-          { Icone: Megaphone, value: d ? String(adsActives) : "—", label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" },
-        ] as { Icone: typeof Flame; value: string; label: string; color: string; href: string | null }[]).map(({ Icone, value, label, color, href }) => {
+      <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: `repeat(${tuiles.length}, 1fr)`, gap: 12, marginBottom: 20 }}>
+        {tuiles.map(({ Icone, value, label, color, href }) => {
           const inner = (
             <>
               <div className="kpi-icone" style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
