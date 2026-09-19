@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 // celui du jeu video, pas d'un service ou les entreprises sont aussi
 // clientes. Les fleches de tendance disent la meme chose, et disent en plus
 // dans quel sens le score bouge.
-import { Star, MapPin, Users, TrendingUp, TrendingDown, X, Flame, Info, ExternalLink } from "lucide-react";
+import { MapPin, Users, TrendingUp, TrendingDown, X, Flame, Info, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { addBoost, addPenalty } from "@/lib/actions/scores";
 import { fetchSwipePage } from "@/lib/actions/companies";
@@ -836,7 +836,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
   const coverSrc = company.cover_url;
 
   return (
-    <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none" }}>
+    <div style={{ width: "100%", height: "100%", borderRadius: 22, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none", display: "flex", flexDirection: "column" }}>
       {/* Fond à la couleur dominante de la photo : la carte est colorée dès le
           premier rendu, donc pas de shimmer ni d'aplat gris même hors ligne. */}
       <div
@@ -845,7 +845,10 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         // bande claire figee.
         className={coverSrc && !imgLoaded && !company.cover_color ? "img-placeholder" : undefined}
         style={{
-          height: "55%", position: "relative", overflow: "hidden",
+          // La photo prenait 55 % de la hauteur, le texte le reste, et comme
+          // le texte fait deux lignes il restait un vide en bas de chaque
+          // carte. Elle prend maintenant tout ce que le texte ne prend pas.
+          flex: 1, minHeight: 0, position: "relative", overflow: "hidden",
           background: company.cover_color
             || (coverSrc ? "var(--surface2)" : `linear-gradient(135deg, ${sectorColor} 0%, #0f172a 100%)`),
         }}
@@ -903,19 +906,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         </div>
       </div>
 
-      <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {/* Même règle que sur la carte : pas d'avis, pas de note. */}
-        {Number(company.review_count) > 0 && Number(company.avg_rating) > 0 && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ display: "flex", gap: 2 }} aria-hidden="true">
-              {[1,2,3,4,5].map(n => (
-                <Star key={n} size={16} fill={n <= Math.round(Number(company.avg_rating)) ? "#f59e0b" : "transparent"} color={n <= Math.round(Number(company.avg_rating)) ? "#f59e0b" : "var(--border2)"} strokeWidth={1.5} />
-              ))}
-            </span>
-            <span style={{ fontSize: 15.5, fontWeight: 700, color: "#f59e0b" }} aria-label={`${Number(company.avg_rating).toFixed(1)} étoiles sur 5`}>{Number(company.avg_rating).toFixed(1)}</span>
-            <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>{company.review_count} avis</span>
-          </div>
-        )}
+      <div style={{ padding: "14px 18px 16px", display: "flex", flexDirection: "column", gap: 10, flexShrink: 0 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <Chip icon={<MapPin size={12} aria-hidden="true" />} label={`${company.city}${company.canton ? `, ${company.canton}` : ""}`} />
           {company.employee_range && <Chip icon={<Users size={12} aria-hidden="true" />} label={`${company.employee_range} emp.`} />}
@@ -943,7 +934,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
   overlayOpacity: number;
 }) {
   return (
-    <div style={{ width: "100%", height: "100%", borderRadius: 28, overflow: "hidden", background: "var(--surface)", border: "2px solid rgba(139,92,246,0.5)", boxShadow: "0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(139,92,246,0.15)", userSelect: "none", display: "flex", flexDirection: "column", cursor: "pointer" }}>
+    <div style={{ width: "100%", height: "100%", borderRadius: 22, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border2)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", userSelect: "none", display: "flex", flexDirection: "column", cursor: "pointer" }}>
       {/* Image zone — same 55% as SwipeCard */}
       <div style={{ height: "55%", position: "relative", overflow: "hidden", flexShrink: 0,
         background: campaign.image_url
