@@ -640,7 +640,13 @@ export function ExploreClient({
 
   // Ad slot map: one ad every 7 companies starting at adOffset
   const AD_INTERVAL = 7;
-  const adsForGrid = (authReady && isGuest) ? [] : squareAdsState;
+  // Rien tant qu'on ne sait pas qui regarde.
+  //
+  // Les publicités arrivaient par leur propre appel, étaient posées dans la
+  // grille, puis retirées dès qu'on apprenait que le visiteur n'est pas
+  // connecté : deux remaniements de la grille coup sur coup, et une secousse
+  // mesurée à 0,079 sur /explore en visiteur. On attend de savoir.
+  const adsForGrid = authReady && !isGuest ? squareAdsState : [];
   const adSlotMap = useMemo((): Map<number, number> => {
     if (adsForGrid.length === 0 || companies.length < decalagePub + 1) return new Map();
     const map = new Map<number, number>();
