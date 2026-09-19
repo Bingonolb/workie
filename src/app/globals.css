@@ -1413,3 +1413,44 @@ body.mode-swipe .page-root {
 .suggestion-ligne { transition: background 0.15s; }
 .suggestion-ligne:hover { background: var(--surface2); }
 .suggestion-ligne:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+
+/* ─── Finitions ─────────────────────────────────────────────────────
+   Ce qui separe une page web d'une application : rien d'ajoute, des details
+   enleves. Le halo gris au toucher, le saut d'un bouton qui ne repond pas, un
+   contour de mise au point different a chaque ecran. */
+
+/* Le rectangle gris que pose le navigateur sur tout element touche. C'est le
+   seul detail qui trahit une page web sur un telephone. */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Un bouton repond au doigt. Dix-huit centiemes pour la couleur, douze pour
+   l'enfoncement : assez pour etre senti, trop peu pour etre attendu. */
+button, a[role="button"], [type="button"], [type="submit"] {
+  transition: background-color 0.18s ease, border-color 0.18s ease,
+              color 0.18s ease, opacity 0.18s ease, transform 0.12s ease;
+}
+button:active:not(:disabled),
+a[role="button"]:active,
+[type="button"]:active:not(:disabled),
+[type="submit"]:active:not(:disabled) { transform: scale(0.985); }
+/* Le curseur d'un champ de plage se deplace, il ne s'enfonce pas. */
+input[type="range"]:active { transform: none; }
+
+/* Un seul contour de mise au point pour tout le site, tire de la couleur du
+   texte : il tient sur les deux themes sans etre redeclare. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--text) 42%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* La page arrive, elle ne surgit pas. Le fondu se joue au montage, donc a
+   chaque changement de page, et jamais pendant qu'on lit. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-main, .page-main-sm, .page-main-md { animation: apparition 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+  html { scroll-behavior: smooth; }
+}
+
+/* Le rebond en fin de liste laisse voir le fond du navigateur, qui n'est pas
+   le notre. */
+body { overscroll-behavior-y: none; }
