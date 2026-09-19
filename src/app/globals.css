@@ -805,6 +805,21 @@ main, .page-main, .page-main-sm, .page-main-md {
   overflow: hidden;
 }
 
+/* Le bandeau d'une fiche passe en colonne bien avant le telephone.
+   Entre 640 et 900 pixels, le nom sur deux lignes et trois boutons se
+   partageaient la meme ligne : la puce de secteur passait sous les boutons,
+   et le titre se cassait au milieu d'un mot. Ce n'est pas une largeur de
+   telephone, c'est une fenetre de bureau a demi ouverte, et c'est la que la
+   plupart des gens lisent. */
+@media (max-width: 900px) {
+  .company-hero-inner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  .company-hero-actions { flex-wrap: wrap; }
+}
+
 @media (max-width: 640px) {
   .company-hero-inner {
     padding: 0 14px !important;
