@@ -39,7 +39,7 @@ export function GuestContentGate({
           Vos entreprises, leurs offres et le fil de vos découvertes. Gratuit.
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
-          <Link href="/signup" className="btn btn-encre btn-bloc">Créer un compte, gratuit</Link>
+          <Link href="/signup" className="btn btn-marque btn-bloc">Créer un compte, gratuit</Link>
           <Link href="/login" className="btn btn-clair btn-bloc">Se connecter</Link>
         </div>
       </div>

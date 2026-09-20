@@ -31,7 +31,7 @@ export function PayUserCampaignButton({ campaignId, total }: { campaignId: strin
 
   return (
     <div>
-      <button type="button" onClick={handlePay} disabled={loading} className="btn btn-encre btn-sm">
+      <button type="button" onClick={handlePay} disabled={loading} className="btn btn-marque btn-sm">
         {/* « Payer CHF 71.00 » : les deux décimales ne portent aucune
             information quand le budget tombe juste, et sur trois cent
             soixante-quinze pixels elles suffisaient à pousser le bouton

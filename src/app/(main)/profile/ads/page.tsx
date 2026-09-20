@@ -71,7 +71,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
                 : `${campaigns.length} campagne${campaigns.length > 1 ? "s" : ""}${activeCampaigns.length > 0 ? `, ${activeCampaigns.length} active${activeCampaigns.length > 1 ? "s" : ""}` : ""}`}
             </p>
           </div>
-          <Link href="/profile/ads/new" className="btn btn-encre">
+          <Link href="/profile/ads/new" className="btn btn-marque">
             <Plus size={16} aria-hidden="true" /> Nouvelle pub
           </Link>
         </div>
@@ -101,7 +101,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
             <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 28px", lineHeight: 1.7 }}>
               Touchez des milliers de candidats actifs en Suisse. Pas d&apos;abonnement : vous payez votre budget, rien d&apos;autre.
             </p>
-            <Link href="/profile/ads/new" className="btn btn-encre btn-lg">
+            <Link href="/profile/ads/new" className="btn btn-marque btn-lg">
               <Plus size={16} aria-hidden="true" /> Créer ma première pub
             </Link>
           </div>

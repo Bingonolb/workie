@@ -197,7 +197,11 @@ export function ProfilClient() {
           }} />
           <h1 style={{
             fontSize: 28, fontWeight: 900,
-            color: "var(--encre-texte)",
+            // Blanc, et non un jeton de theme : ce nom est pose sur le bandeau
+            // sombre du profil, qui reste sombre en mode jour comme en mode
+            // nuit. Il avait pris var(--encre-texte) par erreur lors du
+            // passage des boutons a l'encre, et devenait donc noir sur noir.
+            color: "#fff",
             letterSpacing: "-0.035em",
             lineHeight: 1.1,
             margin: 0,

@@ -230,13 +230,13 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 // La bordure blanche a sept pour cent ne se voyait pas en
                 // mode jour : elle etait pensee pour un fond sombre. Les deux
                 // etats passent par les jetons, donc par le theme.
-                border: format === f ? "1.5px solid var(--text)" : "1.5px solid var(--border2)",
+                border: format === f ? "1.5px solid var(--brand)" : "1.5px solid var(--border2)",
                 background: format === f ? "var(--surface2)" : "transparent",
                 transition: "all 0.2s",
                 position: "relative",
               }}>
                 {format === f && (
-                  <div style={{ position: "absolute", top: 14, right: 14, width: 20, height: 20, borderRadius: "50%", background: "var(--encre)", color: "var(--encre-texte)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ position: "absolute", top: 14, right: 14, width: 20, height: 20, borderRadius: "50%", background: "var(--brand)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7L10 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                 )}
@@ -630,7 +630,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               partir ce formulaire facturerait le tarif national à quelqu'un qui
               n'a rien choisi. */}
           <button type="submit" disabled={pending || sansCiblage}
-            className="btn btn-encre btn-lg"
+            className="btn btn-marque btn-lg"
             style={{ flex: 1, fontSize: "clamp(13px, 3.5vw, 16px)", fontWeight: 800 }}>
             {pending
               ? "Envoi en cours…"
