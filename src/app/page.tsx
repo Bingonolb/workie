@@ -3,7 +3,8 @@ import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ArrowRight, ShieldCheck, Lock, Gauge,
-         GraduationCap, Briefcase, Landmark, Home as IconeMaison, Check } from "lucide-react";
+         GraduationCap, Briefcase, Landmark, Home as IconeMaison, Check,
+         X, Info, Flame } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingFaq } from "@/components/LandingFaq";
 import { largeurCouverture } from "@/lib/coverUrl";
@@ -408,72 +409,74 @@ export default async function Home() {
             fiche évolue. Rien ne crédibilise autant que de montrer ce qu'on
             vend, et la page n'en montrait rien. */}
         <div className="landing-apercu" aria-hidden="true">
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 16, overflow: "hidden", boxShadow: "0 18px 50px rgba(0,0,0,0.13)" }}>
-            {/* En-tête d'une entreprise réelle, couverture comprise.
-                Le visuel du hero ne montrait que des barres de notes : juste,
-                mais sec, et sans image. Les meilleures pages d'accueil n'ont
-                qu'un visuel principal, et il porte à la fois le produit et
-                l'image. Celui-ci fait les deux, ce qui a permis de retirer la
-                composition qui faisait double emploi plus bas. */}
-            {vedette && (
-              <div style={{ position: "relative", height: 132 }}>
-                <div style={{
-                  position: "absolute", inset: 0,
-                  backgroundColor: "var(--surface3)",
-                  backgroundImage: vedette.cover_url ? `url(${largeurCouverture(vedette.cover_url, 940)})` : undefined,
-                  backgroundSize: "cover", backgroundPosition: "center",
-                }} />
-                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.86) 100%)" }} />
-                <div style={{ position: "absolute", left: 20, right: 20, bottom: 14 }}>
-                  <p style={{ fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2 }}>{vedette.name}</p>
-                  <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.72)", marginTop: 3 }}>
-                    {vedette.sector} · {vedette.lieu}
-                  </p>
-                </div>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 22, overflow: "hidden", boxShadow: "0 18px 50px rgba(0,0,0,0.13)", display: "flex", flexDirection: "column" }}>
+
+            {/* La photo prend la plus grande part, comme sur la carte du
+                swipe : c'est elle qui donne son caractere a une entreprise. */}
+            <div style={{ position: "relative", height: 260 }}>
+              <div style={{
+                position: "absolute", inset: 0,
+                backgroundColor: "var(--surface3)",
+                backgroundImage: vedette.cover_url ? `url(${largeurCouverture(vedette.cover_url, 940)})` : undefined,
+                backgroundSize: "cover", backgroundPosition: "center",
+              }} />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 52%, rgba(0,0,0,0.82) 100%)" }} />
+              <span style={{
+                position: "absolute", top: 14, left: 14,
+                fontSize: 11, fontWeight: 700, color: "#fff",
+                background: "rgba(59,130,246,0.9)", borderRadius: 50, padding: "4px 11px",
+              }}>{vedette.sector}</span>
+              <div style={{ position: "absolute", left: 20, right: 20, bottom: 16 }}>
+                <p style={{ fontSize: 23, fontWeight: 800, color: "#fff", letterSpacing: "-0.025em", lineHeight: 1.15 }}>{vedette.name}</p>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.78)", marginTop: 3 }}>Banque et gestion de fortune</p>
               </div>
-            )}
-
-            <div style={{ padding: 22 }}>
-            <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-              Ce que dit la fiche
-            </p>
-
-            {/* Les deux faits qui decident d'une candidature : ou l'on
-                travaille, et dans quelle langue. Ils remplacent la note sur
-                cinq et ses quatre barres, qui n'existent plus. */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
-              {[
-                { l: "Localisation", v: vedette.lieu },
-                { l: "Langues de travail", v: vedette.langues },
-              ].map(({ l, v }) => (
-                <div key={l} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 11, padding: "11px 13px" }}>
-                  <p style={{ fontSize: 14.5, fontWeight: 700, letterSpacing: "-0.01em" }}>{v}</p>
-                  <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 3 }}>{l}</p>
-                </div>
-              ))}
             </div>
 
-            {/* Et la suite du parcours : trois voisines, une par ligne. C'est
-                ce qui fait qu'on ne s'arrete jamais a une seule fiche. */}
-            <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
-              À voir aussi
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 1, background: "var(--border)", border: "1px solid var(--border)", borderRadius: 11, overflow: "hidden" }}>
-              {voisines.map(({ n, d, img }) => (
-                <div key={n} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--surface)", padding: "9px 12px" }}>
-                  <span style={{
-                    width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                    backgroundImage: `url(${img})`, backgroundSize: "cover", backgroundPosition: "center",
-                    backgroundColor: "var(--surface3)",
-                  }} />
-                  <span style={{ minWidth: 0 }}>
-                    <span style={{ display: "block", fontSize: 12.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{n}</span>
-                    <span style={{ display: "block", fontSize: 11, color: "var(--text-muted)" }}>{d}</span>
-                  </span>
-                </div>
-              ))}
+            <div style={{ padding: "16px 18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {[vedette.lieu, vedette.langues].map(t => (
+                  <span key={t} style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    background: "var(--surface2)", border: "1px solid var(--border2)",
+                    borderRadius: 50, padding: "5px 11px", fontSize: 12.5, fontWeight: 600, color: "var(--text-sub)",
+                  }}>{t}</span>
+                ))}
+              </div>
+
+              <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                Première banque suisse, présente dans tous les cantons, de la gestion de
+                fortune au financement des entreprises.
+              </p>
+
+              <span style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7,
+                background: "var(--brand)", color: "#fff",
+                borderRadius: 12, padding: "12px 0", fontSize: 14, fontWeight: 700,
+              }}>
+                Voir les offres d&apos;emploi <ArrowRight size={15} aria-hidden="true" />
+              </span>
             </div>
-            </div>
+          </div>
+
+          {/* Les trois boutons du swipe, sous la carte : passer, en savoir
+              plus, garder. Ils disent en un coup d'oeil comment le site se
+              parcourt. */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 18 }}>
+            {[
+              { Icone: X, couleur: "#ef4444", taille: 56 },
+              { Icone: Info, couleur: "var(--text-muted)", taille: 42 },
+              { Icone: Flame, couleur: "#f97316", taille: 56 },
+            ].map(({ Icone, couleur, taille }, i) => (
+              <span key={i} style={{
+                width: taille, height: taille, borderRadius: "50%",
+                background: "var(--surface)", border: `2px solid ${couleur === "var(--text-muted)" ? "var(--border2)" : `${couleur}66`}`,
+                color: couleur,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 4px 18px rgba(0,0,0,0.08)",
+              }}>
+                <Icone size={taille === 42 ? 17 : 24} strokeWidth={2} aria-hidden="true" />
+              </span>
+            ))}
           </div>
         </div>
       </section>
