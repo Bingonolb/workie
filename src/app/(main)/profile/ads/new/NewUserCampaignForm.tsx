@@ -227,14 +227,17 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             {(["square", "swipe"] as const).map(f => (
               <button key={f} type="button" onClick={() => setFormat(f)} style={{
                 padding: "22px 20px", borderRadius: 16, cursor: "pointer", textAlign: "left",
-                border: format === f ? "2px solid #8b5cf6" : "1.5px solid rgba(255,255,255,0.07)",
-                background: format === f ? "rgba(139,92,246,0.1)" : "rgba(255,255,255,0.02)",
+                // La bordure blanche a sept pour cent ne se voyait pas en
+                // mode jour : elle etait pensee pour un fond sombre. Les deux
+                // etats passent par les jetons, donc par le theme.
+                border: format === f ? "1.5px solid var(--text)" : "1.5px solid var(--border2)",
+                background: format === f ? "var(--surface2)" : "transparent",
                 transition: "all 0.2s",
                 position: "relative",
               }}>
                 {format === f && (
-                  <div style={{ position: "absolute", top: 14, right: 14, width: 20, height: 20, borderRadius: "50%", background: "#8b5cf6", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7L10 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div style={{ position: "absolute", top: 14, right: 14, width: 20, height: 20, borderRadius: "50%", background: "var(--encre)", color: "var(--encre-texte)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7L10 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                 )}
                 <div style={{ marginBottom: 12, color: "var(--text-muted)" }}>
@@ -626,21 +629,16 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               Une liste vide vaut « toute la Suisse » côté serveur : laisser
               partir ce formulaire facturerait le tarif national à quelqu'un qui
               n'a rien choisi. */}
-          <button type="submit" disabled={pending || sansCiblage} style={{
-            flex: 1, padding: "16px", borderRadius: 14,
-            background: pending || sansCiblage ? "rgba(139,92,246,0.35)" : "var(--brand)",
-            color: "#fff", fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", border: "none",
-            cursor: pending || sansCiblage ? "not-allowed" : "pointer", opacity: pending ? 0.7 : 1, transition: "opacity 0.2s",
-          }}>
+          <button type="submit" disabled={pending || sansCiblage}
+            className="btn btn-encre btn-lg"
+            style={{ flex: 1, fontSize: "clamp(13px, 3.5vw, 16px)", fontWeight: 800 }}>
             {pending
               ? "Envoi en cours…"
               : sansCiblage
                 ? "Choisissez un territoire"
                 : `Payer CHF ${prix}`}
           </button>
-          <Link href="/profile/ads" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
-            Annuler
-          </Link>
+          <Link href="/profile/ads" className="btn btn-fantome">Annuler</Link>
         </div>
         <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 12, textAlign: "center", lineHeight: 1.6 }}>
           Paiement sécurisé par Stripe · Vous serez redirigé vers le paiement après soumission
