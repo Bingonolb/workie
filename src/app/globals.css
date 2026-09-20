@@ -1463,8 +1463,15 @@ input[type="range"]:active { transform: none; }
    chaque changement de page, et jamais pendant qu'on lit. */
 @media (prefers-reduced-motion: no-preference) {
   .page-main, .page-main-sm, .page-main-md { animation: apparition 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-  html { scroll-behavior: smooth; }
 }
+
+/* Pas de `scroll-behavior: smooth` sur la page entiere.
+   Il y a ete une journee, et il a casse toute la navigation : en changeant de
+   page, le routeur remet le defilement en haut, et cette regle transformait ce
+   retour instantane en une remontee animee, visible et lente. On voyait la
+   liste defiler vers le haut avant que la fiche s'affiche, au lieu d'entrer
+   dedans. Le defilement doux reste la ou il est demande explicitement, par le
+   bouton de la barre du bas, qui passe `behavior: "smooth"` a l'appel. */
 
 /* Le rebond en fin de liste laisse voir le fond du navigateur, qui n'est pas
    le notre. */
