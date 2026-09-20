@@ -80,8 +80,6 @@ export default async function ExplorePage() {
           isLoggedIn={false}
           isGuest={true}
           isAdmin={false}
-          penaltyCredits={0}
-          penaltySuccess={false}
           initialView="grid"
           squareAds={[]}
         />

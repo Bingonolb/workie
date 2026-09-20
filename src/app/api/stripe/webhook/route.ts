@@ -29,25 +29,12 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
 
-        // One-time penalty pass purchase
-        if (session.mode === "payment" && session.metadata?.type === "penalty_pass") {
-          const userId = session.metadata.user_id ?? session.client_reference_id;
-          if (userId) {
-            // Idempotency guard: use dedicated last_penalty_session_id column
-            const { data: prof } = await supabase.from("profiles")
-              .select("last_penalty_session_id")
-              .eq("id", userId).maybeSingle();
-            if (prof?.last_penalty_session_id !== session.id) {
-              const { error } = await supabase.rpc("increment_penalty_credits", { uid: userId, amount: 10 });
-              if (error) {
-                const { data: p } = await supabase.from("profiles").select("penalty_credits").eq("id", userId).maybeSingle();
-                await supabase.from("profiles").update({ penalty_credits: Number(p?.penalty_credits ?? 0) + 10 }).eq("id", userId);
-              }
-              await supabase.from("profiles").update({ last_penalty_session_id: session.id }).eq("id", userId);
-            }
-          }
-          break;
-        }
+        // Le pass penalite n'existe plus.
+        //
+        // La route qui creait la session est supprimee, donc plus aucune ne
+        // peut arriver ici. La branche qui creditait le compte part avec : un
+        // encaissement sans produit est le genre de code qu'on retrouve un
+        // jour en production, paye par quelqu'un.
 
         // Paiement d'une campagne : elle part en diffusion immédiatement.
         //

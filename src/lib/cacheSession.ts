@@ -107,9 +107,69 @@ export function oublier(...cles: string[]): void {
   for (const cle of cles) memoire.delete(cle);
 }
 
+/**
+ * La même donnée, gardée entre deux chargements de page.
+ *
+ * La mémoire ci-dessus meurt avec l'onglet : au rechargement, le profil
+ * repartait de rien et montrait son squelette, ses tirets et ses blocs vides
+ * le temps d'un aller-retour. C'est ce clignotement qu'on voit comme « le
+ * profil qui bugue au chargement », et aucune optimisation de requête ne le
+ * supprime : il faut avoir la réponse *avant* de peindre.
+ *
+ * Les trois contrôles de cloisonnement s'appliquent ici comme ailleurs, et
+ * c'est le seul endroit où ils sont réécrits parce que la clé elle-même porte
+ * l'identifiant du compte : rien n'est lu sans compte identifiable, rien n'est
+ * lu qui ne déclare pas ce compte comme destinataire.
+ *
+ * Toute lecture et toute écriture sont protégées : le stockage peut être
+ * refusé, et la page doit alors fonctionner sans lui.
+ */
+function clePersistante(cle: string): string | null {
+  const compte = compteCourant();
+  return compte ? `workie_${cle}_${compte}` : null;
+}
+
+export function lirePersistant<T extends { compte?: unknown }>(cle: string): T | null {
+  const k = clePersistante(cle);
+  if (!k) return null;
+  try {
+    const brut = localStorage.getItem(k);
+    if (!brut) return null;
+    const valeur = JSON.parse(brut) as T;
+    // Le destinataire declare par la reponse, revérifié à la lecture.
+    if (typeof valeur?.compte === "string" && valeur.compte !== compteCourant()) {
+      localStorage.removeItem(k);
+      return null;
+    }
+    return valeur;
+  } catch {
+    return null;
+  }
+}
+
+export function ecrirePersistant(cle: string, valeur: unknown): void {
+  const k = clePersistante(cle);
+  if (!k) return;
+  try { localStorage.setItem(k, JSON.stringify(valeur)); } catch { /* stockage refusé */ }
+}
+
+export function oublierPersistant(cle: string): void {
+  const k = clePersistante(cle);
+  if (!k) return;
+  try { localStorage.removeItem(k); } catch { /* sans conséquence */ }
+}
+
 /** Appelé à la déconnexion : plus rien ne doit subsister du compte précédent. */
 export function viderCache(): void {
   memoire.clear();
+  // Les copies durables partent aussi : elles survivraient a la deconnexion.
+  try {
+    const compte = compteCourant();
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("workie_") && (!compte || k.endsWith(compte))) localStorage.removeItem(k);
+    }
+  } catch { /* stockage indisponible */ }
 }
 
 /**

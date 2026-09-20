@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 // dans quel sens le score bouge.
 import { MapPin, Users, TrendingUp, TrendingDown, X, Flame, Info, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
-import { addBoost, addPenalty } from "@/lib/actions/scores";
 import { fetchSwipePage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
@@ -42,24 +41,16 @@ export function SwipeView({
   companies: initialCompanies,
   initialFavIds,
   initialFlameIds,
-  initialBoostIds = [],
-  initialPenaltyIds = [],
   isLoggedIn,
   isAdmin = false,
-  penaltyCredits: initialPenaltyCredits = 0,
-  penaltySuccess = false,
   filters,
   swipeAds = [],
 }: {
   companies: Company[];
   initialFavIds: string[];
   initialFlameIds: string[];
-  initialBoostIds?: string[];
-  initialPenaltyIds?: string[];
   isLoggedIn: boolean;
   isAdmin?: boolean;
-  penaltyCredits?: number;
-  penaltySuccess?: boolean;
   filters?: { sector?: string; canton?: string; search?: string };
   swipeAds?: PublicAdCampaign[];
 }) {
@@ -99,26 +90,10 @@ export function SwipeView({
   const [index, setIndex] = useState<number>(() => sauvegarde?.index ?? 0);
   const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
   const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
-  // Même correction que pour le boost : l'état vient du serveur.
-  const [penaltyIds, setPenaltyIds] = useState<Set<string>>(new Set(initialPenaltyIds));
   // Initialisé depuis le serveur, et non vide : sans cela le bouton oubliait
-  // le boost au moindre rafraîchissement, et le clic suivant le retirait.
-  const [boostIds, setBoostIds] = useState<Set<string>>(new Set(initialBoostIds));
-  const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
-  // true if user started the session with credits > 0 (i.e. has previously purchased)
-  // Valeur figée au montage, pas une ref : une ref lue pendant le rendu n'est
-  // pas suivie par React, donc l'affichage peut ne pas se mettre à jour.
-  const [avaitDesCredits] = useState(initialPenaltyCredits > 0);
   const [gone, setGone] = useState<"left" | "right" | null>(null);
-  const [toast, setToast] = useState<{ msg: string; color: string } | null>(
-    penaltySuccess
-      ? { msg: "Pass pénalité activé. Vous pouvez maintenant pénaliser une entreprise.", color: "#10b981" }
-      : null
-  );
+  const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [showGuestModal, setShowGuestModal] = useState(false);
-  const [showPenaltyUpgrade, setShowPenaltyUpgrade] = useState(false);
-  const [penaltyCheckoutLoading, setPenaltyCheckoutLoading] = useState(false);
-  const [penaltyCheckoutError, setPenaltyCheckoutError] = useState("");
 
   // Entreprises déjà vues : restaurées pour ne pas les reproposer.
   useEffect(() => {
@@ -126,16 +101,6 @@ export function SwipeView({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Le message d'activation était posé depuis un effet : React peignait donc
-  // une fois sans lui, puis une seconde fois avec. Il fait maintenant partie de
-  // l'état initial, et seul le nettoyage de l'URL reste dans un effet — c'est
-  // une action sur le navigateur, pas sur l'affichage.
-  useEffect(() => {
-    if (!penaltySuccess) return;
-    const url = new URL(window.location.href);
-    url.searchParams.delete("penalty_success");
-    window.history.replaceState({}, "", url.toString());
-  }, [penaltySuccess]);
   const [exhausted, setExhausted] = useState(false);
   // Track all companies seen/acted on this session to avoid re-showing them in new batches
   const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
@@ -436,41 +401,6 @@ export function SwipeView({
     return () => window.removeEventListener("keydown", handler);
   }, [advance]);
 
-  const handleBoost = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isAd(current)) return;
-    if (!isLoggedIn) { requireLogin(); return; }
-    if (!current) return;
-    const id = (current as Company).id;
-    const toggled = boostIds.has(id);
-    setBoostIds(prev => { const n = new Set(prev); toggled ? n.delete(id) : n.add(id); return n; });
-    markActed(id);
-    addBoost(id);
-    showToast(toggled ? "Boost retiré" : "Boost appliqué, +100 pts", "#8b5cf6");
-  };
-
-  const handlePenalty = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isAd(current)) return;
-    if (!isLoggedIn) { requireLogin(); return; }
-    if (!current) return;
-    if (!isAdmin && penaltyCredits <= 0) { setShowPenaltyUpgrade(true); return; }
-    const id = (current as Company).id;
-    const toggled = penaltyIds.has(id);
-    setPenaltyIds(prev => { const n = new Set(prev); toggled ? n.delete(id) : n.add(id); return n; });
-    if (!isAdmin) {
-      const newCredits = toggled ? penaltyCredits + 1 : penaltyCredits - 1;
-      setPenaltyCredits(newCredits);
-      // Show recharge modal after a short delay so the toast is seen first
-      if (newCredits === 0 && !toggled) {
-        setTimeout(() => setShowPenaltyUpgrade(true), 1800);
-      }
-    }
-    markActed(id);
-    addPenalty(id);
-    showToast(toggled ? "Pénalité retirée" : "Pénalité appliquée, -100 pts", "#ef4444");
-  };
-
   // Native touch handlers — React touch events are passive by default on iOS,
   // meaning e.preventDefault() is ignored and the browser hijacks the gesture
   // as a scroll. We attach manually with { passive: false } to fix this.
@@ -669,7 +599,11 @@ export function SwipeView({
         </div>
       </div>
 
-      {/* Action buttons */}
+      {/* Les trois boutons ne bougent pas pendant qu'une carte s'en va.
+          Ils s'eteignaient a moitie le temps de l'animation puis revenaient :
+          c'est la carte qui part, eux restent. Ils sont toujours desactives
+          pendant ce court instant, pour qu'un second appui n'avance pas de
+          deux entreprises, mais cela ne se voit plus. */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
 
         <button type="button" onClick={() => advance("left")} disabled={!!gone} aria-label="Passer cette entreprise"
@@ -678,7 +612,7 @@ export function SwipeView({
           background: "var(--surface)",
           border: "2px solid rgba(239,68,68,0.4)",
           color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
+          cursor: "pointer",
           boxShadow: "0 6px 24px rgba(239,68,68,0.15)",
           transition: "all 0.18s",
         }}
@@ -694,7 +628,7 @@ export function SwipeView({
           background: "var(--surface)",
           border: "2px solid rgba(99,102,241,0.45)",
           color: "#818cf8", display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
+          cursor: "pointer",
           boxShadow: "0 4px 18px rgba(99,102,241,0.15)",
           transition: "all 0.18s",
         }}
@@ -713,7 +647,7 @@ export function SwipeView({
           border: !isAd(current) && flameIds.has(current.id) ? "2px solid rgba(249,115,22,0.8)" : "2px solid rgba(249,115,22,0.4)",
           color: !isAd(current) && flameIds.has(current.id) ? "#fff" : "#f97316",
           display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: gone ? "not-allowed" : "pointer", opacity: gone ? 0.45 : 1,
+          cursor: "pointer",
           boxShadow: !isAd(current) && flameIds.has(current.id) ? "0 6px 28px rgba(249,115,22,0.5)" : "0 6px 24px rgba(249,115,22,0.15)",
           transition: "all 0.18s",
         }}
@@ -741,75 +675,6 @@ export function SwipeView({
 
       {showGuestModal && !isLoggedIn && <GuestModal reviewCount={companies.filter(c => !isAd(c)).length} open />}
 
-      {/* Penalty pass upgrade modal */}
-      {showPenaltyUpgrade && (
-        <>
-          <div onClick={() => setShowPenaltyUpgrade(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 10010 }} />
-          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10011, width: "min(420px, 92vw)", background: "var(--surface)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 24, overflow: "hidden" }}>
-            {/* Header band */}
-            <div style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(249,115,22,0.08))", borderBottom: "1px solid rgba(239,68,68,0.15)", padding: "28px 28px 24px", textAlign: "center" }}>
-              <div style={{ width: 60, height: 60, borderRadius: 18, background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 26 }}>💀</div>
-              <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: "-0.02em", color: "var(--text)", marginBottom: 6 }}>
-                {penaltyCredits === 0 && avaitDesCredits && !isAdmin
-                  ? <>Crédits épuisés <span style={{ color: "#ef4444" }}>-100 pts</span></>
-                  : <>Bouton <span style={{ color: "#ef4444" }}>-100 pts</span> : pack 10 utilisations</>}
-              </h2>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                {penaltyCredits === 0 && avaitDesCredits && !isAdmin
-                  ? "Vous avez utilisé tous vos crédits. Rechargez pour continuer à signaler les entreprises toxiques."
-                  : "Signalez les entreprises toxiques et impactez leur classement sur Workie."}
-              </p>
-            </div>
-
-            {/* Body */}
-            <div style={{ padding: "22px 28px 28px" }}>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 22px", display: "flex", flexDirection: "column", gap: 10 }}>
-                {[
-                  "10 utilisations, 1 CHF par entreprise",
-                  "Impact direct sur leur score de réputation",
-                  "1 pénalité max par entreprise (annulable)",
-                  "Paiement sécurisé via Stripe",
-                ].map(item => (
-                  <li key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--text)" }}>
-                    <span style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(16,185,129,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 11, color: "#10b981", fontWeight: 900 }}>✓</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              {penaltyCheckoutError && (
-                <p style={{ fontSize: 12, color: "#ef4444", textAlign: "center", marginBottom: 12, background: "rgba(239,68,68,0.06)", padding: "8px 12px", borderRadius: 8 }}>{penaltyCheckoutError}</p>
-              )}
-
-              <button
-                disabled={penaltyCheckoutLoading}
-                onClick={async () => {
-                  setPenaltyCheckoutError("");
-                  setPenaltyCheckoutLoading(true);
-                  try {
-                    const res = await fetch("/api/user/checkout-penalty", { method: "POST" });
-                    const data = await res.json();
-                    if (!res.ok || !data.url) {
-                      setPenaltyCheckoutError(data.error ?? "Erreur lors de la création du paiement.");
-                      return;
-                    }
-                    window.location.href = data.url;
-                  } catch {
-                    setPenaltyCheckoutError("Erreur réseau. Réessaie.");
-                  } finally {
-                    setPenaltyCheckoutLoading(false);
-                  }
-                }}
-                style={{ width: "100%", padding: "15px 0", borderRadius: 12, background: penaltyCheckoutLoading ? "var(--surface2)" : "linear-gradient(135deg, #ef4444, #f97316)", color: penaltyCheckoutLoading ? "var(--text-muted)" : "#fff", border: "none", fontWeight: 800, fontSize: 15, cursor: penaltyCheckoutLoading ? "not-allowed" : "pointer", letterSpacing: "-0.01em" }}>
-                {penaltyCheckoutLoading ? "Redirection vers Stripe…" : "10 utilisations · 10 CHF"}
-              </button>
-              <button type="button" onClick={() => setShowPenaltyUpgrade(false)} style={{ display: "block", width: "100%", background: "none", border: "none", fontSize: 13, color: "var(--text-muted)", cursor: "pointer", padding: "10px 0 0", textAlign: "center" }}>
-                Pas maintenant
-              </button>
-            </div>
-          </div>
-        </>
-      )}
 
       <style>{`
         @keyframes toastSlide {

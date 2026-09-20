@@ -7,7 +7,6 @@ import { useEtatFiche } from "./EtatFiche";
 import { SaveButton } from "@/components/SaveButton";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { ReportButton } from "@/components/ReportButton";
-import { CompanyVoteButtons } from "@/components/CompanyVoteButtons";
 import { GuestContentGate } from "@/components/GuestContentGate";
 import { ReviewForm } from "@/components/ReviewForm";
 
@@ -50,22 +49,6 @@ export function ActionsFiche({ companyId, companyName }: { companyId: string; co
         variant="icon"
       />
     </>
-  );
-}
-
-export function VotesFiche({ companyId, initialScore }: { companyId: string; initialScore: number }) {
-  const { isLoggedIn, isAdmin, penaltyCredits, boosted, penalized } = useEtatFiche();
-  return (
-    <CompanyVoteButtons
-      companyId={companyId}
-      isLoggedIn={isLoggedIn}
-      isAdmin={isAdmin}
-      penaltyCredits={penaltyCredits}
-      initialBoosted={boosted}
-      initialPenalized={penalized}
-      initialScore={initialScore}
-      variant="card"
-    />
   );
 }
 

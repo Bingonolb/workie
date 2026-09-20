@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import Link from "next/link";
 import { ProfileForm } from "@/components/ProfileForm";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { SignOutButton } from "@/components/SignOutButton";
 import type { Profile } from "@/lib/types";
-import { lireCache, obtenir, CLE_PROFIL } from "@/lib/cacheSession";
+import { lireCache, obtenir, lirePersistant, ecrirePersistant, CLE_PROFIL } from "@/lib/cacheSession";
 import { CoverImage } from "@/components/CoverImage";
 // Les tuiles portaient des emojis dans un carre teinte. Le dessin d'un emoji
 // appartient au systeme d'exploitation : il change d'un appareil a l'autre,
@@ -17,6 +17,8 @@ import { Flame, Megaphone, Download, ChevronRight } from "lucide-react";
 
 type Donnees = {
   authentifie: boolean;
+  /** Destinataire declare par le serveur, revérifié avant tout affichage. */
+  compte?: string;
   email: string;
   creeLe: string | null;
   profile: Profile | null;
@@ -50,6 +52,28 @@ export function ProfilClient() {
   const [d, setD] = useState<Donnees | null>(depuisMemoire);
   const [echec, setEchec] = useState(false);
 
+  /*
+   * La derniere reponse connue, avant meme de peindre.
+   *
+   * La memoire de session meurt avec l'onglet : au rechargement, la page
+   * repartait de rien et montrait son squelette, ses tirets et ses blocs vides
+   * le temps d'un aller-retour. C'est ce clignotement qu'on voit comme « le
+   * profil qui bugue au chargement », et aucune optimisation de requete ne le
+   * supprime : il faut avoir la reponse avant de peindre.
+   *
+   * Dans un effet de disposition, et non au premier rendu : le serveur rend la
+   * coquille vide, et un premier rendu client different d'elle casserait
+   * l'hydratation. Un effet de disposition s'execute avant que le navigateur
+   * peigne, donc l'ecran vide n'est jamais montre.
+   */
+  useLayoutEffect(() => {
+    if (depuisMemoire) return;
+    const garde = lirePersistant<Donnees>(CLE_PROFIL);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (garde && Array.isArray(garde.recentes)) setD(garde);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     let annule = false;
     // La barre de navigation a souvent déjà lancé cet appel : `obtenir`
@@ -61,7 +85,7 @@ export function ProfilClient() {
         // plus de session valide. On repasse par la déconnexion, qui purge
         // les cookies avant d'envoyer vers la connexion.
         if (statut === 401) { window.location.href = "/api/auth/signout?next=/login"; return; }
-        if (donnees && !annule) setD(donnees);
+        if (donnees && !annule) { setD(donnees); ecrirePersistant(CLE_PROFIL, donnees); }
         else if (!donnees && !annule) setEchec(true);
       })
       // Sans cet état, un échec laissait la page sur son squelette
@@ -102,7 +126,10 @@ export function ProfilClient() {
   // le premier rendu, donc l'animation partait même quand le contenu était déjà
   // là. La page paraissait charger alors qu'elle n'avait rien à charger — c'est
   // précisément l'impression qu'on cherchait à supprimer.
-  const anime = d !== null && depuisMemoire === null;
+  // Le fondu ne se joue que si les donnees ont du etre attendues : ni depuis
+  // la memoire de session, ni depuis la copie durable.
+  const [attendu] = useState(() => depuisMemoire === null && lirePersistant<Donnees>(CLE_PROFIL) === null);
+  const anime = d !== null && attendu;
 
   // Deux tuiles au plus, et seulement ce sur quoi on peut agir.
   //

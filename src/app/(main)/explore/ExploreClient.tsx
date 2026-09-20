@@ -91,8 +91,6 @@ export function ExploreClient({
   isLoggedIn: initialIsLoggedIn,
   isGuest: initialIsGuest,
   isAdmin: initialIsAdmin,
-  penaltyCredits: initialPenaltyCredits,
-  penaltySuccess,
   initialView,
   initialSector,
   initialCanton,
@@ -107,8 +105,6 @@ export function ExploreClient({
   isLoggedIn: boolean;
   isGuest: boolean;
   isAdmin: boolean;
-  penaltyCredits: number;
-  penaltySuccess: boolean;
   initialView: "grid" | "swipe";
   initialSector?: string;
   initialCanton?: string;
@@ -149,20 +145,14 @@ export function ExploreClient({
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
   const [isGuest, setIsGuest] = useState(false); // optimistic false until auth resolves
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
-  const [penaltyCredits, setPenaltyCredits] = useState(initialPenaltyCredits);
   // Repris de la mémoire : sans cela les flammes partaient éteintes à chaque
   // navigation et s'allumaient une fois le réseau revenu, souvent après les
   // images — d'où l'impression qu'elles surgissaient.
   const memoireContexte = typeof window !== "undefined"
-    ? lireCache<{ favIds: string[]; flameIds: string[]; boostIds?: string[]; penaltyIds?: string[] }>(CLE_CONTEXTE)
+    ? lireCache<{ favIds: string[]; flameIds: string[] }>(CLE_CONTEXTE)
     : undefined;
   const [favIds, setFavIds] = useState<string[]>(memoireContexte?.favIds ?? initialFavIds);
   const [flameIds, setFlameIds] = useState<string[]>(memoireContexte?.flameIds ?? initialFlameIds);
-  // Boost et pénalité repartaient de zéro à chaque chargement : le bouton
-  // s'affichait éteint alors que le geste était enregistré, et un second clic
-  // l'annulait sans que l'utilisateur l'ait voulu.
-  const [boostIds, setBoostIds] = useState<string[]>(memoireContexte?.boostIds ?? []);
-  const [penaltyIds, setPenaltyIds] = useState<string[]>(memoireContexte?.penaltyIds ?? []);
   const [squareAdsState, setSquareAdsState] = useState<PublicAdCampaign[]>(squareAds);
   const [swipeAdsState, setSwipeAdsState] = useState<PublicAdCampaign[]>(swipeAds);
 
@@ -379,9 +369,6 @@ export function ExploreClient({
       ecrireCache(CLE_CONTEXTE, ctx);
       setFavIds(ctx.favIds);
       setFlameIds(ctx.flameIds);
-      setBoostIds(ctx.boostIds ?? []);
-      setPenaltyIds(ctx.penaltyIds ?? []);
-      setPenaltyCredits(ctx.penaltyCredits);
       if (ads.squareAds) setSquareAdsState(ads.squareAds);
       if (ads.swipeAds) setSwipeAdsState(ads.swipeAds);
     }).catch(() => { setAuthReady(true); /* leave defaults */ });
@@ -682,12 +669,8 @@ export function ExploreClient({
           companies={swipeCompanies}
           initialFavIds={favIds}
           initialFlameIds={flameIds}
-          initialBoostIds={boostIds}
-          initialPenaltyIds={penaltyIds}
           isLoggedIn={isLoggedIn}
           isAdmin={isAdmin}
-          penaltyCredits={penaltyCredits}
-          penaltySuccess={penaltySuccess}
           filters={{ sector: sector || undefined, canton: canton || undefined }}
           swipeAds={swipeAdsState}
         />

@@ -66,72 +66,9 @@ export async function retirerFlamme(companyId: string): Promise<void> {
   return ecrireFlamme(companyId, false);
 }
 
-export async function addBoost(companyId: string): Promise<void> {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || refusDeContribution(user)) return;
-    if (await isBusiness(supabase, user.id)) return;
-
-    const { data: existing } = await supabase
-      .from("score_events").select("id")
-      .eq("company_id", companyId).eq("user_id", user.id).eq("event_type", "boost")
-      .maybeSingle();
-
-    if (existing) {
-      const { error } = await supabase.from("score_events").delete().eq("id", existing.id);
-      if (error) { captureServerError(error, { action: "addBoost", step: "delete" }); return; }
-      revalidatePath("/explore");
-      revalidatePath("/ranking");
-      revalidatePath(`/company/${companyId}`);
-      return;
-    }
-
-    const { error } = await supabase.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "boost", points: 100 });
-    if (error) { captureServerError(error, { action: "addBoost", step: "insert" }); return; }
-    revalidatePath("/explore");
-    revalidatePath("/ranking");
-    revalidatePath(`/company/${companyId}`);
-    revalidateTag("companies", {});
-    revalidateTag("top-companies", {});
-  } catch (e) { captureServerError(e, { action: "addBoost" }); }
-}
-
-export async function addPenalty(companyId: string): Promise<void> {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || refusDeContribution(user)) return;
-
-    const { data: profile } = await supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle();
-    const isAdmin = profile?.role === "admin";
-    const credits = Number(profile?.penalty_credits ?? 0);
-    if (!isAdmin && credits <= 0) return;
-
-    const admin = createAdminClient();
-    const { data: existing } = await admin
-      .from("score_events").select("id")
-      .eq("company_id", companyId).eq("user_id", user.id).eq("event_type", "penalty")
-      .maybeSingle();
-
-    if (existing) {
-      await admin.from("score_events").delete().eq("id", existing.id);
-      if (!isAdmin) await supabase.rpc("increment_penalty_credits", { uid: user.id, amount: 1 });
-    } else {
-      if (!isAdmin) {
-        const { data: ok } = await supabase.rpc("spend_penalty_credit", { uid: user.id });
-        if (!ok) return;
-      }
-      await admin.from("score_events").insert({ company_id: companyId, user_id: user.id, event_type: "penalty", points: -100 });
-    }
-
-    revalidatePath("/explore");
-    revalidatePath("/ranking");
-    revalidatePath(`/company/${companyId}`);
-    revalidateTag("companies", {});
-    revalidateTag("top-companies", {});
-  } catch (e) { captureServerError(e, { action: "addPenalty" }); }
-}
+// addBoost et addPenalty ont ete supprimees avec les boutons « +100 » et
+// « -100 ». Le classement ne mesure plus un jugement mais un interet :
+// favoris, visites et partages, calcules en base.
 
 export async function getTopCompanies(limit = 200) {
   const supabase = await createClient();
