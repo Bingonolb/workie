@@ -116,7 +116,7 @@ export function ReportButton({
   }, [open, isPending]);
 
   function submit() {
-    if (!category) { setError("Veuillez sélectionner une catégorie."); return; }
+    if (!category) { setError("Choisissez d’abord un motif ci-dessus."); return; }
     setError("");
     startTransition(async () => {
       const res = await submitReport({ targetType, targetId, targetLabel, category, explanation });
@@ -318,13 +318,19 @@ export function ReportButton({
                     }}>
                       Annuler
                     </button>
-                    <button type="button" onClick={submit} disabled={isPending || !category} style={{
+                    {/* Actif meme sans motif choisi.
+                        Desactive, il ne disait pas pourquoi : on remplissait
+                        l'explication, on appuyait, rien ne se passait et aucun
+                        message n'apparaissait, puisque le clic n'atteignait
+                        jamais le code qui l'affiche. Un bouton eteint qui ne
+                        s'explique pas est un cul-de-sac. */}
+                    <button type="button" onClick={submit} disabled={isPending} style={{
                       flex: 1, padding: "12px 20px", borderRadius: 10, border: "none",
                       background: !category || isPending
                         ? "var(--surface2)"
-                        : "linear-gradient(135deg, #ef4444, #f97316)",
+                        : "#ef4444",
                       color: !category || isPending ? "var(--text-muted)" : "#fff",
-                      fontWeight: 700, fontSize: 14, cursor: !category ? "not-allowed" : "pointer",
+                      fontWeight: 700, fontSize: 14, cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                       transition: "all 0.15s",
                     }}>
