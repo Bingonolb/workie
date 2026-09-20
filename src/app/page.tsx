@@ -40,6 +40,13 @@ const getApercuEntreprises = unstable_cache(
       .from("companies")
       .select("id, name, sector, subsector, city, canton, description, cover_url, website_url, employee_range, langues")
       .not("cover_url", "is", null)
+      // Une fiche sans description donne une carte a moitie vide, et la page
+      // d'accueil est le dernier endroit ou se le permettre.
+      .not("description", "is", null)
+      // JEJ Asssociation est la fiche d'essai de Luc, fictive et mal
+      // orthographiee. Ses visites l'ont hissee dans le classement : elle
+      // n'a rien a faire en page d'accueil.
+      .neq("id", "87d31750-9816-45bb-bbf4-34549cf19405")
       .order("score", { ascending: false })
       .limit(5);
     return (data ?? []).map(c => ({
