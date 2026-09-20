@@ -130,19 +130,16 @@ export function CarteCampagne({
             <PayUserCampaignButton campaignId={c.id} total={Number(c.total_budget_chf)} />
           )}
           {c.status !== "payment_pending" && (
-            <Link href={`/profile/ads/${c.id}`} style={{ fontSize: 12, fontWeight: 700, color: "#8b5cf6", textDecoration: "none", padding: "5px 12px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)", background: "rgba(139,92,246,0.06)" }}>
+            <Link href={`/profile/ads/${c.id}`} className="btn btn-clair btn-sm">
               Voir les stats
             </Link>
           )}
           <Link
             href={`/profile/ads/new?headline=${encodeURIComponent(c.headline)}&format=${c.format}&cta_label=${encodeURIComponent(c.cta_label)}&cta_url=${encodeURIComponent(c.cta_url)}&image=${encodeURIComponent(c.image_url)}`}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700,
-              textDecoration: "none", padding: "5px 12px", borderRadius: 8,
-              color: aRelancer ? "#8b5cf6" : "var(--text-muted)",
-              border: aRelancer ? "1px solid rgba(139,92,246,0.25)" : "1px solid var(--border2)",
-              background: aRelancer ? "rgba(139,92,246,0.06)" : "transparent",
-            }}
+            // Relancer est l'action qu'on attend d'une campagne terminee ;
+            // dupliquer n'est qu'une commodite. Le premier se donne le poids
+            // d'un bouton, le second se retire.
+            className={aRelancer ? "btn btn-clair btn-sm" : "btn btn-fantome btn-sm"}
           >
             {aRelancer
               ? <><RotateCcw size={11} aria-hidden="true" /> Relancer</>

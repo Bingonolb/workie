@@ -52,7 +52,10 @@ function NotificationItem({ n, onRead, onDelete }: {
     display: "flex", alignItems: "flex-start", gap: 14,
     padding: "14px 16px", borderRadius: 14, textDecoration: "none",
     background: n.read ? "var(--surface)" : "var(--surface2)",
-    border: `1px solid ${n.read ? "var(--border)" : "rgba(139,92,246,0.25)"}`,
+    // Non lue : la bordure se renforce, elle ne se colore pas. La couleur
+    // etait deja prise par la pastille de type a gauche, et deux signaux pour
+    // un seul etat n'en font pas un plus clair.
+    border: `1px solid ${n.read ? "var(--border)" : "var(--border2)"}`,
   };
 
   const cardInner = (
