@@ -144,6 +144,7 @@ export type Database = {
           cover_color: string | null; cover_credit: string | null; cover_credit_url: string | null
           cover_source: string | null; cover_query: string | null
           created_at: string | null; description: string | null; description_source: string | null; employee_range: string | null
+          langues: string[] | null
           founded_year: number | null; id: string; instagram_url: string | null
           is_subscribed: boolean | null; is_verified: boolean | null; linkedin_url: string | null
           logo_url: string | null; name: string; profile_score: number | null; review_count: number | null; score: number
@@ -474,5 +475,21 @@ export function cantonValide(code: string): boolean {
     || code === CANTON_LIECHTENSTEIN.code
     || CANTONS_SAISIE.some(c => c.code === code);
 }
+
+/**
+ * Les langues de travail proposées à la saisie.
+ *
+ * Les codes sont ceux de la norme internationale, et non des abréviations
+ * françaises : « DE » se lit en allemand comme en français, « ALL » ne se lit
+ * qu'en français. Le site passera en allemand ; ces quatre codes n'auront pas
+ * à être retraduits, et ce sont déjà ceux qu'emploient les offres d'emploi
+ * suisses.
+ */
+export const LANGUES_SAISIE: { code: string; nom: string }[] = [
+  { code: "FR", nom: "français" },
+  { code: "DE", nom: "allemand" },
+  { code: "EN", nom: "anglais" },
+  { code: "IT", nom: "italien" },
+];
 
 export const EMPLOYEE_RANGES = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10000", "10001+"];

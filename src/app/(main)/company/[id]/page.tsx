@@ -144,7 +144,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
     getCachedSuggestions(company.id, company.sector, company.subsector ?? null, company.canton ?? null).catch(() => []),
   ]);
 
-  const langues = languesDeTravail(company.canton ?? null, company.website_url ?? null, company.employee_range ?? null);
+  // Ce qui est saisi l'emporte sur ce qui est deduit.
+  const saisies = (company as { langues?: string[] | null }).langues ?? [];
+  const langues = saisies.length > 0
+    ? saisies
+    : languesDeTravail(company.canton ?? null, company.website_url ?? null, company.employee_range ?? null);
 
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
 

@@ -92,6 +92,21 @@ export function ecrireCache(cle: string, valeur: unknown): void {
   memoire.set(cle, { compte: compteCourant(), valeur });
 }
 
+/**
+ * Oublie une entrée, parce qu'elle vient de devenir fausse.
+ *
+ * Le cache tenait jusqu'à la fermeture de l'onglet : poser une flamme puis
+ * ouvrir ses favoris servait la liste d'avant, et il fallait recharger pour
+ * voir l'entreprise qu'on venait d'ajouter. Un cache qui ne s'invalide jamais
+ * n'accélère pas, il ment.
+ *
+ * Oublier vaut mieux que réécrire : la prochaine page redemandera, et elle
+ * redemandera une fois, puisque `obtenir` partage la requête en cours.
+ */
+export function oublier(...cles: string[]): void {
+  for (const cle of cles) memoire.delete(cle);
+}
+
 /** Appelé à la déconnexion : plus rien ne doit subsister du compte précédent. */
 export function viderCache(): void {
   memoire.clear();

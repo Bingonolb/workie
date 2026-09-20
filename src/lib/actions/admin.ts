@@ -6,7 +6,7 @@ import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
 import { notifyNewCompany } from "@/lib/actions/notifications";
-import { cantonValide } from "@/lib/types";
+import { cantonValide, LANGUES_SAISIE } from "@/lib/types";
 
 async function requireAdmin() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -32,6 +32,11 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
       subsector: String(formData.get("subsector") || "") || null,
       city: String(formData.get("city") || ""),
       canton: String(formData.get("canton") || "").trim().toUpperCase() || null,
+      // Liste vide plutot que null : « aucune langue cochee » et « pas encore
+      // renseigne » se traitent pareil cote fiche, qui retombe sur la
+      // deduction dans les deux cas.
+      langues: String(formData.get("langues") || "")
+        .split(",").map(l => l.trim().toUpperCase()).filter(l => LANGUES_SAISIE.some(x => x.code === l)),
       employee_range: String(formData.get("employee_range") || "") || null,
       description: String(formData.get("description") || "").slice(0, 3000) || null,
       cover_url,
@@ -119,6 +124,11 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       subsector: String(formData.get("subsector") || "") || null,
       city: String(formData.get("city") || ""),
       canton: String(formData.get("canton") || "").trim().toUpperCase() || null,
+      // Liste vide plutot que null : « aucune langue cochee » et « pas encore
+      // renseigne » se traitent pareil cote fiche, qui retombe sur la
+      // deduction dans les deux cas.
+      langues: String(formData.get("langues") || "")
+        .split(",").map(l => l.trim().toUpperCase()).filter(l => LANGUES_SAISIE.some(x => x.code === l)),
       // Pas de valeur par défaut : une taille non saisie reste inconnue plutôt
       // que d'affirmer « 11-50 » sans source.
       employee_range: String(formData.get("employee_range") || "") || null,

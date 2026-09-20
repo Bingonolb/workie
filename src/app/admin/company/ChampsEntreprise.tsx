@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { EMPLOYEE_RANGES, CANTONS_SAISIE, CANTON_TOUTE_LA_SUISSE, CANTON_LIECHTENSTEIN } from "@/lib/types";
+import { EMPLOYEE_RANGES, CANTONS_SAISIE, CANTON_TOUTE_LA_SUISSE, CANTON_LIECHTENSTEIN, LANGUES_SAISIE } from "@/lib/types";
 import type { Company } from "@/lib/types";
 import { ImageIcon } from "lucide-react";
 
@@ -58,6 +58,15 @@ export function ChampsEntreprise({
   const [canton, setCanton] = useState(company?.canton ?? "");
   // La ville saisie avant de passer en multi-sites, rendue si l'on revient à
   // un canton : changer d'avis ne doit pas obliger à la retaper.
+  // Les langues de travail, cochees a la main quand la deduction se trompe.
+  // Vide, la fiche retombe sur ce que le canton et l'adresse du site
+  // indiquent, ce qui couvre l'immense majorite des cas.
+  const [langues, setLangues] = useState<string[]>(
+    () => (company as { langues?: string[] } | undefined)?.langues ?? [],
+  );
+  const basculerLangue = (code: string) =>
+    setLangues(l => (l.includes(code) ? l.filter(x => x !== code) : [...l, code]));
+
   const [villeAvant, setVilleAvant] = useState("");
   const multiSites = canton === CANTON_MULTI_SITES;
 
@@ -116,6 +125,38 @@ export function ChampsEntreprise({
 
   return (
     <>
+      <div>
+        <label style={lbl}>Langues de travail</label>
+        {/* Des interrupteurs et non un menu : on en choisit plusieurs, et
+            quatre cases se lisent d'un coup la ou un menu multiple demande
+            d'ouvrir, de maintenir une touche et de deviner ce qui est coche.
+            Les codes sont ceux de la norme internationale, FR, DE, EN, IT :
+            ils ne changent pas quand le site passera en allemand, alors que
+            « ALL » et « ANG » sont des abreviations francaises. */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {LANGUES_SAISIE.map(({ code, nom }) => {
+            const choisie = langues.includes(code);
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() => basculerLangue(code)}
+                aria-pressed={choisie}
+                className={choisie ? "btn btn-encre btn-sm" : "btn btn-clair btn-sm"}
+              >
+                {code} <span style={{ fontWeight: 500, opacity: 0.75 }}>{nom}</span>
+              </button>
+            );
+          })}
+        </div>
+        <input type="hidden" name="langues" value={langues.join(",")} />
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.55 }}>
+          {langues.length === 0
+            ? "Aucune cochée : la fiche déduit les langues du canton et de l'adresse du site."
+            : "Ces langues remplacent la déduction sur la fiche."}
+        </p>
+      </div>
+
       <div className="admin-grille-2">
         <div>
           <label style={lbl}>Nom</label>

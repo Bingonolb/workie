@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { Flame, Star } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
+import { oublier, CLE_FAVORIS, CLE_PROFIL, CLE_CONTEXTE } from "@/lib/cacheSession";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { CoverImage } from "@/components/CoverImage";
@@ -87,7 +88,13 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
     if (next) setScore(s => s + 1);
     else setScore(s => Math.max(0, s - 1));
     startTransition(async () => {
-      try { await toggleFavorite(company.id); }
+      try {
+        await toggleFavorite(company.id);
+        // La liste des favoris et le profil viennent de changer : ce qui est
+        // en memoire est faux. On l'oublie plutot que de le reecrire, la
+        // prochaine page le redemandera une fois.
+        oublier(CLE_FAVORIS, CLE_PROFIL, CLE_CONTEXTE);
+      }
       catch { setFav(prev); setScore(prevScore); }
     });
   };

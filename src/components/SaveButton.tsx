@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Flame } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
+import { oublier, CLE_FAVORIS, CLE_PROFIL, CLE_CONTEXTE } from "@/lib/cacheSession";
 import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
 
 export function SaveButton({ companyId, initialFav }: { companyId: string; initialFav: boolean }) {
@@ -13,7 +14,13 @@ export function SaveButton({ companyId, initialFav }: { companyId: string; initi
     const prev = fav;
     setFav(f => !f);
     startTransition(async () => {
-      try { await toggleFavorite(companyId); }
+      try {
+        await toggleFavorite(companyId);
+        // La liste des favoris et le profil viennent de changer : ce qui est
+        // en memoire est faux. On l'oublie plutot que de le reecrire, la
+        // prochaine page le redemandera une fois.
+        oublier(CLE_FAVORIS, CLE_PROFIL, CLE_CONTEXTE);
+      }
       catch { setFav(prev); }
     });
   };

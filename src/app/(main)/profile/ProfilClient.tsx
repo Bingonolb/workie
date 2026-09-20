@@ -21,7 +21,6 @@ type Donnees = {
   creeLe: string | null;
   profile: Profile | null;
   recentes: { id: string; name: string; city: string; subsector: string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null }[];
-  vuesTotal: number;
   favCount: number;
   adsActives: number;
   adsTotal: number;

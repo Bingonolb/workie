@@ -24,7 +24,7 @@ export async function GET() {
       return NextResponse.json({ authentifie: false }, { status: 401, headers: sansCache });
     }
 
-    const [{ data: profile }, favIds, { count: adsActives }, { count: adsTotal }, { data: vues }, { data: toutesVues }] = await Promise.all([
+    const [{ data: profile }, favIds, { count: adsActives }, { count: adsTotal }, { data: vues }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       getUserFavoriteIds().catch(() => [] as string[]),
       // Compte seul, sans ramener les lignes : la tuile n'affiche qu'un nombre.
@@ -49,11 +49,11 @@ export async function GET() {
       admin.from("company_views")
         .select("company_id, viewed_at, companies(id, name, city, subsector, cover_url, cover_color, is_verified)")
         .eq("user_id", user.id)
+        // Quarante lignes suffisent a en tirer huit entreprises distinctes.
+        // On en lisait deux cents, avec la fiche jointe a chacune : c'est ce
+        // qui rendait le profil lent a l'ouverture.
         .order("viewed_at", { ascending: false })
-        .limit(200),
-      // Le nombre total d'entreprises distinctes consultées, qui ne se déduit
-      // pas des deux cents dernières lignes.
-      admin.from("company_views").select("company_id").eq("user_id", user.id),
+        .limit(40),
     ]);
 
     // Une entreprise ne se répète pas : on garde sa visite la plus récente.
@@ -79,7 +79,6 @@ export async function GET() {
       creeLe: user.created_at ?? null,
       profile: profile ?? null,
       recentes: vuesUniques,
-      vuesTotal: new Set(((toutesVues ?? []) as { company_id: string }[]).map(v => v.company_id)).size,
       favCount: favIds.length,
       adsActives: adsActives ?? 0,
       adsTotal: adsTotal ?? 0,
