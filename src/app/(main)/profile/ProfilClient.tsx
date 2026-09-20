@@ -209,36 +209,17 @@ export function ProfilClient() {
           </h1>
         </div>
 
-        {/* Ligne d'informations.
+        {/* L'anciennete, et rien d'autre.
 
-            Courriel, canton et ancienneté étaient empilés à l'identique,
-            en trois lignes de même taille et de même couleur, dans une
-            carte pleine largeur : trois faits de nature différente
-            présentés comme une liste à puces sans les puces, et beaucoup
-            de vide à droite.
+            Courriel et canton figuraient ici en lecture seule, et plus bas
+            dans le formulaire en champs modifiables : la meme information a
+            deux endroits, dont un ou l'on ne peut rien en faire. C'est le
+            formulaire qui la porte, puisqu'on y agit.
 
-            Ils tiennent sur une ligne, séparés par des points médians,
-            comme les chiffres des cartes d'entreprise et du classement. Le
-            retour à la ligne reste possible sur écran étroit, où une
-            adresse électronique est longue. */}
-        <div className="profil-infos" style={{
-          padding: "16px 32px 20px",
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 9,
-          fontSize: 14.5,
-          color: "var(--text-muted)",
-        }}>
-          <span>{d?.email ?? " "}</span>
-          {(profile?.city || profile?.country) && (
-            <>
-              <span aria-hidden="true" style={{ opacity: 0.45 }}>&middot;</span>
-              <span>{[profile.city, profile.country].filter(Boolean).join(", ")}</span>
-            </>
-          )}
-          <span aria-hidden="true" style={{ opacity: 0.45 }}>&middot;</span>
-          <span>Membre depuis {memberSince}</span>
+            « Membre depuis » reste : c'est le seul fait de cette carte qui ne
+            se modifie pas, donc le seul qui n'a pas de champ. */}
+        <div className="profil-infos">
+          Membre depuis {memberSince}
         </div>
         {/* Les chiffres, dans la meme carte que le nom.
 
