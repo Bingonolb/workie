@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { getCachedCompany, getCachedJobOffers, getCachedSuggestions } from "@/lib/actions/companies";
-import { MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle, ChevronRight, Languages } from "lucide-react";
+import { MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle, Languages } from "lucide-react";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
@@ -19,7 +19,7 @@ import type { Review } from "@/lib/types";
 import { RATING_CATEGORIES } from "@/lib/reviewCategories";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { logoAffichable } from "@/lib/logo";
-import { CoverImage } from "@/components/CoverImage";
+import { LigneSuggestion } from "@/components/company/LigneSuggestion";
 import { largeurCouverture } from "@/lib/coverUrl";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
@@ -340,43 +340,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 <div style={{ padding: "22px 24px 16px" }}>
                   <h2 className="suggestion-titre">{groupe.titre}</h2>
                 </div>
-                {groupe.entreprises.map(c => (
-                  <Link
-                    key={c.id}
-                    href={`/company/${c.id}`}
-                    className="suggestion-ligne"
-                    style={{
-                      display: "grid", gridTemplateColumns: "56px 1fr 16px", gap: 14, alignItems: "center",
-                      padding: "14px 24px", borderTop: "1px solid var(--border)", textDecoration: "none",
-                    }}
-                  >
-                    <div style={{
-                      width: 56, height: 56, borderRadius: 13, overflow: "hidden", position: "relative",
-                      background: c.cover_color ?? "var(--surface3)", flexShrink: 0,
-                    }}>
-                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="56px" vignette />
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{
-                        fontSize: 15.5, fontWeight: 700, color: "var(--text)", marginBottom: 2,
-                        display: "flex", alignItems: "center", gap: 5,
-                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                      }}>
-                        {c.name}
-                        {c.is_verified && (
-                          <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }} aria-label="Entreprise vérifiée">
-                            <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
-                            <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
-                          </svg>
-                        )}
-                      </p>
-                      <p style={{ fontSize: 13.5, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {c.subsector ? `${c.subsector} · ` : ""}{c.city}
-                      </p>
-                    </div>
-                    <ChevronRight size={16} color="var(--text-muted)" aria-hidden="true" />
-                  </Link>
-                ))}
+                {groupe.entreprises.map(c => <LigneSuggestion key={c.id} c={c} />)}
               </div>
             ))}
           </div>

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { Flame, Star } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
+import { useFicheProche } from "@/lib/useFicheProche";
 import { oublier, CLE_FAVORIS, CLE_PROFIL, CLE_CONTEXTE } from "@/lib/cacheSession";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
@@ -67,6 +68,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   loading?: "eager" | "lazy";
 }) {
   const router = useRouter();
+  const refProche = useFicheProche(`/company/${company.id}`);
   // Suit la propriété : sur /explore, page statique, le favori n'est connu
   // qu'après l'arrivée du contexte. Figé, l'état laissait la flamme éteinte
   // sur une entreprise pourtant enregistrée.
@@ -101,15 +103,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
 
   return (
     <Link
+      ref={refProche}
       href={`/company/${company.id}`}
       aria-label={`Voir la fiche ${company.name}${Number(company.review_count) > 0 ? `, ${Number(company.avg_rating).toFixed(1)}/5 (${company.review_count} avis)` : ""}`}
       style={{ textDecoration: "none", display: "block" }}
-      // Next précharge les liens entrant dans la fenêtre, mais seulement quand
-      // le navigateur est inactif : un clic juste après un défilement arrive
-      // avant. Mesuré sur build de production — une fiche déjà préchargée
-      // s'ouvre en 19 à 27 ms, une fiche qui ne l'est pas encore en 345 à 996.
-      // On déclenche donc dès l'intention, au survol ou au premier contact du
-      // doigt, ce qui donne quelques centaines de millisecondes d'avance.
+      // Le survol et le premier contact restent : ils couvrent le cas d'une
+      // carte deja visible au chargement, avant que l'observateur ne se mette
+      // en route. `useFicheProche` ne demande qu'une fois par adresse, donc
+      // ces deux-ci ne font pas double emploi.
       onPointerEnter={() => router.prefetch(`/company/${company.id}`)}
       onTouchStart={() => router.prefetch(`/company/${company.id}`)}
     >
