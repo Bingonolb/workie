@@ -373,11 +373,12 @@ export function ProfilClient() {
               <a
                 href="/api/user/export"
                 download
+                // Texte et non bouton : on telecharge ses donnees une fois
+                // dans sa vie, et un bouton appelle le doigt.
                 style={{
-                  display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "11px 16px", borderRadius: 10,
-                  background: "var(--surface2)", border: "1px solid var(--border2)",
-                  color: "#8b5cf6", fontWeight: 600, fontSize: 14.5, cursor: "pointer",
-                  textDecoration: "none", textAlign: "left",
+                  display: "inline-flex", alignItems: "center", gap: 7,
+                  color: "var(--text-muted)", fontWeight: 600, fontSize: 13.5,
+                  textDecoration: "none", width: "fit-content",
                 }}
               >
                 <Download size={15} strokeWidth={2} aria-hidden="true" />

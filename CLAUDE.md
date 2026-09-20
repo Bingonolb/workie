@@ -233,3 +233,32 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## La règle des boutons
+
+Un écran porte **une** action principale. Ce qui vient ensuite se propose sans
+insister. Ce qui est rare ou dangereux n'est pas un bouton : un bouton appelle
+le doigt, et on ne veut pas appeler le doigt vers la suppression d'un compte.
+
+| Forme | Rôle | Combien |
+|---|---|---|
+| `.btn-marque` (violet plein) | créer un compte, créer une campagne, payer | un seul moment par parcours |
+| `.btn-encre` (encre pleine) | l'action de l'écran | une par écran |
+| `.btn-clair` (contour) | ce qu'on peut faire aussi | autant qu'il faut |
+| `.btn-fantome` (rien) | ce qui se retire : annuler, fermer | |
+| texte seul | rare, administratif, irréversible | jamais un bouton |
+| `.btn-photo` (verre dépoli) | posé sur une image | |
+
+**Le violet ne sert qu'à tirer la main.** Créer un compte, créer une campagne,
+payer, choisir un format. Partout ailleurs l'encre suffit : explorer, se
+connecter, voir des chiffres, relancer, annuler. Un bouton qui ne demande rien
+n'a pas besoin de couleur.
+
+**L'encre suit le thème** par deux jetons, `--encre` et `--encre-texte` :
+sombre sur fond clair, claire sur fond sombre. Ne jamais écrire `color: "#fff"`
+en dur sur un fond d'encre, ni `var(--encre-texte)` sur autre chose qu'un fond
+d'encre. Le nom du profil, posé sur un bandeau qui reste sombre dans les deux
+thèmes, a pris ce jeton par erreur et s'est retrouvé noir sur noir.
+
+La taille se dit à part (`.btn-sm`, `.btn-lg`, `.btn-bloc`), jamais dans le
+rôle : un bouton principal peut être petit.

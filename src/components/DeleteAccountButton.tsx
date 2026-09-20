@@ -31,11 +31,13 @@ export function DeleteAccountButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
+        // Du texte, pas un bouton. Supprimer son compte est irreversible et
+        // se fait une fois : cela doit se trouver, jamais s'offrir.
         style={{
-          width: "100%", padding: "11px 16px", borderRadius: 10,
-          background: "transparent", border: "1px solid rgba(239,68,68,0.2)",
-          color: "rgba(239,68,68,0.6)", fontWeight: 600, fontSize: 13, cursor: "pointer",
-          textAlign: "left", display: "flex", alignItems: "center", gap: 8,
+          display: "inline-flex", alignItems: "center", gap: 7,
+          background: "none", border: "none", padding: 0, cursor: "pointer",
+          color: "#ef4444", opacity: 0.75, fontWeight: 600, fontSize: 13,
+          fontFamily: "inherit", width: "fit-content",
         }}
       >
         <Trash2 size={14} aria-hidden="true" /> Supprimer mon compte

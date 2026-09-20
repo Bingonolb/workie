@@ -23,12 +23,11 @@ export function SignOutButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        style={{
-          width: "100%", padding: "11px 16px", borderRadius: 10,
-          background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)",
-          color: "#ef4444", fontWeight: 600, fontSize: 13, cursor: "pointer",
-          textAlign: "left", display: "flex", alignItems: "center", gap: 8,
-        }}
+        // Se deconnecter n'est pas un danger : on le fait chaque semaine, et
+        // on se reconnecte. Le rouge etait reserve a l'irreversible, et il le
+        // partageait avec la suppression du compte, juste en dessous.
+        className="btn btn-clair btn-sm"
+        style={{ width: "100%", justifyContent: "flex-start" }}
       >
         <LogOut size={14} aria-hidden="true" /> Se déconnecter
       </button>
