@@ -295,7 +295,7 @@ export function ProfilClient() {
                   width: 56, height: 56, borderRadius: 13, overflow: "hidden", position: "relative",
                   background: c.cover_color ?? "var(--surface3)", flexShrink: 0,
                 }}>
-                  <CoverImage src={c.cover_url} color={c.cover_color} sizes="56px" />
+                  <CoverImage src={c.cover_url} color={c.cover_color} sizes="56px" vignette />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <p style={{
@@ -363,6 +363,24 @@ export function ProfilClient() {
               </a>
               <SignOutButton />
               <DeleteAccountButton />
+
+              {/* La regie publicitaire, toujours atteignable.
+                  La tuile de chiffres ne s'affiche que pour qui a deja cree
+                  une campagne, ce qui est juste : un « 0 campagne » n'est pas
+                  une statistique. Mais en la retirant j'avais aussi retire la
+                  porte : personne ne pouvait plus arriver a la regie depuis
+                  son profil. Elle est ici, comme un reglage du compte. */}
+              <Link
+                href="/profile/ads"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 7,
+                  color: "var(--text-muted)", fontWeight: 600, fontSize: 13.5,
+                  textDecoration: "none", width: "fit-content",
+                }}
+              >
+                <Megaphone size={15} strokeWidth={2} aria-hidden="true" />
+                Mes publicités
+              </Link>
 
               {/* Les pages legales, ici plutot qu'en pied de chaque ecran.
                   Elles s'adressent a quelqu'un qui se renseigne sur le site,

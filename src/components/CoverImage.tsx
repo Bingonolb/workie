@@ -38,7 +38,21 @@ import { estPexels, aLaLargeur } from "@/lib/coverUrl";
  * width/height à 1600x900, qui poussaient le navigateur vers les gros
  * candidats ; ils valent maintenant 640x360.
  */
-const LARGEURS = [320, 480, 640, 940, 1280];
+/*
+ * Les largeurs proposees au navigateur.
+ *
+ * La plus petite etait 320 pixels. Or les listes de suggestions affichent des
+ * vignettes de 56 pixels : sur un ecran a deux fois la densite, il en faut
+ * 112, et le navigateur telechargeait la seule candidate disponible, trois
+ * fois trop grande. Quatre suggestions par groupe, trois groupes par fiche,
+ * plus huit sur le profil : cela fait vingt images inutilement lourdes par
+ * page.
+ *
+ * Les petites tailles sont donc ajoutees en tete. Le navigateur choisit
+ * toujours la plus petite qui couvre le besoin reel ; encore faut-il la lui
+ * proposer.
+ */
+const LARGEURS = [128, 192, 256, 320, 480, 640, 940, 1280];
 
 export function CoverImage({
   src,
@@ -47,6 +61,7 @@ export function CoverImage({
   sizes,
   priority = false,
   className,
+  vignette = false,
 }: {
   src: string | null | undefined;
   color?: string | null;
@@ -55,6 +70,8 @@ export function CoverImage({
   /** Vrai pour les cartes visibles sans défiler : elles se chargent tout de suite. */
   priority?: boolean;
   className?: string;
+  /** Vignette de liste : quelques dizaines de pixels, jamais une banniere. */
+  vignette?: boolean;
 }) {
   const [charge, setCharge] = useState(false);
   const fond = color || "var(--surface2)";
@@ -69,7 +86,10 @@ export function CoverImage({
     <div className={className} style={{ position: "absolute", inset: 0, background: fond }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={estPexels(src) ? aLaLargeur(src, 640) : src}
+        // Repli pour les navigateurs sans srcset, et premiere candidate que
+        // certains prennent au pied de la lettre : une vignette n'a pas besoin
+        // de 640 pixels de large.
+        src={estPexels(src) ? aLaLargeur(src, vignette ? 192 : 640) : src}
         srcSet={srcSet}
         sizes={sizes}
         alt={alt}

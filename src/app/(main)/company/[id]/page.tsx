@@ -354,7 +354,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                       width: 56, height: 56, borderRadius: 13, overflow: "hidden", position: "relative",
                       background: c.cover_color ?? "var(--surface3)", flexShrink: 0,
                     }}>
-                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="56px" />
+                      <CoverImage src={c.cover_url} color={c.cover_color} sizes="56px" vignette />
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <p style={{
