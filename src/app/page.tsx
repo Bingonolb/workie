@@ -25,11 +25,11 @@ const getLandingCounts = unstable_cache(
 );
 
 export const metadata: Metadata = {
-  title: "Workie : avis d'employés et salaires réels en Suisse",
-  description: "Comparez les entreprises suisses sur les avis anonymes de leurs employés et les salaires réels, puis allez voir les postes ouverts de celle que vous choisissez.",
+  title: "Workie : chercher du travail en Suisse, autrement",
+  description: "Mille employeurs suisses, par secteur, par canton et par langue de travail. Gardez ceux qui vous intéressent, et postulez sur leur propre site.",
   openGraph: {
-    title: "Workie : avis d'employés et salaires réels en Suisse",
-    description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",
+    title: "Workie : chercher du travail en Suisse, autrement",
+    description: "Mille employeurs suisses, par secteur, par canton et par langue de travail.",
     url: "https://www.workie.ch",
     siteName: "Workie",
     type: "website",
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Workie : avis d'employés et salaires réels en Suisse",
-    description: "Avis anonymes, salaires réels, classement des meilleurs employeurs suisses.",
+    title: "Workie : chercher du travail en Suisse, autrement",
+    description: "Mille employeurs suisses, par secteur, par canton et par langue de travail.",
   },
   alternates: { canonical: "https://www.workie.ch" },
 };
@@ -335,7 +335,7 @@ export default async function Home() {
               après lui. Un titre de page d'accueil se saisit d'un coup d'œil,
               il ne se lit pas. Le corps redescend de 58 à 50 px. */}
           <h1 className="hero-titre" style={{ fontSize: "clamp(32px, 4.4vw, 50px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 20, maxWidth: 560 }}>
-            Les entreprises suisses, avant d&apos;y postuler.
+            Trouvez l&apos;employeur, pas l&apos;annonce.
           </h1>
 
           {/* Douze mots, pas vingt-sept. La phrase enumérait les données puis
@@ -343,8 +343,8 @@ export default async function Home() {
               demande une. Elle dit maintenant d'où viennent les notes, ce qui
               est la seule chose qu'un titre ne peut pas porter. */}
           <p className="hero-accroche" style={{ fontSize: "clamp(15.5px, 1.4vw, 17.5px)", color: "var(--text-sub)", maxWidth: 470, lineHeight: 1.6, marginBottom: 32 }}>
-            Notes, salaires et conditions de travail, publiés anonymement par
-            celles et ceux qui y travaillent.
+            Mille employeurs suisses, par secteur, par canton et par langue de
+            travail. Gardez ceux qui vous intéressent, postulez chez eux.
           </p>
 
           <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
@@ -372,7 +372,7 @@ export default async function Home() {
               // à sa place.
               { valeur: nCompanies.toLocaleString("fr-CH"), libelle: "entreprises référencées" },
               { valeur: "26", libelle: "cantons couverts" },
-              { valeur: "100%", libelle: "anonyme" },
+              { valeur: "36", libelle: "secteurs d'activité" },
             ].map(({ valeur, libelle }, i) => (
               <div key={libelle} style={{
                 // Filets verticaux plutôt que quatre blocs posés côte à côte :
@@ -421,48 +421,48 @@ export default async function Home() {
             <div style={{ padding: 22 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 16 }}>
               <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                Synthèse des avis
+                Ce que dit la fiche
               </p>
-              {/* Les chiffres ci-dessous illustrent la mise en forme ; ils ne
-                  sont pas ceux d'UBS. Le dire est la moindre des choses sur un
-                  site dont l'argument est l'exactitude. */}
+              {/* Les valeurs ci-dessous illustrent la mise en forme ; elles ne
+                  sont pas celles d'une entreprise en particulier. Le dire est
+                  la moindre des choses. */}
               <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-muted)", border: "1px solid var(--border2)", borderRadius: 5, padding: "2px 7px" }}>
                 Exemple
               </span>
             </div>
 
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 18 }}>
-              <span className="landing-apercu-note" style={{ fontSize: 42, fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 0.9 }}>4.2</span>
-              <span style={{ fontSize: 12.5, color: "var(--text-muted)", paddingBottom: 4 }}>sur 34 avis</span>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 18 }}>
+            {/* Les deux faits qui decident d'une candidature : ou l'on
+                travaille, et dans quelle langue. Ils remplacent la note sur
+                cinq et ses quatre barres, qui n'existent plus. */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
               {[
-                { l: "Management", v: 78 },
-                { l: "Vie pro / perso", v: 86 },
-                { l: "Rémunération", v: 64 },
-                { l: "Évolution", v: 71 },
+                { l: "Localisation", v: "Zurich, ZH" },
+                { l: "Langues de travail", v: "DE · EN" },
               ].map(({ l, v }) => (
-                <div key={l} style={{ display: "flex", alignItems: "center", gap: 11 }}>
-                  <span style={{ flex: "1 1 0", fontSize: 12.5, color: "var(--text-muted)" }}>{l}</span>
-                  <div style={{ flex: "0 0 92px", height: 5, background: "var(--surface3)", borderRadius: 3, overflow: "hidden" }}>
-                    <div style={{ width: `${v}%`, height: "100%", background: "var(--brand)", borderRadius: 3 }} />
-                  </div>
-                  <span style={{ flex: "0 0 26px", textAlign: "right", fontSize: 12.5, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-                    {(v / 20).toFixed(1)}
-                  </span>
+                <div key={l} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 11, padding: "11px 13px" }}>
+                  <p style={{ fontSize: 14.5, fontWeight: 700, letterSpacing: "-0.01em" }}>{v}</p>
+                  <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 3 }}>{l}</p>
                 </div>
               ))}
             </div>
 
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 15, borderTop: "1px solid var(--border)" }}>
+            {/* Et la suite du parcours : trois voisines, une par ligne. C'est
+                ce qui fait qu'on ne s'arrete jamais a une seule fiche. */}
+            <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
+              À voir aussi
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 1, background: "var(--border)", border: "1px solid var(--border)", borderRadius: 11, overflow: "hidden" }}>
               {[
-                { g: "82%", p: "recommandent" },
-                { g: "CHF 96k", p: "salaire médian" },
-              ].map(({ g, p }) => (
-                <div key={p} style={{ display: "flex", alignItems: "baseline", gap: 6, background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 9, padding: "7px 12px" }}>
-                  <span style={{ fontSize: 14.5, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{g}</span>
-                  <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>{p}</span>
+                { n: "Swisscom", d: "Télécoms · Berne" },
+                { n: "Logitech", d: "Tech · Lausanne" },
+                { n: "Firmenich", d: "Chimie · Genève" },
+              ].map(({ n, d }) => (
+                <div key={n} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--surface)", padding: "9px 12px" }}>
+                  <span style={{ width: 26, height: 26, borderRadius: 7, background: "var(--surface3)", flexShrink: 0 }} />
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: "block", fontSize: 12.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{n}</span>
+                    <span style={{ display: "block", fontSize: 11, color: "var(--text-muted)" }}>{d}</span>
+                  </span>
                 </div>
               ))}
             </div>
@@ -499,8 +499,8 @@ export default async function Home() {
                 donne maintenant le cas concret qui justifie le titre : c'est
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
-            Deux employeurs notés 3.8 ne se ressemblent pas : chez l&apos;un c&apos;est
-            la rémunération, chez l&apos;autre le management.
+            Un poste s&apos;occupe deux ans, une entreprise se choisit pour bien plus
+            longtemps. C&apos;est elle qu&apos;on regarde ici, pas l&apos;annonce du moment.
           </p>
         </div>
       </section>
@@ -606,13 +606,13 @@ export default async function Home() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
               { Icone: GraduationCap, titre: "Vous terminez vos études",
-                desc: "Le salaire d'un premier poste, et la façon dont chaque employeur encadre ses débutants." },
+                desc: "Les employeurs de votre domaine, y compris ceux dont vous n'avez jamais entendu parler." },
               { Icone: Briefcase, titre: "Vous envisagez de changer",
-                desc: "Comparer votre employeur à ceux qui recrutent, sur des critères plutôt qu'une réputation." },
+                desc: "Repérer qui recrute dans votre métier, sans parcourir des annonces toute la semaine." },
               { Icone: Landmark, titre: "Vous êtes dans le public",
-                desc: "Le privé sur des bases concrètes : rémunération, charge de travail, flexibilité." },
+                desc: "Le privé, secteur par secteur, avec la langue de travail de chaque maison." },
               { Icone: IconeMaison, titre: "Vous reprenez une activité",
-                desc: "Les notes d'équilibre et de flexibilité, données par les équipes en place." },
+                desc: "Les employeurs de votre canton, gardés de côté jusqu'au bon moment." },
             ].map(({ Icone, titre, desc }, i) => (
               <div key={titre} style={{
                 display: "flex", gap: 18, padding: "22px 0",
@@ -629,15 +629,17 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── Ce qui rend l'information fiable ──
-          Ces garanties n'existaient que dans la foire aux questions, tout en
-          bas. Ce sont pourtant elles qui distinguent la plateforme, et la
-          première d'entre elles, le format entièrement chiffré des avis, est aussi
-          ce qui la protège juridiquement. */}
+      {/* ── Ce qui rend le catalogue fiable ──
+          Les trois garanties portaient sur les avis : anonymat, un seul avis
+          par entreprise, moderation. Les avis ne sont plus affiches, et
+          promettre ce qu'on ne fait plus est la pire des promesses. Elles
+          portent desormais sur ce qui fait la valeur du site aujourd'hui :
+          un catalogue tenu a la main, des liens qui menent chez l'employeur,
+          et aucun jugement publie. */}
       <section className="landing-section landing-ton" style={{ padding: "88px 24px" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
-          <p className="landing-eyebrow">Ce qui rend l&apos;information fiable</p>
-          <h2 className="landing-h2">Des garanties vérifiables.</h2>
+          <p className="landing-eyebrow">Ce qui distingue Workie</p>
+          <h2 className="landing-h2">Trois engagements.</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 22 }}>
             {[
               // « Aucun texte libre » énonçait une interdiction, et la suite
@@ -645,12 +647,12 @@ export default async function Home() {
               // tournures négatives pour décrire un choix qui est positif. Le
               // fait est que les avis sont chiffrés, donc comparables. C'est ce
               // que la carte dit maintenant.
-              { Icone: Gauge, titre: "Uniquement des données chiffrées",
-                desc: "Des notes et le contexte du poste, comparables d'une entreprise à l'autre." },
-              { Icone: Lock, titre: "Anonymat par construction",
-                desc: "Votre nom n'est jamais publié, et aucune page ne relie un compte à un avis." },
-              { Icone: ShieldCheck, titre: "Contrôles à la publication",
-                desc: "Adresse confirmée, un seul avis par entreprise, et une modération sur signalement." },
+              { Icone: Gauge, titre: "Un catalogue tenu à la main",
+                desc: "Chaque fiche est reprise une par une : le nom tel qu'on le dit, le secteur juste, et l'adresse officielle." },
+              { Icone: ShieldCheck, titre: "Les offres restent chez l'employeur",
+                desc: "Aucune annonce recopiée ni revendue : le lien mène à sa propre page carrière, jamais à un intermédiaire." },
+              { Icone: Lock, titre: "Aucun jugement publié",
+                desc: "Pas de note, pas de classement des bons et des mauvais patrons. Des faits, et ce qui vous intéresse." },
             ].map(({ Icone, titre, desc }) => (
               <div key={titre}>
                 <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />

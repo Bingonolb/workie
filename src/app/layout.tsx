@@ -50,11 +50,11 @@ const OG_URL = "https://www.workie.ch/opengraph-image.png";
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.workie.ch"),
   title: {
-    default: "Workie : avis et salaires des entreprises suisses",
+    default: "Workie : chercher du travail en Suisse, autrement",
     template: "%s · Workie",
   },
-  description: "Les conditions de travail des entreprises suisses, notées anonymement par leurs employés. Rémunération, management, équilibre et évolution, sur huit critères.",
-  keywords: ["avis entreprise suisse", "salaires suisse", "conditions de travail", "employeurs suisses", "workie"],
+  description: "L'annuaire des employeurs suisses : par secteur, par canton et par langue de travail. Gardez ceux qui vous intéressent, et postulez sur leur propre site.",
+  keywords: ["emploi suisse", "employeurs suisses", "offres d'emploi suisse", "entreprises suisses", "chercher du travail en suisse", "workie"],
   authors: [{ name: "Workie", url: "https://www.workie.ch" }],
   creator: "Workie",
   publisher: "Workie",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     locale: "fr_CH",
     type: "website",
     url: "https://www.workie.ch",
-    images: [{ url: OG_URL, width: 1200, height: 630, alt: "Workie : avis et salaires des entreprises suisses" }],
+    images: [{ url: OG_URL, width: 1200, height: 630, alt: "Workie : chercher du travail en Suisse" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -83,7 +83,7 @@ const websiteSchema = {
   "@type": "WebSite",
   name: "Workie",
   url: "https://www.workie.ch",
-  description: "Avis anonymes sur les entreprises suisses : salaires, culture, management.",
+  description: "L'annuaire des employeurs suisses : par secteur, par canton et par langue de travail.",
   inLanguage: "fr-CH",
   potentialAction: {
     "@type": "SearchAction",

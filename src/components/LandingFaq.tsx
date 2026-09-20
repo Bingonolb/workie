@@ -27,119 +27,77 @@ const ENTREES: Entree[] = [
   {
     q: "Qu'est-ce que Workie ?",
     texte:
-      "Workie est une plateforme suisse où des employés partagent anonymement leur expérience de travail : ambiance, management, équilibre, salaire. Les avis viennent des utilisateurs, jamais des entreprises.",
+      "Workie est un annuaire suisse des employeurs. On y cherche une entreprise plutôt qu'une annonce : par secteur, par canton, par langue de travail. Quand une entreprise vous intéresse, vous la gardez, et vous postulez sur son propre site.",
     r: (
       <>
-        Workie est une plateforme suisse où des employés partagent anonymement leur expérience de
-        travail : ambiance, management, équilibre de vie, salaire. Les avis viennent
-        exclusivement des utilisateurs. Aucune entreprise ne peut acheter, écrire ou faire
-        retirer un avis parce qu&apos;il lui déplaît.
+        Workie est un annuaire suisse des employeurs. On y cherche une entreprise plutôt
+        qu&apos;une annonce : par secteur, par canton, par langue de travail.
+        <br /><br />
+        Quand une entreprise vous intéresse, vous la gardez d&apos;un geste, et vous postulez
+        sur son propre site. Workie n&apos;héberge aucune offre et ne s&apos;interpose pas entre
+        vous et l&apos;employeur.
       </>
     ),
   },
   {
-    q: "Les avis sont-ils vraiment anonymes ?",
+    q: "Pourquoi n'y a-t-il pas de note sur les entreprises ?",
     texte:
-      "Votre nom n'est jamais publié et l'identifiant de votre compte n'est pas transmis au navigateur avec les avis. Votre adresse IP est conservée côté serveur pour la seule détection d'abus, et effacée lorsque vous supprimez votre compte.",
+      "Parce qu'une note moyenne ne dit pas où postuler. Workie ne classe pas les bons et les mauvais employeurs : le site donne des faits, le secteur, le lieu, la langue de travail et le lien vers les offres, et vous décidez.",
     r: (
       <>
-        Votre nom n&apos;est jamais publié. L&apos;identifiant de votre compte n&apos;est pas transmis au
-        navigateur avec les avis, ce qui veut dire qu&apos;aucun visiteur, ni aucune entreprise,
-        ne peut relier un avis à un profil en inspectant la page.
+        Parce qu&apos;une note moyenne ne dit pas où postuler. Deux entreprises notées
+        pareil n&apos;ont ni le même métier, ni le même lieu, ni la même langue de travail,
+        et ce sont ces trois choses-là qui décident d&apos;une candidature.
         <br /><br />
-        Une donnée reste conservée côté serveur : votre adresse IP au moment de la publication.
-        Elle sert uniquement à repérer les abus, par exemple plusieurs avis rédigés depuis le
-        même endroit pour gonfler ou descendre une note. Elle n&apos;est jamais affichée, et elle
-        est effacée lorsque vous supprimez votre compte.
-        <br /><br />
-        Ce que nous ne pouvons pas promettre : si vous occupez un poste que personne
-        d&apos;autre n&apos;occupe dans votre entreprise, l&apos;intitulé seul peut suffire à vous
-        désigner. C&apos;est la raison pour laquelle un avis ne contient aucun texte
-        libre : il n&apos;y a rien à y glisser qui puisse vous trahir.
+        Workie ne classe pas les bons et les mauvais employeurs. Le site donne des faits et
+        vous laisse décider.
       </>
     ),
   },
   {
     q: "D'où viennent les informations sur les entreprises ?",
     texte:
-      "Les fiches ne contiennent que des informations d'entreprise publiques : nom, secteur, canton, site officiel. Aucune donnée interne ou confidentielle. Les appréciations viennent uniquement des avis d'utilisateurs.",
+      "Les fiches sont établies à la main, une par une : le nom tel qu'on le dit, le secteur, la ville et le canton, et l'adresse de la page carrière du site officiel. Jamais un site d'annonces.",
     r: (
       <>
-        Une fiche d&apos;entreprise ne contient que des informations publiques : la dénomination, le
-        secteur, le canton, le site officiel. Rien d&apos;interne, rien de confidentiel, aucun
-        document d&apos;entreprise.
+        Les fiches sont établies à la main, une par une : le nom tel que les gens le disent,
+        le secteur, la ville et le canton, et l&apos;adresse de la{" "}
+        <strong style={{ color: "var(--text)" }}>page carrière du site officiel</strong>.
+        Jamais un site d&apos;annonces intermédiaire.
         <br /><br />
-        Tout ce qui relève de l&apos;appréciation (notes, ambiance, salaires, management) provient
-        uniquement des avis déposés par les utilisateurs. Workie ne produit aucune évaluation
-        de son côté.
-        <br /><br />
-        Une information vous paraît inexacte sur votre fiche ? Écrivez-nous, nous la corrigeons.
+        Les langues de travail sont déduites du canton et du domaine du site quand
+        l&apos;entreprise ne les a pas renseignées elle-même.
       </>
     ),
   },
   {
-    q: "Qui peut publier un avis ?",
+    q: "Comment fonctionne le classement ?",
     texte:
-      "Il faut un compte avec adresse e-mail confirmée, âgé d'au moins 24 heures. Un seul avis par entreprise et par personne, et trois avis maximum par 24 heures.",
+      "Il mesure l'intérêt réel des utilisateurs, pas un jugement : un favori vaut dix points, une visite un point, un partage cinquante. Il se recalcule tout seul.",
     r: (
       <>
-        Il faut un compte dont l&apos;adresse e-mail est confirmée et qui existe depuis au moins
-        24 heures. Cette attente n&apos;est pas une formalité : elle rend coûteuse la création de
-        comptes jetables destinés à fabriquer de faux avis.
+        Il mesure l&apos;intérêt réel des utilisateurs, et rien d&apos;autre : un favori vaut
+        dix points, une visite un point, un partage cinquante. Le partage vaut le plus parce
+        qu&apos;il coûte le plus, il engage celui qui le fait auprès de quelqu&apos;un
+        d&apos;autre.
         <br /><br />
-        S&apos;ajoutent deux limites : un seul avis par entreprise et par personne, et trois avis
-        au maximum sur 24 heures. Les comptes rattachés à une entreprise ne peuvent pas voter
-        sur les avis qui la concernent.
+        Aucune entreprise ne peut acheter sa place, et aucune note n&apos;entre dans le calcul.
       </>
     ),
   },
   {
-    q: "Comment luttez-vous contre les faux avis ?",
+    q: "Une entreprise peut-elle faire retirer sa fiche ?",
     texte:
-      "Engagement signé avant de noter, compte confirmé de plus de 24 heures, un seul avis par entreprise et par personne, trois avis maximum par 24 heures, repérage des publications répétées depuis une même adresse réseau, et file de modération alimentée par les signalements.",
+      "Une fiche ne contient que des informations publiques : nom, secteur, lieu, adresse du site. Une entreprise peut demander une correction ou un retrait en écrivant à contact@workie.ch.",
     r: (
       <>
-        Un avis Workie ne contient aucun texte libre : uniquement des notes et
-        le contexte du poste. Cela retire d&apos;emblée ce qui fait l&apos;essentiel des
-        faux avis ailleurs : les récits inventés, les règlements de comptes, les
-        messages écrits par l&apos;entreprise elle-même.
+        Une fiche ne contient que des informations publiques : le nom, le secteur, la ville
+        et l&apos;adresse du site officiel. Il n&apos;y a ni note, ni témoignage, ni
+        appréciation.
         <br /><br />
-        S&apos;y ajoutent des contrôles sur qui peut déposer un avis :
-        <br /><br />
-        · un engagement signé avant de noter : avoir travaillé dans
-        l&apos;entreprise, et rendre compte de son expérience réelle sans chercher
-        à nuire ;<br />
-        · un compte à l&apos;adresse confirmée, existant depuis plus de 24 heures ;<br />
-        · un seul avis par entreprise et par personne ;<br />
-        · trois avis au maximum sur 24 heures ;<br />
-        · un repérage des publications répétées depuis une même adresse réseau ;<br />
-        · une file de modération alimentée par les signalements, relue à la main.
-        <br /><br />
-        Aucun dispositif n&apos;est infaillible. C&apos;est pourquoi le signalement est ouvert à tous, y
-        compris aux entreprises concernées.
-      </>
-    ),
-  },
-  {
-    q: "Je représente une entreprise et un avis me paraît faux",
-    texte:
-      "Signalez-le depuis la fiche : il part en modération et sera relu. Un avis n'est pas retiré parce qu'il est négatif, mais il l'est s'il enfreint nos règles : expérience manifestement inventée, avis déposé par quelqu'un qui n'a pas travaillé là, ou notes portées pour nuire plutôt que pour rendre compte.",
-    r: (
-      <>
-        Signalez-le depuis la fiche de l&apos;entreprise. Le signalement part en modération et
-        l&apos;avis est relu.
-        <br /><br />
-        Soyons clairs sur la ligne : un avis n&apos;est pas retiré parce qu&apos;il est négatif, ni parce
-        qu&apos;il déplaît. Il l&apos;est s&apos;il enfreint nos règles : expérience manifestement inventée,
-        avis déposé par quelqu&apos;un qui n&apos;a pas travaillé là, ou notes portées pour nuire plutôt
-        que pour rendre compte. Un jugement défavorable exprimé de bonne foi sur des conditions
-        de travail reste publié.
-        <br /><br />
-        Un avis ne contenant aucun texte libre, la question n&apos;est jamais celle des mots
-        employés : elle est celle de la sincérité de la démarche.
-        <br /><br />
-        Les détails figurent dans les{" "}
-        <Link href="/cgu" style={{ color: "#8b5cf6" }}>conditions générales</Link>.
+        Une entreprise qui souhaite une correction, un complément ou un retrait peut écrire à{" "}
+        <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)" }}>contact@workie.ch</a>.
+        Les demandes sont traitées à la main.
       </>
     ),
   },
@@ -164,31 +122,30 @@ const ENTREES: Entree[] = [
   {
     q: "Est-ce payant ?",
     texte:
-      "Non. Consulter les avis, en publier et gérer son compte sont gratuits, sans abonnement. La plateforme se finance par la publicité.",
+      "Non. Chercher une entreprise, la garder en favori et gérer son compte sont gratuits, sans abonnement. La plateforme se finance par la publicité.",
     r: (
       <>
-        Non. Consulter les avis, en publier, gérer son compte : tout est gratuit et sans
-        abonnement.
+        Non. Chercher une entreprise, la garder de côté, gérer son compte : tout est gratuit
+        et sans abonnement.
         <br /><br />
-        La plateforme se finance par la publicité, ce qui permet de ne facturer ni les
-        employés qui témoignent, ni les lecteurs. Les emplacements publicitaires sont
-        identifiés comme tels et n&apos;influencent ni les notes, ni le classement.
+        La plateforme se finance par la publicité, ce qui permet de ne rien facturer à ceux
+        qui cherchent du travail. Les emplacements publicitaires sont identifiés comme tels
+        et n&apos;influencent pas le classement.
       </>
     ),
   },
   {
     q: "Comment récupérer ou supprimer mes données ?",
     texte:
-      "Depuis votre profil, vous pouvez télécharger l'ensemble de vos données et supprimer votre compte. La suppression détache vos avis de votre identité et efface l'adresse IP conservée pour la détection d'abus.",
+      "Depuis les réglages de votre profil : télécharger l'ensemble de vos données, ou supprimer votre compte. La suppression efface vos favoris, votre historique de consultation et l'adresse IP conservée pour la détection d'abus.",
     r: (
       <>
-        Depuis votre profil, deux boutons : télécharger l&apos;ensemble de vos données, et supprimer
-        votre compte.
+        Depuis les réglages de votre profil : télécharger l&apos;ensemble de vos données, ou
+        supprimer votre compte.
         <br /><br />
-        La suppression détache vos avis de votre identité et efface l&apos;adresse IP conservée pour
-        la détection d&apos;abus. Les avis eux-mêmes peuvent rester en ligne, sans plus aucun lien
-        avec vous. C&apos;est ce qui évite qu&apos;une entreprise puisse faire disparaître les
-        témoignages la concernant en poussant leurs auteurs à fermer leur compte.
+        La suppression efface vos favoris, votre historique de consultation et
+        l&apos;adresse IP conservée pour la détection d&apos;abus. Rien de ce que vous avez
+        consulté n&apos;est conservé après coup.
       </>
     ),
   },

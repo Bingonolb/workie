@@ -6,7 +6,7 @@ import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "Connexion · Workie",
-  description: "Connectez-vous à Workie pour accéder aux avis d'employés, salaires réels et offres d'emploi des entreprises suisses.",
+  description: "Connectez-vous pour retrouver les employeurs suisses que vous avez gardés et vos recherches récentes.",
   robots: { index: false, follow: false },
 };
 

@@ -6,7 +6,7 @@ import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "Créer un compte · Workie",
-  description: "Rejoignez Workie gratuitement. Accédez aux avis anonymes d'employés, aux salaires réels et donnez votre avis sur votre employeur.",
+  description: "Créez un compte gratuit pour garder les employeurs suisses qui vous intéressent et retrouver vos recherches.",
   robots: { index: false, follow: false },
 };
 
