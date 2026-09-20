@@ -15,7 +15,8 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [hauteur, setHauteur] = useState("100dvh");
+  // Hauteur du clavier, zero quand il est ferme.
+  const [clavier, setClavier] = useState(0);
   const [recentes, setRecentes] = useState<EntrepriseRecente[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -61,23 +62,48 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   useEffect(() => { search(query); }, [query, search]);
 
   /*
-   * La fenetre epouse la hauteur reellement visible.
+   * La fenetre couvre tout l'ecran, et recule ses resultats au-dessus du
+   * clavier.
    *
-   * Sur iPhone, l'ouverture du clavier retrecit la zone visible sans changer
-   * la hauteur de la page : une fenetre calee sur `bottom: 0` continue donc
-   * derriere le clavier, et le defilement se decroche. `100dvh` suffit sur les
-   * navigateurs recents ; `visualViewport` couvre les autres et le cas du
-   * clavier, qu'aucune unite CSS ne decrit.
+   * Premiere tentative : raccourcir la fenetre a la hauteur visible. C'etait
+   * pire. Sur iPhone la page ne bouge pas quand le clavier monte ; une fenetre
+   * raccourcie laissait donc voir la page dessous, entre son bord et le
+   * clavier. Le fond doit couvrir tout l'ecran, toujours.
+   *
+   * Ce qui change, c'est la place laissee aux resultats : on retranche la
+   * hauteur du clavier au bas de la liste, sinon les dernieres lignes sont
+   * derriere lui et inatteignables. Aucune unite CSS ne decrit le clavier,
+   * seul visualViewport le connait.
    */
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const suivre = () => setHauteur(`${vv.height}px`);
+    const suivre = () => setClavier(Math.max(0, Math.round(window.innerHeight - vv.height)));
     suivre();
     vv.addEventListener("resize", suivre);
-    vv.addEventListener("scroll", suivre);
-    return () => { vv.removeEventListener("resize", suivre); vv.removeEventListener("scroll", suivre); };
+    return () => { vv.removeEventListener("resize", suivre); };
   }, []);
+
+  /*
+   * Le geste de retour ferme la recherche.
+   *
+   * La fenetre n'est pas une page : elle se superpose a celle qu'on regardait.
+   * Glisser vers l'arriere quittait donc cette page, et la recherche restait
+   * affichee par-dessus la precedente. On ajoute une entree d'historique a
+   * l'ouverture, que le geste consomme : il ferme la recherche, et la page
+   * dessous ne bouge pas.
+   */
+  useEffect(() => {
+    history.pushState({ recherche: true }, "");
+    const retour = () => onClose();
+    window.addEventListener("popstate", retour);
+    return () => {
+      window.removeEventListener("popstate", retour);
+      // Fermeture par la croix ou par Echap : l'entree ajoutee doit partir
+      // avec, sinon le geste suivant ne ferait que la consommer.
+      if (history.state?.recherche) history.back();
+    };
+  }, [onClose]);
 
   const ouvrir = (e: Suggestion) => {
     setRecentes(ajouterRecente({ id: e.id, name: e.name, city: e.city, sector: e.sector }));
@@ -89,8 +115,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   return createPortal(
     <div
       style={{
-        position: "fixed", top: 0, left: 0, right: 0,
-        height: hauteur,
+        position: "fixed", inset: 0,
         zIndex: 10100,
         background: "var(--bg)",
         display: "flex", flexDirection: "column",
@@ -170,7 +195,11 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           parcourt une liste, c'est parcourir une liste dans une fente. C'est
           ce que font les applications, et c'est aussi ce qui evite que la
           page se decroche derriere lui sur iPhone. */}
-      <div className="gs-scroll" onTouchMove={() => inputRef.current?.blur()}>
+      <div
+        className="gs-scroll"
+        onTouchMove={() => inputRef.current?.blur()}
+        style={{ paddingBottom: clavier }}
+      >
         {loading && (
           <div style={{ padding: "16px 20px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
         )}

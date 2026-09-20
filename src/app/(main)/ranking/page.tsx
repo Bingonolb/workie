@@ -1,7 +1,6 @@
 export const revalidate = 60;
 
 import type { Metadata } from "next";
-import { Footer } from "@/components/Footer";
 import { getCachedTopCompanies, getCachedReviewCount } from "@/lib/actions/scores";
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
@@ -75,7 +74,11 @@ export default async function RankingPage() {
           )}
         </div>
       </main>
-      <Footer />
+      {/* Pas de pied de page ici.
+          Les mentions legales et le contact s'adressent a quelqu'un qui
+          decouvre le site ; elles restent donc sur les pages publiques et
+          dans les reglages du profil. Sur un classement filtre a deux
+          lignes, ce pave devenait la chose la plus visible de l'ecran. */}
     </div>
   );
 }

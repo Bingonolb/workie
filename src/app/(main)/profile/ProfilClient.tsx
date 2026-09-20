@@ -363,6 +363,26 @@ export function ProfilClient() {
               </a>
               <SignOutButton />
               <DeleteAccountButton />
+
+              {/* Les pages legales, ici plutot qu'en pied de chaque ecran.
+                  Elles s'adressent a quelqu'un qui se renseigne sur le site,
+                  pas a quelqu'un qui le parcourt : on les cherche une fois, et
+                  on les cherche dans ses reglages. */}
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: "6px 14px",
+                paddingTop: 16, borderTop: "1px solid var(--border)",
+              }}>
+                {[
+                  { href: "/cgu", label: "CGU" },
+                  { href: "/confidentialite", label: "Confidentialité" },
+                  { href: "/mentions-legales", label: "Mentions légales" },
+                ].map(({ href, label }) => (
+                  <Link key={href} href={href} style={{ fontSize: 12.5, color: "var(--text-muted)", textDecoration: "none" }}>
+                    {label}
+                  </Link>
+                ))}
+                <a href="mailto:contact@workie.ch" style={{ fontSize: 12.5, color: "var(--text-muted)", textDecoration: "none" }}>Contact</a>
+              </div>
             </div>
           </div>
 
