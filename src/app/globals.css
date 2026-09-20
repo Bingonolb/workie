@@ -1426,8 +1426,23 @@ body.mode-swipe .page-root {
    d'aller ailleurs. La règle vivait dans le style de la fiche entreprise, donc
    le profil héritait du balisage sans le survol. */
 .suggestion-ligne { transition: background 0.15s; }
-.suggestion-ligne:hover { background: var(--surface2); }
+@media (hover: hover) and (pointer: fine) {
+  .suggestion-ligne:hover { background: var(--surface2); }
+}
 .suggestion-ligne:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+
+.suggestion-titre {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+/* Sur telephone, le titre d'un groupe de suggestions n'a pas besoin de la
+   taille d'un titre de page : on en croise trois ou quatre en descendant, et
+   ils prenaient le pas sur les noms d'entreprises qu'ils annoncent. */
+@media (max-width: 700px) {
+  .suggestion-titre { font-size: 16px; }
+}
 
 /* ─── Finitions ─────────────────────────────────────────────────────
    Ce qui separe une page web d'une application : rien d'ajoute, des details
@@ -1567,3 +1582,29 @@ body { overscroll-behavior-y: none; }
 /* Un bouton qui n'est qu'une icone est carre : sa largeur suit sa hauteur. */
 .btn-icone { padding: 0; width: 44px; }
 .btn-icone.btn-sm { width: 36px; }
+
+/* ─── Les chiffres du profil ────────────────────────────────────────
+   Dans la carte du nom, et non flottants dessous. Un filet les separe de la
+   ligne d'informations, une cloison les separe entre eux : c'est la meme
+   personne, il n'y a rien a encadrer. */
+.profil-chiffres {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border-top: 1px solid var(--border);
+}
+.profil-chiffre {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 18px 32px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.profil-chiffre + .profil-chiffre { border-left: 1px solid var(--border); }
+@media (hover: hover) and (pointer: fine) {
+  a.profil-chiffre:hover { background: var(--surface2); }
+}
+@media (max-width: 640px) {
+  .profil-chiffre { padding: 16px 18px; }
+}

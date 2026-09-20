@@ -241,42 +241,33 @@ export function ProfilClient() {
           <span aria-hidden="true" style={{ opacity: 0.45 }}>&middot;</span>
           <span>Membre depuis {memberSince}</span>
         </div>
+        {/* Les chiffres, dans la meme carte que le nom.
+
+            Ils vivaient dans deux cartes flottantes posees juste dessous, avec
+            leurs propres bordures et leur propre rayon : trois rectangles pour
+            une seule chose, l'identite de la personne et ce qu'elle a fait.
+            Un filet suffit a les separer de ce qui precede, et une cloison
+            verticale a les separer entre eux. */}
+        <div className="profil-chiffres">
+          {tuiles.map(({ Icone, value, label, color, href }) => {
+            const dedans = (
+              <>
+                <div className="kpi-icone" style={{ width: 40, height: 40, borderRadius: 11, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Icone size={19} color={color} strokeWidth={1.9} aria-hidden="true" />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
+                  <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
+                </div>
+              </>
+            );
+            return href
+              ? <Link key={label} href={href} className="profil-chiffre">{dedans}</Link>
+              : <div key={label} className="profil-chiffre">{dedans}</div>;
+          })}
+        </div>
       </div>
 
-      {/* ── KPI strip ── */}
-      {/* Trois tuiles, trois nombres, trois destinations.
-
-          Il y en avait quatre. « Note moyenne donnee » affichait la moyenne des
-          notes que l'utilisateur attribue : un chiffre sur lequel il ne peut
-          rien faire, et qui laisse entendre qu'on mesure sa severite. La
-          quatrieme portait le mot « Pub » a la place d'un chiffre, la ou ses
-          voisines alignaient des nombres : une invitation deguisee en
-          statistique. Elle compte desormais les campagnes, zero compris, ce
-          qui est honnete et garde le lien vers la regie. */}
-      <div className="profile-kpi" style={{ display: "grid", gridTemplateColumns: `repeat(${tuiles.length}, 1fr)`, gap: 12, marginBottom: 20 }}>
-        {tuiles.map(({ Icone, value, label, color, href }) => {
-          const inner = (
-            <>
-              <div className="kpi-icone" style={{ width: 44, height: 44, borderRadius: 12, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Icone size={20} color={color} strokeWidth={1.9} aria-hidden="true" />
-              </div>
-              <div>
-                <p style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.03em", lineHeight: 1 }}>{value}</p>
-                <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 4 }}>{label}</p>
-              </div>
-            </>
-          );
-          return href ? (
-            <Link key={label} href={href} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14, textDecoration: "none" }}>
-              {inner}
-            </Link>
-          ) : (
-            <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 22px", display: "flex", alignItems: "center", gap: 14 }}>
-              {inner}
-            </div>
-          );
-        })}
-      </div>
 
       {/* ── Main grid ── */}
       <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16, alignItems: "start" }}>

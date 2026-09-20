@@ -54,15 +54,19 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
             Le secteur devient donc le titre : dit une fois, en grand, plutot
             que trois fois en petit. Le decompte descend d'un cran. */}
+        {/* « Les plus populaires » et non « Top 200 ».
+            Le nombre changeait avec le filtre et ne disait rien de ce qui est
+            classe ; le classement ne mesure plus des notes mais l'interet
+            reel, favoris, visites et partages. Le titre le dit. */}
         <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 2 }}>
-          {secteur || `Top ${companies.length}`}
+          {secteur || "Les plus populaires"}
         </h1>
         <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500, marginBottom: 16 }}>
           {secteur
             ? `${filtered.length} entreprise${filtered.length > 1 ? "s" : ""} sur ${companies.length}`
             : q
               ? `${filtered.length} résultat${filtered.length > 1 ? "s" : ""} sur ${companies.length}`
-              : "Trié par score communautaire"}
+              : `${companies.length} entreprises, les plus suivies en premier`}
         </p>
 
         {/* Chercher et filtrer sont deux intentions distinctes : on cherche une

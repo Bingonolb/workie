@@ -289,7 +289,7 @@ export const getCachedSuggestions = unstable_cache(
       { titre: subsector ? `Aussi dans « ${subsector} »` : "", entreprises: garder(memeMetier.data, 4) },
       { titre: `Dans ${sector}`, entreprises: garder(memeSecteur.data, 4) },
       { titre: canton ? `Dans le canton de ${CANTON_NAMES[canton] ?? canton}` : "", entreprises: garder(memeCanton.data, 4) },
-      { titre: "Beaucoup regardées en ce moment", entreprises: garder(lesPlusVues.data, 4) },
+      { titre: "Les plus populaires", entreprises: garder(lesPlusVues.data, 4) },
     ];
     return groupes.filter(g => g.titre && g.entreprises.length > 0);
   },

@@ -334,9 +334,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             {groupesSuggestions.map(groupe => (
               <div key={groupe.titre} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", marginBottom: 20 }}>
                 <div style={{ padding: "22px 24px 16px" }}>
-                  <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em" }}>
-                    {groupe.titre}
-                  </h2>
+                  <h2 className="suggestion-titre">{groupe.titre}</h2>
                 </div>
                 {groupe.entreprises.map(c => (
                   <Link
