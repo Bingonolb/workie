@@ -25,11 +25,28 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useLayoutEffect(() => { setMounted(true); }, []);
 
+  /*
+   * Fermer, c'est revenir en arriere.
+   *
+   * L'entree d'historique posee a l'ouverture doit etre consommee par la
+   * fermeture, sinon elle s'accumule. Le retour declenche `popstate`, qui
+   * appelle `onClose` : un seul chemin de fermeture, quel que soit le geste.
+   *
+   * Surtout, cette consommation ne doit jamais se faire au demontage. Elle y
+   * etait, et elle annulait la navigation : cliquer sur une entreprise fermait
+   * la recherche, le demontage revenait en arriere, et le clic se perdait. On
+   * repartait sur Explorer au lieu d'ouvrir la fiche.
+   */
+  const fermer = useCallback(() => {
+    if (history.state?.recherche) history.back();
+    else onClose();
+  }, [onClose]);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRecentes(lireRecentes());
     setTimeout(() => inputRef.current?.focus(), 60);
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") fermer(); };
     document.addEventListener("keydown", onKey);
     // Simple scroll lock — no body position manipulation (causes iOS jump)
     document.documentElement.style.overflow = "hidden";
@@ -37,7 +54,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       document.removeEventListener("keydown", onKey);
       document.documentElement.style.overflow = "";
     };
-  }, [onClose]);
+  }, [fermer]);
 
   const search = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -97,12 +114,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
     history.pushState({ recherche: true }, "");
     const retour = () => onClose();
     window.addEventListener("popstate", retour);
-    return () => {
-      window.removeEventListener("popstate", retour);
-      // Fermeture par la croix ou par Echap : l'entree ajoutee doit partir
-      // avec, sinon le geste suivant ne ferait que la consommer.
-      if (history.state?.recherche) history.back();
-    };
+    return () => window.removeEventListener("popstate", retour);
   }, [onClose]);
 
   const ouvrir = (e: Suggestion) => {
@@ -148,7 +160,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
         background: "var(--bg)",
       }}>
         <button
-          onClick={onClose}
+          onClick={fermer}
           aria-label="Fermer"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 10, background: "none", border: "none", cursor: "pointer", color: "var(--text)", flexShrink: 0 }}
         >
@@ -162,8 +174,8 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => {
-              if (e.key === "Enter" && suggestions[0]) { onClose(); router.push(`/company/${suggestions[0].id}`); }
-              if (e.key === "Escape") onClose();
+              if (e.key === "Enter" && suggestions[0]) { ouvrir(suggestions[0]); router.push(`/company/${suggestions[0].id}`); }
+              if (e.key === "Escape") fermer();
             }}
             placeholder="Rechercher une entreprise…"
             autoComplete="off"
