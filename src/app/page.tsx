@@ -4,10 +4,11 @@ import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ArrowRight, ShieldCheck, Lock, Gauge,
          GraduationCap, Briefcase, Landmark, Home as IconeMaison, Check,
-         X, Info, Flame } from "lucide-react";
+       } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingFaq } from "@/components/LandingFaq";
-import { largeurCouverture } from "@/lib/coverUrl";
+import { ApercuSwipe } from "@/components/ApercuSwipe";
+import { languesDeTravail } from "@/lib/langues";
 import { Logo } from "@/components/Logo";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
@@ -23,6 +24,37 @@ const getLandingCounts = unstable_cache(
   },
   ["landing-counts"],
   { revalidate: 300, tags: ["landing-counts"] }
+);
+
+/**
+ * Les cinq entreprises de la pile d'accueil.
+ *
+ * Choisies parmi les plus suivies, avec une photo : la page d'accueil montre
+ * le catalogue tel qu'il est, pas une selection ecrite a la main qui se
+ * perimerait. Mises en cache cinq minutes, comme les compteurs.
+ */
+const getApercuEntreprises = unstable_cache(
+  async () => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("companies")
+      .select("id, name, sector, subsector, city, canton, description, cover_url, website_url, employee_range, langues")
+      .not("cover_url", "is", null)
+      .order("score", { ascending: false })
+      .limit(5);
+    return (data ?? []).map(c => ({
+      id: c.id,
+      name: c.name,
+      sector: c.sector,
+      subsector: c.subsector,
+      lieu: `${c.city}${c.canton ? `, ${c.canton}` : ""}`,
+      langues: languesDeTravail(c.canton ?? null, c.website_url ?? null, c.employee_range ?? null).join(" · "),
+      description: c.description,
+      cover_url: c.cover_url,
+    }));
+  },
+  ["landing-apercu"],
+  { revalidate: 300, tags: ["companies"] }
 );
 
 export const metadata: Metadata = {
@@ -45,7 +77,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const counts = await getLandingCounts();
+  const [counts, apercu] = await Promise.all([getLandingCounts(), getApercuEntreprises()]);
   const nCompanies = counts.companies;
 
   // Vitrine fixe plutôt que tirée du classement.
@@ -55,24 +87,8 @@ export default async function Home() {
   // choisit pas, et le jour où la première du classement a une couverture
   // médiocre, l'accueil l'a aussi.
   //
-  // La mention « Exemple » a disparu avec ce qu'elle protegeait. Elle levait
-  // l'ambiguite d'une note inventee affichee sous le nom d'une banque reelle.
-  // Il n'y a plus de note : tout ce que montre la vitrine est vrai. UBS
-  // emploie dans toute la Suisse et travaille dans les quatre langues, et les
-  // trois voisines sont des fiches du catalogue, avec leurs photos.
-  const vedette = {
-    name: "UBS",
-    sector: "Finance",
-    lieu: "Multi-sites, CH",
-    langues: "FR · DE · EN · IT",
-    cover_url: "https://images.pexels.com/photos/35599425/pexels-photo-35599425.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  };
-
-  const voisines = [
-    { n: "Swisscom", d: "Télécoms · Berne", img: "https://images.pexels.com/photos/4864249/pexels-photo-4864249.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=192&h=108" },
-    { n: "Logitech", d: "Tech · Lausanne", img: "https://images.pexels.com/photos/34803998/pexels-photo-34803998.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=192&h=108" },
-    { n: "Roche", d: "Pharma · Bâle", img: "https://images.pexels.com/photos/15290006/pexels-photo-15290006.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=192&h=108" },
-  ];
+  // La vitrine figee a cede la place a la pile : les cinq entreprises
+  // viennent du catalogue, avec leurs vraies photos et leurs vraies langues.
 
   return (
     <main className="landing-tons" style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
@@ -408,77 +424,11 @@ export default async function Home() {
             suit le thème clair comme sombre, et ne se périme pas quand la
             fiche évolue. Rien ne crédibilise autant que de montrer ce qu'on
             vend, et la page n'en montrait rien. */}
-        <div className="landing-apercu" aria-hidden="true">
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 22, overflow: "hidden", boxShadow: "0 18px 50px rgba(0,0,0,0.13)", display: "flex", flexDirection: "column" }}>
-
-            {/* La photo prend la plus grande part, comme sur la carte du
-                swipe : c'est elle qui donne son caractere a une entreprise. */}
-            <div style={{ position: "relative", height: 260 }}>
-              <div style={{
-                position: "absolute", inset: 0,
-                backgroundColor: "var(--surface3)",
-                backgroundImage: vedette.cover_url ? `url(${largeurCouverture(vedette.cover_url, 940)})` : undefined,
-                backgroundSize: "cover", backgroundPosition: "center",
-              }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 52%, rgba(0,0,0,0.82) 100%)" }} />
-              <span style={{
-                position: "absolute", top: 14, left: 14,
-                fontSize: 11, fontWeight: 700, color: "#fff",
-                background: "rgba(59,130,246,0.9)", borderRadius: 50, padding: "4px 11px",
-              }}>{vedette.sector}</span>
-              <div style={{ position: "absolute", left: 20, right: 20, bottom: 16 }}>
-                <p style={{ fontSize: 23, fontWeight: 800, color: "#fff", letterSpacing: "-0.025em", lineHeight: 1.15 }}>{vedette.name}</p>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.78)", marginTop: 3 }}>Banque et gestion de fortune</p>
-              </div>
-            </div>
-
-            <div style={{ padding: "16px 18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {[vedette.lieu, vedette.langues].map(t => (
-                  <span key={t} style={{
-                    display: "inline-flex", alignItems: "center", gap: 5,
-                    background: "var(--surface2)", border: "1px solid var(--border2)",
-                    borderRadius: 50, padding: "5px 11px", fontSize: 12.5, fontWeight: 600, color: "var(--text-sub)",
-                  }}>{t}</span>
-                ))}
-              </div>
-
-              <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                Première banque suisse, présente dans tous les cantons, de la gestion de
-                fortune au financement des entreprises.
-              </p>
-
-              <span style={{
-                display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7,
-                background: "var(--brand)", color: "#fff",
-                borderRadius: 12, padding: "12px 0", fontSize: 14, fontWeight: 700,
-              }}>
-                Voir les offres d&apos;emploi <ArrowRight size={15} aria-hidden="true" />
-              </span>
-            </div>
-          </div>
-
-          {/* Les trois boutons du swipe, sous la carte : passer, en savoir
-              plus, garder. Ils disent en un coup d'oeil comment le site se
-              parcourt. */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 18 }}>
-            {[
-              { Icone: X, couleur: "#ef4444", taille: 56 },
-              { Icone: Info, couleur: "var(--text-muted)", taille: 42 },
-              { Icone: Flame, couleur: "#f97316", taille: 56 },
-            ].map(({ Icone, couleur, taille }, i) => (
-              <span key={i} style={{
-                width: taille, height: taille, borderRadius: "50%",
-                background: "var(--surface)", border: `2px solid ${couleur === "var(--text-muted)" ? "var(--border2)" : `${couleur}66`}`,
-                color: couleur,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 18px rgba(0,0,0,0.08)",
-              }}>
-                <Icone size={taille === 42 ? 17 : 24} strokeWidth={2} aria-hidden="true" />
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* La pile se manipule vraiment : cinq entreprises du catalogue, le
+            geste du site, et rien d'enregistre puisque le visiteur n'a pas
+            encore de compte. Une capture dit ce que le site montre ; une carte
+            qu'on fait glisser dit ce qu'on y fait. */}
+        <ApercuSwipe entreprises={apercu} />
       </section>
 
       {/* La section « En trois étapes » a été retirée d'ici.
