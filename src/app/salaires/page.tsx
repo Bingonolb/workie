@@ -8,7 +8,7 @@ import { SECTOR_COLORS } from "@/lib/types";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Salaires en Suisse par secteur · Workie",
+  title: "Salaires en Suisse par secteur",
   description: "Salaires réels et anonymes des employés suisses par secteur, poste et type de contrat. Données issues d'avis vérifiés sur Workie.",
   alternates: { canonical: "https://www.workie.ch/salaires" },
   openGraph: {

@@ -15,7 +15,7 @@ import { FavorisClient } from "./FavorisClient";
  * Un visiteur non connecté est renvoyé vers la connexion avant d'arriver ici.
  */
 export const metadata: Metadata = {
-  title: "Mes favoris · Workie",
+  title: "Mes favoris",
   robots: { index: false, follow: false },
 };
 

@@ -3,7 +3,7 @@ import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Mentions légales | Workie",
+  title: "Mentions légales",
   description: "Informations légales de la plateforme Workie, opérée en Suisse.",
 };
 

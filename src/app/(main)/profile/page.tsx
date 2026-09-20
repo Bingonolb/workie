@@ -14,7 +14,7 @@ import { ProfilClient } from "./ProfilClient";
  * la coquille ne contient que la mise en page.
  */
 export const metadata: Metadata = {
-  title: "Mon profil · Workie",
+  title: "Mon profil",
   robots: { index: false, follow: false },
 };
 

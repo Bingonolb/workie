@@ -5,7 +5,7 @@ import { AuthFormWorkie } from "@/components/AuthFormWorkie";
 import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
-  title: "Créer un compte · Workie",
+  title: "Créer un compte",
   description: "Créez un compte gratuit pour garder les employeurs suisses qui vous intéressent et retrouver vos recherches.",
   robots: { index: false, follow: false },
 };

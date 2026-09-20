@@ -5,7 +5,7 @@ import { AuthFormWorkie } from "@/components/AuthFormWorkie";
 import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
-  title: "Connexion · Workie",
+  title: "Connexion",
   description: "Connectez-vous pour retrouver les employeurs suisses que vous avez gardés et vos recherches récentes.",
   robots: { index: false, follow: false },
 };

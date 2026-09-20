@@ -57,7 +57,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const company = await getCachedCompany(id);
-  if (!company) return { title: "Entreprise introuvable · Workie" };
+  if (!company) return { title: "Entreprise introuvable" };
   const desc = company.description
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
     : `${company.name}, ${company.sector} à ${company.city}. Offres d'emploi, langues de travail et entreprises voisines.`;
@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ? [{ url: company.cover_url, width: 1200, height: 630, alt: company.name }]
     : [{ url: apercuDessine, width: 1200, height: 630, alt: company.name }];
   return {
-    title: `${company.name} · Emploi et entreprise · Workie`,
+    title: `${company.name} · Emploi et entreprise`,
     description: desc,
     alternates: { canonical: url },
     openGraph: {

@@ -2,7 +2,7 @@ export const revalidate = 60; // ISR: Vercel CDN caches for 60s, auth/ads/filter
 
 import type { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Explorer les entreprises suisses · Workie",
+  title: "Explorer les entreprises suisses",
   description: "Découvrez les avis anonymes et les salaires des entreprises en Suisse. Tech, Pharma, Finance, Conseil et plus.",
   alternates: { canonical: "https://www.workie.ch/explore" },
   openGraph: {

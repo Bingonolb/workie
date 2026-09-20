@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialité · Workie",
+  title: "Politique de confidentialité",
   description: "Comment Workie collecte, utilise et protège vos données personnelles.",
   alternates: { canonical: "https://www.workie.ch/confidentialite" },
   robots: { index: true, follow: false },

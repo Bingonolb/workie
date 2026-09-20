@@ -6,7 +6,7 @@ import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "Classement des entreprises suisses · Workie",
+  title: "Classement des entreprises suisses",
   description: "Le vrai classement des entreprises en Suisse, calculé sur les avis anonymes, les salaires et les votes de la communauté Workie.",
   alternates: { canonical: "https://www.workie.ch/ranking" },
   openGraph: {
