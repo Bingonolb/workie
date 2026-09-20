@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
+import { lireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
 
 /**
  * Partage l'état du visiteur entre les zones interactives d'une fiche.
@@ -62,7 +63,33 @@ export function FournisseurEtatFiche({ companyId, children }: { companyId: strin
         setEtat(e => ({ ...e, isLoggedIn: true }));
       }
     } catch { /* stockage indisponible : on reste en visiteur */ }
-  }, []);
+
+    /*
+     * La flamme est connue avant le reseau, quand elle peut l'etre.
+     *
+     * La barre de navigation demande le contexte du visiteur a chaque page et
+     * le garde en memoire : la liste de ses favoris y est deja. On la lit ici,
+     * avant peinture, plutot que d'attendre l'appel propre a la fiche, qui
+     * arrive deux a trois cents millisecondes plus tard. C'est ce delai qu'on
+     * voyait comme une flamme qui s'allume en retard.
+     *
+     * Dans un effet de disposition et non au premier rendu : le serveur rend
+     * l'etat visiteur, et un premier rendu client different de lui casserait
+     * l'hydratation. Rien n'est accorde par cette lecture, l'appel qui suit
+     * reste seul juge.
+     */
+    const ctx = lireCache<{ isLoggedIn?: boolean; isAdmin?: boolean; favIds?: string[]; flameIds?: string[] }>(CLE_CONTEXTE);
+    if (ctx) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEtat(e => ({
+        ...e,
+        isLoggedIn: ctx.isLoggedIn ?? e.isLoggedIn,
+        isAdmin: ctx.isAdmin ?? e.isAdmin,
+        isFav: (ctx.favIds ?? []).includes(companyId) || (ctx.flameIds ?? []).includes(companyId),
+      }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId]);
 
   useEffect(() => {
     let annule = false;
