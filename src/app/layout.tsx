@@ -50,10 +50,10 @@ const OG_URL = "https://www.workie.ch/opengraph-image.png";
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.workie.ch"),
   title: {
-    default: "Workie : chercher du travail en Suisse, autrement",
+    default: "Workie : chercher du travail devient passionnant",
     template: "%s · Workie",
   },
-  description: "L'annuaire des employeurs suisses : par secteur, par canton et par langue de travail. Gardez ceux qui vous intéressent, et postulez sur leur propre site.",
+  description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent, et trouvez leurs offres là où elles paraissent vraiment : sur leur propre site.",
   keywords: ["emploi suisse", "employeurs suisses", "offres d'emploi suisse", "entreprises suisses", "chercher du travail en suisse", "workie"],
   authors: [{ name: "Workie", url: "https://www.workie.ch" }],
   creator: "Workie",
@@ -83,7 +83,7 @@ const websiteSchema = {
   "@type": "WebSite",
   name: "Workie",
   url: "https://www.workie.ch",
-  description: "L'annuaire des employeurs suisses : par secteur, par canton et par langue de travail.",
+  description: "Découvrez les entreprises suisses et trouvez leurs offres d'emploi.",
   inLanguage: "fr-CH",
   potentialAction: {
     "@type": "SearchAction",

@@ -25,11 +25,11 @@ const getLandingCounts = unstable_cache(
 );
 
 export const metadata: Metadata = {
-  title: "Workie : chercher du travail en Suisse, autrement",
-  description: "Mille employeurs suisses, par secteur, par canton et par langue de travail. Gardez ceux qui vous intéressent, et postulez sur leur propre site.",
+  title: "Workie : chercher du travail devient passionnant",
+  description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent, et trouvez leurs offres là où elles paraissent vraiment : sur leur propre site.",
   openGraph: {
-    title: "Workie : chercher du travail en Suisse, autrement",
-    description: "Mille employeurs suisses, par secteur, par canton et par langue de travail.",
+    title: "Workie : chercher du travail devient passionnant",
+    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent, trouvez leurs offres.",
     url: "https://www.workie.ch",
     siteName: "Workie",
     type: "website",
@@ -37,8 +37,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Workie : chercher du travail en Suisse, autrement",
-    description: "Mille employeurs suisses, par secteur, par canton et par langue de travail.",
+    title: "Workie : chercher du travail devient passionnant",
+    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent, trouvez leurs offres.",
   },
   alternates: { canonical: "https://www.workie.ch" },
 };
@@ -54,17 +54,24 @@ export default async function Home() {
   // choisit pas, et le jour où la première du classement a une couverture
   // médiocre, l'accueil l'a aussi.
   //
-  // Les chiffres sont illustratifs et le disent. UBS a deux avis réels et une
-  // moyenne de 3,5 : publier « 4.2 sur 34 avis » sous le nom d'une banque
-  // nommée serait une évaluation fausse d'une institution réelle, ce qui
-  // contredit frontalement l'argument de fiabilité du site. La mention
-  // « Exemple » lève l'ambiguïté sans rien retirer à la démonstration.
+  // La mention « Exemple » a disparu avec ce qu'elle protegeait. Elle levait
+  // l'ambiguite d'une note inventee affichee sous le nom d'une banque reelle.
+  // Il n'y a plus de note : tout ce que montre la vitrine est vrai. UBS
+  // emploie dans toute la Suisse et travaille dans les quatre langues, et les
+  // trois voisines sont des fiches du catalogue, avec leurs photos.
   const vedette = {
     name: "UBS",
     sector: "Finance",
-    city: "Zurich",
+    lieu: "Multi-sites, CH",
+    langues: "FR · DE · EN · IT",
     cover_url: "https://images.pexels.com/photos/35599425/pexels-photo-35599425.jpeg?auto=compress&cs=tinysrgb&w=1200",
   };
+
+  const voisines = [
+    { n: "Swisscom", d: "Télécoms · Berne", img: "https://images.pexels.com/photos/4864249/pexels-photo-4864249.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=192&h=108" },
+    { n: "Logitech", d: "Tech · Lausanne", img: "https://images.pexels.com/photos/34803998/pexels-photo-34803998.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=192&h=108" },
+    { n: "Roche", d: "Pharma · Bâle", img: "https://images.pexels.com/photos/15290006/pexels-photo-15290006.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=192&h=108" },
+  ];
 
   return (
     <main className="landing-tons" style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
@@ -175,6 +182,13 @@ export default async function Home() {
           background-image: url("https://images.pexels.com/photos/303335/pexels-photo-303335.jpeg?auto=compress&cs=tinysrgb&w=1880");
           background-size: cover;
           background-position: center 42%;
+        }
+        /* Seconde bande : une autre vue, et un cadrage plus bas, pour que les
+           deux images ne se ressemblent pas. */
+        .landing-bande-2 {
+          background-image: url("https://images.pexels.com/photos/27678917/pexels-photo-27678917.jpeg?auto=compress&cs=tinysrgb&w=1880");
+          background-position: center 55%;
+          min-height: 340px;
         }
         .landing-bande-voile {
           position: absolute;
@@ -335,7 +349,7 @@ export default async function Home() {
               après lui. Un titre de page d'accueil se saisit d'un coup d'œil,
               il ne se lit pas. Le corps redescend de 58 à 50 px. */}
           <h1 className="hero-titre" style={{ fontSize: "clamp(32px, 4.4vw, 50px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 20, maxWidth: 560 }}>
-            Trouvez l&apos;employeur, pas l&apos;annonce.
+            Chercher du travail devient passionnant.
           </h1>
 
           {/* Douze mots, pas vingt-sept. La phrase enumérait les données puis
@@ -343,8 +357,9 @@ export default async function Home() {
               demande une. Elle dit maintenant d'où viennent les notes, ce qui
               est la seule chose qu'un titre ne peut pas porter. */}
           <p className="hero-accroche" style={{ fontSize: "clamp(15.5px, 1.4vw, 17.5px)", color: "var(--text-sub)", maxWidth: 470, lineHeight: 1.6, marginBottom: 32 }}>
-            Mille employeurs suisses, par secteur, par canton et par langue de
-            travail. Gardez ceux qui vous intéressent, postulez chez eux.
+            Découvrez les entreprises suisses, gardez celles qui vous
+            correspondent, et trouvez leurs offres là où elles paraissent
+            vraiment : sur leur propre site.
           </p>
 
           <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
@@ -412,32 +427,24 @@ export default async function Home() {
                 <div style={{ position: "absolute", left: 20, right: 20, bottom: 14 }}>
                   <p style={{ fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.2 }}>{vedette.name}</p>
                   <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.72)", marginTop: 3 }}>
-                    {vedette.sector}{vedette.city ? ` · ${vedette.city}` : ""}
+                    {vedette.sector} · {vedette.lieu}
                   </p>
                 </div>
               </div>
             )}
 
             <div style={{ padding: 22 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 16 }}>
-              <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                Ce que dit la fiche
-              </p>
-              {/* Les valeurs ci-dessous illustrent la mise en forme ; elles ne
-                  sont pas celles d'une entreprise en particulier. Le dire est
-                  la moindre des choses. */}
-              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-muted)", border: "1px solid var(--border2)", borderRadius: 5, padding: "2px 7px" }}>
-                Exemple
-              </span>
-            </div>
+            <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+              Ce que dit la fiche
+            </p>
 
             {/* Les deux faits qui decident d'une candidature : ou l'on
                 travaille, et dans quelle langue. Ils remplacent la note sur
                 cinq et ses quatre barres, qui n'existent plus. */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
               {[
-                { l: "Localisation", v: "Zurich, ZH" },
-                { l: "Langues de travail", v: "DE · EN" },
+                { l: "Localisation", v: vedette.lieu },
+                { l: "Langues de travail", v: vedette.langues },
               ].map(({ l, v }) => (
                 <div key={l} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 11, padding: "11px 13px" }}>
                   <p style={{ fontSize: 14.5, fontWeight: 700, letterSpacing: "-0.01em" }}>{v}</p>
@@ -452,13 +459,13 @@ export default async function Home() {
               À voir aussi
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 1, background: "var(--border)", border: "1px solid var(--border)", borderRadius: 11, overflow: "hidden" }}>
-              {[
-                { n: "Swisscom", d: "Télécoms · Berne" },
-                { n: "Logitech", d: "Tech · Lausanne" },
-                { n: "Firmenich", d: "Chimie · Genève" },
-              ].map(({ n, d }) => (
+              {voisines.map(({ n, d, img }) => (
                 <div key={n} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--surface)", padding: "9px 12px" }}>
-                  <span style={{ width: 26, height: 26, borderRadius: 7, background: "var(--surface3)", flexShrink: 0 }} />
+                  <span style={{
+                    width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                    backgroundImage: `url(${img})`, backgroundSize: "cover", backgroundPosition: "center",
+                    backgroundColor: "var(--surface3)",
+                  }} />
                   <span style={{ minWidth: 0 }}>
                     <span style={{ display: "block", fontSize: 12.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{n}</span>
                     <span style={{ display: "block", fontSize: 11, color: "var(--text-muted)" }}>{d}</span>
@@ -491,7 +498,7 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 760 }}>
-            Choisir son employeur, pas seulement son poste.
+            Mille maisons où travailler en Suisse.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
             {/* Cette phrase a d'abord répété trois éléments déjà lus plus haut,
@@ -499,8 +506,8 @@ export default async function Home() {
                 donne maintenant le cas concret qui justifie le titre : c'est
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
-            Un poste s&apos;occupe deux ans, une entreprise se choisit pour bien plus
-            longtemps. C&apos;est elle qu&apos;on regarde ici, pas l&apos;annonce du moment.
+            Chaque fiche dit l&apos;essentiel : le métier, la ville, les langues de
+            travail, et le lien direct vers ses offres.
           </p>
         </div>
       </section>
@@ -537,7 +544,7 @@ export default async function Home() {
               les offres d'un employeur donne, dont on voit la totalite parce
               qu'on va les lire chez lui. C'est ce que dit le chapeau, et c'est
               ce que le titre annonce maintenant. */}
-          <h2 className="landing-h2 avec-chapo">Toutes les offres d&apos;un employeur, pas une sélection.</h2>
+          <h2 className="landing-h2 avec-chapo">Les offres à la source.</h2>
 
           <p className="landing-chapo">
             Un site d&apos;annonces ne montre que les offres qu&apos;on lui a confiées.
@@ -650,9 +657,9 @@ export default async function Home() {
               { Icone: Gauge, titre: "Un catalogue tenu à la main",
                 desc: "Chaque fiche est reprise une par une : le nom tel qu'on le dit, le secteur juste, et l'adresse officielle." },
               { Icone: ShieldCheck, titre: "Les offres restent chez l'employeur",
-                desc: "Aucune annonce recopiée ni revendue : le lien mène à sa propre page carrière, jamais à un intermédiaire." },
-              { Icone: Lock, titre: "Aucun jugement publié",
-                desc: "Pas de note, pas de classement des bons et des mauvais patrons. Des faits, et ce qui vous intéresse." },
+                desc: "Le lien mène à sa page carrière officielle. Vous postulez chez elle, directement." },
+              { Icone: Lock, titre: "Des faits, et vous décidez",
+                desc: "Le métier, le lieu, les langues de travail, les offres du moment. Votre jugement vous appartient." },
             ].map(({ Icone, titre, desc }) => (
               <div key={titre}>
                 <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
@@ -664,6 +671,23 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── Bande photographique, seconde ──
+          Deux aplats se touchaient ici, le gris souleve des engagements puis
+          le violet pale de l'appel a l'action : une couture, pas une
+          transition. L'image separe les deux et donne une respiration avant
+          la derniere demande. */}
+      <section className="landing-bande landing-bande-2">
+        <div className="landing-bande-voile" />
+        <div className="landing-bande-texte">
+          <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700 }}>
+            Vingt-six cantons, quatre langues, mille employeurs.
+          </p>
+          <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 560, marginTop: 18 }}>
+            De la grande maison bâloise au bureau de trois personnes dans le Jura.
+          </p>
+        </div>
+      </section>
+
       {/* ── Appel à l'action ── */}
       <section className="landing-section landing-accent" style={{ padding: "92px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -671,7 +695,8 @@ export default async function Home() {
             Commencez par votre secteur.
           </h2>
           <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 32 }}>
-            La consultation est libre et ne demande pas de compte.
+            Mille entreprises, vingt-six cantons. La consultation est libre et ne
+            demande pas de compte.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 30px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Star, Wallet, Search } from "lucide-react";
+import { Flame, Briefcase, Search } from "lucide-react";
 
 export function WelcomeModal() {
   const searchParams = useSearchParams();
@@ -83,14 +83,14 @@ export function WelcomeModal() {
           </h2>
 
           <p style={{ margin: "0 0 24px", fontSize: 15, color: "#6b7280", lineHeight: 1.65 }}>
-            Votre compte est prêt. Vous pouvez consulter les conditions de travail des entreprises suisses : notes détaillées, salaires réels et retours d&apos;employés, publiés anonymement.
+            Votre compte est prêt. Explorez les entreprises suisses, gardez celles qui vous correspondent, et retrouvez-les quand vous voulez.
           </p>
 
           {/* Features list */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
             {[
-              { Icone: Star, text: "Avis 100% anonymes d'employés vérifiés" },
-              { Icone: Wallet, text: "Salaires réels partagés par la communauté" },
+              { Icone: Flame, text: "Gardez les entreprises qui vous intéressent" },
+              { Icone: Briefcase, text: "Leurs offres, sur leur propre site carrière" },
               // Le compte etait ecrit en dur, et annoncait 1 733 entreprises
               // pour 1 032 reelles : un chiffre fige derive du jour ou on le
               // recopie. Une borne basse reste vraie quand le catalogue
