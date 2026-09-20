@@ -38,7 +38,7 @@ const memoire = new Map<string, Entree>();
  * sert qu'à savoir si la mémoire appartient bien à la personne devant l'écran.
  * Toute donnée réelle provient du serveur, qui valide le jeton, lui.
  */
-function compteCourant(): string | null {
+export function compteCourant(): string | null {
   if (typeof document === "undefined") return null;
   try {
     // Le cookie est découpé en tranches (.0, .1, …) au-delà d'une certaine

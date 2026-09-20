@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
+import { lireRecentes, ajouterRecente, retirerRecente, viderRecentes, type EntrepriseRecente } from "@/lib/recherchesRecentes";
 
 type Suggestion = { id: string; name: string; city: string; sector: string; logo_url?: string | null };
 
@@ -14,6 +15,8 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [hauteur, setHauteur] = useState("100dvh");
+  const [recentes, setRecentes] = useState<EntrepriseRecente[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -22,6 +25,8 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   useLayoutEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRecentes(lireRecentes());
     setTimeout(() => inputRef.current?.focus(), 60);
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
@@ -55,12 +60,37 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { search(query); }, [query, search]);
 
+  /*
+   * La fenetre epouse la hauteur reellement visible.
+   *
+   * Sur iPhone, l'ouverture du clavier retrecit la zone visible sans changer
+   * la hauteur de la page : une fenetre calee sur `bottom: 0` continue donc
+   * derriere le clavier, et le defilement se decroche. `100dvh` suffit sur les
+   * navigateurs recents ; `visualViewport` couvre les autres et le cas du
+   * clavier, qu'aucune unite CSS ne decrit.
+   */
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const suivre = () => setHauteur(`${vv.height}px`);
+    suivre();
+    vv.addEventListener("resize", suivre);
+    vv.addEventListener("scroll", suivre);
+    return () => { vv.removeEventListener("resize", suivre); vv.removeEventListener("scroll", suivre); };
+  }, []);
+
+  const ouvrir = (e: Suggestion) => {
+    setRecentes(ajouterRecente({ id: e.id, name: e.name, city: e.city, sector: e.sector }));
+    onClose();
+  };
+
   if (!mounted) return null;
 
   return createPortal(
     <div
       style={{
-        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+        position: "fixed", top: 0, left: 0, right: 0,
+        height: hauteur,
         zIndex: 10100,
         background: "var(--bg)",
         display: "flex", flexDirection: "column",
@@ -135,7 +165,12 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Results */}
-      <div className="gs-scroll">
+      {/* Le clavier se retire des qu'on fait defiler.
+          Il occupe la moitie de l'ecran : le garder ouvert pendant qu'on
+          parcourt une liste, c'est parcourir une liste dans une fente. C'est
+          ce que font les applications, et c'est aussi ce qui evite que la
+          page se decroche derriere lui sur iPhone. */}
+      <div className="gs-scroll" onTouchMove={() => inputRef.current?.blur()}>
         {loading && (
           <div style={{ padding: "16px 20px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
         )}
@@ -152,7 +187,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             key={s.id}
             href={`/company/${s.id}`}
             prefetch={false}
-            onClick={onClose}
+            onClick={() => ouvrir(s)}
             className="gs-row"
           >
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -165,7 +200,58 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           </Link>
         ))}
 
-        {!query && (
+        {/* Ce qu'on vient chercher en rouvrant la loupe.
+            On revient rarement sur une recherche neuve, on revient sur celle
+            d'hier. La phrase d'accueil ne s'affiche donc que la premiere
+            fois, quand il n'y a rien a reprendre. */}
+        {!query && recentes.length > 0 && (
+          <>
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "16px 20px 10px",
+            }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Récentes</p>
+              <button
+                type="button"
+                onClick={() => setRecentes(viderRecentes())}
+                style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "var(--text-muted)", fontFamily: "inherit" }}
+              >
+                Tout effacer
+              </button>
+            </div>
+            {recentes.map(r => (
+              <div key={r.id} className="gs-row" style={{ cursor: "default" }}>
+                <Link
+                  href={`/company/${r.id}`}
+                  prefetch={false}
+                  onClick={() => ouvrir({ ...r, logo_url: null })}
+                  style={{ flex: 1, minWidth: 0, textDecoration: "none" }}
+                >
+                  <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {r.name}
+                  </p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{r.city} · {r.sector}</p>
+                </Link>
+                {/* La croix retire la ligne, et rien d'autre : elle ne doit
+                    pas ouvrir la fiche par-dessus le marche. */}
+                <button
+                  type="button"
+                  aria-label={`Retirer ${r.name} des recherches récentes`}
+                  onClick={e => { e.preventDefault(); e.stopPropagation(); setRecentes(retirerRecente(r.id)); }}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    width: 32, height: 32, flexShrink: 0, marginRight: -6,
+                    background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)",
+                  }}
+                >
+                  <X size={15} aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+          </>
+        )}
+
+        {!query && recentes.length === 0 && (
           <div style={{ padding: "48px 20px", textAlign: "center" }}>
             <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Rechercher une entreprise</p>
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nom, ville ou secteur d&apos;activité</p>
