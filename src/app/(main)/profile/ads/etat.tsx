@@ -12,7 +12,9 @@ export const STATUS_CONFIG = {
   payment_pending: { label: "Paiement requis", color: "#ef4444", bg: "rgba(239,68,68,0.1)", icon: <CreditCard size={12} aria-hidden="true" />, dot: "#ef4444" },
   pending:         { label: "En révision",     color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: <Clock size={12} aria-hidden="true" />,       dot: "#f59e0b" },
   active:          { label: "Active",           color: "#10b981", bg: "rgba(16,185,129,0.1)", icon: <CheckCircle size={12} aria-hidden="true" />, dot: "#10b981" },
-  paused:          { label: "Pausée",           color: "#8b5cf6", bg: "rgba(139,92,246,0.1)", icon: <PauseCircle size={12} aria-hidden="true" />, dot: "#8b5cf6" },
+  // En pause est un arret, pas une mise en avant : gris ardoise, comme un
+  // etat qui attend. Le violet le faisait ressembler a une nouveaute.
+  paused:          { label: "Pausée",           color: "#64748b", bg: "rgba(100,116,139,0.12)", icon: <PauseCircle size={12} aria-hidden="true" />, dot: "#64748b" },
   completed:       { label: "Terminée",         color: "#6b7280", bg: "rgba(107,114,128,0.1)", icon: <CheckCircle size={12} aria-hidden="true" />, dot: "#6b7280" },
   rejected:        { label: "Rejetée",          color: "#ef4444", bg: "rgba(239,68,68,0.1)",   icon: <XCircle size={12} aria-hidden="true" />,    dot: "#ef4444" },
 } as const;

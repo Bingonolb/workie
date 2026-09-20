@@ -411,7 +411,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
                   Offres d&apos;emploi
-                  <span style={{ fontSize: 12.5, fontWeight: 700, background: "rgba(139,92,246,0.1)", color: "#8b5cf6", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, background: "var(--surface3)", color: "var(--text)", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {jobs.map((job) => (

@@ -94,7 +94,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
 
         {campaigns.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 24px 60px" }}>
-            <div style={{ width: 72, height: 72, borderRadius: 22, background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+            <div style={{ width: 72, height: 72, borderRadius: 20, background: "var(--surface2)", border: "1px solid var(--border2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
               <Megaphone size={30} color="var(--brand)" strokeWidth={1.7} aria-hidden="true" />
             </div>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune campagne pour l&apos;instant</h2>
@@ -143,14 +143,11 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
                 ] as [string, string, number][]).filter(([s, , n]) => s === "all" || n > 0).map(([status, label, n]) => {
                   const isActive = filtreApplique === status;
                   return (
-                    <a key={status} href={`?tab=${status}`} style={{
-                      display: "inline-flex", alignItems: "center", gap: 6,
-                      padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 600,
-                      textDecoration: "none",
-                      border: isActive ? "1px solid #8b5cf6" : "1px solid var(--border2)",
-                      background: isActive ? "rgba(139,92,246,0.12)" : "transparent",
-                      color: isActive ? "#8b5cf6" : "var(--text-muted)",
-                    }}>
+                    // L'onglet courant se dit a l'encre, comme partout
+                    // ailleurs : pleine quand il est choisi, effacee sinon.
+                    <a key={status} href={`?tab=${status}`}
+                      className={isActive ? "btn btn-encre btn-sm" : "btn btn-fantome btn-sm"}
+                      style={{ borderRadius: 50, fontWeight: 600 }}>
                       {status !== "all" && (
                         <span style={{ width: 7, height: 7, borderRadius: "50%", background: STATUS_CONFIG[status as keyof typeof STATUS_CONFIG]?.dot ?? "#6b7280", display: "inline-block" }} />
                       )}
@@ -171,7 +168,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
             <Link href="/profile/ads/new" style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
               marginTop: 16, padding: "16px", borderRadius: 16,
-              border: "1.5px dashed rgba(139,92,246,0.3)", background: "rgba(139,92,246,0.03)",
+              border: "1.5px dashed var(--border2)", background: "var(--surface2)",
               color: "#8b5cf6", fontWeight: 700, fontSize: 14, textDecoration: "none",
             }}>
               <Plus size={18} aria-hidden="true" /> Lancer une nouvelle campagne
@@ -179,7 +176,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
           </>
         )}
 
-        <div style={{ marginTop: 28, background: "rgba(139,92,246,0.04)", border: "1px solid rgba(139,92,246,0.12)", borderRadius: 14, padding: "16px 20px" }}>
+        <div style={{ marginTop: 28, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <Megaphone size={14} color="#8b5cf6" aria-hidden="true" />
             <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>Comment ça fonctionne</p>
@@ -192,7 +189,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
               { step: "4", text: "À la fin, vous recevez le bilan et pouvez relancer" },
             ].map(({ step, text }) => (
               <div key={step} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(139,92,246,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 900, color: "#8b5cf6", flexShrink: 0 }}>{step}</div>
+                <div style={{ width: 20, height: 20, borderRadius: 6, background: "var(--surface3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 900, color: "var(--text)", flexShrink: 0 }}>{step}</div>
                 <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>{text}</p>
               </div>
             ))}
