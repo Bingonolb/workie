@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { estPexels, aLaLargeur } from "@/lib/coverUrl";
+import { estRedimensionnable, largeurCouverture } from "@/lib/coverUrl";
 
 /**
  * Bannière d'entreprise, servie directement par le CDN Pexels.
@@ -78,8 +78,8 @@ export function CoverImage({
 
   if (!src) return <div className={className} style={{ position: "absolute", inset: 0, background: fond }} />;
 
-  const srcSet = estPexels(src)
-    ? LARGEURS.map(w => `${aLaLargeur(src, w)} ${w}w`).join(", ")
+  const srcSet = estRedimensionnable(src)
+    ? LARGEURS.map(w => `${largeurCouverture(src, w)} ${w}w`).join(", ")
     : undefined;
 
   return (
@@ -89,7 +89,7 @@ export function CoverImage({
         // Repli pour les navigateurs sans srcset, et premiere candidate que
         // certains prennent au pied de la lettre : une vignette n'a pas besoin
         // de 640 pixels de large.
-        src={estPexels(src) ? aLaLargeur(src, vignette ? 192 : 640) : src}
+        src={largeurCouverture(src, vignette ? 192 : 640)}
         srcSet={srcSet}
         sizes={sizes}
         alt={alt}
@@ -142,9 +142,9 @@ export function CoverImage({
 export function prechargerCouvertures(urls: (string | null | undefined)[], largeur = 940) {
   if (typeof window === "undefined") return;
   for (const url of urls) {
-    if (!url || !estPexels(url)) continue;
+    if (!url || !estRedimensionnable(url)) continue;
     const img = new Image();
-    img.src = aLaLargeur(url, largeur);
+    img.src = largeurCouverture(url, largeur);
     void img.decode?.().catch(() => { /* image indisponible : sans conséquence */ });
   }
 }
