@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
-import { lireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
+import { lireCache, compteCourant, CLE_CONTEXTE } from "@/lib/cacheSession";
 
 /**
  * Partage l'état du visiteur entre les zones interactives d'une fiche.
@@ -56,7 +56,13 @@ export function FournisseurEtatFiche({ companyId, children }: { companyId: strin
   // n'apparaît jamais. Avec useEffect, il serait visible le temps d'une image.
   useLayoutEffect(() => {
     try {
-      if (localStorage.getItem(CLE_MEMOIRE) === "1") {
+      // Le marqueur « connecte » ne suffit pas : il survit a la deconnexion.
+      // Un visiteur qui s'etait connecte un jour arrivait donc sur une fiche
+      // nette, que l'appel suivant floutait une demi-seconde plus tard ; c'est
+      // l'effet « net puis flou » constate en venant de l'accueil. Sans cookie
+      // de session, il n'y a pas de compte, et la fiche reste floutee des la
+      // premiere image.
+      if (compteCourant() !== null && localStorage.getItem(CLE_MEMOIRE) === "1") {
         // Même raison : le serveur ignore ce marqueur, l'ajuster avant peinture
         // est ce qui évite le clignotement.
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -79,7 +85,9 @@ export function FournisseurEtatFiche({ companyId, children }: { companyId: strin
      * reste seul juge.
      */
     const ctx = lireCache<{ isLoggedIn?: boolean; isAdmin?: boolean; favIds?: string[]; flameIds?: string[] }>(CLE_CONTEXTE);
-    if (ctx) {
+    // lireCache refuse deja toute entree sans compte identifiable ; la garde
+    // est redite ici parce que c'est elle qui decide du flou.
+    if (ctx && compteCourant() !== null) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setEtat(e => ({
         ...e,

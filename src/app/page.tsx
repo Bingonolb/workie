@@ -436,9 +436,9 @@ export default async function Home() {
               // fonctionnement, pas de ce qui décide quelqu'un à entrer. Le
               // détail reste dans « Chercher, comparer, contribuer », où il est
               // à sa place.
-              { valeur: nCompanies.toLocaleString("fr-CH"), libelle: "entreprises référencées" },
-              { valeur: "26", libelle: "cantons couverts" },
-              { valeur: "36", libelle: "secteurs d'activité" },
+              { valeur: nCompanies.toLocaleString("fr-CH"), libelle: "entreprises" },
+              { valeur: "26", libelle: "cantons" },
+              { valeur: "36", libelle: "secteurs" },
             ].map(({ valeur, libelle }, i) => (
               <div key={libelle} style={{
                 // Filets verticaux plutôt que quatre blocs posés côte à côte :
@@ -485,7 +485,7 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 760 }}>
-            1000 entreprises où travailler en Suisse.
+            Toute la Suisse qui recrute.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
             {/* Cette phrase a d'abord répété trois éléments déjà lus plus haut,
@@ -493,7 +493,7 @@ export default async function Home() {
                 donne maintenant le cas concret qui justifie le titre : c'est
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
-            Le métier, la ville, les langues de travail, et leurs offres.
+            Des grands groupes aux ateliers du Jura. Au même endroit.
           </p>
         </div>
       </section>
@@ -533,26 +533,26 @@ export default async function Home() {
           <h2 className="landing-h2 avec-chapo">Plus qu&apos;une annonce.</h2>
 
           <p className="landing-chapo">
-            Derrière chaque offre, une entreprise. Vous la découvrez avant de postuler.
+            Chaque offre a une entreprise derrière elle. Rencontrez-la d&apos;abord.
           </p>
 
           <div className="landing-parcours">
             <div className="landing-parcours-etape">
               <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
-                Sur Workie
+                D&apos;abord
               </p>
               {/* « Vous jugez l'employeur » : ce n'est pas le rapport qu'on
                   entretient avec un futur employeur, et Workie n'est pas un
                   tribunal. Le titre dit ce qu'on y gagne, savoir où l'on met
                   les pieds, plutôt que le verdict qu'on rendrait. */}
               <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-                Vous découvrez l&apos;entreprise
+                Vous la découvrez
               </h3>
               {/* Cette phrase reprenait presque mot pour mot l'accroche du
                   haut de page : « Notes détaillées, salaires... et conditions
                   de travail, par celles et ceux qui y travaillent ». */}
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
-                Son métier, ses sites, ses langues de travail.
+                Ce qu&apos;elle fait, où, et dans quelle langue.
               </p>
             </div>
 
@@ -560,13 +560,13 @@ export default async function Home() {
 
             <div className="landing-parcours-etape">
               <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
-                Chez l&apos;employeur
+                Ensuite
               </p>
               <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-                Vous voyez ses offres
+                Vous postulez
               </h3>
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
-                Tous ses postes ouverts, à jour.
+                Tous ses postes ouverts, directement chez elle.
               </p>
             </div>
           </div>
@@ -582,7 +582,7 @@ export default async function Home() {
           <div>
             <p className="landing-eyebrow" style={{ textAlign: "left" }}>Pour qui</p>
             <h2 style={{ fontSize: "clamp(24px, 3.4vw, 36px)", fontWeight: 700, letterSpacing: "-0.032em", lineHeight: 1.18, maxWidth: 380, marginBottom: 26 }}>
-              Quatre façons de s&apos;en servir.
+              Où que vous en soyez.
             </h2>
             {/* Éventail de trois fiches réelles.
                 Une photographie d'illustration occupait cette place : elle
@@ -629,8 +629,8 @@ export default async function Home() {
           et aucun jugement publie. */}
       <section className="landing-section landing-ton" style={{ padding: "88px 24px" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
-          <p className="landing-eyebrow">Ce qui distingue Workie</p>
-          <h2 className="landing-h2">Trois engagements.</h2>
+          <p className="landing-eyebrow">Notre promesse</p>
+          <h2 className="landing-h2">Simple, et juste.</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 22 }}>
             {[
               // « Aucun texte libre » énonçait une interdiction, et la suite
@@ -640,10 +640,10 @@ export default async function Home() {
               // que la carte dit maintenant.
               { Icone: Gauge, titre: "Un catalogue tenu à la main",
                 desc: "Chaque fiche est vérifiée, une par une." },
-              { Icone: ShieldCheck, titre: "Les offres restent chez l'employeur",
-                desc: "Vous postulez directement chez l'employeur." },
-              { Icone: Lock, titre: "Des faits, et vous décidez",
-                desc: "Des faits. Vous décidez." },
+              { Icone: ShieldCheck, titre: "Rien entre vous et l'employeur",
+                desc: "Vous postulez chez lui, directement." },
+              { Icone: Lock, titre: "Des faits",
+                desc: "Le métier, le lieu, la langue. Le jugement vous appartient." },
             ].map(({ Icone, titre, desc }) => (
               <div key={titre}>
                 <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
@@ -679,7 +679,7 @@ export default async function Home() {
             Commencez par votre secteur.
           </h2>
           <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 32 }}>
-            Libre, et sans compte.
+            Gratuit. Sans inscription.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 30px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>

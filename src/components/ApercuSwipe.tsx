@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { X, Info, Flame, ArrowRight } from "lucide-react";
 import { largeurCouverture } from "@/lib/coverUrl";
@@ -44,6 +44,24 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
   const courante = entreprises[index];
   const finie = index >= entreprises.length;
 
+  /*
+   * Les dix photos sont pretes avant le premier geste.
+   *
+   * Chaque carte demandait sa photo au moment de s'afficher : on voyait donc
+   * un aplat gris, puis l'image. On les charge toutes des l'arrivee sur la
+   * page, et on les decode : un fichier telecharge mais pas decode laisse
+   * encore un a-coup au moment de le peindre. Dix images de 940 pixels, soit
+   * a peine le poids d'une seule photo de telephone.
+   */
+  useEffect(() => {
+    for (const e of entreprises) {
+      if (!e.cover_url) continue;
+      const img = new Image();
+      img.src = largeurCouverture(e.cover_url, 940);
+      img.decode?.().catch(() => { /* l'image s'affichera quand meme */ });
+    }
+  }, [entreprises]);
+
   const avancer = (sens: "gauche" | "droite") => {
     if (partie) return;
     setPartie(sens);
@@ -54,14 +72,33 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
     }, 220);
   };
 
+  /*
+   * Le glissement ne commence que sur la photo et le texte, jamais sur un
+   * lien.
+   *
+   * La carte capturait le pointeur des qu'on la touchait, bouton compris :
+   * tous les evenements suivants lui revenaient, et le clic sur « Voir les
+   * offres d'emploi » n'atteignait jamais le lien. Le bouton ne menait nulle
+   * part.
+   *
+   * La capture attend aussi que le doigt ait bouge de quelques pixels : un
+   * simple toucher reste un toucher.
+   */
+  const capture = useRef(false);
   const onPointerDown = (e: React.PointerEvent) => {
     if (partie) return;
+    if ((e.target as HTMLElement).closest("a, button")) return;
     depart.current = e.clientX;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    capture.current = false;
   };
   const onPointerMove = (e: React.PointerEvent) => {
     if (depart.current === null) return;
-    setGlissement(e.clientX - depart.current);
+    const d = e.clientX - depart.current;
+    if (!capture.current && Math.abs(d) > 6) {
+      capture.current = true;
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    }
+    if (capture.current) setGlissement(d);
   };
   const onPointerUp = () => {
     if (depart.current === null) return;
@@ -101,8 +138,19 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
           <div aria-hidden="true" style={{
             position: "absolute", inset: 0, transform: "scale(0.96) translateY(10px)",
             background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 22,
-            boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-          }} />
+            boxShadow: "0 10px 30px rgba(0,0,0,0.08)", overflow: "hidden",
+          }}>
+            {/* La photo de la carte suivante est deja peinte dessous : quand
+                la carte du dessus s'en va, il n'y a rien a charger. */}
+            <div style={{
+              height: 260,
+              backgroundColor: "var(--surface3)",
+              backgroundImage: entreprises[index + 1].cover_url
+                ? `url(${largeurCouverture(entreprises[index + 1].cover_url as string, 940)})`
+                : undefined,
+              backgroundSize: "cover", backgroundPosition: "center",
+            }} />
+          </div>
         )}
 
         <div
