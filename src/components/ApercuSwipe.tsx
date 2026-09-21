@@ -12,7 +12,7 @@ import { largeurCouverture } from "@/lib/coverUrl";
  * dit ce qu'on y fait. C'est le geste qui distingue Workie d'un annuaire, et
  * le décrire en mots coûte un paragraphe que personne ne lit.
  *
- * Cinq entreprises réelles, tirées du catalogue. Rien n'est enregistré : la
+ * Dix entreprises réelles, tirées du catalogue. Rien n'est enregistré : la
  * flamme ne pose pas de favori, puisque le visiteur n'a pas encore de compte.
  * C'est une démonstration, et la dernière carte le dit en proposant d'entrer.
  *
@@ -72,31 +72,18 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
     else if (d >= SEUIL) avancer("droite");
   };
 
+  // Apres la derniere carte, une seule chose a faire : entrer.
   if (finie) {
     return (
       <div className="landing-apercu">
-        <div style={{
-          background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 22,
-          padding: "56px 28px", textAlign: "center", boxShadow: "0 18px 50px rgba(0,0,0,0.13)",
-        }}>
-          <p style={{ fontSize: 19, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 8 }}>
-            Il en reste mille.
-          </p>
-          <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 24 }}>
-            Dans vingt-six cantons et trente-six secteurs.
-          </p>
-          <Link href="/explore" className="btn btn-marque">
-            Continuer <ArrowRight size={16} aria-hidden="true" />
+        <div className="apercu-fin">
+          <div className="apercu-fin-halo" aria-hidden="true" />
+          <p className="apercu-fin-titre">Votre prochain employeur est quelque part dans les 1000.</p>
+          <Link href="/signup" className="btn btn-marque btn-lg btn-bloc" style={{ position: "relative" }}>
+            Créer un compte <ArrowRight size={17} aria-hidden="true" />
           </Link>
-          <button
-            type="button"
-            onClick={() => setIndex(0)}
-            style={{
-              display: "block", margin: "16px auto 0", background: "none", border: "none",
-              fontSize: 13, color: "var(--text-muted)", cursor: "pointer", fontFamily: "inherit",
-            }}
-          >
-            Revoir les cinq
+          <button type="button" onClick={() => setIndex(0)} className="apercu-fin-revoir">
+            Revoir
           </button>
         </div>
       </div>
@@ -206,7 +193,7 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
       </div>
 
       <p style={{ fontSize: 12.5, color: "var(--text-muted)", textAlign: "center", marginTop: 12 }}>
-        Faites glisser la carte, ou touchez un bouton.
+        Glissez, ou touchez un bouton.
       </p>
     </div>
   );

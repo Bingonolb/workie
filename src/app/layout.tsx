@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     default: "Workie : chercher du travail devient passionnant",
     template: "%s · Workie",
   },
-  description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent, et trouvez leurs offres là où elles paraissent vraiment : sur leur propre site.",
+  description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
   keywords: ["emploi suisse", "employeurs suisses", "offres d'emploi suisse", "entreprises suisses", "chercher du travail en suisse", "workie"],
   authors: [{ name: "Workie", url: "https://www.workie.ch" }],
   creator: "Workie",

@@ -27,49 +27,76 @@ const getLandingCounts = unstable_cache(
 );
 
 /**
- * Les cinq entreprises de la pile d'accueil.
+ * Les dix entreprises de la pile d'accueil.
  *
- * Choisies parmi les plus suivies, avec une photo : la page d'accueil montre
- * le catalogue tel qu'il est, pas une selection ecrite a la main qui se
- * perimerait. Mises en cache cinq minutes, comme les compteurs.
+ * Tirees des secteurs que Luc a repris a la main, fiche par fiche : ce sont
+ * les seules dont on sait que le nom, la description et l'adresse sont justes.
+ * La page d'accueil est l'endroit ou une erreur se voit le plus.
+ *
+ * Une par secteur d'abord, les mieux suivies, puis on complete : dix cartes de
+ * la meme branche feraient croire a un site specialise.
  */
+const SECTEURS_REPRIS = [
+  "Administration publique", "Aéronautique & Spatial", "Agriculture",
+  "Alimentation", "Association", "Assurances", "Automobile",
+];
+
 const getApercuEntreprises = unstable_cache(
   async () => {
     const admin = createAdminClient();
     const { data } = await admin
       .from("companies")
       .select("id, name, sector, subsector, city, canton, description, cover_url, website_url, employee_range, langues")
+      .in("sector", SECTEURS_REPRIS)
       .not("cover_url", "is", null)
-      // Une fiche sans description donne une carte a moitie vide, et la page
-      // d'accueil est le dernier endroit ou se le permettre.
       .not("description", "is", null)
-      // JEJ Asssociation est la fiche d'essai de Luc, fictive et mal
-      // orthographiee. Ses visites l'ont hissee dans le classement : elle
-      // n'a rien a faire en page d'accueil.
-      .neq("id", "87d31750-9816-45bb-bbf4-34549cf19405")
       .order("score", { ascending: false })
-      .limit(5);
-    return (data ?? []).map(c => ({
-      id: c.id,
-      name: c.name,
-      sector: c.sector,
-      subsector: c.subsector,
-      lieu: `${c.city}${c.canton ? `, ${c.canton}` : ""}`,
-      langues: languesDeTravail(c.canton ?? null, c.website_url ?? null, c.employee_range ?? null).join(" · "),
-      description: c.description,
-      cover_url: c.cover_url,
-    }));
+      .limit(120);
+
+    type Ligne = NonNullable<typeof data>[number];
+    const parSecteur = new Map<string, Ligne[]>();
+    for (const c of data ?? []) {
+      const liste = parSecteur.get(c.sector) ?? [];
+      liste.push(c);
+      parSecteur.set(c.sector, liste);
+    }
+
+    // Tour a tour dans chaque secteur, jusqu'a dix.
+    const retenues: Ligne[] = [];
+    for (let tour = 0; retenues.length < 10 && tour < 10; tour++) {
+      for (const secteur of SECTEURS_REPRIS) {
+        const c = parSecteur.get(secteur)?.[tour];
+        if (c && retenues.length < 10) retenues.push(c);
+      }
+    }
+
+    return retenues.map(c => {
+      const saisies = (c as { langues?: string[] | null }).langues ?? [];
+      const langues = saisies.length > 0
+        ? saisies
+        : languesDeTravail(c.canton ?? null, c.website_url ?? null, c.employee_range ?? null);
+      return {
+        id: c.id,
+        name: c.name,
+        sector: c.sector,
+        subsector: c.subsector,
+        lieu: `${c.city}${c.canton ? `, ${c.canton}` : ""}`,
+        langues: langues.join(" · "),
+        description: c.description,
+        cover_url: c.cover_url,
+      };
+    });
   },
-  ["landing-apercu"],
+  ["landing-apercu-10"],
   { revalidate: 300, tags: ["companies"] }
 );
 
 export const metadata: Metadata = {
   title: "Workie : chercher du travail devient passionnant",
-  description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent, et trouvez leurs offres là où elles paraissent vraiment : sur leur propre site.",
+  description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
   openGraph: {
     title: "Workie : chercher du travail devient passionnant",
-    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent, trouvez leurs offres.",
+    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
     url: "https://www.workie.ch",
     siteName: "Workie",
     type: "website",
@@ -78,7 +105,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Workie : chercher du travail devient passionnant",
-    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent, trouvez leurs offres.",
+    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
   },
   alternates: { canonical: "https://www.workie.ch" },
 };
@@ -314,8 +341,10 @@ export default async function Home() {
           .landing-chiffres { grid-template-columns: repeat(3, 1fr); gap: 0 16px; max-width: none; }
         }
         @media (max-width: 900px) {
-          .landing-apercu > div { padding: 18px; border-radius: 14px; }
-          .landing-apercu .landing-apercu-note { font-size: 34px; }
+          /* La regle « .landing-apercu > div { padding: 18px } » a ete retiree.
+             Elle servait l'ancien apercu statique, une carte a marges ; posee
+             sur la pile, elle ajoutait dix-huit pixels autour de la carte
+             entiere, et la photo flottait au milieu d'un cadre vide. */
         }
 
         /* Sur téléphone, on retire ce qui n'aide pas à lire.
@@ -381,9 +410,7 @@ export default async function Home() {
               demande une. Elle dit maintenant d'où viennent les notes, ce qui
               est la seule chose qu'un titre ne peut pas porter. */}
           <p className="hero-accroche" style={{ fontSize: "clamp(15.5px, 1.4vw, 17.5px)", color: "var(--text-sub)", maxWidth: 470, lineHeight: 1.6, marginBottom: 32 }}>
-            Découvrez les entreprises suisses, gardez celles qui vous
-            correspondent, et trouvez leurs offres là où elles paraissent
-            vraiment : sur leur propre site.
+            Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d&apos;emploi.
           </p>
 
           <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
@@ -458,7 +485,7 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 760 }}>
-            Mille maisons où travailler en Suisse.
+            1000 entreprises où travailler en Suisse.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
             {/* Cette phrase a d'abord répété trois éléments déjà lus plus haut,
@@ -466,8 +493,7 @@ export default async function Home() {
                 donne maintenant le cas concret qui justifie le titre : c'est
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
-            Chaque fiche dit l&apos;essentiel : le métier, la ville, les langues de
-            travail, et le lien direct vers ses offres.
+            Le métier, la ville, les langues de travail, et leurs offres.
           </p>
         </div>
       </section>
@@ -504,11 +530,10 @@ export default async function Home() {
               les offres d'un employeur donne, dont on voit la totalite parce
               qu'on va les lire chez lui. C'est ce que dit le chapeau, et c'est
               ce que le titre annonce maintenant. */}
-          <h2 className="landing-h2 avec-chapo">Les offres à la source.</h2>
+          <h2 className="landing-h2 avec-chapo">Plus qu&apos;une annonce.</h2>
 
           <p className="landing-chapo">
-            Un site d&apos;annonces ne montre que les offres qu&apos;on lui a confiées.
-            Ici, chaque fiche mène à la page emploi de l&apos;employeur.
+            Derrière chaque offre, une entreprise. Vous la découvrez avant de postuler.
           </p>
 
           <div className="landing-parcours">
@@ -521,13 +546,13 @@ export default async function Home() {
                   tribunal. Le titre dit ce qu'on y gagne, savoir où l'on met
                   les pieds, plutôt que le verdict qu'on rendrait. */}
               <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-                Vous savez chez qui vous postulez
+                Vous découvrez l&apos;entreprise
               </h3>
               {/* Cette phrase reprenait presque mot pour mot l'accroche du
                   haut de page : « Notes détaillées, salaires... et conditions
                   de travail, par celles et ceux qui y travaillent ». */}
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
-                Sa note, le détail par critère, et les salaires déclarés.
+                Son métier, ses sites, ses langues de travail.
               </p>
             </div>
 
@@ -538,11 +563,10 @@ export default async function Home() {
                 Chez l&apos;employeur
               </p>
               <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-                Vous voyez tous ses postes
+                Vous voyez ses offres
               </h3>
               <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
-                Sa page emploi, tenue par ses équipes : tous les postes ouverts,
-                et rien de périmé.
+                Tous ses postes ouverts, à jour.
               </p>
             </div>
           </div>
@@ -573,13 +597,13 @@ export default async function Home() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
               { Icone: GraduationCap, titre: "Vous terminez vos études",
-                desc: "Les employeurs de votre domaine, y compris ceux dont vous n'avez jamais entendu parler." },
+                desc: "Les employeurs de votre domaine, même ceux que vous ne connaissez pas." },
               { Icone: Briefcase, titre: "Vous envisagez de changer",
-                desc: "Repérer qui recrute dans votre métier, sans parcourir des annonces toute la semaine." },
+                desc: "Qui recrute dans votre métier, en quelques minutes." },
               { Icone: Landmark, titre: "Vous êtes dans le public",
-                desc: "Le privé, secteur par secteur, avec la langue de travail de chaque maison." },
+                desc: "Le privé, secteur par secteur." },
               { Icone: IconeMaison, titre: "Vous reprenez une activité",
-                desc: "Les employeurs de votre canton, gardés de côté jusqu'au bon moment." },
+                desc: "Les employeurs de votre canton, gardés pour le bon moment." },
             ].map(({ Icone, titre, desc }, i) => (
               <div key={titre} style={{
                 display: "flex", gap: 18, padding: "22px 0",
@@ -615,11 +639,11 @@ export default async function Home() {
               // fait est que les avis sont chiffrés, donc comparables. C'est ce
               // que la carte dit maintenant.
               { Icone: Gauge, titre: "Un catalogue tenu à la main",
-                desc: "Chaque fiche est reprise une par une : le nom tel qu'on le dit, le secteur juste, et l'adresse officielle." },
+                desc: "Chaque fiche est vérifiée, une par une." },
               { Icone: ShieldCheck, titre: "Les offres restent chez l'employeur",
-                desc: "Le lien mène à sa page carrière officielle. Vous postulez chez elle, directement." },
+                desc: "Vous postulez directement chez l'employeur." },
               { Icone: Lock, titre: "Des faits, et vous décidez",
-                desc: "Le métier, le lieu, les langues de travail, les offres du moment. Votre jugement vous appartient." },
+                desc: "Des faits. Vous décidez." },
             ].map(({ Icone, titre, desc }) => (
               <div key={titre}>
                 <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
@@ -640,10 +664,10 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700 }}>
-            Vingt-six cantons, quatre langues, mille employeurs.
+            26 cantons, 4 langues, 1000 employeurs.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 560, marginTop: 18 }}>
-            De la grande maison bâloise au bureau de trois personnes dans le Jura.
+            De la grande maison bâloise au bureau de 3 personnes dans le Jura.
           </p>
         </div>
       </section>
@@ -655,8 +679,7 @@ export default async function Home() {
             Commencez par votre secteur.
           </h2>
           <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 32 }}>
-            Mille entreprises, vingt-six cantons. La consultation est libre et ne
-            demande pas de compte.
+            Libre, et sans compte.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 30px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
@@ -747,7 +770,7 @@ export default async function Home() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 32, marginBottom: 32 }}>
             <div>
               <Logo taille={26} className="logo-pied" />
-              <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.6 }}>La transparence du marché du travail suisse.</p>
+              <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.6 }}>Chercher du travail devient passionnant.</p>
             </div>
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Explorer</p>
