@@ -485,7 +485,7 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 760 }}>
-            Toute la Suisse qui recrute.
+            Plus de 1000 entreprises en Suisse.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
             {/* Cette phrase a d'abord répété trois éléments déjà lus plus haut,

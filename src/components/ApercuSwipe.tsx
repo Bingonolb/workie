@@ -135,22 +135,15 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
         {/* La carte suivante, a peine visible dessous : elle dit qu'il y en a
             d'autres sans demander qu'on la regarde. */}
         {entreprises[index + 1] && (
+          // Le bord de la carte suivante, sans sa photo : pendant qu'on fait
+          // glisser celle du dessus, on voyait l'image d'apres par-dessous, et
+          // la pile avait l'air de se melanger. La photo reste prechargee et
+          // decodee, elle s'affiche d'un coup quand vient son tour.
           <div aria-hidden="true" style={{
             position: "absolute", inset: 0, transform: "scale(0.96) translateY(10px)",
             background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 22,
-            boxShadow: "0 10px 30px rgba(0,0,0,0.08)", overflow: "hidden",
-          }}>
-            {/* La photo de la carte suivante est deja peinte dessous : quand
-                la carte du dessus s'en va, il n'y a rien a charger. */}
-            <div style={{
-              height: 260,
-              backgroundColor: "var(--surface3)",
-              backgroundImage: entreprises[index + 1].cover_url
-                ? `url(${largeurCouverture(entreprises[index + 1].cover_url as string, 940)})`
-                : undefined,
-              backgroundSize: "cover", backgroundPosition: "center",
-            }} />
-          </div>
+            boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+          }} />
         )}
 
         <div
