@@ -31,6 +31,26 @@ function isDisposableEmail(email: string): boolean {
   return BLOCKED_DOMAINS.has(domain);
 }
 
+const COMPTE_EXISTANT = "Un compte existe déjà avec cette adresse. Connectez-vous, ou utilisez « Mot de passe oublié ».";
+
+/**
+ * Renvoie le lien de confirmation d'inscription.
+ *
+ * Supabase limite déjà les envois par adresse ; la réponse reste la même que
+ * l'adresse existe ou non, pour ne rien révéler.
+ */
+export async function renvoyerConfirmation(email: string): Promise<{ ok: boolean }> {
+  const adresse = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adresse)) return { ok: false };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: adresse,
+    options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback` },
+  });
+  return { ok: !error };
+}
+
 export async function signUp(
   _prevState: ActionState,
   formData: FormData
@@ -51,11 +71,11 @@ export async function signUp(
     return { error: "Les deux adresses email ne correspondent pas." };
   }
   if (!canton) {
-    return { error: "Sélectionne ton canton." };
+    return { error: "Choisissez votre canton." };
   }
   const currentYear = new Date().getFullYear();
   if (!birthYear || birthYear < 1920 || birthYear > currentYear - 13) {
-    return { error: "Sélectionne ton année de naissance." };
+    return { error: "Choisissez votre année de naissance." };
   }
   if (password.length < 6) {
     return { error: "Le mot de passe doit faire au moins 6 caractères." };
@@ -81,9 +101,16 @@ export async function signUp(
 
   if (error) {
     if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("already been registered")) {
-      return { error: "Un compte existe déjà avec cet email. Connecte-toi." };
+      return { error: COMPTE_EXISTANT };
     }
     return { error: error.message };
+  }
+
+  // Adresse déjà inscrite et confirmée : Supabase ne renvoie pas d'erreur,
+  // n'envoie aucun courriel, et rend un utilisateur sans identité. Sans ce
+  // contrôle, on annonçait un lien de confirmation qui n'arriverait jamais.
+  if (data.user && (data.user.identities?.length ?? 0) === 0) {
+    return { error: COMPTE_EXISTANT };
   }
 
   // Email confirmation required (session is null)
@@ -113,7 +140,7 @@ export async function signIn(
     // à lui donner était tout autre : va ouvrir ta boîte mail.
     const cause = `${error.code ?? ""} ${error.message}`.toLowerCase();
     if (cause.includes("not confirmed") || cause.includes("email_not_confirmed")) {
-      return { error: "Ton adresse n'est pas encore confirmée. Ouvre le lien reçu par email, puis reconnecte-toi." };
+      return { error: "Votre adresse n'est pas encore confirmée. Ouvrez le lien reçu par courriel, puis reconnectez-vous." };
     }
     // Toute autre cause reste volontairement indistincte : préciser laquelle
     // reviendrait à indiquer si une adresse est enregistrée chez nous.

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { Mail } from "lucide-react";
+import { RenvoyerCourriel } from "./RenvoyerCourriel";
 
 export const metadata: Metadata = {
   title: "Confirmez votre adresse · Workie",
@@ -35,6 +36,9 @@ export default function ConfirmPage({
           Regardez dans vos courriers indésirables. Il vient de <em>noreply@workie.ch</em>.
         </div>
 
+        <Renvoyer searchParams={searchParams} />
+
+
         <Link href="/login" style={{ fontSize: 13, color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>
           Déjà un compte ? Se connecter
         </Link>
@@ -47,4 +51,10 @@ async function ConfirmEmail({ searchParams }: { searchParams: Promise<{ email?: 
   const params = await searchParams;
   if (!params.email) return null;
   return <strong style={{ color: "var(--text)" }}>{params.email}</strong>;
+}
+
+async function Renvoyer({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
+  const params = await searchParams;
+  if (!params.email) return null;
+  return <RenvoyerCourriel email={params.email} />;
 }
