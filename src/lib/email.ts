@@ -2,216 +2,101 @@
 
 import { Resend } from "resend";
 
+/**
+ * Les courriels de Workie, sous un seul gabarit.
+ *
+ * Chaque message portait son propre en-tête : un dégradé violet vers orange,
+ * le mot « workie » tapé en texte à la place du logotype, l'accroche « Avis et
+ * salaires des entreprises suisses », des emojis en guise d'icônes, le
+ * tutoiement, et un compteur figé à « 1 700+ entreprises ». Tout cela datait
+ * d'avant le nouveau logo et d'avant l'abandon des avis.
+ *
+ * Un seul gabarit désormais, que chaque message remplit : l'en-tête sombre du
+ * site avec le vrai logotype, un titre, un texte, un bouton. Le logotype est
+ * une image PNG et non le SVG du site : Gmail et Outlook refusent le SVG dans
+ * un courriel.
+ *
+ * Les styles sont écrits sur chaque balise, et la mise en page tient dans des
+ * tableaux. C'est archaïque, et c'est la seule façon d'être lu pareil dans
+ * Gmail, Outlook et Apple Mail.
+ */
+
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const FROM = "Workie <onboarding@workie.ch>";
 const BASE = "https://www.workie.ch";
 
+const ENCRE = "#101319";
+const MARQUE = "#4f3cc9";
+const TEXTE = "#101319";
+const DISCRET = "#5f6575";
+const FILET = "#e3e6eb";
+const FOND = "#f5f6f8";
+
 function escapeHtml(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function welcomeHtml(rawUsername: string): string {
-  const username = escapeHtml(rawUsername);
+type Gabarit = {
+  /** Titre du document, lu par certaines messageries. */
+  titre: string;
+  /** Première ligne du message, en gros. */
+  accroche: string;
+  /** Paragraphes, déjà échappés. */
+  paragraphes: string[];
+  cta?: { libelle: string; href: string };
+  /** Petite ligne sous le bouton, facultative. */
+  apres?: string;
+};
+
+function gabarit({ titre, accroche, paragraphes, cta, apres }: Gabarit): string {
+  const corps = paragraphes
+    .map(p => `<p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:${DISCRET};">${p}</p>`)
+    .join("");
+
+  const bouton = cta
+    ? `<table cellpadding="0" cellspacing="0" style="margin:28px 0 0;"><tr><td style="border-radius:11px;background:${MARQUE};">
+         <a href="${cta.href}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:11px;">${cta.libelle}</a>
+       </td></tr></table>`
+    : "";
+
+  const suite = apres
+    ? `<p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:${DISCRET};">${apres}</p>`
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Bienvenue sur Workie !</title>
+<meta name="color-scheme" content="light only" />
+<title>${titre}</title>
 </head>
-<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-
-<!-- Wrapper -->
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
+<body style="margin:0;padding:0;background:${FOND};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,Helvetica,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:${FOND};padding:40px 16px;">
 <tr><td align="center">
-
-<!-- Card -->
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-
-  <!-- Header gradient -->
+<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border:1px solid ${FILET};border-radius:16px;overflow:hidden;">
   <tr>
-    <td style="background:linear-gradient(135deg,#8b5cf6 0%,#f97316 100%);padding:48px 40px 40px;text-align:center;">
-      <h1 style="margin:0;font-size:36px;font-weight:400;letter-spacing:-0.005em;color:#ffffff;">workie</h1>
-      <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.85);letter-spacing:0.01em;">Avis et salaires des entreprises suisses</p>
+    <td style="background:${ENCRE};padding:28px 36px;">
+      <img src="${BASE}/email-logo.png" width="134" height="36" alt="Workie" style="display:block;border:0;height:36px;width:auto;" />
     </td>
   </tr>
-
-  <!-- Main content -->
   <tr>
-    <td style="padding:48px 40px 32px;">
-      <h2 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#111827;letter-spacing:-0.02em;">
-        Bienvenue, ${username} ! 🎉
-      </h2>
-      <p style="margin:0 0 24px;font-size:16px;color:#6b7280;line-height:1.7;">
-        Ton compte Workie est prêt. Tu rejoins des milliers d'employés suisses qui partagent leurs expériences pour aider les autres à trouver le bon environnement de travail.
-      </p>
-
-      <!-- Divider -->
-      <hr style="border:none;border-top:1px solid #f3f4f6;margin:0 0 32px;" />
-
-      <!-- 3 features -->
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-          <td style="padding:0 0 24px;">
-            <table cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="width:48px;height:48px;background:rgba(139,92,246,0.1);border-radius:12px;text-align:center;vertical-align:middle;font-size:22px;">🔍</td>
-                <td style="padding-left:16px;vertical-align:middle;">
-                  <p style="margin:0;font-size:15px;font-weight:700;color:#111827;">Explorer 1700+ entreprises</p>
-                  <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">Tech, Finance, Pharma, Conseil et bien plus.</p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 0 24px;">
-            <table cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="width:48px;height:48px;background:rgba(249,115,22,0.1);border-radius:12px;text-align:center;vertical-align:middle;font-size:22px;">💰</td>
-                <td style="padding-left:16px;vertical-align:middle;">
-                  <p style="margin:0;font-size:15px;font-weight:700;color:#111827;">Découvrir les vrais salaires</p>
-                  <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">Données anonymes partagées par des employés comme toi.</p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 0 8px;">
-            <table cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="width:48px;height:48px;background:rgba(16,185,129,0.1);border-radius:12px;text-align:center;vertical-align:middle;font-size:22px;">⭐</td>
-                <td style="padding-left:16px;vertical-align:middle;">
-                  <p style="margin:0;font-size:15px;font-weight:700;color:#111827;">Publier ton avis anonymement</p>
-                  <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">Aide les autres à choisir leur prochain employeur.</p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-
-      <!-- CTA -->
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:36px;">
-        <tr>
-          <td align="center">
-            <a href="${BASE}/explore" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#f97316);color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;padding:16px 40px;border-radius:12px;letter-spacing:-0.01em;">
-              Explorer les entreprises →
-            </a>
-          </td>
-        </tr>
-      </table>
+    <td style="padding:40px 36px 36px;">
+      <h1 style="margin:0 0 18px;font-size:24px;line-height:1.25;font-weight:800;letter-spacing:-0.02em;color:${TEXTE};">${accroche}</h1>
+      ${corps}
+      ${bouton}
+      ${suite}
     </td>
   </tr>
-
-  <!-- Stats band -->
   <tr>
-    <td style="background:#f9fafb;border-top:1px solid #f3f4f6;padding:28px 40px;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-          <td style="text-align:center;border-right:1px solid #e5e7eb;">
-            <p style="margin:0;font-size:22px;font-weight:900;color:#8b5cf6;">1 700+</p>
-            <p style="margin:4px 0 0;font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Entreprises</p>
-          </td>
-          <td style="text-align:center;border-right:1px solid #e5e7eb;">
-            <p style="margin:0;font-size:22px;font-weight:900;color:#f97316;">100%</p>
-            <p style="margin:4px 0 0;font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Anonyme</p>
-          </td>
-          <td style="text-align:center;">
-            <p style="margin:0;font-size:22px;font-weight:900;color:#10b981;">🇨🇭</p>
-            <p style="margin:4px 0 0;font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Suisse uniquement</p>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <!-- Footer -->
-  <tr>
-    <td style="padding:28px 40px;text-align:center;">
-      <p style="margin:0 0 8px;font-size:13px;color:#9ca3af;">
-        Tu reçois cet email car tu viens de créer un compte sur
-        <a href="${BASE}" style="color:#8b5cf6;text-decoration:none;">workie.ch</a>.
-      </p>
-      <p style="margin:0;font-size:12px;color:#d1d5db;">
-        © ${new Date().getFullYear()} Workie · Suisse ·
-        <a href="${BASE}/confidentialite" style="color:#d1d5db;text-decoration:none;">Confidentialité</a>
+    <td style="padding:22px 36px;border-top:1px solid ${FILET};">
+      <p style="margin:0;font-size:12px;line-height:1.6;color:${DISCRET};">
+        Workie · Chercher du travail devient passionnant ·
+        <a href="${BASE}/confidentialite" style="color:${DISCRET};">Confidentialité</a>
       </p>
     </td>
   </tr>
-
-</table>
-<!-- /Card -->
-
-</td></tr>
-</table>
-<!-- /Wrapper -->
-
-</body>
-</html>`;
-}
-
-function claimReceivedHtml(rawFirstName: string, rawCompanyName: string): string {
-  const firstName = escapeHtml(rawFirstName);
-  const companyName = escapeHtml(rawCompanyName);
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Demande reçue | Workie Business</title></head>
-<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-
-  <tr>
-    <td style="background:linear-gradient(135deg,#111827 0%,#1f2937 100%);padding:48px 40px 40px;text-align:center;">
-      <h1 style="margin:0 0 4px;font-size:32px;font-weight:400;letter-spacing:-0.005em;color:#ffffff;">workie</h1>
-      <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:0.05em;text-transform:uppercase;">Business</p>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:48px 40px 40px;">
-      <div style="display:inline-block;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:6px 14px;font-size:12px;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:24px;">En cours d'examen</div>
-      <h2 style="margin:0 0 12px;font-size:24px;font-weight:800;color:#111827;letter-spacing:-0.02em;">Bonjour ${firstName},</h2>
-      <p style="margin:0 0 16px;font-size:15px;color:#6b7280;line-height:1.7;">Nous avons bien reçu votre demande de revendication pour <strong style="color:#111827;">${companyName}</strong>.</p>
-      <p style="margin:0 0 32px;font-size:15px;color:#6b7280;line-height:1.7;">Notre équipe examine votre dossier. Vous recevrez une notification par email dès que votre entreprise sera vérifiée, généralement sous <strong style="color:#111827;">24 à 48 heures ouvrées</strong>.</p>
-
-      <div style="background:#f9fafb;border:1px solid #f3f4f6;border-radius:14px;padding:24px;">
-        <p style="margin:0 0 16px;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;">Ce qui se passe ensuite</p>
-        <table cellpadding="0" cellspacing="0" width="100%">
-          ${[
-            ["✅", "Votre paiement est confirmé"],
-            ["🔍", "Notre équipe vérifie votre identité et votre entreprise"],
-            ["🏆", "Le badge vérifié ✓ apparaît sur votre profil"],
-          ].map(([icon, text]) => `
-          <tr><td style="padding:0 0 12px;">
-            <table cellpadding="0" cellspacing="0"><tr>
-              <td style="width:32px;font-size:18px;vertical-align:middle;">${icon}</td>
-              <td style="padding-left:12px;font-size:14px;color:#6b7280;vertical-align:middle;">${text}</td>
-            </tr></table>
-          </td></tr>`).join("")}
-        </table>
-      </div>
-
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:36px;">
-        <tr><td align="center">
-          <a href="${BASE}/explore" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#f97316);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:12px;">
-            Accéder à Workie →
-          </a>
-        </td></tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:24px 40px;border-top:1px solid #f3f4f6;text-align:center;">
-      <p style="margin:0 0 6px;font-size:13px;color:#9ca3af;">Une question ? Répondez directement à cet email.</p>
-      <p style="margin:0;font-size:12px;color:#d1d5db;">© ${new Date().getFullYear()} Workie · <a href="${BASE}/confidentialite" style="color:#d1d5db;text-decoration:none;">Confidentialité</a></p>
-    </td>
-  </tr>
-
 </table>
 </td></tr>
 </table>
@@ -219,233 +104,89 @@ function claimReceivedHtml(rawFirstName: string, rawCompanyName: string): string
 </html>`;
 }
 
-function claimApprovedHtml(rawFirstName: string, rawCompanyName: string): string {
-  const firstName = escapeHtml(rawFirstName);
-  const companyName = escapeHtml(rawCompanyName);
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Entreprise vérifiée | Workie Business</title></head>
-<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+// ── Les messages ────────────────────────────────────────────────────────────
 
-  <tr>
-    <td style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);padding:48px 40px 40px;text-align:center;">
-      <div style="font-size:48px;margin-bottom:12px;">🏆</div>
-      <h1 style="margin:0 0 4px;font-size:32px;font-weight:400;letter-spacing:-0.005em;color:#ffffff;">workie</h1>
-      <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.85);">Entreprise vérifiée ✓</p>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:48px 40px 40px;">
-      <div style="display:inline-block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:6px 14px;font-size:12px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:24px;">✓ Approuvée</div>
-      <h2 style="margin:0 0 12px;font-size:24px;font-weight:800;color:#111827;letter-spacing:-0.02em;">Félicitations ${firstName} !</h2>
-      <p style="margin:0 0 16px;font-size:15px;color:#6b7280;line-height:1.7;"><strong style="color:#111827;">${companyName}</strong> est maintenant officiellement vérifiée sur Workie.</p>
-      <p style="margin:0 0 32px;font-size:15px;color:#6b7280;line-height:1.7;">Le badge <strong style="color:#10b981;">✓ Vérifié</strong> est maintenant visible sur votre profil entreprise. Vous pouvez répondre aux avis, consulter vos analytics et gérer votre présence.</p>
-
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:24px;margin-bottom:32px;">
-        <p style="margin:0 0 16px;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;">Votre espace business</p>
-        <table cellpadding="0" cellspacing="0" width="100%">
-          ${[
-            ["💬", "Répondre aux avis de vos employés"],
-            ["📊", "Consulter vos analytics en temps réel"],
-            ["💼", "Publier vos offres d'emploi"],
-          ].map(([icon, text]) => `
-          <tr><td style="padding:0 0 10px;">
-            <table cellpadding="0" cellspacing="0"><tr>
-              <td style="width:32px;font-size:18px;vertical-align:middle;">${icon}</td>
-              <td style="padding-left:12px;font-size:14px;color:#6b7280;vertical-align:middle;">${text}</td>
-            </tr></table>
-          </td></tr>`).join("")}
-        </table>
-      </div>
-
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td align="center">
-          <a href="${BASE}/explore" style="display:inline-block;background:linear-gradient(135deg,#10b981,#059669);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:12px;">
-            Accéder à Workie →
-          </a>
-        </td></tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:24px 40px;border-top:1px solid #f3f4f6;text-align:center;">
-      <p style="margin:0 0 6px;font-size:13px;color:#9ca3af;">Une question ? Répondez directement à cet email.</p>
-      <p style="margin:0;font-size:12px;color:#d1d5db;">© ${new Date().getFullYear()} Workie · <a href="${BASE}/confidentialite" style="color:#d1d5db;text-decoration:none;">Confidentialité</a></p>
-    </td>
-  </tr>
-
-</table>
-</td></tr>
-</table>
-</body>
-</html>`;
+export async function sendWelcomeEmail(email: string, username: string): Promise<void> {
+  if (!resend) return;
+  const nom = escapeHtml(username);
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: `Bienvenue sur Workie, ${username}`,
+      html: gabarit({
+        titre: "Bienvenue sur Workie",
+        accroche: `Bienvenue, ${nom}.`,
+        paragraphes: [
+          "Votre compte est prêt.",
+          "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
+          `<strong style="color:${TEXTE};">1000 entreprises · 26 cantons · 4 langues</strong>`,
+        ],
+        cta: { libelle: "Commencer", href: `${BASE}/explore` },
+      }),
+    });
+  } catch { /* un courriel qui échoue ne doit pas bloquer l'inscription */ }
 }
 
 export async function sendClaimReceivedEmail(email: string, firstName: string, companyName: string): Promise<void> {
   if (!resend) return;
+  const prenom = escapeHtml(firstName);
+  const entreprise = escapeHtml(companyName);
   try {
     await resend.emails.send({
       from: FROM,
       to: email,
       subject: `Votre demande pour ${companyName} est en cours d'examen`,
-      html: claimReceivedHtml(firstName, companyName),
+      html: gabarit({
+        titre: "Demande reçue",
+        accroche: `Bonjour ${prenom},`,
+        paragraphes: [
+          `Nous avons bien reçu votre demande pour <strong style="color:${TEXTE};">${entreprise}</strong>.`,
+          `Nous l'examinons à la main. Vous recevrez un courriel dès que la fiche sera vérifiée, généralement sous <strong style="color:${TEXTE};">24 à 48 heures ouvrées</strong>.`,
+        ],
+        apres: "Une question ? Répondez simplement à ce courriel.",
+      }),
     });
-  } catch { /* non-blocking */ }
+  } catch { /* sans conséquence pour la demande */ }
 }
 
 export async function sendClaimApprovedEmail(email: string, firstName: string, companyName: string): Promise<void> {
   if (!resend) return;
+  const prenom = escapeHtml(firstName);
+  const entreprise = escapeHtml(companyName);
   try {
     await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `✓ ${companyName} est maintenant vérifiée sur Workie !`,
-      html: claimApprovedHtml(firstName, companyName),
+      subject: `${companyName} est vérifiée sur Workie`,
+      html: gabarit({
+        titre: "Entreprise vérifiée",
+        accroche: `C'est fait, ${prenom}.`,
+        paragraphes: [
+          `<strong style="color:${TEXTE};">${entreprise}</strong> est désormais vérifiée sur Workie. Le badge est visible sur sa fiche.`,
+          "Vous pouvez tenir la fiche à jour et publier vos offres d'emploi.",
+        ],
+        cta: { libelle: "Voir la fiche", href: `${BASE}/explore` },
+        apres: "Une question ? Répondez simplement à ce courriel.",
+      }),
     });
-  } catch { /* non-blocking */ }
+  } catch { /* sans conséquence pour la validation */ }
 }
 
-export async function sendNewReviewEmail(email: string, companyName: string, companyId: string, rating: number): Promise<void> {
-  if (!resend) return;
-  const stars = "★".repeat(rating) + "☆".repeat(5 - rating);
-  const safeCompany = escapeHtml(companyName);
-  const html = `<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><title>Nouvel avis | Workie</title></head>
-<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-  <tr>
-    <td style="background:linear-gradient(135deg,#8b5cf6 0%,#f97316 100%);padding:32px 40px;text-align:center;">
-      <h1 style="margin:0;font-size:28px;font-weight:400;letter-spacing:-0.005em;color:#ffffff;">workie</h1>
-    </td>
-  </tr>
-  <tr>
-    <td style="padding:40px 40px 32px;">
-      <p style="margin:0 0 8px;font-size:28px;">⭐</p>
-      <h2 style="margin:0 0 12px;font-size:22px;font-weight:800;color:#111827;">Nouvel avis reçu !</h2>
-      <p style="margin:0 0 20px;font-size:15px;color:#6b7280;line-height:1.7;">
-        <strong style="color:#111827;">${safeCompany}</strong> vient de recevoir un nouvel avis anonyme sur Workie.
-      </p>
-      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:20px 24px;margin-bottom:28px;text-align:center;">
-        <p style="margin:0 0 4px;font-size:24px;color:#f59e0b;letter-spacing:2px;">${escapeHtml(stars)}</p>
-        <p style="margin:0;font-size:15px;font-weight:700;color:#111827;">${rating}/5</p>
-      </div>
-      <p style="margin:0 0 24px;font-size:14px;color:#6b7280;line-height:1.6;">
-        Consultez l'avis complet depuis votre espace Workie Business et répondez-y pour montrer à la communauté que vous êtes à l'écoute.
-      </p>
-      <table cellpadding="0" cellspacing="0"><tr><td>
-        <a href="${BASE}/explore" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#f97316);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 32px;border-radius:12px;">
-          Voir l'avis →
-        </a>
-      </td></tr></table>
-      <p style="margin:20px 0 0;font-size:13px;color:#9ca3af;">
-        Ou <a href="${BASE}/company/${escapeHtml(companyId)}" style="color:#8b5cf6;text-decoration:none;">voir la fiche publique</a>
-      </p>
-    </td>
-  </tr>
-  <tr>
-    <td style="padding:20px 40px;border-top:1px solid #f3f4f6;text-align:center;">
-      <p style="margin:0;font-size:12px;color:#d1d5db;">© ${new Date().getFullYear()} Workie · <a href="${BASE}/confidentialite" style="color:#d1d5db;text-decoration:none;">Confidentialité</a></p>
-    </td>
-  </tr>
-</table>
-</td></tr>
-</table>
-</body>
-</html>`;
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: `⭐ Nouvel avis ${rating}/5 pour ${companyName}`,
-      html,
-    });
-  } catch { /* non-blocking */ }
+/*
+ * Les deux messages liés aux avis restent déclarés, parce que le module des
+ * avis les appelle encore, mais ils ne partent plus : les avis ne sont plus
+ * publiés, et annoncer à une entreprise un « nouvel avis 4/5 » qu'elle ne
+ * trouvera nulle part sur sa fiche serait pire que ne rien dire.
+ */
+export async function sendNewReviewEmail(_email: string, _companyName: string, _companyId: string, _rating: number): Promise<void> {
+  return;
 }
 
 export async function sendAdminFlagAlert(
-  companyName: string,
-  flagReason: string,
-  excerpt: string
+  _companyName: string,
+  _flagReason: string,
+  _excerpt: string,
 ): Promise<void> {
-  if (!resend) return;
-  const reasonLabel = flagReason === "ip_abuse" ? "IP suspecte (même IP, même entreprise, comptes différents)"
-    : flagReason === "similar_content" ? "Contenu similaire à un avis existant (Jaccard ≥ 0.45)"
-    : flagReason;
-  const safeCompany = escapeHtml(companyName);
-  const safeExcerpt = escapeHtml(excerpt);
-  const safeReason = escapeHtml(reasonLabel);
-  const html = `<!DOCTYPE html>
-<html lang="fr">
-<head><meta charset="UTF-8" /><title>Avis flaggé | Workie Admin</title></head>
-<body style="margin:0;padding:0;background:#f4f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:40px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-  <tr>
-    <td style="background:linear-gradient(135deg,#ef4444 0%,#f97316 100%);padding:32px 40px;text-align:center;">
-      <h1 style="margin:0;font-size:28px;font-weight:900;color:#ffffff;">⚠ Avis flaggé automatiquement</h1>
-    </td>
-  </tr>
-  <tr>
-    <td style="padding:40px 40px 32px;">
-      <p style="margin:0 0 16px;font-size:15px;color:#374151;">Un avis a été soumis et flaggé automatiquement avant publication.</p>
-      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
-        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.06em;">Raison</p>
-        <p style="margin:0;font-size:14px;color:#374151;">${safeReason}</p>
-      </div>
-      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
-        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">Entreprise</p>
-        <p style="margin:0;font-size:14px;font-weight:700;color:#111827;">${safeCompany}</p>
-      </div>
-      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
-        <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">Extrait</p>
-        <p style="margin:0;font-size:13px;color:#4b5563;line-height:1.6;">${safeExcerpt}…</p>
-      </div>
-      <table cellpadding="0" cellspacing="0"><tr><td>
-        <a href="${BASE}/admin/flagged-reviews" style="display:inline-block;background:linear-gradient(135deg,#ef4444,#f97316);color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:14px 28px;border-radius:10px;">
-          Voir les avis flaggés →
-        </a>
-      </td></tr></table>
-    </td>
-  </tr>
-  <tr>
-    <td style="padding:20px 40px;border-top:1px solid #f3f4f6;text-align:center;">
-      <p style="margin:0;font-size:12px;color:#d1d5db;">© ${new Date().getFullYear()} Workie Admin</p>
-    </td>
-  </tr>
-</table>
-</td></tr>
-</table>
-</body>
-</html>`;
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: "riverse3@gmail.com",
-      subject: `⚠ Avis flaggé : ${companyName} (${flagReason === "ip_abuse" ? "IP suspecte" : "contenu similaire"})`,
-      html,
-    });
-  } catch { /* non-blocking */ }
-}
-
-export async function sendWelcomeEmail(email: string, username: string): Promise<void> {
-  if (!resend) return; // fail silently if RESEND_API_KEY not set
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: `Bienvenue sur Workie, ${username} ! 🎉`,
-      html: welcomeHtml(username),
-    });
-  } catch {
-    // Non-blocking — signup succeeds even if email fails
-  }
+  return;
 }

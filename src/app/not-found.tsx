@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { NavbarClient } from "@/components/NavbarClient";
 
+/**
+ * Page introuvable.
+ *
+ * Le bouton était violet en dur : il ne suivait ni le thème ni la règle des
+ * boutons. Il passe à l'encre, comme toute action qui ne demande rien.
+ */
 export default function NotFound() {
   return (
     <>
@@ -10,19 +16,14 @@ export default function NotFound() {
         alignItems: "center", justifyContent: "center",
         padding: "24px", textAlign: "center",
       }}>
-        <p style={{ fontSize: 72, fontWeight: 900, color: "var(--text-muted)", lineHeight: 1, marginBottom: 8 }}>404</p>
+        <p style={{ fontSize: 64, fontWeight: 900, color: "var(--text-muted)", lineHeight: 1, marginBottom: 12, letterSpacing: "-0.04em" }}>404</p>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-          Page introuvable
+          Cette page n&apos;existe pas
         </h1>
-        <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28, maxWidth: 360, lineHeight: 1.6 }}>
-          Cette page n&apos;existe pas ou a été déplacée.
+        <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 28, maxWidth: 340, lineHeight: 1.6 }}>
+          Les 1000 entreprises, elles, sont toujours là.
         </p>
-        <Link href="/explore" style={{
-          padding: "12px 24px", borderRadius: 12, fontWeight: 700, fontSize: 14,
-          background: "#8b5cf6", color: "#fff", textDecoration: "none",
-        }}>
-          Explorer les entreprises
-        </Link>
+        <Link href="/explore" className="btn btn-encre">Explorer les entreprises</Link>
       </div>
     </>
   );

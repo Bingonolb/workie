@@ -24,19 +24,19 @@ export default function ConfirmPage({
           Vérifiez votre boîte mail
         </h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 28 }}>
-          On a envoyé un lien de confirmation à{" "}
+          Nous avons envoyé un lien de confirmation à{" "}
           <ConfirmEmail searchParams={searchParams} />
           {". "}
           Cliquez dessus pour activer votre compte.
         </p>
 
-        <div style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.18)", borderRadius: 12, padding: "14px 18px", fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 28, textAlign: "left" }}>
-          <strong style={{ color: "var(--text)" }}>Tu ne vois pas l&apos;email ?</strong><br />
-          Vérifiez votre dossier de courriers indésirables. L&apos;email vient de <em>noreply@workie.ch</em>.
+        <div style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "14px 18px", fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 28, textAlign: "left" }}>
+          <strong style={{ color: "var(--text)" }}>Vous ne voyez pas le courriel ?</strong><br />
+          Regardez dans vos courriers indésirables. Il vient de <em>noreply@workie.ch</em>.
         </div>
 
-        <Link href="/login" style={{ fontSize: 13, color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>
-          Déjà un compte ? Se connecter →
+        <Link href="/login" style={{ fontSize: 13, color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>
+          Déjà un compte ? Se connecter
         </Link>
       </div>
     </main>

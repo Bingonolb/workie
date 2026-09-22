@@ -21,14 +21,14 @@ export default function ForgotPasswordPage() {
 
         {sent ? (
           <div style={{ textAlign: "center" }}>
-            <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(139,92,246,0.12)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-              <Mail size={24} color="#8b5cf6" />
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <Mail size={24} color="var(--brand)" />
             </div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Email envoyé</h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 24 }}>
               Si cette adresse est associée à un compte, vous recevrez un lien pour réinitialiser votre mot de passe dans les prochaines minutes.
             </p>
-            <Link href="/login" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 14, fontWeight: 600, color: "#8b5cf6", textDecoration: "none" }}>
+            <Link href="/login" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 14, fontWeight: 600, color: "var(--brand)", textDecoration: "none" }}>
               <ArrowLeft size={14} aria-hidden="true" /> Retour à la connexion
             </Link>
           </div>

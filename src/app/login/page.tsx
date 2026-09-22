@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Connexion</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
           Pas encore de compte ?{" "}
-          <Link href="/signup" style={{ color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>S&apos;inscrire</Link>
+          <Link href="/signup" style={{ color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>S&apos;inscrire</Link>
           {" · "}
           <Link href="/forgot-password" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Mot de passe oublié ?</Link>
         </p>

@@ -21,7 +21,7 @@ export default function SignupPage() {
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Créer un compte</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
           Déjà un compte ?{" "}
-          <Link href="/login" style={{ color: "#8b5cf6", fontWeight: 600, textDecoration: "none" }}>Se connecter</Link>
+          <Link href="/login" style={{ color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>Se connecter</Link>
         </p>
 
         <AuthFormWorkie mode="signup" action={signUp} googleAction={signInWithGoogle} />
