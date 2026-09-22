@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Target, CreditCard, ShieldCheck, BarChart3, MapPin, ExternalLink, Check, CalendarClock } from "lucide-react";
+import { ArrowRight, Target, CreditCard, ShieldCheck, BarChart3, MapPin, Check, CalendarClock } from "lucide-react";
 import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ApercuSwipe, type EntrepriseApercu } from "@/components/ApercuSwipe";
+import { melangerAvecAnnonces } from "@/lib/annoncesExemple";
 import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREE_MIN, DUREE_MAX } from "@/lib/ads/pricing";
 
 export const revalidate = 300;
@@ -22,6 +24,29 @@ const compterEmployeurs = unstable_cache(
   },
   ["annonceurs-employeurs"],
   { revalidate: 300, tags: ["landing-counts"] }
+);
+
+// Cinq fiches pour la démonstration, prises dans les secteurs repris à la main.
+const fichesDemo = unstable_cache(
+  async (): Promise<EntrepriseApercu[]> => {
+    const { data } = await createAdminClient()
+      .from("companies")
+      .select("id, name, sector, subsector, city, canton, description, cover_url")
+      .in("sector", ["Alimentation", "Assurances", "Automobile", "Aéronautique & Spatial", "Agriculture"])
+      .not("cover_url", "is", null)
+      .not("description", "is", null)
+      .order("score", { ascending: false })
+      .limit(40);
+    const vus = new Set<string>();
+    const retenues = (data ?? []).filter(c => !vus.has(c.sector) && vus.add(c.sector)).slice(0, 5);
+    return retenues.map(c => ({
+      id: c.id, name: c.name, sector: c.sector, subsector: c.subsector,
+      lieu: c.canton ? c.city + ", " + c.canton : c.city,
+      langues: "", description: c.description, cover_url: c.cover_url,
+    }));
+  },
+  ["annonceurs-demo"],
+  { revalidate: 300, tags: ["companies"] }
 );
 
 export const metadata: Metadata = {
@@ -51,7 +76,7 @@ export const metadata: Metadata = {
  * croire à une mise en ligne immédiate.
  */
 export default async function AnnonceursPage() {
-  const employeurs = await compterEmployeurs();
+  const [employeurs, demo] = await Promise.all([compterEmployeurs(), fichesDemo()]);
   const chiffres = [
     { valeur: employeurs.toLocaleString("fr-CH"), libelle: "employeurs référencés" },
     { valeur: String(Object.keys(CANTON_WEIGHTS).length), libelle: "cantons ciblables" },
@@ -136,7 +161,7 @@ export default async function AnnonceursPage() {
 
         .ann-exemple {
           display: grid;
-          grid-template-columns: 300px 1fr;
+          grid-template-columns: 380px 1fr;
           gap: 40px;
           align-items: start;
         }
@@ -219,8 +244,8 @@ export default async function AnnonceursPage() {
               {/* Aucun chiffre d'audience : le site est jeune, et un annonceur
                   qui decouvre l'ecart sur son tableau de bord ne revient pas.
                   L'intention se decrit, elle n'a pas besoin d'etre chiffree. */}
-              Ils comparent des employeurs et lisent des salaires : ils décident
-              de plusieurs années de leur vie. Et une décision pareille en
+              Ils comparent des employeurs : ils décident de plusieurs années
+              de leur vie. Et une décision pareille en
               entraîne d&apos;autres, qui engagent tout autant : reprendre une
               formation, changer de trajet, s&apos;assurer, emprunter.
 
@@ -244,11 +269,11 @@ export default async function AnnonceursPage() {
                 {
                   Icone: Target,
                   titre: "Un moment de projection",
-                  desc: "Personne ne compare des employeurs pour passer le temps. Vos lecteurs pensent ici en années, pas en minutes.",
+                  desc: "Personne ne compare des employeurs pour passer le temps. Vos lecteurs pensent ici en années.",
                 },
                 {
                   Icone: CalendarClock,
-                  titre: "Pas seulement des recruteurs",
+                  titre: "Tout ce qui suit un nouveau poste",
                   desc: "Un changement de poste entraîne une formation, un trajet, une assurance, parfois un crédit. Tout ce qui se décide sur la durée a sa place ici.",
                 },
                 {
@@ -307,68 +332,30 @@ export default async function AnnonceursPage() {
             ressembler a une vraie, et une vraie ne nous a rien demande. */}
         <section className="ann-section">
           <div className="ann-large">
-            <p className="ann-eyebrow">Un exemple</p>
-            <h2 className="ann-h2">À quoi ressemble une annonce.</h2>
+            <p className="ann-eyebrow">En situation</p>
+            <h2 className="ann-h2">Votre annonce, entre les entreprises.</h2>
             <p className="ann-chapo">
-              Une école de langues, c&apos;est-à-dire exactement le genre de
-              décision qu&apos;ils prennent en même temps qu&apos;un changement de poste.
-
+              Cinq fiches, cinq annonces d&apos;exemple. Faites glisser : l&apos;annonce a
+              la forme d&apos;une fiche, et se lit comme elle.
             </p>
 
             <div className="ann-exemple">
-              {/* Le format carre, tel qu'il est servi dans la grille. */}
-              <div style={{
-                background: "var(--surface)",
-                border: "1px solid rgba(139,92,246,0.25)",
-                borderRadius: 20, overflow: "hidden", position: "relative",
-                display: "flex", flexDirection: "column", maxWidth: 300,
-              }}>
-                <div style={{
-                  position: "absolute", top: 12, left: 12, zIndex: 2,
-                  background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)", borderRadius: 50,
-                  padding: "3px 10px", fontSize: 10, fontWeight: 700,
-                  color: "rgba(255,255,255,0.75)", letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                }}>
-                  Sponsorisé
-                </div>
-                <div style={{ position: "relative", paddingTop: "60%", overflow: "hidden", flexShrink: 0 }}>
-                  <Image
-                    src="https://images.pexels.com/photos/4778611/pexels-photo-4778611.jpeg?auto=compress&cs=tinysrgb&w=600"
-                    alt=""
-                    fill
-                    sizes="300px"
-                    style={{ objectFit: "cover" }}
-                  />
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.7))" }} />
-                </div>
-                <div style={{ padding: "16px 18px 18px" }}>
-                  <p style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.3, marginBottom: 7 }}>
-                    L&apos;allemand qui vous manque pour ce poste
-                  </p>
-                  <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.55, marginBottom: 14 }}>
-                    Cours du soir à Genève et Lausanne. Niveau B2 en six mois.
-                  </p>
-                  <span style={{
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                    padding: "9px 16px", borderRadius: 10, background: "var(--brand)",
-                    color: "#fff", fontWeight: 650, fontSize: 13.5,
-                  }}>
-                    Voir les cours <ExternalLink size={12} aria-hidden="true" />
-                  </span>
-                </div>
+              <div style={{ maxWidth: 380, width: "100%" }}>
+                <ApercuSwipe
+                  entreprises={melangerAvecAnnonces(demo)}
+                  fin={{ titre: "La prochaine carte pourrait être la vôtre.", libelle: "Créer une campagne", href: "/profile/ads/new" }}
+                />
               </div>
 
               <div>
                 <h3 style={{ fontSize: 16.5, fontWeight: 700, marginBottom: 10 }}>
-                  Pourquoi celle-ci fonctionne
+                  Ce qui fait une bonne annonce ici
                 </h3>
                 <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 14 }}>
                   {[
-                    "Elle parle du poste visé, pas de l\u2019école. Le lecteur est en train de comparer des employeurs, pas de chercher un cours.",
-                    "Elle est datée et située : six mois, Genève et Lausanne. Une promesse vague ne se vérifie pas.",
-                    "Elle vise les cantons de Genève et de Vaud, et les secteurs où l\u2019allemand décide d\u2019une embauche.",
+                    "Elle parle du poste que le lecteur vise : il est en train de choisir un employeur.",
+                    "Elle est datée et située : 6 mois, Genève et Lausanne. Une promesse précise se vérifie.",
+                    "Elle vise les cantons et les secteurs où elle a un sens.",
                   ].map((t) => (
                     <li key={t} style={{ display: "flex", gap: 10, fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
                       <Check size={15} color="var(--brand)" strokeWidth={2.4} aria-hidden="true" style={{ flexShrink: 0, marginTop: 4 }} />
@@ -377,7 +364,7 @@ export default async function AnnonceursPage() {
                   ))}
                 </ul>
                 <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 20, opacity: 0.75 }}>
-                  Exemple fictif. Aucune école n&apos;est représentée.
+                  Annonces fictives. Aucun annonceur n&apos;est représenté.
                 </p>
               </div>
             </div>

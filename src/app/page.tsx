@@ -8,6 +8,7 @@ import { ArrowRight, ShieldCheck, Lock, Gauge,
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingFaq } from "@/components/LandingFaq";
 import { ApercuSwipe } from "@/components/ApercuSwipe";
+import { melangerAvecAnnonces } from "@/lib/annoncesExemple";
 import { languesDeTravail } from "@/lib/langues";
 import { Logo } from "@/components/Logo";
 
@@ -297,6 +298,20 @@ export default async function Home() {
           padding: 28px 26px;
         }
         .landing-parcours-fleche { flex-shrink: 0; }
+        .landing-quatre {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 16px;
+        }
+        @media (max-width: 980px) { .landing-quatre { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 560px) { .landing-quatre { grid-template-columns: 1fr; gap: 12px; } }
+        .landing-pub {
+          display: grid;
+          grid-template-columns: 1fr 380px;
+          gap: 56px;
+          align-items: center;
+        }
+        @media (max-width: 900px) { .landing-pub { grid-template-columns: 1fr; gap: 36px; } }
         @media (max-width: 760px) {
           .landing-parcours {
             grid-template-columns: 1fr;
@@ -509,7 +524,7 @@ export default async function Home() {
           qui ne nous appartient pas, et a promettre un volume qui varie
           chaque semaine. */}
       <section className="landing-section landing-ton" style={{ padding: "96px 24px" }}>
-        <div style={{ maxWidth: 940, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1080, margin: "0 auto" }}>
           <p className="landing-eyebrow">Postuler</p>
           {/* Le vrai écart avec un site d'annonces, et donc la raison d'être de
               cette section. Un site d'annonces ne peut montrer que ce qu'on lui
@@ -536,39 +551,33 @@ export default async function Home() {
             Chaque offre a une entreprise derrière elle. Rencontrez-la d&apos;abord.
           </p>
 
-          <div className="landing-parcours">
-            <div className="landing-parcours-etape">
-              <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
-                D&apos;abord
-              </p>
-              {/* « Vous jugez l'employeur » : ce n'est pas le rapport qu'on
-                  entretient avec un futur employeur, et Workie n'est pas un
-                  tribunal. Le titre dit ce qu'on y gagne, savoir où l'on met
-                  les pieds, plutôt que le verdict qu'on rendrait. */}
-              <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-                Vous la découvrez
-              </h3>
-              {/* Cette phrase reprenait presque mot pour mot l'accroche du
-                  haut de page : « Notes détaillées, salaires... et conditions
-                  de travail, par celles et ceux qui y travaillent ». */}
-              <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
-                Ce qu&apos;elle fait, où, et dans quelle langue.
-              </p>
-            </div>
-
-            <ArrowRight className="landing-parcours-fleche" size={26} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
-
-            <div className="landing-parcours-etape">
-              <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
-                Ensuite
-              </p>
-              <h3 style={{ fontSize: 19, fontWeight: 700, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-                Vous postulez
-              </h3>
-              <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 }}>
-                Tous ses postes ouverts, directement chez elle.
-              </p>
-            </div>
+          {/* Les quatre questions qu'on se pose en cherchant du travail (où
+              postuler, qui recrute autour de moi, pourquoi certaines entreprises
+              n'apparaissent nulle part) trouvent chacune leur réponse ici, dans
+              l'ordre où on les rencontre. */}
+          <div className="landing-quatre">
+            {[
+              { etape: "Trouvez", titre: "Les entreprises autour de vous",
+                desc: "Par canton, par ville, par secteur. Y compris celles qui recrutent seulement sur leur propre site." },
+              { etape: "Découvrez", titre: "L'essentiel sur chacune",
+                desc: "Ce qu'elle fait, où elle se trouve, dans quelle langue on y travaille." },
+              { etape: "Gardez", titre: "Vos favoris, au même endroit",
+                desc: "Une flamme, et l'entreprise rejoint votre liste." },
+              { etape: "Postulez", titre: "Directement chez elle",
+                desc: "Tous ses postes ouverts, sur son site." },
+            ].map(({ etape, titre, desc }) => (
+              <div key={etape} className="landing-parcours-etape">
+                <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--brand)", marginBottom: 12 }}>
+                  {etape}
+                </p>
+                <h3 style={{ fontSize: 17.5, fontWeight: 700, color: "var(--text)", marginBottom: 8, letterSpacing: "-0.02em" }}>
+                  {titre}
+                </h3>
+                <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                  {desc}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -692,72 +701,42 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── Publicité ── */}
-      <section style={{ padding: "68px 24px", borderTop: "1px solid var(--border)" }}>
-        <div style={{ maxWidth: 940, margin: "0 auto" }}>
-          <div className="landing-ads-grid">
-            <div>
-              <p className="landing-eyebrow" style={{ textAlign: "left" }}>Annonceurs</p>
-              <h2 style={{ fontSize: "clamp(21px, 2.8vw, 28px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 13 }}>
-                Touchez des candidats actifs en Suisse.
-              </h2>
-              <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 520 }}>
-                {/* « Vous ne payez que ce que vous consommez » decrivait
-                    l'inverse du fonctionnement : la route de paiement facture
-                    le budget total en une fois, avant diffusion, et la
-                    campagne reste en attente tant que Stripe n'a pas
-                    confirme. Le budget s'epuise ensuite, il n'est pas
-                    preleve au fil de l'eau. */}
-                Un forfait de 7, 14 ou 30 jours, payé une fois. Le prix suit le
-                nombre de cantons visés.
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
-                {[
-                  "Durée au choix",
-                  "Paiement unique",
-                  "Ciblage par canton et secteur",
-                  "Statistiques en temps réel",
-                ].map(f => (
-                  <span key={f} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 550, padding: "5px 12px", borderRadius: 50, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
-                    <Check size={12} color="var(--brand)" strokeWidth={2.5} aria-hidden="true" /> {f}
-                  </span>
-                ))}
-              </div>
-              <Link href="/annonceurs" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 14.5, textDecoration: "none" }}>
-                Créer une campagne <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </div>
-            {/* Même tarif pour les deux formats : rien n'établit qu'une
-                impression en plein écran vaille davantage, et deux prix pour
-                un service dont on ignore encore le rendement se défendent mal
-                auprès d'un annonceur. */}
-            <div className="landing-ads-aside" style={{ flexDirection: "column", gap: 10, minWidth: 210 }}>
-              {/* Un aperçu de chaque format plutôt que son seul nom.
-                  Le bloc n'était que du texte : on lisait « format carré » sans
-                  voir de quoi il s'agit. Deux silhouettes dessinées en CSS
-                  valent mieux qu'une description, et se comprennent d'un coup
-                  d'œil. */}
+      {/* ── Publicité ──
+          Montrer plutôt qu'expliquer : la pile mêle cinq fiches et cinq
+          annonces d'exemple, et c'est en la faisant glisser qu'on voit qu'une
+          annonce a ici la forme du contenu qui l'entoure. */}
+      <section className="landing-section" style={{ padding: "88px 24px", borderTop: "1px solid var(--border)" }}>
+        <div className="landing-pub" style={{ maxWidth: 1040, margin: "0 auto" }}>
+          <div>
+            <p className="landing-eyebrow" style={{ textAlign: "left" }}>Annonceurs</p>
+            <h2 style={{ fontSize: "clamp(23px, 3.2vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", lineHeight: 1.18, marginBottom: 14 }}>
+              Votre annonce, au milieu des entreprises.
+            </h2>
+            <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 500 }}>
+              Elle a la forme d&apos;une fiche et se glisse entre elles. On la voit au moment
+              où l&apos;on choisit son prochain employeur, et souvent tout ce qui va avec :
+              une formation, un logement, une langue.
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 26 }}>
               {[
-                { label: "Format carré", desc: "Dans la grille des entreprises", forme: "carre" },
-                { label: "Format plein écran", desc: "Dans le swipe, toutes les dix cartes", forme: "plein" },
-              ].map(({ label, desc, forme }) => (
-                <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 16px", display: "flex", gap: 14, alignItems: "flex-start" }}>
-                  <div className={`apercu-format apercu-${forme}`} aria-hidden="true">
-                    <span /><span /><span />
-                  </div>
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{label}</p>
-                    {/* Le prix ne figure plus ici. Les deux formats sont au
-                        meme tarif : l'afficher sur chacun le repetait deux
-                        fois, et laissait croire qu'ils different par le prix
-                        alors qu'ils different par l'emplacement. Il est dit
-                        une fois, dans la phrase d'introduction. */}
-                    <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.5 }}>{desc}</p>
-                  </div>
-                </div>
+                "Ciblage par canton et secteur",
+                "7, 14 ou 30 jours",
+                "Paiement unique",
+                "Statistiques en temps réel",
+              ].map(f => (
+                <span key={f} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 550, padding: "5px 12px", borderRadius: 50, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
+                  <Check size={12} color="var(--brand)" strokeWidth={2.5} aria-hidden="true" /> {f}
+                </span>
               ))}
             </div>
+            <Link href="/annonceurs" className="btn btn-clair">
+              Faire de la publicité <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
+          <ApercuSwipe
+            entreprises={melangerAvecAnnonces(apercu.slice(5))}
+            fin={{ titre: "La prochaine carte pourrait être la vôtre.", libelle: "Créer une campagne", href: "/annonceurs" }}
+          />
         </div>
       </section>
 

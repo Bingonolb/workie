@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { X, Info, Flame, ArrowRight } from "lucide-react";
+import { X, Info, Flame, ArrowRight, ExternalLink } from "lucide-react";
 import { largeurCouverture } from "@/lib/coverUrl";
 
 /**
@@ -12,9 +12,13 @@ import { largeurCouverture } from "@/lib/coverUrl";
  * dit ce qu'on y fait. C'est le geste qui distingue Workie d'un annuaire, et
  * le décrire en mots coûte un paragraphe que personne ne lit.
  *
- * Dix entreprises réelles, tirées du catalogue. Rien n'est enregistré : la
- * flamme ne pose pas de favori, puisque le visiteur n'a pas encore de compte.
- * C'est une démonstration, et la dernière carte le dit en proposant d'entrer.
+ * Rien n'est enregistré : la flamme ne pose pas de favori, puisque le visiteur
+ * n'a pas encore de compte. C'est une démonstration, et la dernière carte le
+ * dit en proposant d'entrer.
+ *
+ * La même pile sert aux annonceurs : des annonces d'exemple glissées entre
+ * les fiches montrent, mieux qu'une phrase, qu'une annonce a ici la forme du
+ * contenu qui l'entoure.
  *
  * Le geste est volontairement plus simple que celui de l'écran de swipe : pas
  * de rotation, pas de superposition de couleur, pas de reprise de l'élan. Une
@@ -33,9 +37,38 @@ export type EntrepriseApercu = {
   cover_url: string | null;
 };
 
+/**
+ * Une annonce d'exemple.
+ *
+ * Aucun annonceur n'est nommé : une marque inventée finit toujours par
+ * ressembler à une vraie, et une vraie ne nous a rien demandé.
+ */
+export type AnnonceApercu = {
+  type: "annonce";
+  id: string;
+  titre: string;
+  texte: string;
+  cta: string;
+  image: string;
+  ciblage: string;
+};
+
+export type CarteApercu = ({ type?: "entreprise" } & EntrepriseApercu) | AnnonceApercu;
+
+type Fin = { titre: string; libelle: string; href: string };
+
+const FIN_DEFAUT: Fin = {
+  titre: "Votre prochain employeur est quelque part dans les 1000.",
+  libelle: "Créer un compte",
+  href: "/signup",
+};
+
+const imageDe = (c: CarteApercu): string | null =>
+  c.type === "annonce" ? c.image : c.cover_url ? largeurCouverture(c.cover_url, 940) : null;
+
 const SEUIL = 90;
 
-export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }) {
+export function ApercuSwipe({ entreprises, fin = FIN_DEFAUT }: { entreprises: CarteApercu[]; fin?: Fin }) {
   const [index, setIndex] = useState(0);
   const [glissement, setGlissement] = useState(0);
   const [partie, setPartie] = useState<"gauche" | "droite" | null>(null);
@@ -45,20 +78,20 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
   const finie = index >= entreprises.length;
 
   /*
-   * Les dix photos sont pretes avant le premier geste.
+   * Toutes les photos sont prêtes avant le premier geste.
    *
    * Chaque carte demandait sa photo au moment de s'afficher : on voyait donc
-   * un aplat gris, puis l'image. On les charge toutes des l'arrivee sur la
-   * page, et on les decode : un fichier telecharge mais pas decode laisse
-   * encore un a-coup au moment de le peindre. Dix images de 940 pixels, soit
-   * a peine le poids d'une seule photo de telephone.
+   * un aplat gris, puis l'image. On les charge toutes dès l'arrivée sur la
+   * page, et on les décode : un fichier téléchargé mais pas décodé laisse
+   * encore un à-coup au moment de le peindre.
    */
   useEffect(() => {
     for (const e of entreprises) {
-      if (!e.cover_url) continue;
+      const src = imageDe(e);
+      if (!src) continue;
       const img = new Image();
-      img.src = largeurCouverture(e.cover_url, 940);
-      img.decode?.().catch(() => { /* l'image s'affichera quand meme */ });
+      img.src = src;
+      img.decode?.().catch(() => { /* l'image s'affichera quand même */ });
     }
   }, [entreprises]);
 
@@ -74,15 +107,9 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
 
   /*
    * Le glissement ne commence que sur la photo et le texte, jamais sur un
-   * lien.
-   *
-   * La carte capturait le pointeur des qu'on la touchait, bouton compris :
-   * tous les evenements suivants lui revenaient, et le clic sur « Voir les
-   * offres d'emploi » n'atteignait jamais le lien. Le bouton ne menait nulle
-   * part.
-   *
-   * La capture attend aussi que le doigt ait bouge de quelques pixels : un
-   * simple toucher reste un toucher.
+   * lien : la capture du pointeur avalait le clic sur « Voir les offres
+   * d'emploi ». Elle attend aussi que le doigt ait bougé de quelques pixels :
+   * un simple toucher reste un toucher.
    */
   const capture = useRef(false);
   const onPointerDown = (e: React.PointerEvent) => {
@@ -109,15 +136,14 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
     else if (d >= SEUIL) avancer("droite");
   };
 
-  // Apres la derniere carte, une seule chose a faire : entrer.
+  // Après la dernière carte, une seule chose à faire : entrer.
   if (finie) {
     return (
       <div className="landing-apercu">
         <div className="apercu-fin">
-          <div className="apercu-fin-halo" aria-hidden="true" />
-          <p className="apercu-fin-titre">Votre prochain employeur est quelque part dans les 1000.</p>
-          <Link href="/signup" className="btn btn-marque btn-lg btn-bloc" style={{ position: "relative" }}>
-            Créer un compte <ArrowRight size={17} aria-hidden="true" />
+          <p className="apercu-fin-titre">{fin.titre}</p>
+          <Link href={fin.href} className="btn btn-marque btn-lg btn-bloc" style={{ position: "relative" }}>
+            {fin.libelle} <ArrowRight size={17} aria-hidden="true" />
           </Link>
           <button type="button" onClick={() => setIndex(0)} className="apercu-fin-revoir">
             Revoir
@@ -128,17 +154,17 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
   }
 
   const decalage = partie === "gauche" ? -460 : partie === "droite" ? 460 : glissement;
+  const annonce = courante.type === "annonce" ? courante : null;
+  const entreprise = courante.type === "annonce" ? null : courante;
+  const image = imageDe(courante);
+  const nom = annonce ? annonce.titre : entreprise!.name;
 
   return (
     <div className="landing-apercu">
       <div style={{ position: "relative" }}>
-        {/* La carte suivante, a peine visible dessous : elle dit qu'il y en a
-            d'autres sans demander qu'on la regarde. */}
+        {/* Le bord de la carte suivante, sans sa photo : on voyait l'image
+            d'après par-dessous pendant le glissement. */}
         {entreprises[index + 1] && (
-          // Le bord de la carte suivante, sans sa photo : pendant qu'on fait
-          // glisser celle du dessus, on voyait l'image d'apres par-dessous, et
-          // la pile avait l'air de se melanger. La photo reste prechargee et
-          // decodee, elle s'affiche d'un coup quand vient son tour.
           <div aria-hidden="true" style={{
             position: "absolute", inset: 0, transform: "scale(0.96) translateY(10px)",
             background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 22,
@@ -170,26 +196,26 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
             <div style={{
               position: "absolute", inset: 0,
               backgroundColor: "var(--surface3)",
-              backgroundImage: courante.cover_url ? `url(${largeurCouverture(courante.cover_url, 940)})` : undefined,
+              backgroundImage: image ? `url(${image})` : undefined,
               backgroundSize: "cover", backgroundPosition: "center",
             }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 52%, rgba(0,0,0,0.82) 100%)" }} />
             <span style={{
               position: "absolute", top: 14, left: 14,
               fontSize: 11, fontWeight: 700, color: "#fff",
-              background: "rgba(59,130,246,0.9)", borderRadius: 50, padding: "4px 11px",
-            }}>{courante.sector}</span>
+              background: annonce ? "var(--brand)" : "rgba(59,130,246,0.9)", borderRadius: 50, padding: "4px 11px",
+            }}>{annonce ? "Sponsorisé" : entreprise!.sector}</span>
             <div style={{ position: "absolute", left: 20, right: 20, bottom: 16 }}>
-              <p style={{ fontSize: 23, fontWeight: 800, color: "#fff", letterSpacing: "-0.025em", lineHeight: 1.15 }}>{courante.name}</p>
-              {courante.subsector && (
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.78)", marginTop: 3 }}>{courante.subsector}</p>
+              <p style={{ fontSize: 23, fontWeight: 800, color: "#fff", letterSpacing: "-0.025em", lineHeight: 1.15 }}>{nom}</p>
+              {entreprise?.subsector && (
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.78)", marginTop: 3 }}>{entreprise.subsector}</p>
               )}
             </div>
           </div>
 
           <div style={{ padding: "16px 18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {[courante.lieu, courante.langues].filter(Boolean).map(t => (
+              {(annonce ? [annonce.ciblage] : [entreprise!.lieu, entreprise!.langues]).filter(Boolean).map(t => (
                 <span key={t} style={{
                   display: "inline-flex", alignItems: "center",
                   background: "var(--surface2)", border: "1px solid var(--border2)",
@@ -198,37 +224,56 @@ export function ApercuSwipe({ entreprises }: { entreprises: EntrepriseApercu[] }
               ))}
             </div>
 
-            {courante.description && (
+            {(annonce ? annonce.texte : entreprise!.description) && (
               <p style={{
                 fontSize: 14, color: "var(--text-muted)", lineHeight: 1.5,
                 display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
-              }}>{courante.description}</p>
+              }}>{annonce ? annonce.texte : entreprise!.description}</p>
             )}
 
-            <Link href={`/company/${courante.id}`} className="btn btn-marque btn-bloc" style={{ textDecoration: "none" }}>
-              Voir les offres d&apos;emploi <ArrowRight size={15} aria-hidden="true" />
-            </Link>
+            {/* L'annonce d'exemple ne mène nulle part : son bouton a la forme
+                du vrai, sans lien vers un annonceur qui n'existe pas. */}
+            {annonce ? (
+              <span className="btn btn-marque btn-bloc" aria-hidden="true">
+                {annonce.cta} <ExternalLink size={14} aria-hidden="true" />
+              </span>
+            ) : (
+              <Link href={`/company/${entreprise!.id}`} className="btn btn-marque btn-bloc" style={{ textDecoration: "none" }}>
+                Voir les offres d&apos;emploi <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            )}
           </div>
         </div>
       </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 18 }}>
-        <BoutonRond onClick={() => avancer("gauche")} libelle="Passer cette entreprise" couleur="#ef4444" taille={56}>
+        <BoutonRond onClick={() => avancer("gauche")} libelle="Passer" couleur="#ef4444" taille={56}>
           <X size={24} strokeWidth={2} aria-hidden="true" />
         </BoutonRond>
-        <Link
-          href={`/company/${courante.id}`}
-          aria-label={`En savoir plus sur ${courante.name}`}
-          style={{
+        {entreprise ? (
+          <Link
+            href={`/company/${entreprise.id}`}
+            aria-label={`En savoir plus sur ${entreprise.name}`}
+            style={{
+              width: 42, height: 42, borderRadius: "50%",
+              background: "var(--surface)", border: "2px solid var(--border2)", color: "var(--text-muted)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.08)", textDecoration: "none",
+            }}
+          >
+            <Info size={17} strokeWidth={2} aria-hidden="true" />
+          </Link>
+        ) : (
+          <span aria-hidden="true" style={{
             width: 42, height: 42, borderRadius: "50%",
             background: "var(--surface)", border: "2px solid var(--border2)", color: "var(--text-muted)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 4px 18px rgba(0,0,0,0.08)", textDecoration: "none",
-          }}
-        >
-          <Info size={17} strokeWidth={2} aria-hidden="true" />
-        </Link>
-        <BoutonRond onClick={() => avancer("droite")} libelle="Garder cette entreprise" couleur="#f97316" taille={56}>
+            boxShadow: "0 4px 18px rgba(0,0,0,0.08)",
+          }}>
+            <Info size={17} strokeWidth={2} aria-hidden="true" />
+          </span>
+        )}
+        <BoutonRond onClick={() => avancer("droite")} libelle="Garder" couleur="#f97316" taille={56}>
           <Flame size={24} strokeWidth={2} aria-hidden="true" />
         </BoutonRond>
       </div>
