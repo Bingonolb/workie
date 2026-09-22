@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { CANTONS_SAISIE } from "@/lib/types";
 
 type ActionResult = { error?: string } | undefined;
 
@@ -26,13 +27,9 @@ export function AuthFormWorkie({
   const [emailConfirm, setEmailConfirm] = useState("");
   const emailMismatch = mode === "signup" && emailConfirm.length > 0 && email !== emailConfirm;
 
-  const CANTONS = [
-    "Argovie","Appenzell Rhodes-Extérieures","Appenzell Rhodes-Intérieures",
-    "Bâle-Campagne","Bâle-Ville","Berne","Fribourg","Genève","Glaris",
-    "Grisons","Jura","Lucerne","Neuchâtel","Nidwald","Obwald","Saint-Gall",
-    "Schaffhouse","Schwyz","Soleure","Tessin","Thurgovie","Uri","Valais",
-    "Vaud","Zoug","Zurich",
-  ];
+  // Codes à deux lettres, comme le profil et le ciblage publicitaire : le
+  // nom complet enregistré ici laissait le menu du profil sur « Choisir ».
+  const CANTONS = CANTONS_SAISIE.filter(c => c.code !== "CH" && c.code !== "FL");
 
   const currentYear = new Date().getFullYear();
   const BIRTH_YEARS = Array.from({ length: currentYear - 13 - 1940 + 1 }, (_, i) => currentYear - 13 - i);
@@ -82,7 +79,7 @@ export function AuthFormWorkie({
                 <label htmlFor="canton" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
                 <select id="canton" name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
                   <option value="">Sélectionnez votre canton</option>
-                  {CANTONS.map(c => <option key={c} value={c}>{c}</option>)}
+                  {CANTONS.map(c => <option key={c.code} value={c.code}>{c.nom}</option>)}
                 </select>
               </div>
               <div style={{ flex: 1 }}>

@@ -70,7 +70,7 @@ export async function signUp(
   if (email !== emailConfirm) {
     return { error: "Les deux adresses email ne correspondent pas." };
   }
-  if (!canton) {
+  if (!/^[A-Z]{2}$/.test(canton)) {
     return { error: "Choisissez votre canton." };
   }
   const currentYear = new Date().getFullYear();
