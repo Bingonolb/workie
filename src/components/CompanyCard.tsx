@@ -144,7 +144,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             <CoverImage
               src={company.cover_url!}
               color={company.cover_color}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 580px"
               priority={priority}
             />
           )}

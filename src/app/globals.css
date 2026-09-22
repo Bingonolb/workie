@@ -1691,3 +1691,18 @@ body { overscroll-behavior-y: none; }
 @media (prefers-reduced-motion: no-preference) {
   .apercu-fin { animation: apparition 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 }
+
+/* Grille des entreprises sur ordinateur : deux grandes cartes par rangée.
+   Essai du 2026-09-22 : trois photos côte à côte se disputaient le regard.
+   À deux, chaque image a la place d'être regardée ; la photo passe en 16/9
+   pour ne pas devenir un bandeau étiré. Pour revenir à trois colonnes,
+   retirer ce bloc. */
+@media (min-width: 900px) {
+  .explore-grid, .skeleton-grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    max-width: 1180px;
+    margin-inline: auto;
+  }
+  .explore-grid .card-cover, .skeleton-grille .card-cover { height: auto !important; aspect-ratio: 16 / 9; }
+  .explore-grid .ad-cover { padding-top: 56.25% !important; }
+}

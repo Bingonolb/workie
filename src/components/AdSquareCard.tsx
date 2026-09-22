@@ -104,7 +104,7 @@ export function AdSquareCard({ ad }: { ad: PublicAdCampaign }) {
       </div>
 
       {/* Image */}
-      <div style={{ position: "relative", paddingTop: "60%", overflow: "hidden", flexShrink: 0 }}>
+      <div className="ad-cover" style={{ position: "relative", paddingTop: "60%", overflow: "hidden", flexShrink: 0 }}>
         <Image
           src={ad.image_url}
           alt={ad.headline}

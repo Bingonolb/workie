@@ -706,7 +706,7 @@ export function ExploreClient({
         {visibleCompanies.length === 0 && !isPending ? (
           <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
             <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Aucune entreprise trouvée</p>
-            <p style={{ fontSize: 14 }}>Essaie d&apos;autres filtres.</p>
+            <p style={{ fontSize: 14 }}>Essayez d&apos;autres filtres.</p>
           </div>
         ) : (
           <>
