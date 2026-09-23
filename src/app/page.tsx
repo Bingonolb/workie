@@ -498,10 +498,10 @@ export default async function Home() {
       <section className="landing-bande" aria-hidden="false">
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
-          <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 760 }}>
+          <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700, textWrap: "balance" }}>
             Plus de 1000 entreprises en Suisse.
           </p>
-          <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 620, marginTop: 18 }}>
+          <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 700, marginTop: 18, textWrap: "balance" }}>
             {/* Cette phrase a d'abord répété trois éléments déjà lus plus haut,
                 puis énoncé une évidence (« une moyenne ne dit pas… »). Elle
                 donne maintenant le cas concret qui justifie le titre : c'est
@@ -671,10 +671,10 @@ export default async function Home() {
       <section className="landing-bande landing-bande-2">
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
-          <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700 }}>
+          <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700, textWrap: "balance" }}>
             26 cantons, 4 langues, 1000 employeurs.
           </p>
-          <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 560, marginTop: 18 }}>
+          <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 700, marginTop: 18, textWrap: "balance" }}>
             Vous avez l&apos;impression de toujours voir les mêmes offres ? Ici, ce ne sera jamais le cas.
           </p>
         </div>
