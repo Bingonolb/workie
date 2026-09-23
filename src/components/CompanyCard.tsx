@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState, useTransition } from "react";
-import { Flame, Star } from "lucide-react";
+import {Flame} from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { useFicheProche } from "@/lib/useFicheProche";
 import { oublier, CLE_FAVORIS, CLE_PROFIL, CLE_CONTEXTE } from "@/lib/cacheSession";
@@ -44,15 +44,6 @@ function getInitials(name: string): string {
   const words = name.trim().replace(/[^a-zA-ZÀ-ÿ\s]/g, " ").trim().split(/\s+/);
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
   return (words[0][0] + words[1][0]).toUpperCase();
-}
-
-function StarDisplay({ rating }: { rating: number }) {
-  return (
-    <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-      <Star size={13} fill="#f59e0b" color="#f59e0b" aria-hidden="true" />
-      <span style={{ fontSize: 14.5, fontWeight: 700, color: "#f59e0b" }}>{Number(rating).toFixed(1)}</span>
-    </span>
-  );
 }
 
 
@@ -105,7 +96,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
     <Link
       ref={refProche}
       href={`/company/${company.id}`}
-      aria-label={`Voir la fiche ${company.name}${Number(company.review_count) > 0 ? `, ${Number(company.avg_rating).toFixed(1)}/5 (${company.review_count} avis)` : ""}`}
+      aria-label={`Voir la fiche ${company.name}`}
       style={{ textDecoration: "none", display: "block" }}
       // Le survol et le premier contact restent : ils couvrent le cas d'une
       // carte deja visible au chargement, avant que l'observateur ne se mette
@@ -298,35 +289,14 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             </p>
           )}
 
-          {/* Une seule ligne de chiffres, separes par des points mediant.
-              Chaque donnee avait sa puce, son icone et son cadre : la ville
-              seule mobilisait une epingle et une rangee entiere pour un mot.
-              Une ligne de texte suffit, et les points laissent voir d'un coup
-              d'oeil combien on en sait sur cette entreprise.
-
-              Une note ne s'affiche que si des avis l'appuient : la condition
-              acceptait une note seule, et 24 entreprises montraient des
-              etoiles a cote de « 0 avis ». */}
+          {/* Une ligne de texte, ou la ville et le score se suivent : chaque
+              donnee avait sa puce, son icone et son cadre, et la ville seule
+              mobilisait une epingle et une rangee entiere pour un mot. */}
           <div style={{
             display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
             fontSize: 13.5, color: "var(--text-muted)", minHeight: 20,
           }}>
-            {Number(company.review_count) > 0 && Number(company.avg_rating) > 0 && (
-              <>
-                <StarDisplay rating={Number(company.avg_rating)} />
-                <span>{company.review_count} avis</span>
-                <Separateur />
-              </>
-            )}
             <span>{company.city}</span>
-            {Number(company.avg_salary_chf) > 0 && (
-              <>
-                <Separateur />
-                <span style={{ color: "#10b981", fontWeight: 600 }}>
-                  CHF {(Number(company.avg_salary_chf) / 1000).toFixed(0)}k
-                </span>
-              </>
-            )}
             {score > 0 && (
               <>
                 <Separateur />

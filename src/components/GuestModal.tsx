@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signInWithGoogle } from "@/lib/actions/auth";
 
-export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: boolean }) {
+export function GuestModal({ open }: { open?: boolean }) {
   const [timerVisible, setTimerVisible] = useState(false);
   const pathname = usePathname();
   // Non-dismissable: once visible it stays until the user signs in.
@@ -72,9 +72,7 @@ export function GuestModal({ reviewCount, open }: { reviewCount: number; open?: 
               Connectez-vous pour continuer
             </p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
-              {reviewCount > 1
-                ? `Encore ${reviewCount - 1} avis à lire : salaires, retours d'expérience et conseils d'anciens employés.`
-                : "Accédez aux avis complets et aux salaires réels, et déposez le vôtre. C'est 100% anonyme."}
+              "Créez un compte pour garder les entreprises qui vous correspondent et retrouver vos recherches."
             </p>
           </div>
 

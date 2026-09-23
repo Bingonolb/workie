@@ -15,7 +15,7 @@ export function GuestSaveButton() {
       >
         <Flame size={16} fill="none" aria-hidden="true" /> Sauvegarder
       </button>
-      {open && <GuestModal reviewCount={0} open />}
+      {open && <GuestModal open />}
     </>
   );
 }

@@ -23,13 +23,13 @@ import { join } from "node:path";
  */
 export const runtime = "nodejs";
 
-const BRAND = "#8b5cf6";
+const BRAND = "#6e56cf";
 const FOND = "#101319";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const title   = searchParams.get("title")   ?? "Workie";
-  const sub     = searchParams.get("sub")     ?? "Avis anonymes, salaires, conditions de travail";
+  const sub     = searchParams.get("sub")     ?? "Les entreprises suisses et leurs offres d'emploi";
   const rating  = searchParams.get("rating");
   const reviews = searchParams.get("reviews");
 

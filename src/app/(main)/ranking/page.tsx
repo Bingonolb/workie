@@ -7,7 +7,7 @@ import type { Company } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses",
-  description: "Le vrai classement des entreprises en Suisse, calculé sur les avis anonymes, les salaires et les votes de la communauté Workie.",
+  description: "Les entreprises suisses les plus suivies sur Workie : favoris, consultations et partages.",
   alternates: { canonical: "https://www.workie.ch/ranking" },
   openGraph: {
     title: "Classement des meilleurs employeurs suisses · Workie",
@@ -38,7 +38,7 @@ export default async function RankingPage() {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Classement des meilleurs employeurs suisses",
-    "description": "Top 200 entreprises suisses classées par avis anonymes, notes et votes d'employés sur Workie.",
+    "description": "Les 200 entreprises suisses les plus suivies sur Workie.",
     "url": "https://www.workie.ch/ranking",
     "numberOfItems": typedCompanies.length,
     "itemListElement": typedCompanies.slice(0, 10).map((c, i) => ({
@@ -67,7 +67,7 @@ export default async function RankingPage() {
           {companies.length === 0 ? (
             <div style={{ padding: "80px 24px", textAlign: "center", color: "var(--text-muted)" }}>
               <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Pas encore de données</p>
-              <p style={{ fontSize: 13 }}>Explorez les entreprises et déposez un avis pour alimenter le classement.</p>
+              <p style={{ fontSize: 13 }}>Explorez les entreprises et gardez celles qui vous correspondent.</p>
             </div>
           ) : (
             <RankingTable companies={typedCompanies} />

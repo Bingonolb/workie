@@ -139,8 +139,6 @@ export function ExploreFilters({
                       {([
                         { v: "recent", label: "Récentes" },
                         { v: "score", label: "Score" },
-                        { v: "rating", label: "Meilleure note" },
-                        { v: "reviews", label: "Plus d'avis" },
                         { v: "name", label: "A → Z" },
                       ] as const).map(({ v, label }) => (
                         <button key={v} onClick={() => push("sort", v === "recent" ? undefined : v)}
@@ -191,7 +189,7 @@ export function ExploreFilters({
           )}
           {sort !== "recent" && view !== "swipe" && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 7, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)" }}>
-              ↑ {sort === "score" ? "Score" : sort === "rating" ? "Meilleure note" : sort === "reviews" ? "Plus d'avis" : "A→Z"}
+              ↑ {sort === "score" ? "Score" : "A→Z"}
               <button type="button" aria-label="Retirer le tri" onClick={() => push("sort", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
             </span>
           )}

@@ -3,11 +3,11 @@ export const revalidate = 60; // ISR: Vercel CDN caches for 60s, auth/ads/filter
 import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Explorer les entreprises suisses",
-  description: "Découvrez les avis anonymes et les salaires des entreprises en Suisse. Tech, Pharma, Finance, Conseil et plus.",
+  description: "Parcourez les entreprises suisses par secteur, canton et langue de travail, et trouvez leurs offres d'emploi.",
   alternates: { canonical: "https://www.workie.ch/explore" },
   openGraph: {
     title: "Explorer les entreprises suisses · Workie",
-    description: "Plus de 1 000 entreprises suisses : avis anonymes, salaires réels, classement communautaire.",
+    description: "Plus de 1000 entreprises suisses, leurs métiers, leurs lieux et leurs offres d'emploi.",
     url: "https://www.workie.ch/explore",
     siteName: "Workie",
     type: "website",

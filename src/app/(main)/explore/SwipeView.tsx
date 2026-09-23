@@ -673,7 +673,7 @@ export function SwipeView({
         </p>
       </div>
 
-      {showGuestModal && !isLoggedIn && <GuestModal reviewCount={companies.filter(c => !isAd(c)).length} open />}
+      {showGuestModal && !isLoggedIn && <GuestModal open />}
 
 
       <style>{`

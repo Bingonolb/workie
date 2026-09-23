@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Star, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 
@@ -133,8 +133,6 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           const displayRank = globalRankMap.get(c.id) ?? 0;
           const sectorColor = SECTOR_COLORS[c.sector] ?? "#8b5cf6";
           const score = Number(c.score ?? 0);
-          const avgRating = Number(c.avg_rating ?? 0);
-          const reviewCount = Number(c.review_count ?? 0);
 
           return (
             <Link key={c.id} href={`/company/${c.id}`} className="ranking-row">
@@ -187,16 +185,6 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                     overflow: "hidden", whiteSpace: "nowrap",
                   }}>
                     <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{c.city}</span>
-                    {avgRating > 0 && reviewCount > 0 && (
-                      <>
-                        <span aria-hidden="true" style={{ opacity: 0.45 }}>&middot;</span>
-                        <Star size={11} fill="#f59e0b" color="#f59e0b" aria-hidden="true" style={{ flexShrink: 0 }} />
-                        <span style={{ color: "#f59e0b", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-                          {avgRating.toFixed(1)}
-                        </span>
-                        <span style={{ flexShrink: 0 }}>({reviewCount})</span>
-                      </>
-                    )}
                   </p>
                 </div>
               </div>
