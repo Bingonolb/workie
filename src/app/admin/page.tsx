@@ -4,7 +4,7 @@ import { getUser, createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Navbar } from "@/components/Navbar";
 import { AdminCompanyList } from "./AdminCompanyList";
-import { Shield, Plus, Star, MessageSquare, Users, Inbox, Flag, ShieldAlert } from "lucide-react";
+import { Shield, Plus, Users, Inbox } from "lucide-react";
 import type { Company } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -17,12 +17,9 @@ export default async function AdminPage() {
   if (profile?.role !== "admin") redirect("/explore");
 
   const adminClient = createAdminClient();
-  const [{ count: reviewCount }, { count: userCount }, { count: pendingClaims }, { count: pendingReports }, { count: flaggedReviews }] = await Promise.all([
-    adminClient.from("reviews").select("*", { count: "exact", head: true }).eq("status", "published"),
+  const [{ count: userCount }, { count: pendingClaims }] = await Promise.all([
     adminClient.from("profiles").select("*", { count: "exact", head: true }),
     adminClient.from("company_claims").select("*", { count: "exact", head: true }).or("status.is.null,status.eq.pending"),
-    adminClient.from("reports").select("*", { count: "exact", head: true }).eq("status", "pending"),
-    adminClient.from("reviews").select("*", { count: "exact", head: true }).eq("status", "flagged"),
   ]);
 
   // Fetch all companies in batches to bypass PostgREST max-rows limit
@@ -52,12 +49,9 @@ export default async function AdminPage() {
         {/* KPI strip */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12, marginBottom: 28 }}>
           {[
-            { icon: <Users size={16} color="#8b5cf6" />, value: list.length, label: "Entreprises", color: "#8b5cf6" },
-            { icon: <MessageSquare size={16} color="#f97316" />, value: reviewCount ?? 0, label: "Avis publiés", color: "#f97316" },
-            { icon: <Star size={16} color="#10b981" />, value: userCount ?? 0, label: "Utilisateurs", color: "#10b981" },
+            { icon: <Users size={16} color="var(--brand)" />, value: list.length, label: "Entreprises", color: "#6e56cf" },
+            { icon: <Users size={16} color="#10b981" />, value: userCount ?? 0, label: "Utilisateurs", color: "#10b981" },
             { icon: <Inbox size={16} color="#ef4444" />, value: pendingClaims ?? 0, label: "Demandes en attente", color: "#ef4444" },
-            { icon: <Flag size={16} color="#ec4899" />, value: pendingReports ?? 0, label: "Signalements en attente", color: "#ec4899" },
-            { icon: <ShieldAlert size={16} color="#f59e0b" />, value: flaggedReviews ?? 0, label: "Avis flaggés", color: "#f59e0b" },
           ].map(({ icon, value, label, color }) => (
             <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
               <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
@@ -72,8 +66,8 @@ export default async function AdminPage() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(139,92,246,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Shield size={20} color="#8b5cf6" />
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(110,86,207,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Shield size={20} color="var(--brand)" />
             </div>
             <div>
               <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>
@@ -88,24 +82,8 @@ export default async function AdminPage() {
                 est dormante (plus de formulaire depuis le retrait de l'espace
                 entreprise, 0 demande en attente). La logique serveur
                 (approveClaim, emails) est conservée pour son retour. */}
-            <Link href="/admin/reports" style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-              <Flag size={15} aria-hidden="true" /> Signalements
-              {(pendingReports ?? 0) > 0 && (
-                <span style={{ position: "absolute", top: -6, right: -6, background: "#ef4444", color: "#fff", fontSize: 10, fontWeight: 800, borderRadius: 50, width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {pendingReports}
-                </span>
-              )}
-            </Link>
-            <Link href="/admin/flagged-reviews" style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid rgba(245,158,11,0.3)", color: "#f59e0b", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-              <ShieldAlert size={15} aria-hidden="true" /> Flaggés
-              {(flaggedReviews ?? 0) > 0 && (
-                <span style={{ position: "absolute", top: -6, right: -6, background: "#f59e0b", color: "#fff", fontSize: 10, fontWeight: 800, borderRadius: 50, width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {flaggedReviews}
-                </span>
-              )}
-            </Link>
             <Link href="/admin/ads" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid rgba(236,72,153,0.3)", color: "#ec4899", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-              📣 Publicités
+              Publicités
             </Link>
             <Link href="/admin/company/new" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
               <Plus size={15} aria-hidden="true" /> Ajouter une entreprise

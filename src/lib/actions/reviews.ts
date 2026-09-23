@@ -253,7 +253,6 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
 
   revalidatePath(`/company/${company_id}`);
   revalidatePath("/profile");
-  revalidatePath("/salaires");
   revalidatePath("/ranking");
   revalidateTag("companies", {});
   revalidateTag("reviews", {});

@@ -28,7 +28,6 @@ export function Footer() {
         <nav className="pied-liens">
           {/* /salaires n'était liée depuis aucune navigation : page publique,
               indexée, mais introuvable depuis l'interface. */}
-          <Link href="/salaires" style={lien} className="pied-lien-large">Salaires</Link>
           <Link href="/annonceurs" style={lien} className="pied-lien-large">Annonceurs</Link>
           <Link href="/cgu" style={lien}>CGU</Link>
           <Link href="/confidentialite" style={lien}>Confidentialité</Link>
