@@ -24,7 +24,7 @@ export default function MentionsLegalesPage() {
           <address style={{ fontStyle: "normal", marginTop: 12, lineHeight: 1.9 }}>
             <strong>Workie</strong><br />
             Suisse<br />
-            Contact : <a href="mailto:contact@workie.ch" style={{ color: "var(--accent)", textDecoration: "none" }}>contact@workie.ch</a>
+            Contact : <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)", textDecoration: "none" }}>contact@workie.ch</a>
           </address>
         </Section>
 
@@ -41,18 +41,19 @@ export default function MentionsLegalesPage() {
             ou font l&apos;objet d&apos;une licence accordée à Workie. Toute reproduction, distribution ou utilisation sans autorisation écrite préalable est interdite.
           </p>
           <p style={{ marginTop: 12 }}>
-            Les avis publiés par les utilisateurs restent leur propriété. En les soumettant, l&apos;utilisateur accorde à Workie une licence
-            non exclusive, mondiale et gratuite pour les afficher sur la plateforme.
+            Les noms, marques et visuels des entreprises référencées appartiennent à leurs titulaires : ils ne sont cités qu'à des fins
+            d'information. Les visuels fournis par un annonceur restent sa propriété, sous licence non exclusive limitée à sa campagne.
           </p>
         </Section>
 
         <Section title="Responsabilité des contenus">
           <p>
-            Workie est une plateforme d&apos;hébergement de contenus générés par des tiers au sens de la loi fédérale suisse sur les services de communication électronique.
-            Workie n&apos;est pas responsable des avis publiés par ses utilisateurs, mais s&apos;engage à retirer tout contenu signalé comme illicite dans les meilleurs délais.
+            Les fiches d'entreprise sont établies par Workie à partir d'informations publiques. Les offres d'emploi sont publiées par les
+            employeurs sur leurs propres sites. Workie s'engage à corriger ou retirer, dans les meilleurs délais, toute information signalée comme
+            inexacte ou illicite.
           </p>
           <p style={{ marginTop: 12 }}>
-            Pour signaler un contenu : <a href="mailto:contact@workie.ch" style={{ color: "var(--accent)", textDecoration: "none" }}>contact@workie.ch</a>
+            Pour signaler un contenu : <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)", textDecoration: "none" }}>contact@workie.ch</a>
           </p>
         </Section>
 
@@ -60,7 +61,7 @@ export default function MentionsLegalesPage() {
           <p>
             Workie traite les données personnelles conformément à la loi fédérale suisse sur la protection des données (nFADP, entrée en vigueur le 1er septembre 2023).
             Pour toute demande relative à vos données (accès, rectification, suppression, portabilité), consultez notre{" "}
-            <a href="/confidentialite" style={{ color: "var(--accent)", textDecoration: "none" }}>Politique de confidentialité</a>.
+            <a href="/confidentialite" style={{ color: "var(--brand)", textDecoration: "none" }}>Politique de confidentialité</a>.
           </p>
         </Section>
 

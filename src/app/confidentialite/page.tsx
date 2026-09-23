@@ -19,17 +19,17 @@ export default function ConfidentialitePage() {
           Politique de confidentialité
         </h1>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 48 }}>
-          Dernière mise à jour : 15 juillet 2026, conforme à la LPD (loi fédérale sur la protection des données) et au RGPD
+          Dernière mise à jour : 23 septembre 2026, conforme à la LPD (loi fédérale sur la protection des données) et au RGPD
         </p>
 
         <Section title="1. Responsable du traitement">
-          <p>Workie, Suisse. <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a></p>
+          <p>Workie, Suisse. <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)" }}>contact@workie.ch</a></p>
         </Section>
 
         <Section title="2. Données collectées">
           <p><strong>Données de compte</strong> : adresse email, nom d&apos;utilisateur, date de création du compte.</p>
           <p><strong>Données de profil</strong> (optionnelles) : photo de profil, ville, pays, biographie.</p>
-          <p><strong>Avis et salaires</strong> : contenu publié anonymement, votre identité n&apos;est jamais affichée publiquement associée à un avis.</p>
+          <p><strong>Données d&apos;usage</strong> : entreprises mises en favori, fiches consultées, recherches récentes. Elles servent votre propre compte et ne sont jamais affichées à d&apos;autres visiteurs.</p>
           <p><strong>Données techniques</strong> : adresse IP (pour la détection de fraude et la géolocalisation approximative), type de navigateur, pages visitées.</p>
           <p><strong>Données de paiement</strong> : traitées exclusivement par Stripe. Workie ne stocke aucun numéro de carte bancaire.</p>
         </Section>
@@ -38,21 +38,16 @@ export default function ConfidentialitePage() {
           <ul>
             <li>Fourniture et amélioration des services Workie</li>
             <li>Authentification et sécurité des comptes</li>
-            <li>Prévention de la fraude et des avis falsifiés</li>
+            <li>Prévention de la fraude et des créations de comptes automatisées</li>
             <li>Envoi de notifications liées à votre compte (nouvelles offres d&apos;emploi des entreprises suivies)</li>
             <li>Traitement des paiements</li>
             <li>Respect de nos obligations légales</li>
           </ul>
         </Section>
 
-        <Section title="4. Anonymat des avis">
-          <p>Les avis publiés sur Workie sont anonymes. Votre nom, votre email et votre identité ne sont <strong>jamais affichés</strong> en lien avec vos avis sur la plateforme publique.</p>
-          <p>Workie conserve en interne l&apos;association entre votre compte et vos avis uniquement pour :</p>
-          <ul>
-            <li>Prévenir les doublons (1 avis max par entreprise)</li>
-            <li>Répondre à d&apos;éventuelles demandes légales</li>
-            <li>Assurer l&apos;intégrité de la plateforme</li>
-          </ul>
+        <Section title="4. Ce qui reste privé">
+          <p>Workie ne publie aucun avis et aucune note : rien de ce que vous faites sur le site n&apos;est visible par les autres visiteurs.</p>
+          <p>Vos favoris, vos recherches récentes et les fiches que vous consultez ne sont lisibles que par vous, depuis votre compte. Les statistiques de consultation remises aux entreprises sont agrégées et ne permettent pas de vous identifier.</p>
         </Section>
 
         <Section title="5. Partage des données">
@@ -91,7 +86,7 @@ export default function ConfidentialitePage() {
             <li><strong>Portabilité</strong> : recevoir vos données dans un format structuré</li>
             <li><strong>Opposition</strong> : vous opposer à certains traitements</li>
           </ul>
-          <p>Pour exercer ces droits : <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a>, réponse sous 30 jours.</p>
+          <p>Pour exercer ces droits : <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)" }}>contact@workie.ch</a>, réponse sous 30 jours.</p>
         </Section>
 
         <Section title="9. Sécurité">
@@ -99,12 +94,12 @@ export default function ConfidentialitePage() {
         </Section>
 
         <Section title="10. Contact & réclamations">
-          <p>Pour toute question sur vos données : <a href="mailto:contact@workie.ch" style={{ color: "#8b5cf6" }}>contact@workie.ch</a></p>
-          <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez déposer une réclamation auprès du <a href="https://www.edoeb.admin.ch" target="_blank" rel="noopener noreferrer" style={{ color: "#8b5cf6" }}>Préposé fédéral à la protection des données (PFPDT)</a>.</p>
+          <p>Pour toute question sur vos données : <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)" }}>contact@workie.ch</a></p>
+          <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez déposer une réclamation auprès du <a href="https://www.edoeb.admin.ch" target="_blank" rel="noopener noreferrer" style={{ color: "var(--brand)" }}>Préposé fédéral à la protection des données (PFPDT)</a>.</p>
         </Section>
 
         <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid var(--border)", display: "flex", gap: 16, flexWrap: "wrap" }}>
-          <Link href="/cgu" style={{ fontSize: 13, color: "#8b5cf6", textDecoration: "none", fontWeight: 600 }}>Conditions générales d&apos;utilisation →</Link>
+          <Link href="/cgu" style={{ fontSize: 13, color: "var(--brand)", textDecoration: "none", fontWeight: 600 }}>Conditions générales d&apos;utilisation →</Link>
           <Link href="/explore" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>Retour à l&apos;accueil</Link>
         </div>
       </main>
