@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Workie : avis et salaires des entreprises suisses",
+    name: "Workie : chercher du travail devient passionnant",
     short_name: "Workie",
-    description: "Avis anonymes, salaires et culture des entreprises suisses.",
+    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
     start_url: "/explore",
     display: "standalone",
     background_color: "#0d0d0f",
-    theme_color: "#8b5cf6",
+    theme_color: "#101319",
     lang: "fr-CH",
     icons: [
       // Les deux fichiers déclarés ici étaient des SVG qui n'existent pas :
