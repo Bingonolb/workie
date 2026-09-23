@@ -8,7 +8,6 @@ import { ArrowRight, ShieldCheck, Lock, Gauge,
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingFaq } from "@/components/LandingFaq";
 import { ApercuSwipe } from "@/components/ApercuSwipe";
-import { melangerAvecAnnonces } from "@/lib/annoncesExemple";
 import { languesDeTravail } from "@/lib/langues";
 import { Logo } from "@/components/Logo";
 
@@ -733,10 +732,26 @@ export default async function Home() {
               Faire de la publicité <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
-          <ApercuSwipe
-            entreprises={melangerAvecAnnonces(apercu.slice(5))}
-            fin={{ titre: "La prochaine carte pourrait être la vôtre.", libelle: "Créer une campagne", href: "/annonceurs" }}
-          />
+          {/* La pile mêlant fiches et annonces reste sur la page Annonceurs.
+              L'accueil a déjà la sienne, en haut, et deux piles sur une même
+              page font se demander laquelle est le site. Ici, les deux
+              silhouettes disent l'emplacement, ce qui suffit. */}
+          <div className="landing-ads-aside">
+            {[
+              { label: "Format carré", desc: "Dans la grille des entreprises", forme: "carre" },
+              { label: "Format plein écran", desc: "Dans le swipe, toutes les dix cartes", forme: "plein" },
+            ].map(({ label, desc, forme }) => (
+              <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 16px", display: "flex", gap: 14, alignItems: "flex-start" }}>
+                <div className={`apercu-format apercu-${forme}`} aria-hidden="true">
+                  <span /><span /><span />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{label}</p>
+                  <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.5 }}>{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
