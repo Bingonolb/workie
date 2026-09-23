@@ -40,21 +40,6 @@ const ENTREES: Entree[] = [
     ),
   },
   {
-    q: "Pourquoi n'y a-t-il pas de note sur les entreprises ?",
-    texte:
-      "Parce qu'une note moyenne ne dit pas où postuler. Workie ne classe pas les bons et les mauvais employeurs : le site donne des faits, le secteur, le lieu, la langue de travail et le lien vers les offres, et vous décidez.",
-    r: (
-      <>
-        Parce qu&apos;une note moyenne ne dit pas où postuler. Deux entreprises notées
-        pareil n&apos;ont ni le même métier, ni le même lieu, ni la même langue de travail,
-        et ce sont ces trois choses-là qui décident d&apos;une candidature.
-        <br /><br />
-        Workie ne classe pas les bons et les mauvais employeurs. Le site donne des faits et
-        vous laisse décider.
-      </>
-    ),
-  },
-  {
     q: "D'où viennent les informations sur les entreprises ?",
     texte:
       "Les fiches sont établies à la main, une par une : le nom tel qu'on le dit, le secteur, la ville et le canton, et l'adresse de la page carrière du site officiel. Jamais un site d'annonces.",
