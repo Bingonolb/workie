@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, Target, CreditCard, ShieldCheck, BarChart3, MapPin, Check, CalendarClock } from "lucide-react";
 import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
@@ -199,34 +198,30 @@ export default async function AnnonceursPage() {
       <main className="ann-tons" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
         {/* ── Ouverture ──
-            Deux colonnes : le texte tenait seul la gauche et laissait la
-            droite vide sur toute la hauteur. Une page qui vend de l'espace
-            d'affichage ne peut pas s'ouvrir sur du vide. */}
+            La page s'ouvrait sur une photographie de réunion : de quoi
+            remplir la colonne de droite, rien qui montre ce qu'on achète. La
+            pile est à sa place ici, parce qu'un annonceur veut d'abord voir à
+            quoi ressemble son annonce une fois posée. */}
         <section className="ann-section">
           <div className="ann-large ann-ouverture">
             <div>
-            <p className="ann-eyebrow">Annonceurs</p>
-            <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
-              Vos clients y préparent les années qui viennent.
-            </h1>
-            <p style={{ fontSize: 16.5, color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 500, marginBottom: 30 }}>
-              Votre annonce paraît au moment où ils engagent plusieurs années
-              de leur vie.
-
-            </p>
-            <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
-              Créer une campagne <ArrowRight size={17} aria-hidden="true" />
-            </Link>
+              <p className="ann-eyebrow">Annonceurs</p>
+              <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
+                Votre annonce, entre les entreprises.
+              </h1>
+              <p style={{ fontSize: 16.5, color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 480, marginBottom: 26 }}>
+                Elle a la forme d&apos;une fiche et paraît au milieu d&apos;elles, pendant
+                qu&apos;on choisit son prochain employeur. Faites glisser les cartes.
+              </p>
+              <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
+                Créer une campagne <ArrowRight size={17} aria-hidden="true" />
+              </Link>
             </div>
 
-            <div style={{ position: "relative", aspectRatio: "4 / 3", borderRadius: 16, overflow: "hidden", border: "1px solid var(--border)" }}>
-              <Image
-                src="https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1000"
-                alt=""
-                fill
-                sizes="(max-width: 860px) 100vw, 420px"
-                style={{ objectFit: "cover" }}
-                priority
+            <div style={{ maxWidth: 380, width: "100%", justifySelf: "end" }}>
+              <ApercuSwipe
+                entreprises={melangerAvecAnnonces(demo)}
+                fin={{ titre: "La prochaine carte pourrait être la vôtre.", libelle: "Créer une campagne", href: "/profile/ads/new" }}
               />
             </div>
           </div>
@@ -332,42 +327,28 @@ export default async function AnnonceursPage() {
             ressembler a une vraie, et une vraie ne nous a rien demande. */}
         <section className="ann-section">
           <div className="ann-large">
-            <p className="ann-eyebrow">En situation</p>
-            <h2 className="ann-h2">Votre annonce, entre les entreprises.</h2>
+            <p className="ann-eyebrow">Écrire son annonce</p>
+            <h2 className="ann-h2">Ce qui fonctionne ici.</h2>
             <p className="ann-chapo">
-              Cinq fiches, cinq annonces d&apos;exemple. Faites glisser : l&apos;annonce a
-              la forme d&apos;une fiche, et se lit comme elle.
+              Les gens lisent des fiches d&apos;entreprise. Votre annonce est lue dans
+              ce mouvement, et les trois règles ci-dessous en découlent.
             </p>
 
-            <div className="ann-exemple">
-              <div style={{ maxWidth: 380, width: "100%" }}>
-                <ApercuSwipe
-                  entreprises={melangerAvecAnnonces(demo)}
-                  fin={{ titre: "La prochaine carte pourrait être la vôtre.", libelle: "Créer une campagne", href: "/profile/ads/new" }}
-                />
-              </div>
-
-              <div>
-                <h3 style={{ fontSize: 16.5, fontWeight: 700, marginBottom: 10 }}>
-                  Ce qui fait une bonne annonce ici
-                </h3>
-                <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 14 }}>
-                  {[
-                    "Elle parle du poste que le lecteur vise : il est en train de choisir un employeur.",
-                    "Elle est datée et située : 6 mois, Genève et Lausanne. Une promesse précise se vérifie.",
-                    "Elle vise les cantons et les secteurs où elle a un sens.",
-                  ].map((t) => (
-                    <li key={t} style={{ display: "flex", gap: 10, fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                      <Check size={15} color="var(--brand)" strokeWidth={2.4} aria-hidden="true" style={{ flexShrink: 0, marginTop: 4 }} />
-                      <span>{t}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 20, opacity: 0.75 }}>
-                  Annonces fictives. Aucun annonceur n&apos;est représenté.
-                </p>
-              </div>
-            </div>
+            <ul style={{ listStyle: "none", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
+              {[
+                "Elle parle du poste que le lecteur vise : il est en train de choisir un employeur.",
+                "Elle est datée et située : 6 mois, Genève et Lausanne. Une promesse précise se vérifie.",
+                "Elle vise les cantons et les secteurs où elle a un sens.",
+              ].map((t) => (
+                <li key={t} style={{ display: "flex", gap: 10, fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                  <Check size={15} color="var(--brand)" strokeWidth={2.4} aria-hidden="true" style={{ flexShrink: 0, marginTop: 4 }} />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+            <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 22, opacity: 0.75 }}>
+              Les annonces montrées plus haut sont fictives. Aucun annonceur n&apos;est représenté.
+            </p>
           </div>
         </section>
 

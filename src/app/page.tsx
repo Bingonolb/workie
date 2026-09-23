@@ -709,12 +709,12 @@ export default async function Home() {
           <div>
             <p className="landing-eyebrow" style={{ textAlign: "left" }}>Annonceurs</p>
             <h2 style={{ fontSize: "clamp(23px, 3.2vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", lineHeight: 1.18, marginBottom: 14 }}>
-              Votre annonce, au milieu des entreprises.
+              Vos annonces au milieu de leur recherche.
             </h2>
             <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 500 }}>
-              Elle a la forme d&apos;une fiche et se glisse entre elles. On la voit au moment
-              où l&apos;on choisit son prochain employeur, et souvent tout ce qui va avec :
-              une formation, un logement, une langue.
+              Sur Workie, on compare des employeurs et on prépare la suite : une
+              formation, un déménagement, une langue à reprendre. Votre annonce paraît
+              là, ciblée par canton et par secteur.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 26 }}>
               {[
