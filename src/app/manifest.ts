@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Workie : chercher du travail devient passionnant",
     short_name: "Workie",
-    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
+    description: "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
     start_url: "/explore",
     display: "standalone",
     background_color: "#0d0d0f",

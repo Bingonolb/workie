@@ -93,10 +93,10 @@ const getApercuEntreprises = unstable_cache(
 
 export const metadata: Metadata = {
   title: "Workie : chercher du travail devient passionnant",
-  description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
+  description: "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
   openGraph: {
     title: "Workie : chercher du travail devient passionnant",
-    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
+    description: "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
     url: "https://www.workie.ch",
     siteName: "Workie",
     type: "website",
@@ -105,7 +105,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Workie : chercher du travail devient passionnant",
-    description: "Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d'emploi.",
+    description: "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
   },
   alternates: { canonical: "https://www.workie.ch" },
 };
@@ -424,7 +424,7 @@ export default async function Home() {
               demande une. Elle dit maintenant d'où viennent les notes, ce qui
               est la seule chose qu'un titre ne peut pas porter. */}
           <p className="hero-accroche" style={{ fontSize: "clamp(15.5px, 1.4vw, 17.5px)", color: "var(--text-sub)", maxWidth: 470, lineHeight: 1.6, marginBottom: 32 }}>
-            Découvrez les entreprises suisses, gardez celles qui vous correspondent et trouvez leurs offres d&apos;emploi.
+            Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d&apos;emploi.
           </p>
 
           <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
@@ -507,7 +507,7 @@ export default async function Home() {
                 donne maintenant le cas concret qui justifie le titre : c'est
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
-            Des grands groupes aux ateliers du Jura. Au même endroit.
+            Des grands groupes aux équipes de 3 personnes. Au même endroit.
           </p>
         </div>
       </section>
@@ -675,7 +675,7 @@ export default async function Home() {
             26 cantons, 4 langues, 1000 employeurs.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 560, marginTop: 18 }}>
-            De la grande maison bâloise au bureau de 3 personnes dans le Jura.
+            Vous avez l&apos;impression de toujours voir les mêmes offres ? Ici, ce ne sera jamais le cas.
           </p>
         </div>
       </section>
