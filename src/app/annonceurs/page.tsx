@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Target, CreditCard, ShieldCheck, BarChart3, MapPin, Check, CalendarClock } from "lucide-react";
+import { ArrowRight, Target, CreditCard, ShieldCheck, BarChart3 } from "lucide-react";
 import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 import { unstable_cache } from "next/cache";
@@ -88,7 +88,7 @@ export default async function AnnonceursPage() {
           reste parfois figé d'un déploiement à l'autre alors que le HTML se met
           à jour, et la page arrive alors sans ses règles. */}
       <style>{`
-        .ann-section { padding: 84px 24px; }
+        .ann-section { padding: 64px 24px; }
         .ann-large { max-width: 940px; margin: 0 auto; }
         .ann-eyebrow {
           font-size: 11.5px; font-weight: 700; letter-spacing: 0.14em;
@@ -210,8 +210,10 @@ export default async function AnnonceursPage() {
                 Votre annonce, entre les entreprises.
               </h1>
               <p style={{ fontSize: 16.5, color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 480, marginBottom: 26 }}>
-                Elle a la forme d&apos;une fiche et paraît au milieu d&apos;elles, pendant
-                qu&apos;on choisit son prochain employeur. Faites glisser les cartes.
+                Elle paraît au milieu des entreprises, avec le même soin qu&apos;une fiche :
+                on la lit comme le reste du site. Et puisque ici chaque carte mène chez
+                celui qui la publie, arriver chez vous en cliquant sur la vôtre n&apos;a rien
+                d&apos;une interruption.
               </p>
               <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
                 Créer une campagne <ArrowRight size={17} aria-hidden="true" />
@@ -233,54 +235,22 @@ export default async function AnnonceursPage() {
             et elle passe donc avant le mecanisme. */}
         <section className="ann-section ann-ton">
           <div className="ann-large">
-            <p className="ann-eyebrow">L&apos;audience</p>
-            <h2 className="ann-h2">Des gens qui regardent loin.</h2>
-            <p className="ann-chapo">
-              {/* Aucun chiffre d'audience : le site est jeune, et un annonceur
-                  qui decouvre l'ecart sur son tableau de bord ne revient pas.
-                  L'intention se decrit, elle n'a pas besoin d'etre chiffree. */}
-              Ils comparent des employeurs : ils décident de plusieurs années
-              de leur vie. Et une décision pareille en
-              entraîne d&apos;autres, qui engagent tout autant : reprendre une
-              formation, changer de trajet, s&apos;assurer, emprunter.
+            <p className="ann-eyebrow">Le terrain</p>
+            <h2 className="ann-h2">Ce que couvre une campagne.</h2>
 
+            {/* Les cantons et les secteurs sont comptes dans le module de
+                tarification : ces nombres sont exactement ceux que le
+                formulaire de ciblage propose.
 
-
-            </p>
-            {/* Le terrain, en valeur absolue. Les cantons et les secteurs sont
-                comptes dans le module de tarification, donc ces nombres sont
-                exactement ceux que le formulaire de ciblage propose. */}
-            <div className="ann-chiffres">
+                Les trois cartes qui suivaient ont ete retirees : elles
+                redisaient l'ouverture avec d'autres mots, et une page qui
+                repete une idee trois fois donne l'impression de n'en avoir
+                qu'une. */}
+            <div className="ann-chiffres" style={{ marginBottom: 0 }}>
               {chiffres.map(({ valeur, libelle }, i) => (
                 <div key={libelle} style={{ paddingLeft: i === 0 ? 0 : 28, borderLeft: i === 0 ? "none" : "1px solid var(--border)" }}>
                   <p style={{ fontSize: "clamp(26px, 3.6vw, 36px)", fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1 }}>{valeur}</p>
                   <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 9, lineHeight: 1.4 }}>{libelle}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="ann-grille ann-trois">
-              {[
-                {
-                  Icone: Target,
-                  titre: "Un moment de projection",
-                  desc: "Personne ne compare des employeurs pour passer le temps. Vos lecteurs pensent ici en années.",
-                },
-                {
-                  Icone: CalendarClock,
-                  titre: "Tout ce qui suit un nouveau poste",
-                  desc: "Un changement de poste entraîne une formation, un trajet, une assurance, parfois un crédit. Tout ce qui se décide sur la durée a sa place ici.",
-                },
-                {
-                  Icone: MapPin,
-                  titre: "Par canton et par secteur",
-                  desc: "Vous choisissez où et à qui votre annonce paraît, et vous ne payez que pour ce périmètre.",
-                },
-              ].map(({ Icone, titre, desc }) => (
-                <div key={titre} className="ann-carte">
-                  <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
-                  <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px", lineHeight: 1.3 }}>{titre}</h3>
-                  <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.6 }}>{desc}</p>
                 </div>
               ))}
             </div>
@@ -325,28 +295,12 @@ export default async function AnnonceursPage() {
 
             Aucune ecole n'est nommee. Une marque inventee finit toujours par
             ressembler a une vraie, et une vraie ne nous a rien demande. */}
-        <section className="ann-section">
+        {/* Une section « Ce qui fonctionne ici » disait aux annonceurs comment
+            rediger leur annonce. Ce n'est pas notre place : ils connaissent
+            leur metier, et la pile du haut montre deja le resultat. */}
+        <section className="ann-section" style={{ paddingTop: 0 }}>
           <div className="ann-large">
-            <p className="ann-eyebrow">Écrire son annonce</p>
-            <h2 className="ann-h2">Ce qui fonctionne ici.</h2>
-            <p className="ann-chapo">
-              Les gens lisent des fiches d&apos;entreprise. Votre annonce est lue dans
-              ce mouvement, et les trois règles ci-dessous en découlent.
-            </p>
-
-            <ul style={{ listStyle: "none", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20 }}>
-              {[
-                "Elle parle du poste que le lecteur vise : il est en train de choisir un employeur.",
-                "Elle est datée et située : 6 mois, Genève et Lausanne. Une promesse précise se vérifie.",
-                "Elle vise les cantons et les secteurs où elle a un sens.",
-              ].map((t) => (
-                <li key={t} style={{ display: "flex", gap: 10, fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                  <Check size={15} color="var(--brand)" strokeWidth={2.4} aria-hidden="true" style={{ flexShrink: 0, marginTop: 4 }} />
-                  <span>{t}</span>
-                </li>
-              ))}
-            </ul>
-            <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 22, opacity: 0.75 }}>
+            <p style={{ fontSize: 12.5, color: "var(--text-muted)", opacity: 0.75 }}>
               Les annonces montrées plus haut sont fictives. Aucun annonceur n&apos;est représenté.
             </p>
           </div>
@@ -386,9 +340,8 @@ export default async function AnnonceursPage() {
                 <Target size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
                 <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>Les chiffres réels, jour par jour</h3>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.62 }}>
-                  Vues, clics et répartition par canton pendant toute la
-                  diffusion. Vous mesurez ce qui s&apos;est passé, pas une
-                  estimation faite d&apos;avance.
+                  Vues, clics et répartition par canton, mis à jour pendant
+                  toute la diffusion.
                 </p>
               </div>
             </div>

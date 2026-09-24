@@ -23,12 +23,12 @@ const ENTREES: Entree[] = [
   {
     q: "C'est quoi Workie ?",
     texte:
-      "Une façon moderne de chercher du travail : vous partez de l'entreprise, vous voyez en quelques secondes ce qu'elle fait, où elle est et dans quelle langue on y travaille, et vous arrivez directement sur ses offres, à la source.",
+      "Une façon moderne de chercher du travail : la recherche commence par les entreprises elles-mêmes. En quelques secondes, vous voyez ce que fait l'une d'elles, où elle est et dans quelle langue on y travaille, puis vous arrivez sur ses offres, à la source.",
     r: (
       <>
-        Une façon moderne de chercher du travail. Vous partez de l&apos;entreprise :
-        en quelques secondes, vous savez ce qu&apos;elle fait, où elle se trouve et dans
-        quelle langue on y travaille.
+        Une façon moderne de chercher du travail : ici, la recherche commence par les
+        entreprises elles-mêmes. En quelques secondes, vous voyez ce que fait l&apos;une
+        d&apos;elles, où elle se trouve et dans quelle langue on y travaille.
         <br /><br />
         Un geste pour la garder, un clic pour arriver sur ses offres, à la source, sur son
         propre site. Vous voyez tous ses postes ouverts, tels qu&apos;elle vient de les
