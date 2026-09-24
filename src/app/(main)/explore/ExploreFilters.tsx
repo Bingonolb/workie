@@ -5,6 +5,19 @@ import { X, SlidersHorizontal } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
 import { SECTOR_COLORS } from "@/lib/types";
 
+/** Les quatre langues de travail que les fiches peuvent porter. */
+const LANGUES = [
+  { code: "FR", nom: "Français" },
+  { code: "DE", nom: "Allemand" },
+  { code: "IT", nom: "Italien" },
+  { code: "EN", nom: "Anglais" },
+];
+
+/** « GE,VD » devient ["GE", "VD"]. */
+function liste(valeur: string | undefined): string[] {
+  return (valeur ?? "").split(",").map(v => v.trim()).filter(Boolean);
+}
+
 export function ExploreFilters({
   sectors,
   cantons,
@@ -14,7 +27,7 @@ export function ExploreFilters({
 }: {
   sectors: readonly string[];
   cantons: { code: string; name: string }[];
-  current: { sector?: string; canton?: string; view?: string; sort?: string };
+  current: { sector?: string; canton?: string; langue?: string; view?: string; sort?: string };
   onFilter?: (key: string, value: string | undefined) => void;
   onClear?: () => void;
 }) {
@@ -27,8 +40,23 @@ export function ExploreFilters({
 
   const view = current.view ?? "grid";
   const sort = current.sort ?? "recent";
-  const activeCanton = cantons.find(c => c.code === current.canton);
-  const activeCount = (current.sector ? 1 : 0) + (current.canton ? 1 : 0) + (sort !== "recent" && view !== "swipe" ? 1 : 0);
+
+  /*
+   * Chaque filtre porte une liste, pas une valeur.
+   *
+   * Cliquer un canton remplaçait le précédent : chercher « Genève ou Vaud »
+   * demandait deux recherches. La règle est maintenant « ou » dans une liste,
+   * « et » entre les listes, ce qui élargit la zone sans relâcher le métier.
+   */
+  const secteursActifs = liste(current.sector);
+  const cantonsActifs = liste(current.canton);
+  const languesActives = liste(current.langue);
+  const basculer = (cle: string, actuels: string[], valeur: string) => {
+    const suite = actuels.includes(valeur) ? actuels.filter(v => v !== valeur) : [...actuels, valeur];
+    push(cle, suite.join(",") || undefined);
+  };
+  const activeCount = secteursActifs.length + cantonsActifs.length + languesActives.length
+    + (sort !== "recent" && view !== "swipe" ? 1 : 0);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -94,10 +122,10 @@ export function ExploreFilters({
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Secteur</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
                   {sectors.map(s => {
-                    const color = SECTOR_COLORS[s] ?? "#8b5cf6";
-                    const active = current.sector === s;
+                    const color = SECTOR_COLORS[s] ?? "var(--brand)";
+                    const active = secteursActifs.includes(s);
                     return (
-                      <button key={s} onClick={() => push("sector", active ? undefined : s)}
+                      <button key={s} onClick={() => basculer("sector", secteursActifs, s)}
                         style={{
                           padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
                           border: active ? `1.5px solid ${color}` : "1px solid var(--border2)",
@@ -114,9 +142,9 @@ export function ExploreFilters({
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Canton</p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))", gap: 5, marginBottom: view !== "swipe" ? 18 : 0 }}>
                   {cantons.map(c => {
-                    const active = current.canton === c.code;
+                    const active = cantonsActifs.includes(c.code);
                     return (
-                      <button key={c.code} onClick={() => push("canton", active ? undefined : c.code)}
+                      <button key={c.code} onClick={() => basculer("canton", cantonsActifs, c.code)}
                         style={{
                           padding: "6px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer",
                           border: active ? "1.5px solid #f97316" : "1px solid var(--border)",
@@ -126,6 +154,28 @@ export function ExploreFilters({
                         }}>
                         <div style={{ fontSize: 9, opacity: 0.5 }}>{c.code}</div>
                         {c.name}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Langue de travail.
+                    Une offre à Zurich ne sert à rien à qui ne parle pas
+                    allemand : après le lieu, c'est la première chose qui
+                    décide si une entreprise est atteignable. */}
+                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "18px 0 10px" }}>Langue de travail</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: view !== "swipe" ? 18 : 0 }}>
+                  {LANGUES.map(({ code, nom }) => {
+                    const active = languesActives.includes(code);
+                    return (
+                      <button key={code} onClick={() => basculer("langue", languesActives, code)}
+                        style={{
+                          padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                          border: active ? "1.5px solid #3b82f6" : "1px solid var(--border2)",
+                          background: active ? "rgba(59,130,246,0.15)" : "transparent",
+                          color: active ? "#3b82f6" : "var(--text-muted)", transition: "all 0.1s",
+                        }}>
+                        {nom}
                       </button>
                     );
                   })}
@@ -172,21 +222,37 @@ export function ExploreFilters({
 
       </div>
 
-      {/* Active filter chips — separate row below the button */}
-      {(current.sector || activeCanton || (sort !== "recent" && view !== "swipe")) && (
+      {/* Les filtres actifs, un par valeur : avec des listes, une seule
+          pastille par catégorie ne dirait plus ce qui est coché. */}
+      {(activeCount > 0) && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-          {current.sector && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: `${SECTOR_COLORS[current.sector] ?? "#8b5cf6"}18`, border: `1px solid ${SECTOR_COLORS[current.sector] ?? "#8b5cf6"}44`, color: SECTOR_COLORS[current.sector] ?? "#8b5cf6" }}>
-              {current.sector}
-              <button type="button" aria-label="Retirer le secteur" onClick={() => push("sector", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
-            </span>
-          )}
-          {activeCanton && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.3)", color: "#f97316" }}>
-              {activeCanton.name}
-              <button type="button" aria-label="Retirer le canton" onClick={() => push("canton", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
-            </span>
-          )}
+          {secteursActifs.map(s => {
+            const color = SECTOR_COLORS[s] ?? "var(--brand)";
+            return (
+              <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: `color-mix(in srgb, ${color} 14%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`, color }}>
+                {s}
+                <button type="button" aria-label={`Retirer ${s}`} onClick={() => basculer("sector", secteursActifs, s)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
+              </span>
+            );
+          })}
+          {cantonsActifs.map(code => {
+            const c = cantons.find(x => x.code === code);
+            return (
+              <span key={code} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.3)", color: "#f97316" }}>
+                {c?.name ?? code}
+                <button type="button" aria-label={`Retirer ${c?.name ?? code}`} onClick={() => basculer("canton", cantonsActifs, code)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
+              </span>
+            );
+          })}
+          {languesActives.map(code => {
+            const l = LANGUES.find(x => x.code === code);
+            return (
+              <span key={code} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.3)", color: "#3b82f6" }}>
+                {l?.nom ?? code}
+                <button type="button" aria-label={`Retirer ${l?.nom ?? code}`} onClick={() => basculer("langue", languesActives, code)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
+              </span>
+            );
+          })}
           {sort !== "recent" && view !== "swipe" && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 7, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)" }}>
               ↑ {sort === "score" ? "Score" : "A→Z"}

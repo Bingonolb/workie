@@ -138,6 +138,7 @@ export function ExploreClient({
   }
   const [sector, setSector] = useState(() => parametreUrl("sector", initialSector ?? ""));
   const [canton, setCanton] = useState(() => parametreUrl("canton", initialCanton ?? ""));
+  const [langue, setLangue] = useState(() => parametreUrl("langue", ""));
   const [sort, setSort] = useState(() => parametreUrl("sort", initialSort ?? "recent"));
 
   // null = auth not yet resolved (loading). Avoids flash of cadenas for logged-in users.
@@ -197,7 +198,7 @@ export function ExploreClient({
     try {
       const brut = sessionStorage.getItem("workie_grille");
       if (!brut) return null;
-      const e = JSON.parse(brut) as { graine: number; sector: string; canton: string; sort: string; companies: Company[]; total: number; page: number };
+      const e = JSON.parse(brut) as { graine: number; sector: string; canton: string; langue?: string; sort: string; companies: Company[]; total: number; page: number };
       // Un état constitué avec d'autres filtres ou une autre graine n'a plus
       // de sens : on repart du serveur plutôt que d'afficher un mélange bâtard.
       //
@@ -209,7 +210,7 @@ export function ExploreClient({
       // écrasait la liste complète par ces 24. L'ordre restait le bon, la
       // graine étant stable une demi-heure, ce qui masquait la panne.
       const memeContexte = e.graine === graine
-        && e.sector === sector && e.canton === canton && e.sort === sort;
+        && e.sector === sector && e.canton === canton && (e.langue ?? "") === langue && e.sort === sort;
       return memeContexte && Array.isArray(e.companies) && e.companies.length > 0 ? e : null;
     } catch { return null; }
   })();
@@ -302,6 +303,7 @@ export function ExploreClient({
     const sp = new URLSearchParams(window.location.search);
     const urlSector = sp.get("sector") ?? "";
     const urlCanton = sp.get("canton") ?? "";
+    const urlLangue = sp.get("langue") ?? "";
     const urlSort   = sp.get("sort")   ?? "recent";
 
     // Les filtres et la vue sont déjà pris en compte à l'initialisation des
@@ -315,11 +317,11 @@ export function ExploreClient({
     // bascule d'une version à l'autre, et à la moindre coupure réseau.
     // En cas d'échec, la liste rendue par le serveur reste affichée : elle
     // n'est pas mélangée, ce qui est très préférable à un écran vide.
-    if (urlSector || urlCanton || urlSort !== "recent") {
+    if (urlSector || urlCanton || urlLangue || urlSort !== "recent") {
       startTransition(async () => {
         try {
           const result = await fetchGridPage(
-            { sector: urlSector || undefined, canton: urlCanton || undefined, sort: urlSort || undefined, graine },
+            { sector: urlSector || undefined, canton: urlCanton || undefined, langue: urlLangue || undefined, sort: urlSort || undefined, graine },
             0,
           );
           setCompanies(result.companies);
@@ -357,7 +359,8 @@ export function ExploreClient({
 
   // Hydrate auth state + ads client-side (page is ISR/CDN-cached, no cookies in SSR)
   useEffect(() => {
-    const sectorParam = sector ? `&sector=${encodeURIComponent(sector)}` : "";
+    // Une publicité vise un secteur : avec plusieurs cochés, on prend le premier.
+    const sectorParam = sector ? `&sector=${encodeURIComponent(sector.split(",")[0])}` : "";
     Promise.all([
       fetch("/api/user/context").then(r => r.json()),
       fetch(`/api/ads/active?${sectorParam}`).then(r => r.json()),
@@ -386,10 +389,11 @@ export function ExploreClient({
   // L'ancienne version réécrivait « /explore » ou « /explore?view=swipe » en
   // dur, ce qui effaçait sector/canton/sort : un lien filtré n'était pas
   // partageable et un rechargement perdait les filtres.
-  const syncUrl = useCallback((s: string, c: string, so: string, v: string) => {
+  const syncUrl = useCallback((s: string, c: string, l: string, so: string, v: string) => {
     const p = new URLSearchParams();
     if (s) p.set("sector", s);
     if (c) p.set("canton", c);
+    if (l) p.set("langue", l);
     if (so && so !== "recent") p.set("sort", so);
     if (v === "swipe") p.set("view", "swipe");
     const qs = p.toString();
@@ -404,8 +408,8 @@ export function ExploreClient({
   const didMountRef = useRef(false);
   useEffect(() => {
     if (!didMountRef.current) { didMountRef.current = true; return; }
-    syncUrl(sector, canton, sort, view);
-  }, [sector, canton, sort, view, syncUrl]);
+    syncUrl(sector, canton, langue, sort, view);
+  }, [sector, canton, langue, sort, view, syncUrl]);
 
   // La vue swipe occupe exactement l'écran et ne défile pas.
   //
@@ -429,16 +433,18 @@ export function ExploreClient({
   const applyFilters = useCallback((
     newSector: string,
     newCanton: string,
+    newLangue: string,
     newSort: string,
   ) => {
     setSector(newSector);
     setCanton(newCanton);
+    setLangue(newLangue);
     setSort(newSort);
     setPage(0);
     startTransition(async () => {
       try {
         const result = await fetchGridPage(
-          { sector: newSector || undefined, canton: newCanton || undefined, sort: newSort || undefined, graine },
+          { sector: newSector || undefined, canton: newCanton || undefined, langue: newLangue || undefined, sort: newSort || undefined, graine },
           0,
         );
         setCompanies(result.companies);
@@ -453,12 +459,13 @@ export function ExploreClient({
   const handleFilter = useCallback((key: string, value: string | undefined) => {
     const newSector = key === "sector" ? (value ?? "") : sector;
     const newCanton = key === "canton" ? (value ?? "") : canton;
+    const newLangue = key === "langue" ? (value ?? "") : langue;
     const newSort   = key === "sort"   ? (value ?? "recent") : sort;
-    applyFilters(newSector, newCanton, newSort);
-  }, [sector, canton, sort, applyFilters]);
+    applyFilters(newSector, newCanton, newLangue, newSort);
+  }, [sector, canton, langue, sort, applyFilters]);
 
   const handleClear = useCallback(() => {
-    applyFilters("", "", "recent");
+    applyFilters("", "", "", "recent");
   }, [applyFilters]);
 
   const [newFrom, setNewFrom] = useState<number>(-1);
@@ -483,7 +490,7 @@ export function ExploreClient({
     // encore en cours de chargement dans le lot visible.
     const lancer = () => {
       fetchGridPage(
-        { sector: sector || undefined, canton: canton || undefined, sort: sort || undefined, graine },
+        { sector: sector || undefined, canton: canton || undefined, langue: langue || undefined, sort: sort || undefined, graine },
         page + 1,
       )
         .then(r => prechargerCouvertures(r.companies.map(c => c.cover_url), 640))
@@ -507,7 +514,7 @@ export function ExploreClient({
     setLoadingMore(true);
     try {
       const result = await fetchGridPage(
-        { sector: sector || undefined, canton: canton || undefined, sort: sort || undefined, graine },
+        { sector: sector || undefined, canton: canton || undefined, langue: langue || undefined, sort: sort || undefined, graine },
         nextPage,
       );
       setCompanies(prev => {
@@ -563,12 +570,12 @@ export function ExploreClient({
     if (typeof window === "undefined" || companies.length === 0 || !melangeApplique) return;
     try {
       sessionStorage.setItem("workie_grille", JSON.stringify({
-        graine, sector, canton, sort, companies, total, page,
+        graine, sector, canton, langue, sort, companies, total, page,
       }));
     } catch {
       // Quota dépassé : le confort disparaît, la page continue de fonctionner.
     }
-  }, [graine, sector, canton, sort, companies, total, page, melangeApplique]);
+  }, [graine, sector, canton, langue, sort, companies, total, page, melangeApplique]);
 
   // Retenir où l'on en est, tant qu'on est bien dans la grille. En vue swipe
   // la page ne défile pas : y enregistrer zéro effacerait la position.
@@ -647,6 +654,7 @@ export function ExploreClient({
   const current = {
     sector: sector || undefined,
     canton: canton || undefined,
+    langue: langue || undefined,
     sort: sort !== "recent" ? sort : undefined,
     view: view as "grid" | "swipe",
   };
@@ -659,13 +667,14 @@ export function ExploreClient({
           cantons={CANTONS}
           current={current}
           onFilter={(key, value) => {
-            if (key === "sector") applyFilters(value ?? "", canton, sort);
-            else if (key === "canton") applyFilters(sector, value ?? "", sort);
+            if (key === "sector") applyFilters(value ?? "", canton, langue, sort);
+            else if (key === "canton") applyFilters(sector, value ?? "", langue, sort);
+            else if (key === "langue") applyFilters(sector, canton, value ?? "", sort);
           }}
-          onClear={() => applyFilters("", "", sort)}
+          onClear={() => applyFilters("", "", "", sort)}
         />
         <SwipeView
-          key={`${sector}-${canton}`}
+          key={`${sector}-${canton}-${langue}`}
           companies={swipeCompanies}
           initialFavIds={favIds}
           initialFlameIds={flameIds}

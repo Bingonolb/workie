@@ -27,7 +27,7 @@ export async function getAllCompaniesForSwipe(filters?: {
 
 // Appelé depuis le client pour charger le prochain batch
 export async function fetchSwipePage(
-  filters: { sector?: string; canton?: string; search?: string } | undefined,
+  filters: { sector?: string; canton?: string; langue?: string; search?: string } | undefined,
   offset: number
 ) {
   const supabase = await createClient();
@@ -40,8 +40,11 @@ export async function fetchSwipePage(
     .order("name", { ascending: true })
     .range(offset, offset + SWIPE_PAGE_SIZE - 1);
 
-  if (filters?.sector) q = q.eq("sector", filters.sector);
-  if (filters?.canton) q = q.eq("canton", filters.canton);
+  const secteurs = liste(filters?.sector);
+  const cantons = cantonsDemandes(filters?.canton, filters?.langue);
+  if (secteurs.length) q = q.in("sector", secteurs);
+  if (cantons.length) q = q.in("canton", cantons);
+  if (liste(filters?.langue).includes("EN")) q = q.or(ANGLAIS);
   if (filters?.search) {
     // Le nom et le sous-secteur, chacun dans la forme saisie et dans sa forme
     // sans accents. Chercher « brasserie » ne renvoyait rien alors que huit
@@ -75,13 +78,53 @@ export async function fetchSwipePage(
 
 import { GRID_PAGE_SIZE, COMPANY_PUBLIC_COLS } from "@/lib/actions/columns";
 
+/**
+ * Un paramètre d'URL en liste : « GE,VD » devient ["GE", "VD"].
+ *
+ * La règle des filtres est « ou » à l'intérieur d'une liste, « et » entre les
+ * listes : cocher deux cantons élargit la zone, ajouter un secteur resserre le
+ * métier. Un filtre qui ne sait cocher qu'une valeur oblige à chercher deux
+ * fois pour une question unique.
+ */
+function liste(valeur: string | undefined): string[] {
+  return (valeur ?? "").split(",").map(v => v.trim()).filter(Boolean);
+}
+
+/** Langues officielles par canton, comme à l'affichage d'une fiche. */
+const CANTONS_PAR_LANGUE: Record<string, string[]> = {
+  FR: ["GE", "VD", "NE", "JU", "BE", "FR", "VS", "CH"],
+  DE: ["BE", "FR", "VS", "GR", "ZH", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG",
+       "SO", "BS", "BL", "SH", "AR", "AI", "SG", "AG", "TG", "CH", "FL"],
+  IT: ["TI", "GR", "CH"],
+};
+
+/**
+ * L'anglais ne suit pas le territoire.
+ *
+ * Il se déduit de ce que la fiche porte déjà : une enseigne présente dans tout
+ * le pays, une grande maison, ou un site qui n'est pas en « .ch ».
+ */
+const ANGLAIS = "canton.eq.CH,employee_range.in.(1001-5000,5001-10000,10001+),website_url.not.ilike.%.ch";
+
+/**
+ * Les cantons réellement demandés : ceux qu'on a cochés, croisés avec ceux où
+ * l'on parle les langues choisies. Sans canton coché, la langue décide seule.
+ */
+function cantonsDemandes(canton: string | undefined, langue: string | undefined): string[] {
+  const coches = liste(canton);
+  const langues = liste(langue).filter(l => l !== "EN");
+  if (!langues.length) return coches;
+  const parLangue = [...new Set(langues.flatMap(l => CANTONS_PAR_LANGUE[l] ?? []))];
+  return coches.length ? coches.filter(c => parLangue.includes(c)) : parLangue;
+}
+
 const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,cover_color,logo_url,score,is_verified,description,profile_score";
 
 // Cached grid fetcher — no cookies(), uses adminClient, safe to cache across requests.
 // All users with the same filters share one DB query per 60s instead of N.
 const _fetchGridPageCached = unstable_cache(
   async (
-    filters: { sector?: string; canton?: string; sort?: string; graine?: number },
+    filters: { sector?: string; canton?: string; langue?: string; sort?: string; graine?: number },
     page: number
   ): Promise<{ companies: Company[]; total: number }> => {
     const admin = createAdminClient();
@@ -96,11 +139,16 @@ const _fetchGridPageCached = unstable_cache(
     // 168 chargées, toutes issues du premier lot.
     const triExplicite = filters.sort && filters.sort !== "recent" ? filters.sort : undefined;
 
+    const secteurs = liste(filters.sector);
+    const cantons = cantonsDemandes(filters.canton, filters.langue);
+    const anglais = liste(filters.langue).includes("EN");
+
     if (!triExplicite && filters.graine !== undefined) {
-      const { data } = await admin.rpc("lister_entreprises_melangees", {
+      const { data } = await admin.rpc("lister_entreprises_melangees_v2", {
         graine: filters.graine,
-        secteur: filters.sector ?? null,
-        canton_filtre: filters.canton ?? null,
+        secteurs: secteurs.length ? secteurs : null,
+        cantons: cantons.length ? cantons : null,
+        anglais,
         decalage: page * GRID_PAGE_SIZE,
         taille: GRID_PAGE_SIZE,
       });
@@ -115,8 +163,9 @@ const _fetchGridPageCached = unstable_cache(
       .from("companies")
       .select(GRID_COLS, { count: "exact" })
 
-    if (filters.sector) q = q.eq("sector", filters.sector);
-    if (filters.canton) q = q.eq("canton", filters.canton);
+    if (secteurs.length) q = q.in("sector", secteurs);
+    if (cantons.length) q = q.in("canton", cantons);
+    if (anglais) q = q.or(ANGLAIS);
 
     switch (triExplicite) {
       case "rating":
@@ -173,7 +222,7 @@ const _fetchGridPageCached = unstable_cache(
  * que d'être recalculé pour chacun.
  */
 export async function fetchGridPage(
-  filters: { sector?: string; canton?: string; sort?: string; graine?: number },
+  filters: { sector?: string; canton?: string; langue?: string; sort?: string; graine?: number },
   page: number
 ): Promise<{ companies: Company[]; total: number }> {
   return _fetchGridPageCached(filters, page);

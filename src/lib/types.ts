@@ -280,6 +280,7 @@ export type Database = {
       increment_ad_impression: { Args: { p_campaign_id: string }; Returns: undefined }
       increment_helpful: { Args: { review_id: string }; Returns: undefined }
       lister_entreprises_melangees: { Args: { graine: number; secteur?: string | null; canton_filtre?: string | null; decalage?: number; taille?: number }; Returns: Record<string, unknown>[] }
+      lister_entreprises_melangees_v2: { Args: { graine: number; secteurs?: string[] | null; cantons?: string[] | null; anglais?: boolean; decalage?: number; taille?: number }; Returns: Record<string, unknown>[] }
       rechercher_entreprises: { Args: { terme: string; nb?: number }; Returns: { id: string; name: string; city: string; sector: string; logo_url: string | null; rang: number; ressemblance: number }[] }
       notify_new_company: { Args: { p_company_id: string; p_company_name: string; p_company_sector: string | null; p_company_city: string | null }; Returns: number }
       increment_job_apply_click: { Args: { job_id: string }; Returns: undefined }
