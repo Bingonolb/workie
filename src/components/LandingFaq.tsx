@@ -115,10 +115,10 @@ const ENTREES: Entree[] = [
   {
     q: "Est-ce payant ?",
     texte:
-      "Non. Chercher, garder des entreprises et gérer son compte sont gratuits, sans abonnement. Le site se finance par la publicité, qui n'influence pas le classement.",
+      "Non. Chercher, sauvegarder des entreprises et gérer son compte sont gratuits, sans abonnement. Le site se finance par la publicité, qui n'influence pas le classement.",
     r: (
       <>
-        Non, et il n&apos;y a pas d&apos;abonnement. Chercher, garder des entreprises,
+        Non, et il n&apos;y a pas d&apos;abonnement. Chercher, sauvegarder des entreprises,
         gérer son compte : tout est gratuit.
         <br /><br />
         Le site se finance par la publicité. Les annonces sont signalées comme telles et

@@ -67,7 +67,7 @@ export default async function RankingPage() {
           {companies.length === 0 ? (
             <div style={{ padding: "80px 24px", textAlign: "center", color: "var(--text-muted)" }}>
               <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Pas encore de données</p>
-              <p style={{ fontSize: 13 }}>Explorez les entreprises et gardez celles qui vous correspondent.</p>
+              <p style={{ fontSize: 13 }}>Explorez les entreprises et ajoutez en favori celles qui vous correspondent.</p>
             </div>
           ) : (
             <RankingTable companies={typedCompanies} />

@@ -560,8 +560,8 @@ export default async function Home() {
                 desc: "Par canton, par ville, par secteur. Y compris celles qui recrutent seulement sur leur propre site." },
               { etape: "Découvrez", titre: "L'essentiel sur chacune",
                 desc: "Ce qu'elle fait, où elle se trouve, dans quelle langue on y travaille." },
-              { etape: "Gardez", titre: "Vos favoris, au même endroit",
-                desc: "Une flamme, et l'entreprise rejoint votre liste." },
+              { etape: "Sauvegardez", titre: "Vos favoris, au même endroit",
+                desc: "Une flamme, et l'entreprise rejoint vos favoris." },
               { etape: "Postulez", titre: "Directement chez elle",
                 desc: "Tous ses postes ouverts, sur son site." },
             ].map(({ etape, titre, desc }) => (

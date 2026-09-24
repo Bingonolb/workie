@@ -273,7 +273,7 @@ export function ApercuSwipe({ entreprises, fin = FIN_DEFAUT }: { entreprises: Ca
             <Info size={17} strokeWidth={2} aria-hidden="true" />
           </span>
         )}
-        <BoutonRond onClick={() => avancer("droite")} libelle="Garder" couleur="#f97316" taille={56}>
+        <BoutonRond onClick={() => avancer("droite")} libelle="Ajouter aux favoris" couleur="#f97316" taille={56}>
           <Flame size={24} strokeWidth={2} aria-hidden="true" />
         </BoutonRond>
       </div>

@@ -72,7 +72,7 @@ export function GuestModal({ open }: { open?: boolean }) {
               Connectez-vous pour continuer
             </p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
-              "Créez un compte pour garder les entreprises qui vous correspondent et retrouver vos recherches."
+              "Créez un compte pour sauvegarder les entreprises qui vous correspondent et retrouver vos recherches."
             </p>
           </div>
 

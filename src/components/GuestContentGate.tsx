@@ -33,7 +33,7 @@ export function GuestContentGate({
       {/* CTA — normal flow, no empty space, always visible */}
       <div className="guest-gate-cta">
         <p style={{ fontSize: 21, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.025em" }}>
-          Gardez ce que vous trouvez
+          Vos favoris, au même endroit
         </p>
         <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, maxWidth: 300, lineHeight: 1.65 }}>
           Vos entreprises, leurs offres et le fil de vos découvertes. Gratuit.

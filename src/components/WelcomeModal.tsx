@@ -83,13 +83,13 @@ export function WelcomeModal() {
           </h2>
 
           <p style={{ margin: "0 0 24px", fontSize: 15, color: "#6b7280", lineHeight: 1.65 }}>
-            Votre compte est prêt. Explorez les entreprises suisses, gardez celles qui vous correspondent, et retrouvez-les quand vous voulez.
+            Votre compte est prêt. Explorez les entreprises suisses, ajoutez en favori celles qui vous correspondent, et retrouvez-les quand vous voulez.
           </p>
 
           {/* Features list */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
             {[
-              { Icone: Flame, text: "Gardez les entreprises qui vous intéressent" },
+              { Icone: Flame, text: "Sauvegardez les entreprises qui vous intéressent" },
               { Icone: Briefcase, text: "Et leurs offres d'emploi" },
               // Le compte etait ecrit en dur, et annoncait 1 733 entreprises
               // pour 1 032 reelles : un chiffre fige derive du jour ou on le
