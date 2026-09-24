@@ -50,7 +50,7 @@ const fichesDemo = unstable_cache(
 
 export const metadata: Metadata = {
   title: "Annoncer sur Workie",
-  description: "Diffusez vos annonces auprès de candidats suisses, ciblées par canton et par secteur. Un forfait de 7, 14 ou 30 jours, payé une fois, sans abonnement.",
+  description: "Diffusez vos publicités auprès de candidats suisses, ciblées par canton et par secteur. Un forfait de 7, 14 ou 30 jours, payé une fois, sans abonnement.",
   alternates: { canonical: "https://www.workie.ch/annonceurs" },
   openGraph: {
     title: "Annoncer sur Workie",
@@ -207,10 +207,10 @@ export default async function AnnonceursPage() {
             <div>
               <p className="ann-eyebrow">Annonceurs</p>
               <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
-                Votre annonce, entre les entreprises.
+                Votre publicité, entre les entreprises.
               </h1>
               <p style={{ fontSize: 16.5, color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 480, marginBottom: 26 }}>
-                Elle paraît au milieu des entreprises, avec le même soin qu&apos;une fiche :
+                Votre publicité paraît au milieu des entreprises, avec le même soin qu&apos;une fiche :
                 on la lit comme le reste du site. Et puisque ici chaque carte mène chez
                 celui qui la publie, arriver chez vous en cliquant sur la vôtre n&apos;a rien
                 d&apos;une interruption.
@@ -301,7 +301,7 @@ export default async function AnnonceursPage() {
         <section className="ann-section" style={{ paddingTop: 0 }}>
           <div className="ann-large">
             <p style={{ fontSize: 12.5, color: "var(--text-muted)", opacity: 0.75 }}>
-              Les annonces montrées plus haut sont fictives. Aucun annonceur n&apos;est représenté.
+              Les publicités montrées plus haut sont fictives. Aucun annonceur n&apos;est représenté.
             </p>
           </div>
         </section>
@@ -323,7 +323,7 @@ export default async function AnnonceursPage() {
             <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, maxWidth: 580, marginBottom: 34 }}>
               Deux choses déterminent le prix : la durée, de {DUREE_MIN} à {DUREE_MAX} jours,
               et le nombre de cantons visés. Vous les réglez tous les deux au
-              moment de composer votre annonce, et le montant s&apos;affiche avant
+              moment de composer votre publicité, et le montant s&apos;affiche avant
               que vous ne payiez quoi que ce soit.
             </p>
 
@@ -356,7 +356,7 @@ export default async function AnnonceursPage() {
             <p className="ann-chapo">
               Aucune attente entre le paiement et la diffusion. Un filtre
               automatique refuse à la création ce qui n&apos;a rien à faire ici, et
-              deux signalements suffisent ensuite à retirer une annonce.
+              deux signalements suffisent ensuite à retirer une publicité.
             </p>
             <div className="ann-grille ann-quatre">
               {[
@@ -380,7 +380,7 @@ export default async function AnnonceursPage() {
         <section className="ann-section ann-accent" style={{ textAlign: "center" }}>
           <div style={{ maxWidth: 560, margin: "0 auto" }}>
             <h2 style={{ fontSize: "clamp(24px, 3.6vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 12 }}>
-              Lancez votre première annonce.
+              Lancez votre première publicité.
             </h2>
             <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 28 }}>
               Une semaine sur un seul canton suffit à voir ce que ça donne, et

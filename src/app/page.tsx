@@ -709,13 +709,14 @@ export default async function Home() {
           <div>
             <p className="landing-eyebrow" style={{ textAlign: "left" }}>Annonceurs</p>
             <h2 style={{ fontSize: "clamp(23px, 3.2vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", lineHeight: 1.18, marginBottom: 14 }}>
-              Vos annonces au milieu de leur recherche.
+              Votre publicité au milieu de leur recherche.
             </h2>
             <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 500 }}>
               Changer de travail est une décision qui en entraîne beaucoup d&apos;autres :
               déménager, acheter une voiture, revoir son assurance, reprendre une
               formation. Les gens qui vivent ce moment sont ici, et ils sont attentifs à
-              tout ce qui peut les aider à le traverser.
+              tout ce qui peut les aider à le traverser. Votre publicité paraît là, ciblée par
+              canton et par secteur.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 26 }}>
               {[
