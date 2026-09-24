@@ -224,7 +224,11 @@ export function ExploreFilters({
 
       {/* Les filtres actifs, un par valeur : avec des listes, une seule
           pastille par catégorie ne dirait plus ce qui est coché. */}
-      {(activeCount > 0) && (
+      {/* Le swipe n'en montre aucune. Une carte y occupe l'écran entier, et
+          treize pastilles repoussaient la flamme et la croix hors de l'écran :
+          on ne pouvait plus rien faire de la carte qu'on regardait. Le compteur
+          sur le bouton Filtres dit déjà combien sont actifs. */}
+      {(activeCount > 0 && view !== "swipe") && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
           {secteursActifs.map(s => {
             const color = SECTOR_COLORS[s] ?? "var(--brand)";
