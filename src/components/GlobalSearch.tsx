@@ -56,19 +56,40 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
     };
   }, [fermer]);
 
+  /*
+   * Seule la dernière frappe décide de ce qui s'affiche.
+   *
+   * Les réponses n'arrivent pas dans l'ordre où elles sont parties : en
+   * écrivant vite plusieurs recherches de suite, une réponse vide partie plus
+   * tôt revenait après la bonne et effaçait les résultats. L'écran annonçait
+   * alors « Aucun résultat » pour un nom parfaitement juste, et rien ne le
+   * corrigeait tant qu'on ne changeait pas la saisie.
+   *
+   * Chaque recherche porte donc un numéro, et une réponse dont le numéro n'est
+   * plus le dernier est ignorée. La précédente est annulée au passage, pour ne
+   * pas laisser courir une requête dont on ne veut plus.
+   */
+  const dernierRef = useRef(0);
+  const controleurRef = useRef<AbortController | null>(null);
+
   const search = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    controleurRef.current?.abort();
+    const numero = ++dernierRef.current;
     if (!q.trim()) { setSuggestions([]); setLoading(false); return; }
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
+      const controleur = new AbortController();
+      controleurRef.current = controleur;
       try {
-        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(q.trim())}`);
+        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(q.trim())}`, { signal: controleur.signal });
         const data = await res.json();
+        if (numero !== dernierRef.current) return;
         setSuggestions(data.companies ?? []);
       } catch {
-        setSuggestions([]);
+        if (numero === dernierRef.current) setSuggestions([]);
       } finally {
-        setLoading(false);
+        if (numero === dernierRef.current) setLoading(false);
       }
     }, 150);
   }, []);
