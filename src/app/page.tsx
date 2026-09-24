@@ -712,7 +712,7 @@ export default async function Home() {
               Votre publicité au milieu de leur recherche.
             </h2>
             <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 500 }}>
-              Changer de travail est une décision qui en entraîne beaucoup d&apos;autres :
+              Changer de travail est une décision qui en entraîne beaucoup d&apos;autres :
               déménager, acheter une voiture, revoir son assurance, reprendre une
               formation. Les gens qui vivent ce moment sont ici, et ils sont attentifs à
               tout ce qui peut les aider à le traverser. Votre publicité paraît là, ciblée par
