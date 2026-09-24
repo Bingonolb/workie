@@ -507,7 +507,7 @@ export default async function Home() {
                 donne maintenant le cas concret qui justifie le titre : c'est
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
-            Des grands groupes aux équipes de 3 personnes. Au même endroit.
+            Vous avez l&apos;impression de toujours voir les mêmes offres ? Ici, ce ne sera jamais le cas.
           </p>
         </div>
       </section>
@@ -638,7 +638,7 @@ export default async function Home() {
       <section className="landing-section landing-ton" style={{ padding: "88px 24px" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
           <p className="landing-eyebrow">Notre promesse</p>
-          <h2 className="landing-h2">Simple, et juste.</h2>
+          <h2 className="landing-h2">Vous savez ce que vous lisez.</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 22 }}>
             {[
               // « Aucun texte libre » énonçait une interdiction, et la suite
@@ -646,8 +646,8 @@ export default async function Home() {
               // tournures négatives pour décrire un choix qui est positif. Le
               // fait est que les avis sont chiffrés, donc comparables. C'est ce
               // que la carte dit maintenant.
-              { Icone: Gauge, titre: "Un catalogue tenu à la main",
-                desc: "Chaque fiche est vérifiée, une par une." },
+              { Icone: Gauge, titre: "Des informations vérifiées",
+                desc: "Le nom, le secteur, le lieu et le lien officiel sont contrôlés avant publication." },
               { Icone: ShieldCheck, titre: "Rien entre vous et l'employeur",
                 desc: "Vous postulez chez lui, directement." },
               { Icone: Lock, titre: "Des faits",
@@ -675,7 +675,7 @@ export default async function Home() {
             26 cantons, 4 langues, 1000 employeurs.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 700, marginTop: 18, textWrap: "balance" }}>
-            Vous avez l&apos;impression de toujours voir les mêmes offres ? Ici, ce ne sera jamais le cas.
+            Des grands groupes aux équipes de 3 personnes. Au même endroit.
           </p>
         </div>
       </section>
