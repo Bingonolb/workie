@@ -712,9 +712,10 @@ export default async function Home() {
               Vos annonces au milieu de leur recherche.
             </h2>
             <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 500 }}>
-              Sur Workie, on compare des employeurs et on prépare la suite : une
-              formation, un déménagement, une langue à reprendre. Votre annonce paraît
-              là, ciblée par canton et par secteur.
+              Changer de travail est une décision qui en entraîne beaucoup d&apos;autres :
+              déménager, acheter une voiture, revoir son assurance, reprendre une
+              formation. Les gens qui vivent ce moment sont ici, et ils sont attentifs à
+              tout ce qui peut les aider à le traverser.
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 26 }}>
               {[
