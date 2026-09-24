@@ -211,9 +211,9 @@ export default async function AnnonceursPage() {
               </h1>
               <p style={{ fontSize: 16.5, color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 480, marginBottom: 26 }}>
                 Votre publicité paraît au milieu des entreprises, avec le même soin qu&apos;une fiche :
-                on la lit comme le reste du site. Et puisque ici chaque carte mène chez
-                celui qui la publie, arriver chez vous en cliquant sur la vôtre n&apos;a rien
-                d&apos;une interruption.
+                on la lit comme le reste du site. Ici, chaque carte emmène sur un site
+                extérieur, celui de l&apos;employeur : arriver sur le vôtre se fait dans le
+                même geste.
               </p>
               <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
                 Créer une campagne <ArrowRight size={17} aria-hidden="true" />
