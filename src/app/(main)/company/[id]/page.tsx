@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { HautDePage } from "@/components/HautDePage";
 import Link from "next/link";
 import Image from "next/image";
 import { getCachedCompany, getCachedJobOffers, getCachedSuggestions } from "@/lib/actions/companies";
@@ -185,6 +186,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   return (
     <FournisseurEtatFiche companyId={company.id}>
     <div className="page-root">
+      <HautDePage />
       <ViewTracker companyId={company.id} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/<\/script>/gi, "<\\/script>") }} />
 

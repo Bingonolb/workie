@@ -73,7 +73,22 @@ export function CoverImage({
   /** Vignette de liste : quelques dizaines de pixels, jamais une banniere. */
   vignette?: boolean;
 }) {
+  /*
+   * Une image deja en cache ne se refond pas.
+   *
+   * L'opacite partait de zero a chaque montage : au retour sur la grille,
+   * apres un geste de retour arriere, toutes les photos etaient deja dans le
+   * cache mais reapparaissaient une a une en fondu. Le fondu sert a couvrir un
+   * telechargement, pas un affichage instantane.
+   *
+   * La fonction de reference s'execute au moment du commit, avant que le
+   * navigateur ne peigne : une image deja complete est donc opaque des sa
+   * premiere apparition a l'ecran.
+   */
   const [charge, setCharge] = useState(false);
+  const surImage = (el: HTMLImageElement | null) => {
+    if (el && el.complete && el.naturalWidth > 0) setCharge(true);
+  };
   const fond = color || "var(--surface2)";
 
   if (!src) return <div className={className} style={{ position: "absolute", inset: 0, background: fond }} />;
@@ -115,6 +130,7 @@ export function CoverImage({
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "low"}
         decoding="async"
+        ref={surImage}
         onLoad={() => setCharge(true)}
         onError={() => setCharge(false)}
         style={{
