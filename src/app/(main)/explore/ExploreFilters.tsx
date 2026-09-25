@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { X, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
 import { SECTOR_COLORS } from "@/lib/types";
 
@@ -222,49 +222,12 @@ export function ExploreFilters({
 
       </div>
 
-      {/* Les filtres actifs, un par valeur : avec des listes, une seule
-          pastille par catégorie ne dirait plus ce qui est coché. */}
-      {/* Le swipe n'en montre aucune. Une carte y occupe l'écran entier, et
-          treize pastilles repoussaient la flamme et la croix hors de l'écran :
-          on ne pouvait plus rien faire de la carte qu'on regardait. Le compteur
-          sur le bouton Filtres dit déjà combien sont actifs. */}
-      {(activeCount > 0 && view !== "swipe") && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-          {secteursActifs.map(s => {
-            const color = SECTOR_COLORS[s] ?? "var(--brand)";
-            return (
-              <span key={s} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: `color-mix(in srgb, ${color} 14%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 35%, transparent)`, color }}>
-                {s}
-                <button type="button" aria-label={`Retirer ${s}`} onClick={() => basculer("sector", secteursActifs, s)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
-              </span>
-            );
-          })}
-          {cantonsActifs.map(code => {
-            const c = cantons.find(x => x.code === code);
-            return (
-              <span key={code} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.3)", color: "#f97316" }}>
-                {c?.name ?? code}
-                <button type="button" aria-label={`Retirer ${c?.name ?? code}`} onClick={() => basculer("canton", cantonsActifs, code)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
-              </span>
-            );
-          })}
-          {languesActives.map(code => {
-            const l = LANGUES.find(x => x.code === code);
-            return (
-              <span key={code} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 50, background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.3)", color: "#3b82f6" }}>
-                {l?.nom ?? code}
-                <button type="button" aria-label={`Retirer ${l?.nom ?? code}`} onClick={() => basculer("langue", languesActives, code)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
-              </span>
-            );
-          })}
-          {sort !== "recent" && view !== "swipe" && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, padding: "3px 10px", borderRadius: 7, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)" }}>
-              ↑ {sort === "score" ? "Score" : "A→Z"}
-              <button type="button" aria-label="Retirer le tri" onClick={() => push("sort", undefined)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex", opacity: 0.7 }}><X size={11} aria-hidden="true" /></button>
-            </span>
-          )}
-        </div>
-      )}
+      {/* Aucune pastille de filtre, ni ici ni dans le swipe.
+          Treize secteurs coches faisaient quatre rangees de pastilles : dans le
+          swipe elles poussaient la flamme hors de l ecran, et dans la grille
+          elles repoussaient les entreprises sous la ligne de flottaison. Ce
+          qu on cherche a voir, ce sont les fiches. Le compteur du bouton
+          Filtres dit combien sont actifs, le panneau dit lesquels. */}
     </div>
   );
 }
