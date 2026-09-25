@@ -48,11 +48,40 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
     setTimeout(() => inputRef.current?.focus(), 60);
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") fermer(); };
     document.addEventListener("keydown", onKey);
-    // Simple scroll lock — no body position manipulation (causes iOS jump)
+
+    /*
+     * La page dessous est immobilisée, vraiment.
+     *
+     * `overflow: hidden` sur la racine ne suffit pas sur iPhone : le doigt
+     * continue d'entraîner la page, la fenêtre de recherche reste fixe
+     * par-dessus, et le geste semble ne rien faire. Avec le clavier ouvert,
+     * l'écran se met en plus à rebondir. Vu de l'utilisateur, la recherche est
+     * bloquée.
+     *
+     * La seule méthode qui tienne sur iPhone est de sortir la page du flux, à
+     * sa position exacte, puis de l'y remettre à la fermeture. Le décalage que
+     * cette méthode provoquait vient d'un retour à zéro ; on retient donc la
+     * position et on la rétablit.
+     */
+    const y = window.scrollY;
+    const style = document.body.style;
+    const memoire = { position: style.position, top: style.top, left: style.left, right: style.right, width: style.width };
+    style.position = "fixed";
+    style.top = `-${y}px`;
+    style.left = "0";
+    style.right = "0";
+    style.width = "100%";
     document.documentElement.style.overflow = "hidden";
+
     return () => {
       document.removeEventListener("keydown", onKey);
       document.documentElement.style.overflow = "";
+      style.position = memoire.position;
+      style.top = memoire.top;
+      style.left = memoire.left;
+      style.right = memoire.right;
+      style.width = memoire.width;
+      window.scrollTo(0, y);
     };
   }, [fermer]);
 
@@ -174,7 +203,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
         }
         .gs-row:active { background: var(--surface2); }
         @media (hover: hover) { .gs-row:hover { background: var(--surface2); } }
-        .gs-scroll { overflow-y: auto; flex: 1; overscroll-behavior: contain; }
+        .gs-scroll { overflow-y: auto; flex: 1; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
         .gs-scroll::-webkit-scrollbar { display: none; }
       `}</style>
 
