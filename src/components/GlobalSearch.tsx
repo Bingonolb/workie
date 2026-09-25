@@ -116,7 +116,13 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const suivre = () => setClavier(Math.max(0, Math.round(window.innerHeight - vv.height)));
+    // La hauteur ne se repose que lorsqu'elle change vraiment : le clavier
+    // envoie une rafale d'événements en montant et en descendant, et chacun
+    // refaisait la liste pour la même valeur.
+    const suivre = () => {
+      const hauteur = Math.max(0, Math.round(window.innerHeight - vv.height));
+      setClavier(actuel => (Math.abs(actuel - hauteur) > 2 ? hauteur : actuel));
+    };
     suivre();
     vv.addEventListener("resize", suivre);
     return () => { vv.removeEventListener("resize", suivre); };
@@ -230,7 +236,16 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           page se decroche derriere lui sur iPhone. */}
       <div
         className="gs-scroll"
-        onTouchMove={() => inputRef.current?.blur()}
+        onTouchStart={() => {
+          // Une seule fois, au tout début du geste.
+          //
+          // C'était posé sur `onTouchMove` : l'événement part des dizaines de
+          // fois par seconde, et chacune appelait `blur()`. Sur iPhone, chaque
+          // appel redemande le retrait du clavier, la fenêtre visible change de
+          // hauteur, l'état suit, et la liste se refait pendant qu'on la fait
+          // défiler. Le défilement se bloquait net.
+          if (document.activeElement === inputRef.current) inputRef.current?.blur();
+        }}
         style={{ paddingBottom: clavier }}
       >
         {loading && (
