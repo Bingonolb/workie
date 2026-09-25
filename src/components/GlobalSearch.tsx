@@ -265,14 +265,20 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           page se decroche derriere lui sur iPhone. */}
       <div
         className="gs-scroll"
-        onTouchStart={() => {
-          // Une seule fois, au tout début du geste.
-          //
-          // C'était posé sur `onTouchMove` : l'événement part des dizaines de
-          // fois par seconde, et chacune appelait `blur()`. Sur iPhone, chaque
-          // appel redemande le retrait du clavier, la fenêtre visible change de
-          // hauteur, l'état suit, et la liste se refait pendant qu'on la fait
-          // défiler. Le défilement se bloquait net.
+        onTouchEnd={() => {
+          /*
+           * Le clavier se retire quand le doigt se lève, jamais avant.
+           *
+           * Retirer le clavier pendant le geste change la hauteur visible, donc
+           * la mise en page de la liste, au moment précis où elle défile :
+           * iPhone abandonne alors le défilement en cours, et la liste se fige
+           * sous le doigt. C'est ce qu'on voyait en cherchant « banque » puis
+           * en faisant défiler les résultats.
+           *
+           * Posé sur la fin du geste, le retrait ne coupe plus rien : on fait
+           * défiler, on lève le doigt, le clavier descend et la liste occupe
+           * tout l'écran.
+           */
           if (document.activeElement === inputRef.current) inputRef.current?.blur();
         }}
         style={{ paddingBottom: clavier }}

@@ -54,7 +54,10 @@ export async function GET(request: Request) {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("rechercher_entreprises", { terme: q, nb: 8 });
+  // Vingt, et non huit. « banque » ramene largement plus de huit maisons :
+  // s'arreter la, c'est cacher celle qu'on cherche derriere un plafond
+  // invisible, sans le dire.
+  const { data, error } = await supabase.rpc("rechercher_entreprises", { terme: q, nb: 20 });
 
   if (error) {
     // Une recherche en échec ne doit pas casser la page : on renvoie une liste
