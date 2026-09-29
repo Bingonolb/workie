@@ -436,7 +436,7 @@ export const CANTON_NAMES: Record<string, string> = {
  * fiches : il est court et tout le monde en Suisse le lit.
  *
  * Deux valeurs hors des vingt-six : « CH » pour une enseigne implantée sur
- * tout le pays (convention LANDI), et « FL » pour le Liechtenstein, où une
+ * plusieurs sites (convention LANDI), et « FL » pour le Liechtenstein, où une
  * fiche est déjà enregistrée (Oerlikon Balzers, à Balzers).
  */
 export const CANTONS_SAISIE: { code: string; nom: string }[] = [
