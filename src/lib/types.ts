@@ -435,7 +435,7 @@ export const CANTON_NAMES: Record<string, string> = {
  * Le code à deux lettres reste ce qui est enregistré et affiché sur les
  * fiches : il est court et tout le monde en Suisse le lit.
  *
- * Deux valeurs hors des vingt-six : « CH » pour une enseigne présente dans
+ * Deux valeurs hors des vingt-six : « CH » pour une enseigne implantée sur
  * tout le pays (convention LANDI), et « FL » pour le Liechtenstein, où une
  * fiche est déjà enregistrée (Oerlikon Balzers, à Balzers).
  */
@@ -467,7 +467,14 @@ export const CANTONS_SAISIE: { code: string; nom: string }[] = [
   { code: "ZG", nom: "Zoug" },
   { code: "ZH", nom: "Zurich" },
 ];
-export const CANTON_TOUTE_LA_SUISSE = { code: "CH", nom: "Toute la Suisse, multi-sites" };
+/*
+ * Le code « CH » dit plusieurs implantations, pas une couverture nationale.
+ *
+ * Il s'appelait « Toute la Suisse, multi-sites » : une entreprise a trois
+ * adresses en Suisse alemanique se voyait alors decrite comme presente
+ * partout, ce qu'aucune fiche ne verifie.
+ */
+export const CANTON_TOUTE_LA_SUISSE = { code: "CH", nom: "Multi-sites" };
 export const CANTON_LIECHTENSTEIN = { code: "FL", nom: "Liechtenstein" };
 
 /** Vrai pour un code accepté à l'enregistrement d'une fiche. */

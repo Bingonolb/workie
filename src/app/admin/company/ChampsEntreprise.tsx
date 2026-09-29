@@ -29,7 +29,7 @@ const lbl: React.CSSProperties = {
   color: "var(--text-muted)", marginBottom: 5, letterSpacing: "0.05em", textTransform: "uppercase",
 };
 
-/** Convention pour une enseigne présente dans toute la Suisse. */
+/** Convention pour une enseigne implantee sur plusieurs sites. */
 export const VILLE_MULTI_SITES = "Multi-sites";
 export const CANTON_MULTI_SITES = "CH";
 
@@ -48,7 +48,7 @@ export function ChampsEntreprise({
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverUrlValue, setCoverUrlValue] = useState(company?.cover_url ?? "");
 
-  // Multi-sites : une enseigne présente dans toute la Suisse n'a pas de ville
+  // Multi-sites : une enseigne implantee sur plusieurs sites n'a pas de ville
   // ni de canton propres. La convention est celle de LANDI, la première fiche
   // traitée ainsi, et elle est écrite ici une fois pour toutes plutôt que
   // ressaisie à la main : « Multi-site » ou « multisites » deviendraient des
@@ -185,7 +185,7 @@ export function ChampsEntreprise({
             onChange={e => setVille(e.target.value)}
             readOnly={multiSites}
             required
-            title={multiSites ? "Une enseigne présente dans toute la Suisse n'a pas de ville propre" : undefined}
+            title={multiSites ? "Une enseigne implantée sur plusieurs sites n'a pas de ville propre" : undefined}
             style={{ ...inp, ...(multiSites ? { opacity: 0.65, cursor: "not-allowed" } : null) }}
           />
         </div>
