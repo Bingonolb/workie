@@ -22,6 +22,19 @@ export default async function AdminEditCompanyPage({ params }: { params: Promise
   if (!data) notFound();
   const company = data as Company;
 
+  /*
+   * Les deux fiches voisines, dans l'ordre alphabetique.
+   *
+   * Reprendre le catalogue fiche par fiche obligeait a repasser par le panel
+   * entre chaque, et la liste y repart du debut : on perdait sa place a chaque
+   * aller-retour. L'ordre est celui du nom, le seul qui se devine sans avoir
+   * la liste sous les yeux.
+   */
+  const [{ data: avant }, { data: apres }] = await Promise.all([
+    supabase.from("companies").select("id, name").lt("name", company.name).order("name", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("companies").select("id, name").gt("name", company.name).order("name", { ascending: true }).limit(1).maybeSingle(),
+  ]);
+
   const dbSectors = sectorRows?.map(r => r.sector as string).filter(Boolean) ?? [];
   const allSectors = [...new Set([...Object.keys(SECTOR_COLORS), ...dbSectors])].sort();
 
@@ -47,7 +60,7 @@ export default async function AdminEditCompanyPage({ params }: { params: Promise
         </div>
 
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: 28 }}>
-          <AdminCompanyForm company={company} sectors={allSectors} />
+          <AdminCompanyForm company={company} sectors={allSectors} precedente={avant ?? null} suivante={apres ?? null} />
         </div>
 
       </main>
