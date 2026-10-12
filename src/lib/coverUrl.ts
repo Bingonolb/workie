@@ -45,12 +45,34 @@ export function estSupabase(url: string): boolean {
 
 function supabaseALaLargeur(url: string, w: number): string {
   const base = url.split("?")[0].replace(SUPABASE_BRUT, SUPABASE_RENDU);
-  return `${base}?width=${w}&quality=72&resize=contain`;
+  // Qualite 80 et non 72.
+  //
+  // A 72, le reencodage ajoutait son propre flou a une photo deja nette :
+  // les bannieres paraissaient mediocres alors que les originaux sont en
+  // 2560 pixels. Mesure sur une banniere du catalogue : 52 Ko a 1280/72,
+  // 65 Ko a 1280/80, pour une image qui redevient franche.
+  return `${base}?width=${w}&quality=80&resize=contain`;
 }
 
 /** Vrai quand la source sait servir la largeur qu'on lui demande. */
 export function estRedimensionnable(url: string): boolean {
   return estPexels(url) || estSupabase(url);
+}
+
+/**
+ * Le jeu de densites d'un fond CSS : la meme image en simple et en double
+ * densite, laissant le navigateur choisir.
+ *
+ * Un fond CSS n'a pas de srcset. La banniere d'une fiche etait donc servie en
+ * 1280 pixels a tout le monde, y compris sur un ecran de 1900 pixels a densite
+ * double, ou elle etait agrandie trois fois. C'est ce qu'on voyait : une photo
+ * nette a l'origine, molle a l'arrivee.
+ */
+export function fondDensite(url: string, largeur: number): string {
+  if (!estRedimensionnable(url)) return `url(${url})`;
+  const un = largeurCouverture(url, largeur);
+  const deux = largeurCouverture(url, Math.min(largeur * 2, 2560));
+  return `image-set(url(${un}) 1x, url(${deux}) 2x)`;
 }
 
 /** Même image à la largeur voulue, quelle que soit sa provenance connue. */

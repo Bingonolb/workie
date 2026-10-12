@@ -21,7 +21,7 @@ import { RATING_CATEGORIES } from "@/lib/reviewCategories";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { logoAffichable } from "@/lib/logo";
 import { LigneSuggestion } from "@/components/company/LigneSuggestion";
-import { largeurCouverture } from "@/lib/coverUrl";
+import { largeurCouverture, fondDensite } from "@/lib/coverUrl";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -206,8 +206,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           // La couleur dominante de la photo est peinte sous l'image : le hero
           // est coloré dès le premier rendu au lieu d'afficher un vide.
           backgroundColor: company.cover_color ?? sectorColor,
+          // La photo en simple et en double densité : un écran de bureau à
+          // densité double affichait jusqu'ici une image de 1280 pixels
+          // agrandie trois fois.
           background: company.cover_url
-            ? `url(${largeurCouverture(company.cover_url, 1280)}) center / cover no-repeat, ${company.cover_color ?? sectorColor}`
+            ? `${fondDensite(company.cover_url, 1280)} center / cover no-repeat, ${company.cover_color ?? sectorColor}`
             : `linear-gradient(135deg, ${sectorColor}, #f97316)`,
         }} />
         {/* Top gradient — darkens so navbar stays readable */}
