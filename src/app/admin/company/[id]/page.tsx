@@ -23,17 +23,22 @@ export default async function AdminEditCompanyPage({ params }: { params: Promise
   const company = data as Company;
 
   /*
-   * Les deux fiches voisines, dans l'ordre alphabetique.
+   * Les deux fiches voisines, dans l'ordre du panel : secteur, puis nom.
    *
    * Reprendre le catalogue fiche par fiche obligeait a repasser par le panel
    * entre chaque, et la liste y repart du debut : on perdait sa place a chaque
-   * aller-retour. L'ordre est celui du nom, le seul qui se devine sans avoir
-   * la liste sous les yeux.
+   * aller-retour. L'ordre doit etre celui de la liste qu'on descend, sans quoi
+   * la fiche suivante arrive d'un autre secteur.
+   *
+   * Le calcul est fait en base : une comparaison sur deux colonnes exprimee en
+   * filtres PostgREST demanderait de citer des valeurs qui contiennent des
+   * virgules et des esperluettes, et une citation ratee renverrait la mauvaise
+   * voisine en silence.
    */
-  const [{ data: avant }, { data: apres }] = await Promise.all([
-    supabase.from("companies").select("id, name").lt("name", company.name).order("name", { ascending: false }).limit(1).maybeSingle(),
-    supabase.from("companies").select("id, name").gt("name", company.name).order("name", { ascending: true }).limit(1).maybeSingle(),
-  ]);
+  const { data: voisines } = await supabase.rpc("voisines_fiche", { p_id: id });
+  const v = voisines?.[0];
+  const avant = v?.prev_id ? { id: v.prev_id, name: v.prev_name ?? "" } : null;
+  const apres = v?.next_id ? { id: v.next_id, name: v.next_name ?? "" } : null;
 
   const dbSectors = sectorRows?.map(r => r.sector as string).filter(Boolean) ?? [];
   const allSectors = [...new Set([...Object.keys(SECTOR_COLORS), ...dbSectors])].sort();
