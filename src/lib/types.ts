@@ -309,7 +309,6 @@ export const SECTOR_COLORS: Record<string, string> = {
   "Industrie": "#64748b",
   "Automobile": "#6366f1",
   "Horlogerie": "#f97316",
-  "Commerce": "#a855f7",
   "Alimentation": "#84cc16",
   "Agriculture": "#65a30d",
   "Éducation & Recherche": "#06b6d4",
@@ -370,7 +369,9 @@ export const SECTORS = [
   "Beauté",
   "Biens de consommation",
   "Chimie",
-  "Commerce",
+  // « Commerce » a ete retire : il faisait doublon avec « Commerce de détail »,
+  // et les deux listes voisines obligeaient a choisir entre deux mots pour la
+  // meme chose. Les fiches ont toutes ete reversees dans « Commerce de détail ».
   "Commerce de détail",
   "Conseil",
   "Défense & Sécurité",
