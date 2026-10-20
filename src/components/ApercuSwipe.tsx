@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { X, Info, Flame, ArrowRight, ExternalLink } from "lucide-react";
-import { largeurCouverture } from "@/lib/coverUrl";
+import { largeurCouverture, styleCadrageFond } from "@/lib/coverUrl";
 
 /**
  * La pile de cartes de la page d'accueil, qui se manipule vraiment.
@@ -192,12 +192,13 @@ export function ApercuSwipe({ entreprises, fin = FIN_DEFAUT }: { entreprises: Ca
             userSelect: "none",
           }}
         >
-          <div style={{ position: "relative", height: 260 }}>
+          <div style={{ position: "relative", height: 260, overflow: "hidden" }}>
             <div style={{
               position: "absolute", inset: 0,
               backgroundColor: "var(--surface3)",
               backgroundImage: image ? `url(${image})` : undefined,
               backgroundSize: "cover", backgroundPosition: "center",
+              ...(entreprise ? styleCadrageFond(entreprise.cover_url) : {}),
             }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 52%, rgba(0,0,0,0.82) 100%)" }} />
             <span style={{

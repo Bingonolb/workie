@@ -7,6 +7,30 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
 import { notifyNewCompany } from "@/lib/actions/notifications";
 import { cantonValide, LANGUES_SAISIE } from "@/lib/types";
+import { avecCadrage, lireCadrage, CADRAGE_NEUTRE, ZOOM_MAX, type Cadrage } from "@/lib/coverUrl";
+
+/**
+ * Le cadrage choisi dans l'éditeur, lu depuis le formulaire et borné.
+ *
+ * Il est rattaché à l'adresse finale de la bannière, après un éventuel
+ * téléversement : sans cela, une image tout juste envoyée perdrait le cadrage
+ * qu'on venait de régler sur son aperçu.
+ */
+function cadrageDuFormulaire(formData: FormData): Cadrage {
+  const brut = String(formData.get("cover_cadrage") || "");
+  const [x, y, zoom] = brut.split(",").map(Number);
+  if (![x, y, zoom].every(Number.isFinite)) return CADRAGE_NEUTRE;
+  return {
+    x: Math.min(100, Math.max(0, x)),
+    y: Math.min(100, Math.max(0, y)),
+    zoom: Math.min(ZOOM_MAX, Math.max(1, zoom)),
+  };
+}
+
+function banniereCadree(url: string | null, formData: FormData): string | null {
+  if (!url) return null;
+  return avecCadrage(lireCadrage(url).src, cadrageDuFormulaire(formData)) || null;
+}
 
 async function requireAdmin() {
   const [user, supabase] = await Promise.all([getUser(), createClient()]);
@@ -24,6 +48,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     let cover_url: string | null = String(formData.get("cover_url") || "") || null;
     const depot = await televerserCouverture(admin, id, formData.get("cover_file"));
     if (depot.url) cover_url = depot.url;
+    cover_url = banniereCadree(cover_url, formData);
     const avertissement = depot.avertissement ?? null;
 
     const fields = {
@@ -133,7 +158,7 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       // que d'affirmer « 11-50 » sans source.
       employee_range: String(formData.get("employee_range") || "") || null,
       description: String(formData.get("description") || "").slice(0, 3000) || null,
-      cover_url: String(formData.get("cover_url") || "") || null,
+      cover_url: banniereCadree(String(formData.get("cover_url") || "") || null, formData),
       website_url: String(formData.get("website_url") || "") || null,
       // Aucune dérivation automatique de logo. Le logo d'une entreprise est une
       // marque déposée : l'afficher suppose une autorisation qu'on n'a pas.
@@ -173,7 +198,7 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       if (depot.url) {
         const { error: majErr } = await supabase
           .from("companies")
-          .update({ cover_url: depot.url })
+          .update({ cover_url: banniereCadree(depot.url, formData) })
           .eq("id", created.id);
         if (majErr) avertissement = "La fiche est créée. L'image a été envoyée mais n'a pas pu y être rattachée.";
       }

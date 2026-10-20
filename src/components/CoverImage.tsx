@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { estRedimensionnable, largeurCouverture } from "@/lib/coverUrl";
+import { estRedimensionnable, largeurCouverture, styleCadrage } from "@/lib/coverUrl";
 
 /**
  * Bannière d'entreprise, servie directement par le CDN Pexels.
@@ -136,6 +136,9 @@ export function CoverImage({
         style={{
           position: "absolute", inset: 0,
           width: "100%", height: "100%", objectFit: "cover",
+          // Le point choisi dans l'administration reste au centre, quel que
+          // soit le format de la carte.
+          ...styleCadrage(src),
           opacity: charge ? 1 : 0,
           transition: "opacity 0.25s ease-out",
         }}

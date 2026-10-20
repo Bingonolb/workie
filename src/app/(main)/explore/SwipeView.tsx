@@ -12,7 +12,7 @@ import { fetchSwipePage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { prechargerCouvertures } from "@/components/CoverImage";
-import { largeurCouverture } from "@/lib/coverUrl";
+import { largeurCouverture, styleCadrage } from "@/lib/coverUrl";
 import { GuestModal } from "@/components/GuestModal";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
@@ -728,6 +728,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           style={{
             position: "absolute", inset: 0, width: "100%", height: "100%",
             objectFit: "cover",
+            ...styleCadrage(coverSrc),
             opacity: imgLoaded ? 1 : 0,
             transition: "opacity 0.25s ease-out",
           }}

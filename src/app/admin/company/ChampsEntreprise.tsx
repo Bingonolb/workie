@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { EMPLOYEE_RANGES, CANTONS_SAISIE, CANTON_TOUTE_LA_SUISSE, CANTON_LIECHTENSTEIN, LANGUES_SAISIE } from "@/lib/types";
 import type { Company } from "@/lib/types";
 import { ImageIcon } from "lucide-react";
+import { lireCadrage, CADRAGE_NEUTRE, type Cadrage } from "@/lib/coverUrl";
+import { RecadrageBanniere } from "./RecadrageBanniere";
 
 /**
  * Les champs d'une fiche entreprise, écrits une seule fois.
@@ -46,7 +48,10 @@ export function ChampsEntreprise({
   setInfoImage: (v: string | null) => void;
 }) {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [coverUrlValue, setCoverUrlValue] = useState(company?.cover_url ?? "");
+  // L'adresse enregistrée porte le cadrage après un dièse : le champ montre
+  // l'adresse seule, et le cadrage vit dans l'éditeur, à côté.
+  const [coverUrlValue, setCoverUrlValue] = useState(() => lireCadrage(company?.cover_url ?? "").src);
+  const [cadrage, setCadrage] = useState<Cadrage>(() => lireCadrage(company?.cover_url ?? "").cadrage);
 
   // Multi-sites : une enseigne implantee sur plusieurs sites n'a pas de ville
   // ni de canton propres. La convention est celle de LANDI, la première fiche
@@ -119,6 +124,7 @@ export function ChampsEntreprise({
     const url = URL.createObjectURL(r.fichier);
     blobRef.current = url;
     setCoverPreview(url);
+    setCadrage(CADRAGE_NEUTRE);
   };
 
   const displayCover = coverPreview ?? (coverUrlValue || null);
@@ -236,7 +242,7 @@ export function ChampsEntreprise({
           <input
             name="cover_url"
             value={coverUrlValue}
-            onChange={e => { setCoverUrlValue(e.target.value); revokeBlobPreview(); setCoverPreview(null); }}
+            onChange={e => { setCoverUrlValue(e.target.value); revokeBlobPreview(); setCoverPreview(null); setCadrage(CADRAGE_NEUTRE); }}
             placeholder="https://images.unsplash.com/..."
             style={inp}
           />
@@ -254,7 +260,7 @@ export function ChampsEntreprise({
               <input ref={fileRef} name="cover_file" type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
             </label>
             {(coverPreview || coverUrlValue) && (
-              <button type="button" onClick={() => { revokeBlobPreview(); setCoverPreview(null); setCoverUrlValue(""); if (fileRef.current) fileRef.current.value = ""; }} style={{
+              <button type="button" onClick={() => { revokeBlobPreview(); setCoverPreview(null); setCoverUrlValue(""); setCadrage(CADRAGE_NEUTRE); if (fileRef.current) fileRef.current.value = ""; }} style={{
                 fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600,
               }}>
                 ✕ Supprimer la bannière
@@ -262,15 +268,15 @@ export function ChampsEntreprise({
             )}
           </div>
 
+          <input type="hidden" name="cover_cadrage" value={`${Math.round(cadrage.x)},${Math.round(cadrage.y)},${cadrage.zoom.toFixed(2)}`} />
           {displayCover && (
             <div style={{ position: "relative" }}>
+              <RecadrageBanniere src={displayCover} cadrage={cadrage} onChange={setCadrage} />
               {coverPreview && (
-                <div style={{ position: "absolute", top: 8, left: 8, background: "rgba(139,92,246,0.9)", borderRadius: 6, padding: "3px 10px", fontSize: 11, fontWeight: 700, color: "#fff" }}>
-                  Aperçu, non enregistré
-                </div>
+                <p style={{ fontSize: 12, color: "var(--brand)", fontWeight: 600, marginTop: 8 }}>
+                  Nouvelle image : aperçu, pas encore enregistrée.
+                </p>
               )}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={displayCover} alt="" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 10, border: `2px solid ${coverPreview ? "#8b5cf6" : "var(--border)"}` }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
             </div>
           )}
         </div>

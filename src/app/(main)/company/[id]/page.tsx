@@ -21,7 +21,7 @@ import { RATING_CATEGORIES } from "@/lib/reviewCategories";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { logoAffichable } from "@/lib/logo";
 import { LigneSuggestion } from "@/components/company/LigneSuggestion";
-import { largeurCouverture, fondDensite } from "@/lib/coverUrl";
+import { largeurCouverture, fondDensite, lireCadrage, styleCadrageFond } from "@/lib/coverUrl";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const apercuDessine = `${BASE_URL}/api/og?title=${encodeURIComponent(company.name)}`
     + `&sub=${encodeURIComponent([company.city, company.sector].filter(Boolean).join(" · "))}`;
   const ogImage = company.cover_url
-    ? [{ url: company.cover_url, width: 1200, height: 630, alt: company.name }]
+    ? [{ url: lireCadrage(company.cover_url).src, width: 1200, height: 630, alt: company.name }]
     : [{ url: apercuDessine, width: 1200, height: 630, alt: company.name }];
   return {
     title: `${company.name} · Emploi et entreprise`,
@@ -212,6 +212,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           background: company.cover_url
             ? `${fondDensite(company.cover_url, 1280)} center / cover no-repeat, ${company.cover_color ?? sectorColor}`
             : `linear-gradient(135deg, ${sectorColor}, #f97316)`,
+          // Le point choisi dans l'administration, et l'agrandissement autour.
+          ...styleCadrageFond(company.cover_url),
         }} />
         {/* Top gradient — darkens so navbar stays readable */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(13,13,19,0.65) 0%, rgba(13,13,19,0.0) 40%, rgba(13,13,19,0.0) 50%, rgba(13,13,19,0.92) 100%)" }} />

@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 /**
  * Manipulation des URL de bannière. Module volontairement neutre — ni
  * « use client » ni « use server ».
@@ -75,9 +77,104 @@ export function fondDensite(url: string, largeur: number): string {
   return `image-set(url(${un}) 1x, url(${deux}) 2x)`;
 }
 
-/** Même image à la largeur voulue, quelle que soit sa provenance connue. */
+/**
+ * Même image à la largeur voulue, quelle que soit sa provenance connue.
+ *
+ * Le cadrage voyage dans l'adresse (voir plus bas) : il est retiré ici, et
+ * quand la bannière est zoomée, la largeur demandée augmente d'autant. Une
+ * photo agrandie deux fois à l'écran doit être téléchargée deux fois plus
+ * large, sans quoi le zoom la rendrait floue.
+ */
 export function largeurCouverture(url: string, w: number): string {
-  if (estPexels(url)) return aLaLargeur(url, w);
-  if (estSupabase(url)) return supabaseALaLargeur(url, w);
-  return url;
+  const { src, cadrage } = lireCadrage(url);
+  const largeur = Math.min(Math.round(w * cadrage.zoom), 2560);
+  if (estPexels(src)) return aLaLargeur(src, largeur);
+  if (estSupabase(src)) return supabaseALaLargeur(src, largeur);
+  return src;
+}
+
+/* ── Cadrage de la bannière ─────────────────────────────────────────────────
+ *
+ * Une bannière est affichée dans des formats très différents : un bandeau
+ * très allongé sur la fiche, une carte presque carrée dans la grille, une
+ * carte en hauteur dans le swipe. Recadrée au centre, elle coupait souvent ce
+ * qui comptait.
+ *
+ * Le cadrage ne modifie jamais le fichier : il dit seulement quel point de la
+ * photo garder au centre, et de combien l'agrandir. L'original reste intact,
+ * on peut changer d'avis autant qu'on veut, et rien n'est réencodé.
+ *
+ * Il est écrit à la fin de l'adresse, après un dièse :
+ *   https://…/photo.webp#cadrage=40,25,1.3
+ * Le navigateur n'envoie jamais ce qui suit le dièse au serveur d'images, donc
+ * l'adresse reste valable telle quelle. Et le cadrage suit la bannière partout
+ * où elle circule, sans toucher aux droits de lecture de la table, qui sont
+ * accordés colonne par colonne.
+ */
+export type Cadrage = {
+  /** Point gardé au centre, de 0 (bord gauche) à 100 (bord droit). */
+  x: number;
+  /** Point gardé au centre, de 0 (haut) à 100 (bas). */
+  y: number;
+  /** 1 = la photo remplit le cadre, 2 = agrandie deux fois. */
+  zoom: number;
+};
+
+export const CADRAGE_NEUTRE: Cadrage = { x: 50, y: 50, zoom: 1 };
+export const ZOOM_MAX = 2.5;
+
+const borner = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
+export function lireCadrage(url: string): { src: string; cadrage: Cadrage } {
+  const [src, fragment = ""] = url.split("#");
+  const m = /(?:^|&)cadrage=([\d.]+),([\d.]+),([\d.]+)/.exec(fragment);
+  if (!m) return { src, cadrage: CADRAGE_NEUTRE };
+  return {
+    src,
+    cadrage: {
+      x: borner(Number(m[1]), 0, 100),
+      y: borner(Number(m[2]), 0, 100),
+      zoom: borner(Number(m[3]), 1, ZOOM_MAX),
+    },
+  };
+}
+
+export function estNeutre(c: Cadrage): boolean {
+  return Math.round(c.x) === 50 && Math.round(c.y) === 50 && Math.abs(c.zoom - 1) < 0.01;
+}
+
+/** L'adresse avec son cadrage, ou sans s'il n'apporte rien. */
+export function avecCadrage(url: string, c: Cadrage): string {
+  const { src } = lireCadrage(url);
+  if (!src || estNeutre(c)) return src;
+  return `${src}#cadrage=${Math.round(c.x)},${Math.round(c.y)},${c.zoom.toFixed(2)}`;
+}
+
+/**
+ * Le style à poser sur une image en `object-fit: cover`.
+ *
+ * `object-position` choisit ce qui reste visible, et l'agrandissement se fait
+ * autour du même point : zoomer ne déplace donc pas ce qu'on a choisi.
+ */
+export function styleCadrage(url: string | null | undefined): CSSProperties {
+  if (!url) return {};
+  const { cadrage: c } = lireCadrage(url);
+  if (estNeutre(c)) return {};
+  const origine = `${c.x}% ${c.y}%`;
+  return {
+    objectPosition: origine,
+    ...(c.zoom > 1 ? { transform: `scale(${c.zoom})`, transformOrigin: origine } : {}),
+  };
+}
+
+/** La même chose pour une image posée en fond CSS. */
+export function styleCadrageFond(url: string | null | undefined): CSSProperties {
+  if (!url) return {};
+  const { cadrage: c } = lireCadrage(url);
+  if (estNeutre(c)) return {};
+  const origine = `${c.x}% ${c.y}%`;
+  return {
+    backgroundPosition: origine,
+    ...(c.zoom > 1 ? { transform: `scale(${c.zoom})`, transformOrigin: origine } : {}),
+  };
 }
