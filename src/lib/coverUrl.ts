@@ -94,11 +94,18 @@ export function sourcesBandeau(url: string, largeur = 1280): { un: string; deux:
   };
 }
 
-/** La source du bandeau que l'écran courant va réellement demander. */
+/**
+ * La source du bandeau que l'écran courant va réellement demander.
+ *
+ * Le navigateur prend dans `image-set` la plus petite densité qui couvre la
+ * sienne : dès que l'écran dépasse 1, c'est la version double. Le seuil était
+ * à 1,5, et un portable réglé à 125 % téléchargeait les deux versions, la
+ * simple au préchargement, la double à l'affichage.
+ */
 export function sourceBandeauPourEcran(url: string): string {
   const { un, deux } = sourcesBandeau(url);
   const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-  return dpr >= 1.5 ? deux : un;
+  return dpr > 1 ? deux : un;
 }
 
 /**
