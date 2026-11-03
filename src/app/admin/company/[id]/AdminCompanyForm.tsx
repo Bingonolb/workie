@@ -80,10 +80,10 @@ export function AdminCompanyForm({ company, sectors, precedente, suivante }: {
 
   const handleDelete = () => {
     startTransition(async () => {
+      // En cas de succès, le serveur redirige lui-même vers la fiche suivante
+      // du panel : on ne revient ici qu'en cas d'erreur, pour l'afficher.
       const res = await adminDeleteCompany(company.id);
-      if (res.error) { setError(res.error); return; }
-      // Hard navigation — évite la tentative de rerender sur une entité supprimée
-      window.location.href = "/admin";
+      if (res?.error) setError(res.error);
     });
   };
 

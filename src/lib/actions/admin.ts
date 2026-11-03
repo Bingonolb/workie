@@ -2,6 +2,7 @@
 
 import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
@@ -221,10 +222,31 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
   }
 }
 
+/*
+ * Supprimer une fiche, puis ouvrir la suivante.
+ *
+ * Après la suppression, le navigateur rechargeait la page de la fiche qu'on
+ * venait d'effacer : elle n'existait plus, d'où une page 404, puis un retour
+ * au début du panel. On perdait sa place dans la liste qu'on reprenait une
+ * fiche après l'autre.
+ *
+ * Les voisines sont donc lues avant d'effacer, dans l'ordre du panel, et la
+ * redirection se fait depuis le serveur : le navigateur passe directement à
+ * la fiche suivante, sans jamais redemander celle qui n'existe plus. À la fin
+ * de la liste, on recule sur la précédente ; s'il n'y en a plus du tout, on
+ * revient au panel.
+ */
 export async function adminDeleteCompany(id: string): Promise<{ error?: string }> {
+  let destination = "/admin";
   try {
     await requireAdmin();
     const admin = createAdminClient();
+
+    const { data: voisines } = await admin.rpc("voisines_fiche", { p_id: id });
+    const v = voisines?.[0];
+    if (v?.next_id) destination = `/admin/company/${v.next_id}`;
+    else if (v?.prev_id) destination = `/admin/company/${v.prev_id}`;
+
     const { error } = await admin.from("companies").delete().eq("id", id);
     if (error) return { error: error.message };
     revalidatePath("/explore");
@@ -232,10 +254,12 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
     revalidateTag("landing-counts", {});
-    return {};
   } catch (e) {
     return { error: (e as Error).message };
   }
+  // En dehors du try : redirect() fonctionne en levant une exception, que le
+  // catch avalerait.
+  redirect(destination);
 }
 
 export async function getClaims() {
