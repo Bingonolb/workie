@@ -335,6 +335,7 @@ export const SECTOR_COLORS: Record<string, string> = {
   "Télécoms": "#2563eb",
   "Biens de consommation": "#d946ef",
   "Logistique & Supply Chain": "#0284c7",
+  "Matières premières": "#b45309",
   "Aéronautique & Spatial": "#4f46e5",
   "Défense & Sécurité": "#475569",
   // Legacy aliases
@@ -386,6 +387,10 @@ export const SECTORS = [
   "Industrie",
   "Ingénierie",
   "Logistique & Supply Chain",
+  // Mines et négoce. La Suisse est le premier centre mondial du négoce de
+  // matières premières : ces maisons n'avaient pas de place à elles, et
+  // Glencore se retrouvait en Finance.
+  "Matières premières",
   "Médias & Communication",
   "Mode",
   "ONG",

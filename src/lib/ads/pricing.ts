@@ -79,6 +79,7 @@ export const SECTOR_WEIGHTS: Record<string, number> = {
   // et une portee faux.
   "Biens de consommation":     5,
   "Logistique & Supply Chain": 6,
+  "Matières premières":      4,
   "Aéronautique & Spatial":    1,
   "Défense & Sécurité":        2,
   // Les bureaux d'ingénieurs et d'architectes emploient largement en

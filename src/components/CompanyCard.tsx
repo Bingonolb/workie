@@ -33,6 +33,7 @@ const SECTOR_GRADIENTS: Record<string, string> = {
   "Sports & Fashion":      "linear-gradient(135deg, #db2777 0%, #500724 100%)",
   "Transport":             "linear-gradient(135deg, #0d9488 0%, #134e4a 100%)",
   "Énergie":               "linear-gradient(135deg, #ca8a04 0%, #451a03 100%)",
+  "Matières premières":    "linear-gradient(135deg, #b45309 0%, #292524 100%)",
 };
 
 function getCoverGradient(sector: string, sectorColor: string): string {
