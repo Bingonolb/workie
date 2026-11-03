@@ -255,7 +255,9 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
                 )}
               </p>
               {company.subsector && (
-                <p style={{ fontSize: 12.5, fontWeight: 500, color: "rgba(255,255,255,0.62)", marginTop: 3 }}>{company.subsector}</p>
+                // 62 % de blanc descendait sous le seuil de lisibilité sur les
+                // photos claires : 82 % et une ombre discrète suffisent.
+                <p style={{ fontSize: 12.5, fontWeight: 500, color: "rgba(255,255,255,0.82)", marginTop: 3, textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}>{company.subsector}</p>
               )}
             </div>
           </div>

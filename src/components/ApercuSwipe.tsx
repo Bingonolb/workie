@@ -204,7 +204,9 @@ export function ApercuSwipe({ entreprises, fin = FIN_DEFAUT }: { entreprises: Ca
             <span style={{
               position: "absolute", top: 14, left: 14,
               fontSize: 11, fontWeight: 700, color: "#fff",
-              background: annonce ? "var(--brand)" : "rgba(59,130,246,0.9)", borderRadius: 50, padding: "4px 11px",
+              // Bleu plus profond : le blanc sur l'ancien bleu clair restait
+              // sous le seuil de lisibilité pour un texte de cette taille.
+              background: annonce ? "var(--brand)" : "rgba(37,99,235,0.92)", borderRadius: 50, padding: "4px 11px",
             }}>{annonce ? "Sponsorisé" : entreprise!.sector}</span>
             <div style={{ position: "absolute", left: 20, right: 20, bottom: 16 }}>
               <p style={{ fontSize: 23, fontWeight: 800, color: "#fff", letterSpacing: "-0.025em", lineHeight: 1.15 }}>{nom}</p>

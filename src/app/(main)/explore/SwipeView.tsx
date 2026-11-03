@@ -751,7 +751,11 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           </div>
         )}
 
-        <div style={{ position: "absolute", top: 16, left: 16, background: `${sectorColor}33`, border: `1px solid ${sectorColor}55`, borderRadius: 50, padding: "5px 14px", fontSize: 13.5, fontWeight: 700, color: sectorColor, backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
+        {/* Même pastille que sur la fiche : la couleur du secteur, éclaircie pour
+            le texte, en verre teinté sombre pour le fond. Posée en haut de la
+            photo, là où le voile est le plus léger, l'ancienne disparaissait
+            sur les images claires. */}
+        <div style={{ position: "absolute", top: 16, left: 16, background: `color-mix(in srgb, ${sectorColor} 38%, rgba(10,10,14,0.55))`, border: `1px solid color-mix(in srgb, ${sectorColor} 55%, transparent)`, borderRadius: 50, padding: "5px 14px", fontSize: 13.5, fontWeight: 700, color: `color-mix(in srgb, ${sectorColor} 30%, #fff)`, backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
           {company.sector}
         </div>
         {isFav && (
@@ -768,7 +772,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
               </svg>
             )}
           </p>
-          {company.subsector && <p style={{ fontSize: 13.5, color: "rgba(255,255,255,0.78)", marginTop: 3 }}>{company.subsector}</p>}
+          {company.subsector && <p style={{ fontSize: 13.5, color: "rgba(255,255,255,0.85)", marginTop: 3, textShadow: "0 1px 3px rgba(0,0,0,0.45)" }}>{company.subsector}</p>}
         </div>
       </div>
 

@@ -262,10 +262,23 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <span style={{ padding: "3px 10px", borderRadius: 50, fontSize: 13.5, fontWeight: 600, color: sectorColor, background: `${sectorColor}22`, border: `1px solid ${sectorColor}44` }}>
+                {/* La pastille garde la couleur du secteur, mais en version
+                    éclaircie pour le texte et en verre teinté pour le fond.
+                    Le texte était écrit dans la couleur pure du secteur sur un
+                    fond presque noir : 25 secteurs sur 39 passaient sous le
+                    seuil de lisibilité, jusqu'à 2,1 pour Défense & Sécurité. */}
+                <span style={{
+                  padding: "3px 11px", borderRadius: 50, fontSize: 13.5, fontWeight: 650,
+                  color: `color-mix(in srgb, ${sectorColor} 30%, #fff)`,
+                  background: `color-mix(in srgb, ${sectorColor} 38%, rgba(10,10,14,0.55))`,
+                  border: `1px solid color-mix(in srgb, ${sectorColor} 55%, transparent)`,
+                  backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+                }}>
                   {company.sector}
                 </span>
-                {company.subsector && <span style={{ fontSize: 13.5, color: "rgba(255,255,255,0.5)" }}>{company.subsector}</span>}
+                {/* Blanc à 50 % tombait à 2,6 sur une photo claire : à 85 %,
+                    avec une ombre légère, il se lit sur n'importe quelle image. */}
+                {company.subsector && <span style={{ fontSize: 13.5, fontWeight: 500, color: "rgba(255,255,255,0.85)", textShadow: "0 1px 3px rgba(0,0,0,0.45)" }}>{company.subsector}</span>}
               </div>
             </div>
             </div>
