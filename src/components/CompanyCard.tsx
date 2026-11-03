@@ -59,7 +59,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   loading?: "eager" | "lazy";
 }) {
   const router = useRouter();
-  const refProche = useFicheProche(`/company/${company.id}`);
+  const refProche = useFicheProche(`/company/${company.id}`, company.cover_url);
   // Suit la propriété : sur /explore, page statique, le favori n'est connu
   // qu'après l'arrivée du contexte. Figé, l'état laissait la flamme éteinte
   // sur une entreprise pourtant enregistrée.

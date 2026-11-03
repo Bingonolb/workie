@@ -6,7 +6,8 @@ import { Shield } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
 import { SearchButton } from "./SearchButton";
-import { precharger, lireCache, ecrireCache, CLE_PROFIL, CLE_FAVORIS, CLE_CONTEXTE } from "@/lib/cacheSession";
+import { obtenir, lireCache, ecrireCache, CLE_PROFIL, CLE_FAVORIS, CLE_CONTEXTE } from "@/lib/cacheSession";
+import { collecterCouvertures, prechargerVignettes, prechargerCartes } from "@/components/CoverImage";
 import { Logo } from "@/components/Logo";
 
 type UserCtx = {
@@ -43,9 +44,17 @@ export function NavbarClient() {
         //
         // Deux requêtes de plus par session, en arrière-plan, contre une
         // arrivée instantanée à chaque visite : le compte est vite fait.
+        //
+        // Leurs images aussi, une fois les données arrivées et la page au
+        // calme : sans cela, le profil et les favoris s'affichaient avec leurs
+        // textes, puis leurs photos une à une.
         if (data.isLoggedIn) {
-          precharger(CLE_PROFIL, "/api/user/profile");
-          precharger(CLE_FAVORIS, "/api/user/favorites");
+          obtenir(CLE_PROFIL, "/api/user/profile")
+            .then(({ donnees }) => prechargerVignettes(collecterCouvertures(donnees)))
+            .catch(() => { /* sans conséquence */ });
+          obtenir(CLE_FAVORIS, "/api/user/favorites")
+            .then(({ donnees }) => prechargerCartes(collecterCouvertures(donnees)))
+            .catch(() => { /* sans conséquence */ });
         }
       })
       .catch(() => setCtx({ isLoggedIn: false, isAdmin: false, penaltyCredits: 0, unreadCount: 0 }));

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { estRedimensionnable, sourceBandeauPourEcran } from "@/lib/coverUrl";
 
 /**
  * Précharge une fiche quand elle approche de l'écran.
@@ -61,7 +62,7 @@ function connexionMenagee(): boolean {
  * Renvoie une ref à poser sur le lien. Dès qu'il approche de l'écran, sa
  * destination est préchargée, une fois.
  */
-export function useFicheProche(href: string) {
+export function useFicheProche(href: string, banniere?: string | null) {
   const router = useRouter();
   const ref = useRef<HTMLAnchorElement | null>(null);
 
@@ -83,6 +84,17 @@ export function useFicheProche(href: string) {
           // la place après un court délai, le temps que la requête parte et
           // laisse le réseau à la suivante.
           try { router.prefetch(href); } catch { /* sans conséquence */ }
+          // La bannière de la fiche aussi, à la densité de cet écran.
+          //
+          // La page était prête au clic, mais pas sa photo : le bandeau
+          // arrivait une demi-seconde après le reste, et c'est ce qu'on voit
+          // en premier. Demandée ici, elle sort du cache au moment du clic.
+          // Priorité basse, pour ne jamais passer devant ce qui est à l'écran.
+          if (banniere && estRedimensionnable(banniere)) {
+            const img = new Image();
+            img.fetchPriority = "low";
+            img.src = sourceBandeauPourEcran(banniere);
+          }
           setTimeout(terminee, 250);
         });
         suivant();
@@ -94,7 +106,7 @@ export function useFicheProche(href: string) {
 
     observateur.observe(el);
     return () => observateur.disconnect();
-  }, [href, router]);
+  }, [href, banniere, router]);
 
   return ref;
 }

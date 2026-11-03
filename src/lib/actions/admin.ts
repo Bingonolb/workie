@@ -3,12 +3,13 @@
 import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
 import { notifyNewCompany } from "@/lib/actions/notifications";
 import { cantonValide, LANGUES_SAISIE } from "@/lib/types";
-import { avecCadrage, lireCadrage, CADRAGE_NEUTRE, ZOOM_MAX, type Cadrage } from "@/lib/coverUrl";
+import { avecCadrage, lireCadrage, CADRAGE_NEUTRE, ZOOM_MAX, variantesARechauffer, type Cadrage } from "@/lib/coverUrl";
 
 /**
  * Le cadrage choisi dans l'éditeur, lu depuis le formulaire et borné.
@@ -129,14 +130,29 @@ async function televerserCouverture(
 
   const ext = EXT_MAP[coverFile.type] ?? "jpg";
   const path = `covers/${companyId}/${randomUUID()}.${ext}`;
-  const { error } = await admin.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true });
+  // Cache d'un an : le nom du fichier est un UUID, une image ne change donc
+  // jamais à adresse égale. Avec le réglage par défaut d'une heure, le
+  // navigateur redemandait chaque bannière à chaque retour sur le site.
+  const { error } = await admin.storage.from("covers").upload(path, coverFile, { contentType: coverFile.type, upsert: true, cacheControl: "31536000" });
   if (error) {
     // L'échec était jusqu'ici parfaitement silencieux : l'ancienne image
     // restait en place sans que personne ne sache pourquoi.
     return { avertissement: "Le texte est enregistré. L'envoi de l'image a échoué." };
   }
   const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
+  // Toutes ses tailles préparées d'avance, une fois la réponse partie : le
+  // premier visiteur ne paie pas la demi-seconde de redimensionnement.
+  after(() => rechaufferBanniere(pub.publicUrl));
   return { url: pub.publicUrl };
+}
+
+async function rechaufferBanniere(url: string): Promise<void> {
+  const variantes = variantesARechauffer(url);
+  for (let i = 0; i < variantes.length; i += 3) {
+    await Promise.all(variantes.slice(i, i + 3).map(v =>
+      fetch(v, { headers: { Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8" } }).then(r => r.arrayBuffer()).catch(() => null),
+    ));
+  }
 }
 
 export async function adminAddCompany(formData: FormData): Promise<{ error?: string; avertissement?: string }> {

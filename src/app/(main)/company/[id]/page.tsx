@@ -21,7 +21,7 @@ import { RATING_CATEGORIES } from "@/lib/reviewCategories";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { logoAffichable } from "@/lib/logo";
 import { LigneSuggestion } from "@/components/company/LigneSuggestion";
-import { largeurCouverture, fondDensite, lireCadrage, styleCadrageFond } from "@/lib/coverUrl";
+import { fondDensite, lireCadrage, styleCadrageFond, sourcesBandeau } from "@/lib/coverUrl";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -195,7 +195,16 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           1600 px : la précharger telle quelle faisait télécharger 198 Ko là où
           la même photo en pèse 81 à la taille du hero. */}
       {company.cover_url && (
-        <link rel="preload" as="image" href={largeurCouverture(company.cover_url, 1280)} fetchPriority="high" />
+        // Le préchargement annonce les deux densités, comme le bandeau. Il
+        // n'annonçait que la version simple : un écran Retina la téléchargeait
+        // pour rien, puis téléchargeait la double en affichant le bandeau.
+        <link
+          rel="preload"
+          as="image"
+          href={sourcesBandeau(company.cover_url).un}
+          imageSrcSet={`${sourcesBandeau(company.cover_url).un} 1x, ${sourcesBandeau(company.cover_url).deux} 2x`}
+          fetchPriority="high"
+        />
       )}
 
       {/* Hero cover */}

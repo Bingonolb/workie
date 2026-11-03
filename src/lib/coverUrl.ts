@@ -45,7 +45,7 @@ export function estSupabase(url: string): boolean {
   return url.includes(SUPABASE_BRUT) || url.includes(SUPABASE_RENDU);
 }
 
-function supabaseALaLargeur(url: string, w: number): string {
+function supabaseALaLargeur(url: string, w: number, qualite = 80): string {
   const base = url.split("?")[0].replace(SUPABASE_BRUT, SUPABASE_RENDU);
   // Qualite 80 et non 72.
   //
@@ -53,7 +53,7 @@ function supabaseALaLargeur(url: string, w: number): string {
   // les bannieres paraissaient mediocres alors que les originaux sont en
   // 2560 pixels. Mesure sur une banniere du catalogue : 52 Ko a 1280/72,
   // 65 Ko a 1280/80, pour une image qui redevient franche.
-  return `${base}?width=${w}&quality=80&resize=contain`;
+  return `${base}?width=${w}&quality=${qualite}&resize=contain`;
 }
 
 /** Vrai quand la source sait servir la largeur qu'on lui demande. */
@@ -72,9 +72,33 @@ export function estRedimensionnable(url: string): boolean {
  */
 export function fondDensite(url: string, largeur: number): string {
   if (!estRedimensionnable(url)) return `url(${url})`;
-  const un = largeurCouverture(url, largeur);
-  const deux = largeurCouverture(url, Math.min(largeur * 2, 2560));
+  const { un, deux } = sourcesBandeau(url, largeur);
   return `image-set(url(${un}) 1x, url(${deux}) 2x)`;
+}
+
+/*
+ * Les deux sources du bandeau de fiche, une par densité d'écran.
+ *
+ * La version double densité est encodée en qualité 65 au lieu de 80. Sur un
+ * écran Retina, chaque pixel de l'image occupe un quart de pixel visible : la
+ * compression ne s'y voit pas, alors que le poids baisse d'un bon tiers.
+ *
+ * Exposées à part pour que le préchargement demande exactement le même
+ * fichier que le bandeau : une adresse qui diffère d'un seul caractère est un
+ * second téléchargement.
+ */
+export function sourcesBandeau(url: string, largeur = 1280): { un: string; deux: string } {
+  return {
+    un: largeurCouverture(url, largeur),
+    deux: largeurCouverture(url, Math.min(largeur * 2, 2560), 65),
+  };
+}
+
+/** La source du bandeau que l'écran courant va réellement demander. */
+export function sourceBandeauPourEcran(url: string): string {
+  const { un, deux } = sourcesBandeau(url);
+  const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+  return dpr >= 1.5 ? deux : un;
 }
 
 /**
@@ -85,12 +109,28 @@ export function fondDensite(url: string, largeur: number): string {
  * photo agrandie deux fois à l'écran doit être téléchargée deux fois plus
  * large, sans quoi le zoom la rendrait floue.
  */
-export function largeurCouverture(url: string, w: number): string {
+export function largeurCouverture(url: string, w: number, qualite = 80): string {
   const { src, cadrage } = lireCadrage(url);
   const largeur = Math.min(Math.round(w * cadrage.zoom), 2560);
   if (estPexels(src)) return aLaLargeur(src, largeur);
-  if (estSupabase(src)) return supabaseALaLargeur(src, largeur);
+  if (estSupabase(src)) return supabaseALaLargeur(src, largeur, qualite);
   return src;
+}
+
+/**
+ * Toutes les variantes qu'un écran du site peut demander pour une bannière.
+ *
+ * Supabase redimensionne à la première demande, ce qui coûte environ une
+ * demi-seconde, puis garde le résultat. Les demander d'avance, juste après
+ * l'envoi d'une image, évite que le premier visiteur paie cette attente.
+ */
+export function variantesARechauffer(url: string): string[] {
+  if (!estSupabase(lireCadrage(url).src)) return [];
+  const { un, deux } = sourcesBandeau(url);
+  return [
+    ...[128, 192, 256, 320, 480, 640, 940, 1280].map(w => largeurCouverture(url, w)),
+    un, deux,
+  ].filter((v, i, t) => t.indexOf(v) === i);
 }
 
 /* ── Cadrage de la bannière ─────────────────────────────────────────────────

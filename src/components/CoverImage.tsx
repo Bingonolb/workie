@@ -158,6 +158,52 @@ export function CoverImage({
  * `decode()`, le navigateur a le fichier mais doit encore le décoder au moment
  * de l'afficher, ce qui laisse un à-coup visible sur les grandes photos.
  */
+/**
+ * La largeur que le navigateur choisira dans le srcset pour un affichage donné.
+ *
+ * Le navigateur prend la plus petite candidate qui couvre la taille affichée
+ * multipliée par la densité de l'écran. Précharger une autre largeur que
+ * celle-là, c'est télécharger un fichier qui ne servira pas.
+ */
+export function largeurPourAffichage(pixelsCss: number): number {
+  const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+  const besoin = pixelsCss * dpr;
+  return LARGEURS.find(w => w >= besoin) ?? LARGEURS[LARGEURS.length - 1];
+}
+
+/** Toutes les bannières d'une réponse d'API, où qu'elles soient rangées. */
+export function collecterCouvertures(valeur: unknown, trouvees: string[] = []): string[] {
+  if (Array.isArray(valeur)) valeur.forEach(v => collecterCouvertures(v, trouvees));
+  else if (valeur && typeof valeur === "object") {
+    for (const [cle, v] of Object.entries(valeur)) {
+      if (cle === "cover_url" && typeof v === "string") trouvees.push(v);
+      else collecterCouvertures(v, trouvees);
+    }
+  }
+  return trouvees;
+}
+
+/** Quand le navigateur n'a plus rien d'urgent à faire. */
+function auCalme(tache: () => void) {
+  const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void };
+  if (w.requestIdleCallback) w.requestIdleCallback(tache, { timeout: 3000 });
+  else setTimeout(tache, 1500);
+}
+
+/** Les vignettes de 56 pixels des listes : profil, suggestions. */
+export function prechargerVignettes(urls: string[]) {
+  if (typeof window === "undefined" || urls.length === 0) return;
+  auCalme(() => prechargerCouvertures(urls, largeurPourAffichage(56)));
+}
+
+/** Les cartes de la grille, à la taille qu'annonce leur attribut `sizes`. */
+export function prechargerCartes(urls: string[]) {
+  if (typeof window === "undefined" || urls.length === 0) return;
+  const vw = window.innerWidth;
+  const css = vw <= 640 ? vw : vw <= 1024 ? vw / 2 : 400;
+  auCalme(() => prechargerCouvertures(urls.slice(0, 12), largeurPourAffichage(css)));
+}
+
 export function prechargerCouvertures(urls: (string | null | undefined)[], largeur = 940) {
   if (typeof window === "undefined") return;
   for (const url of urls) {

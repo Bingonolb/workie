@@ -13,7 +13,7 @@ import { useFicheProche } from "@/lib/useFicheProche";
  * l'entoure reste un composant serveur, rendu une fois pour tout le monde.
  */
 export function LigneSuggestion({ c }: { c: { id: string; name: string; city: string; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; subsector: string | null } }) {
-  const ref = useFicheProche(`/company/${c.id}`);
+  const ref = useFicheProche(`/company/${c.id}`, c.cover_url);
   return (
     <Link
       ref={ref}
