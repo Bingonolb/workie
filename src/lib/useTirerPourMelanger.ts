@@ -39,7 +39,8 @@ export function useTirerPourMelanger(actif: boolean, surDeclenchement: () => voi
     let horizontal = false;
 
     const debut = (e: TouchEvent) => {
-      if (window.scrollY > 0 || e.touches.length !== 1) { depart = null; return; }
+      // Safari place parfois la page à une fraction de pixel du haut.
+      if (window.scrollY > 2 || e.touches.length !== 1) { depart = null; return; }
       depart = e.touches[0].clientY;
       departX = e.touches[0].clientX;
       horizontal = false;
@@ -49,8 +50,18 @@ export function useTirerPourMelanger(actif: boolean, surDeclenchement: () => voi
       if (depart === null || horizontal) return;
       const dy = e.touches[0].clientY - depart;
       const dx = e.touches[0].clientX - departX;
+      // Un vrai doigt bouge de 1 ou 2 px dans tous les sens au départ : juger
+      // la direction là-dessus classait au hasard le geste comme horizontal,
+      // et plus rien ne répondait. On attend un mouvement net.
+      // Pendant cette attente, un début de tirage vers le bas est déjà retenu :
+      // laissé au navigateur, il lancerait son propre défilement, et les
+      // mouvements suivants ne pourraient plus être interceptés.
+      if (courant === 0 && Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+        if (dy > 0 && e.cancelable) e.preventDefault();
+        return;
+      }
       if (courant === 0 && Math.abs(dx) > Math.abs(dy)) { horizontal = true; return; }
-      if (dy <= 0 || window.scrollY > 0) { if (courant) { courant = 0; setDistance(0); } return; }
+      if (dy <= 0 || window.scrollY > 2) { if (courant) { courant = 0; setDistance(0); } return; }
       // Résistance : le doigt parcourt plus que l'indicateur, comme un élastique.
       courant = Math.min(COURSE_MAX, dy * 0.5);
       setDistance(courant);
