@@ -13,6 +13,7 @@ import { SECTORS } from "@/lib/types";
 import type { Company } from "@/lib/types";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 import { lireCache, ecrireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
+import { useTirerPourMelanger, SEUIL_TIRAGE } from "@/lib/useTirerPourMelanger";
 
 // Guests see the first 12 companies + 6 blurred
 /**
@@ -167,7 +168,7 @@ export function ExploreClient({
   // répéterait ou sauterait des entreprises ; et changer à la visite suivante,
   // pour qu'on découvre autre chose. sessionStorage donne exactement ça : une
   // valeur par onglet, effacée à la fermeture.
-  const [graine] = useState<number>(() => {
+  const [graine, setGraine] = useState<number>(() => {
     if (typeof window === "undefined") return 0;
     try {
       const brut = localStorage.getItem("workie_graine");
@@ -189,6 +190,10 @@ export function ExploreClient({
     } catch { /* sans conséquence : l'ordre sera simplement retiré au prochain chargement */ }
     return nouvelle;
   });
+  // applyFilters est mémorisé une fois pour toutes : il lit la graine ici,
+  // sinon il garderait celle d'avant un nouveau mélange.
+  const graineRef = useRef(graine);
+  useEffect(() => { graineRef.current = graine; }, [graine]);
 
   // État de la grille conservé d'un aller-retour à l'autre : revenir sur
   // l'explorateur ne doit pas tout recharger ni replacer l'utilisateur en haut
@@ -444,7 +449,7 @@ export function ExploreClient({
     startTransition(async () => {
       try {
         const result = await fetchGridPage(
-          { sector: newSector || undefined, canton: newCanton || undefined, langue: newLangue || undefined, sort: newSort || undefined, graine },
+          { sector: newSector || undefined, canton: newCanton || undefined, langue: newLangue || undefined, sort: newSort || undefined, graine: graineRef.current },
           0,
         );
         setCompanies(result.companies);
@@ -455,6 +460,37 @@ export function ExploreClient({
       }
     });
   }, []);
+
+  // Nouveau mélange demandé en tirant vers le bas, en haut de la grille.
+  // Les filtres restent ; seul l'ordre change, et il est mémorisé comme
+  // l'ordre automatique : revenir d'une fiche retrouve ce nouvel ordre.
+  const [melangeEnCours, setMelangeEnCours] = useState(false);
+  const [newFrom, setNewFrom] = useState<number>(-1);
+  const remelanger = useCallback(async () => {
+    if (melangeEnCours) return;
+    let nouvelle = graineRef.current;
+    while (nouvelle === graineRef.current) nouvelle = Math.floor(Math.random() * 100);
+    setMelangeEnCours(true);
+    try {
+      const result = await fetchGridPage(
+        { sector: sector || undefined, canton: canton || undefined, langue: langue || undefined, sort: sort || undefined, graine: nouvelle },
+        0,
+      );
+      try { localStorage.setItem("workie_graine", JSON.stringify({ valeur: nouvelle, vue: Date.now() })); } catch { /* sans mémoire */ }
+      graineRef.current = nouvelle;
+      setGraine(nouvelle);
+      setCompanies(result.companies);
+      setTotal(result.total);
+      setPage(0);
+      setNewFrom(0);
+      setMelangeApplique(true);
+      window.scrollTo(0, 0);
+    } catch {
+      /* réseau indisponible : l'ordre actuel reste */
+    } finally {
+      setMelangeEnCours(false);
+    }
+  }, [melangeEnCours, sector, canton, langue, sort]);
 
   const handleFilter = useCallback((key: string, value: string | undefined) => {
     const newSector = key === "sector" ? (value ?? "") : sector;
@@ -468,7 +504,6 @@ export function ExploreClient({
     applyFilters("", "", "", "recent");
   }, [applyFilters]);
 
-  const [newFrom, setNewFrom] = useState<number>(-1);
 
   /**
    * Photos du lot suivant, téléchargées et décodées à l'avance.
@@ -506,7 +541,7 @@ export function ExploreClient({
       if (surIdle) (window as unknown as { cancelIdleCallback: (i: number) => void }).cancelIdleCallback(id);
       else clearTimeout(id);
     };
-  }, [page, sector, canton, sort, total]);
+  }, [page, sector, canton, sort, total, graine]);
 
   const loadMore = async () => {
     if (loadingMore) return;
@@ -659,6 +694,8 @@ export function ExploreClient({
     view: view as "grid" | "swipe",
   };
 
+  const tirage = useTirerPourMelanger(view === "grid" && pretAAfficher, remelanger);
+
   if (view === "swipe") {
     return (
       <>
@@ -709,6 +746,34 @@ export function ExploreClient({
           « qui regarde ? » : la grille descendait alors de soixante-quinze
           pixels sous les yeux du lecteur. Mesuré à 0,079 de décalage cumulé
           sur /explore, la seule secousse de la page. */}
+
+      {/* Indicateur du geste « tirer pour mélanger ». Hors du flux : il ne
+          pousse rien, la grille ne bouge pas sous le doigt. */}
+      {(tirage > 0 || melangeEnCours) && (
+        <div aria-live="polite" style={{
+          position: "fixed", left: "50%", top: 0, zIndex: 10002, pointerEvents: "none",
+          transform: `translate(-50%, ${melangeEnCours ? 64 : Math.max(0, tirage - 20)}px)`,
+          transition: tirage > 0 ? "none" : "transform 0.2s ease",
+          width: 40, height: 40, borderRadius: "50%",
+          background: "var(--surface)", border: "1px solid var(--border)",
+          boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          opacity: melangeEnCours ? 1 : Math.min(1, tirage / SEUIL_TIRAGE),
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+            style={{
+              transform: `rotate(${melangeEnCours ? 0 : (tirage / SEUIL_TIRAGE) * 270}deg)`,
+              animation: melangeEnCours ? "tourner-melange 0.8s linear infinite" : undefined,
+              color: tirage >= SEUIL_TIRAGE ? "var(--brand)" : "var(--text)",
+            }}>
+            <path d="M16 3h5v5" /><path d="M4 20 21 3" /><path d="M21 16v5h-5" /><path d="m15 15 6 6" /><path d="M4 4l5 5" />
+          </svg>
+          <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
+            {melangeEnCours ? "Nouveau mélange en cours" : ""}
+          </span>
+          <style>{`@keyframes tourner-melange { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
 
       {/* Pending overlay — fades the grid while new results load */}
       <div style={{ opacity: isPending ? 0.5 : 1, transition: "opacity 0.15s" }}>
