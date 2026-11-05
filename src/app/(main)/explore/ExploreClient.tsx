@@ -749,34 +749,38 @@ export function ExploreClient({
 
       {/* Indicateur du geste « tirer pour mélanger ». Hors du flux : il ne
           pousse rien, la grille ne bouge pas sous le doigt. */}
-      {(tirage > 0 || melangeEnCours) && (
+      {/* La grille elle-même descend sous le doigt et révèle une roue de
+          chargement classique au-dessus. Pendant le chargement elle reste
+          entrouverte, puis remonte. */}
+      <div style={{ position: "relative" }}>
         <div aria-live="polite" style={{
-          position: "fixed", left: "50%", top: 0, zIndex: 10002, pointerEvents: "none",
-          transform: `translate(-50%, ${melangeEnCours ? 64 : Math.max(0, tirage - 20)}px)`,
-          transition: tirage > 0 ? "none" : "transform 0.2s ease",
-          width: 40, height: 40, borderRadius: "50%",
-          background: "var(--surface)", border: "1px solid var(--border)",
-          boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+          position: "absolute", top: 0, left: 0, right: 0,
+          height: melangeEnCours ? 56 : tirage,
           display: "flex", alignItems: "center", justifyContent: "center",
-          opacity: melangeEnCours ? 1 : Math.min(1, tirage / SEUIL_TIRAGE),
+          overflow: "hidden", pointerEvents: "none",
+          transition: tirage > 0 ? "none" : "height 0.3s cubic-bezier(.2,.8,.2,1)",
         }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-            style={{
-              transform: `rotate(${melangeEnCours ? 0 : (tirage / SEUIL_TIRAGE) * 270}deg)`,
-              animation: melangeEnCours ? "tourner-melange 0.8s linear infinite" : undefined,
-              color: tirage >= SEUIL_TIRAGE ? "var(--brand)" : "var(--text)",
-            }}>
-            <path d="M16 3h5v5" /><path d="M4 20 21 3" /><path d="M21 16v5h-5" /><path d="m15 15 6 6" /><path d="M4 4l5 5" />
-          </svg>
-          <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
-            {melangeEnCours ? "Nouveau mélange en cours" : ""}
-          </span>
-          <style>{`@keyframes tourner-melange { to { transform: rotate(360deg); } }`}</style>
+          {(tirage > 0 || melangeEnCours) && (
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-label={melangeEnCours ? "Chargement" : undefined}
+              style={{
+                opacity: melangeEnCours ? 1 : Math.min(1, tirage / SEUIL_TIRAGE),
+                transform: `rotate(${melangeEnCours ? 0 : tirage * 4}deg)`,
+                animation: melangeEnCours ? "roue-tirage 0.7s linear infinite" : undefined,
+              }}>
+              {Array.from({ length: 8 }, (_, i) => (
+                <line key={i} x1="12" y1="2.5" x2="12" y2="6.5" stroke="var(--text-muted)" strokeWidth="2.2" strokeLinecap="round"
+                  transform={`rotate(${i * 45} 12 12)`}
+                  opacity={melangeEnCours ? 0.25 + (i / 8) * 0.75 : (i < Math.round((tirage / SEUIL_TIRAGE) * 8) ? 0.9 : 0)} />
+              ))}
+              <style>{`@keyframes roue-tirage { to { transform: rotate(360deg); } }`}</style>
+            </svg>
+          )}
         </div>
-      )}
-
-      {/* Pending overlay — fades the grid while new results load */}
-      <div style={{ opacity: isPending ? 0.5 : 1, transition: "opacity 0.15s" }}>
+      <div style={{
+        opacity: isPending ? 0.5 : 1,
+        transform: `translateY(${melangeEnCours ? 56 : tirage}px)`,
+        transition: tirage > 0 ? "opacity 0.15s" : "opacity 0.15s, transform 0.3s cubic-bezier(.2,.8,.2,1)",
+      }}>
         {visibleCompanies.length === 0 && !isPending ? (
           <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
             <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Aucune entreprise trouvée</p>
@@ -896,6 +900,7 @@ export function ExploreClient({
             )}
           </>
         )}
+      </div>
       </div>
     </>
   );

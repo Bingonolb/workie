@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 /** Distance à tirer, en pixels à l'écran, pour déclencher. */
-export const SEUIL_TIRAGE = 72;
-/** Course maximale de l'indicateur : au-delà, le doigt tire dans le vide. */
-const COURSE_MAX = 110;
+export const SEUIL_TIRAGE = 64;
+/** Course maximale de la page : au-delà, le doigt tire dans le vide. */
+const COURSE_MAX = 140;
 
 /**
  * Geste « tirer vers le bas » en haut de la page, sur écran tactile.
@@ -63,7 +63,8 @@ export function useTirerPourMelanger(actif: boolean, surDeclenchement: () => voi
       if (courant === 0 && Math.abs(dx) > Math.abs(dy)) { horizontal = true; return; }
       if (dy <= 0 || window.scrollY > 2) { if (courant) { courant = 0; setDistance(0); } return; }
       // Résistance : le doigt parcourt plus que l'indicateur, comme un élastique.
-      courant = Math.min(COURSE_MAX, dy * 0.5);
+      // Freinage progressif : facile au début, de plus en plus dur ensuite.
+      courant = COURSE_MAX * (1 - Math.exp(-dy / (COURSE_MAX * 1.6)));
       setDistance(courant);
       if (e.cancelable) e.preventDefault();
     };
