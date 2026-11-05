@@ -52,7 +52,7 @@ describe("le tarif journalier", () => {
   });
 
   it("garde une part fixe : viser un canton minuscule n'est pas gratuit", () => {
-    expect(tarifJournalier(["AI"], ["Horlogerie"])).toBeGreaterThan(0);
+    expect(tarifJournalier(["AI"], ["Horlogerie & Joaillerie"])).toBeGreaterThan(0);
   });
 
   it("ne dépasse jamais le tarif national", () => {

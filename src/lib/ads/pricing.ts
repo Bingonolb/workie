@@ -51,7 +51,7 @@ export const SECTOR_WEIGHTS: Record<string, number> = {
   "Éducation & Recherche":   5,
   "Transport":               5,
   "Alimentation":            5,
-  "Horlogerie":              4,
+  "Horlogerie & Joaillerie":              4,
   "Automobile":              4,
   "Énergie":                 4,
   "Sport":                   4,

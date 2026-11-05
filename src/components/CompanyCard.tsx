@@ -23,7 +23,7 @@ const SECTOR_GRADIENTS: Record<string, string> = {
   "Conseil":               "linear-gradient(135deg, #d97706 0%, #7c2d12 100%)",
   "Industrie":             "linear-gradient(135deg, #475569 0%, #0f172a 100%)",
   "Automobile":            "linear-gradient(135deg, #4f46e5 0%, #1e1b4b 100%)",
-  "Horlogerie":            "linear-gradient(135deg, #ea580c 0%, #431407 100%)",
+  "Horlogerie & Joaillerie":            "linear-gradient(135deg, #ea580c 0%, #431407 100%)",
   "Alimentation":          "linear-gradient(135deg, #65a30d 0%, #1a2e05 100%)",
   "Agriculture":           "linear-gradient(135deg, #4d7c0f 0%, #1a2e05 100%)",
   "Éducation & Recherche": "linear-gradient(135deg, #0891b2 0%, #0c4a6e 100%)",
