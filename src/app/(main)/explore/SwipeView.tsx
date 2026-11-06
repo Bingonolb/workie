@@ -16,6 +16,7 @@ import { largeurCouverture, styleCadrage } from "@/lib/coverUrl";
 import { GuestModal } from "@/components/GuestModal";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
+import { rafraichirFiches } from "@/lib/rafraichirFiches";
 
 const SWIPE_THRESHOLD = 90;
 const PREFETCH_AHEAD = 25;
@@ -73,6 +74,15 @@ export function SwipeView({
       return s.deck?.length ? s : null;
     } catch { return null; }
   });
+
+  // Un paquet restitué peut contenir des fiches modifiées depuis : on le remet
+  // à jour une fois, juste après l'affichage, sans toucher à l'ordre.
+  useEffect(() => {
+    if (!sauvegarde?.deck) return;
+    void rafraichirFiches(sauvegarde.deck as Array<SwipeItem & { id?: string }>).then(frais => {
+      if (frais) setCompanies(frais as SwipeItem[]);
+    });
+  }, [sauvegarde]);
 
   // Build the initial deck: restore from sessionStorage if recent, otherwise shuffle fresh
   const [companies, setCompanies] = useState<SwipeItem[]>(() => {

@@ -14,6 +14,7 @@ import type { Company } from "@/lib/types";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 import { lireCache, ecrireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
 import { useTirerPourMelanger, SEUIL_TIRAGE } from "@/lib/useTirerPourMelanger";
+import { rafraichirFiches } from "@/lib/rafraichirFiches";
 
 // Guests see the first 12 companies + 6 blurred
 /**
@@ -299,6 +300,8 @@ export function ExploreClient({
       setTotal(etatMemorise.total);
       setPage(etatMemorise.page);
       setMelangeApplique(true);
+      // La copie peut dater : on la remet à jour juste après l'affichage.
+      void rafraichirFiches(etatMemorise.companies).then(frais => { if (frais) setCompanies(frais); });
       return;
     }
     // Sinon la liste du serveur va être remplacée : on masque la grille pour
