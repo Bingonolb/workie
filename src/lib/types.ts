@@ -484,6 +484,16 @@ export const CANTONS_SAISIE: { code: string; nom: string }[] = [
 export const CANTON_TOUTE_LA_SUISSE = { code: "CH", nom: "Multi-sites" };
 export const CANTON_LIECHTENSTEIN = { code: "FL", nom: "Liechtenstein" };
 
+/**
+ * Le lieu tel qu'on l'affiche : « Genève, GE », mais « Multi-sites » seul.
+ * Le code « CH » est interne : affiché, il laissait croire à un canton.
+ */
+export function lieuAffiche(ville: string | null | undefined, canton: string | null | undefined): string {
+  const v = ville ?? "";
+  if (!canton || canton === CANTON_TOUTE_LA_SUISSE.code || v === CANTON_TOUTE_LA_SUISSE.nom) return v || CANTON_TOUTE_LA_SUISSE.nom;
+  return v ? `${v}, ${canton}` : canton;
+}
+
 /** Vrai pour un code accepté à l'enregistrement d'une fiche. */
 export function cantonValide(code: string): boolean {
   return code === CANTON_TOUTE_LA_SUISSE.code

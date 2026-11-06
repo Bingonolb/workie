@@ -10,7 +10,7 @@ import { MapPin, Users, TrendingUp, TrendingDown, X, Flame, Info, ExternalLink }
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { fetchSwipePage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
-import { SECTOR_COLORS } from "@/lib/types";
+import { SECTOR_COLORS, lieuAffiche } from "@/lib/types";
 import { prechargerCouvertures } from "@/components/CoverImage";
 import { largeurCouverture, styleCadrage } from "@/lib/coverUrl";
 import { GuestModal } from "@/components/GuestModal";
@@ -781,7 +781,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           erreur de mise en page. */}
       <div style={{ padding: "20px 18px 24px", display: "flex", flexDirection: "column", gap: 13, flexShrink: 0 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          <Chip icon={<MapPin size={12} aria-hidden="true" />} label={`${company.city}${company.canton ? `, ${company.canton}` : ""}`} />
+          <Chip icon={<MapPin size={12} aria-hidden="true" />} label={lieuAffiche(company.city, company.canton)} />
           {company.employee_range && <Chip icon={<Users size={12} aria-hidden="true" />} label={`${company.employee_range} emp.`} />}
           {Number(company.avg_salary_chf) > 0 && <Chip icon={<TrendingUp size={12} aria-hidden="true" />} label={`CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`} color="#10b981" />}
         </div>

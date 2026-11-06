@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, X, Pencil, ExternalLink, ChevronRight } from "lucide-react";
 import type { Company } from "@/lib/types";
+import { lieuAffiche } from "@/lib/types";
 import { largeurCouverture } from "@/lib/coverUrl";
 
 export function AdminCompanyList({ companies }: { companies: Company[] }) {
@@ -189,7 +190,7 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
                 <div className="admin-identite">
                   <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)", lineHeight: 1.3 }}>{c.name}</p>
                   <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3 }}>
-                    {c.city}{c.canton ? `, ${c.canton}` : ""}{c.employee_range ? ` · ${c.employee_range} emp.` : ""}
+                    {lieuAffiche(c.city, c.canton)}{c.employee_range ? ` · ${c.employee_range} emp.` : ""}
                   </p>
                 </div>
 

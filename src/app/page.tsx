@@ -10,6 +10,7 @@ import { LandingFaq } from "@/components/LandingFaq";
 import { ApercuSwipe } from "@/components/ApercuSwipe";
 import { languesDeTravail } from "@/lib/langues";
 import { Logo } from "@/components/Logo";
+import { lieuAffiche } from "@/lib/types";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
@@ -80,7 +81,7 @@ const getApercuEntreprises = unstable_cache(
         name: c.name,
         sector: c.sector,
         subsector: c.subsector,
-        lieu: `${c.city}${c.canton ? `, ${c.canton}` : ""}`,
+        lieu: lieuAffiche(c.city, c.canton),
         langues: langues.join(" · "),
         description: c.description,
         cover_url: c.cover_url,

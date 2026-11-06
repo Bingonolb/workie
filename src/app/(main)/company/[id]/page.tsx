@@ -12,7 +12,7 @@ import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
 import { ActionsFiche, PorteInvite } from "@/components/company/Interactions";
 import { BoutonRetour } from "@/components/company/BoutonRetour";
 
-import { SECTOR_COLORS } from "@/lib/types";
+import { SECTOR_COLORS, lieuAffiche } from "@/lib/types";
 import { languesDeTravail } from "@/lib/langues";
 import type { Review } from "@/lib/types";
 // Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
@@ -337,7 +337,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 disponibles (1 à 4), la grille s'ajuste au lieu d'être figée à 3. */}
             <div className="company-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, marginBottom: 32 }}>
               {([
-                { icon: <MapPin size={18} color="#8b5cf6" aria-hidden="true" />, value: `${company.city}${company.canton ? `, ${company.canton}` : ""}`, label: "Localisation" },
+                { icon: <MapPin size={18} color="#8b5cf6" aria-hidden="true" />, value: lieuAffiche(company.city, company.canton), label: "Localisation" },
                 company.employee_range
                   ? { icon: <Users size={18} color="#f97316" aria-hidden="true" />, value: company.employee_range, label: "Employés" }
                   : null,

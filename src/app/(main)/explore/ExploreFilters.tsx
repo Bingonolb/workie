@@ -152,7 +152,8 @@ export function ExploreFilters({
                           color: active ? "#f97316" : "var(--text-muted)",
                           textAlign: "center", lineHeight: 1.4, transition: "all 0.1s",
                         }}>
-                        <div style={{ fontSize: 9, opacity: 0.5 }}>{c.code}</div>
+                        {/* « CH » n'est pas un canton : Multi-sites s'affiche seul. */}
+                        {c.code !== "CH" && <div style={{ fontSize: 9, opacity: 0.5 }}>{c.code}</div>}
                         {c.name}
                       </button>
                     );
