@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 /** Distance à tirer, en pixels à l'écran, pour déclencher. */
-export const SEUIL_TIRAGE = 64;
+export const SEUIL_TIRAGE = 92;
 /** Course maximale de la page : au-delà, le doigt tire dans le vide. */
-const COURSE_MAX = 140;
+const COURSE_MAX = 170;
 
 /**
  * Petite vibration au passage du seuil, comme dans les applications natives.

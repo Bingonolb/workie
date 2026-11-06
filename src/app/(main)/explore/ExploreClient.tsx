@@ -755,30 +755,34 @@ export function ExploreClient({
       <div style={{ position: "relative" }}>
         <div aria-live="polite" style={{
           position: "absolute", top: 0, left: 0, right: 0,
-          height: melangeEnCours ? 56 : tirage,
+          height: melangeEnCours ? 60 : tirage,
           display: "flex", alignItems: "center", justifyContent: "center",
           overflow: "hidden", pointerEvents: "none",
           transition: tirage > 0 ? "none" : "height 0.3s cubic-bezier(.2,.8,.2,1)",
         }}>
+          {/* Roue d'activité à la manière du système iOS : 8 rayons fins
+              qui apparaissent un à un pendant qu'on tire, sans tourner, puis
+              tournent par crans une fois le chargement lancé. */}
           {(tirage > 0 || melangeEnCours) && (
-            <svg width="26" height="26" viewBox="0 0 24 24" aria-label={melangeEnCours ? "Chargement" : undefined}
-              style={{
-                opacity: melangeEnCours ? 1 : Math.min(1, tirage / SEUIL_TIRAGE),
-                transform: `rotate(${melangeEnCours ? 0 : tirage * 4}deg)`,
-                animation: melangeEnCours ? "roue-tirage 0.7s linear infinite" : undefined,
-              }}>
-              {Array.from({ length: 8 }, (_, i) => (
-                <line key={i} x1="12" y1="2.5" x2="12" y2="6.5" stroke="var(--text-muted)" strokeWidth="2.2" strokeLinecap="round"
-                  transform={`rotate(${i * 45} 12 12)`}
-                  opacity={melangeEnCours ? 0.25 + (i / 8) * 0.75 : (i < Math.round((tirage / SEUIL_TIRAGE) * 8) ? 0.9 : 0)} />
-              ))}
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-label={melangeEnCours ? "Chargement" : undefined}
+              style={{ animation: melangeEnCours ? "roue-tirage 0.8s steps(8) infinite" : undefined }}>
+              {Array.from({ length: 8 }, (_, i) => {
+                const visibles = Math.min(8, Math.floor((tirage / SEUIL_TIRAGE) * 8));
+                // En rotation, une traînée : le rayon de tête est plein, les
+                // suivants s'estompent.
+                const opacite = melangeEnCours ? 0.22 + 0.78 * (i / 7) : (i < visibles ? 0.85 : 0);
+                return (
+                  <rect key={i} x="12.75" y="2" width="2.5" height="7.5" rx="1.25" fill="var(--text-muted)"
+                    transform={`rotate(${i * 45} 14 14)`} opacity={opacite} />
+                );
+              })}
               <style>{`@keyframes roue-tirage { to { transform: rotate(360deg); } }`}</style>
             </svg>
           )}
         </div>
       <div style={{
         opacity: isPending ? 0.5 : 1,
-        transform: `translateY(${melangeEnCours ? 56 : tirage}px)`,
+        transform: `translateY(${melangeEnCours ? 60 : tirage}px)`,
         transition: tirage > 0 ? "opacity 0.15s" : "opacity 0.15s, transform 0.3s cubic-bezier(.2,.8,.2,1)",
       }}>
         {visibleCompanies.length === 0 && !isPending ? (
