@@ -30,7 +30,15 @@ function vibrer() {
       interrupteur.appendChild(entree);
       document.body.appendChild(interrupteur);
     }
+    // Le clic donne le focus à l'interrupteur : on le lui retire aussitôt,
+    // sinon la page croit qu'un champ est actif et cache la barre du bas.
+    const actif = document.activeElement;
     interrupteur.click();
+    const entree = interrupteur.querySelector("input");
+    if (entree && document.activeElement === entree) {
+      entree.blur();
+      if (actif instanceof HTMLElement && actif !== document.body) actif.focus({ preventScroll: true });
+    }
   } catch { /* sans vibration, le geste fonctionne pareil */ }
 }
 

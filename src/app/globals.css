@@ -496,7 +496,9 @@ main, .page-main, .page-main-sm, .page-main-md {
    Prevents the "flying nav" jump caused by viewport shrinking on keyboard open.
    :has() is supported on Chrome 105+, Safari 16.4+, Firefox 121+. */
 @media (max-width: 768px) {
-  body:has(input:focus, textarea:focus, select:focus) .bottom-nav {
+  /* Seuls les champs qui ouvrent un clavier comptent : une case à cocher ou
+     un interrupteur qui prend le focus faisait disparaître la barre. */
+  body:has(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="file"]):focus, textarea:focus, select:focus) .bottom-nav {
     display: none;
   }
 }
