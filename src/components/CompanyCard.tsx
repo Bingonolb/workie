@@ -28,7 +28,7 @@ const SECTOR_GRADIENTS: Record<string, string> = {
   "Agriculture":           "linear-gradient(135deg, #4d7c0f 0%, #1a2e05 100%)",
   "Éducation & Recherche": "linear-gradient(135deg, #0891b2 0%, #0c4a6e 100%)",
   "Sport":                 "linear-gradient(135deg, #c2410c 0%, #431407 100%)",
-  "Mode":                  "linear-gradient(135deg, #db2777 0%, #500724 100%)",
+  "Mode & Luxe":                  "linear-gradient(135deg, #db2777 0%, #500724 100%)",
   // Porte par les fiches importees avant la separation des deux metiers.
   "Sports & Fashion":      "linear-gradient(135deg, #db2777 0%, #500724 100%)",
   "Transport":             "linear-gradient(135deg, #0d9488 0%, #134e4a 100%)",

@@ -313,7 +313,7 @@ export const SECTOR_COLORS: Record<string, string> = {
   "Agriculture": "#65a30d",
   "Éducation & Recherche": "#06b6d4",
   "Sport": "#c2410c",
-  "Mode": "#ec4899",
+  "Mode & Luxe": "#ec4899",
   "Transport": "#14b8a6",
   "Énergie": "#eab308",
   "Droit": "#7c3aed",
@@ -392,7 +392,7 @@ export const SECTORS = [
   // Glencore se retrouvait en Finance.
   "Matières premières",
   "Médias & Communication",
-  "Mode",
+  "Mode & Luxe",
   "ONG",
   "Organisations internationales",
   "Pharma",
