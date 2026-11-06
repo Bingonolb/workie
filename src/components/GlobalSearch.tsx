@@ -20,6 +20,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const [recentes, setRecentes] = useState<EntrepriseRecente[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const departToucherRef = useRef<number | null>(null);
 
   // Portail : il n'a pas d'équivalent dans le HTML du serveur.
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -196,6 +197,16 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("popstate", retour);
   }, [onClose]);
 
+  // Les 3 premiers résultats sont ceux qu'on ouvre presque toujours : on les
+  // prépare dès qu'ils s'affichent, après une courte pause dans la frappe.
+  useEffect(() => {
+    if (loading || suggestions.length === 0) return;
+    const t = setTimeout(() => {
+      for (const s of suggestions.slice(0, 3)) router.prefetch(`/company/${s.id}`);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [suggestions, loading, router]);
+
   const ouvrir = (e: Suggestion) => {
     setRecentes(ajouterRecente({ id: e.id, name: e.name, city: e.city, sector: e.sector }));
     onClose();
@@ -288,7 +299,30 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           page se decroche derriere lui sur iPhone. */}
       <div
         className="gs-scroll"
-        onTouchEnd={() => {
+        onTouchStart={e => {
+          departToucherRef.current = e.touches[0]?.clientY ?? null;
+          /*
+           * La fiche touchée est préchargée dès que le doigt se pose : le temps
+           * de le lever, son code et ses données sont déjà là, et l'ouverture
+           * n'attend plus le réseau.
+           */
+          const lien = (e.target as HTMLElement).closest?.("a[href^='/company/']");
+          const href = lien?.getAttribute("href");
+          if (href) router.prefetch(href);
+        }}
+        onTouchEnd={e => {
+          /*
+           * Un simple toucher n'est pas un défilement.
+           *
+           * Fermer le clavier sur un toucher faisait remonter la liste sous le
+           * doigt au moment du clic : le clic tombait à côté et il fallait
+           * toucher l'entreprise une seconde fois. On ne retire le clavier que
+           * si le doigt a réellement fait défiler la liste.
+           */
+          const depart = departToucherRef.current;
+          departToucherRef.current = null;
+          const fin = e.changedTouches[0]?.clientY;
+          if (depart === null || fin === undefined || Math.abs(fin - depart) < 10) return;
           /*
            * Le clavier se retire quand le doigt se lève, jamais avant.
            *
