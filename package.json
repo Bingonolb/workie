@@ -21,7 +21,7 @@
     "date-fns": "^4.4.0",
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.22.0",
-    "next": "16.3.0",
+    "next": "^16.4.5",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.17.2",
@@ -34,7 +34,7 @@
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "^16.4.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"

@@ -95,11 +95,17 @@ export function ProfilClient() {
     return () => { annule = true; };
   }, []);
 
+  // Le fondu ne se joue que si les donnees ont du etre attendues : ni depuis
+  // la memoire de session, ni depuis la copie durable.
+  // Déclaré avant tout retour anticipé : placé après `if (echec)`, ce hook
+  // n'était pas appelé dans le cas d'erreur, et React plantait la page.
+  const [attendu] = useState(() => depuisMemoire === null && lirePersistant<Donnees>(CLE_PROFIL) === null);
+
   if (echec) {
     return (
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "48px 32px", textAlign: "center" }}>
         <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger votre profil</p>
-        <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 20 }}>Tes données sont intactes, c&apos;est l&apos;affichage qui a échoué.</p>
+        <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 20 }}>Vos données sont intactes. Rechargez la page pour réessayer.</p>
         <button
           onClick={() => window.location.reload()}
           style={{
@@ -126,9 +132,6 @@ export function ProfilClient() {
   // le premier rendu, donc l'animation partait même quand le contenu était déjà
   // là. La page paraissait charger alors qu'elle n'avait rien à charger — c'est
   // précisément l'impression qu'on cherchait à supprimer.
-  // Le fondu ne se joue que si les donnees ont du etre attendues : ni depuis
-  // la memoire de session, ni depuis la copie durable.
-  const [attendu] = useState(() => depuisMemoire === null && lirePersistant<Donnees>(CLE_PROFIL) === null);
   const anime = d !== null && attendu;
 
   // Deux tuiles au plus, et seulement ce sur quoi on peut agir.
