@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Nouvelle publicité", robots: { index: false, follow: false } };
+
 import { redirect } from "next/navigation";
 import { getUser, createClient } from "@/lib/supabase/server";
 
