@@ -8,6 +8,33 @@ export const SEUIL_TIRAGE = 64;
 const COURSE_MAX = 140;
 
 /**
+ * Petite vibration au passage du seuil, comme dans les applications natives.
+ *
+ * Android : `navigator.vibrate`. Safari ne l'expose pas ; depuis iOS 18, un
+ * interrupteur `<input type="checkbox" switch>` vibre quand il bascule, et
+ * basculer un interrupteur invisible donne le même retour. Usage détourné :
+ * si Apple le retire, il n'y a simplement plus de vibration.
+ */
+let interrupteur: HTMLLabelElement | null = null;
+function vibrer() {
+  try {
+    if (typeof navigator.vibrate === "function") { navigator.vibrate(10); return; }
+    if (!interrupteur) {
+      interrupteur = document.createElement("label");
+      interrupteur.setAttribute("aria-hidden", "true");
+      interrupteur.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none";
+      const entree = document.createElement("input");
+      entree.type = "checkbox";
+      entree.setAttribute("switch", "");
+      entree.tabIndex = -1;
+      interrupteur.appendChild(entree);
+      document.body.appendChild(interrupteur);
+    }
+    interrupteur.click();
+  } catch { /* sans vibration, le geste fonctionne pareil */ }
+}
+
+/**
  * Geste « tirer vers le bas » en haut de la page, sur écran tactile.
  *
  * Le mélange automatique de l'explorateur reste celui qu'on connaît : stable
@@ -64,7 +91,9 @@ export function useTirerPourMelanger(actif: boolean, surDeclenchement: () => voi
       if (dy <= 0 || window.scrollY > 2) { if (courant) { courant = 0; setDistance(0); } return; }
       // Résistance : le doigt parcourt plus que l'indicateur, comme un élastique.
       // Freinage progressif : facile au début, de plus en plus dur ensuite.
+      const precedent = courant;
       courant = COURSE_MAX * (1 - Math.exp(-dy / (COURSE_MAX * 1.6)));
+      if (precedent < SEUIL_TIRAGE && courant >= SEUIL_TIRAGE) vibrer();
       setDistance(courant);
       if (e.cancelable) e.preventDefault();
     };
