@@ -45,7 +45,7 @@ export async function GET(request: Request) {
   const q = (searchParams.get("q") ?? "").trim().slice(0, 100);
   if (q.length < 1) return NextResponse.json({ companies: [] });
 
-  const cle = q.toLowerCase();
+  const cle = q.toLowerCase().replace(/\s+/g, " ");
   const enCache = cache.get(cle);
   if (enCache && enCache.expire > Date.now()) {
     return NextResponse.json({ companies: enCache.data }, {
@@ -57,12 +57,12 @@ export async function GET(request: Request) {
   // Vingt, et non huit. « banque » ramene largement plus de huit maisons :
   // s'arreter la, c'est cacher celle qu'on cherche derriere un plafond
   // invisible, sans le dire.
-  const { data, error } = await supabase.rpc("rechercher_entreprises", { terme: q, nb: 20 });
+  const { data, error } = await supabase.rpc("rechercher_entreprises", { terme: q, nb: 30 });
 
   if (error) {
-    // Une recherche en échec ne doit pas casser la page : on renvoie une liste
-    // vide, la barre reste utilisable.
-    return NextResponse.json({ companies: [] }, { headers: { "Cache-Control": "no-store" } });
+    // Un échec n'est pas « aucun résultat » : le client doit pouvoir faire la
+    // différence pour garder l'affichage précédent et réessayer.
+    return NextResponse.json({ companies: [], error: true }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 
   const companies: Resultat[] = (data ?? []).map(

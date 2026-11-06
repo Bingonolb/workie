@@ -22,7 +22,7 @@ try {
 
   const redis = new Redis({ url, token });
   rl = {
-    search:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60s"),  prefix: "rl:search",   ephemeralCache: new Map() }),
+    search:   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(150, "60s"), prefix: "rl:search",   ephemeralCache: new Map() }),
     checkout: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60s"),   prefix: "rl:checkout", ephemeralCache: new Map() }),
     actions:  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, "60s"), prefix: "rl:actions",  ephemeralCache: new Map() }),
     auth:     new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(15, "60s"),  prefix: "rl:auth",     ephemeralCache: new Map() }),

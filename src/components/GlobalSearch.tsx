@@ -101,26 +101,49 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const dernierRef = useRef(0);
   const controleurRef = useRef<AbortController | null>(null);
 
-  const search = useCallback((q: string) => {
+  /*
+   * Mémoire des réponses déjà reçues pendant la session.
+   *
+   * Taper, effacer, retaper repassait chaque fois par le serveur. Au bout d'un
+   * moment la limite de requêtes était atteinte, le serveur refusait, et le
+   * refus était affiché comme « Aucun résultat ». Une saisie déjà vue s'affiche
+   * désormais instantanément, sans requête.
+   */
+  const memoireRef = useRef(new Map<string, Suggestion[]>());
+
+  const search = useCallback((brut: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     controleurRef.current?.abort();
     const numero = ++dernierRef.current;
-    if (!q.trim()) { setSuggestions([]); setLoading(false); return; }
+    const q = brut.trim().replace(/\s+/g, " ");
+    if (!q) { setSuggestions([]); setLoading(false); return; }
+    const cle = q.toLowerCase();
+    const connu = memoireRef.current.get(cle);
+    if (connu) { setSuggestions(connu); setLoading(false); return; }
     setLoading(true);
-    debounceRef.current = setTimeout(async () => {
+
+    // Un échec (réseau, limite, serveur) n'est jamais montré comme une absence
+    // de résultat : on garde l'affichage précédent et on réessaie.
+    const tenter = async (essai: number): Promise<void> => {
+      if (numero !== dernierRef.current) return;
       const controleur = new AbortController();
       controleurRef.current = controleur;
       try {
-        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(q.trim())}`, { signal: controleur.signal });
+        const res = await fetch(`/api/companies/search?q=${encodeURIComponent(q)}`, { signal: controleur.signal });
+        if (!res.ok) throw new Error(String(res.status));
         const data = await res.json();
+        const liste: Suggestion[] = data.companies ?? [];
+        memoireRef.current.set(cle, liste);
         if (numero !== dernierRef.current) return;
-        setSuggestions(data.companies ?? []);
-      } catch {
-        if (numero === dernierRef.current) setSuggestions([]);
-      } finally {
-        if (numero === dernierRef.current) setLoading(false);
+        setSuggestions(liste);
+        setLoading(false);
+      } catch (e) {
+        if (numero !== dernierRef.current || (e as Error)?.name === "AbortError") return;
+        if (essai < 3) { setTimeout(() => { void tenter(essai + 1); }, 600 * (essai + 1)); return; }
+        setLoading(false);
       }
-    }, 150);
+    };
+    debounceRef.current = setTimeout(() => { void tenter(0); }, 180);
   }, []);
 
   // La recherche est lancee par la frappe, et son resultat est un etat :
