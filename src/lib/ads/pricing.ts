@@ -70,7 +70,7 @@ export const SECTOR_WEIGHTS: Record<string, number> = {
   "Association":             2,
   "Commerce de détail":      8,
   "Hôtellerie & Restauration": 6,
-  "Immobilier":              4,
+  "Immobilier & Gérance":    4,
   "Médias & Communication":  4,
   "Chimie":                  5,
   "Télécoms":                5,
