@@ -127,7 +127,7 @@ export default async function AnnonceursPage() {
 
         .ann-ouverture {
           display: grid;
-          grid-template-columns: 1.05fr 0.95fr;
+          grid-template-columns: 1fr 420px;
           gap: 56px;
           align-items: center;
         }
@@ -182,7 +182,7 @@ export default async function AnnonceursPage() {
             pile est à sa place ici, parce qu'un annonceur veut d'abord voir à
             quoi ressemble son annonce une fois posée. */}
         <section className="ann-section">
-          <div className="ann-large ann-ouverture" style={{ maxWidth: 1120, padding: "0 24px" }}>
+          <div className="ann-large ann-ouverture">
             <div>
               <p className="ann-eyebrow">Annonceurs</p>
               <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
@@ -199,7 +199,7 @@ export default async function AnnonceursPage() {
               </Link>
             </div>
 
-            <div style={{ width: "100%", minWidth: 0 }}>
+            <div style={{ maxWidth: 380, width: "100%", justifySelf: "end" }}>
               <ApercuSwipe
                 entreprises={melangerAvecAnnonces(demo)}
                 fin={{ titre: "La prochaine carte pourrait être la vôtre.", libelle: "Créer une campagne", href: "/profile/ads/new" }}
