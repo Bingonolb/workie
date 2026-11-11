@@ -182,7 +182,7 @@ export default async function AnnonceursPage() {
             pile est à sa place ici, parce qu'un annonceur veut d'abord voir à
             quoi ressemble son annonce une fois posée. */}
         <section className="ann-section">
-          <div className="ann-large ann-ouverture" style={{ maxWidth: 1280 }}>
+          <div className="ann-large ann-ouverture" style={{ maxWidth: 1120, padding: "0 24px" }}>
             <div>
               <p className="ann-eyebrow">Annonceurs</p>
               <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
