@@ -7,7 +7,7 @@ import Link from "next/link";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { AdminCompanyForm } from "./AdminCompanyForm";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft, ExternalLink, Shield } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Company } from "@/lib/types";
 
@@ -60,12 +60,21 @@ export default async function AdminEditCompanyPage({ params }: { params: Promise
           <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(139,92,246,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Shield size={16} color="#8b5cf6" />
           </div>
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>
               {company.name}
             </h1>
             <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Modifier les informations</p>
           </div>
+          <a
+            href={`/company/${company.id}`}
+            target="_blank"
+            rel="noopener"
+            className="btn-clair btn-sm"
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0, textDecoration: "none" }}
+          >
+            Voir la fiche <ExternalLink size={14} aria-hidden="true" />
+          </a>
         </div>
 
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: 28 }}>
