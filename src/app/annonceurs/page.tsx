@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Target, CreditCard, ShieldCheck, BarChart3 } from "lucide-react";
 import { NavbarClient } from "@/components/NavbarClient";
-import { Footer } from "@/components/Footer";
+import { PiedAccueil } from "@/components/PiedAccueil";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ApercuSwipe } from "@/components/ApercuSwipe";
@@ -372,7 +372,7 @@ export default async function AnnonceursPage() {
         </section>
       </main>
 
-      <Footer />
+      <PiedAccueil />
     </div>
   );
 }
