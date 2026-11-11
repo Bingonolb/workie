@@ -45,7 +45,7 @@ export function estSupabase(url: string): boolean {
   return url.includes(SUPABASE_BRUT) || url.includes(SUPABASE_RENDU);
 }
 
-function supabaseALaLargeur(url: string, w: number, qualite = 80): string {
+function supabaseALaLargeur(url: string, w: number, qualite = 85): string {
   const base = url.split("?")[0].replace(SUPABASE_BRUT, SUPABASE_RENDU);
   // Qualite 80 et non 72.
   //
@@ -90,7 +90,10 @@ export function fondDensite(url: string, largeur: number): string {
 export function sourcesBandeau(url: string, largeur = 1280): { un: string; deux: string } {
   return {
     un: largeurCouverture(url, largeur),
-    deux: largeurCouverture(url, Math.min(largeur * 2, 2560), 65),
+    // Qualité 82 : à 65, la version Retina était visiblement dégradée sur
+    // la fiche (aplats tachés, détails mous). L'affirmation « la compression
+    // ne s'y voit pas » ne tenait pas sur un grand bandeau.
+    deux: largeurCouverture(url, Math.min(largeur * 2, 2560), 82),
   };
 }
 
@@ -116,7 +119,7 @@ export function sourceBandeauPourEcran(url: string): string {
  * photo agrandie deux fois à l'écran doit être téléchargée deux fois plus
  * large, sans quoi le zoom la rendrait floue.
  */
-export function largeurCouverture(url: string, w: number, qualite = 80): string {
+export function largeurCouverture(url: string, w: number, qualite = 85): string {
   const { src, cadrage } = lireCadrage(url);
   const largeur = Math.min(Math.round(w * cadrage.zoom), 2560);
   if (estPexels(src)) return aLaLargeur(src, largeur);
