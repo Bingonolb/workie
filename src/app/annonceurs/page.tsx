@@ -5,7 +5,8 @@ import { NavbarClient } from "@/components/NavbarClient";
 import { Footer } from "@/components/Footer";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ApercuSwipe, type EntrepriseApercu } from "@/components/ApercuSwipe";
+import { ApercuSwipe } from "@/components/ApercuSwipe";
+import { getApercuEntreprises } from "@/lib/apercuAccueil";
 import { melangerAvecAnnonces } from "@/lib/annoncesExemple";
 import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREE_MIN, DUREE_MAX } from "@/lib/ads/pricing";
 
@@ -25,28 +26,6 @@ const compterEmployeurs = unstable_cache(
   { revalidate: 300, tags: ["landing-counts"] }
 );
 
-// Cinq fiches pour la démonstration, prises dans les secteurs repris à la main.
-const fichesDemo = unstable_cache(
-  async (): Promise<EntrepriseApercu[]> => {
-    const { data } = await createAdminClient()
-      .from("companies")
-      .select("id, name, sector, subsector, city, canton, description, cover_url")
-      .in("sector", ["Alimentation", "Assurances", "Automobile", "Aéronautique & Spatial", "Agriculture"])
-      .not("cover_url", "is", null)
-      .not("description", "is", null)
-      .order("score", { ascending: false })
-      .limit(40);
-    const vus = new Set<string>();
-    const retenues = (data ?? []).filter(c => !vus.has(c.sector) && vus.add(c.sector)).slice(0, 5);
-    return retenues.map(c => ({
-      id: c.id, name: c.name, sector: c.sector, subsector: c.subsector,
-      lieu: c.canton ? c.city + ", " + c.canton : c.city,
-      langues: "", description: c.description, cover_url: c.cover_url,
-    }));
-  },
-  ["annonceurs-demo"],
-  { revalidate: 300, tags: ["companies"] }
-);
 
 export const metadata: Metadata = {
   title: "Annoncer sur Workie",
@@ -75,7 +54,7 @@ export const metadata: Metadata = {
  * croire à une mise en ligne immédiate.
  */
 export default async function AnnonceursPage() {
-  const [employeurs, demo] = await Promise.all([compterEmployeurs(), fichesDemo()]);
+  const [employeurs, demo] = await Promise.all([compterEmployeurs(), getApercuEntreprises()]);
   const chiffres = [
     { valeur: employeurs.toLocaleString("fr-CH"), libelle: "employeurs référencés" },
     { valeur: String(Object.keys(CANTON_WEIGHTS).length), libelle: "cantons ciblables" },
@@ -148,7 +127,7 @@ export default async function AnnonceursPage() {
 
         .ann-ouverture {
           display: grid;
-          grid-template-columns: 1fr 420px;
+          grid-template-columns: 1.05fr 0.95fr;
           gap: 56px;
           align-items: center;
         }
@@ -203,7 +182,7 @@ export default async function AnnonceursPage() {
             pile est à sa place ici, parce qu'un annonceur veut d'abord voir à
             quoi ressemble son annonce une fois posée. */}
         <section className="ann-section">
-          <div className="ann-large ann-ouverture">
+          <div className="ann-large ann-ouverture" style={{ maxWidth: 1280 }}>
             <div>
               <p className="ann-eyebrow">Annonceurs</p>
               <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
@@ -220,7 +199,7 @@ export default async function AnnonceursPage() {
               </Link>
             </div>
 
-            <div style={{ maxWidth: 380, width: "100%", justifySelf: "end" }}>
+            <div style={{ width: "100%", minWidth: 0 }}>
               <ApercuSwipe
                 entreprises={melangerAvecAnnonces(demo)}
                 fin={{ titre: "La prochaine carte pourrait être la vôtre.", libelle: "Créer une campagne", href: "/profile/ads/new" }}
