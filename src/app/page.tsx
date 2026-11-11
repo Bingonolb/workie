@@ -411,7 +411,7 @@ export default async function Home() {
             geste du site, et rien d'enregistre puisque le visiteur n'a pas
             encore de compte. Une capture dit ce que le site montre ; une carte
             qu'on fait glisser dit ce qu'on y fait. */}
-        <ApercuSwipe entreprises={apercu} />
+        <ApercuSwipe entreprises={apercu} total={nCompanies} />
       </section>
 
       {/* La section « En trois étapes » a été retirée d'ici.
@@ -607,7 +607,7 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700, textWrap: "balance" }}>
-            26 cantons, 4 langues, 1000 employeurs.
+            26 cantons, 4 langues, {nCompanies.toLocaleString("fr-CH")} employeurs.
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 700, marginTop: 18, textWrap: "balance" }}>
             Des grands groupes aux équipes de 3 personnes. Au même endroit.

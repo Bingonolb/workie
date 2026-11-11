@@ -68,7 +68,11 @@ const imageDe = (c: CarteApercu): string | null =>
 
 const SEUIL = 90;
 
-export function ApercuSwipe({ entreprises, fin = FIN_DEFAUT }: { entreprises: CarteApercu[]; fin?: Fin }) {
+export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises: CarteApercu[]; fin?: Fin; total?: number }) {
+  // Le nombre d'entreprises vient de la base : un chiffre écrit en dur devient faux dès qu'une fiche est ajoutée ou retirée.
+  const fin = finRecue ?? (total
+    ? { ...FIN_DEFAUT, titre: `Votre prochain employeur est quelque part dans les ${total.toLocaleString("fr-CH")}.` }
+    : { ...FIN_DEFAUT, titre: "Votre prochain employeur est quelque part ici." });
   const [index, setIndex] = useState(0);
   const [glissement, setGlissement] = useState(0);
   const [partie, setPartie] = useState<"gauche" | "droite" | null>(null);
