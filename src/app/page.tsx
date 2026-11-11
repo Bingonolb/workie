@@ -39,7 +39,11 @@ const getLandingCounts = unstable_cache(
  */
 const SECTEURS_REPRIS = [
   "Administration publique", "Aéronautique & Spatial", "Agriculture",
-  "Alimentation", "Association", "Assurances", "Automobile",
+  "Alimentation", "Association", "Assurances", "Automobile", "Bâtiment",
+  "Beauté", "Biens de consommation", "Chimie", "Commerce de détail", "Conseil",
+  "Défense & Sécurité", "Droit", "Éducation & Recherche", "Énergie", "Finance",
+  "Fondation", "Horlogerie & Joaillerie", "Hôtellerie & Restauration",
+  "Immobilier & Gérance", "Industrie",
 ];
 
 const getApercuEntreprises = unstable_cache(
@@ -52,7 +56,7 @@ const getApercuEntreprises = unstable_cache(
       .not("cover_url", "is", null)
       .not("description", "is", null)
       .order("score", { ascending: false })
-      .limit(120);
+      .limit(600);
 
     type Ligne = NonNullable<typeof data>[number];
     const parSecteur = new Map<string, Ligne[]>();
@@ -88,7 +92,7 @@ const getApercuEntreprises = unstable_cache(
       };
     });
   },
-  ["landing-apercu-10"],
+  ["landing-apercu-v2"],
   { revalidate: 300, tags: ["companies"] }
 );
 
