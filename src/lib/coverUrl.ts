@@ -87,7 +87,7 @@ export function fondDensite(url: string, largeur: number): string {
  * fichier que le bandeau : une adresse qui diffère d'un seul caractère est un
  * second téléchargement.
  */
-export function sourcesBandeau(url: string, largeur = 1280): { un: string; deux: string } {
+export function sourcesBandeau(url: string, largeur = 1920): { un: string; deux: string } {
   return {
     un: largeurCouverture(url, largeur),
     // Qualité 82 : à 65, la version Retina était visiblement dégradée sur

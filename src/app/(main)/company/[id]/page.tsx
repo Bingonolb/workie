@@ -219,7 +219,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           // densité double affichait jusqu'ici une image de 1280 pixels
           // agrandie trois fois.
           background: company.cover_url
-            ? `${fondDensite(company.cover_url, 1280)} center / cover no-repeat, ${company.cover_color ?? sectorColor}`
+            ? `${fondDensite(company.cover_url, 1920)} center / cover no-repeat, ${company.cover_color ?? sectorColor}`
             : `linear-gradient(135deg, ${sectorColor}, #f97316)`,
           // Le point choisi dans l'administration, et l'agrandissement autour.
           ...styleCadrageFond(company.cover_url),
