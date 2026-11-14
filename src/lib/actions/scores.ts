@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -69,7 +69,7 @@ export async function retirerFlamme(companyId: string): Promise<void> {
 
 // addBoost et addPenalty ont ete supprimees avec les boutons « +100 » et
 // « -100 ». Le classement ne mesure plus un jugement mais un interet :
-// favoris, visites et partages, calcules en base.
+// favoris et visites, calcules en base (les partages ne comptent plus : ils ne se prouvent pas).
 
 export async function getTopCompanies(limit = 200) {
   const supabase = await createClient();

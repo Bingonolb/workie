@@ -8,7 +8,7 @@ import { lieuAffiche } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses",
-  description: "Les entreprises suisses les plus suivies sur Workie : favoris, consultations et partages.",
+  description: "Les entreprises suisses les plus suivies sur Workie : favoris et consultations.",
   alternates: { canonical: "https://www.workie.ch/ranking" },
   openGraph: {
     title: "Classement des meilleurs employeurs suisses · Workie",

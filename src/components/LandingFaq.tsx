@@ -71,12 +71,10 @@ const ENTREES: Entree[] = [
   {
     q: "Comment fonctionne le classement ?",
     texte:
-      "Il suit l'intérêt des visiteurs : un favori vaut 10 points, une visite 1, un partage 50. Aucune place ne s'achète.",
+      "Il suit l'intérêt des visiteurs : un favori vaut 10 points, une visite 1. Aucune place ne s'achète.",
     r: (
       <>
-        Il suit l&apos;intérêt des visiteurs. Un favori vaut 10 points, une visite 1, un
-        partage 50 : partager coûte quelque chose, on engage son nom auprès de quelqu&apos;un
-        d&apos;autre, donc ça pèse le plus.
+        Il suit l&apos;intérêt des visiteurs. Un favori vaut 10 points, une visite 1.
         <br /><br />
         Aucune place ne s&apos;achète.
       </>
