@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
+import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { refusDeContribution } from "@/lib/actions/compteVerifie";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,13 +89,14 @@ export const getCachedTopCompanies = unstable_cache(
     const { data } = await admin
       .from("companies")
       .select("id, name, sector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified")
+      .in("sector", await getSecteursEnLigne())
       .order("score", { ascending: false })
       .order("avg_rating", { ascending: false })
       .order("review_count", { ascending: false })
       .limit(limit);
     return data ?? [];
   },
-  ["top-companies"],
+  ["top-companies-v2"],
   { revalidate: 60, tags: ["top-companies"] }
 );
 
