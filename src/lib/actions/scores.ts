@@ -88,7 +88,7 @@ export const getCachedTopCompanies = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("companies")
-      .select("id, name, sector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified")
+      .select("id, slug, name, sector, city, canton, employee_range, avg_rating, review_count, avg_salary_chf, cover_url, score, is_verified")
       .in("sector", await getSecteursEnLigne())
       .order("score", { ascending: false })
       .order("avg_rating", { ascending: false })

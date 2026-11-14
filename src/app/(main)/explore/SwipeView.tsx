@@ -17,6 +17,7 @@ import { GuestModal } from "@/components/GuestModal";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 import { rafraichirFiches } from "@/lib/rafraichirFiches";
+import { urlFiche } from "@/lib/urlFiche";
 
 const SWIPE_THRESHOLD = 90;
 const PREFETCH_AHEAD = 25;
@@ -153,7 +154,7 @@ export function SwipeView({
   const current = companies[index];
   useEffect(() => {
     if (isAd(current)) trackAdImpression(current.campaign.id);
-    else if (current) router.prefetch(`/company/${current.id}`);
+    else if (current) router.prefetch(urlFiche(current));
 
     // Les 8 cartes suivantes, décodées d'avance. On demande la largeur de la
     // carte et non l'original stocké en 1600 px : à cette taille, huit
@@ -466,7 +467,7 @@ export function SwipeView({
           trackAdClick(c.campaign.id);
           window.open(c.campaign.cta_url, "_blank", "noopener,noreferrer");
         } else if (c && !isAd(c)) {
-          router.push(`/company/${c.id}`);
+          router.push(urlFiche(c));
         }
         setDrag(0);
         return;
@@ -530,7 +531,7 @@ export function SwipeView({
         trackAdClick(c.campaign.id);
         window.open(c.campaign.cta_url, "_blank", "noopener,noreferrer");
       } else if (c && !isAd(c)) {
-        router.push(`/company/${c.id}`);
+        router.push(urlFiche(c));
       }
       setDrag(0);
       return;
@@ -632,7 +633,7 @@ export function SwipeView({
           <X size={26} strokeWidth={2.5} aria-hidden="true" />
         </button>
 
-        <button type="button" onClick={() => !isAd(current) && current && router.push(`/company/${current.id}`)} disabled={!!gone || isAd(current)} aria-label="Voir la fiche entreprise"
+        <button type="button" onClick={() => !isAd(current) && current && router.push(urlFiche(current))} disabled={!!gone || isAd(current)} aria-label="Voir la fiche entreprise"
           style={{
           width: 48, height: 48, borderRadius: "50%",
           background: "var(--surface)",

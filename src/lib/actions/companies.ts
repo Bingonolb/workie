@@ -119,7 +119,7 @@ function cantonsDemandes(canton: string | undefined, langue: string | undefined)
   return coches.length ? coches.filter(c => parLangue.includes(c)) : parLangue;
 }
 
-const GRID_COLS = "id,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,cover_color,logo_url,score,is_verified,description,profile_score";
+const GRID_COLS = "id,slug,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,cover_color,logo_url,score,is_verified,description,profile_score";
 
 // Cached grid fetcher — no cookies(), uses adminClient, safe to cache across requests.
 // All users with the same filters share one DB query per 60s instead of N.
@@ -271,7 +271,7 @@ export const getCachedSimilarCompanies = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("companies")
-      .select("id, name, city, avg_rating, review_count, cover_url, cover_color, is_verified, sector, subsector")
+      .select("id, slug, name, city, avg_rating, review_count, cover_url, cover_color, is_verified, sector, subsector")
       .in("sector", await getSecteursEnLigne())
       .eq("sector", sector)
       .neq("id", excludeId)
@@ -285,12 +285,12 @@ export const getCachedSimilarCompanies = unstable_cache(
 
 /** Une entreprise telle qu'elle apparaît dans une suggestion. */
 export type Suggestion = {
-  id: string; name: string; city: string; canton: string | null;
+  id: string; slug?: string | null; name: string; city: string; canton: string | null;
   cover_url: string | null; cover_color: string | null;
   is_verified: boolean | null; sector: string; subsector: string | null;
 };
 
-const COLONNES_SUGGESTION = "id, name, city, canton, cover_url, cover_color, is_verified, sector, subsector";
+const COLONNES_SUGGESTION = "id, slug, name, city, canton, cover_url, cover_color, is_verified, sector, subsector";
 
 /**
  * De quoi cliquer, toujours, quelle que soit la fiche.

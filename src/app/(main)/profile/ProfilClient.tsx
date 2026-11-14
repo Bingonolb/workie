@@ -14,6 +14,7 @@ import { CoverImage } from "@/components/CoverImage";
 // n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
 // le site, et se colore tout seul en travers de la teinte de la tuile.
 import { Flame, Megaphone, Download, ChevronRight } from "lucide-react";
+import { urlFiche } from "@/lib/urlFiche";
 
 type Donnees = {
   authentifie: boolean;
@@ -314,7 +315,7 @@ export function ProfilClient() {
             recentes.map(c => (
               <Link
                 key={c.id}
-                href={`/company/${c.id}`}
+                href={urlFiche(c)}
                 className="suggestion-ligne"
                 style={{
                   display: "grid", gridTemplateColumns: "56px 1fr 16px", gap: 14, alignItems: "center",

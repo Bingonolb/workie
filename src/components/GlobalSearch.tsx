@@ -6,6 +6,7 @@ import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { lireRecentes, ajouterRecente, retirerRecente, viderRecentes, type EntrepriseRecente } from "@/lib/recherchesRecentes";
+import { urlFiche } from "@/lib/urlFiche";
 
 type Suggestion = { id: string; name: string; city: string; sector: string; logo_url?: string | null };
 
@@ -202,7 +203,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (loading || suggestions.length === 0) return;
     const t = setTimeout(() => {
-      for (const s of suggestions.slice(0, 3)) router.prefetch(`/company/${s.id}`);
+      for (const s of suggestions.slice(0, 3)) router.prefetch(urlFiche(s));
     }, 300);
     return () => clearTimeout(t);
   }, [suggestions, loading, router]);
@@ -264,7 +265,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => {
-              if (e.key === "Enter" && suggestions[0]) { ouvrir(suggestions[0]); router.push(`/company/${suggestions[0].id}`); }
+              if (e.key === "Enter" && suggestions[0]) { ouvrir(suggestions[0]); router.push(urlFiche(suggestions[0])); }
               if (e.key === "Escape") fermer();
             }}
             placeholder="Rechercher une entreprise…"
@@ -306,7 +307,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
            * de le lever, son code et ses données sont déjà là, et l'ouverture
            * n'attend plus le réseau.
            */
-          const lien = (e.target as HTMLElement).closest?.("a[href^='/company/']");
+          const lien = (e.target as HTMLElement).closest?.("a[href^='/company/'], a[href^='/entreprise/']");
           const href = lien?.getAttribute("href");
           if (href) router.prefetch(href);
         }}
@@ -354,7 +355,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
         {suggestions.map(s => (
           <Link
             key={s.id}
-            href={`/company/${s.id}`}
+            href={urlFiche(s)}
             prefetch={false}
             onClick={() => ouvrir(s)}
             className="gs-row"
@@ -391,7 +392,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             {recentes.map(r => (
               <div key={r.id} className="gs-row" style={{ cursor: "default" }}>
                 <Link
-                  href={`/company/${r.id}`}
+                  href={urlFiche(r)}
                   prefetch={false}
                   onClick={() => ouvrir({ ...r, logo_url: null })}
                   style={{ flex: 1, minWidth: 0, textDecoration: "none" }}

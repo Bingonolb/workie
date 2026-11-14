@@ -21,7 +21,7 @@ export const getApercuEntreprises = unstable_cache(
     const SECTEURS_REPRIS = await getSecteursEnLigne();
     const { data } = await admin
       .from("companies")
-      .select("id, name, sector, subsector, city, canton, description, cover_url, website_url, employee_range, langues")
+      .select("id, slug, name, sector, subsector, city, canton, description, cover_url, website_url, employee_range, langues")
       .in("sector", SECTEURS_REPRIS)
       .not("cover_url", "is", null)
       .not("description", "is", null)

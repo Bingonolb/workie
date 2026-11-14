@@ -10,6 +10,7 @@ import { AdminCompanyForm } from "./AdminCompanyForm";
 import { ArrowLeft, ExternalLink, Shield } from "lucide-react";
 import { SECTOR_COLORS } from "@/lib/types";
 import type { Company } from "@/lib/types";
+import { urlFiche } from "@/lib/urlFiche";
 
 export default async function AdminEditCompanyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -67,7 +68,7 @@ export default async function AdminEditCompanyPage({ params }: { params: Promise
             <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Modifier les informations</p>
           </div>
           <a
-            href={`/company/${company.id}`}
+            href={urlFiche(company)}
             target="_blank"
             rel="noopener"
             className="btn-clair btn-sm"

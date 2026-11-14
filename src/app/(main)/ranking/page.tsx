@@ -5,6 +5,7 @@ import { getCachedTopCompanies, getCachedReviewCount } from "@/lib/actions/score
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
 import { lieuAffiche } from "@/lib/types";
+import { urlFiche } from "@/lib/urlFiche";
 
 export const metadata: Metadata = {
   title: "Classement des entreprises suisses",
@@ -46,7 +47,7 @@ export default async function RankingPage() {
       "@type": "ListItem",
       "position": i + 1,
       "name": c.name,
-      "url": `https://www.workie.ch/company/${c.id}`,
+      "url": `https://www.workie.ch${urlFiche(c)}`,
       ...(Number(c.avg_rating) > 0 ? { "description": `Note : ${Number(c.avg_rating).toFixed(1)}/5 · ${lieuAffiche(c.city, c.canton)}` } : {}),
     })),
   };

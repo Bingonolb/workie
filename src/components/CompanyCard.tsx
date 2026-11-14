@@ -13,6 +13,7 @@ import { SECTOR_COLORS } from "@/lib/types";
 import { CoverImage } from "@/components/CoverImage";
 import { logoAffichable } from "@/lib/logo";
 import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
+import { urlFiche } from "@/lib/urlFiche";
 
 const SECTOR_GRADIENTS: Record<string, string> = {
   "Tech":                  "linear-gradient(135deg, #6d28d9 0%, #1e40af 100%)",
@@ -59,7 +60,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   loading?: "eager" | "lazy";
 }) {
   const router = useRouter();
-  const refProche = useFicheProche(`/company/${company.id}`, company.cover_url);
+  const refProche = useFicheProche(urlFiche(company), company.cover_url);
   // Suit la propriété : sur /explore, page statique, le favori n'est connu
   // qu'après l'arrivée du contexte. Figé, l'état laissait la flamme éteinte
   // sur une entreprise pourtant enregistrée.
@@ -95,15 +96,15 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   return (
     <Link
       ref={refProche}
-      href={`/company/${company.id}`}
+      href={urlFiche(company)}
       aria-label={`Voir la fiche ${company.name}`}
       style={{ textDecoration: "none", display: "block" }}
       // Le survol et le premier contact restent : ils couvrent le cas d'une
       // carte deja visible au chargement, avant que l'observateur ne se mette
       // en route. `useFicheProche` ne demande qu'une fois par adresse, donc
       // ces deux-ci ne font pas double emploi.
-      onPointerEnter={() => router.prefetch(`/company/${company.id}`)}
-      onTouchStart={() => router.prefetch(`/company/${company.id}`)}
+      onPointerEnter={() => router.prefetch(urlFiche(company))}
+      onTouchStart={() => router.prefetch(urlFiche(company))}
     >
       {/* Le panneau reste.
           Il a ete retire un temps, au profit d'une photo flottante et d'un

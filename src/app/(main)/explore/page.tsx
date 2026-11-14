@@ -25,6 +25,7 @@ import { largeurCouverture } from "@/lib/coverUrl";
 import { ExploreClient } from "./ExploreClient";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import type { Company } from "@/lib/types";
+import { urlFiche } from "@/lib/urlFiche";
 
 export default async function ExplorePage() {
   // No searchParams — ISR requires no dynamic input.
@@ -48,7 +49,7 @@ export default async function ExplorePage() {
     "itemListElement": topForJsonLd.map((c, i) => ({
       "@type": "ListItem",
       "position": i + 1,
-      "url": `${BASE_URL}/company/${c.id}`,
+      "url": `${BASE_URL}${urlFiche(c)}`,
       "name": c.name,
     })),
   } : null;

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { CoverImage } from "@/components/CoverImage";
 import { useFicheProche } from "@/lib/useFicheProche";
+import { urlFiche } from "@/lib/urlFiche";
 
 /**
  * Une entreprise suggérée, en ligne.
@@ -13,11 +14,11 @@ import { useFicheProche } from "@/lib/useFicheProche";
  * l'entoure reste un composant serveur, rendu une fois pour tout le monde.
  */
 export function LigneSuggestion({ c }: { c: { id: string; name: string; city: string; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; subsector: string | null } }) {
-  const ref = useFicheProche(`/company/${c.id}`, c.cover_url);
+  const ref = useFicheProche(urlFiche(c), c.cover_url);
   return (
     <Link
       ref={ref}
-      href={`/company/${c.id}`}
+      href={urlFiche(c)}
       className="suggestion-ligne"
       style={{
         display: "grid", gridTemplateColumns: "56px 1fr 16px", gap: 14, alignItems: "center",

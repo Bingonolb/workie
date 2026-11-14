@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
+import { urlFiche } from "@/lib/urlFiche";
 
 export const revalidate = 3600;
 
@@ -29,11 +30,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // donc que 1000 des 1796 entreprises — près de 800 fiches invisibles pour
     // les moteurs de recherche.
     const PAGE = 1000;
-    const companies: { id: string; review_count: number | null; created_at: string | null }[] = [];
+    const companies: { id: string; slug: string; review_count: number | null; created_at: string | null }[] = [];
     for (let from = 0; from < 10_000; from += PAGE) {
       const { data, error } = await admin
         .from("companies")
-        .select("id, review_count, created_at")
+        .select("id, slug, review_count, created_at")
         .in("sector", enLigne)
         .order("score", { ascending: false })
         .range(from, from + PAGE - 1);
@@ -43,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     const companyRoutes: MetadataRoute.Sitemap = (companies ?? []).map(c => ({
-      url: `${base}/company/${c.id}`,
+      url: `${base}${urlFiche(c)}`,
       lastModified: c.created_at ? new Date(c.created_at) : STATIC_LAST_MOD,
       changeFrequency: (Number(c.review_count) > 0 ? "weekly" : "monthly") as "weekly" | "monthly",
       priority: Number(c.review_count) > 5 ? 0.8 : Number(c.review_count) > 0 ? 0.6 : 0.4,

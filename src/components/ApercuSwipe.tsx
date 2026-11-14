@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { X, Info, Flame, ArrowRight, ExternalLink } from "lucide-react";
 import { largeurCouverture, styleCadrageFond } from "@/lib/coverUrl";
+import { urlFiche } from "@/lib/urlFiche";
 
 /**
  * La pile de cartes de la page d'accueil, qui se manipule vraiment.
@@ -245,7 +246,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
                 {annonce.cta} <ExternalLink size={14} aria-hidden="true" />
               </span>
             ) : (
-              <Link href={`/company/${entreprise!.id}`} className="btn btn-marque btn-bloc" style={{ textDecoration: "none" }}>
+              <Link href={urlFiche(entreprise!)} className="btn btn-marque btn-bloc" style={{ textDecoration: "none" }}>
                 Voir les offres d&apos;emploi <ArrowRight size={15} aria-hidden="true" />
               </Link>
             )}
@@ -259,7 +260,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
         </BoutonRond>
         {entreprise ? (
           <Link
-            href={`/company/${entreprise.id}`}
+            href={urlFiche(entreprise)}
             aria-label={`En savoir plus sur ${entreprise.name}`}
             style={{
               width: 42, height: 42, borderRadius: "50%",

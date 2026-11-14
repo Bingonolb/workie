@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Briefcase, Building2, CheckCheck, MessageCircle, Trash2, MoreHorizontal } from "lucide-react";
 import { markAllRead, markRead, deleteNotification, type Notification } from "@/lib/actions/notifications";
+import { urlFiche } from "@/lib/urlFiche";
 
 function timeAgo(date: string) {
   const diff = Date.now() - new Date(date).getTime();
@@ -73,7 +74,7 @@ function NotificationItem({ n, onRead, onDelete }: {
               {companies.map(c => (
                 <Link
                   key={c.id}
-                  href={`/company/${c.id}`}
+                  href={urlFiche(c)}
                   onClick={() => { if (!n.read) onRead(n.id); }}
                   className="notif-company-chip"
                 >

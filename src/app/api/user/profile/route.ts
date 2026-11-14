@@ -47,7 +47,7 @@ export async function GET() {
       // revenait vide et la tuile affichait zéro pour quelqu'un qui a consulté
       // cent soixante-seize entreprises.
       admin.from("company_views")
-        .select("company_id, viewed_at, companies(id, name, city, subsector, cover_url, cover_color, is_verified)")
+        .select("company_id, viewed_at, companies(id, slug, name, city, subsector, cover_url, cover_color, is_verified)")
         .eq("user_id", user.id)
         // Quarante lignes suffisent a en tirer huit entreprises distinctes.
         // On en lisait deux cents, avec la fiche jointe a chacune : c'est ce
@@ -59,7 +59,7 @@ export async function GET() {
     // Une entreprise ne se répète pas : on garde sa visite la plus récente.
     type LigneVue = {
       company_id: string;
-      companies: { id: string; name: string; city: string; subsector: string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null } | null;
+      companies: { id: string; slug: string; name: string; city: string; subsector: string | null; cover_url: string | null; cover_color: string | null; is_verified: boolean | null } | null;
     };
     const vuesUniques: NonNullable<LigneVue["companies"]>[] = [];
     const dejaVue = new Set<string>();

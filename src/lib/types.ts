@@ -1,5 +1,7 @@
 export interface Company {
   id: string;
+  /** Adresse lisible de la fiche : /entreprise/{slug}. */
+  slug?: string | null;
   zefix_uid: string | null;
   name: string;
   sector: string;
@@ -144,6 +146,7 @@ export type Database = {
           cover_color: string | null; cover_credit: string | null; cover_credit_url: string | null
           cover_source: string | null; cover_query: string | null
           created_at: string | null; description: string | null; description_source: string | null; employee_range: string | null
+          slug: string
           langues: string[] | null
           founded_year: number | null; id: string; instagram_url: string | null
           is_subscribed: boolean | null; is_verified: boolean | null; linkedin_url: string | null
@@ -282,7 +285,7 @@ export type Database = {
       lister_entreprises_melangees: { Args: { graine: number; secteur?: string | null; canton_filtre?: string | null; decalage?: number; taille?: number }; Returns: Record<string, unknown>[] }
       voisines_fiche: { Args: { p_id: string }; Returns: { prev_id: string | null; prev_name: string | null; next_id: string | null; next_name: string | null }[] }
       lister_entreprises_melangees_v2: { Args: { graine: number; secteurs?: string[] | null; cantons?: string[] | null; anglais?: boolean; decalage?: number; taille?: number }; Returns: Record<string, unknown>[] }
-      rechercher_entreprises: { Args: { terme: string; nb?: number }; Returns: { id: string; name: string; city: string; sector: string; logo_url: string | null; rang: number; ressemblance: number }[] }
+      rechercher_entreprises: { Args: { terme: string; nb?: number }; Returns: { id: string; slug: string | null; name: string; city: string; sector: string; logo_url: string | null; rang: number; ressemblance: number }[] }
       notify_new_company: { Args: { p_company_id: string; p_company_name: string; p_company_sector: string | null; p_company_city: string | null }; Returns: number }
       increment_job_apply_click: { Args: { job_id: string }; Returns: undefined }
       increment_penalty_credits: { Args: { uid: string; amount: number }; Returns: undefined }

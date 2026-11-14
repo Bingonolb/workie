@@ -7,6 +7,7 @@ import { Search, X, Pencil, ExternalLink, ChevronRight } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { lieuAffiche } from "@/lib/types";
 import { largeurCouverture } from "@/lib/coverUrl";
+import { urlFiche } from "@/lib/urlFiche";
 
 export function AdminCompanyList({ companies }: { companies: Company[] }) {
   const router = useRouter();
@@ -213,7 +214,7 @@ export function AdminCompanyList({ companies }: { companies: Company[] }) {
                   <Link href={`/admin/company/${c.id}`} className="admin-bouton-modifier">
                     <Pencil size={13} aria-hidden="true" /> Modifier
                   </Link>
-                  <Link href={`/company/${c.id}`} target="_blank" aria-label="Voir la page publique" className="admin-bouton-voir">
+                  <Link href={urlFiche(c)} target="_blank" aria-label="Voir la page publique" className="admin-bouton-voir">
                     <ExternalLink size={14} aria-hidden="true" />
                   </Link>
                 </div>

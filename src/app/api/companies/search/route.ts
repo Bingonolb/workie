@@ -20,6 +20,7 @@ import { createClient } from "@/lib/supabase/server";
 
 type Resultat = {
   id: string;
+  slug: string | null;
   name: string;
   city: string;
   sector: string;
@@ -67,7 +68,7 @@ export async function GET(request: Request) {
 
   const companies: Resultat[] = (data ?? []).map(
     (r: Resultat & { rang: number; ressemblance: number }) => ({
-      id: r.id, name: r.name, city: r.city, sector: r.sector, logo_url: r.logo_url,
+      id: r.id, slug: r.slug, name: r.name, city: r.city, sector: r.sector, logo_url: r.logo_url,
     })
   );
 

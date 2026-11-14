@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { logoAffichable } from "@/lib/logo";
+import { urlFiche } from "@/lib/urlFiche";
 
 // Or, argent, bronze. Les trois premiers portaient des médailles en émoji,
 // dont le dessin change d'un système à l'autre et qui donnent à un classement
@@ -136,7 +137,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           const score = Number(c.score ?? 0);
 
           return (
-            <Link key={c.id} href={`/company/${c.id}`} className="ranking-row">
+            <Link key={c.id} href={urlFiche(c)} className="ranking-row">
               {/* Rang */}
               <span style={{
                 fontSize: 14.5, fontWeight: 800,
