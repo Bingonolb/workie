@@ -1,3 +1,5 @@
+import { largeurCouverture } from "@/lib/coverUrl";
+
 /**
  * Décide si un logo d'entreprise peut être affiché.
  *
@@ -13,19 +15,26 @@
  * onError du composant puisse servir de filet. Une seule URL résiduelle sur un
  * hôte non déclaré suffit à faire échouer le rendu de la fiche.
  *
- * Un logo n'est donc affiché que s'il est hébergé chez nous, c'est-à-dire
- * téléversé par l'entreprise elle-même lorsqu'elle revendique sa fiche : dans ce
- * cas le droit d'usage vient d'elle, et l'hôte est déclaré.
+ * Un logo n'est donc affiché que s'il est hébergé chez nous : téléversé depuis
+ * l'administration, comme la bannière. Sans logo, les initiales s'affichent.
  */
 
 const HOTES_AUTORISES = [".supabase.co", ".supabase.in"];
+
+/**
+ * Le logo est servi redimensionné, comme la bannière : le fichier déposé peut
+ * faire 1024 pixels, il s'affiche au plus sur 128. 256 couvre les écrans à
+ * densité double.
+ */
+export const LOGO_LARGEUR = 256;
 
 export function logoAffichable(url: string | null | undefined): string | null {
   if (!url) return null;
   try {
     const { protocol, hostname } = new URL(url);
     if (protocol !== "https:") return null;
-    return HOTES_AUTORISES.some(h => hostname.endsWith(h)) ? url : null;
+    if (!HOTES_AUTORISES.some(h => hostname.endsWith(h))) return null;
+    return largeurCouverture(url, LOGO_LARGEUR);
   } catch {
     // URL relative ou malformée : rien à afficher plutôt qu'un rendu qui casse
     return null;

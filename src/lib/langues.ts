@@ -64,3 +64,16 @@ export function languesDeTravail(
   // l'afficher donnerait une précision que la déduction n'a pas.
   return langues.filter(l => l !== "RM").slice(0, 4);
 }
+
+/**
+ * Abréviation affichée sur la version francophone.
+ *
+ * Les codes stockés restent ceux de la norme (FR, DE, EN, IT) : ils servent au
+ * filtre et ne changeront pas quand le site sera traduit. Seul l'affichage
+ * prend les abréviations françaises.
+ */
+const ABREGE_FR: Record<string, string> = { FR: "FR", DE: "ALL", EN: "ANG", IT: "IT" };
+
+export function abregeLangue(code: string): string {
+  return ABREGE_FR[code.toUpperCase()] ?? code;
+}

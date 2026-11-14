@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
+import { logoAffichable } from "@/lib/logo";
 
 // Or, argent, bronze. Les trois premiers portaient des médailles en émoji,
 // dont le dessin change d'un système à l'autre et qui donnent à un classement
@@ -147,14 +148,14 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
               {/* Entreprise */}
               <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                {c.logo_url && (
+                {logoAffichable(c.logo_url) && (
                   <div style={{
                     width: 36, height: 36, borderRadius: 8, overflow: "hidden",
                     flexShrink: 0, background: "var(--surface3)",
                     border: "1px solid var(--border)",
                   }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={c.logo_url} alt="" loading="lazy" decoding="async" className="img-fade" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = "none"; }} />
+                    <img src={logoAffichable(c.logo_url)!} alt="" loading="lazy" decoding="async" className="img-fade" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }} onError={e => { (e.currentTarget as HTMLImageElement).parentElement!.style.display = "none"; }} />
                   </div>
                 )}
                 <div style={{ minWidth: 0 }}>

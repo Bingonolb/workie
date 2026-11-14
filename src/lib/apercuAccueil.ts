@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { languesDeTravail } from "@/lib/langues";
+import { languesDeTravail, abregeLangue } from "@/lib/langues";
 import { lieuAffiche } from "@/lib/types";
 
 /**
@@ -62,7 +62,7 @@ export const getApercuEntreprises = unstable_cache(
         sector: c.sector,
         subsector: c.subsector,
         lieu: lieuAffiche(c.city, c.canton),
-        langues: langues.join(" · "),
+        langues: langues.map(abregeLangue).join(" · "),
         description: c.description,
         cover_url: c.cover_url,
       };

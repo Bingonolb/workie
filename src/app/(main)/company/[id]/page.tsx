@@ -13,7 +13,7 @@ import { ActionsFiche, PorteInvite } from "@/components/company/Interactions";
 import { BoutonRetour } from "@/components/company/BoutonRetour";
 
 import { SECTOR_COLORS, lieuAffiche } from "@/lib/types";
-import { languesDeTravail } from "@/lib/langues";
+import { languesDeTravail, abregeLangue } from "@/lib/langues";
 import type { Review } from "@/lib/types";
 // Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
 // d'avis et les tests de colonnes s'appuient sur la même liste.
@@ -348,7 +348,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 // langue qu'on ne parle pas, et c'est la première chose qu'un
                 // candidat romand veut savoir d'une entreprise alémanique.
                 langues.length > 0
-                  ? { icon: <Languages size={18} color="#06b6d4" aria-hidden="true" />, value: langues.join(" · "), label: "Langues de travail" }
+                  ? { icon: <Languages size={18} color="#06b6d4" aria-hidden="true" />, value: langues.map(abregeLangue).join(" · "), label: "Langues de travail" }
                   : null,
               ].filter(Boolean) as { icon: React.ReactNode; value: string; label: string }[]).map(({ icon, value, label }) => (
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>

@@ -5,7 +5,9 @@ import { EMPLOYEE_RANGES, CANTONS_SAISIE, CANTON_TOUTE_LA_SUISSE, CANTON_LIECHTE
 import type { Company } from "@/lib/types";
 import { ImageIcon } from "lucide-react";
 import { lireCadrage, CADRAGE_NEUTRE, type Cadrage } from "@/lib/coverUrl";
+import { abregeLangue } from "@/lib/langues";
 import { RecadrageBanniere } from "./RecadrageBanniere";
+import { ChampLogo } from "./ChampLogo";
 
 /**
  * Les champs d'une fiche entreprise, écrits une seule fois.
@@ -136,7 +138,7 @@ export function ChampsEntreprise({
         {/* Des interrupteurs et non un menu : on en choisit plusieurs, et
             quatre cases se lisent d'un coup la ou un menu multiple demande
             d'ouvrir, de maintenir une touche et de deviner ce qui est coche.
-            Les codes sont ceux de la norme internationale, FR, DE, EN, IT :
+            Les codes enregistres sont ceux de la norme, FR, DE, EN, IT ; le bouton montre l abreviation francaise (ALL, ANG) :
             ils ne changent pas quand le site passera en allemand, alors que
             « ALL » et « ANG » sont des abreviations francaises. */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -150,7 +152,7 @@ export function ChampsEntreprise({
                 aria-pressed={choisie}
                 className={choisie ? "btn btn-encre btn-sm" : "btn btn-clair btn-sm"}
               >
-                {code} <span style={{ fontWeight: 500, opacity: 0.75 }}>{nom}</span>
+                {abregeLangue(code)} <span style={{ fontWeight: 500, opacity: 0.75 }}>{nom}</span>
               </button>
             );
           })}
@@ -283,10 +285,7 @@ export function ChampsEntreprise({
       </div>
 
       <div className="admin-grille-2">
-        <div>
-          <label style={lbl}>Logo URL</label>
-          <input name="logo_url" defaultValue={company?.logo_url ?? ""} placeholder="https://..." style={inp} />
-        </div>
+        <ChampLogo actuel={company?.logo_url ?? ""} nom={company?.name ?? ""} />
         <div>
           <label style={lbl}>Site web</label>
           <input name="website_url" defaultValue={company?.website_url ?? ""} placeholder="https://..." style={inp} />

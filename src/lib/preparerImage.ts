@@ -27,7 +27,8 @@ export const POIDS_MAX_OCTETS = 6 * 1024 * 1024; // marge sous la limite de requ
 
 export type ImagePreparee = { fichier: File; reduite: boolean; avant: number; apres: number };
 
-export async function preparerImage(fichier: File): Promise<ImagePreparee> {
+/** `largeurMax` : 2560 pour une bannière, bien moins pour un logo. */
+export async function preparerImage(fichier: File, largeurMax = LARGEUR_MAX): Promise<ImagePreparee> {
   const avant = fichier.size;
 
   // Les formats que le navigateur ne sait pas décoder (HEIC de certains
@@ -49,7 +50,7 @@ export async function preparerImage(fichier: File): Promise<ImagePreparee> {
     return { fichier, reduite: false, avant, apres: avant };
   }
 
-  const facteur = Math.min(1, LARGEUR_MAX / bitmap.width);
+  const facteur = Math.min(1, largeurMax / Math.max(bitmap.width, largeurMax === LARGEUR_MAX ? bitmap.width : bitmap.height));
   const dejaLegere = avant <= POIDS_MAX_OCTETS;
 
   // Rien à gagner : image déjà petite et déjà légère.

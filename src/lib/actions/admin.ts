@@ -9,6 +9,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
 import { notifyNewCompany } from "@/lib/actions/notifications";
 import { cantonValide, LANGUES_SAISIE } from "@/lib/types";
+import { logoAffichable } from "@/lib/logo";
 import { avecCadrage, lireCadrage, CADRAGE_NEUTRE, ZOOM_MAX, variantesARechauffer, type Cadrage } from "@/lib/coverUrl";
 
 /**
@@ -51,7 +52,8 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     const depot = await televerserCouverture(admin, id, formData.get("cover_file"));
     if (depot.url) cover_url = depot.url;
     cover_url = banniereCadree(cover_url, formData);
-    const avertissement = depot.avertissement ?? null;
+    const logo = await televerserCouverture(admin, id, formData.get("logo_file"), "logos");
+    const avertissement = depot.avertissement ?? logo.avertissement ?? null;
 
     const fields = {
       name: String(formData.get("name") || ""),
@@ -67,7 +69,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
       employee_range: String(formData.get("employee_range") || "") || null,
       description: String(formData.get("description") || "").slice(0, 3000) || null,
       cover_url,
-      logo_url: String(formData.get("logo_url") || "") || null,
+      logo_url: logo.url ?? (String(formData.get("logo_url") || "") || null),
       website_url: String(formData.get("website_url") || "") || null,
       linkedin_url: String(formData.get("linkedin_url") || "") || null,
       twitter_url: String(formData.get("twitter_url") || "") || null,
@@ -112,6 +114,8 @@ async function televerserCouverture(
   admin: ReturnType<typeof createAdminClient>,
   companyId: string,
   coverFile: FormDataEntryValue | null,
+  // Le logo suit exactement le même chemin que la bannière, dans son propre dossier.
+  dossier: "covers" | "logos" = "covers",
 ): Promise<{ url?: string; avertissement?: string }> {
   const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
@@ -129,7 +133,7 @@ async function televerserCouverture(
   }
 
   const ext = EXT_MAP[coverFile.type] ?? "jpg";
-  const path = `covers/${companyId}/${randomUUID()}.${ext}`;
+  const path = `${dossier}/${companyId}/${randomUUID()}.${ext}`;
   // Cache d'un an : le nom du fichier est un UUID, une image ne change donc
   // jamais à adresse égale. Avec le réglage par défaut d'une heure, le
   // navigateur redemandait chaque bannière à chaque retour sur le site.
@@ -142,8 +146,13 @@ async function televerserCouverture(
   const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
   // Toutes ses tailles préparées d'avance, une fois la réponse partie : le
   // premier visiteur ne paie pas la demi-seconde de redimensionnement.
-  after(() => rechaufferBanniere(pub.publicUrl));
+  after(() => (dossier === "logos" ? rechaufferLogo(pub.publicUrl) : rechaufferBanniere(pub.publicUrl)));
   return { url: pub.publicUrl };
+}
+
+async function rechaufferLogo(url: string): Promise<void> {
+  const v = logoAffichable(url);
+  if (v) await fetch(v, { headers: { Accept: "image/avif,image/webp,image/*,*/*;q=0.8" } }).then(r => r.arrayBuffer()).catch(() => null);
 }
 
 async function rechaufferBanniere(url: string): Promise<void> {
@@ -212,6 +221,9 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
     if (created?.id) {
       const depot = await televerserCouverture(supabase, created.id, formData.get("cover_file"));
       avertissement = depot.avertissement ?? null;
+      const logo = await televerserCouverture(supabase, created.id, formData.get("logo_file"), "logos");
+      avertissement = avertissement ?? logo.avertissement ?? null;
+      if (logo.url) await supabase.from("companies").update({ logo_url: logo.url }).eq("id", created.id);
       if (depot.url) {
         const { error: majErr } = await supabase
           .from("companies")
