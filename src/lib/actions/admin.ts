@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -87,7 +87,7 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     const { error } = await admin.from("companies").update(fields).eq("id", id);
     if (error) return { error: error.message };
 
-    revalidatePath(`/company/${id}`);
+    revalidatePath("/entreprise/[slug]", "page");
     revalidatePath("/explore");
     revalidatePath("/admin/companies");
     revalidateTag("companies", {});
@@ -367,7 +367,7 @@ export async function approveClaim(
     if (claimUpdateErr) return { error: `Erreur mise à jour demande : ${claimUpdateErr.message}` };
 
     revalidatePath("/admin/claims");
-    revalidatePath(`/company/${companyId}`);
+    revalidatePath("/entreprise/[slug]", "page");
 
     // Notify the company owner by email
     const { data: claimData } = await adminClient
