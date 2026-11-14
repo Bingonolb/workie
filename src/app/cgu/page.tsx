@@ -44,7 +44,7 @@ export default function CGUPage() {
         </Section>
 
         <Section title="4. Classement">
-          <p>Le classement reflète l&apos;intérêt que les visiteurs portent à une entreprise : mises en favori et consultations de la fiche. Il ne constitue ni une évaluation de l&apos;employeur, ni une recommandation professionnelle ou financière de Workie.</p>
+          <p>Le classement reflète l&apos;intérêt que les visiteurs portent à une entreprise : mises en favori, consultations de la fiche et clics vers les offres d&apos;emploi. Il ne constitue ni une évaluation de l&apos;employeur, ni une recommandation professionnelle ou financière de Workie.</p>
         </Section>
 
         <Section title="5. Comptes Business">
