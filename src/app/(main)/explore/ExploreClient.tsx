@@ -98,6 +98,7 @@ export function ExploreClient({
   initialCanton,
   initialSort,
   squareAds,
+  secteurs = SECTORS,
 }: {
   initialCompanies: Company[];
   initialTotal: number;
@@ -106,6 +107,7 @@ export function ExploreClient({
   swipeAds: PublicAdCampaign[];
   isLoggedIn: boolean;
   isGuest: boolean;
+  secteurs?: readonly string[];
   isAdmin: boolean;
   initialView: "grid" | "swipe";
   initialSector?: string;
@@ -703,7 +705,7 @@ export function ExploreClient({
     return (
       <>
         <ExploreFilters
-          sectors={SECTORS}
+          sectors={secteurs}
           cantons={CANTONS}
           current={current}
           onFilter={(key, value) => {
@@ -736,7 +738,7 @@ export function ExploreClient({
   return (
     <>
       <ExploreFilters
-        sectors={SECTORS}
+        sectors={secteurs}
         cantons={CANTONS}
         current={current}
         onFilter={handleFilter}

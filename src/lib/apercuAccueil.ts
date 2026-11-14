@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { languesDeTravail, abregeLangue } from "@/lib/langues";
 import { lieuAffiche } from "@/lib/types";
+import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 
 /**
  * Les dix entreprises de la pile d'accueil.
@@ -13,18 +14,11 @@ import { lieuAffiche } from "@/lib/types";
  * Une par secteur d'abord, les mieux suivies, puis on complete : dix cartes de
  * la meme branche feraient croire a un site specialise.
  */
-const SECTEURS_REPRIS = [
-  "Administration publique", "Aéronautique & Spatial", "Agriculture",
-  "Alimentation", "Association", "Assurances", "Automobile", "Bâtiment",
-  "Beauté", "Biens de consommation", "Chimie", "Commerce de détail", "Conseil",
-  "Défense & Sécurité", "Droit", "Éducation & Recherche", "Énergie", "Finance",
-  "Fondation", "Horlogerie & Joaillerie", "Hôtellerie & Restauration",
-  "Immobilier & Gérance", "Industrie",
-];
-
 export const getApercuEntreprises = unstable_cache(
   async () => {
     const admin = createAdminClient();
+    // Les catégories publiées sont celles que Luc a terminées.
+    const SECTEURS_REPRIS = await getSecteursEnLigne();
     const { data } = await admin
       .from("companies")
       .select("id, name, sector, subsector, city, canton, description, cover_url, website_url, employee_range, langues")

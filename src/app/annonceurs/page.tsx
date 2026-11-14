@@ -7,6 +7,7 @@ import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ApercuSwipe } from "@/components/ApercuSwipe";
 import { getApercuEntreprises } from "@/lib/apercuAccueil";
+import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { melangerAvecAnnonces } from "@/lib/annoncesExemple";
 import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREE_MIN, DUREE_MAX } from "@/lib/ads/pricing";
 
@@ -19,7 +20,8 @@ const compterEmployeurs = unstable_cache(
   async () => {
     const { count } = await createAdminClient()
       .from("companies")
-      .select("*", { count: "exact", head: true });
+      .select("*", { count: "exact", head: true })
+      .in("sector", await getSecteursEnLigne());
     return count ?? 0;
   },
   ["annonceurs-employeurs"],

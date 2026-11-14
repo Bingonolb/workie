@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Company } from "@/lib/types";
 import { CANTON_NAMES } from "@/lib/types";
+import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 
 function stripAccents(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -162,6 +163,7 @@ const _fetchGridPageCached = unstable_cache(
     let q = admin
       .from("companies")
       .select(GRID_COLS, { count: "exact" })
+      .in("sector", await getSecteursEnLigne())
 
     if (secteurs.length) q = q.in("sector", secteurs);
     if (cantons.length) q = q.in("canton", cantons);
@@ -231,7 +233,12 @@ export async function fetchGridPage(
 export const getCachedCompany = unstable_cache(
   async (id: string) => {
     const admin = createAdminClient();
-    const { data } = await admin.from("companies").select(COMPANY_PUBLIC_COLS).eq("id", id).maybeSingle();
+    const [{ data }, enLigne] = await Promise.all([
+      admin.from("companies").select(COMPANY_PUBLIC_COLS).eq("id", id).maybeSingle(),
+      getSecteursEnLigne(),
+    ]);
+    // Une fiche d'une catégorie pas encore publiée n'existe pas pour le public.
+    if (data && !enLigne.includes((data as unknown as { sector: string }).sector)) return null;
     return data as Company | null;
   },
   ["company"],
@@ -265,6 +272,7 @@ export const getCachedSimilarCompanies = unstable_cache(
     const { data } = await admin
       .from("companies")
       .select("id, name, city, avg_rating, review_count, cover_url, cover_color, is_verified, sector, subsector")
+      .in("sector", await getSecteursEnLigne())
       .eq("sector", sector)
       .neq("id", excludeId)
       .order("score", { ascending: false })
@@ -304,9 +312,11 @@ export const getCachedSuggestions = unstable_cache(
     canton: string | null,
   ): Promise<{ titre: string; entreprises: Suggestion[] }[]> => {
     const admin = createAdminClient();
+    const enLigne = await getSecteursEnLigne();
     const req = (colonne: "subsector" | "sector" | "canton", valeur: string) =>
       admin.from("companies")
         .select(COLONNES_SUGGESTION)
+        .in("sector", enLigne)
         .eq(colonne, valeur)
         .neq("id", companyId)
         .order("score", { ascending: false })
@@ -316,7 +326,7 @@ export const getCachedSuggestions = unstable_cache(
       subsector ? req("subsector", subsector) : Promise.resolve({ data: [] }),
       req("sector", sector),
       canton ? req("canton", canton) : Promise.resolve({ data: [] }),
-      admin.from("companies").select(COLONNES_SUGGESTION).neq("id", companyId)
+      admin.from("companies").select(COLONNES_SUGGESTION).in("sector", enLigne).neq("id", companyId)
         .order("score", { ascending: false }).limit(8),
     ]);
 

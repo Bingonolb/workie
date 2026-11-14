@@ -23,13 +23,16 @@ export const metadata: Metadata = {
 import { fetchGridPage } from "@/lib/actions/companies";
 import { largeurCouverture } from "@/lib/coverUrl";
 import { ExploreClient } from "./ExploreClient";
+import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import type { Company } from "@/lib/types";
 
 export default async function ExplorePage() {
   // No searchParams — ISR requires no dynamic input.
   // Filters are applied client-side via ExploreClient → fetchGridPage (cached).
-  const { companies: initialCompanies, total: initialTotal } = await fetchGridPage({}, 0)
-    .catch(() => ({ companies: [] as Company[], total: 0 }));
+  const [{ companies: initialCompanies, total: initialTotal }, secteurs] = await Promise.all([
+    fetchGridPage({}, 0).catch(() => ({ companies: [] as Company[], total: 0 })),
+    getSecteursEnLigne().catch(() => [] as string[]),
+  ]);
 
   // JSON-LD for Google indexing of top companies
   const BASE_URL = "https://www.workie.ch";
@@ -82,6 +85,7 @@ export default async function ExplorePage() {
           isAdmin={false}
           initialView="grid"
           squareAds={[]}
+          secteurs={secteurs.length ? secteurs : undefined}
         />
       </main>
     </div>

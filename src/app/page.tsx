@@ -11,14 +11,16 @@ import { ApercuSwipe } from "@/components/ApercuSwipe";
 import { Logo } from "@/components/Logo";
 import { PiedAccueil } from "@/components/PiedAccueil";
 import { getApercuEntreprises } from "@/lib/apercuAccueil";
+import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
 const getLandingCounts = unstable_cache(
   async () => {
     const admin = createAdminClient();
+    const enLigne = await getSecteursEnLigne();
     const [{ count: companyCount }, { count: reviewCount }] = await Promise.all([
-      admin.from("companies").select("*", { count: "exact", head: true }),
+      admin.from("companies").select("*", { count: "exact", head: true }).in("sector", enLigne),
       admin.from("reviews").select("*", { count: "exact", head: true }),
     ]);
     return { companies: companyCount ?? 0, reviews: reviewCount ?? 0 };

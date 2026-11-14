@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 
 export const revalidate = 3600;
 
@@ -21,6 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     // Admin client — no cookies needed, works in crawler context
     const admin = createAdminClient();
+    const enLigne = await getSecteursEnLigne();
 
     // Pagination obligatoire : PostgREST plafonne toute requête à 1000 lignes
     // côté serveur, un .limit(5000) ne le contourne pas. Le sitemap ne listait
@@ -32,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const { data, error } = await admin
         .from("companies")
         .select("id, review_count, created_at")
+        .in("sector", enLigne)
         .order("score", { ascending: false })
         .range(from, from + PAGE - 1);
       if (error || !data || data.length === 0) break;
