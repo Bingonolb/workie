@@ -4,7 +4,8 @@ import { HautDePage } from "@/components/HautDePage";
 import Link from "next/link";
 import Image from "next/image";
 import { getCachedCompany, getCachedJobOffers, getCachedSuggestions } from "@/lib/actions/companies";
-import { MapPin, Users, Globe, ArrowLeft, TrendingUp, CheckCircle, Languages } from "lucide-react";
+import { LienOffres } from "@/components/company/LienOffres";
+import { MapPin, Users, ArrowLeft, TrendingUp, CheckCircle, Languages } from "lucide-react";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
@@ -106,7 +107,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  * social n'est pas une offre d'emploi. C'est le site officiel qu'on ouvre
  * pour postuler.
  */
-function BlocOffresEmploi({ url, className, style }: { url: string; className?: string; style?: React.CSSProperties }) {
+function BlocOffresEmploi({ url, companyId, className, style }: { url: string; companyId: string; className?: string; style?: React.CSSProperties }) {
   const href = /^https?:\/\//.test(url) ? url : `https://${url}`;
   return (
     <div className={className} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", ...style }}>
@@ -114,11 +115,7 @@ function BlocOffresEmploi({ url, className, style }: { url: string; className?: 
       {/* Pastille d'accent plutôt que pavé gris : c'est le vocabulaire déjà
           employé pour le compteur d'offres et le badge de secteur. Le gris
           plein pesait autant qu'une carte pour un simple lien. */}
-      <a href={href} target="_blank" rel="noopener noreferrer" className="lien-site">
-        <Globe size={14} aria-hidden="true" />
-        Site internet
-        <span aria-hidden="true" className="lien-site-fleche">↗</span>
-      </a>
+      <LienOffres href={href} companyId={companyId} />
     </div>
   );
 }
@@ -325,7 +322,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
                 après les avis. Or c'est ce qu'on vient y chercher : il remonte
                 donc ici, et la version de droite est masquée à cette taille. */}
             {company.website_url && (
-              <BlocOffresEmploi url={company.website_url} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
             )}
 
             {/* Key stats — seules les données réellement disponibles sont
@@ -384,7 +381,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             )}
 
             {company.website_url && (
-              <BlocOffresEmploi url={company.website_url} className="liens-desktop" />
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} className="liens-desktop" />
             )}
 
             {/* Le bloc « Tags » a été retiré.
