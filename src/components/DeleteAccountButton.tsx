@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { deleteAccount } from "@/lib/actions/auth";
-import { Trash2, X } from "lucide-react";
+import { X } from "lucide-react";
 
 export function DeleteAccountButton() {
   const [open, setOpen] = useState(false);
@@ -34,13 +34,12 @@ export function DeleteAccountButton() {
         // Du texte, pas un bouton. Supprimer son compte est irreversible et
         // se fait une fois : cela doit se trouver, jamais s'offrir.
         style={{
-          display: "inline-flex", alignItems: "center", gap: 7,
           background: "none", border: "none", padding: 0, cursor: "pointer",
-          color: "#ef4444", opacity: 0.75, fontWeight: 600, fontSize: 13,
+          color: "var(--text-muted)", fontWeight: 400, fontSize: 12.5,
           fontFamily: "inherit", width: "fit-content",
         }}
       >
-        <Trash2 size={14} aria-hidden="true" /> Supprimer mon compte
+        Supprimer mon compte
       </button>
 
       {open && (

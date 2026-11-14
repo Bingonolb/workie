@@ -392,7 +392,6 @@ export function ProfilClient() {
                 Télécharger mes données
               </a>
               <SignOutButton />
-              <DeleteAccountButton />
 
               {/* La regie publicitaire, toujours atteignable.
                   La tuile de chiffres ne s'affiche que pour qui a deja cree
@@ -430,6 +429,9 @@ export function ProfilClient() {
                   </Link>
                 ))}
                 <a href="mailto:contact@workie.ch" style={{ fontSize: 12.5, color: "var(--text-muted)", textDecoration: "none" }}>Contact</a>
+                {/* En bas, en gris, comme les pages légales : on la trouve
+                    quand on la cherche, elle n'attire pas l'oeil. */}
+                <DeleteAccountButton />
               </div>
             </div>
           </div>
