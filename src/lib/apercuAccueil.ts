@@ -62,6 +62,6 @@ export const getApercuEntreprises = unstable_cache(
       };
     });
   },
-  ["landing-apercu-v2"],
+  ["landing-apercu-v3"],
   { revalidate: 300, tags: ["companies"] }
 );

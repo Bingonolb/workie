@@ -206,7 +206,7 @@ const _fetchGridPageCached = unstable_cache(
 
     return { companies: (data ?? []) as Company[], total: count ?? 0 };
   },
-  ["grid-page"],
+  ["grid-page-v2"],
   { revalidate: 60, tags: ["companies"] }
 );
 
@@ -241,7 +241,7 @@ export const getCachedCompany = unstable_cache(
     if (data && !enLigne.includes((data as unknown as { sector: string }).sector)) return null;
     return data as Company | null;
   },
-  ["company"],
+  ["company-v2"],
   { revalidate: 60, tags: ["companies"] }
 );
 
@@ -279,7 +279,7 @@ export const getCachedSimilarCompanies = unstable_cache(
       .limit(4);
     return data ?? [];
   },
-  ["similar-companies"],
+  ["similar-companies-v2"],
   { revalidate: 300, tags: ["companies"] }
 );
 
@@ -352,6 +352,6 @@ export const getCachedSuggestions = unstable_cache(
     ];
     return groupes.filter(g => g.titre && g.entreprises.length > 0);
   },
-  ["suggestions-entreprise"],
+  ["suggestions-entreprise-v2"],
   { revalidate: 300, tags: ["companies"] }
 );

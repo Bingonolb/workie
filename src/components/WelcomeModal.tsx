@@ -95,7 +95,7 @@ export function WelcomeModal() {
               // pour 1 032 reelles : un chiffre fige derive du jour ou on le
               // recopie. Une borne basse reste vraie quand le catalogue
               // grandit, et ne peut pas mentir a la hausse.
-              { Icone: Search, text: "1000 entreprises suisses" },
+              { Icone: Search, text: "Des entreprises suisses" },
             ].map(f => (
               <div key={f.text} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f9fafb", border: "1px solid #f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>

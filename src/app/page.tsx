@@ -25,8 +25,8 @@ const getLandingCounts = unstable_cache(
     ]);
     return { companies: companyCount ?? 0, reviews: reviewCount ?? 0 };
   },
-  ["landing-counts"],
-  { revalidate: 300, tags: ["landing-counts"] }
+  ["landing-counts-v2"],
+  { revalidate: 300, tags: ["landing-counts-v2"] }
 );
 
 export const metadata: Metadata = {
@@ -49,8 +49,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const [counts, apercu] = await Promise.all([getLandingCounts(), getApercuEntreprises()]);
+  const [counts, apercu, secteursEnLigne] = await Promise.all([getLandingCounts(), getApercuEntreprises(), getSecteursEnLigne()]);
   const nCompanies = counts.companies;
+  const nSecteurs = secteursEnLigne.length;
 
   // Vitrine fixe plutôt que tirée du classement.
   //
@@ -390,7 +391,7 @@ export default async function Home() {
               // à sa place.
               { valeur: nCompanies.toLocaleString("fr-CH"), libelle: "entreprises" },
               { valeur: "26", libelle: "cantons" },
-              { valeur: "36", libelle: "secteurs" },
+              { valeur: String(nSecteurs), libelle: "secteurs" },
             ].map(({ valeur, libelle }, i) => (
               <div key={libelle} style={{
                 // Filets verticaux plutôt que quatre blocs posés côte à côte :

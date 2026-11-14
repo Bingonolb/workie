@@ -120,7 +120,7 @@ export async function sendWelcomeEmail(email: string, username: string): Promise
         paragraphes: [
           "Votre compte est prêt.",
           "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
-          `<strong style="color:${TEXTE};">1000 entreprises · 26 cantons · 4 langues</strong>`,
+          `<strong style="color:${TEXTE};">26 cantons · 4 langues</strong>`,
         ],
         cta: { libelle: "Commencer", href: `${BASE}/explore` },
       }),

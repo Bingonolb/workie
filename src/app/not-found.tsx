@@ -21,7 +21,7 @@ export default function NotFound() {
           Cette page n&apos;existe pas
         </h1>
         <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 28, maxWidth: 340, lineHeight: 1.6 }}>
-          Les 1000 entreprises, elles, sont toujours là.
+          Les entreprises, elles, sont toujours là.
         </p>
         <Link href="/explore" className="btn btn-encre">Explorer les entreprises</Link>
       </div>

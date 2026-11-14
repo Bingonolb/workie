@@ -24,7 +24,7 @@ const compterEmployeurs = unstable_cache(
       .in("sector", await getSecteursEnLigne());
     return count ?? 0;
   },
-  ["annonceurs-employeurs"],
+  ["annonceurs-employeurs-v2"],
   { revalidate: 300, tags: ["landing-counts"] }
 );
 
