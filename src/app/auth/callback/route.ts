@@ -82,14 +82,8 @@ export async function GET(request: Request) {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const companyIdFromMeta = user.user_metadata?.company_id as string | undefined;
-        if (companyIdFromMeta) {
-          await upsertProfileGeo(user.id, {
-            claimed_company_id: companyIdFromMeta,
-            full_name: (user.user_metadata?.full_name as string | undefined)
-              ?? (`${(user.user_metadata?.first_name as string | undefined) ?? ""} ${(user.user_metadata?.last_name as string | undefined) ?? ""}`.trim() || null),
-          });
-        }
+        // L'entreprise revendiquée ne vient jamais des métadonnées d'inscription,
+        // que l'utilisateur contrôle : elle est attribuée par l'admin.
         const isNew = await upsertProfileGeo(user.id);
         if (isNew) {
           void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
@@ -110,14 +104,8 @@ export async function GET(request: Request) {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {
-        const companyIdFromMeta = user.user_metadata?.company_id as string | undefined;
-        if (companyIdFromMeta) {
-          await upsertProfileGeo(user.id, {
-            claimed_company_id: companyIdFromMeta,
-            full_name: (user.user_metadata?.full_name as string | undefined)
-              ?? (`${(user.user_metadata?.first_name as string | undefined) ?? ""} ${(user.user_metadata?.last_name as string | undefined) ?? ""}`.trim() || null),
-          });
-        }
+        // L'entreprise revendiquée ne vient jamais des métadonnées d'inscription,
+        // que l'utilisateur contrôle : elle est attribuée par l'admin.
         const isNew = await upsertProfileGeo(user.id);
         if (isNew) {
           void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
