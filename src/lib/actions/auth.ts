@@ -77,8 +77,8 @@ export async function signUp(
   if (!birthYear || birthYear < 1920 || birthYear > currentYear - 13) {
     return { error: "Choisissez votre année de naissance." };
   }
-  if (password.length < 6) {
-    return { error: "Le mot de passe doit faire au moins 6 caractères." };
+  if (password.length < 8) {
+    return { error: "Le mot de passe doit faire au moins 8 caractères." };
   }
   if (isDisposableEmail(email)) {
     return { error: "Les adresses email temporaires ne sont pas acceptées." };
@@ -172,7 +172,7 @@ export async function resetPassword(
   formData: FormData
 ): Promise<ActionState> {
   const password = String(formData.get("password") || "");
-  if (password.length < 6) return { error: "Le mot de passe doit faire au moins 6 caractères." };
+  if (password.length < 8) return { error: "Le mot de passe doit faire au moins 8 caractères." };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });

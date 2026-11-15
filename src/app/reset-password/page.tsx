@@ -30,7 +30,7 @@ export default function ResetPasswordPage() {
               type="password"
               name="password"
               required
-              minLength={6}
+              minLength={8}
               placeholder="••••••••"
               autoComplete="new-password"
               style={{

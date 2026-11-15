@@ -1,19 +1,59 @@
 "use server";
 
+import { createHash } from "crypto";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/**
+ * Empreinte anonyme du visiteur, valable une journée : hachage de l'IP, du
+ * navigateur et de la date avec un secret serveur. Elle reconnaît une rafale
+ * de rechargements sans conserver l'adresse IP, et change chaque jour, ce qui
+ * empêche de suivre quelqu'un dans le temps.
+ */
+function empreinte(ip: string, ua: string): string {
+  const sel = process.env.EMPREINTE_SEL ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+  const jour = new Date().toISOString().slice(0, 10);
+  return createHash("sha256").update(`${sel}|${jour}|${ip}|${ua}`).digest("hex").slice(0, 32);
+}
+
+const ROBOT = /bot|crawl|spider|slurp|preview|fetch|curl|wget|python|headless|lighthouse/i;
+
+/**
+ * Une visite de fiche : 1 point au classement. Comptée une fois par personne,
+ * par fiche et par jour. Les robots ne comptent pas. Sans cela, recharger la
+ * page en boucle suffisait à faire monter une entreprise.
+ */
 export async function trackCompanyView(companyId: string): Promise<void> {
   try {
+    if (!UUID_RE.test(companyId)) return;
     const [supabase, h] = await Promise.all([createClient(), headers()]);
+    const ua = h.get("user-agent") ?? "";
+    if (!ua || ROBOT.test(ua)) return;
+    const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "";
     const { data: { user } } = await supabase.auth.getUser();
-    const viewer_canton = h.get("x-vercel-ip-country-region") ?? null;
-    const viewer_city   = h.get("x-vercel-ip-city") ?? null;
-    await supabase.from("company_views").insert({ company_id: companyId, user_id: user?.id ?? null, viewer_canton, viewer_city });
-  } catch { /* silent */ }
+    const cle = user ? `u:${user.id}` : empreinte(ip, ua);
+
+    const admin = createAdminClient();
+    const depuis = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    // Table et colonne hors des types générés.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const vues = admin.from("company_views") as any;
+    const { count } = await vues
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", companyId).eq("empreinte", cle).gte("viewed_at", depuis);
+    if ((count ?? 0) > 0) return;
+
+    await vues.insert({
+      company_id: companyId,
+      user_id: user?.id ?? null,
+      empreinte: cle,
+      viewer_canton: h.get("x-vercel-ip-country-region") ?? null,
+      viewer_city: h.get("x-vercel-ip-city") ?? null,
+    });
+  } catch { /* silencieux : une statistique ne doit jamais casser une page */ }
 }
 
 export async function trackJobApplyClick(jobId: string, companyId: string): Promise<void> {

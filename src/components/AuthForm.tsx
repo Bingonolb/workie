@@ -57,7 +57,7 @@ export function AuthForm({
           type="password"
           name="password"
           required
-          minLength={6}
+          minLength={mode === "signup" ? 8 : undefined}
           placeholder="••••••••"
           autoComplete="current-password"
           className="w-full rounded-xl border border-neutral-300 px-4 py-2.5 outline-none focus:border-brand"

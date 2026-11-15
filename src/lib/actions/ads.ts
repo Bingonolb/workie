@@ -631,7 +631,7 @@ export async function trackAdImpression(campaignId: string): Promise<void> {
       if ((count ?? 0) > 0) return;
     }
 
-    const { error: insErr } = await supabase.from("ad_impressions").insert({
+    const { error: insErr } = await createAdminClient().from("ad_impressions").insert({
       campaign_id: campaignId,
       user_id: user?.id ?? null,
       viewer_canton: geo.canton,
@@ -674,7 +674,7 @@ export async function trackAdClick(campaignId: string): Promise<void> {
       if ((count ?? 0) > 0) return;
     }
 
-    const { error: clkErr } = await supabase.from("ad_clicks").insert({
+    const { error: clkErr } = await createAdminClient().from("ad_clicks").insert({
       campaign_id: campaignId,
       user_id: user?.id ?? null,
       viewer_canton: geo.canton,
