@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
+import { catalogueEmploi } from "@/lib/pagesEmploi";
 import { urlFiche } from "@/lib/urlFiche";
 
 export const revalidate = 3600;
@@ -50,7 +51,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: Number(c.review_count) > 5 ? 0.8 : Number(c.review_count) > 0 ? 0.6 : 0.4,
     }));
 
-    return [...staticRoutes, ...companyRoutes];
+    // Pages par secteur et par canton : ce sont elles qui captent les
+    // recherches du type « entreprises horlogerie Genève ».
+    const { pages } = await catalogueEmploi();
+    const emploiRoutes: MetadataRoute.Sitemap = [
+      { url: `${base}/emploi`, changeFrequency: "daily", priority: 0.8 },
+      ...pages.map(p => ({
+        url: `${base}/emploi/${p.slug}`,
+        changeFrequency: "daily" as const,
+        priority: p.type === "croise" ? 0.6 : 0.7,
+      })),
+    ];
+
+    return [...staticRoutes, ...emploiRoutes, ...companyRoutes];
   } catch {
     return staticRoutes;
   }

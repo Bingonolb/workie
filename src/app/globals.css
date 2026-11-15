@@ -1693,3 +1693,12 @@ body { overscroll-behavior-y: none; }
 @media (prefers-reduced-motion: no-preference) {
   .apercu-fin { animation: apparition 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 }
+
+/* Pastilles de liens des pages /emploi (secteurs, cantons). */
+.lien-emploi {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 13px; border-radius: 999px; min-height: 36px;
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: 13.5px; font-weight: 600; color: var(--text); text-decoration: none;
+}
+.lien-emploi:hover { border-color: var(--text-muted); }

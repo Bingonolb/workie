@@ -7,6 +7,16 @@ import { getCachedCompany, getCachedJobOffers, getCachedSuggestions } from "@/li
 import { LienOffres } from "@/components/company/LienOffres";
 import { idDeFiche } from "@/lib/resoudreFiche";
 import { urlFiche } from "@/lib/urlFiche";
+import { slugifier } from "@/lib/pagesEmploi";
+
+/**
+ * Le titre que Google affiche : le nom, ce qu'on y cherche (l'emploi), le
+ * lieu et le métier. « Omega : emploi à Bienne, Horlogerie de luxe ».
+ */
+function titreFiche(c: { name: string; city: string | null; sector: string; subsector?: string | null }): string {
+  const lieu = !c.city || /multi/i.test(c.city) ? "en Suisse" : `à ${c.city}`;
+  return `${c.name} : emploi ${lieu}, ${c.subsector || c.sector}`;
+}
 import { MapPin, Users, ArrowLeft, TrendingUp, CheckCircle, Languages } from "lucide-react";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
@@ -74,7 +84,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     ? [{ url: lireCadrage(company.cover_url).src, width: 1200, height: 630, alt: company.name }]
     : [{ url: apercuDessine, width: 1200, height: 630, alt: company.name }];
   return {
-    title: `${company.name} · Emploi et entreprise`,
+    title: titreFiche(company),
     description: desc,
     alternates: { canonical: url },
     openGraph: {
@@ -172,8 +182,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
       "@type": "BreadcrumbList",
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Workie", "item": BASE_URL },
-        { "@type": "ListItem", "position": 2, "name": "Explorer", "item": `${BASE_URL}/explore` },
-        { "@type": "ListItem", "position": 3, "name": company.sector, "item": `${BASE_URL}/explore?sector=${encodeURIComponent(company.sector)}` },
+        { "@type": "ListItem", "position": 2, "name": "Emploi", "item": `${BASE_URL}/emploi` },
+        { "@type": "ListItem", "position": 3, "name": company.sector, "item": `${BASE_URL}/emploi/${slugifier(company.sector)}` },
         { "@type": "ListItem", "position": 4, "name": company.name, "item": `${BASE_URL}${urlFiche(company)}` },
       ],
     },

@@ -14,7 +14,7 @@ export function PiedAccueil() {
             <div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Explorer</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[{ href: "/explore", label: "Entreprises" }, { href: "/ranking", label: "Classement" }, { href: "/annonceurs", label: "Faire de la publicité" }].map(({ href, label }) => (
+                {[{ href: "/explore", label: "Entreprises" }, { href: "/emploi", label: "Emploi par secteur et canton" }, { href: "/ranking", label: "Classement" }, { href: "/annonceurs", label: "Faire de la publicité" }].map(({ href, label }) => (
                   <Link key={href} href={href} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>{label}</Link>
                 ))}
               </div>
