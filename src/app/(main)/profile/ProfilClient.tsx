@@ -141,15 +141,13 @@ export function ProfilClient() {
   // le vise pas, on n'en fait rien, il ne dit même pas lesquelles. La liste
   // juste en dessous, elle, les nomme et y ramène.
   //
-  // La tuile de régie n'apparaît que pour qui a déjà créé une campagne : un
-  // « 0 campagne active » sur le profil de tout le monde n'est pas une
-  // statistique, c'est une réclame qui en prend la place.
+  // Les campagnes s'affichent toujours, même à 0 (choix de Luc).
   const tuiles: { Icone: typeof Flame; value: string; label: string; color: string; href: string | null }[] = [
     { Icone: Flame, value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
+    // Toujours affichée, même à 0 : demandé par Luc le 2026-11-15. La tuile
+    // sert aussi de porte vers la régie, sur mobile comme sur ordinateur.
+    { Icone: Megaphone, value: d ? String(adsActives) : "—", label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" },
   ];
-  if ((d?.adsTotal ?? 0) > 0) {
-    tuiles.push({ Icone: Megaphone, value: String(adsActives), label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" });
-  }
 
   return (
     <div className={anime ? "apparition" : undefined}>

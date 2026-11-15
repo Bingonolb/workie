@@ -1608,7 +1608,8 @@ body { overscroll-behavior-y: none; }
   a.profil-chiffre:hover { background: var(--surface2); }
 }
 @media (max-width: 640px) {
-  .profil-chiffre { padding: 16px 18px; }
+  .profil-chiffre { padding: 16px 14px; gap: 10px; }
+  .profil-chiffre .kpi-icone { width: 34px !important; height: 34px !important; }
 }
 
 /* L'anciennete, sous le nom. Une seule ligne, discrete : le reste de ce que
