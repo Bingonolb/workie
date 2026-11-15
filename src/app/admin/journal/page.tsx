@@ -14,6 +14,8 @@ const LIBELLES: Record<string, string> = {
   "company_claims.update": "Revendication traitée",
   "profiles.update": "Droits d'un compte modifiés",
   "ad_campaigns.update": "Statut d'une campagne modifié",
+  "utilisateurs.bloquer": "Compte bloqué",
+  "utilisateurs.debloquer": "Compte débloqué",
 };
 
 const ORIGINES: Record<string, string> = {

@@ -57,13 +57,13 @@ export default async function AdminPage() {
             { icon: <Users size={16} color="#10b981" />, value: userCount ?? 0, label: "Utilisateurs", color: "#10b981" },
             { icon: <Inbox size={16} color="#ef4444" />, value: pendingClaims ?? 0, label: "Demandes en attente", color: "#ef4444" },
           ].map(({ icon, value, label, color }) => (
-            <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+            <Link key={label} href={label === "Utilisateurs" ? "/admin/utilisateurs" : "#"} aria-disabled={label !== "Utilisateurs"} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, textDecoration: "none", pointerEvents: label === "Utilisateurs" ? "auto" : "none" }}>
               <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
               <div>
                 <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>{value}</p>
                 <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{label}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
