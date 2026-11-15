@@ -3,13 +3,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
   getUser: vi.fn(),
+  getNiveauAal: vi.fn(),
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }));
 vi.mock("@/lib/email", () => ({ sendClaimApprovedEmail: vi.fn() }));
 vi.mock("@/lib/actions/notifications", () => ({ notifyNewCompany: vi.fn() }));
 
-import { createClient, getUser } from "@/lib/supabase/server";
+import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { adminUpdateCompany } from "@/lib/actions/admin";
 
@@ -37,6 +38,7 @@ describe("adminUpdateCompany refuse tout le monde sauf un administrateur", () =>
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(createAdminClient).mockReturnValue({} as ReturnType<typeof createAdminClient>);
+    vi.mocked(getNiveauAal).mockResolvedValue("aal2");
   });
 
   it("refuse un visiteur sans session", async () => {
@@ -79,6 +81,16 @@ describe("adminUpdateCompany refuse tout le monde sauf un administrateur", () =>
       expect(r.error, `le rôle « ${role} » ne doit pas passer`).toBeTruthy();
       expect(createAdminClient).not.toHaveBeenCalled();
     }
+  });
+
+  it("refuse un administrateur qui n'a pas saisi son code à 6 chiffres", async () => {
+    vi.mocked(getUser).mockResolvedValue({ id: "patron" } as NonNullable<Awaited<ReturnType<typeof getUser>>>);
+    vi.mocked(createClient).mockResolvedValue(clientAvecRole("admin"));
+    vi.mocked(getNiveauAal).mockResolvedValue("aal1");
+
+    const r = await adminUpdateCompany("entreprise-1", new FormData());
+    expect(r.error).toBeTruthy();
+    expect(createAdminClient).not.toHaveBeenCalled();
   });
 
   it("laisse passer un administrateur", async () => {

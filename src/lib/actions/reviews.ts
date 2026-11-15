@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-import { createClient, getUser } from "@/lib/supabase/server";
+import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
 import type { Review } from "@/lib/types";
@@ -340,6 +340,7 @@ async function assertAdmin(): Promise<{ error: string } | null> {
   if (!user) return { error: "Non autorisé" };
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (profile?.role !== "admin") return { error: "Accès refusé" };
+  if ((await getNiveauAal()) !== "aal2") return { error: "Double authentification requise" };
   return null;
 }
 

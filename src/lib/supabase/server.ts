@@ -42,8 +42,28 @@ const getProfile = cache(async () => {
   return data ?? null;
 });
 
-export const getIsAdmin = cache(async () => {
+/**
+ * Niveau d'authentification de la session : « aal2 » quand le code à 6
+ * chiffres a été saisi. Lu dans le jeton, sans appel réseau.
+ */
+export const getNiveauAal = cache(async () => {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  return data?.currentLevel ?? null;
+});
+
+/** Le rôle seul, pour savoir s'il faut demander le code. */
+export const getEstAdminSansMfa = cache(async () => {
   const profile = await getProfile();
   return profile?.role === "admin";
+});
+
+/**
+ * Admin confirmé : le rôle ET la double authentification. Un mot de passe
+ * volé ne suffit plus à ouvrir l'administration.
+ */
+export const getIsAdmin = cache(async () => {
+  const [profile, niveau] = await Promise.all([getProfile(), getNiveauAal()]);
+  return profile?.role === "admin" && niveau === "aal2";
 });
 

@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getUser, getIsAdmin } from "@/lib/supabase/server";
+import { getUser, getEstAdminSansMfa, getNiveauAal } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
-// Central admin guard — all /admin/* routes inherit this.
-// Individual pages may still fetch their own data but don't need to repeat the auth check.
+// Garde centrale de l'administration : toutes les pages /admin/* en héritent.
+// Le rôle admin ne suffit pas : la session doit avoir passé la double
+// authentification (code à 6 chiffres). Les actions serveur le revérifient,
+// et la base aussi.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [user, isAdmin] = await Promise.all([getUser(), getIsAdmin()]);
+  const [user, estAdmin, niveau] = await Promise.all([getUser(), getEstAdminSansMfa(), getNiveauAal()]);
   if (!user) redirect("/api/auth/signout?next=/login");
-  if (!isAdmin) redirect("/explore");
+  if (!estAdmin) redirect("/explore");
+  if (niveau !== "aal2") redirect("/securite/code");
   return <>{children}</>;
 }

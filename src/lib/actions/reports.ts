@@ -1,7 +1,7 @@
 ﻿"use server";
 
 import { revalidateTag } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/supabase/server";
 
@@ -86,6 +86,7 @@ export async function getReports(): Promise<{ reports?: Report[]; error?: string
     .eq("id", user.id)
     .maybeSingle();
   if (profile?.role !== "admin") return { error: "Accès refusé" };
+  if ((await getNiveauAal()) !== "aal2") return { error: "Double authentification requise" };
 
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -160,6 +161,7 @@ export async function updateReportStatus(
     .eq("id", user.id)
     .maybeSingle();
   if (profile?.role !== "admin") return { error: "Accès refusé" };
+  if ((await getNiveauAal()) !== "aal2") return { error: "Double authentification requise" };
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -186,6 +188,7 @@ export async function deleteReportedContent(
     .eq("id", user.id)
     .maybeSingle();
   if (profile?.role !== "admin") return { error: "Accès refusé" };
+  if ((await getNiveauAal()) !== "aal2") return { error: "Double authentification requise" };
 
   const admin = createAdminClient();
 

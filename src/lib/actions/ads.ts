@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { randomUUID } from "crypto";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getNiveauAal } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { tarifJournalier, dureeValide, dateDeFin } from "@/lib/ads/pricing";
@@ -89,6 +89,7 @@ async function requireAdmin() {
   if (!user) throw new Error("Non authentifié");
   const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (data?.role !== "admin") throw new Error("Accès refusé");
+  if ((await getNiveauAal()) !== "aal2") throw new Error("Double authentification requise");
   return { user };
 }
 

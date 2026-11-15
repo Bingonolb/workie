@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { createClient, getUser } from "@/lib/supabase/server";
+import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendClaimApprovedEmail } from "@/lib/email";
 import { notifyNewCompany } from "@/lib/actions/notifications";
@@ -40,6 +40,7 @@ async function requireAdmin() {
   if (!user) throw new Error("Non authentifié");
   const { data } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (data?.role !== "admin") throw new Error("Accès refusé");
+  if ((await getNiveauAal()) !== "aal2") throw new Error("Double authentification requise");
   return { user, supabase };
 }
 
