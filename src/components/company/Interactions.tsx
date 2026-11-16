@@ -9,6 +9,7 @@ import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { ReportButton } from "@/components/ReportButton";
 import { GuestContentGate } from "@/components/GuestContentGate";
 import { ReviewForm } from "@/components/ReviewForm";
+import { BoutonVueEntreprise } from "./BoutonVueEntreprise";
 
 /**
  * Zones d'une fiche entreprise qui dépendent du visiteur.
@@ -40,6 +41,7 @@ export function ActionsFiche({ companyId, companyName }: { companyId: string; co
           <Pencil size={15} aria-hidden="true" /> Modifier
         </Link>
       )}
+      {isAdmin && <BoutonVueEntreprise companyId={companyId} />}
       {isLoggedIn ? <SaveButton companyId={companyId} initialFav={isFav} /> : <GuestSaveButton />}
       <ReportButton
         targetType="company"

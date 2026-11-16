@@ -5,6 +5,7 @@ import { ficheGeree } from "@/lib/actions/espaceEntreprise";
 import { NavbarClient } from "@/components/NavbarClient";
 import { OngletsEspace } from "./OngletsEspace";
 import { SansEntreprise } from "./SansEntreprise";
+import { BandeauVueAdmin } from "./BandeauVueAdmin";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Espace entreprise", robots: { index: false, follow: false } };
@@ -20,6 +21,7 @@ export default async function LayoutEspace({ children }: { children: React.React
       <main style={{ maxWidth: 1040, margin: "0 auto", padding: "28px 16px 72px" }}>
         {c ? (
           <>
+            {c.vueAdmin && <BandeauVueAdmin nom={c.name} retour={`/entreprise/${c.slug}`} />}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
               <div>
                 <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.07em", textTransform: "uppercase" }}>Espace entreprise</p>

@@ -2,7 +2,8 @@
 
 import Stripe from "stripe";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { getUser } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+import { getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { LANGUES_SAISIE, EMPLOYEE_RANGES } from "@/lib/types";
 import { banniereCadree, televerserCouverture } from "@/lib/televersement";
@@ -25,11 +26,36 @@ export type FicheGeree = {
 
 const COLONNES = "id, slug, name, sector, city, canton, description, website_url, cover_url, cover_color, logo_url, langues, employee_range, is_subscribed, subscription_ends_at, subscription_cancel_at_period_end, stripe_customer_id";
 
-/** L'entreprise gérée par la personne connectée, si son abonnement est actif. */
-export async function ficheGeree(): Promise<FicheGeree | null> {
+const COOKIE_VUE_ADMIN = "workie_vue_entreprise";
+
+/** Vrai si la session est celle de l'admin, code à 6 chiffres compris. */
+async function estAdminConfirme(userId: string): Promise<boolean> {
+  const [{ data }, niveau] = await Promise.all([
+    createAdminClient().from("profiles").select("role").eq("id", userId).maybeSingle(),
+    getNiveauAal(),
+  ]);
+  return data?.role === "admin" && niveau === "aal2";
+}
+
+/**
+ * L'entreprise gérée par la personne connectée, si son abonnement est actif.
+ *
+ * Vue admin : l'administrateur (rôle + code à 6 chiffres, revérifiés à chaque
+ * requête) peut ouvrir l'espace de n'importe quelle fiche, abonnée ou non,
+ * pour voir exactement ce que voit l'entreprise. Le cookie ne fait que
+ * désigner la fiche ; il n'accorde rien à qui n'est pas admin.
+ */
+export async function ficheGeree(): Promise<(FicheGeree & { vueAdmin?: boolean }) | null> {
   const user = await getUser();
   if (!user) return null;
   const admin = createAdminClient();
+
+  const vue = (await cookies()).get(COOKIE_VUE_ADMIN)?.value;
+  if (vue && /^[0-9a-f-]{36}$/i.test(vue) && await estAdminConfirme(user.id)) {
+    const { data } = await admin.from("companies").select(COLONNES).eq("id", vue).maybeSingle();
+    if (data) return { ...(data as unknown as FicheGeree), vueAdmin: true };
+  }
+
   const { data: p } = await admin.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
   if (!p?.claimed_company_id) return null;
   const { data } = await admin.from("companies").select(COLONNES).eq("id", p.claimed_company_id).maybeSingle();
@@ -38,6 +64,17 @@ export async function ficheGeree(): Promise<FicheGeree | null> {
   return c;
 }
 
+/** Admin : ouvrir l'espace entreprise d'une fiche, tel que l'entreprise le voit. */
+export async function entrerVueEntreprise(companyId: string): Promise<{ error?: string }> {
+  const user = await getUser();
+  if (!user || !/^[0-9a-f-]{36}$/i.test(companyId) || !(await estAdminConfirme(user.id))) return { error: "Accès refusé." };
+  (await cookies()).set(COOKIE_VUE_ADMIN, companyId, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 4 * 3600 });
+  return {};
+}
+
+export async function quitterVueEntreprise(): Promise<void> {
+  (await cookies()).delete(COOKIE_VUE_ADMIN);
+}
 export type Stats = {
   visites: number; visites_avant: number; favoris_total: number; favoris_nouveaux: number;
   clics_offres: number; par_jour: { jour: string; visites: number }[];
