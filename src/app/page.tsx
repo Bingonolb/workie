@@ -639,6 +639,50 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── Employeurs ──
+          Visible quand la revendication est ouverte au public. */}
+      {process.env.NEXT_PUBLIC_REVENDICATION_OUVERTE === "1" && (
+      <section className="landing-section" style={{ padding: "88px 24px", borderTop: "1px solid var(--border)" }}>
+        <div className="landing-pub" style={{ maxWidth: 1040, margin: "0 auto" }}>
+          <div>
+            <p className="landing-eyebrow" style={{ textAlign: "left" }}>Employeurs</p>
+            <h2 style={{ fontSize: "clamp(23px, 3.2vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", lineHeight: 1.18, marginBottom: 14 }}>
+              Votre entreprise est déjà sur Workie. Prenez-en les commandes.
+            </h2>
+            <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 500 }}>
+              Revendiquez votre fiche : présentez l&apos;entreprise avec vos mots et vos images,
+              menez les candidats droit vers votre page carrière, et voyez qui s&apos;intéresse
+              à vous, jour après jour.
+            </p>
+            <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 22 }}>
+              129 CHF par mois <span style={{ fontWeight: 500, color: "var(--text-muted)" }}>· ou 1 290 CHF par an, 2 mois offerts</span>
+            </p>
+            <Link href="/explore" className="btn btn-encre">
+              Trouver ma fiche <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+            <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 12 }}>
+              Sur votre fiche, choisissez « Gérer cette fiche ». Vérification par e-mail professionnel.
+            </p>
+          </div>
+          <div className="landing-ads-aside">
+            {[
+              { t: "Une fiche à votre image", d: "Présentation, bannière, logo, langues de travail et lien carrière." },
+              { t: "Votre fréquentation", d: "Visites par jour, favoris, clics vers vos offres et cantons des visiteurs." },
+              { t: "Le badge vérifié", d: "Les candidats savent que la fiche est tenue par l'entreprise." },
+            ].map(({ t, d }) => (
+              <div key={t} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <Check size={16} color="var(--brand)" strokeWidth={2.5} aria-hidden="true" style={{ marginTop: 2, flexShrink: 0 }} />
+                <div>
+                  <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{t}</p>
+                  <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.5 }}>{d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      )}
+
       {/* ── Publicité ──
           Montrer plutôt qu'expliquer : la pile mêle cinq fiches et cinq
           annonces d'exemple, et c'est en la faisant glisser qu'on voit qu'une
