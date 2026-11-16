@@ -187,9 +187,13 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         ) : (
           <>
             <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}><CreditCard size={30} strokeWidth={1.7} color="var(--brand)" aria-hidden="true" /></div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>Campagne créée !</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>Dernière étape : le paiement</h1>
+            {/* Rien n'annonce une campagne créée avant le paiement : le message
+                faisait croire que c'était payé alors que rien n'était fait. */}
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 8 }}>
-              {checkoutLoading ? "Redirection vers le paiement sécurisé…" : "Traitement en cours…"}
+              {checkoutLoading
+                ? "Ouverture du paiement sécurisé… Votre campagne démarrera dès le paiement confirmé."
+                : "Préparation du paiement…"}
             </p>
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Propulsé par Stripe · Aucune donnée bancaire stockée sur Workie</p>
           </>
