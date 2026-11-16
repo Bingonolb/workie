@@ -51,6 +51,12 @@ export async function renvoyerConfirmation(email: string): Promise<{ ok: boolean
   return { ok: !error };
 }
 
+function suiteInscription(formData: FormData): string {
+  const n = String(formData.get("next") || "");
+  return /^\/(?![/\\])/.test(n) && !n.toLowerCase().includes("javascript:") && n !== "/explore"
+    ? `?next=${encodeURIComponent(n)}` : "";
+}
+
 export async function signUp(
   _prevState: ActionState,
   formData: FormData
@@ -94,8 +100,9 @@ export async function signUp(
     password,
     options: {
       data: { username, full_name: fullName, first_name: firstName, last_name: lastName, canton, birth_year: birthYear },
-      // Pas de paramètre `next` : le callback envoie vers /explore?welcome=1.
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback`,
+      // Avec `next`, la confirmation ramène là où l'inscription a commencé
+      // (par exemple la revendication d'une fiche) ; sinon /explore?welcome=1.
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback${suiteInscription(formData)}`,
     },
   });
 

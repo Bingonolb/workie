@@ -87,7 +87,8 @@ export async function GET(request: Request) {
         const isNew = await upsertProfileGeo(user.id);
         if (isNew) {
           void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
-          return NextResponse.redirect(`${origin}/explore?welcome=1`);
+          // Une inscription commencée ailleurs (ex. revendiquer une fiche) y revient.
+          return NextResponse.redirect(`${origin}${next || "/explore?welcome=1"}`);
         }
       }
       if (next) return NextResponse.redirect(`${origin}${next}`);

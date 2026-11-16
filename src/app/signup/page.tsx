@@ -10,7 +10,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function SignupPage() {
+export default async function SignupPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const { next: brut } = await searchParams;
+  const next = brut && /^\/(?![/\\])/.test(brut) ? brut : "/explore";
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 40 }}>
@@ -21,10 +23,10 @@ export default function SignupPage() {
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Créer un compte</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
           Déjà un compte ?{" "}
-          <Link href="/login" style={{ color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>Se connecter</Link>
+          <Link href={next !== "/explore" ? `/login?next=${encodeURIComponent(next)}` : "/login"} style={{ color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>Se connecter</Link>
         </p>
 
-        <AuthFormWorkie mode="signup" action={signUp} googleAction={signInWithGoogle} />
+        <AuthFormWorkie mode="signup" action={signUp} googleAction={signInWithGoogle} next={next} />
       </div>
     </main>
   );
