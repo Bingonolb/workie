@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://www.workie.ch/ranking" },
   openGraph: {
     title: "Classement des meilleurs employeurs suisses · Workie",
-    description: "200 entreprises classées par note, salaire et votes anonymes d'employés.",
+    description: "Les entreprises suisses les plus suivies sur Workie : favoris et consultations.",
     url: "https://www.workie.ch/ranking",
     siteName: "Workie",
     type: "website",
@@ -48,7 +48,7 @@ export default async function RankingPage() {
       "position": i + 1,
       "name": c.name,
       "url": `https://www.workie.ch${urlFiche(c)}`,
-      ...(Number(c.avg_rating) > 0 ? { "description": `Note : ${Number(c.avg_rating).toFixed(1)}/5 · ${lieuAffiche(c.city, c.canton)}` } : {}),
+      "description": lieuAffiche(c.city, c.canton),
     })),
   };
 

@@ -349,9 +349,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 company.employee_range
                   ? { icon: <Users size={18} color="#f97316" aria-hidden="true" />, value: company.employee_range, label: "Employés" }
                   : null,
-                Number(company.avg_salary_chf) > 0
-                  ? { icon: <TrendingUp size={18} color="#10b981" aria-hidden="true" />, value: `CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`, label: "Salaire moyen déclaré" }
-                  : null,
                 // Les langues remplacent la note : on ne postule pas dans une
                 // langue qu'on ne parle pas, et c'est la première chose qu'un
                 // candidat romand veut savoir d'une entreprise alémanique.
