@@ -566,49 +566,52 @@ export function SwipeView({
             {toast.msg}
           </div>
         )}
-        {next && (
-          <div style={{
-            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-            // La carte suivante ne bouge pas. Elle était posée en retrait,
-            // scale(0.95) et douze pixels plus bas, puis remontait à sa taille
-            // pendant que celle du dessus s'en allait : le regard suivait donc
-            // deux mouvements à la fois, et le second poussait vers l'avant.
-            // Elle attend désormais à sa place définitive, déjà prête. Seule
-            // la carte de devant se déplace, et ce qu'on découvre derrière est
-            // exactement ce qui restera.
-          }}>
-            {isAd(next)
-              ? <AdSwipeCard campaign={next.campaign} overlayDir={null} overlayOpacity={0} />
-              : <SwipeCard company={next} flameIds={flameIds} overlayDir={null} overlayOpacity={0} />
-            }
-          </div>
-        )}
-        <div
-          ref={cardRef}
-          style={{
-            position: "absolute", inset: 0, zIndex: 1,
-            transform: gone
-              ? `translateX(${gone === "right" ? 650 : -650}px) rotate(${gone === "right" ? 22 : -22}deg)`
-              : `translateX(${drag}px) rotate(${rotate}deg)`,
-            transition: isDragging || sautSansAnimation
-              ? "none"
-              : gone
-                ? "transform 0.26s cubic-bezier(0.4, 0, 1, 1)"
-                : "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            cursor: isDragging ? "grabbing" : "pointer",
-            touchAction: "pan-y",
-          }}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp}
-          onMouseLeave={e => { if (dragStart.current) onMouseUp(e as React.MouseEvent); }}
-        >
-          {isAd(current)
-            ? <AdSwipeCard campaign={current.campaign} overlayDir={isRight ? "right" : isLeft ? "left" : null} overlayOpacity={overlayOpacity} />
-            : <SwipeCard company={current} flameIds={flameIds} overlayDir={isRight ? "right" : isLeft ? "left" : null} overlayOpacity={overlayOpacity} />
+        {/* Les deux cartes vivent dans une même liste, repérées par l'entreprise.
+            Quand celle de devant s'en va, celle de derrière n'est pas recréée :
+            c'est le même élément, image déjà chargée, qui passe au premier
+            plan. Auparavant, la carte du dessous était jetée puis reconstruite
+            à l'avant ; son image se rechargeait une fraction de seconde, et l'on
+            apercevait la carte suivante à travers. */}
+        {[next, current].filter((c): c is NonNullable<typeof current> => !!c).map(item => {
+          const devant = item === current;
+          const cle = isAd(item) ? `pub-${item.campaign.id}` : item.id;
+          if (!devant) {
+            return (
+              <div key={cle} style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+                {isAd(item)
+                  ? <AdSwipeCard campaign={item.campaign} overlayDir={null} overlayOpacity={0} />
+                  : <SwipeCard company={item} flameIds={flameIds} overlayDir={null} overlayOpacity={0} />}
+              </div>
+            );
           }
-        </div>
-      </div>
+          return (
+            <div
+              key={cle}
+              ref={cardRef}
+              style={{
+                position: "absolute", inset: 0, zIndex: 1,
+                transform: gone
+                  ? `translateX(${gone === "right" ? 650 : -650}px) rotate(${gone === "right" ? 22 : -22}deg)`
+                  : `translateX(${drag}px) rotate(${rotate}deg)`,
+                transition: isDragging || sautSansAnimation
+                  ? "none"
+                  : gone
+                    ? "transform 0.26s cubic-bezier(0.4, 0, 1, 1)"
+                    : "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                cursor: isDragging ? "grabbing" : "pointer",
+                touchAction: "pan-y",
+              }}
+              onMouseDown={onMouseDown}
+              onMouseMove={onMouseMove}
+              onMouseUp={onMouseUp}
+              onMouseLeave={e => { if (dragStart.current) onMouseUp(e as React.MouseEvent); }}
+            >
+              {isAd(item)
+                ? <AdSwipeCard campaign={item.campaign} overlayDir={isRight ? "right" : isLeft ? "left" : null} overlayOpacity={overlayOpacity} />
+                : <SwipeCard company={item} flameIds={flameIds} overlayDir={isRight ? "right" : isLeft ? "left" : null} overlayOpacity={overlayOpacity} />}
+            </div>
+          );
+        })}      </div>
 
       {/* Les trois boutons ne bougent pas pendant qu'une carte s'en va.
           Ils s'eteignaient a moitie le temps de l'animation puis revenaient :
