@@ -119,7 +119,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  * social n'est pas une offre d'emploi. C'est le site officiel qu'on ouvre
  * pour postuler.
  */
-function BlocOffresEmploi({ url, companyId, className, style }: { url: string; companyId: string; className?: string; style?: React.CSSProperties }) {
+function BlocOffresEmploi({ url, companyId, slug, revendicable, className, style }: { url: string; companyId: string; slug?: string | null; revendicable?: boolean; className?: string; style?: React.CSSProperties }) {
   const href = /^https?:\/\//.test(url) ? url : `https://${url}`;
   return (
     <div className={className} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", ...style }}>
@@ -128,6 +128,13 @@ function BlocOffresEmploi({ url, companyId, className, style }: { url: string; c
           employé pour le compteur d'offres et le badge de secteur. Le gris
           plein pesait autant qu'une carte pour un simple lien. */}
       <LienOffres href={href} companyId={companyId} />
+      {/* Discret : on le trouve quand on le cherche, il ne détourne pas le
+          candidat de ce qu'il est venu faire. */}
+      {revendicable && slug && (
+        <Link href={`/revendiquer/${slug}`} style={{ display: "block", marginTop: 14, fontSize: 12.5, color: "var(--text-muted)", textDecoration: "underline" }}>
+          Vous représentez cette entreprise ? Gérer cette fiche
+        </Link>
+      )}
     </div>
   );
 }
@@ -333,7 +340,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 après les avis. Or c'est ce qu'on vient y chercher : il remonte
                 donc ici, et la version de droite est masquée à cette taille. */}
             {company.website_url && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} slug={company.slug} revendicable={!company.is_subscribed} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
             )}
 
             {/* Key stats — seules les données réellement disponibles sont
@@ -389,7 +396,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             )}
 
             {company.website_url && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} className="liens-desktop" />
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} slug={company.slug} revendicable={!company.is_subscribed} className="liens-desktop" />
             )}
 
             {/* Le bloc « Tags » a été retiré.

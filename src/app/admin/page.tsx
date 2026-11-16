@@ -23,7 +23,8 @@ export default async function AdminPage() {
   const adminClient = createAdminClient();
   const [{ count: userCount }, { count: pendingClaims }] = await Promise.all([
     adminClient.from("profiles").select("*", { count: "exact", head: true }),
-    adminClient.from("company_claims").select("*", { count: "exact", head: true }).or("status.is.null,status.eq.pending"),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient.from("revendications" as any) as any).select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
   ]);
 
   // Fetch all companies in batches to bypass PostgREST max-rows limit
@@ -57,7 +58,7 @@ export default async function AdminPage() {
             { icon: <Users size={16} color="#10b981" />, value: userCount ?? 0, label: "Utilisateurs", color: "#10b981" },
             { icon: <Inbox size={16} color="#ef4444" />, value: pendingClaims ?? 0, label: "Demandes en attente", color: "#ef4444" },
           ].map(({ icon, value, label, color }) => (
-            <Link key={label} href={label === "Utilisateurs" ? "/admin/utilisateurs" : "#"} aria-disabled={label !== "Utilisateurs"} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, textDecoration: "none", pointerEvents: label === "Utilisateurs" ? "auto" : "none" }}>
+            <Link key={label} href={({ Utilisateurs: "/admin/utilisateurs", "Demandes en attente": "/admin/revendications" } as Record<string, string>)[label] ?? "/admin"} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, textDecoration: "none" }}>
               <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
               <div>
                 <p style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em" }}>{value}</p>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendClaimReceivedEmail } from "@/lib/email";
+import { sendAbonnementActif } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
@@ -58,38 +58,41 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        // Business subscription
+        // Abonnement entreprise : la revendication vérifiée devient active.
         const companyId = session.client_reference_id;
         if (!companyId || session.mode !== "subscription") break;
+        const revId = session.metadata?.revendication_id;
+        const userId = session.metadata?.user_id;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sub = await stripe.subscriptions.retrieve(session.subscription as string) as any;
-        const periodEnd: number = sub.current_period_end ?? sub.billing_cycle_anchor ?? 0;
+        const periodEnd: number = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end ?? 0;
         const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 
         const { error: subErr } = await supabase.from("companies").update({
           is_subscribed: true,
+          is_verified: true,
+          stripe_customer_id: typeof session.customer === "string" ? session.customer : null,
           stripe_subscription_id: sub.id,
           subscription_ends_at: endsAt,
           subscription_cancel_at_period_end: false,
         }).eq("id", companyId);
         if (subErr) console.error("[webhook] subscription activate failed:", subErr.message);
 
-        // Send confirmation email to the company owner
-        const { data: claim } = await supabase
-          .from("company_claims")
-          .select("work_email, first_name, company_name")
-          .eq("company_id", companyId)
-          .eq("status", "pending")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (claim) {
-          await sendClaimReceivedEmail(claim.work_email, claim.first_name, claim.company_name);
+        if (revId && userId) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const revs = supabase.from("revendications" as any) as any;
+          const { data: rev } = await revs.select("prenom, email_pro, user_id, company_id")
+            .eq("id", revId).maybeSingle();
+          if (rev && rev.user_id === userId && rev.company_id === companyId) {
+            await revs.update({ statut: "active", activee_le: new Date().toISOString() }).eq("id", revId);
+            await supabase.from("profiles").update({ claimed_company_id: companyId }).eq("id", userId);
+            const { data: c } = await supabase.from("companies").select("name").eq("id", companyId).maybeSingle();
+            await sendAbonnementActif(rev.email_pro, rev.prenom, c?.name ?? "votre entreprise");
+          }
         }
         break;
       }
-
       case "customer.subscription.updated": {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sub = event.data.object as any;
@@ -122,6 +125,12 @@ export async function POST(req: NextRequest) {
           subscription_ends_at: null,
         }).eq("id", companyId);
         if (error) console.error("[webhook] subscription.deleted failed:", error.message);
+
+        // L'accès se ferme : la revendication s'arrête et le compte est délié.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const revs = supabase.from("revendications" as any) as any;
+        await revs.update({ statut: "annulee" }).eq("company_id", companyId).eq("statut", "active");
+        await supabase.from("profiles").update({ claimed_company_id: null }).eq("claimed_company_id", companyId);
         break;
       }
     }

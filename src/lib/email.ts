@@ -173,6 +173,96 @@ export async function sendClaimApprovedEmail(email: string, firstName: string, c
   } catch { /* sans conséquence pour la validation */ }
 }
 
+// ── Revendication d'une fiche ─────────────────────────────────────────────
+
+/** Le code à 6 chiffres qui prouve l'accès à l'adresse professionnelle. */
+export async function sendCodeRevendication(email: string, prenom: string, entreprise: string, code: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: `${code} : votre code pour gérer ${entreprise} sur Workie`,
+      html: gabarit({
+        titre: "Votre code de vérification",
+        accroche: `Bonjour ${escapeHtml(prenom)},`,
+        paragraphes: [
+          `Voici votre code pour confirmer que vous représentez <strong style="color:${TEXTE};">${escapeHtml(entreprise)}</strong> :`,
+          `<span style="display:inline-block;font-size:32px;font-weight:800;letter-spacing:0.25em;color:${TEXTE};font-variant-numeric:tabular-nums;">${escapeHtml(code)}</span>`,
+          "Il est valable 30 minutes.",
+        ],
+        apres: "Vous n'avez rien demandé ? Ignorez simplement ce courriel : rien ne se passera.",
+      }),
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** Prévient l'administration qu'une demande attend une validation manuelle. */
+export async function sendRevendicationAValider(entreprise: string, demandeur: string, emailDemandeur: string): Promise<void> {
+  const destinataire = process.env.ADMIN_EMAIL;
+  if (!resend || !destinataire) return;
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: destinataire,
+      subject: `Revendication à valider : ${entreprise}`,
+      html: gabarit({
+        titre: "Revendication à valider",
+        accroche: `${escapeHtml(entreprise)}`,
+        paragraphes: [
+          `${escapeHtml(demandeur)} (${escapeHtml(emailDemandeur)}) demande à gérer cette fiche. Son adresse n'appartient pas au domaine officiel de l'entreprise.`,
+        ],
+        cta: { libelle: "Examiner la demande", href: `${BASE}/admin/revendications` },
+      }),
+    });
+  } catch { /* la demande reste visible dans l'admin */ }
+}
+
+/** La demande manuelle est acceptée : il ne reste qu'à s'abonner. */
+export async function sendRevendicationAcceptee(email: string, prenom: string, entreprise: string, lien: string): Promise<void> {
+  if (!resend) return;
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: `Votre demande pour ${entreprise} est acceptée`,
+      html: gabarit({
+        titre: "Demande acceptée",
+        accroche: `C'est bon, ${escapeHtml(prenom)}.`,
+        paragraphes: [
+          `Votre demande pour <strong style="color:${TEXTE};">${escapeHtml(entreprise)}</strong> est acceptée. Il reste à activer l'abonnement pour ouvrir votre espace entreprise.`,
+        ],
+        cta: { libelle: "Activer l'abonnement", href: lien },
+      }),
+    });
+  } catch { /* le lien reste accessible depuis la fiche */ }
+}
+
+/** Confirmation : l'abonnement est actif, l'espace entreprise est ouvert. */
+export async function sendAbonnementActif(email: string, prenom: string, entreprise: string): Promise<void> {
+  if (!resend) return;
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: `Bienvenue : ${entreprise} est à vous sur Workie`,
+      html: gabarit({
+        titre: "Abonnement actif",
+        accroche: `Bienvenue, ${escapeHtml(prenom)}.`,
+        paragraphes: [
+          `Vous gérez désormais <strong style="color:${TEXTE};">${escapeHtml(entreprise)}</strong> sur Workie. Le badge vérifié est visible sur la fiche.`,
+          "Depuis votre espace entreprise, vous pouvez mettre la fiche à jour et suivre sa fréquentation.",
+        ],
+        cta: { libelle: "Ouvrir mon espace", href: `${BASE}/espace-entreprise` },
+        apres: "Une question ? Répondez simplement à ce courriel.",
+      }),
+    });
+  } catch { /* sans conséquence pour l'abonnement */ }
+}
+
 /*
  * Les deux messages liés aux avis restent déclarés, parce que le module des
  * avis les appelle encore, mais ils ne partent plus : les avis ne sont plus
