@@ -5,11 +5,25 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signInWithGoogle } from "@/lib/actions/auth";
 
-export function GuestModal({ open }: { open?: boolean }) {
+/**
+ * Invitation à créer un compte. Elle se ferme toujours : un clic sur le fond,
+ * ou la touche Échap ramène au site. Une invitation
+ * qu'on ne peut pas refuser fait fuir.
+ */
+export function GuestModal({ open, onClose }: { open?: boolean; onClose?: () => void }) {
   const [timerVisible, setTimerVisible] = useState(false);
   const pathname = usePathname();
-  // Non-dismissable: once visible it stays until the user signs in.
-  const visible = open !== undefined ? open : timerVisible;
+  const [fermee, setFermee] = useState(false);
+  const visible = (open !== undefined ? open : timerVisible) && !fermee;
+  const fermer = () => { setFermee(true); onClose?.(); };
+
+  useEffect(() => {
+    if (!visible) return;
+    const touche = (e: KeyboardEvent) => { if (e.key === "Escape") fermer(); };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   useEffect(() => {
     if (open !== undefined) return;
@@ -26,8 +40,10 @@ export function GuestModal({ open }: { open?: boolean }) {
 
   return (
     <>
-      {/* Non-clickable overlay */}
+      {/* Fond : un clic dessus ferme l'invitation. */}
       <div
+        onClick={fermer}
+        aria-hidden="true"
         style={{
           position: "fixed", inset: 0, zIndex: 10002,
           background: "rgba(0,0,0,0.65)",
@@ -72,7 +88,7 @@ export function GuestModal({ open }: { open?: boolean }) {
               Connectez-vous pour continuer
             </p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
-              "Créez un compte pour sauvegarder les entreprises qui vous correspondent et retrouver vos recherches."
+              Créez un compte pour sauvegarder les entreprises qui vous correspondent et retrouver vos recherches.
             </p>
           </div>
 

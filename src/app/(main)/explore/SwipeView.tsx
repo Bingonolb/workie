@@ -687,7 +687,7 @@ export function SwipeView({
         </p>
       </div>
 
-      {showGuestModal && !isLoggedIn && <GuestModal open />}
+      {showGuestModal && !isLoggedIn && <GuestModal open onClose={() => setShowGuestModal(false)} />}
 
 
       <style>{`

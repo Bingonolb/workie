@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { X, Info, Flame, ArrowRight, ExternalLink } from "lucide-react";
 import { largeurCouverture, styleCadrageFond } from "@/lib/coverUrl";
 import { urlFiche } from "@/lib/urlFiche";
@@ -78,6 +79,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
   const [glissement, setGlissement] = useState(0);
   const [partie, setPartie] = useState<"gauche" | "droite" | null>(null);
   const depart = useRef<number | null>(null);
+  const router = useRouter();
 
   const courante = entreprises[index];
   const finie = index >= entreprises.length;
@@ -135,8 +137,15 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
   const onPointerUp = () => {
     if (depart.current === null) return;
     const d = glissement;
+    const toucher = !capture.current;
     depart.current = null;
     setGlissement(0);
+    // Un toucher sans glissement ouvre la fiche, comme le bouton.
+    if (toucher) {
+      const c = entreprises[index];
+      if (c && c.type !== "annonce") router.push(urlFiche(c));
+      return;
+    }
     if (d <= -SEUIL) avancer("gauche");
     else if (d >= SEUIL) avancer("droite");
   };
@@ -193,7 +202,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
               ? "transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease"
               : "none",
             touchAction: "pan-y",
-            cursor: "grab",
+            cursor: "pointer",
             userSelect: "none",
           }}
         >
