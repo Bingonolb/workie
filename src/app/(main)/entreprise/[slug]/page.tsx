@@ -22,7 +22,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
 import { ViewTracker } from "@/components/ViewTracker";
 import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
-import { ActionsFiche, PorteInvite } from "@/components/company/Interactions";
+import { ActionsFiche } from "@/components/company/Interactions";
 import { BoutonRetour } from "@/components/company/BoutonRetour";
 
 import { SECTOR_COLORS, lieuAffiche } from "@/lib/types";
@@ -317,7 +317,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         }
       `}</style>
       <main className="page-main-sm">
-      <PorteInvite>
         <div className="company-grid two-col" style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 32, alignItems: "start" }}>
           {/* Left column */}
           <div>
@@ -428,7 +427,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
 
-      </PorteInvite>
       </main>
     </div>
     </FournisseurEtatFiche>

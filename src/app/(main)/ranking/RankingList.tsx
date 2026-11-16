@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { logoAffichable } from "@/lib/logo";
 import { urlFiche } from "@/lib/urlFiche";
+import { compteCourant } from "@/lib/cacheSession";
+
+/**
+ * Sans compte, le classement se goûte : les 50 premiers en clair, quelques
+ * lignes floutées ensuite, et une invitation à créer un compte pour la suite.
+ */
+const LIMITE_INVITE = 50;
 
 // Or, argent, bronze. Les trois premiers portaient des médailles en émoji,
 // dont le dessin change d'un système à l'autre et qui donnent à un classement
@@ -38,6 +45,14 @@ export function RankingTable({ companies }: { companies: Company[] }) {
   // saute de 03 a 07, ce que le sous-titre explique.
   const globalRankMap = new Map(companies.map((c, i) => [c.id, i]));
   const isFiltered = q.length > 0 || secteur !== "";
+
+  // Lu dans le cookie de session au rendu : côté serveur, la page partagée est
+  // celle d'un visiteur ; côté navigateur, une personne connectée voit tout.
+  const connecte = useSyncExternalStore(() => () => {}, () => !!compteCourant(), () => false);
+  const rang = (c: Company) => globalRankMap.get(c.id) ?? 0;
+  const visibles = connecte ? filtered : filtered.filter(c => rang(c) < LIMITE_INVITE);
+  const apercu = connecte ? [] : filtered.filter(c => rang(c) >= LIMITE_INVITE).slice(0, 4);
+  const floues = new Set(apercu.map(c => c.id));
 
   return (
     // La colonne « Secteur » reste affichee, filtre compris.
@@ -131,13 +146,15 @@ export function RankingTable({ companies }: { companies: Company[] }) {
 
       {/* Lignes */}
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {filtered.map(c => {
+        {[...visibles, ...apercu].map(c => {
           const displayRank = globalRankMap.get(c.id) ?? 0;
           const sectorColor = SECTOR_COLORS[c.sector] ?? "#8b5cf6";
           const score = Number(c.score ?? 0);
 
           return (
-            <Link key={c.id} href={urlFiche(c)} className="ranking-row">
+            <Link key={c.id} href={urlFiche(c)}
+              className={floues.has(c.id) ? "ranking-row ranking-floue" : "ranking-row"}
+              aria-hidden={floues.has(c.id) || undefined} tabIndex={floues.has(c.id) ? -1 : undefined}>
               {/* Rang */}
               <span style={{
                 fontSize: 14.5, fontWeight: 800,
@@ -223,6 +240,21 @@ export function RankingTable({ companies }: { companies: Company[] }) {
             </Link>
           );
         })}
+
+        {apercu.length > 0 && (
+          <div className="guest-gate-cta" style={{ marginTop: -40, position: "relative" }}>
+            <p style={{ fontSize: 19, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.025em" }}>
+              Voir la suite du classement
+            </p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20, maxWidth: 320, lineHeight: 1.6 }}>
+              Les {LIMITE_INVITE} premiers sont ouverts à tous. Créez un compte gratuit pour voir tout le classement.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
+              <Link href="/signup" className="btn btn-marque btn-bloc">Créer un compte, gratuit</Link>
+              <Link href="/login" className="btn btn-clair btn-bloc">Se connecter</Link>
+            </div>
+          </div>
+        )}
 
         {filtered.length === 0 && (
           <div style={{ padding: "48px 16px", textAlign: "center", color: "var(--text-muted)" }}>
