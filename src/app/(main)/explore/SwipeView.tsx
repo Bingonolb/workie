@@ -797,7 +797,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <Chip icon={<MapPin size={12} aria-hidden="true" />} label={lieuAffiche(company.city, company.canton)} />
           {company.employee_range && <Chip icon={<Users size={12} aria-hidden="true" />} label={`${company.employee_range} emp.`} />}
-          {Number(company.avg_salary_chf) > 0 && <Chip icon={<TrendingUp size={12} aria-hidden="true" />} label={`CHF ${Math.round(Number(company.avg_salary_chf) / 1000)}k`} color="#10b981" />}
+          {/* Aucun salaire affiché (décision du 2026-11-16). */}
         </div>
         {company.description && (
           <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>

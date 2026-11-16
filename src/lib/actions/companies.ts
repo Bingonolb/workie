@@ -119,7 +119,7 @@ function cantonsDemandes(canton: string | undefined, langue: string | undefined)
   return coches.length ? coches.filter(c => parLangue.includes(c)) : parLangue;
 }
 
-const GRID_COLS = "id,slug,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,avg_salary_chf,cover_url,cover_color,logo_url,score,is_verified,description,profile_score";
+const GRID_COLS = "id,slug,name,sector,subsector,city,canton,employee_range,avg_rating,review_count,cover_url,cover_color,logo_url,score,is_verified,description,profile_score";
 
 // Cached grid fetcher — no cookies(), uses adminClient, safe to cache across requests.
 // All users with the same filters share one DB query per 60s instead of N.
@@ -256,7 +256,7 @@ export const getCachedJobOffers = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("job_offers")
-      .select("id, title, location, contract_type, work_mode, experience_level, salary_range, apply_url, description, created_at")
+      .select("id, title, location, contract_type, work_mode, experience_level, apply_url, description, created_at")
       .eq("company_id", companyId)
       .eq("is_active", true)
       .order("created_at", { ascending: false });

@@ -11,7 +11,7 @@ type Job = {
   contract_type: string | null;
   work_mode: string | null;
   experience_level: string | null;
-  salary_range: string | null;
+  salary_range?: string | null;
   apply_url: string | null;
   description?: string | null;
   created_at: string;
@@ -77,9 +77,6 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             </span>
           )}
         </div>
-        {job.salary_range && (
-          <p style={{ fontSize: 11, color: "#10b981", fontWeight: 700, marginTop: 6 }}>{job.salary_range}</p>
-        )}
         <p style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>Voir l&apos;offre →</p>
       </button>
 
@@ -134,13 +131,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
               )}
             </div>
 
-            {/* Salary */}
-            {job.salary_range && (
-              <div style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 20 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 2 }}>Salaire annuel (CHF)</p>
-                <p style={{ fontSize: 18, fontWeight: 900, color: "#10b981" }}>{job.salary_range}</p>
-              </div>
-            )}
+            {/* Aucun salaire affiché : décision de Luc du 2026-11-16. */}
 
             {/* Description */}
             {job.description ? (

@@ -43,7 +43,7 @@ export const GRID_PAGE_SIZE = 24;
 export const COMPANY_PUBLIC_COLS = [
   "id", "slug", "name", "sector", "subsector", "city", "canton", "langues", "employee_range",
   "description", "logo_url", "cover_url", "cover_color", "website_url", "linkedin_url",
-  "twitter_url", "instagram_url", "founded_year", "avg_salary_chf",
+  "twitter_url", "instagram_url", "founded_year",
   "avg_rating", "review_count", "is_verified", "is_subscribed",
   "score", "profile_score", "created_at", "zefix_uid",
 ].join(",");
