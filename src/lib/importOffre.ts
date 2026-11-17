@@ -103,7 +103,9 @@ async function lirePage(depart: string): Promise<{ html: string; url: string } |
     }
     if (!rep.ok) {
       clearTimeout(minuteur);
-      return { erreur: rep.status === 404 ? "Cette offre n'existe plus à cette adresse." : "La page de l'offre ne peut pas être lue." };
+      if (rep.status === 404 || rep.status === 410) return { erreur: "Cette offre n'existe plus à cette adresse." };
+      if ([401, 403, 429, 503].includes(rep.status)) return { erreur: "Ce site bloque la lecture automatique de ses offres. Saisissez l'offre ci-dessous : cela prend une minute." };
+      return { erreur: "La page de l'offre ne peut pas être lue. Saisissez l'offre ci-dessous." };
     }
 
     // Lecture plafonnée : on s'arrête à 3 Mo.

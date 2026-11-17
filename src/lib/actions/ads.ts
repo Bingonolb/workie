@@ -473,17 +473,29 @@ export async function reprendreCampagne(id: string): Promise<{ error?: string }>
  */
 export async function deleteUserCampaign(id: string): Promise<{ error?: string }> {
   try {
-    const { supabase, user } = await requireUser();
-    const { data, error } = await supabase
+    const { user } = await requireUser();
+    // Suppressibles : jamais payée, terminée ou refusée. Une campagne en
+    // diffusion, en pause ou en validation porte encore de l'argent engagé.
+    // Suppression réelle (vues et clics partent en cascade), via le client
+    // admin mais toujours filtrée sur l'auteur et le statut.
+    const admin = createAdminClient();
+    const { data, error } = await admin
       .from("ad_campaigns")
       .delete()
       .eq("id", id)
       .eq("user_id", user.id)
-      .eq("status", "payment_pending")
-      .select("id");
-    if (error) return { error: error.message };
+      .in("status", ["payment_pending", "completed", "rejected"])
+      .select("image_url");
+    if (error) return { error: "La suppression a échoué. Réessayez." };
     if (!data?.length) {
-      return { error: "Cette campagne ne peut plus être supprimée : elle a été payée." };
+      return { error: "Cette campagne ne peut pas être supprimée tant qu'elle est en cours." };
+    }
+    // Le visuel part aussi, sauf si une autre campagne (une relance) l'utilise encore.
+    const image = data[0].image_url as string | null;
+    const chemin = image?.split("/storage/v1/object/public/covers/")[1];
+    if (chemin?.startsWith("ads/")) {
+      const { count } = await admin.from("ad_campaigns").select("id", { count: "exact", head: true }).eq("image_url", image);
+      if (!count) await admin.storage.from("covers").remove([decodeURIComponent(chemin)]);
     }
     revalidatePath("/profile/ads");
     return {};

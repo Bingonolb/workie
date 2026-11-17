@@ -148,7 +148,7 @@ export function CarteCampagne({
           {/* La suppression s'écarte du bouton de paiement plutôt que de le
               jouxter : ce sont les deux actions les plus opposées de la carte,
               et sur téléphone le pouce vise large. */}
-          {c.status === "payment_pending" && (
+          {(c.status === "payment_pending" || c.status === "completed" || c.status === "rejected") && (
             <span style={{ marginLeft: "auto" }}>
               <DeleteCampaignButton campaignId={c.id} onDelete={onDelete} />
             </span>
