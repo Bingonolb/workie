@@ -8,7 +8,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { LANGUES_SAISIE, EMPLOYEE_RANGES } from "@/lib/types";
 import { banniereCadree, televerserCouverture } from "@/lib/televersement";
 import { CONTRATS, MODES, NIVEAUX } from "@/lib/offres";
-import { importerOffreDepuisLien, type OffreImportee } from "@/lib/importOffre";
 
 /**
  * Espace entreprise. Chaque action relit en base, côté serveur, le lien entre
@@ -164,10 +163,11 @@ export async function ouvrirPortailAbonnement(): Promise<{ error?: string; url?:
 export type Offre = {
   id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null;
   experience_level: string | null; apply_url: string | null; description: string | null;
+  missions: string | null; requirements: string | null; avantages: string | null;
   is_active: boolean | null; created_at: string; expires_at: string | null;
 };
 
-const COLONNES_OFFRE = "id, title, location, contract_type, work_mode, experience_level, apply_url, description, is_active, created_at, expires_at";
+const COLONNES_OFFRE = "id, title, location, contract_type, work_mode, experience_level, apply_url, description, missions, requirements, avantages, is_active, created_at, expires_at";
 
 export async function listerOffres(): Promise<Offre[]> {
   const c = await ficheGeree();
@@ -198,6 +198,11 @@ export async function enregistrerOffre(formData: FormData): Promise<{ error?: st
     const choix = <T extends readonly string[]>(v: FormDataEntryValue | null, liste: T) =>
       (liste as readonly string[]).includes(String(v)) ? String(v) : null;
     const jours = Math.min(120, Math.max(7, Number(formData.get("duree")) || 60));
+    const texte = (nom: string) => String(formData.get(nom) || "").trim().slice(0, 4000) || null;
+    const missions = texte("missions"), profil = texte("requirements"), avantages = texte("avantages");
+    if (!missions) return { error: "Décrivez les missions du poste." };
+    if (!profil) return { error: "Décrivez le profil recherché." };
+    if (!avantages) return { error: "Indiquez ce que vous offrez." };
 
     const champs = {
       title: titre,
@@ -206,7 +211,8 @@ export async function enregistrerOffre(formData: FormData): Promise<{ error?: st
       work_mode: choix(formData.get("work_mode"), MODES),
       experience_level: choix(formData.get("experience_level"), NIVEAUX),
       apply_url: lien,
-      description: String(formData.get("description") || "").trim().slice(0, 4000) || null,
+      description: String(formData.get("description") || "").trim().slice(0, 1000) || null,
+      missions, requirements: profil, avantages,
       expires_at: new Date(Date.now() + jours * 86400_000).toISOString(),
       is_active: true,
     };
@@ -235,24 +241,4 @@ export async function retirerOffre(id: string): Promise<{ error?: string }> {
   if (error) return { error: "La suppression a échoué." };
   rafraichirFiche();
   return {};
-}
-// ── Import d'une offre depuis son lien ──────────────────────────────────────
-
-const importsRecents = new Map<string, number[]>();
-
-/**
- * Pré-remplit une offre à partir de son lien (données structurées seulement,
- * voir lib/importOffre). Rien n'est publié : l'entreprise relit puis publie.
- * 30 imports par heure et par entreprise, pour qu'on ne puisse pas se servir
- * de nos serveurs pour interroger d'autres sites en boucle.
- */
-export async function importerOffre(lien: string): Promise<{ offre?: OffreImportee; error?: string }> {
-  const c = await ficheGeree();
-  if (!c) return { error: "Accès refusé." };
-  const maintenant = Date.now();
-  const recents = (importsRecents.get(c.id) ?? []).filter(t => maintenant - t < 3600_000);
-  if (recents.length >= 30) return { error: "Trop d'imports en peu de temps. Réessayez dans une heure." };
-  importsRecents.set(c.id, [...recents, maintenant]);
-  const r = await importerOffreDepuisLien(String(lien ?? "").slice(0, 2000));
-  return r.offre ? { offre: r.offre } : { error: r.erreur ?? "Import impossible." };
 }

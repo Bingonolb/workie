@@ -256,9 +256,11 @@ export const getCachedJobOffers = unstable_cache(
     const admin = createAdminClient();
     const { data } = await admin
       .from("job_offers")
-      .select("id, title, location, contract_type, work_mode, experience_level, apply_url, description, created_at")
+      .select("id, title, location, contract_type, work_mode, experience_level, apply_url, description, missions, requirements, avantages, created_at")
       .eq("company_id", companyId)
       .eq("is_active", true)
+      // Une offre expirée ne s'affiche plus (au pire 5 minutes de retard, le temps du cache).
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
       .order("created_at", { ascending: false });
     return data ?? [];
   },

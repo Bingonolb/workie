@@ -14,8 +14,29 @@ type Job = {
   salary_range?: string | null;
   apply_url: string | null;
   description?: string | null;
+  missions?: string | null;
+  requirements?: string | null;
+  avantages?: string | null;
   created_at: string;
 };
+
+/** Un texte saisi une ligne par point devient une liste ; un paragraphe reste un paragraphe. */
+function Section({ titre, texte }: { titre: string; texte: string | null | undefined }) {
+  const lignes = (texte ?? "").split("\n").map(l => l.replace(/^\s*[-•*·]\s*/, "").trim()).filter(Boolean);
+  if (lignes.length === 0) return null;
+  return (
+    <section style={{ marginBottom: 22 }}>
+      <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>{titre}</h3>
+      {lignes.length === 1 ? (
+        <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7 }}>{lignes[0]}</p>
+      ) : (
+        <ul style={{ display: "grid", gap: 6, paddingLeft: 18, margin: 0 }}>
+          {lignes.map((l, i) => <li key={i} style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{l}</li>)}
+        </ul>
+      )}
+    </section>
+  );
+}
 
 function Badge({ label, color }: { label: string; color: string }) {
   return (
@@ -134,17 +155,16 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             {/* Aucun salaire affiché : décision de Luc du 2026-11-16. */}
 
             {/* Description */}
-            {job.description ? (
-              <div style={{ marginBottom: 24 }}>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>Description du poste</p>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{job.description}</p>
-              </div>
-            ) : (
-              <div style={{ marginBottom: 24 }}>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7 }}>
-                  Clique sur &laquo; Postuler &raquo; pour voir tous les détails et envoyer votre candidature directement à l&apos;entreprise.
-                </p>
-              </div>
+            {job.description && (
+              <p style={{ fontSize: 14.5, color: "var(--text)", lineHeight: 1.7, marginBottom: 22, whiteSpace: "pre-wrap" }}>{job.description}</p>
+            )}
+            <Section titre="Vos missions" texte={job.missions} />
+            <Section titre="Votre profil" texte={job.requirements} />
+            <Section titre="Ce que nous offrons" texte={job.avantages} />
+            {!job.description && !job.missions && !job.requirements && !job.avantages && (
+              <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 24 }}>
+                Cliquez sur « Postuler » pour lire l&apos;offre complète et envoyer votre candidature directement à l&apos;entreprise.
+              </p>
             )}
 
             {/* Date */}
