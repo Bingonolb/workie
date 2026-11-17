@@ -202,7 +202,7 @@ export async function sendCodeRevendication(email: string, prenom: string, entre
 
 /** Prévient l'administration qu'une demande attend une validation manuelle. */
 export async function sendRevendicationAValider(entreprise: string, demandeur: string, emailDemandeur: string): Promise<void> {
-  const destinataire = process.env.ADMIN_EMAIL;
+  const destinataire = process.env.ADMIN_EMAIL?.trim();
   if (!resend || !destinataire) return;
   try {
     await resend.emails.send({

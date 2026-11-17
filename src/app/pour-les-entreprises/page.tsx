@@ -5,6 +5,7 @@ import { NavbarClient } from "@/components/NavbarClient";
 import { PiedAccueil } from "@/components/PiedAccueil";
 import { ABONNEMENT } from "@/lib/tarifs";
 import { RechercheRevendication } from "./RechercheRevendication";
+import { revendicationOuverte } from "@/lib/ouverture";
 
 export const metadata: Metadata = {
   title: "Pour les entreprises : gérez votre fiche employeur",
@@ -63,7 +64,7 @@ function ApercuTableau() {
 }
 
 export default function PourLesEntreprises() {
-  if (process.env.NEXT_PUBLIC_REVENDICATION_OUVERTE !== "1") notFound();
+  if (!revendicationOuverte) notFound();
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <NavbarClient />

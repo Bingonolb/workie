@@ -13,6 +13,7 @@ import { PiedAccueil } from "@/components/PiedAccueil";
 import { RechercheRevendication } from "@/app/pour-les-entreprises/RechercheRevendication";
 import { getApercuEntreprises } from "@/lib/apercuAccueil";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
+import { revendicationOuverte } from "@/lib/ouverture";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
@@ -642,7 +643,7 @@ export default async function Home() {
 
       {/* ── Employeurs ──
           Visible quand la revendication est ouverte au public. */}
-      {process.env.NEXT_PUBLIC_REVENDICATION_OUVERTE === "1" && (
+      {revendicationOuverte && (
       <section className="landing-section" style={{ padding: "88px 24px", borderTop: "1px solid var(--border)" }}>
         <div className="landing-pub" style={{ maxWidth: 1040, margin: "0 auto" }}>
           <div>

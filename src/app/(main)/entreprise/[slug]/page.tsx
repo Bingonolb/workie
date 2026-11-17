@@ -35,6 +35,7 @@ import { CompanyHeroLogo } from "@/components/LogoImg";
 import { logoAffichable } from "@/lib/logo";
 import { LigneSuggestion } from "@/components/company/LigneSuggestion";
 import { fondDensite, lireCadrage, styleCadrageFond, sourcesBandeau } from "@/lib/coverUrl";
+import { revendicationOuverte } from "@/lib/ouverture";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -340,7 +341,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 après les avis. Or c'est ce qu'on vient y chercher : il remonte
                 donc ici, et la version de droite est masquée à cette taille. */}
             {company.website_url && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} slug={company.slug} revendicable={process.env.NEXT_PUBLIC_REVENDICATION_OUVERTE === "1" && !company.is_subscribed} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} slug={company.slug} revendicable={revendicationOuverte && !company.is_subscribed} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
             )}
 
             {/* Key stats — seules les données réellement disponibles sont
@@ -396,7 +397,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             )}
 
             {company.website_url && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} slug={company.slug} revendicable={process.env.NEXT_PUBLIC_REVENDICATION_OUVERTE === "1" && !company.is_subscribed} className="liens-desktop" />
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} slug={company.slug} revendicable={revendicationOuverte && !company.is_subscribed} className="liens-desktop" />
             )}
 
             {/* Le bloc « Tags » a été retiré.
