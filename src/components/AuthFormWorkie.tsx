@@ -78,7 +78,7 @@ export function AuthFormWorkie({
               <div style={{ flex: 1 }}>
                 <label htmlFor="canton" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
                 <select id="canton" name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
-                  <option value="">Sélectionnez votre canton</option>
+                  <option value="">Choisir</option>
                   {CANTONS.map(c => <option key={c.code} value={c.code}>{c.nom}</option>)}
                 </select>
               </div>
