@@ -10,6 +10,7 @@ import { LandingFaq } from "@/components/LandingFaq";
 import { ApercuSwipe } from "@/components/ApercuSwipe";
 import { Logo } from "@/components/Logo";
 import { PiedAccueil } from "@/components/PiedAccueil";
+import { RechercheRevendication } from "@/app/pour-les-entreprises/RechercheRevendication";
 import { getApercuEntreprises } from "@/lib/apercuAccueil";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 
@@ -657,12 +658,10 @@ export default async function Home() {
             <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 22 }}>
               129 CHF par mois <span style={{ fontWeight: 500, color: "var(--text-muted)" }}>· ou 1 290 CHF par an, 2 mois offerts</span>
             </p>
-            <Link href="/explore" className="btn btn-encre">
-              Trouver ma fiche <ArrowRight size={16} aria-hidden="true" />
+            <RechercheRevendication />
+            <Link href="/pour-les-entreprises" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
+              Tout savoir sur l&apos;offre entreprise <ArrowRight size={15} aria-hidden="true" />
             </Link>
-            <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 12 }}>
-              Sur votre fiche, choisissez « Gérer cette fiche ». Vérification par e-mail professionnel.
-            </p>
           </div>
           <div className="landing-ads-aside">
             {[

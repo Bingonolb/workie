@@ -35,7 +35,7 @@ try {
 const PUBLIC_PATHS = [
   "/login", "/signup", "/auth",
   "/forgot-password", "/reset-password",
-  "/explore", "/company", "/entreprise", "/emploi", "/ranking", "/annonceurs",
+  "/explore", "/company", "/entreprise", "/emploi", "/pour-les-entreprises", "/ranking", "/annonceurs",
   "/api",
   "/cgu", "/confidentialite", "/mentions-legales",
   "/robots.txt", "/sitemap.xml", "/_next", "/favicon",
