@@ -36,13 +36,17 @@ export async function PiedAccueil() {
   return (
     <footer className="pied" style={{ borderTop: "1px solid var(--border)" }}>
       <style>{`
-        .pied { padding: 36px 24px 24px; }
+        .pied { padding: 40px 24px 24px; text-align: left; background: var(--surface); }
+        .pied * { text-align: left; }
         .pied-grille { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 32px; margin-bottom: 28px; }
         .pied-titre { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
         .pied-liens { display: flex; flex-direction: column; gap: 8px; }
         .pied a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
         .pied a:hover { color: var(--text); }
-        .pied-cantons { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 24px; }
+        .pied-cantons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        .pied-cantons a { display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 999px;
+          border: 1px solid var(--border); background: var(--bg); font-size: 12.5px; transition: border-color .15s, color .15s; }
+        .pied-cantons a:hover { border-color: var(--brand); color: var(--text); }
         @media (max-width: 640px) {
           .pied { padding: 28px 16px calc(20px + env(safe-area-inset-bottom)); }
           /* Logo sur toute la largeur, puis les deux groupes de liens côte à côte. */
@@ -50,9 +54,9 @@ export async function PiedAccueil() {
           .pied-marque { grid-column: 1 / -1; }
           .pied-liens { gap: 0; }
           /* Cibles au doigt : 40 px de haut, sans allonger la page plus que nécessaire. */
-          .pied-liens a { display: flex; align-items: center; min-height: 40px; }
-          .pied-cantons { gap: 0 14px; margin-bottom: 18px; }
-          .pied-cantons a { display: inline-flex; align-items: center; min-height: 40px; }
+          .pied-liens a { display: flex; align-items: center; justify-content: flex-start; min-height: 40px; font-size: 14px; }
+          .pied-cantons { gap: 8px; margin-bottom: 20px; }
+          .pied-cantons a { height: 38px; font-size: 13px; }
         }
       `}</style>
       <div style={{ maxWidth: 860, margin: "0 auto" }}>
@@ -74,7 +78,7 @@ export async function PiedAccueil() {
           <nav aria-label="Emploi par canton">
             <p className="pied-titre">Emploi par canton</p>
             <div className="pied-cantons">
-              {cantons.map(p => <Link key={p.slug} href={`/emploi/${p.slug}`}>Emploi {CANTONS[p.canton].nom}</Link>)}
+              {cantons.map(p => <Link key={p.slug} href={`/emploi/${p.slug}`} title={`Emploi ${CANTONS[p.canton].dans}`}>{CANTONS[p.canton].nom}</Link>)}
             </div>
           </nav>
         )}
