@@ -7,6 +7,7 @@ import { ExternalLink } from "lucide-react";
 const ONGLETS = [
   { href: "/espace-entreprise", label: "Tableau de bord" },
   { href: "/espace-entreprise/fiche", label: "Ma fiche" },
+  { href: "/espace-entreprise/offres", label: "Offres d'emploi" },
   { href: "/espace-entreprise/abonnement", label: "Abonnement" },
   // Les campagnes vivent dans la régie existante, rattachée au même compte.
   { href: "/profile/ads", label: "Publicités" },

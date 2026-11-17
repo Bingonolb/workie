@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { revendicationOuverte } from "@/lib/ouverture";
 
 /**
  * Foire aux questions de la page d'accueil.
@@ -141,8 +142,22 @@ const ENTREES: Entree[] = [
   },
 ];
 
+/** Les questions des employeurs, ajoutées quand l'offre entreprise est ouverte. */
+const ENTREPRISES: Entree[] = [
+  {
+    q: "Je travaille pour une entreprise présente sur Workie : puis-je gérer sa fiche ?",
+    texte: "Oui. Depuis la page Pour les entreprises, retrouvez votre fiche et faites la demande. Avec une adresse e-mail de l'entreprise, la vérification est immédiate. L'abonnement coûte 129 CHF par mois, sans engagement.",
+    r: <>Oui. Depuis la page <a href="/pour-les-entreprises" style={{ color: "var(--brand)", fontWeight: 600 }}>Pour les entreprises</a>, retrouvez votre fiche et faites la demande. Avec une adresse e-mail de l&apos;entreprise, la vérification est immédiate. L&apos;abonnement coûte 129 CHF par mois, sans engagement.</>,
+  },
+  {
+    q: "Une entreprise peut-elle payer pour être mieux classée ?",
+    texte: "Non. Le classement suit l'intérêt des visiteurs. Un abonnement permet de tenir sa fiche à jour et de voir sa fréquentation, pas de monter dans le classement.",
+    r: <>Non. Le classement suit l&apos;intérêt des visiteurs. Un abonnement permet de tenir sa fiche à jour et de voir sa fréquentation, pas de monter dans le classement.</>,
+  },
+];
+
 export function LandingFaq({ items: itemsRecus, titre = "Questions fréquentes", sousTitre }: { items?: Entree[]; titre?: string; sousTitre?: string } = {}) {
-  const items = itemsRecus ?? ENTREES;
+  const items = itemsRecus ?? (revendicationOuverte ? [...ENTREES, ...ENTREPRISES] : ENTREES);
   return (
     <section
       className="landing-section landing-ton"

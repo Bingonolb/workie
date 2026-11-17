@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { statsFiche } from "@/lib/actions/espaceEntreprise";
+import { statsFiche, ficheGeree, listerOffres } from "@/lib/actions/espaceEntreprise";
+import { Completude } from "./Completude";
 import { CANTON_NAMES } from "@/lib/types";
 
 const PERIODES = [7, 30, 90] as const;
@@ -59,13 +60,14 @@ function Graphique({ jours }: { jours: { jour: string; visites: number }[] }) {
 export default async function TableauDeBord({ searchParams }: { searchParams: Promise<{ p?: string }> }) {
   const { p } = await searchParams;
   const periode = (PERIODES as readonly number[]).includes(Number(p)) ? (Number(p) as 7 | 30 | 90) : 30;
-  const s = await statsFiche(periode);
+  const [s, c, offres] = await Promise.all([statsFiche(periode), ficheGeree(), listerOffres()]);
   if (!s) return <p style={{ color: "var(--text-muted)" }}>Les statistiques ne sont pas disponibles pour le moment.</p>;
 
   const totalCantons = s.cantons.reduce((a, c) => a + c.n, 0);
 
   return (
     <div style={{ display: "grid", gap: 18 }}>
+      {c && <Completude c={c} offres={offres} />}
       <div style={{ display: "flex", gap: 6 }} role="group" aria-label="Période">
         {PERIODES.map(d => (
           <Link key={d} href={`/espace-entreprise?p=${d}`} style={{
