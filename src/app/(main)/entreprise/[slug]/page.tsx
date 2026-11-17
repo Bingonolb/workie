@@ -32,7 +32,6 @@ import { languesDeTravail, abregeLangue } from "@/lib/langues";
 import type { Review } from "@/lib/types";
 // Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
 // d'avis et les tests de colonnes s'appuient sur la même liste.
-import { RATING_CATEGORIES } from "@/lib/reviewCategories";
 import { CompanyHeroLogo } from "@/components/LogoImg";
 import { logoAffichable } from "@/lib/logo";
 import { LigneSuggestion } from "@/components/company/LigneSuggestion";
@@ -166,10 +165,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
   if (!company) notFound();
 
 
-  // Tous les avis sont affichés, notes uniquement. Les anciens avis rédigés
-  // étaient auparavant masqués alors qu'ils comptaient dans la moyenne — leur
-  // texte n'est simplement plus rendu (voir SectionAvis). Le tri est appliqué
-  // côté client, pour qu'il ne coûte plus une navigation.
   const [jobs, groupesSuggestions] = await Promise.all([
     getCachedJobOffers(id).catch(() => [] as never[]),
     getCachedSuggestions(company.id, company.sector, company.subsector ?? null, company.canton ?? null).catch(() => []),
@@ -210,9 +205,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
         { "@type": "ListItem", "position": 4, "name": company.name, "item": `${BASE_URL}${urlFiche(company)}` },
       ],
     },
-    // Pas d'objets Review individuels : le format 100% notes n'a pas de corps
-    // de texte, et c'est aggregateRating (émis plus haut) qui porte les étoiles
-    // dans les résultats de recherche.
   ];
 
   return (

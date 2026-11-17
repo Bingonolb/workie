@@ -38,7 +38,6 @@ export default async function ExplorePage() {
   // JSON-LD for Google indexing of top companies
   const BASE_URL = "https://www.workie.ch";
   const topForJsonLd = initialCompanies
-    .filter(c => Number(c.review_count) > 0)
     .slice(0, 30);
   const exploreJsonLd = topForJsonLd.length > 0 ? {
     "@context": "https://schema.org",

@@ -1,7 +1,7 @@
 export const revalidate = 60;
 
 import type { Metadata } from "next";
-import { getCachedTopCompanies, getCachedReviewCount } from "@/lib/actions/scores";
+import { getCachedTopCompanies } from "@/lib/actions/scores";
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
 import { lieuAffiche } from "@/lib/types";
@@ -24,17 +24,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RankingPage() {
-  const [companies, reviewCount] = await Promise.all([
-    getCachedTopCompanies(200).catch(() => [] as Company[]),
-    getCachedReviewCount().catch(() => 0),
-  ]);
+  const companies = await getCachedTopCompanies(200).catch(() => [] as Company[]);
   const typedCompanies = companies as Company[];
 
-  const withRating = typedCompanies.filter(c => Number(c.avg_rating) > 0);
-  const avgRating = withRating.length
-    ? withRating.reduce((s, c) => s + Number(c.avg_rating), 0) / withRating.length
-    : 0;
-  const totalReviews = reviewCount;
 
   const rankingJsonLd = {
     "@context": "https://schema.org",
