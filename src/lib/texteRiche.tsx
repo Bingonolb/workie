@@ -9,15 +9,18 @@ import { Fragment, type ReactNode } from "react";
  */
 export function texteRiche(ligne: string): ReactNode {
   const morceaux: ReactNode[] = [];
-  const motif = /\*\*(.+?)\*\*|\*(?!\s)(.+?)(?<!\s)\*/g;
+  // Trois étoiles d'abord (gras + italique), puis deux, puis une.
+  const motif = /\*\*\*(?!\s)(.+?)(?<!\s)\*\*\*|\*\*(?!\s)(.+?)(?<!\s)\*\*|\*(?!\s)(.+?)(?<!\s)\*/g;
+  const gras: React.CSSProperties = { color: "var(--text)", fontWeight: 700 };
   let dernier = 0;
   let m: RegExpExecArray | null;
   let k = 0;
   while ((m = motif.exec(ligne))) {
     if (m.index > dernier) morceaux.push(ligne.slice(dernier, m.index));
-    morceaux.push(m[1] !== undefined
-      ? <strong key={k++} style={{ color: "var(--text)", fontWeight: 700 }}>{texteRiche(m[1])}</strong>
-      : <em key={k++}>{m[2]}</em>);
+    morceaux.push(
+      m[1] !== undefined ? <strong key={k++} style={gras}><em>{texteRiche(m[1])}</em></strong>
+      : m[2] !== undefined ? <strong key={k++} style={gras}>{texteRiche(m[2])}</strong>
+      : <em key={k++}>{texteRiche(m[3])}</em>);
     dernier = m.index + m[0].length;
   }
   if (dernier < ligne.length) morceaux.push(ligne.slice(dernier));

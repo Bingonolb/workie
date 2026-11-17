@@ -9,6 +9,12 @@ describe("gras et italique des offres", () => {
     expect(html(texteRiche("Un **CFC** et *idéalement* un brevet"))).toBe(
       'Un <strong style="color:var(--text);font-weight:700">CFC</strong> et <em>idéalement</em> un brevet');
   });
+  it("gras et italique ensemble, dans les deux ordres de clic", () => {
+    const attendu = '<strong style="color:var(--text);font-weight:700"><em>clé</em></strong>';
+    expect(html(texteRiche("***clé***"))).toBe(attendu);
+    expect(html(texteRiche("Un mot **gras** puis *penché*"))).not.toContain("*");
+    expect(html(texteRiche("**gras avec *italique* dedans**"))).not.toContain("*");
+  });
   it("n'injecte jamais de HTML", () => {
     const h = html(lignesRiches("<script>alert(1)</script>\n**<img src=x onerror=alert(1)>**"));
     expect(h).not.toContain("<script");
