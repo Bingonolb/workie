@@ -48,7 +48,7 @@ export function RechercheRevendication() {
               {charge ? "Recherche…" : <>Aucune fiche trouvée. Votre entreprise n&apos;est pas encore sur Workie ? Écrivez à contact@workie.ch.</>}
             </p>
           ) : res.map(c => (
-            <Link key={c.id} href={`/revendiquer/${c.slug}`} style={{
+            <Link key={c.id} href={`/entreprise/${c.slug}?gerer=1`} style={{
               display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
               padding: "13px 16px", borderTop: "1px solid var(--border)", textDecoration: "none", color: "var(--text)",
             }}>
@@ -57,7 +57,7 @@ export function RechercheRevendication() {
                 <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{c.sector} · {c.city}</span>
               </span>
               <span style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)", display: "inline-flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}>
-                Gérer cette fiche <ArrowRight size={14} aria-hidden="true" />
+                Voir la fiche <ArrowRight size={14} aria-hidden="true" />
               </span>
             </Link>
           ))}

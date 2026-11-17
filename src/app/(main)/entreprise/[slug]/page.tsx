@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCachedCompany, getCachedJobOffers, getCachedSuggestions } from "@/lib/actions/companies";
 import { LienOffres } from "@/components/company/LienOffres";
+import { BandeauRevendication } from "@/components/company/BandeauRevendication";
+import { Suspense } from "react";
 import { idDeFiche } from "@/lib/resoudreFiche";
 import { urlFiche } from "@/lib/urlFiche";
 import { slugifier } from "@/lib/pagesEmploi";
@@ -202,6 +204,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
   return (
     <FournisseurEtatFiche companyId={company.id}>
+      {revendicationOuverte && (
+        <Suspense fallback={null}>
+          <BandeauRevendication slug={company.slug!} dejaGeree={!!company.is_subscribed} />
+        </Suspense>
+      )}
     <div className="page-root">
       <HautDePage />
       <ViewTracker companyId={company.id} />
