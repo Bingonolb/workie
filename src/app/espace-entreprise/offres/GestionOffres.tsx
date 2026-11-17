@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
-import { enregistrerOffre, retirerOffre, CONTRATS, MODES, NIVEAUX, type Offre } from "@/lib/actions/espaceEntreprise";
+import { enregistrerOffre, retirerOffre, type Offre } from "@/lib/actions/espaceEntreprise";
+import { CONTRATS, MODES, NIVEAUX } from "@/lib/offres";
 
 const lbl: React.CSSProperties = { display: "block", fontSize: 12.5, fontWeight: 700, color: "var(--text-muted)", marginBottom: 6 };
 const inp: React.CSSProperties = { width: "100%", padding: "11px 13px", borderRadius: 11, border: "1px solid var(--border)", background: "var(--surface2)", color: "var(--text)", fontSize: 15 };

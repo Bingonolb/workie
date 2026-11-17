@@ -7,6 +7,7 @@ import { getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { LANGUES_SAISIE, EMPLOYEE_RANGES } from "@/lib/types";
 import { banniereCadree, televerserCouverture } from "@/lib/televersement";
+import { CONTRATS, MODES, NIVEAUX } from "@/lib/offres";
 
 /**
  * Espace entreprise. Chaque action relit en base, côté serveur, le lien entre
@@ -153,9 +154,6 @@ export async function ouvrirPortailAbonnement(): Promise<{ error?: string; url?:
 
 // ── Offres d'emploi ─────────────────────────────────────────────────────────
 
-export const CONTRATS = ["CDI", "CDD", "Stage", "Apprentissage", "Temporaire", "Freelance"] as const;
-export const MODES = ["Sur site", "Hybride", "Télétravail"] as const;
-export const NIVEAUX = ["Débutant", "Confirmé", "Expérimenté", "Cadre"] as const;
 
 export type Offre = {
   id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null;
