@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendRevendicationAcceptee } from "@/lib/email";
+import { sendRevendicationAcceptee, sendRevendicationRefusee } from "@/lib/email";
 
 async function exigerAdmin() {
   const [user, supabase, niveau] = await Promise.all([getUser(), createClient(), getNiveauAal()]);
@@ -54,6 +54,8 @@ export async function deciderRevendication(id: string, accepter: boolean, note: 
     if (accepter && r.entreprise) {
       const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
       await sendRevendicationAcceptee(r.email_pro, r.prenom, r.entreprise.name, `${base}/revendiquer/${r.entreprise.slug}`);
+    } else if (r.entreprise) {
+      await sendRevendicationRefusee(r.email_pro, r.prenom, r.entreprise.name);
     }
     revalidatePath("/admin/revendications");
     return {};

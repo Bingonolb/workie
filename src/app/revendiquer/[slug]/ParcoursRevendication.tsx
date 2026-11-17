@@ -89,8 +89,11 @@ export function ParcoursRevendication({ companyId, etatInitial }: { companyId: s
       <div style={carte}>
         <h1 style={{ fontSize: 20, fontWeight: 800 }}>Demande non retenue</h1>
         <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-          Nous n&apos;avons pas pu confirmer votre lien avec l&apos;entreprise. Écrivez à contact@workie.ch avec une adresse professionnelle pour en parler.
+          Nous n&apos;avons pas pu confirmer votre lien avec l&apos;entreprise. Recommencez avec une adresse e-mail de l&apos;entreprise : la vérification est alors immédiate.
         </p>
+        <button type="button" className="btn btn-encre" onClick={() => setEtat({ etape: "formulaire", domaine: null })}>
+          Recommencer la demande
+        </button>
       </div>
     );
   }

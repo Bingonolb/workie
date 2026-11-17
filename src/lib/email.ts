@@ -241,6 +241,27 @@ export async function sendRevendicationAcceptee(email: string, prenom: string, e
   } catch { /* le lien reste accessible depuis la fiche */ }
 }
 
+/** La demande manuelle n'est pas retenue : la personne le sait, avec une porte de sortie. */
+export async function sendRevendicationRefusee(email: string, prenom: string, entreprise: string): Promise<void> {
+  if (!resend) return;
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: `Votre demande pour ${entreprise}`,
+      html: gabarit({
+        titre: "Demande non retenue",
+        accroche: `Bonjour ${escapeHtml(prenom)},`,
+        paragraphes: [
+          `Nous n'avons pas pu confirmer votre lien avec <strong style="color:${TEXTE};">${escapeHtml(entreprise)}</strong> à partir des informations reçues.`,
+          "Le plus simple : recommencez la demande avec une adresse e-mail de l'entreprise. La vérification est alors immédiate.",
+        ],
+        apres: "Une question ? Répondez simplement à ce courriel.",
+      }),
+    });
+  } catch { /* la décision reste visible sur la page de revendication */ }
+}
+
 /** Confirmation : l'abonnement est actif, l'espace entreprise est ouvert. */
 export async function sendAbonnementActif(email: string, prenom: string, entreprise: string): Promise<void> {
   if (!resend) return;
