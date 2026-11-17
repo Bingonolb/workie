@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { unstable_cache } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
@@ -50,12 +50,10 @@ async function ecrireFlamme(companyId: string, pose: boolean): Promise<void> {
       return; // déjà dans l'état voulu : rien à faire, et surtout rien à inverser
     }
 
-    // Le classement doit refléter le geste immédiatement.
-    revalidatePath("/explore");
-    revalidatePath("/ranking");
-    revalidatePath(`/company/${companyId}`);
-    revalidateTag("companies", {});
-    revalidateTag("top-companies", {});
+    // Pas de vidage de cache ici : vider « companies » à chaque flamme
+    // recalculait tout le site (fiches, Explorer, classement) à chaque clic.
+    // La flamme ne compte plus dans le score, et le classement se rafraîchit
+    // seul toutes les minutes.
   } catch (e) { captureServerError(e, { action: "ecrireFlamme", companyId }); }
 }
 

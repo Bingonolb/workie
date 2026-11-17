@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { poserFlamme, retirerFlamme } from "@/lib/actions/scores";
 import { captureServerError } from "@/lib/monitoring";
@@ -30,9 +29,8 @@ export async function toggleFavorite(companyId: string): Promise<void> {
       ]);
       if (error && error.code !== "23505") captureServerError(error, { action: "toggleFavorite", step: "insert", companyId });
     }
-    revalidatePath("/profile");
-    revalidatePath("/favorites");
-    revalidatePath(`/company/${companyId}`);
+    // Profil et favoris lisent leurs données à la demande (routes privées) :
+    // rien à vider, et surtout pas les fiches, communes à tous les visiteurs.
   } catch (e) { captureServerError(e, { action: "toggleFavorite" }); }
 }
 
