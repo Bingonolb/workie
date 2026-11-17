@@ -66,9 +66,14 @@ export async function ficheGeree(): Promise<(FicheGeree & { vueAdmin?: boolean }
 }
 
 /** Admin : ouvrir l'espace entreprise d'une fiche, tel que l'entreprise le voit. */
-export async function entrerVueEntreprise(companyId: string): Promise<{ error?: string }> {
+export async function entrerVueEntreprise(companyId: string): Promise<{ error?: string; code?: "aal" }> {
   const user = await getUser();
-  if (!user || !/^[0-9a-f-]{36}$/i.test(companyId) || !(await estAdminConfirme(user.id))) return { error: "Accès refusé." };
+  if (!user || !/^[0-9a-f-]{36}$/i.test(companyId)) return { error: "Accès refusé." };
+  if (!(await estAdminConfirme(user.id))) {
+    // Admin sans le code à 6 chiffres dans cette session : on l'y envoie.
+    const { data } = await createAdminClient().from("profiles").select("role").eq("id", user.id).maybeSingle();
+    return data?.role === "admin" ? { error: "Code de sécurité requis.", code: "aal" } : { error: "Accès refusé." };
+  }
   (await cookies()).set(COOKIE_VUE_ADMIN, companyId, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 4 * 3600 });
   return {};
 }

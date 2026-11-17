@@ -50,7 +50,9 @@ export function CodeAdmin() {
       setErreur("Code incorrect ou expiré. Saisissez le code affiché maintenant dans l'application.");
       return;
     }
-    window.location.href = "/admin";
+    // Retour là où l'admin allait (ex. la fiche, pour la vue entreprise).
+    const suite = new URLSearchParams(window.location.search).get("next") ?? "";
+    window.location.href = /^\/(?![/\\])/.test(suite) ? suite : "/admin";
   };
 
   const carte: React.CSSProperties = {
