@@ -50,7 +50,7 @@ export async function PiedAccueil() {
 
   const ParCanton = cantons.length > 0 && (
     <details className="pied-cantons">
-      <summary>Par canton <span aria-hidden="true" className="pied-chevron">⌄</span></summary>
+      <summary>Par canton <svg aria-hidden="true" className="pied-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg></summary>
       <div className="pied-cantons-grille">
         {cantons.map(p => (
           <Link key={p.slug} href={`/emploi/${p.slug}`} title={`Emploi ${CANTONS[p.canton].dans}`}>{CANTONS[p.canton].nom}</Link>
@@ -76,8 +76,8 @@ export async function PiedAccueil() {
           font-size: 13px; color: var(--text-muted); }
         .pied-cantons summary::-webkit-details-marker { display: none; }
         .pied-cantons summary:hover { color: var(--text); }
-        .pied-chevron { display: inline-block; font-size: 13px; line-height: 1; transform: translateY(-2px); transition: transform .2s; }
-        .pied-cantons[open] .pied-chevron { transform: rotate(180deg) translateY(-1px); }
+        .pied-chevron { flex-shrink: 0; transition: transform .2s; }
+        .pied-cantons[open] > summary .pied-chevron { transform: rotate(180deg); }
         .pied-cantons-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin-top: 10px; }
         .pied-cantons-grille a { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pied-bas { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between;
@@ -94,8 +94,8 @@ export async function PiedAccueil() {
           .pied-acc > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
             min-height: 48px; font-size: 14px; font-weight: 600; color: var(--text); }
           .pied-acc > summary::-webkit-details-marker { display: none; }
-          .pied-acc > summary .pied-chevron { font-size: 16px; color: var(--text-muted); }
-          .pied-acc[open] > summary .pied-chevron { transform: rotate(180deg) translateY(-1px); }
+          .pied-acc > summary .pied-chevron { width: 14px; height: 14px; color: var(--text-muted); }
+          .pied-acc[open] > summary .pied-chevron { transform: rotate(180deg); }
           .pied-acc .pied-liste { gap: 0; padding-bottom: 10px; }
           .pied-acc .pied-liste a { display: flex; align-items: center; min-height: 40px; font-size: 14px; }
           .pied-acc .pied-cantons { margin: 0 0 12px; }
@@ -127,7 +127,7 @@ export async function PiedAccueil() {
           <div className="pied-mobile">
             {rubriques.map(r => (
               <details key={r.titre} className="pied-acc">
-                <summary>{r.titre}<span aria-hidden="true" className="pied-chevron">⌄</span></summary>
+                <summary>{r.titre}<svg aria-hidden="true" className="pied-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg></summary>
                 <div className="pied-liste">
                   {r.liens.map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}
                 </div>
