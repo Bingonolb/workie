@@ -31,11 +31,14 @@ const getLandingCounts = unstable_cache(
 );
 
 export const metadata: Metadata = {
-  title: "Workie : chercher du travail devient passionnant",
-  description: "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
+  // Le titre est le premier signal pour Google : « Emploi », « job » et
+  // « Suisse » y figurent, la marque vient après. « absolute » évite que le
+  // gabarit du site n'ajoute « · Workie » une seconde fois.
+  title: { absolute: "Emploi en Suisse : trouvez votre job chez le bon employeur · Workie" },
+  description: "Emploi et jobs en Suisse : découvrez les entreprises par métier, secteur et canton, puis postulez directement sur leurs offres officielles.",
   openGraph: {
-    title: "Workie : chercher du travail devient passionnant",
-    description: "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
+    title: "Emploi en Suisse : trouvez votre job chez le bon employeur · Workie",
+    description: "Emploi et jobs en Suisse : découvrez les entreprises par métier, secteur et canton, puis postulez directement sur leurs offres officielles.",
     url: "https://www.workie.ch",
     siteName: "Workie",
     type: "website",
@@ -43,8 +46,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Workie : chercher du travail devient passionnant",
-    description: "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
+    title: "Emploi en Suisse : trouvez votre job chez le bon employeur · Workie",
+    description: "Emploi et jobs en Suisse : découvrez les entreprises par métier, secteur et canton, puis postulez directement sur leurs offres officielles.",
   },
   alternates: { canonical: "https://www.workie.ch" },
 };

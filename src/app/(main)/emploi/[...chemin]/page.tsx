@@ -49,7 +49,8 @@ export async function generateMetadata({ params }: { params: Promise<{ chemin: s
   if (!r) return { title: "Page introuvable" };
   const p = r.page;
   const url = `${BASE_URL}/emploi/${p.slug}`;
-  const t = `${titre(p)} : ${nombre(p)} entreprises`;
+  // « emploi » et « job » : les deux mots que les gens tapent réellement.
+  const t = `${titre(p)} : jobs chez ${nombre(p)} employeurs`;
   const description = intro(p).slice(0, 158);
   return {
     title: t,

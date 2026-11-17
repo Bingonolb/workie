@@ -5,8 +5,8 @@ import { catalogueEmploi, nombre, CANTONS } from "@/lib/pagesEmploi";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Emploi en Suisse par secteur et par canton",
-  description: "Les employeurs suisses référencés sur Workie, classés par secteur et par canton. Accédez directement à leurs pages carrière officielles.",
+  title: "Emploi en Suisse : jobs par métier, secteur et canton",
+  description: "Trouvez un emploi en Suisse : les employeurs référencés sur Workie, classés par secteur et par canton, avec un accès direct à leurs offres de job officielles.",
   alternates: { canonical: "https://www.workie.ch/emploi" },
 };
 
