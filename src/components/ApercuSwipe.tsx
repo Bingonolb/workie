@@ -119,11 +119,14 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
    * un simple toucher reste un toucher.
    */
   const capture = useRef(false);
+  // Où et quand le doigt s'est posé, pour distinguer un toucher d'un défilement.
+  const toucherDepart = useRef<{ x: number; y: number; t: number } | null>(null);
   const onPointerDown = (e: React.PointerEvent) => {
     if (partie) return;
     if ((e.target as HTMLElement).closest("a, button")) return;
     depart.current = e.clientX;
     capture.current = false;
+    toucherDepart.current = { x: e.clientX, y: e.clientY, t: Date.now() };
   };
   const onPointerMove = (e: React.PointerEvent) => {
     if (depart.current === null) return;
@@ -134,13 +137,19 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
     }
     if (capture.current) setGlissement(d);
   };
-  const onPointerUp = () => {
+  const onPointerUp = (e: React.PointerEvent) => {
     if (depart.current === null) return;
     const d = glissement;
-    const toucher = !capture.current;
+    const td = toucherDepart.current;
     depart.current = null;
+    toucherDepart.current = null;
     setGlissement(0);
-    // Un toucher sans glissement ouvre la fiche, comme le bouton.
+    // Un vrai toucher ouvre la fiche : doigt resté presque immobile, dans les
+    // deux sens, et relevé vite. Un défilement de la page, même léger, n'ouvre
+    // rien.
+    const toucher = !capture.current && td !== null
+      && Math.abs(e.clientX - td.x) < 8 && Math.abs(e.clientY - td.y) < 8
+      && Date.now() - td.t < 500;
     if (toucher) {
       const c = entreprises[index];
       if (c && c.type !== "annonce") router.push(urlFiche(c));
@@ -149,7 +158,13 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
     if (d <= -SEUIL) avancer("gauche");
     else if (d >= SEUIL) avancer("droite");
   };
-
+  /** Le navigateur reprend le geste (défilement) : on annule, sans rien ouvrir. */
+  const onPointerCancel = () => {
+    depart.current = null;
+    toucherDepart.current = null;
+    capture.current = false;
+    setGlissement(0);
+  };
   // Après la dernière carte, une seule chose à faire : entrer.
   if (finie) {
     return (
@@ -190,7 +205,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
+          onPointerCancel={onPointerCancel}
           style={{
             position: "relative",
             background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 22,

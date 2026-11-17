@@ -150,3 +150,85 @@ export async function ouvrirPortailAbonnement(): Promise<{ error?: string; url?:
     return { error: "Le portail d'abonnement n'a pas pu s'ouvrir. Réessayez." };
   }
 }
+
+// ── Offres d'emploi ─────────────────────────────────────────────────────────
+
+export const CONTRATS = ["CDI", "CDD", "Stage", "Apprentissage", "Temporaire", "Freelance"] as const;
+export const MODES = ["Sur site", "Hybride", "Télétravail"] as const;
+export const NIVEAUX = ["Débutant", "Confirmé", "Expérimenté", "Cadre"] as const;
+
+export type Offre = {
+  id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null;
+  experience_level: string | null; apply_url: string | null; description: string | null;
+  is_active: boolean | null; created_at: string; expires_at: string | null;
+};
+
+const COLONNES_OFFRE = "id, title, location, contract_type, work_mode, experience_level, apply_url, description, is_active, created_at, expires_at";
+
+export async function listerOffres(): Promise<Offre[]> {
+  const c = await ficheGeree();
+  if (!c) return [];
+  const { data } = await createAdminClient().from("job_offers").select(COLONNES_OFFRE)
+    .eq("company_id", c.id).order("created_at", { ascending: false });
+  return (data ?? []) as Offre[];
+}
+
+function rafraichirFiche() {
+  revalidatePath("/entreprise/[slug]", "page");
+  revalidatePath("/espace-entreprise/offres");
+  revalidateTag("companies", {});
+}
+
+/** Crée ou modifie une offre de l'entreprise gérée. */
+export async function enregistrerOffre(formData: FormData): Promise<{ error?: string }> {
+  try {
+    const c = await ficheGeree();
+    if (!c) return { error: "Accès refusé." };
+    const id = String(formData.get("id") || "");
+    const titre = String(formData.get("title") || "").trim().slice(0, 120);
+    let lien = String(formData.get("apply_url") || "").trim();
+    if (!titre) return { error: "Indiquez l'intitulé du poste." };
+    if (!lien) return { error: "Indiquez le lien pour postuler." };
+    if (!/^https?:\/\//i.test(lien)) lien = `https://${lien}`;
+    try { new URL(lien); } catch { return { error: "Le lien pour postuler n'est pas une adresse valide." }; }
+    const choix = <T extends readonly string[]>(v: FormDataEntryValue | null, liste: T) =>
+      (liste as readonly string[]).includes(String(v)) ? String(v) : null;
+    const jours = Math.min(120, Math.max(7, Number(formData.get("duree")) || 60));
+
+    const champs = {
+      title: titre,
+      location: String(formData.get("location") || "").trim().slice(0, 80) || c.city,
+      contract_type: choix(formData.get("contract_type"), CONTRATS),
+      work_mode: choix(formData.get("work_mode"), MODES),
+      experience_level: choix(formData.get("experience_level"), NIVEAUX),
+      apply_url: lien,
+      description: String(formData.get("description") || "").trim().slice(0, 4000) || null,
+      expires_at: new Date(Date.now() + jours * 86400_000).toISOString(),
+      is_active: true,
+    };
+    const admin = createAdminClient();
+    if (id) {
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return { error: "Offre introuvable." };
+      const { error } = await admin.from("job_offers").update(champs).eq("id", id).eq("company_id", c.id);
+      if (error) return { error: "L'enregistrement a échoué. Réessayez." };
+    } else {
+      const { count } = await admin.from("job_offers").select("id", { count: "exact", head: true }).eq("company_id", c.id).eq("is_active", true);
+      if ((count ?? 0) >= 50) return { error: "50 offres actives au maximum. Retirez-en une avant d'en ajouter." };
+      const { error } = await admin.from("job_offers").insert({ ...champs, company_id: c.id });
+      if (error) return { error: "L'enregistrement a échoué. Réessayez." };
+    }
+    rafraichirFiche();
+    return {};
+  } catch {
+    return { error: "Une erreur est survenue. Réessayez." };
+  }
+}
+
+export async function retirerOffre(id: string): Promise<{ error?: string }> {
+  const c = await ficheGeree();
+  if (!c || !/^[0-9a-f-]{36}$/i.test(id)) return { error: "Accès refusé." };
+  const { error } = await createAdminClient().from("job_offers").delete().eq("id", id).eq("company_id", c.id);
+  if (error) return { error: "La suppression a échoué." };
+  rafraichirFiche();
+  return {};
+}
