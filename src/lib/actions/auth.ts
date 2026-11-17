@@ -34,6 +34,22 @@ function isDisposableEmail(email: string): boolean {
 const COMPTE_EXISTANT = "Un compte existe déjà avec cette adresse. Connectez-vous, ou utilisez « Mot de passe oublié ».";
 
 /**
+ * Les messages de Supabase arrivent en anglais (« Auth session missing! »,
+ * « Email rate limit exceeded »…) et s'affichaient tels quels. On les traduit ;
+ * à défaut, un message général plutôt que du jargon.
+ */
+function traduire(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("rate limit") || m.includes("too many") || m.includes("security purposes")) return "Trop de tentatives. Patientez une minute, puis réessayez.";
+  if (m.includes("session missing") || m.includes("session not found") || m.includes("jwt")) return "Ce lien n'est plus valide. Demandez un nouveau lien depuis « Mot de passe oublié ».";
+  if (m.includes("same as") || m.includes("different from the old")) return "Choisissez un mot de passe différent de l'ancien.";
+  if (m.includes("weak") || m.includes("pwned") || m.includes("password should")) return "Ce mot de passe est trop faible ou trop courant. Choisissez-en un autre.";
+  if (m.includes("invalid") && m.includes("email")) return "Adresse e-mail invalide.";
+  if (m.includes("signup") && m.includes("disabled")) return "Les inscriptions sont momentanément fermées.";
+  return "Une erreur est survenue. Réessayez dans un instant.";
+}
+
+/**
  * Renvoie le lien de confirmation d'inscription.
  *
  * Supabase limite déjà les envois par adresse ; la réponse reste la même que
@@ -110,7 +126,7 @@ export async function signUp(
     if (error.message.toLowerCase().includes("already registered") || error.message.toLowerCase().includes("already been registered")) {
       return { error: COMPTE_EXISTANT };
     }
-    return { error: error.message };
+    return { error: traduire(error.message) };
   }
 
   // Adresse déjà inscrite et confirmée : Supabase ne renvoie pas d'erreur,
@@ -135,10 +151,10 @@ export async function signIn(
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
   const rawNext = String(formData.get("next") || "");
-  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";
+  const nextDemande = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "";
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: connexion, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     // Un compte non confirmé recevait « Email ou mot de passe incorrect ».
@@ -154,7 +170,14 @@ export async function signIn(
     return { error: "Email ou mot de passe incorrect." };
   }
 
-  redirect(next);
+  // Sans destination demandée : une entreprise abonnée arrive dans son espace,
+  // tout le monde ailleurs sur Explorer.
+  let next = nextDemande;
+  if (!next && connexion.user) {
+    const { data: p } = await supabase.from("profiles").select("claimed_company_id").eq("id", connexion.user.id).maybeSingle();
+    next = p?.claimed_company_id ? "/espace-entreprise" : "/explore";
+  }
+  redirect(next || "/explore");
 }
 
 export async function forgotPassword(
@@ -170,7 +193,7 @@ export async function forgotPassword(
     redirectTo: `${base}/auth/callback?next=/reset-password`,
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: traduire(error.message) };
   return { error: undefined };
 }
 
@@ -183,7 +206,7 @@ export async function resetPassword(
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return { error: error.message };
+  if (error) return { error: traduire(error.message) };
 
   redirect("/explore");
 }
@@ -246,7 +269,7 @@ export async function deleteAccount(): Promise<{ error?: string }> {
 
   // Delete the auth user
   const { error } = await admin.auth.admin.deleteUser(user.id);
-  if (error) return { error: error.message };
+  if (error) return { error: "La suppression du compte a échoué. Réessayez, ou écrivez à contact@workie.ch." };
 
   // Sign out locally and redirect
   await supabase.auth.signOut();
@@ -255,14 +278,16 @@ export async function deleteAccount(): Promise<{ error?: string }> {
 
 export async function signInWithGoogle(formData: FormData) {
   const rawNext = String(formData.get("next") || "");
-  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "/explore";
+  const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "";
 
   const supabase = await createClient();
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+  // Sans destination demandée, le rappel décide : accueil des nouveaux
+  // comptes (?welcome=1), espace entreprise, ou Explorer.
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${base}/auth/callback?next=${encodeURIComponent(next)}`,
+      redirectTo: `${base}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ""}`,
     },
   });
 

@@ -113,7 +113,9 @@ export async function GET(request: Request) {
         }
         if (next) return NextResponse.redirect(`${origin}${next}`);
         if (isNew) return NextResponse.redirect(`${origin}/explore?welcome=1`);
-        return NextResponse.redirect(`${origin}/explore`);
+        // Une entreprise qui revient arrive dans son espace.
+        const { data: p } = await supabase.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
+        return NextResponse.redirect(`${origin}${p?.claimed_company_id ? "/espace-entreprise" : "/explore"}`);
       }
 
       return NextResponse.redirect(`${origin}/explore`);

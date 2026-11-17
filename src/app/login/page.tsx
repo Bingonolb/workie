@@ -10,9 +10,19 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next: rawNext } = await searchParams;
-  const next = rawNext && /^\/(?![/\\])/.test(rawNext) ? rawNext : "/explore";
+/** Ce qui ramène ici après un lien d'e-mail ou une connexion Google ratés. */
+const ERREURS: Record<string, string> = {
+  oauth: "Ce lien n'est plus valide : il a expiré ou a déjà servi. Connectez-vous, ou demandez un nouveau lien.",
+  invite: "Ce lien n'est plus valide : il a expiré ou a déjà servi. Connectez-vous, ou demandez un nouveau lien.",
+  google: "La connexion avec Google n'a pas abouti. Réessayez, ou connectez-vous avec votre e-mail.",
+};
+
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
+  const { next: rawNext, error } = await searchParams;
+  // Sans destination demandée, signIn choisit : espace entreprise ou Explorer.
+  const demande = rawNext && /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "";
+  const next = demande || "/explore";
+  const message = error ? ERREURS[error] : undefined;
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 40 }}>
@@ -28,7 +38,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <Link href="/forgot-password" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Mot de passe oublié ?</Link>
         </p>
 
-        <AuthFormWorkie mode="login" action={signIn} googleAction={signInWithGoogle} next={next} />
+        {message && (
+          <p role="alert" style={{ fontSize: 13.5, lineHeight: 1.5, color: "#b45309", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 10, padding: "10px 12px", marginBottom: 18 }}>
+            {message}
+          </p>
+        )}
+        <AuthFormWorkie mode="login" action={signIn} googleAction={signInWithGoogle} next={demande} />
       </div>
     </main>
   );
