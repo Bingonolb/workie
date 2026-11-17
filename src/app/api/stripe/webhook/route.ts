@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { revalidateTag, revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendAbonnementActif } from "@/lib/email";
 
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
         if (!companyId) break;
 
         const active = sub.status === "active" || sub.status === "trialing";
-        const periodEnd: number = sub.current_period_end ?? 0;
+        const periodEnd: number = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end ?? 0;
         const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 
         const { error } = await supabase.from("companies").update({
@@ -121,6 +122,8 @@ export async function POST(req: NextRequest) {
 
         const { error } = await supabase.from("companies").update({
           is_subscribed: false,
+          // Le badge dit « tenue par l'entreprise » : il part avec l'abonnement.
+          is_verified: false,
           stripe_subscription_id: null,
           subscription_ends_at: null,
         }).eq("id", companyId);
@@ -133,6 +136,13 @@ export async function POST(req: NextRequest) {
         await supabase.from("profiles").update({ claimed_company_id: null }).eq("claimed_company_id", companyId);
         break;
       }
+    }
+    // Badge et fiche publique : sans ceci, ils restaient figés dans le cache
+    // jusqu'à la prochaine invalidation, après un abonnement comme après une
+    // résiliation. Événements rares, coût négligeable.
+    if (event.type.startsWith("customer.subscription.") || event.type === "checkout.session.completed") {
+      revalidateTag("companies", {});
+      revalidatePath("/entreprise/[slug]", "page");
     }
   } catch (e) {
     console.error("[webhook] handler error:", e);
