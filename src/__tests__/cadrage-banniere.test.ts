@@ -38,19 +38,23 @@ describe("cadrage de la bannière", () => {
     expect(lireCadrage(`${SUPABASE}#cadrage=abc`)).toEqual({ src: SUPABASE, cadrage: CADRAGE_NEUTRE });
   });
 
-  it("l'adresse de rendu Supabase ne contient jamais le dièse", () => {
+  it("l'adresse d'une taille préparée ne contient jamais le dièse, ni de transformation Supabase", () => {
     const rendu = largeurCouverture(`${SUPABASE}#cadrage=30,70,1.00`, 640);
-    expect(rendu).not.toContain("#");
-    expect(rendu).toContain("/render/image/public/");
-    expect(rendu).toContain("width=640");
+    expect(rendu).toBe(`${SUPABASE}.w640.webp`);
+    expect(rendu).not.toContain("/render/image/");
+  });
+
+  it("une largeur hors liste prend la taille préparée juste au-dessus", () => {
+    expect(largeurCouverture(SUPABASE, 600)).toBe(`${SUPABASE}.w640.webp`);
+    expect(largeurCouverture(SUPABASE, 1000)).toBe(`${SUPABASE}.w1280.webp`);
   });
 
   it("zoomer demande une image plus large, pour rester nette", () => {
-    expect(largeurCouverture(`${SUPABASE}#cadrage=50,50,2.00`, 640)).toContain("width=1280");
+    expect(largeurCouverture(`${SUPABASE}#cadrage=50,50,2.00`, 640)).toBe(`${SUPABASE}.w1280.webp`);
     expect(largeurCouverture(`${PEXELS}#cadrage=50,50,2.00`, 640)).toContain("w=1280");
   });
 
   it("la largeur demandée ne dépasse jamais 2560", () => {
-    expect(largeurCouverture(`${SUPABASE}#cadrage=50,50,2.50`, 1280)).toContain("width=2560");
+    expect(largeurCouverture(`${SUPABASE}#cadrage=50,50,2.50`, 1280)).toBe(`${SUPABASE}.w2560.webp`);
   });
 });

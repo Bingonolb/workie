@@ -45,15 +45,23 @@ export function estSupabase(url: string): boolean {
   return url.includes(SUPABASE_BRUT) || url.includes(SUPABASE_RENDU);
 }
 
-function supabaseALaLargeur(url: string, w: number, qualite = 85): string {
-  const base = url.split("?")[0].replace(SUPABASE_BRUT, SUPABASE_RENDU);
-  // Qualite 80 et non 72.
-  //
-  // A 72, le reencodage ajoutait son propre flou a une photo deja nette :
-  // les bannieres paraissaient mediocres alors que les originaux sont en
-  // 2560 pixels. Mesure sur une banniere du catalogue : 52 Ko a 1280/72,
-  // 65 Ko a 1280/80, pour une image qui redevient franche.
-  return `${base}?width=${w}&quality=${qualite}&resize=contain`;
+/**
+ * Les tailles préparées d'avance pour chaque image du stockage (voir
+ * lib/variantesImage). Le site ne demande plus de transformation à Supabase :
+ * ce service est limité à 100 images d'origine par mois, le catalogue en
+ * compte près de 500.
+ */
+export const LARGEURS_VARIANTES = [128, 192, 256, 320, 480, 640, 940, 1280, 1920, 2560] as const;
+
+/** « covers/x/y.jpg » → « covers/x/y.jpg.w640.webp » : rangée à côté de l'original. */
+export function cheminVariante(chemin: string, w: number): string {
+  return `${chemin}.w${w}.webp`;
+}
+
+function supabaseALaLargeur(url: string, w: number): string {
+  const base = url.split("?")[0].replace(SUPABASE_RENDU, SUPABASE_BRUT);
+  const taille = LARGEURS_VARIANTES.find(l => l >= w) ?? LARGEURS_VARIANTES[LARGEURS_VARIANTES.length - 1];
+  return cheminVariante(base, taille);
 }
 
 /** Vrai quand la source sait servir la largeur qu'on lui demande. */
@@ -119,28 +127,14 @@ export function sourceBandeauPourEcran(url: string): string {
  * photo agrandie deux fois à l'écran doit être téléchargée deux fois plus
  * large, sans quoi le zoom la rendrait floue.
  */
-export function largeurCouverture(url: string, w: number, qualite = 85): string {
+// `qualite` ne sert plus qu'aux sources externes : les tailles du stockage
+// sont encodées une fois pour toutes à la préparation.
+export function largeurCouverture(url: string, w: number, _qualite = 85): string {
   const { src, cadrage } = lireCadrage(url);
   const largeur = Math.min(Math.round(w * cadrage.zoom), 2560);
   if (estPexels(src)) return aLaLargeur(src, largeur);
-  if (estSupabase(src)) return supabaseALaLargeur(src, largeur, qualite);
+  if (estSupabase(src)) return supabaseALaLargeur(src, largeur);
   return src;
-}
-
-/**
- * Toutes les variantes qu'un écran du site peut demander pour une bannière.
- *
- * Supabase redimensionne à la première demande, ce qui coûte environ une
- * demi-seconde, puis garde le résultat. Les demander d'avance, juste après
- * l'envoi d'une image, évite que le premier visiteur paie cette attente.
- */
-export function variantesARechauffer(url: string): string[] {
-  if (!estSupabase(lireCadrage(url).src)) return [];
-  const { un, deux } = sourcesBandeau(url);
-  return [
-    ...[128, 192, 256, 320, 480, 640, 940, 1280].map(w => largeurCouverture(url, w)),
-    un, deux,
-  ].filter((v, i, t) => t.indexOf(v) === i);
 }
 
 /* ── Cadrage de la bannière ─────────────────────────────────────────────────

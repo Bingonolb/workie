@@ -4,10 +4,9 @@
  * n'est appelable depuis le navigateur. Chaque appelant vérifie les droits.
  */
 import { randomUUID } from "crypto";
-import { after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { logoAffichable } from "@/lib/logo";
-import { avecCadrage, lireCadrage, CADRAGE_NEUTRE, ZOOM_MAX, variantesARechauffer, type Cadrage } from "@/lib/coverUrl";
+import { avecCadrage, lireCadrage, CADRAGE_NEUTRE, ZOOM_MAX, type Cadrage } from "@/lib/coverUrl";
+import { preparerVariantes } from "@/lib/variantesImage";
 
 /**
  * Le cadrage choisi dans l'éditeur, lu depuis le formulaire et borné.
@@ -76,24 +75,15 @@ export async function televerserCouverture(
     // restait en place sans que personne ne sache pourquoi.
     return { avertissement: "Le texte est enregistré. L'envoi de l'image a échoué." };
   }
-  const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
-  // Toutes ses tailles préparées d'avance, une fois la réponse partie : le
-  // premier visiteur ne paie pas la demi-seconde de redimensionnement.
-  after(() => (dossier === "logos" ? rechaufferLogo(pub.publicUrl) : rechaufferBanniere(pub.publicUrl)));
-  return { url: pub.publicUrl };
-}
-
-async function rechaufferLogo(url: string): Promise<void> {
-  const v = logoAffichable(url);
-  if (v) await fetch(v, { headers: { Accept: "image/avif,image/webp,image/*,*/*;q=0.8" } }).then(r => r.arrayBuffer()).catch(() => null);
-}
-
-async function rechaufferBanniere(url: string): Promise<void> {
-  const variantes = variantesARechauffer(url);
-  for (let i = 0; i < variantes.length; i += 3) {
-    await Promise.all(variantes.slice(i, i + 3).map(v =>
-      fetch(v, { headers: { Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8" } }).then(r => r.arrayBuffer()).catch(() => null),
-    ));
+  // Toutes ses tailles, préparées AVANT de renvoyer l'adresse : le site pointe
+  // directement vers elles, une taille manquante serait une image cassée.
+  // En cas d'échec, l'original est retiré et l'ancienne image reste en place.
+  const pret = await preparerVariantes(admin, path, Buffer.from(await coverFile.arrayBuffer())).catch(() => false);
+  if (!pret) {
+    await admin.storage.from("covers").remove([path]);
+    return { avertissement: "Le texte est enregistré. L'image n'a pas pu être préparée : essayez un autre fichier (JPG ou PNG)." };
   }
+  const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
+  return { url: pub.publicUrl };
 }
 
