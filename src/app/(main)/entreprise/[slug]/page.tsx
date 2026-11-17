@@ -122,15 +122,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  * social n'est pas une offre d'emploi. C'est le site officiel qu'on ouvre
  * pour postuler.
  */
-function BlocOffresEmploi({ url, companyId, slug, revendicable, className, style }: { url: string; companyId: string; slug?: string | null; revendicable?: boolean; className?: string; style?: React.CSSProperties }) {
-  const href = /^https?:\/\//.test(url) ? url : `https://${url}`;
+/*
+ * Un seul bloc « Offres d'emploi » : les offres publiées sur Workie d'abord,
+ * puis le site carrière de l'entreprise. Il y avait deux blocs du même nom,
+ * l'un en haut avec le lien, l'autre tout en bas avec les offres : sur
+ * téléphone, les offres arrivaient après toute la page.
+ */
+function BlocOffresEmploi({ url, companyId, companyName, jobs, slug, revendicable, className, style }: { url: string | null; companyId: string; companyName: string; jobs: Parameters<typeof JobOfferCard>[0]["job"][]; slug?: string | null; revendicable?: boolean; className?: string; style?: React.CSSProperties }) {
+  const href = url ? (/^https?:\/\//.test(url) ? url : `https://${url}`) : null;
   return (
     <div className={className} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", ...style }}>
-      <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Offres d&apos;emploi</h3>
-      {/* Pastille d'accent plutôt que pavé gris : c'est le vocabulaire déjà
-          employé pour le compteur d'offres et le badge de secteur. Le gris
-          plein pesait autant qu'une carte pour un simple lien. */}
-      <LienOffres href={href} companyId={companyId} />
+      <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+        Offres d&apos;emploi
+        {jobs.length > 0 && <span style={{ fontSize: 12.5, fontWeight: 700, background: "var(--surface3)", color: "var(--text)", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>}
+      </h3>
+      {jobs.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: href ? 14 : 0 }}>
+          {jobs.map(job => <JobOfferCard key={job.id} job={job} companyName={companyName} companyId={companyId} />)}
+        </div>
+      )}
+      {href && <LienOffres href={href} companyId={companyId} />}
       {/* Discret : on le trouve quand on le cherche, il ne détourne pas le
           candidat de ce qu'il est venu faire. */}
       {revendicable && slug && (
@@ -163,6 +174,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
     getCachedJobOffers(id).catch(() => [] as never[]),
     getCachedSuggestions(company.id, company.sector, company.subsector ?? null, company.canton ?? null).catch(() => []),
   ]);
+
+  const offres = jobs.map(j => ({ ...j, created_at: j.created_at ?? "" }));
 
   // Ce qui est saisi l'emporte sur ce qui est deduit.
   const saisies = (company as { langues?: string[] | null }).langues ?? [];
@@ -347,8 +360,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 la colonne de droite, se retrouvait tout en bas de la page,
                 après les avis. Or c'est ce qu'on vient y chercher : il remonte
                 donc ici, et la version de droite est masquée à cette taille. */}
-            {company.website_url && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} slug={company.slug} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
+            {(company.website_url || offres.length > 0) && (
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} slug={company.slug} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
             )}
 
             {/* Key stats — seules les données réellement disponibles sont
@@ -403,8 +416,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
 
-            {company.website_url && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} slug={company.slug} className="liens-desktop" />
+            {(company.website_url || offres.length > 0) && (
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} slug={company.slug} className="liens-desktop" />
             )}
 
             {/* Le bloc « Tags » a été retiré.
@@ -421,20 +434,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
 
-            {/* Job offers */}
-            {jobs.length > 0 && (
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
-                  Offres d&apos;emploi
-                  <span style={{ fontSize: 12.5, fontWeight: 700, background: "var(--surface3)", color: "var(--text)", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {jobs.map((job) => (
-                    <JobOfferCard key={job.id} job={{ ...job, created_at: job.created_at ?? "" }} companyName={company.name} companyId={company.id} />
-                  ))}
-                </div>
-              </div>
-            )}
 
           </div>
         </div>

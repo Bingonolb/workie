@@ -6,6 +6,7 @@ import { X, MapPin, ExternalLink } from "lucide-react";
 import { trackJobApplyClick } from "@/lib/actions/analytics";
 import { libelleTaux, nomLangue } from "@/lib/offres";
 import { useVerrouDefilement } from "@/lib/useVerrouDefilement";
+import { texteRiche, lignesRiches } from "@/lib/texteRiche";
 
 type Job = {
   id: string;
@@ -54,10 +55,10 @@ function Section({ titre, texte }: { titre: string; texte: string | null | undef
           }
           return morceaux.map((m, j) => m.puces ? (
             <ul key={`${i}-${j}`} style={{ display: "grid", gap: 6, paddingLeft: 20, margin: 0 }}>
-              {m.lignes.map((l, k) => <li key={k} style={txt}>{l}</li>)}
+              {m.lignes.map((l, k) => <li key={k} style={txt}>{texteRiche(l)}</li>)}
             </ul>
           ) : (
-            <p key={`${i}-${j}`} style={{ ...txt, whiteSpace: "pre-line", margin: 0 }}>{m.lignes.join("\n")}</p>
+            <p key={`${i}-${j}`} style={{ ...txt, margin: 0 }}>{lignesRiches(m.lignes.join("\n"))}</p>
           ));
         })}
       </div>
@@ -189,7 +190,7 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
 
             {/* Description */}
             {job.description && (
-              <p style={{ fontSize: 14.5, color: "var(--text)", lineHeight: 1.7, marginBottom: 22, whiteSpace: "pre-wrap" }}>{job.description}</p>
+              <p style={{ fontSize: 14.5, color: "var(--text)", lineHeight: 1.7, marginBottom: 22 }}>{lignesRiches(job.description)}</p>
             )}
             <Section titre="Vos missions" texte={job.missions} />
             <Section titre="Votre profil" texte={job.requirements} />

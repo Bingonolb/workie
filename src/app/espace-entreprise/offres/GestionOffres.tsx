@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
 import { enregistrerOffre, retirerOffre, type Offre } from "@/lib/actions/espaceEntreprise";
@@ -31,12 +31,35 @@ function Choix({ nom, liste, valeur, libelle }: { nom: string; liste: readonly s
 function Rubrique({ nom, titre, aide, exemple, valeur, requis, lignes = 5, max = 4000 }: {
   nom: string; titre: string; aide: string; exemple: string; valeur: string | null | undefined; requis?: boolean; lignes?: number; max?: number;
 }) {
+  const zone = useRef<HTMLTextAreaElement>(null);
+  // Entoure la sélection de la marque (** pour le gras, * pour l'italique),
+  // ou la retire si elle y est déjà. Sans sélection, place la marque et le curseur au milieu.
+  const marquer = (marque: string) => {
+    const t = zone.current;
+    if (!t) return;
+    const { selectionStart: d, selectionEnd: f, value } = t;
+    const choisi = value.slice(d, f);
+    const dejaLa = value.slice(d - marque.length, d) === marque && value.slice(f, f + marque.length) === marque;
+    const avant = dejaLa ? value.slice(0, d - marque.length) : value.slice(0, d);
+    const apres = dejaLa ? value.slice(f + marque.length) : value.slice(f);
+    const milieu = dejaLa ? choisi : `${marque}${choisi}${marque}`;
+    t.value = avant + milieu + apres;
+    const debut = avant.length + (dejaLa ? 0 : marque.length);
+    t.focus();
+    t.setSelectionRange(debut, debut + choisi.length);
+  };
+  const bouton: React.CSSProperties = { width: 36, height: 32, borderRadius: 8, border: "1px solid var(--border2)", background: "var(--surface)", color: "var(--text)", cursor: "pointer", fontSize: 14 };
   return (
-    <label style={{ display: "grid", gap: 4 }}>
-      <span style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text)" }}>{titre}{!requis && <span style={{ fontWeight: 500, color: "var(--text-muted)", fontSize: 12.5 }}> (facultatif)</span>}</span>
+    <div style={{ display: "grid", gap: 4 }}>
+      <label htmlFor={`rub-${nom}`} style={{ fontSize: 14.5, fontWeight: 800, color: "var(--text)" }}>{titre}{!requis && <span style={{ fontWeight: 500, color: "var(--text-muted)", fontSize: 12.5 }}> (facultatif)</span>}</label>
       <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginBottom: 4 }}>{aide}</span>
-      <textarea name={nom} rows={lignes} maxLength={max} required={requis} defaultValue={valeur ?? ""} placeholder={exemple} style={{ ...inp, resize: "vertical", lineHeight: 1.55 }} />
-    </label>
+      <div style={{ display: "flex", gap: 6, marginBottom: 2 }}>
+        {/* onMouseDown + preventDefault : la sélection du texte n'est pas perdue au clic. */}
+        <button type="button" style={{ ...bouton, fontWeight: 800 }} aria-label="Gras" title="Gras" onMouseDown={e => e.preventDefault()} onClick={() => marquer("**")}>G</button>
+        <button type="button" style={{ ...bouton, fontStyle: "italic", fontFamily: "Georgia, serif" }} aria-label="Italique" title="Italique" onMouseDown={e => e.preventDefault()} onClick={() => marquer("*")}>I</button>
+      </div>
+      <textarea id={`rub-${nom}`} ref={zone} name={nom} rows={lignes} maxLength={max} required={requis} defaultValue={valeur ?? ""} placeholder={exemple} style={{ ...inp, resize: "vertical", lineHeight: 1.55 }} />
+    </div>
   );
 }
 
