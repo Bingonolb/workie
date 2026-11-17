@@ -205,13 +205,28 @@ export async function deleteAccount(): Promise<{ error?: string }> {
     .select("claimed_company_id")
     .eq("id", user.id)
     .maybeSingle();
-  if (profile?.claimed_company_id) {
-    return { error: "Les comptes entreprise ne peuvent pas être supprimés automatiquement. Contactez le support." };
-  }
-
   // Delete user data via admin client (bypasses RLS)
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const admin = createAdminClient();
+
+  if (profile?.claimed_company_id) {
+    const { data: c } = await admin.from("companies").select("name, is_subscribed").eq("id", profile.claimed_company_id).maybeSingle();
+    if (c?.is_subscribed) {
+      return { error: `Ce compte gère ${c.name} avec un abonnement actif. Résiliez d'abord l'abonnement depuis votre espace entreprise, puis supprimez le compte.` };
+    }
+  }
+
+  // Une campagne payée encore en cours serait perdue avec le compte.
+  const aujourdhui = new Date().toISOString().slice(0, 10);
+  const { count: campagnesEnCours } = await admin.from("ad_campaigns").select("id", { count: "exact", head: true })
+    .eq("user_id", user.id).in("status", ["active", "paused"]).gte("end_date", aujourdhui);
+  if ((campagnesEnCours ?? 0) > 0) {
+    return { error: "Vous avez une campagne publicitaire en cours. Attendez sa fin pour supprimer votre compte, ou écrivez à contact@workie.ch." };
+  }
+
+  // La photo de profil est publique : elle part avec le compte.
+  const { data: fichiers } = await admin.storage.from("avatars").list(user.id);
+  if (fichiers?.length) await admin.storage.from("avatars").remove(fichiers.map(f => `${user.id}/${f.name}`));
 
   // Anonymize reviews: disconnect from user but keep the content for the community.
   // The FK on reviews.user_id is ON DELETE SET NULL, so we only need to null it out here.
