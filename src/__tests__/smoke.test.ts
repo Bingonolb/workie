@@ -105,6 +105,9 @@ vi.mock("@/lib/supabase/admin", () => ({
 
 import { submitReview } from "@/lib/actions/reviews";
 
+// Les avis sont fermés en production ; ces tests vérifient leur logique interne.
+process.env.AVIS_OUVERTS = "1";
+
 function makeFormData(overrides: Record<string, string> = {}): FormData {
   const fd = new FormData();
   const defaults: Record<string, string> = {

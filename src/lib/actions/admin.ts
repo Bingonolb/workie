@@ -4,7 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { notifyNewCompany } from "@/lib/actions/notifications";
+import { notifyNewCompany } from "@/lib/notificationsInternes";
 import { cantonValide, LANGUES_SAISIE } from "@/lib/types";
 import { banniereCadree, televerserCouverture } from "@/lib/televersement";
 

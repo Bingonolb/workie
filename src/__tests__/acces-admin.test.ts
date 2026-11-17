@@ -8,7 +8,7 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }));
 vi.mock("@/lib/email", () => ({}));
-vi.mock("@/lib/actions/notifications", () => ({ notifyNewCompany: vi.fn() }));
+vi.mock("@/lib/notificationsInternes", () => ({ notifyNewCompany: vi.fn() }));
 
 import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";

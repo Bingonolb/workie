@@ -31,6 +31,9 @@ vi.mock("@/lib/supabase/admin", () => ({
 
 import { submitReview, voteHelpful } from "@/lib/actions/reviews";
 
+// Les avis sont fermés en production ; ces tests vérifient leur logique interne.
+process.env.AVIS_OUVERTS = "1";
+
 // Helper to build a chainable Supabase query builder that resolves to `result`
 function chain(result: unknown) {
   const b: Record<string, unknown> = {};

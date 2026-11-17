@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { headers } from "next/headers";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
@@ -103,7 +103,15 @@ async function isIpAbuse(
 
 type ReviewState = { error?: string; success?: boolean } | undefined;
 
+/**
+ * Les avis ne sont plus publiés sur Workie. L'action reste en place (et testée)
+ * pour le jour où ils reviendraient, mais elle est fermée par défaut : une
+ * action serveur exportée reste appelable de l'extérieur même sans écran.
+ */
+const avisOuverts = () => (process.env.AVIS_OUVERTS ?? "").trim() === "1";
+
 export async function submitReview(_prev: ReviewState, formData: FormData): Promise<ReviewState> {
+  if (!avisOuverts()) return { error: "Les avis ne sont plus acceptés sur Workie." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Tu dois être connecté pour poster un avis." };
@@ -298,6 +306,7 @@ async function notifyAdminFlaggedReview(
 // ── Vote helpful ─────────────────────────────────────────────────────────────
 
 export async function voteHelpful(reviewId: string): Promise<{ error?: string; alreadyVoted?: boolean }> {
+  if (!avisOuverts()) return { error: "Les avis ne sont plus acceptés sur Workie." };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Non authentifié" };

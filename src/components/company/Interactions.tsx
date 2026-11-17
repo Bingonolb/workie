@@ -8,7 +8,6 @@ import { SaveButton } from "@/components/SaveButton";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { MenuFiche } from "./MenuFiche";
 import { GuestContentGate } from "@/components/GuestContentGate";
-import { ReviewForm } from "@/components/ReviewForm";
 import { BoutonVueEntreprise } from "./BoutonVueEntreprise";
 
 /**
@@ -52,23 +51,4 @@ export function ActionsFiche({ companyId, companyName, slug = null, gerable = fa
 export function PorteInvite({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useEtatFiche();
   return <GuestContentGate isGuest={!isLoggedIn}>{children}</GuestContentGate>;
-}
-
-export function FormulaireAvis({ companyId }: { companyId: string }) {
-  const { isLoggedIn } = useEtatFiche();
-  if (isLoggedIn) return <ReviewForm companyId={companyId} />;
-  return (
-    <div style={{ textAlign: "center", padding: "24px" }}>
-      <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Connectez-vous pour publier un avis anonyme.
-      </p>
-      <Link href="/login" style={{
-        display: "inline-block", background: "var(--encre)",
-        color: "var(--encre-texte)", fontWeight: 700, borderRadius: 10, padding: "12px 28px",
-        textDecoration: "none", fontSize: 14,
-      }}>
-        Se connecter
-      </Link>
-    </div>
-  );
 }
