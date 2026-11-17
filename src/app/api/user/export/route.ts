@@ -18,7 +18,10 @@ type LigneAvisExport = {
 type LigneFavoriExport = { companies: { name: string | null; sector: string | null } | null; created_at: string };
 type LigneVoteExport = { review_id: string; created_at: string };
 type LigneNotificationExport = { type: string; read: boolean; created_at: string };
-type LigneSignalementExport = { review_id: string; reason: string; created_at: string };
+type LigneSignalementExport = { target_type: string; target_label: string | null; category: string; explanation: string | null; status: string | null; created_at: string };
+type LigneCampagneExport = { headline: string; format: string; status: string; start_date: string | null; end_date: string | null; total_budget_chf: number | null; paid_at: string | null; created_at: string };
+type LigneRevendicationExport = { prenom: string; nom: string; fonction: string; email_pro: string; statut: string; cree_le: string; companies: { name: string | null } | null };
+type LigneClicOffreExport = { clique_le: string; companies: { name: string | null } | null };
 
 
 export const dynamic = "force-dynamic";
@@ -30,7 +33,11 @@ export async function GET() {
   }
 
   // Fetch all personal data in parallel
-  const [profileRes, reviewsRes, favoritesRes, votesRes, notificationsRes, reportsRes] =
+  // Clé de service, filtrée sur l'identité de la session : l'export doit être
+  // complet, y compris pour une entreprise d'une catégorie pas encore publiée
+  // (la lecture ordinaire la masquerait et le nom manquerait).
+  const admin = createAdminClient();
+  const [profileRes, reviewsRes, favoritesRes, votesRes, notificationsRes, reportsRes, campagnesRes, revendicationsRes, clicsRes] =
     await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       // Colonnes explicites : les droits sur reviews sont par colonne depuis
@@ -38,10 +45,16 @@ export async function GET() {
       // Clé de service : le filtre porte sur user_id, colonne fermée aux rôles
       // anon et authenticated. L'identité vient de la session déjà validée.
       createAdminClient().from("reviews").select(`${REVIEW_PUBLIC_COLS}, companies(name)`).eq("user_id", user.id),
-      supabase.from("favorites").select("*, companies(name, sector)").eq("user_id", user.id),
+      admin.from("favorites").select("created_at, companies(name, sector)").eq("user_id", user.id),
       supabase.from("review_votes").select("review_id, created_at").eq("user_id", user.id),
       supabase.from("notifications").select("*").eq("user_id", user.id),
-      supabase.from("reports").select("review_id, reason, created_at").eq("reporter_id", user.id),
+      supabase.from("reports").select("target_type, target_label, category, explanation, status, created_at").eq("reporter_id", user.id),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (admin.from("ad_campaigns") as any).select("headline, format, status, start_date, end_date, total_budget_chf, paid_at, created_at").eq("user_id", user.id),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (admin.from("revendications" as any) as any).select("prenom, nom, fonction, email_pro, statut, cree_le, companies(name)").eq("user_id", user.id),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (admin.from("clics_offres" as any) as any).select("clique_le, companies(name)").eq("user_id", user.id),
     ]);
 
   // Strip internal/sensitive columns from profile before export
@@ -91,10 +104,19 @@ export async function GET() {
       created_at: n.created_at,
     })),
     reports_submitted: ((reportsRes.data ?? []) as unknown as LigneSignalementExport[]).map((r) => ({
-      review_id: r.review_id,
-      reason: r.reason,
+      target_type: r.target_type,
+      target: r.target_label,
+      category: r.category,
+      explanation: r.explanation,
+      status: r.status,
       created_at: r.created_at,
     })),
+    ad_campaigns: ((campagnesRes.data ?? []) as LigneCampagneExport[]),
+    company_management_requests: ((revendicationsRes.data ?? []) as LigneRevendicationExport[]).map(r => ({
+      company: r.companies?.name, first_name: r.prenom, last_name: r.nom, job_title: r.fonction,
+      work_email: r.email_pro, status: r.statut, created_at: r.cree_le,
+    })),
+    job_offer_clicks: ((clicsRes.data ?? []) as LigneClicOffreExport[]).map(c => ({ company: c.companies?.name, clicked_at: c.clique_le })),
   };
 
   const filename = `workie-export-${new Date().toISOString().slice(0, 10)}.json`;
