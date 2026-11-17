@@ -493,7 +493,7 @@ export async function deleteUserCampaign(id: string): Promise<{ error?: string }
     // Le visuel part aussi, sauf si une autre campagne (une relance) l'utilise encore.
     const image = data[0].image_url as string | null;
     const chemin = image?.split("/storage/v1/object/public/covers/")[1];
-    if (chemin?.startsWith("ads/")) {
+    if (image && chemin?.startsWith("ads/")) {
       const { count } = await admin.from("ad_campaigns").select("id", { count: "exact", head: true }).eq("image_url", image);
       if (!count) await admin.storage.from("covers").remove([decodeURIComponent(chemin)]);
     }
