@@ -430,7 +430,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {jobs.map((job) => (
-                    <JobOfferCard key={job.id} job={{ ...job, created_at: job.created_at ?? "" }} companyName={company.name} />
+                    <JobOfferCard key={job.id} job={{ ...job, created_at: job.created_at ?? "" }} companyName={company.name} companyId={company.id} />
                   ))}
                 </div>
               </div>

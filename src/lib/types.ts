@@ -205,6 +205,7 @@ export type Database = {
           expires_at: string | null; id: string; is_active: boolean | null; location: string | null
           requirements: string | null; salary_range: string | null; title: string; view_count: number | null; work_mode: string | null
           missions: string | null; avantages: string | null
+          taux_min: number | null; taux_max: number | null; entree: string | null; langues: string[] | null
         }
         Insert: Partial<Database["public"]["Tables"]["job_offers"]["Row"]> & { company_id: string; title: string }
         Update: Partial<Database["public"]["Tables"]["job_offers"]["Row"]>

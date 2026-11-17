@@ -7,7 +7,7 @@ import { getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { LANGUES_SAISIE, EMPLOYEE_RANGES } from "@/lib/types";
 import { banniereCadree, televerserCouverture } from "@/lib/televersement";
-import { CONTRATS, MODES, NIVEAUX } from "@/lib/offres";
+import { CONTRATS, MODES, NIVEAUX, TAUX } from "@/lib/offres";
 
 /**
  * Espace entreprise. Chaque action relit en base, côté serveur, le lien entre
@@ -164,10 +164,11 @@ export type Offre = {
   id: string; title: string; location: string | null; contract_type: string | null; work_mode: string | null;
   experience_level: string | null; apply_url: string | null; description: string | null;
   missions: string | null; requirements: string | null; avantages: string | null;
+  taux_min: number | null; taux_max: number | null; entree: string | null; langues: string[] | null;
   is_active: boolean | null; created_at: string; expires_at: string | null;
 };
 
-const COLONNES_OFFRE = "id, title, location, contract_type, work_mode, experience_level, apply_url, description, missions, requirements, avantages, is_active, created_at, expires_at";
+const COLONNES_OFFRE = "id, title, location, contract_type, work_mode, experience_level, apply_url, description, missions, requirements, avantages, taux_min, taux_max, entree, langues, is_active, created_at, expires_at";
 
 export async function listerOffres(): Promise<Offre[]> {
   const c = await ficheGeree();
@@ -203,6 +204,11 @@ export async function enregistrerOffre(formData: FormData): Promise<{ error?: st
     if (!missions) return { error: "Décrivez les missions du poste." };
     if (!profil) return { error: "Décrivez le profil recherché." };
     if (!avantages) return { error: "Indiquez ce que vous offrez." };
+    const tauxMin = Number(formData.get("taux_min")), tauxMax = Number(formData.get("taux_max"));
+    if (!TAUX.includes(tauxMin as never) || !TAUX.includes(tauxMax as never)) return { error: "Indiquez le taux d'activité." };
+    if (tauxMin > tauxMax) return { error: "Le taux minimum dépasse le taux maximum." };
+    const entree = String(formData.get("entree") || "").trim().slice(0, 40) || null;
+    const langues = String(formData.get("langues") || "").split(",").filter(l => ["FR", "DE", "EN", "IT"].includes(l));
 
     const champs = {
       title: titre,
@@ -213,6 +219,7 @@ export async function enregistrerOffre(formData: FormData): Promise<{ error?: st
       apply_url: lien,
       description: String(formData.get("description") || "").trim().slice(0, 1000) || null,
       missions, requirements: profil, avantages,
+      taux_min: tauxMin, taux_max: tauxMax, entree, langues: langues.length ? langues : null,
       expires_at: new Date(Date.now() + jours * 86400_000).toISOString(),
       is_active: true,
     };

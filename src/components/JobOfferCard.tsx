@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, MapPin, ExternalLink } from "lucide-react";
+import { trackJobApplyClick } from "@/lib/actions/analytics";
+import { libelleTaux, nomLangue } from "@/lib/offres";
 
 type Job = {
   id: string;
@@ -17,6 +19,10 @@ type Job = {
   missions?: string | null;
   requirements?: string | null;
   avantages?: string | null;
+  taux_min?: number | null;
+  taux_max?: number | null;
+  entree?: string | null;
+  langues?: string[] | null;
   created_at: string;
 };
 
@@ -47,8 +53,15 @@ function Badge({ label, color }: { label: string; color: string }) {
   );
 }
 
-export function JobOfferCard({ job, companyName }: { job: Job; companyName: string }) {
+export function JobOfferCard({ job, companyName, companyId }: { job: Job; companyName: string; companyId: string }) {
   const [open, setOpen] = useState(false);
+  const taux = libelleTaux(job.taux_min, job.taux_max);
+  // Le clic sur « Postuler » compte pour l'entreprise (statistiques) et pour le
+  // classement (une fois par compte). Rien n'est attendu : le site s'ouvre aussitôt.
+  const auClicPostuler = () => {
+    trackJobApplyClick(job.id, companyId).catch(() => {});
+    fetch(`/api/company/${companyId}/offres`, { method: "POST", keepalive: true }).catch(() => {});
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -90,6 +103,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
       >
         <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{job.title}</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+          {taux && <Badge label={taux} color="#0ea5e9" />}
           {job.contract_type && <Badge label={job.contract_type} color="#8b5cf6" />}
           {job.work_mode && <Badge label={job.work_mode} color="#10b981" />}
           {job.location && (
@@ -142,6 +156,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
 
             {/* Badges */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
+              {taux && <Badge label={taux} color="#0ea5e9" />}
               {job.contract_type && <Badge label={job.contract_type} color="#8b5cf6" />}
               {job.work_mode && <Badge label={job.work_mode} color="#10b981" />}
               {job.experience_level && <Badge label={job.experience_level} color="#f97316" />}
@@ -161,6 +176,12 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
             <Section titre="Vos missions" texte={job.missions} />
             <Section titre="Votre profil" texte={job.requirements} />
             <Section titre="Ce que nous offrons" texte={job.avantages} />
+            {(job.entree || (job.langues?.length ?? 0) > 0) && (
+              <dl style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 14, marginBottom: 22 }}>
+                {job.entree && <><dt style={{ color: "var(--text-muted)" }}>Entrée en fonction</dt><dd style={{ margin: 0, fontWeight: 600 }}>{job.entree}</dd></>}
+                {(job.langues?.length ?? 0) > 0 && <><dt style={{ color: "var(--text-muted)" }}>Langues</dt><dd style={{ margin: 0, fontWeight: 600 }}>{job.langues!.map(nomLangue).join(", ")}</dd></>}
+              </dl>
+            )}
             {!job.description && !job.missions && !job.requirements && !job.avantages && (
               <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 24 }}>
                 Cliquez sur « Postuler » pour lire l&apos;offre complète et envoyer votre candidature directement à l&apos;entreprise.
@@ -178,6 +199,7 @@ export function JobOfferCard({ job, companyName }: { job: Job; companyName: stri
                 href={job.apply_url}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={auClicPostuler}
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                   padding: "14px 0", borderRadius: 12,

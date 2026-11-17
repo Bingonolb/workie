@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
 import { enregistrerOffre, retirerOffre, type Offre } from "@/lib/actions/espaceEntreprise";
-import { CONTRATS, MODES, NIVEAUX } from "@/lib/offres";
+import { CONTRATS, MODES, NIVEAUX, TAUX, libelleTaux } from "@/lib/offres";
+import { LANGUES_SAISIE } from "@/lib/types";
 
 const lbl: React.CSSProperties = { display: "block", fontSize: 12.5, fontWeight: 700, color: "var(--text-muted)", marginBottom: 6 };
 const inp: React.CSSProperties = { width: "100%", padding: "11px 13px", borderRadius: 11, border: "1px solid var(--border)", background: "var(--surface2)", color: "var(--text)", fontSize: 15 };
@@ -44,6 +45,7 @@ function Formulaire({ offre, onFini }: { offre: Offre | null; onFini: () => void
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, demarrer] = useTransition();
   const v: Partial<Offre> = offre ?? {};
+  const [langues, setLangues] = useState<string[]>(offre?.langues ?? []);
   const envoyer = (fd: FormData) => {
     setErreur(null);
     demarrer(async () => {
@@ -59,10 +61,41 @@ function Formulaire({ offre, onFini }: { offre: Offre | null; onFini: () => void
       <div style={{ display: "grid", gap: 14 }}>
         <label><span style={lbl}>Intitulé du poste</span><input name="title" required maxLength={120} defaultValue={v.title ?? ""} placeholder="Responsable logistique" style={inp} /></label>
         <label>
-          <span style={lbl}>Lien pour postuler</span>
+          <span style={lbl}>Lien du poste sur votre site</span>
           <input name="apply_url" type="url" required defaultValue={v.apply_url ?? ""} placeholder="https://www.entreprise.ch/carriere/poste-123" style={inp} />
-          <span style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 6, display: "block" }}>La page de l&apos;offre sur votre site : c&apos;est là que les candidats postulent.</span>
+          <span style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 6, display: "block" }}>Le bouton « Postuler » de votre offre y mène : c&apos;est là que les candidats envoient leur dossier.</span>
         </label>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12 }}>
+          <label><span style={lbl}>Taux d&apos;activité, de</span>
+            <select name="taux_min" defaultValue={String(v.taux_min ?? 100)} style={{ ...inp, cursor: "pointer" }}>
+              {TAUX.map(t => <option key={t} value={t}>{t} %</option>)}
+            </select>
+          </label>
+          <label><span style={lbl}>à</span>
+            <select name="taux_max" defaultValue={String(v.taux_max ?? 100)} style={{ ...inp, cursor: "pointer" }}>
+              {TAUX.map(t => <option key={t} value={t}>{t} %</option>)}
+            </select>
+          </label>
+          <label><span style={lbl}>Entrée en fonction</span>
+            <input name="entree" list="entrees" maxLength={40} defaultValue={v.entree ?? ""} placeholder="Dès que possible" style={inp} />
+            <datalist id="entrees"><option value="Dès que possible" /><option value="À convenir" /></datalist>
+          </label>
+        </div>
+        <div>
+          <span style={lbl}>Langues requises</span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {LANGUES_SAISIE.map(({ code, nom }) => {
+              const on = langues.includes(code);
+              return (
+                <button key={code} type="button" aria-pressed={on} className={on ? "btn btn-encre btn-sm" : "btn btn-clair btn-sm"}
+                  onClick={() => setLangues(l => (l.includes(code) ? l.filter(x => x !== code) : [...l, code]))}>
+                  {nom}
+                </button>
+              );
+            })}
+          </div>
+          <input type="hidden" name="langues" value={langues.join(",")} />
+        </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12 }}>
           <label><span style={lbl}>Lieu</span><input name="location" maxLength={80} defaultValue={v.location ?? ""} placeholder="Genève" style={inp} /></label>
           <Choix nom="contract_type" liste={CONTRATS} valeur={v.contract_type ?? null} libelle="Contrat" />
@@ -134,7 +167,7 @@ export function GestionOffres({ offres, maintenant }: { offres: Offre[]; mainten
             <div style={{ flex: "1 1 260px", minWidth: 0 }}>
               <p style={{ fontWeight: 750, fontSize: 15.5 }}>{o.title}</p>
               <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 3 }}>
-                {[o.contract_type, o.work_mode, o.location].filter(Boolean).join(" · ")}
+                {[libelleTaux(o.taux_min, o.taux_max), o.contract_type, o.work_mode, o.location].filter(Boolean).join(" · ")}
               </p>
               <p style={{ fontSize: 12.5, marginTop: 6, color: expiree ? "#ef4444" : "#10b981", fontWeight: 600 }}>
                 {expiree ? `Expirée le ${date(o.expires_at)} : modifiez-la pour la remettre en ligne` : `En ligne jusqu'au ${date(o.expires_at)}`}
