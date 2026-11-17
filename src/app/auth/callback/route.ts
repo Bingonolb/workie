@@ -29,6 +29,22 @@ export async function GET(request: Request) {
   // On UPDATE (conflict on id): preserves existing username via ignoreDuplicates=false
   // but the WITH CHECK on the UPDATE RLS policy blocks role changes server-side.
   // Returns true if this is a brand-new profile (used to decide onboarding redirect)
+  /**
+   * Premier passage après inscription ? Le profil est créé par la base dès
+   * l'inscription, avant le clic sur le lien : « le profil existe déjà » ne
+   * dit donc rien. Ce qui le dit, c'est une marque posée dans le compte la
+   * première fois (bienvenue_le) : bienvenue et e-mail ne partent qu'une fois.
+   */
+  async function premierPassage(): Promise<boolean> {
+    const { data: { user: u } } = await supabase.auth.getUser();
+    if (!u || u.user_metadata?.bienvenue_le) return false;
+    // Les comptes antérieurs à cette marque ne la portent pas : seul un compte
+    // récent peut être en train de vivre sa première connexion.
+    if (Date.now() - new Date(u.created_at).getTime() > 7 * 86400_000) return false;
+    await supabase.auth.updateUser({ data: { bienvenue_le: new Date().toISOString() } });
+    return true;
+  }
+
   async function upsertProfileGeo(userId: string, extra?: Record<string, unknown>): Promise<boolean> {
     const geoFields = geo.city ? { city: geo.city } : {};
 
@@ -84,7 +100,8 @@ export async function GET(request: Request) {
       if (user) {
         // L'entreprise revendiquée ne vient jamais des métadonnées d'inscription,
         // que l'utilisateur contrôle : elle est attribuée par l'admin.
-        const isNew = await upsertProfileGeo(user.id);
+        await upsertProfileGeo(user.id);
+        const isNew = await premierPassage();
         if (isNew) {
           void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
           // Une inscription commencée ailleurs (ex. revendiquer une fiche) y revient.
@@ -107,7 +124,8 @@ export async function GET(request: Request) {
       if (user) {
         // L'entreprise revendiquée ne vient jamais des métadonnées d'inscription,
         // que l'utilisateur contrôle : elle est attribuée par l'admin.
-        const isNew = await upsertProfileGeo(user.id);
+        await upsertProfileGeo(user.id);
+        const isNew = await premierPassage();
         if (isNew) {
           void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
         }

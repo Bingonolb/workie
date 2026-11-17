@@ -231,7 +231,10 @@ export function ProfilClient() {
             // nuit. Il avait pris var(--encre-texte) par erreur lors du
             // passage des boutons a l'encre, et devenait donc noir sur noir.
             color: "#fff",
-            letterSpacing: "-0.035em",
+            // Resserré, mais pas au point d'avaler l'espace entre prénom et nom :
+            // à -0,035 em et graisse 900, « Bernard Feran » se lisait d'un bloc.
+            letterSpacing: "-0.02em",
+            wordSpacing: "0.12em",
             lineHeight: 1.1,
             margin: 0,
           }}>
