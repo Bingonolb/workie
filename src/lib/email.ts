@@ -128,51 +128,6 @@ export async function sendWelcomeEmail(email: string, username: string): Promise
   } catch { /* un courriel qui échoue ne doit pas bloquer l'inscription */ }
 }
 
-export async function sendClaimReceivedEmail(email: string, firstName: string, companyName: string): Promise<void> {
-  if (!resend) return;
-  const prenom = escapeHtml(firstName);
-  const entreprise = escapeHtml(companyName);
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: `Votre demande pour ${companyName} est en cours d'examen`,
-      html: gabarit({
-        titre: "Demande reçue",
-        accroche: `Bonjour ${prenom},`,
-        paragraphes: [
-          `Nous avons bien reçu votre demande pour <strong style="color:${TEXTE};">${entreprise}</strong>.`,
-          `Nous l'examinons à la main. Vous recevrez un courriel dès que la fiche sera vérifiée, généralement sous <strong style="color:${TEXTE};">24 à 48 heures ouvrées</strong>.`,
-        ],
-        apres: "Une question ? Répondez simplement à ce courriel.",
-      }),
-    });
-  } catch { /* sans conséquence pour la demande */ }
-}
-
-export async function sendClaimApprovedEmail(email: string, firstName: string, companyName: string): Promise<void> {
-  if (!resend) return;
-  const prenom = escapeHtml(firstName);
-  const entreprise = escapeHtml(companyName);
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: `${companyName} est vérifiée sur Workie`,
-      html: gabarit({
-        titre: "Entreprise vérifiée",
-        accroche: `C'est fait, ${prenom}.`,
-        paragraphes: [
-          `<strong style="color:${TEXTE};">${entreprise}</strong> est désormais vérifiée sur Workie. Le badge est visible sur sa fiche.`,
-          "Vous pouvez tenir la fiche à jour et publier vos offres d'emploi.",
-        ],
-        cta: { libelle: "Voir la fiche", href: `${BASE}/explore` },
-        apres: "Une question ? Répondez simplement à ce courriel.",
-      }),
-    });
-  } catch { /* sans conséquence pour la validation */ }
-}
-
 // ── Revendication d'une fiche ─────────────────────────────────────────────
 
 /** Le code à 6 chiffres qui prouve l'accès à l'adresse professionnelle. */

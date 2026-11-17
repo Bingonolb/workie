@@ -142,6 +142,17 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
     }
 
     const admin = createAdminClient();
+    // Un compte gère une seule fiche : une seconde revendication écraserait
+    // l'accès à la première.
+    if (user) {
+      const { data: p } = await admin.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
+      if (p?.claimed_company_id && p.claimed_company_id !== companyId) {
+        const { data: autre } = await admin.from("companies").select("name, is_subscribed").eq("id", p.claimed_company_id).maybeSingle();
+        if (autre?.is_subscribed) {
+          return { error: `Ce compte gère déjà ${autre.name}. Pour gérer une autre entreprise, utilisez un autre compte ou écrivez à contact@workie.ch.` };
+        }
+      }
+    }
     let userId = user?.id ?? null;
     let compteCree = false;
     if (!userId) {

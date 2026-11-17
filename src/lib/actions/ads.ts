@@ -490,7 +490,6 @@ export async function pauseBusinessCampaign(id: string): Promise<{ error?: strin
       .eq("company_id", companyId)
       .in("status", ["active", "pending"]);
     if (error) return { error: error.message };
-    revalidatePath("/business/dashboard/ads");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
@@ -572,7 +571,6 @@ export async function createCampaign(
     }).select("id").single();
 
     if (error || !inserted) return { error: error?.message ?? "Erreur lors de la création de la campagne" };
-    revalidatePath("/business/dashboard/ads");
     return { campaignId: inserted.id };
   } catch (e) { return { error: (e as Error).message }; }
 }
@@ -596,7 +594,6 @@ export async function adminSetCampaignStatus(
       .eq("id", campaignId);
     if (error) return { error: error.message };
     revalidatePath("/admin/ads");
-    revalidatePath("/business/dashboard/ads");
     revalidatePath("/explore");
     return {};
   } catch (e) { return { error: (e as Error).message }; }

@@ -84,9 +84,8 @@ export default async function AdminPage() {
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {/* Le bouton « Demandes » pointait vers /admin/claims, qui n'a
                 jamais eu de page : clic = 404. La revendication d'entreprise
-                est dormante (plus de formulaire depuis le retrait de l'espace
-                entreprise, 0 demande en attente). La logique serveur
-                (approveClaim, emails) est conservée pour son retour. */}
+                a été remplacée par le parcours Workie Business : la tuile
+                « Demandes en attente » mène à /admin/revendications. */}
             <Link href="/admin/ads" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 10, background: "var(--surface2)", border: "1px solid rgba(236,72,153,0.3)", color: "#ec4899", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
               Publicités
             </Link>

@@ -62,8 +62,9 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
     demarrer(async () => {
       const r = await verifierCodeRevendication(etat.id, code);
       if (r.error) setErreur(r.error);
-      // La session vient peut-être de s'ouvrir : la barre du haut se met à jour.
-      else if (r.etat) { setEtat(r.etat); router.refresh(); }
+      // La session vient de s'ouvrir pour un nouveau compte : la page est
+      // rechargée pour que la barre du haut l'affiche connecté.
+      else if (r.etat) { setEtat(r.etat); if (!connecte) window.location.reload(); else router.refresh(); }
     });
   };
 

@@ -7,6 +7,7 @@ import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { etatRevendication } from "@/lib/actions/revendication";
 import { urlFiche } from "@/lib/urlFiche";
 import { domaineOfficiel } from "@/lib/domaineEntreprise";
+import { revendicationOuverte } from "@/lib/ouverture";
 import { NavbarClient } from "@/components/NavbarClient";
 import { CoverImage } from "@/components/CoverImage";
 import { ParcoursRevendication } from "./ParcoursRevendication";
@@ -16,6 +17,8 @@ export const metadata: Metadata = { title: "Gérer cette fiche", robots: { index
 
 export default async function PageRevendiquer({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // Fermée au public tant que l'offre entreprise n'est pas ouverte.
+  if (!revendicationOuverte) notFound();
   // Ouverte sans compte : le parcours Workie Business crée le compte avec la demande.
   const user = await getUser();
 
