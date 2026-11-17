@@ -62,15 +62,23 @@ export async function renvoyerConfirmation(email: string): Promise<{ ok: boolean
   const { error } = await supabase.auth.resend({
     type: "signup",
     email: adresse,
-    options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback` },
+    options: { emailRedirectTo: RETOUR },
   });
   return { ok: !error };
 }
 
+/**
+ * Adresse de retour du lien de confirmation. Elle porte toujours une
+ * requête (« ?e=1 ») : le modèle d'e-mail y ajoute « &token_hash=… », pour
+ * que le bouton mène à workie.ch et non à supabase.co (un lien vers un
+ * domaine étranger à l'expéditeur envoyait le courriel en indésirables).
+ */
+const RETOUR = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback?e=1`;
+
 function suiteInscription(formData: FormData): string {
   const n = String(formData.get("next") || "");
   return /^\/(?![/\\])/.test(n) && !n.toLowerCase().includes("javascript:") && n !== "/explore"
-    ? `?next=${encodeURIComponent(n)}` : "";
+    ? `&next=${encodeURIComponent(n)}` : "";
 }
 
 export async function signUp(
@@ -118,7 +126,7 @@ export async function signUp(
       data: { username, full_name: fullName, first_name: firstName, last_name: lastName, canton, birth_year: birthYear },
       // Avec `next`, la confirmation ramène là où l'inscription a commencé
       // (par exemple la revendication d'une fiche) ; sinon /explore?welcome=1.
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback${suiteInscription(formData)}`,
+      emailRedirectTo: `${RETOUR}${suiteInscription(formData)}`,
     },
   });
 
