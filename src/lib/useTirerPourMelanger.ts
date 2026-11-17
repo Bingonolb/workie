@@ -74,6 +74,13 @@ export function useTirerPourMelanger(actif: boolean, surDeclenchement: () => voi
     let horizontal = false;
 
     const debut = (e: TouchEvent) => {
+      // Un geste dans une fenêtre ouverte (filtres, offre…) ne la concerne pas.
+      // Quand elle est ouverte, la page derrière est figée et scrollY vaut 0 :
+      // sans ce garde, chaque glissé vers le bas dans les filtres était
+      // intercepté ici comme un « tirer pour mélanger », et le défilement
+      // de la liste accrochait.
+      const cible = e.target as Element | null;
+      if (cible?.closest?.('[role="dialog"], [aria-modal="true"]') || document.body.style.position === "fixed") { depart = null; return; }
       // Safari place parfois la page à une fraction de pixel du haut.
       if (window.scrollY > 2 || e.touches.length !== 1) { depart = null; return; }
       depart = e.touches[0].clientY;
