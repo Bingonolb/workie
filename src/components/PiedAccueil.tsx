@@ -4,87 +4,142 @@ import { revendicationOuverte } from "@/lib/ouverture";
 import { catalogueEmploi, CANTONS, type Page } from "@/lib/pagesEmploi";
 
 /**
- * Le pied de page de l'accueil, repris tel quel sur la page Annonceurs.
+ * Pied de page de l'accueil, des pages Annonceurs et Pour les entreprises.
  *
- * La rangée « Emploi par canton » sert le référencement : l'accueil est la
- * page la plus forte du site, et les liens qu'elle porte disent à Google
- * quelles pages comptent. Seules les pages cantonales qui existent sont
- * listées, les plus fournies d'abord : jamais de lien mort.
+ * Dans l'esprit d'apple.com : sur ordinateur, quelques colonnes sobres ; sur
+ * téléphone, chaque rubrique se replie derrière une ligne à chevron, si bien
+ * que le pied de page reste court et qu'on n'ouvre que ce qu'on cherche.
  *
- * Sur téléphone, les colonnes s'empilaient en une seule file de dix-sept
- * lignes. Les liens tiennent maintenant sur deux colonnes, et les cantons sur
- * une rangée qui s'enroule : le pied de page garde la hauteur d'un pied de
- * page.
+ * Les cantons ne s'alignent plus à la suite : un petit bouton « Par canton »
+ * les déroule. Ils restent présents dans la page (éléments <details>), donc
+ * lus par les moteurs de recherche. Seules les pages cantonales qui existent
+ * sont listées : jamais de lien mort.
  */
 export async function PiedAccueil() {
   const cantons = await catalogueEmploi()
     .then(({ pages }) => pages
       .filter((p): p is Extract<Page, { type: "canton" }> => p.type === "canton")
-      .sort((a, b) => b.locales.length - a.locales.length)
-      .slice(0, 8))
+      .sort((a, b) => CANTONS[a.canton].nom.localeCompare(CANTONS[b.canton].nom, "fr")))
     .catch(() => []);
 
-  const explorer = [
-    { href: "/explore", label: "Entreprises" },
-    { href: "/emploi", label: "Emploi par secteur" },
-    { href: "/ranking", label: "Classement" },
-    { href: "/annonceurs", label: "Faire de la publicité" },
-    ...(revendicationOuverte ? [{ href: "/pour-les-entreprises", label: "Pour les entreprises" }] : []),
+  const rubriques = [
+    {
+      titre: "Explorer",
+      liens: [
+        { href: "/explore", label: "Entreprises" },
+        { href: "/ranking", label: "Classement" },
+        { href: "/emploi", label: "Emploi par secteur" },
+      ],
+    },
+    {
+      titre: "Entreprises",
+      liens: [
+        ...(revendicationOuverte ? [{ href: "/pour-les-entreprises", label: "Gérer votre fiche" }] : []),
+        { href: "/annonceurs", label: "Faire de la publicité" },
+      ],
+    },
+    {
+      titre: "Workie",
+      liens: [
+        { href: "/cgu", label: "Conditions d'utilisation" },
+        { href: "/confidentialite", label: "Confidentialité" },
+        { href: "/mentions-legales", label: "Mentions légales" },
+      ],
+    },
   ];
-  const legal = [{ href: "/cgu", label: "CGU" }, { href: "/confidentialite", label: "Confidentialité" }, { href: "/mentions-legales", label: "Mentions légales" }];
+
+  const ParCanton = cantons.length > 0 && (
+    <details className="pied-cantons">
+      <summary>Par canton <span aria-hidden="true" className="pied-chevron">⌄</span></summary>
+      <div className="pied-cantons-grille">
+        {cantons.map(p => (
+          <Link key={p.slug} href={`/emploi/${p.slug}`} title={`Emploi ${CANTONS[p.canton].dans}`}>{CANTONS[p.canton].nom}</Link>
+        ))}
+      </div>
+    </details>
+  );
 
   return (
-    <footer className="pied" style={{ borderTop: "1px solid var(--border)" }}>
+    <footer className="pied">
       <style>{`
-        .pied { padding: 40px 24px 24px; text-align: left; background: var(--surface); }
-        .pied * { text-align: left; }
-        .pied-grille { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 32px; margin-bottom: 28px; }
-        .pied-titre { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
-        .pied-liens { display: flex; flex-direction: column; gap: 8px; }
-        .pied a { font-size: 13px; color: var(--text-muted); text-decoration: none; }
+        .pied { border-top: 1px solid var(--border); background: var(--surface); padding: 44px 24px 28px; text-align: left; }
+        .pied-in { max-width: 980px; margin: 0 auto; }
+        .pied a { color: var(--text-muted); text-decoration: none; transition: color .15s; }
         .pied a:hover { color: var(--text); }
-        .pied-cantons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-        .pied-cantons a { display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 999px;
-          border: 1px solid var(--border); background: var(--bg); font-size: 12.5px; transition: border-color .15s, color .15s; }
-        .pied-cantons a:hover { border-color: var(--brand); color: var(--text); }
-        @media (max-width: 640px) {
+        .pied-haut { display: grid; grid-template-columns: 1.3fr repeat(3, 1fr); gap: 32px; }
+        .pied-marque p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-top: 10px; max-width: 240px; }
+        .pied-titre { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+        .pied-liste { display: grid; gap: 9px; justify-items: start; }
+        .pied-liste a { font-size: 13px; }
+        .pied-cantons { margin-top: 9px; }
+        .pied-cantons summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          font-size: 13px; color: var(--text-muted); }
+        .pied-cantons summary::-webkit-details-marker { display: none; }
+        .pied-cantons summary:hover { color: var(--text); }
+        .pied-chevron { display: inline-block; font-size: 13px; line-height: 1; transform: translateY(-2px); transition: transform .2s; }
+        .pied-cantons[open] .pied-chevron { transform: rotate(180deg) translateY(-1px); }
+        .pied-cantons-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin-top: 10px; }
+        .pied-cantons-grille a { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pied-bas { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between;
+          flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text-muted); }
+        .pied-mobile { display: none; }
+
+        @media (max-width: 760px) {
           .pied { padding: 28px 16px calc(20px + env(safe-area-inset-bottom)); }
-          /* Logo sur toute la largeur, puis les deux groupes de liens côte à côte. */
-          .pied-grille { grid-template-columns: 1fr 1fr; gap: 20px 16px; margin-bottom: 20px; }
-          .pied-marque { grid-column: 1 / -1; }
-          .pied-liens { gap: 0; }
-          /* Cibles au doigt : 40 px de haut, sans allonger la page plus que nécessaire. */
-          .pied-liens a { display: flex; align-items: center; justify-content: flex-start; min-height: 40px; font-size: 14px; }
-          .pied-cantons { gap: 8px; margin-bottom: 20px; }
-          .pied-cantons a { height: 38px; font-size: 13px; }
+          .pied-haut { display: block; }
+          .pied-colonne { display: none; }
+          .pied-mobile { display: block; margin-top: 18px; border-top: 1px solid var(--border); }
+          /* Une ligne par rubrique, repliée : le motif d'apple.com. */
+          .pied-acc { border-bottom: 1px solid var(--border); }
+          .pied-acc > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            min-height: 48px; font-size: 14px; font-weight: 600; color: var(--text); }
+          .pied-acc > summary::-webkit-details-marker { display: none; }
+          .pied-acc > summary .pied-chevron { font-size: 16px; color: var(--text-muted); }
+          .pied-acc[open] > summary .pied-chevron { transform: rotate(180deg) translateY(-1px); }
+          .pied-acc .pied-liste { gap: 0; padding-bottom: 10px; }
+          .pied-acc .pied-liste a { display: flex; align-items: center; min-height: 40px; font-size: 14px; }
+          .pied-acc .pied-cantons { margin: 0 0 12px; }
+          .pied-acc .pied-cantons summary { min-height: 40px; font-size: 14px; }
+          .pied-acc .pied-cantons-grille a { font-size: 13.5px; padding: 6px 0; }
+          .pied-bas { margin-top: 18px; border-top: none; padding-top: 0; flex-direction: column; gap: 4px; }
         }
+        @media (prefers-reduced-motion: reduce) { .pied-chevron { transition: none; } }
       `}</style>
-      <div style={{ maxWidth: 860, margin: "0 auto" }}>
-        <div className="pied-grille">
+      <div className="pied-in">
+        <div className="pied-haut">
           <div className="pied-marque">
-            <Logo taille={26} className="logo-pied" />
-            <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.6 }}>Chercher du travail devient passionnant.</p>
+            <Logo taille={24} className="logo-pied" />
+            <p>Chercher du travail devient passionnant.</p>
           </div>
-          <nav aria-label="Explorer">
-            <p className="pied-titre">Explorer</p>
-            <div className="pied-liens">{explorer.map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
-          </nav>
-          <nav aria-label="Informations légales">
-            <p className="pied-titre">Légal</p>
-            <div className="pied-liens">{legal.map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}</div>
-          </nav>
+
+          {/* Ordinateur : colonnes. */}
+          {rubriques.map(r => (
+            <nav key={r.titre} className="pied-colonne" aria-label={r.titre}>
+              <p className="pied-titre">{r.titre}</p>
+              <div className="pied-liste">
+                {r.liens.map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}
+              </div>
+              {r.titre === "Explorer" && ParCanton}
+            </nav>
+          ))}
+
+          {/* Téléphone : rubriques repliables. */}
+          <div className="pied-mobile">
+            {rubriques.map(r => (
+              <details key={r.titre} className="pied-acc">
+                <summary>{r.titre}<span aria-hidden="true" className="pied-chevron">⌄</span></summary>
+                <div className="pied-liste">
+                  {r.liens.map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}
+                </div>
+                {r.titre === "Explorer" && ParCanton}
+              </details>
+            ))}
+          </div>
         </div>
-        {cantons.length > 0 && (
-          <nav aria-label="Emploi par canton">
-            <p className="pied-titre">Emploi par canton</p>
-            <div className="pied-cantons">
-              {cantons.map(p => <Link key={p.slug} href={`/emploi/${p.slug}`} title={`Emploi ${CANTONS[p.canton].dans}`}>{CANTONS[p.canton].nom}</Link>)}
-            </div>
-          </nav>
-        )}
-        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-          <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>© 2026 Workie</span>
-          <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>Plateforme suisse, données hébergées en Europe</span>
+
+        <div className="pied-bas">
+          <span>© 2026 Workie</span>
+          <span>Plateforme suisse, données hébergées en Europe</span>
         </div>
       </div>
     </footer>
