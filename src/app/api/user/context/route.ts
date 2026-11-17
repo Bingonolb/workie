@@ -21,7 +21,7 @@ export async function GET() {
       // éteint alors que son geste était bien enregistré, recliquait, et
       // l'annulait sans le vouloir.
       supabase.from("score_events").select("company_id, event_type").eq("user_id", user.id).in("event_type", ["flame", "boost", "penalty"]),
-      supabase.from("profiles").select("role, penalty_credits").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles").select("role, penalty_credits, claimed_company_id").eq("id", user.id).maybeSingle(),
       supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false),
     ]);
 
@@ -30,6 +30,8 @@ export async function GET() {
         isLoggedIn: true,
         compte: user.id,
         isAdmin: profileRes.data?.role === "admin",
+        // Raccourci vers l'espace entreprise ; l'espace revérifie l'abonnement.
+        estEntreprise: !!profileRes.data?.claimed_company_id,
         favIds: (favRes.data ?? []).map(r => r.company_id),
         flameIds:   (flameRes.data ?? []).filter(r => r.event_type === "flame").map(r => r.company_id),
         boostIds:   (flameRes.data ?? []).filter(r => r.event_type === "boost").map(r => r.company_id),

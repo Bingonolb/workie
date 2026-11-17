@@ -13,7 +13,8 @@ import { CoverImage } from "@/components/CoverImage";
 // appartient au systeme d'exploitation : il change d'un appareil a l'autre,
 // n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
 // le site, et se colore tout seul en travers de la teinte de la tuile.
-import { Flame, Megaphone, Download, ChevronRight } from "lucide-react";
+import { Flame, Megaphone, Download, ChevronRight, Building2 } from "lucide-react";
+import { revendicationOuverte } from "@/lib/ouverture";
 import { urlFiche } from "@/lib/urlFiche";
 
 type Donnees = {
@@ -409,6 +410,20 @@ export function ProfilClient() {
                 <Megaphone size={15} strokeWidth={2} aria-hidden="true" />
                 Mes publicités
               </Link>
+
+              {/* Porte vers l'offre entreprise, rangée dans les réglages : un
+                  candidat ne la croise pas, une RH la trouve. */}
+              {(profile as { claimed_company_id?: string | null } | null)?.claimed_company_id ? (
+                <Link href="/espace-entreprise" style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--text-muted)", fontWeight: 600, fontSize: 13.5, textDecoration: "none", width: "fit-content" }}>
+                  <Building2 size={15} strokeWidth={2} aria-hidden="true" />
+                  Mon espace entreprise
+                </Link>
+              ) : revendicationOuverte ? (
+                <Link href="/pour-les-entreprises" style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--text-muted)", fontWeight: 600, fontSize: 13.5, textDecoration: "none", width: "fit-content" }}>
+                  <Building2 size={15} strokeWidth={2} aria-hidden="true" />
+                  Vous représentez une entreprise ?
+                </Link>
+              ) : null}
 
               {/* Les pages legales, ici plutot qu'en pied de chaque ecran.
                   Elles s'adressent a quelqu'un qui se renseigne sur le site,

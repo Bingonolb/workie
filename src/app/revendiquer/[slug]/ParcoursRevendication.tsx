@@ -33,7 +33,7 @@ function Progression({ actuelle }: { actuelle: number }) {
   );
 }
 
-export function ParcoursRevendication({ companyId, etatInitial }: { companyId: string; etatInitial: EtatRevendication }) {
+export function ParcoursRevendication({ companyId, slug, domaine, etatInitial }: { companyId: string; slug: string; domaine: string | null; etatInitial: EtatRevendication }) {
   const [etat, setEtat] = useState<EtatRevendication>(etatInitial);
   const [erreur, setErreur] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -80,6 +80,7 @@ export function ParcoursRevendication({ companyId, etatInitial }: { companyId: s
         <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
           Une personne de l&apos;entreprise gère déjà cette fiche. Pour obtenir un accès, adressez-vous à elle ou écrivez à contact@workie.ch.
         </p>
+        <Link href={`/entreprise/${slug}`} className="btn btn-clair">Retour à la fiche</Link>
       </div>
     );
   }
@@ -91,7 +92,7 @@ export function ParcoursRevendication({ companyId, etatInitial }: { companyId: s
         <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
           Nous n&apos;avons pas pu confirmer votre lien avec l&apos;entreprise. Recommencez avec une adresse e-mail de l&apos;entreprise : la vérification est alors immédiate.
         </p>
-        <button type="button" className="btn btn-encre" onClick={() => setEtat({ etape: "formulaire", domaine: null })}>
+        <button type="button" className="btn btn-encre" onClick={() => setEtat({ etape: "formulaire", domaine })}>
           Recommencer la demande
         </button>
       </div>
@@ -162,9 +163,9 @@ export function ParcoursRevendication({ companyId, etatInitial }: { companyId: s
           <button type="submit" className="btn btn-encre btn-bloc" disabled={code.length !== 6 || enCours}>
             {enCours ? "Vérification…" : "Vérifier"}
           </button>
-          <button type="button" onClick={() => { setErreur(null); setCode(""); setEtat({ etape: "formulaire", domaine: null }); }}
+          <button type="button" onClick={() => { setErreur(null); setCode(""); setEtat({ etape: "formulaire", domaine }); }}
             style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 13, cursor: "pointer", textDecoration: "underline" }}>
-            Pas reçu ? Recommencer la demande
+            Pas reçu ou mauvaise adresse ? Refaire la demande
           </button>
         </form>
       </>
@@ -182,7 +183,7 @@ export function ParcoursRevendication({ companyId, etatInitial }: { companyId: s
             Votre adresse n&apos;appartient pas au domaine officiel de l&apos;entreprise : notre équipe vérifie la demande à la main.
             Vous recevrez un e-mail à <strong>{etat.email}</strong> dès qu&apos;elle est acceptée, généralement sous 1 jour ouvré.
           </p>
-          <Link href="/explore" className="btn btn-clair btn-bloc">Continuer sur Workie</Link>
+          <Link href={`/entreprise/${slug}`} className="btn btn-clair btn-bloc">Retour à la fiche</Link>
         </div>
       </>
     );

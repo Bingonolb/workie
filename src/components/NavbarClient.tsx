@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Shield } from "lucide-react";
+import { Shield, Building2 } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
 import { SearchButton } from "./SearchButton";
@@ -13,6 +13,7 @@ import { Logo } from "@/components/Logo";
 type UserCtx = {
   isLoggedIn: boolean;
   isAdmin: boolean;
+  estEntreprise?: boolean;
   penaltyCredits: number;
   unreadCount: number;
 };
@@ -98,6 +99,13 @@ export function NavbarClient() {
             <Link href="/admin" className="nav-admin" aria-label="Administration">
               <Shield size={14} aria-hidden="true" />
               <span className="nav-label">Admin</span>
+            </Link>
+          )}
+          {/* Accès à l'espace entreprise, pour un compte qui gère une fiche. */}
+          {isLoggedIn && ctx?.estEntreprise && (
+            <Link href="/espace-entreprise" className="nav-admin" aria-label="Espace entreprise">
+              <Building2 size={14} aria-hidden="true" />
+              <span className="nav-label">Mon entreprise</span>
             </Link>
           )}
           {isLoggedIn && <SearchButton />}

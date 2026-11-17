@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { etatRevendication } from "@/lib/actions/revendication";
 import { urlFiche } from "@/lib/urlFiche";
+import { domaineOfficiel } from "@/lib/domaineEntreprise";
 import { NavbarClient } from "@/components/NavbarClient";
 import { CoverImage } from "@/components/CoverImage";
 import { ParcoursRevendication } from "./ParcoursRevendication";
@@ -20,10 +21,10 @@ export default async function PageRevendiquer({ params }: { params: Promise<{ sl
 
   const [{ data }, enLigne] = await Promise.all([
     createAdminClient().from("companies")
-      .select("id, slug, name, sector, city, cover_url, cover_color").eq("slug", slug).maybeSingle(),
+      .select("id, slug, name, sector, city, cover_url, cover_color, website_url").eq("slug", slug).maybeSingle(),
     getSecteursEnLigne(),
   ]);
-  const c = data as { id: string; slug: string; name: string; sector: string; city: string; cover_url: string | null; cover_color: string | null } | null;
+  const c = data as { id: string; slug: string; name: string; sector: string; city: string; cover_url: string | null; cover_color: string | null; website_url: string | null } | null;
   if (!c || !enLigne.includes(c.sector)) notFound();
 
   const etat = await etatRevendication(c.id);
@@ -50,7 +51,7 @@ export default async function PageRevendiquer({ params }: { params: Promise<{ sl
           </div>
         </div>
 
-        <ParcoursRevendication companyId={c.id} etatInitial={etat} />
+        <ParcoursRevendication companyId={c.id} slug={c.slug} domaine={domaineOfficiel(c.website_url)} etatInitial={etat} />
       </main>
     </div>
   );
