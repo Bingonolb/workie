@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
@@ -16,8 +16,8 @@ export const metadata: Metadata = { title: "Gérer cette fiche", robots: { index
 
 export default async function PageRevendiquer({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // Ouverte sans compte : le parcours Workie Business crée le compte avec la demande.
   const user = await getUser();
-  if (!user) redirect(`/login?next=/revendiquer/${encodeURIComponent(slug)}`);
 
   const [{ data }, enLigne] = await Promise.all([
     createAdminClient().from("companies")
@@ -45,13 +45,15 @@ export default async function PageRevendiquer({ params }: { params: Promise<{ sl
             <CoverImage src={c.cover_url} color={c.cover_color} sizes="64px" vignette />
           </div>
           <div style={{ minWidth: 0 }}>
-            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Gérer la fiche de</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2, display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--brand)" }}>Workie Business</span> · Gérer la fiche de
+            </p>
             <p style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</p>
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{c.sector} · {c.city}</p>
           </div>
         </div>
 
-        <ParcoursRevendication companyId={c.id} slug={c.slug} domaine={domaineOfficiel(c.website_url)} etatInitial={etat} />
+        <ParcoursRevendication companyId={c.id} slug={c.slug} domaine={domaineOfficiel(c.website_url)} connecte={!!user} etatInitial={etat} />
       </main>
     </div>
   );

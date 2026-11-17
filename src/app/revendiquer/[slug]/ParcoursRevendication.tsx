@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Check, ShieldCheck, BarChart3, PenLine, BadgeCheck } from "lucide-react";
 import {
   demarrerRevendication, verifierCodeRevendication, lancerAbonnement, type EtatRevendication,
@@ -33,7 +34,10 @@ function Progression({ actuelle }: { actuelle: number }) {
   );
 }
 
-export function ParcoursRevendication({ companyId, slug, domaine, etatInitial }: { companyId: string; slug: string; domaine: string | null; etatInitial: EtatRevendication }) {
+export function ParcoursRevendication({ companyId, slug, domaine, connecte, etatInitial }: { companyId: string; slug: string; domaine: string | null; connecte: boolean; etatInitial: EtatRevendication }) {
+  const router = useRouter();
+  const [compteExistant, setCompteExistant] = useState(false);
+  const lienConnexion = `/login?next=${encodeURIComponent(`/revendiquer/${slug}`)}`;
   const [etat, setEtat] = useState<EtatRevendication>(etatInitial);
   const [erreur, setErreur] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -45,6 +49,7 @@ export function ParcoursRevendication({ companyId, slug, domaine, etatInitial }:
     formData.set("company_id", companyId);
     demarrer(async () => {
       const r = await demarrerRevendication(formData);
+      setCompteExistant(!!r.compteExistant);
       if (r.error) setErreur(r.error);
       else if (r.etat) setEtat(r.etat);
     });
@@ -57,7 +62,8 @@ export function ParcoursRevendication({ companyId, slug, domaine, etatInitial }:
     demarrer(async () => {
       const r = await verifierCodeRevendication(etat.id, code);
       if (r.error) setErreur(r.error);
-      else if (r.etat) setEtat(r.etat);
+      // La session vient peut-être de s'ouvrir : la barre du haut se met à jour.
+      else if (r.etat) { setEtat(r.etat); router.refresh(); }
     });
   };
 
@@ -71,7 +77,11 @@ export function ParcoursRevendication({ companyId, slug, domaine, etatInitial }:
     });
   };
 
-  const alerte = erreur && <p role="alert" style={{ fontSize: 13.5, color: "#ef4444" }}>{erreur}</p>;
+  const alerte = erreur && (
+    <p role="alert" style={{ fontSize: 13.5, color: "#ef4444" }}>
+      {erreur}{compteExistant && <> <Link href={lienConnexion} style={{ color: "var(--brand)", fontWeight: 700 }}>Se connecter</Link></>}
+    </p>
+  );
 
   if (etat.etape === "deja_geree") {
     return (
@@ -133,14 +143,28 @@ export function ParcoursRevendication({ companyId, slug, domaine, etatInitial }:
                 placeholder={etat.domaine ? `prenom.nom@${etat.domaine}` : "prenom.nom@entreprise.ch"} style={champ} />
               <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, display: "block", lineHeight: 1.5 }}>
                 {etat.domaine
-                  ? <>Avec une adresse en <strong>@{etat.domaine}</strong>, la vérification est immédiate. Sinon, notre équipe valide la demande à la main.</>
-                  : "Notre équipe vérifie la demande à la main."}
+                  ? <>Nous y envoyons un code. Avec une adresse en <strong>@{etat.domaine}</strong>, c&apos;est validé tout de suite ; sinon, notre équipe confirme ensuite à la main.</>
+                  : "Nous y envoyons un code, puis notre équipe confirme la demande à la main."}
               </span>
             </label>
+            {!connecte && (
+              <label>
+                <span style={etiquette}>Mot de passe de votre compte Workie Business</span>
+                <input name="mot_de_passe" type="password" required minLength={8} autoComplete="new-password" style={champ} />
+                <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, display: "block" }}>
+                  8 caractères au minimum. Vous l&apos;utiliserez pour revenir dans votre espace entreprise.
+                </span>
+              </label>
+            )}
             {alerte}
             <button type="submit" className="btn btn-encre btn-bloc" disabled={enCours}>
-              {enCours ? "Envoi…" : "Continuer"}
+              {enCours ? "Envoi…" : "Recevoir mon code"}
             </button>
+            {!connecte && (
+              <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center" }}>
+                Vous avez déjà un compte Workie ? <Link href={lienConnexion} style={{ color: "var(--brand)", fontWeight: 600 }}>Se connecter</Link>
+              </p>
+            )}
           </form>
         </div>
       </>
@@ -180,8 +204,8 @@ export function ParcoursRevendication({ companyId, slug, domaine, etatInitial }:
           <ShieldCheck size={28} color="var(--brand)" aria-hidden="true" />
           <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>Demande reçue</h1>
           <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-            Votre adresse n&apos;appartient pas au domaine officiel de l&apos;entreprise : notre équipe vérifie la demande à la main.
-            Vous recevrez un e-mail à <strong>{etat.email}</strong> dès qu&apos;elle est acceptée, généralement sous 1 jour ouvré.
+            Votre adresse est confirmée. Comme elle n&apos;appartient pas au domaine officiel de l&apos;entreprise, notre équipe vérifie encore la demande à la main.
+            Vous recevrez un e-mail à <strong>{etat.email}</strong> dès qu&apos;elle est acceptée, en général dans la journée.
           </p>
           <Link href={`/entreprise/${slug}`} className="btn btn-clair btn-bloc">Retour à la fiche</Link>
         </div>
