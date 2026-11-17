@@ -18,7 +18,7 @@ const PHOTO = (id: number, w = 1880) => `https://images.pexels.com/photos/${id}/
 
 const ETAPES = [
   { I: Search, t: "Trouvez votre fiche", d: "Tapez le nom de votre entreprise. Elle est sans doute déjà là." },
-  { I: MailCheck, t: "Confirmez que c'est vous", d: "Avec votre adresse e-mail professionnelle, c'est immédiat. Sinon, notre équipe s'en charge en un jour ouvré." },
+  { I: MailCheck, t: "Confirmez que c'est vous", d: "Avec votre adresse e-mail professionnelle, c'est immédiat. Sinon, notre équipe vérifie votre demande et vous répond par e-mail." },
   { I: LayoutDashboard, t: "Prenez la main", d: "Votre espace s'ouvre dès l'abonnement activé. Vous pouvez tout modifier tout de suite." },
 ];
 
@@ -31,7 +31,7 @@ const AVANTAGES = [
 
 const FAQ = [
   { q: "Ma fiche existe déjà : pourquoi m'abonner ?", texte: "La fiche reste visible gratuitement. L'abonnement vous la confie : vous la tenez à jour, vous l'enrichissez et vous voyez qui la consulte.", r: <>La fiche reste visible gratuitement. L&apos;abonnement vous la confie : vous la tenez à jour, vous l&apos;enrichissez et vous voyez qui la consulte.</> },
-  { q: "Comment savez-vous que je représente l'entreprise ?", texte: "Avec une adresse e-mail de l'entreprise, nous vous envoyons un code et c'est réglé. Sinon, notre équipe vérifie votre demande à la main, en général dans la journée.", r: <>Avec une adresse e-mail de l&apos;entreprise, nous vous envoyons un code et c&apos;est réglé. Sinon, notre équipe vérifie votre demande à la main, en général dans la journée.</> },
+  { q: "Comment savez-vous que je représente l'entreprise ?", texte: "Avec une adresse e-mail de l'entreprise, nous vous envoyons un code et c'est réglé. Sinon, notre équipe vérifie votre demande à la main et vous prévient par e-mail dès que c'est fait.", r: <>Avec une adresse e-mail de l&apos;entreprise, nous vous envoyons un code et c&apos;est réglé. Sinon, notre équipe vérifie votre demande à la main et vous prévient par e-mail dès que c'est fait.</> },
   { q: "Puis-je arrêter quand je veux ?", texte: "Oui, en deux clics depuis votre espace. Vous gardez l'accès jusqu'à la fin de la période déjà payée.", r: <>Oui, en deux clics depuis votre espace. Vous gardez l&apos;accès jusqu&apos;à la fin de la période déjà payée.</> },
   { q: "Puis-je changer le nom ou le secteur ?", texte: "Ces deux informations sont vérifiées par notre équipe, pour que l'annuaire reste fiable. Écrivez-nous à contact@workie.ch.", r: <>Ces deux informations sont vérifiées par notre équipe, pour que l&apos;annuaire reste fiable. Écrivez-nous à contact@workie.ch.</> },
   { q: "Y a-t-il des avis ou des salaires sur ma fiche ?", texte: "Non. Workie présente les employeurs et renvoie vers leurs offres officielles. Rien d'autre.", r: <>Non. Workie présente les employeurs et renvoie vers leurs offres officielles. Rien d&apos;autre.</> },
