@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
 import { SECTOR_COLORS } from "@/lib/types";
 import { useVerrouDefilement } from "@/lib/useVerrouDefilement";
@@ -122,7 +122,15 @@ export function ExploreFilters({
           {showPanel && (
             <>
               <div className="filter-panel-overlay" onClick={() => setShowPanel(false)} />
-              <div ref={panelRef} id="filter-panel" className="filter-panel">
+              <div ref={panelRef} id="filter-panel" className="filter-panel" role="dialog" aria-label="Filtres">
+                {/* Téléphone uniquement : le panneau prend tout l'écran, avec son en-tête. */}
+                <div className="filtre-mobile filtre-entete">
+                  <p style={{ fontSize: 18, fontWeight: 800, color: "var(--text)" }}>Filtres</p>
+                  <button type="button" onClick={() => setShowPanel(false)} aria-label="Fermer les filtres"
+                    style={{ width: 44, height: 44, borderRadius: "50%", border: "1px solid var(--border2)", background: "var(--surface2)", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                    <X size={18} aria-hidden="true" />
+                  </button>
+                </div>
                 {/* Sectors */}
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Secteur</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
@@ -211,8 +219,16 @@ export function ExploreFilters({
                   </>
                 )}
 
+                <div className="filtre-mobile filtre-pied">
+                  <button type="button" onClick={clearAll} disabled={activeCount === 0} className="btn btn-fantome" style={{ opacity: activeCount === 0 ? 0.4 : 1 }}>
+                    Tout effacer
+                  </button>
+                  <button type="button" onClick={() => setShowPanel(false)} className="btn btn-encre" style={{ flex: 1 }}>
+                    Voir les résultats
+                  </button>
+                </div>
                 {activeCount > 0 && (
-                  <div style={{ borderTop: "1px solid var(--border)", marginTop: 18, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div className="filtre-bureau" style={{ borderTop: "1px solid var(--border)", marginTop: 18, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <button type="button" onClick={clearAll} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
                       Tout réinitialiser
                     </button>
