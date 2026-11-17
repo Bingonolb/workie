@@ -7,14 +7,18 @@ import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { getUserCampaignById, getUserCampaignDailyStats, getUserCampaignCantonStats, pauseUserCampaign } from "@/lib/actions/ads";
 
-import { AdStatsChart } from "@/components/AdStatsChart";
+import { GraphiqueJours } from "@/components/GraphiqueJours";
+import { CANTON_NAMES } from "@/lib/types";
 import { CancelCampaignButton } from "@/components/CancelCampaignButton";
 import Image from "next/image";
 import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, AlertTriangle } from "lucide-react";
 
 
-function ctr(imp: number, clk: number) { return imp ? `${((clk / imp) * 100).toFixed(2)}%` : "0.0%"; }
-function cpc(clk: number, spent: number) { return clk ? `CHF ${(spent / clk).toFixed(2)}` : "–"; }
+const pourcent = (n: number) => `${n.toLocaleString("fr-CH", { minimumFractionDigits: 1, maximumFractionDigits: 2 })} %`;
+const chf = (n: number) => `CHF ${n.toLocaleString("fr-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+/** Part des vues qui ont mené à un clic. */
+function ctr(imp: number, clk: number) { return imp ? pourcent((clk / imp) * 100) : "–"; }
+function cpc(clk: number, spent: number) { return clk ? chf(spent / clk) : "–"; }
 
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
 import { etat, jour } from "../etat";
@@ -63,13 +67,16 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
   const last7 = stats.slice(-7);
   const last7Imp = last7.reduce((s, d) => s + d.impressions, 0);
   const last7Clk = last7.reduce((s, d) => s + d.clicks, 0);
-  const today = stats.find(d => d.day === new Date().toISOString().slice(0, 10));
+  // Le dernier jour de la série est aujourd'hui, à l'heure suisse.
+  const today = stats[stats.length - 1];
 
-  // Durée écoulée : elle dépend de l'instant de lecture, elle ne peut pas
-  // être pure.
+  // Jours de diffusion écoulés : jusqu'à aujourd'hui pour une campagne en
+  // cours, pas jusqu'à sa date de fin future, qui faisait chuter la moyenne.
+  // eslint-disable-next-line react-hooks/purity
+  const maintenant = Date.now();
+  const fin = campaign.end_date ? Math.min(new Date(campaign.end_date).getTime(), maintenant) : maintenant;
   const durationDays = campaign.start_date
-    // eslint-disable-next-line react-hooks/purity
-    ? Math.max(1, Math.round(((campaign.end_date ? new Date(campaign.end_date).getTime() : Date.now()) - new Date(campaign.start_date).getTime()) / 86400000))
+    ? Math.max(1, Math.ceil((fin - new Date(campaign.start_date).getTime()) / 86400000))
     : 1;
   const avgDailyImp = Math.round(impCount / durationDays);
   const avgDailyClk = Math.round(clkCount / durationDays);
@@ -157,10 +164,10 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
               <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>Performance totale</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 {[
-                  { label: "Impressions", value: impCount.toLocaleString("fr-CH"), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
+                  { label: "Vues", value: impCount.toLocaleString("fr-CH"), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
                   { label: "Clics", value: clkCount.toLocaleString("fr-CH"), icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
-                  { label: "CTR", value: ctr(impCount, clkCount), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
-                  { label: "CPC moyen", value: cpc(clkCount, spentBudget), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#6b7280" },
+                  { label: "Taux de clic", value: ctr(impCount, clkCount), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
+                  { label: "Coût par clic", value: cpc(clkCount, spentBudget), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#6b7280" },
                 ].map(({ label, value, icon, color }) => (
                   <div key={label}>
                     <div style={{ display: "flex", alignItems: "center", gap: 5, color, marginBottom: 3 }}>{icon}<span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span></div>
@@ -194,11 +201,11 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8 }}>
                 <span style={{ color: "var(--text-muted)" }}>Dépensé</span>
-                <span style={{ fontWeight: 800, color: "var(--text)" }}>CHF {spentBudget.toFixed(2)}</span>
+                <span style={{ fontWeight: 800, color: "var(--text)" }}>{chf(spentBudget)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 12 }}>
                 <span style={{ color: "var(--text-muted)" }}>Total alloué</span>
-                <span style={{ fontWeight: 800, color: "var(--text)" }}>CHF {totalBudget.toFixed(2)}</span>
+                <span style={{ fontWeight: 800, color: "var(--text)" }}>{chf(totalBudget)}</span>
               </div>
               <div style={{ height: 8, borderRadius: 50, background: "var(--surface2)", overflow: "hidden", marginBottom: 6 }}>
                 <div style={{ height: "100%", width: `${budgetPct}%`, background: budgetPct >= 90 ? "#ef4444" : "var(--brand)", borderRadius: 50 }} />
@@ -207,9 +214,9 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
             </div>
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { label: "Budget journalier", value: `CHF ${Number(campaign.daily_budget_chf)}/j` },
-                { label: "CPM", value: `CHF ${Number(campaign.cpm_chf).toFixed(4)}` },
-                { label: "Budget restant", value: `CHF ${Math.max(0, totalBudget - spentBudget).toFixed(2)}` },
+                { label: "Budget par jour", value: chf(Number(campaign.daily_budget_chf)) },
+                { label: "Prix pour 1 000 vues", value: chf(Number(campaign.cpm_chf)) },
+                { label: "Budget restant", value: chf(Math.max(0, totalBudget - spentBudget)) },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
                   <span style={{ color: "var(--text-muted)" }}>{label}</span>
@@ -222,8 +229,13 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
 
         {stats.length > 0 && (
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 20px 4px", marginBottom: 20 }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>Évolution sur 30 jours</p>
-            <AdStatsChart stats={stats} />
+            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Les 30 derniers jours</p>
+            <div style={{ paddingBottom: 16 }}>
+              <GraphiqueJours jours={stats.map(d => ({ jour: d.day, vues: Number(d.impressions), clics: Number(d.clicks) }))} series={[
+                { cle: "vues", libelle: "Vues", couleur: "#8b5cf6" },
+                { cle: "clics", libelle: "Clics", couleur: "#f97316" },
+              ]} />
+            </div>
           </div>
         )}
 
@@ -241,16 +253,16 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {cantonStats.map(({ canton, impressions, clicks }) => {
                     const pct = Math.round((impressions / maxImp) * 100);
-                    const ctrVal = impressions > 0 ? ((clicks / impressions) * 100).toFixed(1) : "0.0";
                     const isTargeted = campaign.target_cantons.length === 0 || campaign.target_cantons.includes(canton);
                     return (
-                      <div key={canton} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontSize: 12, fontWeight: 800, color: isTargeted ? "var(--text)" : "var(--text-muted)", width: 28, flexShrink: 0 }}>{canton}</span>
-                        <div style={{ flex: 1, height: 7, borderRadius: 50, background: "var(--surface2)", overflow: "hidden" }}>
+                      <div key={canton} style={{ display: "grid", gridTemplateColumns: "minmax(80px, 130px) 1fr auto", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontSize: 13, fontWeight: 650, color: isTargeted ? "var(--text)" : "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{CANTON_NAMES[canton] ?? canton}</span>
+                        <div style={{ height: 7, borderRadius: 50, background: "var(--surface2)", overflow: "hidden" }}>
                           <div style={{ height: "100%", width: `${pct}%`, borderRadius: 50, background: isTargeted ? "var(--brand)" : "rgba(107,114,128,0.3)" }} />
                         </div>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", width: 40, textAlign: "right", flexShrink: 0 }}>{impressions.toLocaleString("fr-CH")}</span>
-                        <span style={{ fontSize: 11, color: "#10b981", width: 42, textAlign: "right", flexShrink: 0 }}>{ctrVal}%</span>
+                        <span style={{ fontSize: 12.5, color: "var(--text-muted)", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                          <strong style={{ color: "var(--text)" }}>{impressions.toLocaleString("fr-CH")}</strong> vues · {clicks.toLocaleString("fr-CH")} clics · {ctr(impressions, clicks)}
+                        </span>
                       </div>
                     );
                   })}
