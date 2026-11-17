@@ -79,7 +79,7 @@ export async function PiedAccueil() {
         .pied-chevron { flex-shrink: 0; transition: transform .2s; }
         .pied-cantons[open] > summary .pied-chevron { transform: rotate(180deg); }
         .pied-cantons-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin-top: 10px; }
-        .pied-cantons-grille a { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pied-cantons-grille a { font-size: 12.5px; line-height: 1.35; overflow-wrap: anywhere; }
         .pied-bas { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between;
           flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text-muted); }
         .pied-mobile { display: none; }
