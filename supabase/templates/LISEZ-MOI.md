@@ -22,6 +22,6 @@ dossier.
 Le bouton n'utilise pas `{{ .ConfirmationURL }}`, qui mène à
 `xtbdxfzbbuedlktpqpna.supabase.co` : un lien vers un domaine étranger à
 l'expéditeur fait classer le courriel en indésirables par Outlook (SCL 5 malgré
-SPF, DKIM et DMARC valides). Il mène à `{{ .RedirectTo }}&token_hash=…`, que
-`/auth/callback` vérifie lui-même. `RedirectTo` porte donc toujours une requête
-(`?e=1` pour l'inscription, `?next=/reset-password` pour le mot de passe).
+SPF, DKIM et DMARC valides). Il mène à `{{ .SiteURL }}/auth/callback?token_hash=…&type=…`, que
+`/auth/callback` vérifie lui-même. On part de l'adresse du site plutôt que de
+`RedirectTo` : celle-ci dépend de la liste des retours autorisés de Supabase.
