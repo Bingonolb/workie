@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { LANGUES_SAISIE, EMPLOYEE_RANGES } from "@/lib/types";
 import { banniereCadree, televerserCouverture } from "@/lib/televersement";
 import { CONTRATS, MODES, NIVEAUX } from "@/lib/offres";
+import { importerOffreDepuisLien, type OffreImportee } from "@/lib/importOffre";
 
 /**
  * Espace entreprise. Chaque action relit en base, côté serveur, le lien entre
@@ -234,4 +235,24 @@ export async function retirerOffre(id: string): Promise<{ error?: string }> {
   if (error) return { error: "La suppression a échoué." };
   rafraichirFiche();
   return {};
+}
+// ── Import d'une offre depuis son lien ──────────────────────────────────────
+
+const importsRecents = new Map<string, number[]>();
+
+/**
+ * Pré-remplit une offre à partir de son lien (données structurées seulement,
+ * voir lib/importOffre). Rien n'est publié : l'entreprise relit puis publie.
+ * 30 imports par heure et par entreprise, pour qu'on ne puisse pas se servir
+ * de nos serveurs pour interroger d'autres sites en boucle.
+ */
+export async function importerOffre(lien: string): Promise<{ offre?: OffreImportee; error?: string }> {
+  const c = await ficheGeree();
+  if (!c) return { error: "Accès refusé." };
+  const maintenant = Date.now();
+  const recents = (importsRecents.get(c.id) ?? []).filter(t => maintenant - t < 3600_000);
+  if (recents.length >= 30) return { error: "Trop d'imports en peu de temps. Réessayez dans une heure." };
+  importsRecents.set(c.id, [...recents, maintenant]);
+  const r = await importerOffreDepuisLien(String(lien ?? "").slice(0, 2000));
+  return r.offre ? { offre: r.offre } : { error: r.erreur ?? "Import impossible." };
 }
