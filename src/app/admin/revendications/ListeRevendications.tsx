@@ -39,9 +39,12 @@ export function ListeRevendications({ demandes }: { demandes: DemandeAdmin[] }) 
           <div key={d.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: 16, display: "grid", gap: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
               <div>
-                <p style={{ fontWeight: 800, fontSize: 15 }}>{d.entreprise?.name ?? "Fiche supprimée"}</p>
+                <p style={{ fontWeight: 800, fontSize: 15 }}>
+                  {d.fiche && !d.entreprise && <span style={{ fontSize: 11, fontWeight: 800, color: "#7c5cff", background: "rgba(124,92,255,0.12)", padding: "2px 8px", borderRadius: 999, marginRight: 8 }}>Nouvelle entreprise</span>}
+                  {d.entreprise?.name ?? d.fiche?.name ?? "Fiche supprimée"}
+                </p>
                 <p style={{ fontSize: 12.5, color: "var(--text-muted)" }}>
-                  Site officiel : {d.entreprise?.website_url ?? "non renseigné"}
+                  Site : {(d.entreprise?.website_url ?? d.fiche?.website_url) || "non renseigné"}
                 </p>
               </div>
               <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 999, color: s.couleur, background: `${s.couleur}1f` }}>{s.libelle}</span>
@@ -50,6 +53,13 @@ export function ListeRevendications({ demandes }: { demandes: DemandeAdmin[] }) 
               <strong>{d.prenom} {d.nom}</strong>, {d.fonction} · {d.email_pro}
               <span style={{ color: "var(--text-muted)" }}> · {new Date(d.cree_le).toLocaleDateString("fr-CH", { timeZone: "Europe/Zurich" })}</span>
             </p>
+            {d.fiche && !d.entreprise && (
+              <div style={{ background: "var(--surface2)", borderRadius: 10, padding: "10px 12px", fontSize: 13.5, display: "grid", gap: 6 }}>
+                <p><strong>{d.fiche.sector}</strong> · {d.fiche.city} ({d.fiche.canton}){d.fiche.employee_range ? ` · ${d.fiche.employee_range} employés` : ""}{d.fiche.langues?.length ? ` · ${d.fiche.langues.join(", ")}` : ""}</p>
+                <p style={{ color: "var(--text-muted)", lineHeight: 1.55, whiteSpace: "pre-line" }}>{d.fiche.description}</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Acceptée, la fiche sera créée et publiée dès le paiement de l&apos;abonnement.</p>
+              </div>
+            )}
             {d.statut === "en_attente" && (
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
                 <input value={notes[d.id] ?? ""} onChange={e => setNotes(n => ({ ...n, [d.id]: e.target.value }))}

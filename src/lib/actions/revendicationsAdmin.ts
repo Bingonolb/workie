@@ -18,6 +18,8 @@ export type DemandeAdmin = {
   id: string; statut: string; methode: string; cree_le: string;
   prenom: string; nom: string; fonction: string; email_pro: string;
   entreprise: { id: string; name: string; slug: string; website_url: string | null } | null;
+  /** Création : la fiche proposée, pas encore dans l'annuaire. */
+  fiche: { name: string; sector: string; city: string; canton: string; website_url: string; description: string; employee_range: string | null; langues: string[] } | null;
 };
 
 export async function listerRevendications(): Promise<{ demandes?: DemandeAdmin[]; error?: string }> {
@@ -25,7 +27,7 @@ export async function listerRevendications(): Promise<{ demandes?: DemandeAdmin[
     await exigerAdmin();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (createAdminClient().from("revendications" as any) as any)
-      .select("id, statut, methode, cree_le, prenom, nom, fonction, email_pro, entreprise:companies(id, name, slug, website_url)")
+      .select("id, statut, methode, cree_le, prenom, nom, fonction, email_pro, fiche, entreprise:companies(id, name, slug, website_url)")
       .neq("statut", "annulee")
       .order("cree_le", { ascending: false })
       .limit(200);
@@ -42,7 +44,7 @@ export async function deciderRevendication(id: string, accepter: boolean, note: 
     if (!/^[0-9a-f-]{36}$/i.test(id)) return { error: "Demande invalide." };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const revs = createAdminClient().from("revendications" as any) as any;
-    const { data: r } = await revs.select("id, statut, prenom, email_pro, entreprise:companies(name, slug)").eq("id", id).maybeSingle();
+    const { data: r } = await revs.select("id, statut, prenom, email_pro, fiche, entreprise:companies(name, slug)").eq("id", id).maybeSingle();
     if (!r || r.statut !== "en_attente") return { error: "Cette demande n'attend plus de décision." };
 
     await revs.update({
@@ -51,12 +53,13 @@ export async function deciderRevendication(id: string, accepter: boolean, note: 
       note_admin: note.trim().slice(0, 300) || null,
     }).eq("id", id);
 
-    if (accepter && r.entreprise) {
-      const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
-      await sendRevendicationAcceptee(r.email_pro, r.prenom, r.entreprise.name, `${base}/revendiquer/${r.entreprise.slug}`);
-    } else if (r.entreprise) {
-      await sendRevendicationRefusee(r.email_pro, r.prenom, r.entreprise.name);
-    }
+    // Revendication : lien vers la fiche. Création : lien vers le parcours, où
+    // l'entreprise retrouve l'étape du paiement.
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+    const nomFiche: string | undefined = r.entreprise?.name ?? r.fiche?.name;
+    const lien = r.entreprise ? `${base}/revendiquer/${r.entreprise.slug}` : `${base}/creer-entreprise`;
+    if (nomFiche && accepter) await sendRevendicationAcceptee(r.email_pro, r.prenom, nomFiche, lien);
+    else if (nomFiche) await sendRevendicationRefusee(r.email_pro, r.prenom, nomFiche);
     revalidatePath("/admin/revendications");
     return {};
   } catch (e) {

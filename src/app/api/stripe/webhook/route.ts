@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { revalidateTag, revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendAbonnementActif } from "@/lib/email";
+import { creerFicheDepuisDemande } from "@/lib/creationFiche";
 
 export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
@@ -60,13 +61,26 @@ export async function POST(req: NextRequest) {
         }
 
         // Abonnement entreprise : la revendication vérifiée devient active.
-        const companyId = session.client_reference_id;
-        if (!companyId || session.mode !== "subscription") break;
+        if (session.mode !== "subscription") break;
         const revId = session.metadata?.revendication_id;
         const userId = session.metadata?.user_id;
+        let companyId = session.client_reference_id;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sub = await stripe.subscriptions.retrieve(session.subscription as string) as any;
+        let sub = await stripe.subscriptions.retrieve(session.subscription as string) as any;
+
+        // Création d'entreprise : la fiche naît maintenant, payée. L'abonnement
+        // reçoit son identifiant, pour que renouvellements et résiliation la
+        // retrouvent ensuite.
+        if (session.metadata?.type === "creation_entreprise") {
+          companyId = revId && userId ? await creerFicheDepuisDemande(revId, userId) : null;
+          if (!companyId) {
+            console.error("[webhook] creation: fiche introuvable pour la demande", revId);
+            break;
+          }
+          sub = await stripe.subscriptions.update(sub.id, { metadata: { ...sub.metadata, company_id: companyId } });
+        }
+        if (!companyId) break;
         const periodEnd: number = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end ?? 0;
         const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 

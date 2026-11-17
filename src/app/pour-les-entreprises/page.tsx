@@ -5,7 +5,7 @@ import { StylesLanding } from "@/components/StylesLanding";
 import { NavbarClient } from "@/components/NavbarClient";
 import { PiedAccueil } from "@/components/PiedAccueil";
 import { LandingFaq } from "@/components/LandingFaq";
-import { revendicationOuverte } from "@/lib/ouverture";
+import { revendicationOuverte, creationOuverte } from "@/lib/ouverture";
 import { RechercheRevendication } from "./RechercheRevendication";
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ const AVANTAGES = [
 
 const FAQ = [
   { q: "Ma fiche existe déjà : pourquoi m'abonner ?", texte: "La fiche reste visible gratuitement. L'abonnement vous la confie : vous la tenez à jour, vous l'enrichissez et vous voyez qui la consulte.", r: <>La fiche reste visible gratuitement. L&apos;abonnement vous la confie : vous la tenez à jour, vous l&apos;enrichissez et vous voyez qui la consulte.</> },
-  { q: "Comment savez-vous que je représente l'entreprise ?", texte: "Avec une adresse e-mail de l'entreprise, nous vous envoyons un code et c'est réglé. Sinon, notre équipe vérifie votre demande à la main et vous prévient par e-mail dès que c'est fait.", r: <>Avec une adresse e-mail de l&apos;entreprise, nous vous envoyons un code et c&apos;est réglé. Sinon, notre équipe vérifie votre demande à la main et vous prévient par e-mail dès que c'est fait.</> },
+  { q: "Comment savez-vous que je représente l'entreprise ?", texte: "Avec une adresse e-mail de l'entreprise, nous vous envoyons un code et c'est réglé. Sinon, notre équipe vérifie votre demande à la main et vous prévient par e-mail dès que c'est fait.", r: <>Avec une adresse e-mail de l&apos;entreprise, nous vous envoyons un code et c&apos;est réglé. Sinon, notre équipe vérifie votre demande à la main et vous prévient par e-mail dès que c&apos;est fait.</> },
   { q: "Puis-je arrêter quand je veux ?", texte: "Oui, en deux clics depuis votre espace. Vous gardez l'accès jusqu'à la fin de la période déjà payée.", r: <>Oui, en deux clics depuis votre espace. Vous gardez l&apos;accès jusqu&apos;à la fin de la période déjà payée.</> },
   { q: "Puis-je changer le nom ou le secteur ?", texte: "Ces deux informations sont vérifiées par notre équipe, pour que l'annuaire reste fiable. Écrivez-nous à contact@workie.ch.", r: <>Ces deux informations sont vérifiées par notre équipe, pour que l&apos;annuaire reste fiable. Écrivez-nous à contact@workie.ch.</> },
   { q: "Y a-t-il des avis ou des salaires sur ma fiche ?", texte: "Non. Workie présente les employeurs et renvoie vers leurs offres officielles. Rien d'autre.", r: <>Non. Workie présente les employeurs et renvoie vers leurs offres officielles. Rien d&apos;autre.</> },
@@ -69,7 +69,7 @@ export default function PourLesEntreprises() {
           <p style={{ fontSize: "clamp(16px, 1.6vw, 18px)", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 28, maxWidth: 520 }}>
             Des candidats ouvrent votre fiche avant de postuler chez vous. Prenez la main dessus : racontez qui vous êtes, envoyez-les vers vos offres et voyez qui s&apos;intéresse à vous.
           </p>
-          <RechercheRevendication />
+          <RechercheRevendication creation={creationOuverte} />
           <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 12 }}>129 CHF par mois · sans engagement</p>
         </div>
         <div className="pe-photo">
@@ -150,7 +150,7 @@ export default function PourLesEntreprises() {
           </ul>
           {/* Plutôt qu'un bouton qui renvoie en haut de page : la recherche ici même. */}
           <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 10 }}>Commencez par retrouver votre entreprise</p>
-          <div style={{ display: "flex", justifyContent: "center", textAlign: "left" }}><RechercheRevendication id="trouver-prix" /></div>
+          <div style={{ display: "flex", justifyContent: "center", textAlign: "left" }}><RechercheRevendication id="trouver-prix" creation={creationOuverte} /></div>
           <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 12 }}>Paiement sécurisé par Stripe. Sans engagement.</p>
         </div>
       </section>

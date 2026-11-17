@@ -248,8 +248,11 @@ export async function verifierCodeRevendication(id: string, code: string): Promi
       return { etat: { etape: "paiement", id: r.id } };
     }
     await table().update({ statut: "en_attente", code_hash: null }).eq("id", r.id);
-    const c = await entreprise(r.company_id);
-    await sendRevendicationAValider(c?.name ?? "Entreprise", `${r.prenom} ${r.nom}, ${r.fonction}`, r.email_pro);
+    // Création : pas encore de fiche, le nom vient de la fiche proposée.
+    const fiche = (r as Ligne & { fiche?: { name?: string } | null }).fiche;
+    const c = r.company_id ? await entreprise(r.company_id) : null;
+    await sendRevendicationAValider(c?.name ?? fiche?.name ?? "Entreprise", `${r.prenom} ${r.nom}, ${r.fonction}`, r.email_pro, !r.company_id);
+    if (!r.company_id) jar.delete("workie_creation");
     return { etat: { etape: "en_attente", email: masquer(r.email_pro) } };
   } catch {
     return { error: "Une erreur est survenue. Réessayez." };
@@ -263,15 +266,22 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
     if (!process.env.STRIPE_SECRET_KEY) return { error: "Le paiement n'est pas disponible pour le moment." };
 
     const { data } = await table().select("*").eq("id", id).eq("user_id", user.id).maybeSingle();
-    const r = data as Ligne | null;
+    const r = data as (Ligne & { fiche?: { name: string } | null }) | null;
     if (!r || r.statut !== "verifiee") return { error: "Cette demande n'est pas encore vérifiée." };
-    const c = await entreprise(r.company_id);
+
+    // Création : la fiche n'existe pas encore, elle naîtra au paiement (webhook).
+    const creation = !r.company_id && !!r.fiche;
+    const c = creation
+      ? { id: "", slug: "", name: r.fiche!.name, website_url: null, is_subscribed: false }
+      : await entreprise(r.company_id);
     if (!c) return { error: "Fiche introuvable." };
     if (c.is_subscribed) return { error: "Cette fiche est déjà gérée par l'entreprise." };
 
     const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
     const offre = ABONNEMENT[formule];
-    const meta = { type: "abonnement_entreprise", company_id: c.id, revendication_id: r.id, user_id: user.id };
+    const meta: Record<string, string> = creation
+      ? { type: "creation_entreprise", revendication_id: r.id, user_id: user.id }
+      : { type: "abonnement_entreprise", company_id: c.id, revendication_id: r.id, user_id: user.id };
     const session = await new Stripe(process.env.STRIPE_SECRET_KEY).checkout.sessions.create({
       mode: "subscription",
       customer_email: r.email_pro,
@@ -284,13 +294,13 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
         },
         quantity: 1,
       }],
-      client_reference_id: c.id,
+      client_reference_id: creation ? r.id : c.id,
       metadata: meta,
       subscription_data: { metadata: meta },
       allow_promotion_codes: true,
       billing_address_collection: "required",
       success_url: `${base}/espace-entreprise?bienvenue=1`,
-      cancel_url: `${base}/revendiquer/${c.slug}`,
+      cancel_url: creation ? `${base}/creer-entreprise` : `${base}/revendiquer/${c.slug}`,
     });
     return session.url ? { url: session.url } : { error: "Le paiement n'a pas pu démarrer." };
   } catch {

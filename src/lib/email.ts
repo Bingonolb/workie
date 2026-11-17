@@ -156,19 +156,21 @@ export async function sendCodeRevendication(email: string, prenom: string, entre
 }
 
 /** Prévient l'administration qu'une demande attend une validation manuelle. */
-export async function sendRevendicationAValider(entreprise: string, demandeur: string, emailDemandeur: string): Promise<void> {
+export async function sendRevendicationAValider(entreprise: string, demandeur: string, emailDemandeur: string, creation = false): Promise<void> {
   const destinataire = process.env.ADMIN_EMAIL?.trim();
   if (!resend || !destinataire) return;
   try {
     await resend.emails.send({
       from: FROM,
       to: destinataire,
-      subject: `Revendication à valider : ${entreprise}`,
+      subject: creation ? `Nouvelle entreprise à valider : ${entreprise}` : `Revendication à valider : ${entreprise}`,
       html: gabarit({
-        titre: "Revendication à valider",
+        titre: creation ? "Nouvelle entreprise à valider" : "Revendication à valider",
         accroche: `${escapeHtml(entreprise)}`,
         paragraphes: [
-          `${escapeHtml(demandeur)} (${escapeHtml(emailDemandeur)}) demande à gérer cette fiche. Son adresse n'appartient pas au domaine officiel de l'entreprise.`,
+          creation
+            ? `${escapeHtml(demandeur)} (${escapeHtml(emailDemandeur)}) propose de créer cette fiche. Relisez-la avant de l'accepter : elle sera publiée dès le paiement.`
+            : `${escapeHtml(demandeur)} (${escapeHtml(emailDemandeur)}) demande à gérer cette fiche. Son adresse n'appartient pas au domaine officiel de l'entreprise.`,
         ],
         cta: { libelle: "Examiner la demande", href: `${BASE}/admin/revendications` },
       }),

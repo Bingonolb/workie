@@ -11,7 +11,7 @@ type Resultat = { id: string; slug: string | null; name: string; city: string; s
  * sur la revendication. Une RH tape son nom et arrive sur sa fiche à gérer,
  * sans passer par Explorer.
  */
-export function RechercheRevendication({ id = "trouver" }: { id?: string } = {}) {
+export function RechercheRevendication({ id = "trouver", creation = false }: { id?: string; creation?: boolean } = {}) {
   const [q, setQ] = useState("");
   const [res, setRes] = useState<Resultat[]>([]);
   const [charge, setCharge] = useState(false);
@@ -45,9 +45,11 @@ export function RechercheRevendication({ id = "trouver" }: { id?: string } = {})
         <div style={{ marginTop: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
           {res.length === 0 ? (
             <p style={{ padding: "14px 16px", fontSize: 14, color: "var(--text-muted)" }}>
-              {charge ? "Recherche…" : <>Aucune fiche trouvée. Votre entreprise n&apos;est pas encore sur Workie ? Écrivez à contact@workie.ch.</>}
+              {charge ? "Recherche…" : creation
+                ? <>Aucune fiche trouvée. <Link href="/creer-entreprise" style={{ color: "var(--brand)", fontWeight: 700 }}>Créez la fiche de votre entreprise</Link></>
+                : <>Aucune fiche trouvée. Votre entreprise n&apos;est pas encore sur Workie ? Écrivez à contact@workie.ch.</>}
             </p>
-          ) : res.map(c => (
+          ) : [...res.map(c => (
             <Link key={c.id} href={`/entreprise/${c.slug}?gerer=1`} style={{
               display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
               padding: "13px 16px", borderTop: "1px solid var(--border)", textDecoration: "none", color: "var(--text)",
@@ -60,7 +62,11 @@ export function RechercheRevendication({ id = "trouver" }: { id?: string } = {})
                 Voir la fiche <ArrowRight size={14} aria-hidden="true" />
               </span>
             </Link>
-          ))}
+          )), ...(creation && !charge ? [
+            <Link key="creer" href="/creer-entreprise" style={{ display: "block", padding: "12px 16px", borderTop: "1px solid var(--border)", fontSize: 13.5, color: "var(--text-muted)", textDecoration: "none" }}>
+              Pas dans la liste ? <span style={{ color: "var(--brand)", fontWeight: 700 }}>Créez la fiche de votre entreprise</span>
+            </Link>,
+          ] : [])]}
         </div>
       )}
     </div>
