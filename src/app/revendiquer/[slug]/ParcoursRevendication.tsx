@@ -206,7 +206,7 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
           <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>Demande reçue</h1>
           <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
             Votre adresse est confirmée. Comme elle n&apos;appartient pas au domaine officiel de l&apos;entreprise, notre équipe vérifie encore la demande à la main.
-            Vous recevrez un e-mail à <strong>{etat.email}</strong> dès qu&apos;elle est acceptée, en général dans la journée.
+            Vous recevrez un e-mail à <strong>{etat.email}</strong> dès qu&apos;elle est acceptée.
           </p>
           <Link href={`/entreprise/${slug}`} className="btn btn-clair btn-bloc">Retour à la fiche</Link>
         </div>
