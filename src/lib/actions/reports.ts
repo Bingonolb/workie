@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { revalidateTag } from "next/cache";
 import { createClient, getNiveauAal } from "@/lib/supabase/server";
@@ -132,7 +132,7 @@ export async function getReports(): Promise<{ reports?: Report[]; error?: string
 
   const reports: Report[] = rows.map(r => {
     let target_url: string | null = null;
-    if (r.target_type === "company") target_url = `/company/${r.target_id}`;
+    if (r.target_type === "company") target_url = `/company/${r.target_id}`; // redirige vers /entreprise/{slug}
     // No public profile page exists — profile reports have no target_url
     else if (r.target_type === "review" && reviewCompanyMap[r.target_id])
       target_url = `/company/${reviewCompanyMap[r.target_id]}`;
