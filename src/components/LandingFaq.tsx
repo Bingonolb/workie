@@ -141,7 +141,8 @@ const ENTREES: Entree[] = [
   },
 ];
 
-export function LandingFaq() {
+export function LandingFaq({ items: itemsRecus, titre = "Questions fréquentes", sousTitre }: { items?: Entree[]; titre?: string; sousTitre?: string } = {}) {
+  const items = itemsRecus ?? ENTREES;
   return (
     <section
       className="landing-section landing-ton"
@@ -158,7 +159,7 @@ export function LandingFaq() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            mainEntity: ENTREES.map(({ q, texte }) => ({
+            mainEntity: items.map(({ q, texte }) => ({
               "@type": "Question",
               name: q,
               acceptedAnswer: { "@type": "Answer", text: texte },
@@ -172,14 +173,14 @@ export function LandingFaq() {
           id="faq-titre"
           style={{ textAlign: "center", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 12 }}
         >
-          Questions fréquentes
+          {titre}
         </h2>
         <p style={{ textAlign: "center", fontSize: 15, color: "var(--text-muted)", marginBottom: 40 }}>
-          Ce que vous trouverez ici, d&apos;où viennent les informations, et ce que ça coûte.
+          {sousTitre ?? <>Ce que vous trouverez ici, d&apos;où viennent les informations, et ce que ça coûte.</>}
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {ENTREES.map(({ q, r }) => (
+          {items.map(({ q, r }) => (
             // Apparence entièrement en CSS : un style en ligne l'emporte sur
             // une feuille de style, donc les règles d'état ouvert ne pouvaient
             // pas reprendre la main sur la bordure ni sur la couleur.
