@@ -55,7 +55,10 @@ interface ReportButtonProps {
    * Laissé de côté, la fenêtre s'ouvre et c'est le serveur qui tranche.
    */
   isLoggedIn?: boolean;
-  variant?: "icon" | "link" | "button";
+  /** « aucun » : pas de bouton, la fenêtre est ouverte par `ouvert` (menu « ⋯ »). */
+  variant?: "icon" | "link" | "button" | "aucun";
+  ouvert?: boolean;
+  onFermer?: () => void;
   /** Appelé une fois le signalement parti, pour retirer le contenu de la vue. */
   onReported?: () => void;
 }
@@ -67,6 +70,8 @@ export function ReportButton({
   isLoggedIn,
   variant = "link",
   onReported,
+  ouvert,
+  onFermer,
 }: ReportButtonProps) {
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState("");
@@ -104,8 +109,16 @@ export function ReportButton({
   function close() {
     if (isPending) return;
     setOpen(false);
+    onFermer?.();
     if (done) onReported?.();
   }
+
+  // Ouverture demandée de l'extérieur (menu « ⋯ »).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (ouvert) openModal();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ouvert]);
 
   useEffect(() => {
     if (!open) return;
@@ -125,7 +138,7 @@ export function ReportButton({
     });
   }
 
-  const trigger = variant === "icon" ? (
+  const trigger = variant === "aucun" ? null : variant === "icon" ? (
     <button type="button" onClick={openModal} title="Signaler" aria-label="Signaler ce contenu" style={{
       display: "flex", alignItems: "center", justifyContent: "center",
       width: 32, height: 32, borderRadius: 8, border: "none",

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEtatFiche } from "./EtatFiche";
 import { SaveButton } from "@/components/SaveButton";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
-import { ReportButton } from "@/components/ReportButton";
+import { MenuFiche } from "./MenuFiche";
 import { GuestContentGate } from "@/components/GuestContentGate";
 import { ReviewForm } from "@/components/ReviewForm";
 import { BoutonVueEntreprise } from "./BoutonVueEntreprise";
@@ -20,7 +20,7 @@ import { BoutonVueEntreprise } from "./BoutonVueEntreprise";
  * le contexte, pour que le reste de la page redevienne cacheable.
  */
 
-export function ActionsFiche({ companyId, companyName }: { companyId: string; companyName: string }) {
+export function ActionsFiche({ companyId, companyName, slug = null, gerable = false }: { companyId: string; companyName: string; slug?: string | null; gerable?: boolean }) {
   const { isLoggedIn, isFav, isAdmin } = useEtatFiche();
   return (
     <>
@@ -43,13 +43,7 @@ export function ActionsFiche({ companyId, companyName }: { companyId: string; co
       )}
       {isAdmin && <BoutonVueEntreprise companyId={companyId} />}
       {isLoggedIn ? <SaveButton companyId={companyId} initialFav={isFav} /> : <GuestSaveButton />}
-      <ReportButton
-        targetType="company"
-        targetId={companyId}
-        targetLabel={companyName}
-        isLoggedIn={isLoggedIn}
-        variant="icon"
-      />
+      <MenuFiche companyId={companyId} companyName={companyName} slug={slug} gerable={gerable} isLoggedIn={isLoggedIn} />
     </>
   );
 }

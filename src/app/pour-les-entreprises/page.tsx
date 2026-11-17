@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Check, Search, MailCheck, LayoutDashboard, BadgeCheck, PenLine, BarChart3, Megaphone, ArrowRight } from "lucide-react";
-import { StylesLanding, NavLanding } from "@/components/StylesLanding";
+import { Check, Search, MailCheck, LayoutDashboard, BadgeCheck, PenLine, BarChart3, Megaphone } from "lucide-react";
+import { StylesLanding } from "@/components/StylesLanding";
+import { NavbarClient } from "@/components/NavbarClient";
 import { PiedAccueil } from "@/components/PiedAccueil";
 import { LandingFaq } from "@/components/LandingFaq";
 import { revendicationOuverte } from "@/lib/ouverture";
@@ -55,7 +56,8 @@ export default function PourLesEntreprises() {
         .landing-bande-pe-1 { background-image: url("${PHOTO(3184465)}"); background-position: center 40%; }
         .landing-bande-pe-2 { background-image: url("${PHOTO(1181406)}"); background-position: center 50%; min-height: 340px; }
       `}</style>
-      <NavLanding />
+      {/* La barre du site : elle sait si la personne est connectée. */}
+      <NavbarClient />
 
       {/* ── En-tête : le message, la recherche, une vraie photo ── */}
       <section className="landing-hero-deux-col">
@@ -146,7 +148,9 @@ export default function PourLesEntreprises() {
               <li key={f} style={{ display: "flex", gap: 10, fontSize: 15 }}><Check size={18} color="var(--brand)" aria-hidden="true" style={{ flexShrink: 0 }} /> {f}</li>
             ))}
           </ul>
-          <a href="#trouver" className="btn btn-marque btn-lg">Trouver ma fiche <ArrowRight size={17} aria-hidden="true" /></a>
+          {/* Plutôt qu'un bouton qui renvoie en haut de page : la recherche ici même. */}
+          <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 10 }}>Commencez par retrouver votre entreprise</p>
+          <div style={{ display: "flex", justifyContent: "center", textAlign: "left" }}><RechercheRevendication id="trouver-prix" /></div>
           <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 12 }}>Paiement sécurisé par Stripe. Sans engagement.</p>
         </div>
       </section>

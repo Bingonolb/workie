@@ -310,7 +310,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             {/* Actions */}
             <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
               <ShareButton name={company.name} url={`${BASE_URL}${urlFiche(company)}`} companyId={company.id} />
-              <ActionsFiche companyId={company.id} companyName={company.name} />
+              <ActionsFiche companyId={company.id} companyName={company.name} slug={company.slug} gerable={revendicationOuverte && !company.is_subscribed} />
             </div>
           </div>
         </div>

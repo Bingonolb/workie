@@ -11,7 +11,7 @@ type Resultat = { id: string; slug: string | null; name: string; city: string; s
  * sur la revendication. Une RH tape son nom et arrive sur sa fiche à gérer,
  * sans passer par Explorer.
  */
-export function RechercheRevendication() {
+export function RechercheRevendication({ id = "trouver" }: { id?: string } = {}) {
   const [q, setQ] = useState("");
   const [res, setRes] = useState<Resultat[]>([]);
   const [charge, setCharge] = useState(false);
@@ -35,10 +35,10 @@ export function RechercheRevendication() {
 
   return (
     <div style={{ width: "100%", maxWidth: 560 }}>
-      <label htmlFor="trouver" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>Nom de votre entreprise</label>
+      <label htmlFor={id} style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>Nom de votre entreprise</label>
       <div style={{ position: "relative" }}>
         <Search size={18} aria-hidden="true" style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-        <input id="trouver" value={q} onChange={e => setQ(e.target.value)} placeholder="Nom de votre entreprise" autoComplete="off"
+        <input id={id} value={q} onChange={e => setQ(e.target.value)} placeholder="Nom de votre entreprise" autoComplete="off"
           style={{ width: "100%", padding: "16px 16px 16px 46px", borderRadius: 14, border: "1px solid var(--border2)", background: "var(--surface)", color: "var(--text)", fontSize: 16, boxShadow: "0 8px 30px rgba(0,0,0,0.06)" }} />
       </div>
       {q.trim().length >= 2 && (
