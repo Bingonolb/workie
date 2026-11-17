@@ -51,6 +51,10 @@ export default function PourLesEntreprises() {
           padding: 14px 16px; display: flex; align-items: center; gap: 12px;
           box-shadow: 0 12px 34px rgba(0,0,0,0.18);
         }
+        .pe-garanties { list-style: none; padding: 0; margin: 14px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+        .pe-garanties li { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
+        .pe-garanties svg { color: #10b981; flex-shrink: 0; }
+        @media (max-width: 860px) { .pe-garanties { margin-bottom: 12px; } }
         .pe-trois { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
         @media (max-width: 860px) { .pe-trois { grid-template-columns: 1fr; } }
         .landing-bande-pe-1 { background-image: url("${PHOTO(3184465)}"); background-position: center 40%; }
@@ -70,7 +74,13 @@ export default function PourLesEntreprises() {
             Des candidats ouvrent votre fiche avant de postuler chez vous. Prenez la main dessus : racontez qui vous êtes, envoyez-les vers vos offres et voyez qui s&apos;intéresse à vous.
           </p>
           <RechercheRevendication creation={creationOuverte} />
-          <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 12 }}>129 CHF par mois · sans engagement</p>
+          {/* Ce qui rassure avant de chercher : le prix et l'absence d'engagement,
+              en garanties lisibles plutôt qu'en ligne grise orpheline. */}
+          <ul className="pe-garanties" aria-label="Conditions">
+            {["129 CHF par mois", "Sans engagement", "Résiliable en ligne"].map(g => (
+              <li key={g}><Check size={14} strokeWidth={2.6} aria-hidden="true" /> {g}</li>
+            ))}
+          </ul>
         </div>
         <div className="pe-photo">
           {/* eslint-disable-next-line @next/next/no-img-element */}
