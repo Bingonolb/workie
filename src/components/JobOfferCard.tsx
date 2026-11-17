@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, MapPin, ExternalLink } from "lucide-react";
 import { trackJobApplyClick } from "@/lib/actions/analytics";
 import { libelleTaux, nomLangue } from "@/lib/offres";
+import { useVerrouDefilement } from "@/lib/useVerrouDefilement";
 
 type Job = {
   id: string;
@@ -26,20 +27,40 @@ type Job = {
   created_at: string;
 };
 
-/** Un texte saisi une ligne par point devient une liste ; un paragraphe reste un paragraphe. */
+const PUCE = /^\s*[-•*·–]\s+/;
+
+/**
+ * Le texte s'affiche tel que l'entreprise l'a saisi : ses retours à la ligne
+ * et ses lignes vides sont gardés. Seules les lignes qu'elle a commencées par
+ * « - » ou « • » deviennent des puces. Transformer chaque ligne en puce
+ * coupait les phrases collées depuis un autre site en morceaux sans sens.
+ */
 function Section({ titre, texte }: { titre: string; texte: string | null | undefined }) {
-  const lignes = (texte ?? "").split("\n").map(l => l.replace(/^\s*[-•*·]\s*/, "").trim()).filter(Boolean);
-  if (lignes.length === 0) return null;
+  const blocs = (texte ?? "").replace(/\r/g, "").split(/\n\s*\n/).map(b => b.split("\n").filter(l => l.trim())).filter(b => b.length);
+  if (blocs.length === 0) return null;
+  const txt: React.CSSProperties = { fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 };
   return (
-    <section style={{ marginBottom: 22 }}>
-      <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>{titre}</h3>
-      {lignes.length === 1 ? (
-        <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7 }}>{lignes[0]}</p>
-      ) : (
-        <ul style={{ display: "grid", gap: 6, paddingLeft: 18, margin: 0 }}>
-          {lignes.map((l, i) => <li key={i} style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{l}</li>)}
-        </ul>
-      )}
+    <section style={{ marginBottom: 26 }}>
+      <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>{titre}</h3>
+      <div style={{ display: "grid", gap: 12 }}>
+        {blocs.map((lignes, i) => {
+          // Lignes consécutives à puce : une liste ; le reste : du texte, retours gardés.
+          const morceaux: { puces: boolean; lignes: string[] }[] = [];
+          for (const l of lignes) {
+            const puce = PUCE.test(l);
+            const dernier = morceaux[morceaux.length - 1];
+            if (dernier && dernier.puces === puce) dernier.lignes.push(puce ? l.replace(PUCE, "") : l);
+            else morceaux.push({ puces: puce, lignes: [puce ? l.replace(PUCE, "") : l] });
+          }
+          return morceaux.map((m, j) => m.puces ? (
+            <ul key={`${i}-${j}`} style={{ display: "grid", gap: 6, paddingLeft: 20, margin: 0 }}>
+              {m.lignes.map((l, k) => <li key={k} style={txt}>{l}</li>)}
+            </ul>
+          ) : (
+            <p key={`${i}-${j}`} style={{ ...txt, whiteSpace: "pre-line", margin: 0 }}>{m.lignes.join("\n")}</p>
+          ));
+        })}
+      </div>
     </section>
   );
 }
@@ -67,12 +88,9 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open]);
+  useVerrouDefilement(open);
 
   const [mounted, setMounted] = useState(false);
   // Portail : il n'a pas d'équivalent dans le HTML du serveur.
@@ -193,7 +211,8 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
               Publiée le {new Date(job.created_at).toLocaleDateString("fr-CH", { day: "numeric", month: "long", year: "numeric" })}
             </p>
 
-            {/* CTA */}
+            {/* CTA : collé en bas de la fenêtre, toujours à portée du pouce. */}
+            <div className="job-cta" style={{ position: "sticky", bottom: -28, margin: "0 -28px -28px", padding: "14px 28px calc(20px + env(safe-area-inset-bottom))", background: "var(--surface)", borderTop: "1px solid var(--border)" }}>
             {job.apply_url ? (
               <a
                 href={job.apply_url}
@@ -218,6 +237,7 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
                 Aucun lien de candidature disponible pour le moment.
               </p>
             )}
+            </div>
           </div>
         </div>,
         document.body
@@ -229,6 +249,14 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
         .job-modal::-webkit-scrollbar { width: 4px; }
         .job-modal::-webkit-scrollbar-track { background: transparent; }
         .job-modal::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+        .job-modal { overscroll-behavior: contain; }
+        /* Sur téléphone, l'offre prend tout l'écran : rien d'autre à voir ni à toucher. */
+        @media (max-width: 640px) {
+          .job-modal-overlay { padding: 0 !important; align-items: stretch !important; }
+          .job-modal { max-width: none !important; max-height: none !important; height: 100% !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; padding: calc(20px + env(safe-area-inset-top)) 20px 28px !important; animation: fadeIn 0.18s ease !important; }
+          .job-cta { margin: 0 -20px -28px !important; padding-left: 20px !important; padding-right: 20px !important; }
+          .job-modal button[aria-label="Fermer"] { width: 44px !important; height: 44px !important; }
+        }
       `}</style>
     </>
   );

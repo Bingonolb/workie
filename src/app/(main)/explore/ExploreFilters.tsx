@@ -4,6 +4,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 import { useTransition, useState, useEffect, useRef } from "react";
 import { SECTOR_COLORS } from "@/lib/types";
+import { useVerrouDefilement } from "@/lib/useVerrouDefilement";
 
 /** Les quatre langues de travail que les fiches peuvent porter. */
 const LANGUES = [
@@ -37,6 +38,10 @@ export function ExploreFilters({
   const [isPending, startTransition] = useTransition();
   const [showPanel, setShowPanel] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  // Sur téléphone, le panneau occupe le bas de l'écran : la page derrière ne
+  // doit plus bouger sous le doigt pendant qu'on choisit. Sur ordinateur, c'est
+  // un simple menu déroulant, la page reste libre.
+  useVerrouDefilement(showPanel && typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches);
 
   const view = current.view ?? "grid";
   const sort = current.sort ?? "recent";
