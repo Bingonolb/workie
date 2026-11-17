@@ -391,14 +391,19 @@ export async function getBusinessCampaignById(id: string): Promise<AdCampaign | 
  */
 export async function pauseUserCampaign(id: string): Promise<{ error?: string }> {
   try {
-    const { supabase, user } = await requireUser();
+    const { user } = await requireUser();
+    // La base n'accorde aucune modification directe à l'annonceur (sinon il
+    // pourrait passer une campagne impayée en « active »). Le serveur fait la
+    // mise à jour, limitée à SA campagne et à l'état attendu.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase.from("ad_campaigns") as any)
+    const { data, error } = await (createAdminClient().from("ad_campaigns") as any)
       .update({ status: "paused", paused_at: new Date().toISOString() })
       .eq("id", id)
       .eq("user_id", user.id)
-      .in("status", ["active", "pending"]);
-    if (error) return { error: error.message };
+      .in("status", ["active", "pending"])
+      .select("id");
+    if (error) return { error: "La mise en pause a échoué. Réessayez." };
+    if (!data?.length) return { error: "Cette campagne ne peut pas être mise en pause." };
     revalidatePath("/profile/ads");
     revalidateTag("ad-campaigns", {});
     return {};
@@ -439,13 +444,18 @@ export async function reprendreCampagne(id: string): Promise<{ error?: string }>
       end_date = fin.toISOString().slice(0, 10);
     }
 
+    // Même règle que la pause : seule une campagne payée puis mise en pause
+    // peut repartir, et c'est le serveur qui la relance.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase.from("ad_campaigns") as any)
+    const { data: maj, error } = await (createAdminClient().from("ad_campaigns") as any)
       .update({ status: "active", paused_at: null, end_date })
       .eq("id", id)
       .eq("user_id", user.id)
-      .eq("status", "paused");
-    if (error) return { error: error.message };
+      .eq("status", "paused")
+      .not("paid_at", "is", null)
+      .select("id");
+    if (error) return { error: "La relance a échoué. Réessayez." };
+    if (!maj?.length) return { error: "Cette campagne ne peut pas être relancée." };
     revalidatePath("/profile/ads");
     revalidateTag("ad-campaigns", {});
     return {};
