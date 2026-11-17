@@ -40,14 +40,14 @@ const ENTREES: Entree[] = [
   {
     q: "Pourquoi je ne retrouve pas dix fois la même offre ?",
     texte:
-      "Parce que Workie classe des entreprises, pas des annonces. Une entreprise apparaît une fois, et ses offres sont celles de son propre site, à jour au moment où vous cliquez.",
+      "Parce que Workie classe des entreprises, pas des annonces. Une entreprise apparaît une fois, et ses offres viennent d'elle : publiées par l'entreprise sur Workie, ou sur son propre site.",
     r: (
       <>
         Parce qu&apos;ici, on classe des entreprises. Une entreprise apparaît une fois,
         quel que soit le nombre de postes qu&apos;elle publie.
         <br /><br />
-        Et ses offres sont celles de son site, affichées telles qu&apos;elles y sont au
-        moment où vous cliquez. Ce que vous lisez est donc ce qui est ouvert aujourd&apos;hui.
+        Et ses offres viennent d&apos;elle : publiées par l&apos;entreprise sur Workie, ou
+        sur son propre site. Jamais recopiées par un intermédiaire.
       </>
     ),
   },
@@ -90,8 +90,8 @@ const ENTREES: Entree[] = [
       <>
         Écrivez à{" "}
         <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)" }}>contact@workie.ch</a>.
-        Correction, complément, changement d&apos;adresse ou retrait : les demandes sont
-        traitées à la main, sous 24 à 48 heures ouvrées.
+        Correction, complément, changement d&apos;adresse ou retrait : chaque demande est
+        traitée à la main.
       </>
     ),
   },
@@ -112,7 +112,21 @@ const ENTREES: Entree[] = [
       </>
     ),
   },
-  {
+  revendicationOuverte ? {
+    q: "Est-ce payant ?",
+    texte:
+      "Pas pour chercher du travail : chercher, sauvegarder des entreprises et gérer son compte sont gratuits. Les entreprises peuvent s'abonner pour gérer leur fiche (129 CHF par mois ou 1 290 CHF par an), et le site se finance aussi par la publicité. Ni l'un ni l'autre n'influence le classement.",
+    r: (
+      <>
+        Pas pour chercher du travail. Chercher, sauvegarder des entreprises, gérer son
+        compte : tout est gratuit, sans abonnement.
+        <br /><br />
+        Les entreprises peuvent s&apos;abonner pour gérer leur fiche (129 CHF par mois ou
+        1 290 CHF par an), et le site se finance aussi par la publicité, toujours signalée
+        comme telle. Ni l&apos;un ni l&apos;autre n&apos;influence le classement.
+      </>
+    ),
+  } : {
     q: "Est-ce payant ?",
     texte:
       "Non. Chercher, sauvegarder des entreprises et gérer son compte sont gratuits, sans abonnement. Le site se finance par la publicité, qui n'influence pas le classement.",
@@ -146,8 +160,8 @@ const ENTREES: Entree[] = [
 const ENTREPRISES: Entree[] = [
   {
     q: "Je travaille pour une entreprise présente sur Workie : puis-je gérer sa fiche ?",
-    texte: "Oui. Depuis la page Pour les entreprises, retrouvez votre fiche et faites la demande. Avec une adresse e-mail de l'entreprise, la vérification est immédiate. L'abonnement coûte 129 CHF par mois, sans engagement.",
-    r: <>Oui. Depuis la page <a href="/pour-les-entreprises" style={{ color: "var(--brand)", fontWeight: 600 }}>Pour les entreprises</a>, retrouvez votre fiche et faites la demande. Avec une adresse e-mail de l&apos;entreprise, la vérification est immédiate. L&apos;abonnement coûte 129 CHF par mois, sans engagement.</>,
+    texte: "Oui. Depuis la page Pour les entreprises, retrouvez votre fiche et faites la demande. Avec une adresse e-mail de l'entreprise, la vérification est immédiate ; sinon, notre équipe vérifie la demande à la main. L'abonnement coûte 129 CHF par mois ou 1 290 CHF par an, sans engagement.",
+    r: <>Oui. Depuis la page <a href="/pour-les-entreprises" style={{ color: "var(--brand)", fontWeight: 600 }}>Pour les entreprises</a>, retrouvez votre fiche et faites la demande. Avec une adresse e-mail de l&apos;entreprise, la vérification est immédiate ; sinon, notre équipe vérifie la demande à la main. L&apos;abonnement coûte 129 CHF par mois ou 1 290 CHF par an, sans engagement.</>,
   },
   {
     q: "Une entreprise peut-elle payer pour être mieux classée ?",
