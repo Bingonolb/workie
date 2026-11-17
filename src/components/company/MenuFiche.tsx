@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { MoreHorizontal, Flag, Building2 } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
@@ -18,16 +19,35 @@ export function MenuFiche({ companyId, companyName, slug, gerable, isLoggedIn }:
   companyId: string; companyName: string; slug: string | null; gerable: boolean; isLoggedIn: boolean;
 }) {
   const [ouvert, setOuvert] = useState(false);
+  // Le menu est posé sur la page entière : le bandeau photo de la fiche coupe
+  // tout ce qui en dépasse. Sa position suit le bouton.
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  const boutonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const basculer = () => {
+    const r = boutonRef.current?.getBoundingClientRect();
+    if (r) setPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
+    setOuvert(o => !o);
+  };
   const [signaler, setSignaler] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!ouvert) return;
-    const dehors = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOuvert(false); };
+    const dehors = (e: MouseEvent) => {
+      const n = e.target as Node;
+      if (!ref.current?.contains(n) && !menuRef.current?.contains(n)) setOuvert(false);
+    };
     const echap = (e: KeyboardEvent) => { if (e.key === "Escape") setOuvert(false); };
+    const fermer = () => setOuvert(false);
     document.addEventListener("mousedown", dehors);
     document.addEventListener("keydown", echap);
-    return () => { document.removeEventListener("mousedown", dehors); document.removeEventListener("keydown", echap); };
+    window.addEventListener("scroll", fermer, { passive: true });
+    window.addEventListener("resize", fermer);
+    return () => {
+      document.removeEventListener("mousedown", dehors); document.removeEventListener("keydown", echap);
+      window.removeEventListener("scroll", fermer); window.removeEventListener("resize", fermer);
+    };
   }, [ouvert]);
 
   const ligne: React.CSSProperties = {
@@ -38,13 +58,13 @@ export function MenuFiche({ companyId, companyName, slug, gerable, isLoggedIn }:
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button type="button" className="btn btn-photo" aria-label="Plus d'options" aria-haspopup="menu" aria-expanded={ouvert}
-        onClick={() => setOuvert(o => !o)} style={{ padding: "8px 10px" }}>
+      <button ref={boutonRef} type="button" className="btn btn-photo" aria-label="Plus d'options" aria-haspopup="menu" aria-expanded={ouvert}
+        onClick={basculer} style={{ padding: "8px 10px" }}>
         <MoreHorizontal size={18} aria-hidden="true" />
       </button>
-      {ouvert && (
-        <div role="menu" style={{
-          position: "absolute", right: 0, top: "calc(100% + 8px)", zIndex: 50, minWidth: 250,
+      {ouvert && pos && createPortal(
+        <div ref={menuRef} role="menu" style={{
+          position: "fixed", right: pos.right, top: pos.top, zIndex: 10050, minWidth: 250,
           background: "var(--surface)", border: "1px solid var(--border2)", borderRadius: 14,
           boxShadow: "0 16px 40px rgba(0,0,0,0.18)", overflow: "hidden",
         }}>
@@ -57,7 +77,8 @@ export function MenuFiche({ companyId, companyName, slug, gerable, isLoggedIn }:
               <span>C&apos;est votre entreprise ? <span style={{ color: "var(--text-muted)" }}>Gérer la fiche</span></span>
             </Link>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
       <ReportButton targetType="company" targetId={companyId} targetLabel={companyName} isLoggedIn={isLoggedIn}
         variant="aucun" ouvert={signaler} onFermer={() => setSignaler(false)} />
