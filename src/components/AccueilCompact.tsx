@@ -42,8 +42,11 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
         .ae-bloc { padding: 120px 0 0; }
         .ae-tete { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
         .ae-h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; max-width: 700px; text-wrap: balance; }
-        .ae-rail { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
-          padding: 34px max(24px, calc((100vw - 1180px) / 2 + 24px)) 8px; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+        /* La marge latérale aligne la première carte sur le titre ; scroll-padding
+           la fait respecter par l'aimantation, qui sinon colle la carte au bord. */
+        .ae-rail { --marge: max(24px, calc((100vw - 1180px) / 2 + 24px));
+          display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+          padding: 34px var(--marge) 8px; scroll-padding-inline: var(--marge); -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
         .ae-rail::-webkit-scrollbar { display: none; }
         .ae-carte { position: relative; flex: 0 0 auto; width: clamp(240px, 26vw, 330px); aspect-ratio: 3 / 4; border-radius: 22px; overflow: hidden;
           scroll-snap-align: start; background: var(--surface2); text-decoration: none; color: #fff; isolation: isolate; }
@@ -72,7 +75,7 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
           .ae-produit { padding: 40px 16px 0; }
           .ae-bloc { padding-top: 84px; }
           .ae-tete { padding: 0 20px; }
-          .ae-rail { padding: 24px 20px 8px; gap: 12px; }
+          .ae-rail { --marge: 20px; padding: 24px 20px 8px; gap: 12px; }
           .ae-carte { width: 72vw; border-radius: 18px; }
           .ae-trois { grid-template-columns: 1fr; gap: 36px; padding: 0 20px; }
           .ae-secteurs { padding: 0 20px; gap: 8px; }
