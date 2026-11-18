@@ -12,7 +12,10 @@ import { StylesLanding, NavLanding } from "@/components/StylesLanding";
 import { RechercheRevendication } from "@/app/pour-les-entreprises/RechercheRevendication";
 import { getApercuEntreprises } from "@/lib/apercuAccueil";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
-import { revendicationOuverte } from "@/lib/ouverture";
+import { revendicationOuverte, accueilCompact } from "@/lib/ouverture";
+import { AccueilCompact } from "@/components/AccueilCompact";
+import { fetchGridPage } from "@/lib/actions/companies";
+import type { Company } from "@/lib/types";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
@@ -53,6 +56,15 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
+  // Accueil compact à l'essai : actif seulement là où l'interrupteur est posé.
+  if (accueilCompact) {
+    const [counts, secteurs, grille] = await Promise.all([
+      getLandingCounts(), getSecteursEnLigne(),
+      fetchGridPage({}, 0).catch(() => ({ companies: [] as Company[], total: 0 })),
+    ]);
+    return <AccueilCompact entreprises={grille.companies} total={counts.companies} secteurs={secteurs.length} />;
+  }
+
   const [counts, apercu, secteursEnLigne] = await Promise.all([getLandingCounts(), getApercuEntreprises(), getSecteursEnLigne()]);
   const nCompanies = counts.companies;
   const nSecteurs = secteursEnLigne.length;
