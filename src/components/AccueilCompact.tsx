@@ -37,11 +37,17 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
         .ae-lien { font-size: 16px; font-weight: 600; color: var(--brand); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
         .ae-lien:hover { text-decoration: underline; text-underline-offset: 4px; }
         .ae-produit { display: flex; justify-content: center; padding: 56px 24px 0; }
-        .ae-produit > * { width: 100%; max-width: 420px; }
+        /* Exactement la carte du swipe de l'application : même largeur, même
+           hauteur, la photo prend tout ce que le texte laisse. */
+        .ae-produit > * { width: min(420px, 96vw); max-width: 100%; }
+        .ae .apercu-carte { height: clamp(300px, calc(100svh - 340px), 490px); }
+        .ae .apercu-photo { height: auto !important; flex: 1 1 auto; min-height: 0; }
 
         .ae-bloc { padding: 120px 0 0; }
         .ae-tete { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-        .ae-h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; max-width: 700px; text-wrap: balance; }
+        /* Les titres de section restent nettement sous le titre d'accueil :
+           une seule voix forte par page, les autres l'accompagnent. */
+        .ae-h2 { font-size: clamp(26px, 2.9vw, 40px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; max-width: 640px; text-wrap: balance; }
         /* La marge latérale aligne la première carte sur le titre ; scroll-padding
            la fait respecter par l'aimantation, qui sinon colle la carte au bord. */
         .ae-rail { --marge: max(24px, calc((100vw - 1180px) / 2 + 24px));
@@ -59,7 +65,7 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
         .ae-carte-lieu { font-size: 13px; opacity: .75; margin-top: 4px; }
 
         .ae-trois { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; }
-        .ae-trois h3 { font-size: clamp(22px, 2.2vw, 28px); font-weight: 750; letter-spacing: -0.03em; line-height: 1.15; }
+        .ae-trois h3 { font-size: clamp(19px, 1.8vw, 23px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
         .ae-trois p { font-size: 16px; color: var(--text-muted); line-height: 1.55; margin-top: 12px; }
 
         .ae-secteurs { max-width: 1180px; margin: 30px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 10px; }
@@ -72,13 +78,19 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
 
         @media (max-width: 760px) {
           .ae-hero { padding: 48px 20px 0; }
-          .ae-produit { padding: 40px 16px 0; }
+          .ae-produit { padding: 32px 0 0; }
           .ae-bloc { padding-top: 84px; }
           .ae-tete { padding: 0 20px; }
+          .ae-h2 { font-size: 26px; }
           .ae-rail { --marge: 20px; padding: 24px 20px 8px; gap: 12px; }
           .ae-carte { width: 72vw; border-radius: 18px; }
           .ae-trois { grid-template-columns: 1fr; gap: 36px; padding: 0 20px; }
-          .ae-secteurs { padding: 0 20px; gap: 8px; }
+          /* Trois rangées qui défilent à l'horizontale : les 23 secteurs empilés
+             occupaient une page et demie sur un petit téléphone. */
+          .ae-secteurs { display: grid; grid-auto-flow: column; grid-template-rows: repeat(3, auto); grid-auto-columns: max-content;
+            gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 0 20px 4px; margin-top: 24px; overscroll-behavior-x: contain; }
+          .ae-secteurs::-webkit-scrollbar { display: none; }
+          .ae-secteurs a { height: 42px; font-size: 14.5px; }
           .ae-pro { margin-top: 84px; }
           .ae-pro-in { padding: 28px 20px; }
         }
@@ -103,7 +115,7 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
       {vitrine.length > 0 && (
         <section className="ae-bloc" aria-labelledby="ae-vitrine">
           <div className="ae-tete">
-            <h2 id="ae-vitrine" className="ae-h2">{total.toLocaleString("fr-CH")} employeurs. Rencontrez-les d&apos;abord.</h2>
+            <h2 id="ae-vitrine" className="ae-h2">{total.toLocaleString("fr-CH")} employeurs. Rencontrez&#8209;les d&apos;abord.</h2>
             <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
           <div className="ae-rail">

@@ -202,6 +202,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
         )}
 
         <div
+          className="apercu-carte"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
@@ -221,7 +222,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
             userSelect: "none",
           }}
         >
-          <div style={{ position: "relative", height: 260, overflow: "hidden" }}>
+          <div className="apercu-photo" style={{ position: "relative", height: 260, overflow: "hidden" }}>
             <div style={{
               position: "absolute", inset: 0,
               backgroundColor: "var(--surface3)",
