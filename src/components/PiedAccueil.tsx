@@ -53,7 +53,9 @@ export async function PiedAccueil() {
       <summary>Par canton <svg aria-hidden="true" className="pied-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg></summary>
       <div className="pied-cantons-grille">
         {cantons.map(p => (
-          <Link key={p.slug} href={`/emploi/${p.slug}`} title={`Emploi ${CANTONS[p.canton].dans}`}>{CANTONS[p.canton].nom}</Link>
+          // Explorer filtré sur le canton : c'est ce qu'on attend en touchant un
+          // canton. Les pages /emploi/… restent liées depuis /emploi et le plan du site.
+          <Link key={p.slug} href={`/explore?canton=${p.canton}`} title={`Entreprises ${CANTONS[p.canton].dans}`}>{CANTONS[p.canton].nom}</Link>
         ))}
       </div>
     </details>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { ApercuSwipe, type EntrepriseApercu } from "@/components/ApercuSwipe";
+import { RailVitrine } from "@/components/RailVitrine";
 import { LandingFaq } from "@/components/LandingFaq";
 import { PiedAccueil } from "@/components/PiedAccueil";
 import { StylesLanding, NavLanding } from "@/components/StylesLanding";
@@ -19,10 +19,10 @@ import type { Company } from "@/lib/types";
  *   4. les secteurs, en un geste ;
  *   5. la FAQ, puis les entreprises, discrètement, au-dessus du pied de page.
  */
-export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
-  apercu: EntrepriseApercu[]; entreprises: Company[]; total: number; secteurs: string[];
+export function AccueilCompact({ entreprises, total, secteurs }: {
+  entreprises: Company[]; total: number; secteurs: string[];
 }) {
-  const vitrine = entreprises.filter(c => c.cover_url).slice(0, 12);
+  const vitrine = entreprises.filter(c => c.cover_url).slice(0, 20);
   return (
     <main className="landing-tons ae" style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
       <StylesLanding />
@@ -33,15 +33,11 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
           max-width: 980px; margin: 0 auto; text-wrap: balance; }
         .ae-titre em { font-style: normal; color: var(--brand); }
         .ae-sous { font-size: clamp(17px, 1.7vw, 21px); color: var(--text-sub); line-height: 1.5; max-width: 600px; margin: 22px auto 0; text-wrap: balance; }
-        .ae-actions { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 34px; }
+        /* Deux boutons de même largeur, centrés comme un seul bloc. */
+        .ae-actions { display: grid; grid-template-columns: repeat(2, 240px); gap: 12px; justify-content: center; margin: 36px auto 0; }
+        .ae-bouton { width: 100%; justify-content: center; margin: 0; }
         .ae-lien { font-size: 16px; font-weight: 600; color: var(--brand); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
         .ae-lien:hover { text-decoration: underline; text-underline-offset: 4px; }
-        .ae-produit { display: flex; justify-content: center; padding: 56px 24px 0; }
-        /* Exactement la carte du swipe de l'application : même largeur, même
-           hauteur, la photo prend tout ce que le texte laisse. */
-        .ae-produit > * { width: min(420px, 96vw); max-width: 100%; }
-        .ae .apercu-carte { height: clamp(300px, calc(100svh - 340px), 490px); }
-        .ae .apercu-photo { height: auto !important; flex: 1 1 auto; min-height: 0; }
 
         .ae-bloc { padding: 120px 0 0; }
         .ae-tete { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -78,7 +74,7 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
 
         @media (max-width: 760px) {
           .ae-hero { padding: 48px 20px 0; }
-          .ae-produit { padding: 32px 0 0; }
+          .ae-actions { grid-template-columns: minmax(0, 340px); }
           .ae-bloc { padding-top: 84px; }
           .ae-tete { padding: 0 20px; }
           .ae-h2 { font-size: 26px; }
@@ -102,14 +98,14 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
       <section className="ae-hero">
         <h1 className="ae-titre">Chercher du travail devient <em>passionnant.</em></h1>
         <p className="ae-sous">Les employeurs suisses, en un regard. Et le chemin le plus court vers leurs offres.</p>
+        {/* Deux portes d'entrée, côte à côte et de même poids visuel : la
+            grille ou le swipe. La pile de démonstration a été retirée, elle
+            redisait ce que le second bouton propose. */}
         <div className="ae-actions">
-          <Link href="/explore" className="btn btn-marque btn-lg">Découvrir les entreprises</Link>
-          <Link href="/explore?view=swipe" className="ae-lien">Essayer le swipe <ArrowRight size={16} aria-hidden="true" /></Link>
+          <Link href="/explore" className="btn btn-marque btn-lg ae-bouton">Découvrir les entreprises</Link>
+          <Link href="/explore?view=swipe" className="btn btn-clair btn-lg ae-bouton">Essayer le swipe</Link>
         </div>
       </section>
-      <div className="ae-produit">
-        <ApercuSwipe entreprises={apercu} total={total} />
-      </div>
 
       {/* 2 ── La vitrine */}
       {vitrine.length > 0 && (
@@ -118,12 +114,17 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
             <h2 id="ae-vitrine" className="ae-h2">{total.toLocaleString("fr-CH")} employeurs. Rencontrez&#8209;les d&apos;abord.</h2>
             <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
-          <div className="ae-rail">
+          <RailVitrine>
             {vitrine.map((c, i) => (
               <Link key={c.id} href={urlFiche(c)} className="ae-carte" aria-label={`${c.name}, ${c.city}`}>
+                {/* Les photos sont en paysage (16:9), la carte en portrait (3:4) :
+                    pour la remplir sans flou, l'image doit être environ 2,4 fois
+                    plus large que la carte. D'où « sizes » bien au-delà de la
+                    largeur affichée. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={largeurCouverture(c.cover_url!, 480)} srcSet={`${largeurCouverture(c.cover_url!, 480)} 480w, ${largeurCouverture(c.cover_url!, 940)} 940w`}
-                  sizes="(max-width: 760px) 72vw, 330px" alt="" loading={i < 4 ? "eager" : "lazy"} decoding="async" />
+                <img src={largeurCouverture(c.cover_url!, 940)}
+                  srcSet={[640, 940, 1280, 1920].map(w => `${largeurCouverture(c.cover_url!, w)} ${w}w`).join(", ")}
+                  sizes="(max-width: 760px) 171vw, 790px" alt="" loading={i < 3 ? "eager" : "lazy"} decoding="async" fetchPriority={i === 0 ? "high" : "auto"} />
                 <span className="ae-carte-txt">
                   <span className="ae-carte-sect" style={{ display: "block" }}>{c.subsector || c.sector}</span>
                   <span className="ae-carte-nom" style={{ display: "block" }}>{c.name}</span>
@@ -131,7 +132,7 @@ export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
                 </span>
               </Link>
             ))}
-          </div>
+          </RailVitrine>
         </section>
       )}
 

@@ -35,10 +35,6 @@ import { rafraichirFiches } from "@/lib/rafraichirFiches";
  * jamais fermé, une mémoire liée à l'onglet ne serait donc jamais renouvelée.
  */
 /** Paramètre d'URL lu au tout premier rendu, sans passer par un effet. */
-function parametreUrl(nom: string, defaut: string): string {
-  if (typeof window === "undefined") return defaut;
-  return new URLSearchParams(window.location.search).get(nom) ?? defaut;
-}
 
 const DUREE_GRAINE_MS = 30 * 60 * 1000;
 
@@ -140,10 +136,10 @@ export function ExploreClient({
     setVueUrlPrecedente(vueUrl);
     setView(vueUrl);
   }
-  const [sector, setSector] = useState(() => parametreUrl("sector", initialSector ?? ""));
-  const [canton, setCanton] = useState(() => parametreUrl("canton", initialCanton ?? ""));
-  const [langue, setLangue] = useState(() => parametreUrl("langue", ""));
-  const [sort, setSort] = useState(() => parametreUrl("sort", initialSort ?? "recent"));
+  const [sector, setSector] = useState(() => (parametres.get("sector") ?? initialSector ?? ""));
+  const [canton, setCanton] = useState(() => (parametres.get("canton") ?? initialCanton ?? ""));
+  const [langue, setLangue] = useState(() => (parametres.get("langue") ?? ""));
+  const [sort, setSort] = useState(() => (parametres.get("sort") ?? initialSort ?? "recent"));
 
   // null = auth not yet resolved (loading). Avoids flash of cadenas for logged-in users.
   const [authReady, setAuthReady] = useState(false);
@@ -466,6 +462,22 @@ export function ExploreClient({
     });
   }, []);
 
+  // Les filtres de l'adresse font foi. Arriver depuis un lien interne
+  // (« Genève » dans le pied de page, un secteur sur l'accueil) réutilise
+  // cette page sans la recharger : sans cette relecture, la liste et le
+  // compteur du bouton Filtres restaient ceux d'avant, et le canton touché
+  // ne filtrait rien. Un filtre posé depuis le panneau met déjà l'état à
+  // jour : l'adresse le rejoint, l'égalité évite tout second chargement.
+  const filtresAdresse = `${parametres.get("sector") ?? ""}|${parametres.get("canton") ?? ""}|${parametres.get("langue") ?? ""}`;
+  useEffect(() => {
+    const [s, c, l] = filtresAdresse.split("|");
+    // Synchronisation avec une source extérieure (l'adresse) : exception
+    // assumée à la règle, comme pour la vue plus haut.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (s !== sector || c !== canton || l !== langue) applyFilters(s, c, l, sort);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtresAdresse]);
+
   // Nouveau mélange demandé en tirant vers le bas, en haut de la grille.
   // Les filtres restent ; seul l'ordre change, et il est mémorisé comme
   // l'ordre automatique : revenir d'une fiche retrouve ce nouvel ordre.
@@ -524,6 +536,10 @@ export function ExploreClient({
    * loadMore, là où elle a toujours fonctionné.
    */
   useEffect(() => {
+    // Pendant un changement de filtre, total et liste sont encore les
+    // anciens : précharger maintenant demandait une page pour rien, puis la
+    // redemandait une fois la nouvelle liste arrivée.
+    if (isPending) return;
     if ((page + 1) * GRID_PAGE_SIZE >= total) return;
 
     // requestIdleCallback : on ne dispute pas la bande passante aux images
@@ -546,7 +562,7 @@ export function ExploreClient({
       if (surIdle) (window as unknown as { cancelIdleCallback: (i: number) => void }).cancelIdleCallback(id);
       else clearTimeout(id);
     };
-  }, [page, sector, canton, sort, total, graine]);
+  }, [page, sector, canton, langue, sort, total, graine, isPending]);
 
   const loadMore = async () => {
     if (loadingMore) return;
