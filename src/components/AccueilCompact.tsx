@@ -1,129 +1,163 @@
 import Link from "next/link";
-import { ArrowRight, Gauge, ShieldCheck, Lock } from "lucide-react";
-import { CompanyCard } from "@/components/CompanyCard";
+import { ArrowRight } from "lucide-react";
+import { ApercuSwipe, type EntrepriseApercu } from "@/components/ApercuSwipe";
 import { LandingFaq } from "@/components/LandingFaq";
 import { PiedAccueil } from "@/components/PiedAccueil";
 import { StylesLanding, NavLanding } from "@/components/StylesLanding";
+import { largeurCouverture } from "@/lib/coverUrl";
+import { urlFiche } from "@/lib/urlFiche";
 import { revendicationOuverte } from "@/lib/ouverture";
 import type { Company } from "@/lib/types";
 
 /**
- * Accueil compact (essai, derrière NEXT_PUBLIC_ACCUEIL_COMPACT).
+ * Accueil épuré (essai, derrière NEXT_PUBLIC_ACCUEIL_COMPACT).
  *
- * Retour reçu : l'accueil était trop chargé, une douzaine de blocs avant
- * d'atteindre une seule entreprise. Ici, on arrive directement sur les
- * entreprises ; le reste tient en une section, puis la FAQ ; l'offre aux
- * entreprises descend dans une bande sobre juste au-dessus du pied de page.
+ * Une idée par écran, beaucoup d'air, et le produit montré plutôt que décrit :
+ *   1. un titre, une phrase, un bouton, et la pile qu'on fait glisser ;
+ *   2. une vitrine d'entreprises en grandes photos, qui défile à l'horizontale ;
+ *   3. trois phrases, rien d'autre ;
+ *   4. les secteurs, en un geste ;
+ *   5. la FAQ, puis les entreprises, discrètement, au-dessus du pied de page.
  */
-export function AccueilCompact({ entreprises, total, secteurs }: { entreprises: Company[]; total: number; secteurs: number }) {
+export function AccueilCompact({ apercu, entreprises, total, secteurs }: {
+  apercu: EntrepriseApercu[]; entreprises: Company[]; total: number; secteurs: string[];
+}) {
+  const vitrine = entreprises.filter(c => c.cover_url).slice(0, 12);
   return (
-    <main className="landing-tons" style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
+    <main className="landing-tons ae" style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
       <StylesLanding />
       <style>{`
-        .ac-tete { max-width: 1180px; margin: 0 auto; padding: 40px 24px 8px; width: 100%; }
-        .ac-grille { max-width: 1180px; margin: 0 auto; padding: 18px 24px 8px; width: 100%;
-          display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-        .ac-suite { max-width: 1180px; margin: 0 auto; padding: 8px 24px 56px; width: 100%; display: flex; justify-content: center; }
-        .ac-chiffres { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 13.5px; color: var(--text-muted); }
-        .ac-chiffres strong { color: var(--text); font-variant-numeric: tabular-nums; }
-        .ac-etapes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; }
-        .ac-promesses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 44px; padding-top: 36px; border-top: 1px solid var(--border); }
-        .ac-pro { border-top: 1px solid var(--border); background: var(--surface2); }
-        .ac-pro-in { max-width: 1180px; margin: 0 auto; padding: 28px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px 28px; flex-wrap: wrap; }
-        .ac-pro-liens { display: flex; gap: 10px; flex-wrap: wrap; }
-        @media (max-width: 960px) {
-          .ac-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .ac-etapes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ae { overflow-x: clip; }
+        .ae-hero { text-align: center; padding: 88px 24px 0; }
+        .ae-titre { font-size: clamp(40px, 6.4vw, 84px); font-weight: 800; letter-spacing: -0.045em; line-height: 1.02;
+          max-width: 980px; margin: 0 auto; text-wrap: balance; }
+        .ae-titre em { font-style: normal; color: var(--brand); }
+        .ae-sous { font-size: clamp(17px, 1.7vw, 21px); color: var(--text-sub); line-height: 1.5; max-width: 600px; margin: 22px auto 0; text-wrap: balance; }
+        .ae-actions { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 34px; }
+        .ae-lien { font-size: 16px; font-weight: 600; color: var(--brand); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .ae-lien:hover { text-decoration: underline; text-underline-offset: 4px; }
+        .ae-produit { display: flex; justify-content: center; padding: 56px 24px 0; }
+        .ae-produit > * { width: 100%; max-width: 420px; }
+
+        .ae-bloc { padding: 120px 0 0; }
+        .ae-tete { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .ae-h2 { font-size: clamp(30px, 4vw, 52px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; max-width: 700px; text-wrap: balance; }
+        .ae-rail { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+          padding: 34px max(24px, calc((100vw - 1180px) / 2 + 24px)) 8px; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+        .ae-rail::-webkit-scrollbar { display: none; }
+        .ae-carte { position: relative; flex: 0 0 auto; width: clamp(240px, 26vw, 330px); aspect-ratio: 3 / 4; border-radius: 22px; overflow: hidden;
+          scroll-snap-align: start; background: var(--surface2); text-decoration: none; color: #fff; isolation: isolate; }
+        .ae-carte img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2,.7,.2,1); z-index: -2; }
+        .ae-carte::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.15) 45%, rgba(0,0,0,0) 70%); }
+        .ae-carte:hover img { transform: scale(1.04); }
+        .ae-carte-txt { position: absolute; left: 20px; right: 20px; bottom: 20px; }
+        .ae-carte-sect { font-size: 12px; font-weight: 600; letter-spacing: .02em; opacity: .8; }
+        .ae-carte-nom { font-size: 22px; font-weight: 750; letter-spacing: -0.02em; line-height: 1.15; margin-top: 4px; }
+        .ae-carte-lieu { font-size: 13px; opacity: .75; margin-top: 4px; }
+
+        .ae-trois { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; }
+        .ae-trois h3 { font-size: clamp(22px, 2.2vw, 28px); font-weight: 750; letter-spacing: -0.03em; line-height: 1.15; }
+        .ae-trois p { font-size: 16px; color: var(--text-muted); line-height: 1.55; margin-top: 12px; }
+
+        .ae-secteurs { max-width: 1180px; margin: 30px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .ae-secteurs a { display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 999px; font-size: 15px; font-weight: 550;
+          color: var(--text); text-decoration: none; background: var(--surface); border: 1px solid var(--border); transition: border-color .15s, transform .15s; }
+        .ae-secteurs a:hover { border-color: var(--text); transform: translateY(-1px); }
+
+        .ae-pro { margin-top: 120px; border-top: 1px solid var(--border); }
+        .ae-pro-in { max-width: 1180px; margin: 0 auto; padding: 36px 24px; display: flex; align-items: center; justify-content: space-between; gap: 14px 32px; flex-wrap: wrap; }
+
+        @media (max-width: 760px) {
+          .ae-hero { padding: 48px 20px 0; }
+          .ae-produit { padding: 40px 16px 0; }
+          .ae-bloc { padding-top: 84px; }
+          .ae-tete { padding: 0 20px; }
+          .ae-rail { padding: 24px 20px 8px; gap: 12px; }
+          .ae-carte { width: 72vw; border-radius: 18px; }
+          .ae-trois { grid-template-columns: 1fr; gap: 36px; padding: 0 20px; }
+          .ae-secteurs { padding: 0 20px; gap: 8px; }
+          .ae-pro { margin-top: 84px; }
+          .ae-pro-in { padding: 28px 20px; }
         }
-        @media (max-width: 640px) {
-          .ac-tete { padding: 24px 16px 4px; }
-          .ac-grille { grid-template-columns: 1fr; padding: 14px 16px 4px; gap: 14px; }
-          /* Six cartes sur téléphone : assez pour comprendre, sans un défilement sans fin. */
-          .ac-grille > :nth-child(n+7) { display: none; }
-          .ac-suite { padding: 8px 16px 40px; }
-          .ac-etapes, .ac-promesses { grid-template-columns: 1fr; gap: 20px; }
-          .ac-pro-in { padding: 22px 16px; }
-        }
+        @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
       `}</style>
       <NavLanding />
 
-      {/* ── Directement les entreprises ── */}
-      <section className="ac-tete">
-        <h1 style={{ fontSize: "clamp(26px, 3.4vw, 38px)", fontWeight: 800, letterSpacing: "-0.035em", lineHeight: 1.1, marginBottom: 10 }}>
-          Chercher du travail devient passionnant.
-        </h1>
-        <p style={{ fontSize: "clamp(15px, 1.3vw, 16.5px)", color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 640, marginBottom: 14 }}>
-          Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d&apos;emploi.
-        </p>
-        <p className="ac-chiffres">
-          <span><strong>{total.toLocaleString("fr-CH")}</strong> entreprises</span>
-          <span><strong>26</strong> cantons</span>
-          <span><strong>{secteurs}</strong> secteurs</span>
-          <span>Gratuit, sans inscription</span>
-        </p>
+      {/* 1 ── Le titre, et le produit */}
+      <section className="ae-hero">
+        <h1 className="ae-titre">Chercher du travail devient <em>passionnant.</em></h1>
+        <p className="ae-sous">Les employeurs suisses, en un regard. Et le chemin le plus court vers leurs offres.</p>
+        <div className="ae-actions">
+          <Link href="/explore" className="btn btn-marque btn-lg">Découvrir les entreprises</Link>
+          <Link href="/explore?view=swipe" className="ae-lien">Essayer le swipe <ArrowRight size={16} aria-hidden="true" /></Link>
+        </div>
       </section>
-
-      <section aria-label="Entreprises" className="ac-grille">
-        {entreprises.slice(0, 9).map((c, i) => (
-          <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} priority={i < 3} loading={i < 3 ? "eager" : "lazy"} />
-        ))}
-      </section>
-      <div className="ac-suite">
-        <Link href="/explore" className="btn btn-marque btn-lg">
-          Voir toutes les entreprises <ArrowRight size={17} aria-hidden="true" />
-        </Link>
+      <div className="ae-produit">
+        <ApercuSwipe entreprises={apercu} total={total} />
       </div>
 
-      {/* ── Chercher un emploi : l'essentiel, en une section ── */}
-      <section className="landing-section landing-ton" style={{ padding: "72px 24px" }}>
-        <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-          <p className="landing-eyebrow">Postuler</p>
-          <h2 className="landing-h2 avec-chapo">Plus qu&apos;une annonce.</h2>
-          <p className="landing-chapo">Chaque offre a une entreprise derrière elle. Rencontrez-la d&apos;abord.</p>
-          <div className="ac-etapes">
-            {[
-              { etape: "Trouvez", titre: "Les entreprises autour de vous", desc: "Par canton, par ville, par secteur. Y compris celles qui recrutent seulement sur leur propre site." },
-              { etape: "Découvrez", titre: "L'essentiel sur chacune", desc: "Ce qu'elle fait, où elle se trouve, dans quelle langue on y travaille." },
-              { etape: "Sauvegardez", titre: "Vos favoris, au même endroit", desc: "Une flamme, et l'entreprise rejoint vos favoris." },
-              { etape: "Postulez", titre: "Directement chez elle", desc: "Tous ses postes ouverts, sur son site." },
-            ].map(({ etape, titre, desc }) => (
-              <div key={etape}>
-                <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--brand)", marginBottom: 10 }}>{etape}</p>
-                <h3 style={{ fontSize: 16.5, fontWeight: 700, marginBottom: 6, letterSpacing: "-0.02em" }}>{titre}</h3>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>{desc}</p>
-              </div>
+      {/* 2 ── La vitrine */}
+      {vitrine.length > 0 && (
+        <section className="ae-bloc" aria-labelledby="ae-vitrine">
+          <div className="ae-tete">
+            <h2 id="ae-vitrine" className="ae-h2">{total.toLocaleString("fr-CH")} employeurs. Rencontrez-les d&apos;abord.</h2>
+            <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
+          </div>
+          <div className="ae-rail">
+            {vitrine.map((c, i) => (
+              <Link key={c.id} href={urlFiche(c)} className="ae-carte" aria-label={`${c.name}, ${c.city}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={largeurCouverture(c.cover_url!, 480)} srcSet={`${largeurCouverture(c.cover_url!, 480)} 480w, ${largeurCouverture(c.cover_url!, 940)} 940w`}
+                  sizes="(max-width: 760px) 72vw, 330px" alt="" loading={i < 4 ? "eager" : "lazy"} decoding="async" />
+                <span className="ae-carte-txt">
+                  <span className="ae-carte-sect" style={{ display: "block" }}>{c.subsector || c.sector}</span>
+                  <span className="ae-carte-nom" style={{ display: "block" }}>{c.name}</span>
+                  <span className="ae-carte-lieu" style={{ display: "block" }}>{c.city}</span>
+                </span>
+              </Link>
             ))}
           </div>
-          <div className="ac-promesses">
-            {[
-              { Icone: Gauge, titre: "Des informations vérifiées", desc: "Le nom, le secteur, le lieu et le lien officiel sont contrôlés avant publication." },
-              { Icone: ShieldCheck, titre: "Rien entre vous et l'employeur", desc: "Vous postulez chez lui, directement." },
-              { Icone: Lock, titre: "Des faits", desc: "Le métier, le lieu, la langue. Le jugement vous appartient." },
-            ].map(({ Icone, titre, desc }) => (
-              <div key={titre} style={{ display: "flex", gap: 14 }}>
-                <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" style={{ flexShrink: 0, marginTop: 2 }} />
-                <div>
-                  <h3 style={{ fontSize: 15.5, fontWeight: 700, marginBottom: 5 }}>{titre}</h3>
-                  <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.6 }}>{desc}</p>
-                </div>
-              </div>
-            ))}
+        </section>
+      )}
+
+      {/* 3 ── Trois phrases */}
+      <section className="ae-bloc" aria-label="Ce qui change">
+        <div className="ae-trois">
+          <div>
+            <h3>Des entreprises, pas des annonces.</h3>
+            <p>Chacune apparaît une fois : ce qu&apos;elle fait, où, dans quelle langue on y travaille.</p>
+          </div>
+          <div>
+            <h3>Rien entre vous et l&apos;employeur.</h3>
+            <p>Vous postulez chez lui, sur son site. Tous ses postes ouverts, à la source.</p>
+          </div>
+          <div>
+            <h3>Des faits, vérifiés.</h3>
+            <p>Chaque fiche est relue à la main. Le jugement vous appartient.</p>
           </div>
         </div>
       </section>
 
+      {/* 4 ── Les secteurs */}
+      <section className="ae-bloc" aria-labelledby="ae-secteurs">
+        <div className="ae-tete"><h2 id="ae-secteurs" className="ae-h2">Commencez par votre métier.</h2></div>
+        <nav className="ae-secteurs" aria-label="Secteurs">
+          {secteurs.map(s => <Link key={s} href={`/explore?sector=${encodeURIComponent(s)}`}>{s}</Link>)}
+        </nav>
+      </section>
+
+      <div style={{ height: 120 }} aria-hidden="true" />
       <LandingFaq />
 
-      {/* ── Entreprises : une bande sobre, juste avant le pied de page ── */}
-      <section className="ac-pro" aria-label="Pour les entreprises">
-        <div className="ac-pro-in">
-          <div>
-            <p style={{ fontSize: 15.5, fontWeight: 750, letterSpacing: "-0.015em" }}>Vous êtes une entreprise ?</p>
-            <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginTop: 3 }}>Gérez votre fiche ou faites connaître votre marque auprès des candidats.</p>
-          </div>
-          <div className="ac-pro-liens">
-            {revendicationOuverte && <Link href="/pour-les-entreprises" className="btn btn-clair">Gérer votre fiche</Link>}
-            <Link href="/annonceurs" className="btn btn-clair">Faire de la publicité</Link>
+      {/* 5 ── Les entreprises, discrètement */}
+      <section className="ae-pro" style={{ marginTop: 0 }} aria-label="Pour les entreprises">
+        <div className="ae-pro-in">
+          <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
+            <strong style={{ color: "var(--text)", fontWeight: 650 }}>Vous recrutez ?</strong> Présentez votre entreprise et suivez qui s&apos;y intéresse.
+          </p>
+          <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
+            {revendicationOuverte && <Link href="/pour-les-entreprises" className="ae-lien">Gérer votre fiche <ArrowRight size={15} aria-hidden="true" /></Link>}
+            <Link href="/annonceurs" className="ae-lien">Faire de la publicité <ArrowRight size={15} aria-hidden="true" /></Link>
           </div>
         </div>
       </section>

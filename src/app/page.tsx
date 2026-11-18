@@ -58,11 +58,13 @@ export const metadata: Metadata = {
 export default async function Home() {
   // Accueil compact à l'essai : actif seulement là où l'interrupteur est posé.
   if (accueilCompact) {
-    const [counts, secteurs, grille] = await Promise.all([
+    const [counts, secteurs, grille, apercu] = await Promise.all([
       getLandingCounts(), getSecteursEnLigne(),
       fetchGridPage({}, 0).catch(() => ({ companies: [] as Company[], total: 0 })),
+      getApercuEntreprises(),
     ]);
-    return <AccueilCompact entreprises={grille.companies} total={counts.companies} secteurs={secteurs.length} />;
+    return <AccueilCompact apercu={apercu} entreprises={grille.companies} total={counts.companies}
+      secteurs={[...secteurs].sort((a, b) => a.localeCompare(b, "fr"))} />;
   }
 
   const [counts, apercu, secteursEnLigne] = await Promise.all([getLandingCounts(), getApercuEntreprises(), getSecteursEnLigne()]);
