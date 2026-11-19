@@ -6,7 +6,9 @@ import { Shield, Building2 } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
 import { SearchButton } from "./SearchButton";
-import { obtenir, lireCache, ecrireCache, CLE_PROFIL, CLE_FAVORIS, CLE_CONTEXTE } from "@/lib/cacheSession";
+import { obtenir, lireCache, ecrireCache, oublier, CLE_PROFIL, CLE_FAVORIS, CLE_CONTEXTE } from "@/lib/cacheSession";
+import { idsFavorisInvite, viderFavorisInvite } from "@/lib/favorisInvite";
+import { importerFavorisInvite } from "@/lib/actions/favorites";
 import { collecterCouvertures, prechargerVignettes, prechargerCartes } from "@/components/CoverImage";
 import { Logo } from "@/components/Logo";
 
@@ -17,6 +19,25 @@ type UserCtx = {
   penaltyCredits: number;
   unreadCount: number;
 };
+
+/**
+ * Les favoris gardés dans le navigateur avant d'avoir un compte rejoignent le
+ * compte. Un seul envoi à la fois (le verrou évite deux envois si deux
+ * composants le demandent), et le navigateur n'est vidé qu'après réussite :
+ * en cas d'échec réseau, on retentera à la page suivante, sans rien perdre.
+ */
+let fusionEnCours = false;
+async function fusionnerFavorisInvite() {
+  const ids = idsFavorisInvite();
+  if (!ids.length || fusionEnCours) return;
+  fusionEnCours = true;
+  try {
+    await importerFavorisInvite(ids);
+    viderFavorisInvite();
+    oublier(CLE_FAVORIS, CLE_PROFIL, CLE_CONTEXTE);
+  } catch { /* on retentera */ }
+  finally { fusionEnCours = false; }
+}
 
 export function NavbarClient() {
   // Repris de la mémoire s'il y est : la barre s'affiche alors dans le bon
@@ -50,6 +71,7 @@ export function NavbarClient() {
         // calme : sans cela, le profil et les favoris s'affichaient avec leurs
         // textes, puis leurs photos une à une.
         if (data.isLoggedIn) {
+          void fusionnerFavorisInvite();
           obtenir(CLE_PROFIL, "/api/user/profile")
             .then(({ donnees }) => prechargerVignettes(collecterCouvertures(donnees)))
             .catch(() => { /* sans conséquence */ });
@@ -78,11 +100,11 @@ export function NavbarClient() {
           <Logo taille={28} />
         </Link>
 
-        {isLoggedIn && (
-          <div className="nav-links-desktop" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <NavLinks />
-          </div>
-        )}
+        {/* Menus et recherche pour tous : le site se parcourt entièrement sans
+            compte (favoris gardés dans le navigateur, profil visiteur). */}
+        <div className="nav-links-desktop" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <NavLinks />
+        </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {/* Accès administration, hors du groupe masqué sur téléphone.
@@ -108,7 +130,7 @@ export function NavbarClient() {
               <span className="nav-label">Mon entreprise</span>
             </Link>
           )}
-          {isLoggedIn && <SearchButton />}
+          <SearchButton />
           {/* Cloche retirée : aucune notification n'a jamais été émise — table vide —
               et un bouton qui ne mène à rien coûte de l'attention. La page et la
               table restent en place, il suffira de rétablir cette ligne. */}
@@ -125,7 +147,7 @@ export function NavbarClient() {
         </div>
       </nav>
 
-      {isLoggedIn && <BottomNav />}
+      <BottomNav />
       <div id="main-content" tabIndex={-1} style={{ outline: "none" }} />
     </>
   );

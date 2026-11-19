@@ -6,6 +6,7 @@ import { Flame } from "lucide-react";
 import { CompanyCard } from "@/components/CompanyCard";
 import type { Company } from "@/lib/types";
 import { lireCache, obtenir, CLE_FAVORIS } from "@/lib/cacheSession";
+import { idsFavorisInvite, useFavorisInvite } from "@/lib/favorisInvite";
 
 /**
  * Liste des favoris, chargée après affichage.
@@ -30,6 +31,8 @@ export function FavorisClient() {
     return Array.isArray(c?.companies) ? c.companies : null;
   });
   const [echec, setEchec] = useState(false);
+  const [invite, setInvite] = useState(false);
+  const favorisInvite = useFavorisInvite();
 
   useEffect(() => {
     let annule = false;
@@ -37,11 +40,25 @@ export function FavorisClient() {
     // `obtenir` le partage au lieu d'en ouvrir un second.
     obtenir<{ companies?: Company[] }>(CLE_FAVORIS, "/api/user/favorites")
       .then(({ statut, donnees }) => {
-        // Session expirée entre le service de la coquille (en cache) et cet
-        // appel. On repasse par la déconnexion, qui purge les cookies avant
-        // d'envoyer vers la connexion — afficher « aucun favori » ferait
-        // croire à une perte de données.
-        if (statut === 401) { window.location.href = "/api/auth/signout?next=/login"; return; }
+        if (statut === 401) {
+          // Session expirée d'un compte (la barre l'avait vu connecté) : on
+          // repasse par la déconnexion, qui purge les cookies avant la
+          // connexion. Afficher les favoris de visiteur ferait croire que
+          // ceux du compte sont perdus.
+          let etaitConnecte = false;
+          try { etaitConnecte = localStorage.getItem("workie_connecte") === "1"; } catch { /* inconnu */ }
+          if (etaitConnecte) { window.location.href = "/api/auth/signout?next=/login"; return; }
+          // Visiteur sans compte : ses favoris gardés dans le navigateur.
+          if (annule) return;
+          setInvite(true);
+          const ids = idsFavorisInvite();
+          if (!ids.length) { setCompanies([]); return; }
+          fetch(`/api/companies/par-ids?ids=${ids.join(",")}`)
+            .then(r => r.json())
+            .then(d => { if (!annule) setCompanies(Array.isArray(d.companies) ? d.companies : []); })
+            .catch(() => { if (!annule) setEchec(true); });
+          return;
+        }
         if (annule) return;
         if (donnees) setCompanies(Array.isArray(donnees.companies) ? donnees.companies : []);
         else setEchec(true);
@@ -73,8 +90,23 @@ export function FavorisClient() {
 
   if (companies === null) return <GrilleAttente />;
 
-  if (companies.length === 0) {
+  // Visiteur : la liste suit ses favoris en direct (retirer une flamme ici
+  // retire la carte).
+  const liste = invite ? companies.filter(c => favorisInvite.has(c.id)) : companies;
+
+  const bandeauInvite = invite && (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap",
+      background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "14px 18px", marginBottom: 22 }}>
+      <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.5, maxWidth: 560 }}>
+        <strong style={{ color: "var(--text)" }}>Vos favoris sont gardés sur cet appareil.</strong> Créez un compte gratuit pour les retrouver partout, sur téléphone comme sur ordinateur.
+      </p>
+      <Link href="/signup?next=/favorites" className="btn btn-encre btn-sm">Créer un compte</Link>
+    </div>
+  );
+
+  if (liste.length === 0) {
     return (
+      <>{bandeauInvite}
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "64px 32px", textAlign: "center" }}>
         <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(249,115,22,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
           <Flame size={28} color="#f97316" aria-hidden="true" />
@@ -83,21 +115,23 @@ export function FavorisClient() {
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>Touchez la flamme d&apos;une entreprise pour la sauvegarder ici.</p>
         <Link href="/explore" className="btn btn-encre">Explorer les entreprises</Link>
       </div>
+      </>
     );
   }
 
   return (
     <>
+      {bandeauInvite}
       {/* Repère de volume. Sans lui la grille ressemble à un mur sans fin :
           on ne sait pas si on a tout vu, ni quand la liste devient assez
           longue pour mériter une recherche. Discret et en haut de page, pas
           sur les cartes, où il ferait doublon avec le compteur 🔥. */}
       <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
-        {companies.length} entreprise{companies.length > 1 ? "s" : ""}
+        {liste.length} entreprise{liste.length > 1 ? "s" : ""}
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "44px 30px" }}>
-        {companies.map((c, i) => (
-          <CompanyCard key={c.id} company={c} isFav isLoggedIn priority={i < 4} />
+        {liste.map((c, i) => (
+          <CompanyCard key={c.id} company={c} isFav isLoggedIn={!invite} priority={i < 4} />
         ))}
       </div>
     </>

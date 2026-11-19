@@ -44,6 +44,14 @@ const PUBLIC_PATHS = [
   "/manifest.webmanifest",
 ];
 
+/**
+ * Favoris et profil s'ouvrent aussi aux visiteurs (version sans compte), sur
+ * le chemin exact seulement : /profile/ads et la suite restent privées. Elles
+ * ne prennent pas le chemin rapide des pages publiques : pour un compte, la
+ * session doit continuer d'y être rafraîchie.
+ */
+const PAGES_OUVERTES_SEULES = ["/favorites", "/profile"];
+
 // Correspondance sur une frontière de segment : `startsWith` seul rendrait
 // public toute route dont le nom *commence* par un préfixe listé (/apikeys
 // serait couvert par "/api", /companyadmin par "/company"). Ici seuls le
@@ -168,6 +176,7 @@ export async function middleware(request: NextRequest) {
     }
 
     const isPublic = isPublicPath(pathname);
+    const ouverteAuxVisiteurs = PAGES_OUVERTES_SEULES.includes(pathname);
     // Routes that redirect logged-in users elsewhere
     const isAuthRoute = pathname === "/" || pathname === "/login" || pathname === "/signup";
 
@@ -182,7 +191,7 @@ export async function middleware(request: NextRequest) {
     const etat = etatSession(request);
 
     if (etat === "absente") {
-      if (!isPublic) {
+      if (!isPublic && !ouverteAuxVisiteurs) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         url.searchParams.set("next", pathname + request.nextUrl.search);
@@ -224,7 +233,7 @@ export async function middleware(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     const loggedIn = !!user;
 
-    if (!loggedIn && !isPublic) {
+    if (!loggedIn && !isPublic && !ouverteAuxVisiteurs) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("next", pathname + request.nextUrl.search);

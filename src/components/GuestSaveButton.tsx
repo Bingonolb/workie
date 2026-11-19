@@ -1,21 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import { Flame } from "lucide-react";
-import { GuestModal } from "@/components/GuestModal";
+import { useFavorisInvite, basculerFavoriInvite } from "@/lib/favorisInvite";
 
-export function GuestSaveButton() {
-  const [open, setOpen] = useState(false);
+/**
+ * « Sauvegarder » pour un visiteur sans compte : le favori est gardé dans le
+ * navigateur et rejoindra le compte à l'inscription. Même aspect que le
+ * bouton des comptes (SaveButton), pour qu'on ne voie pas la différence.
+ */
+export function GuestSaveButton({ companyId }: { companyId: string }) {
+  const fav = useFavorisInvite().has(companyId);
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="btn btn-photo"
-      >
-        <Flame size={16} fill="none" aria-hidden="true" /> Sauvegarder
-      </button>
-      {open && <GuestModal open onClose={() => setOpen(false)} />}
-    </>
+    <button
+      type="button"
+      onClick={() => basculerFavoriInvite(companyId)}
+      aria-pressed={fav}
+      aria-label={fav ? "Retirer des favoris" : "Ajouter aux favoris"}
+      className="btn btn-photo"
+      style={fav ? { color: "#f97316", borderColor: "rgba(249,115,22,0.55)" } : undefined}
+    >
+      <Flame size={16} fill={fav ? "#f97316" : "none"} aria-hidden="true" /> {fav ? "Sauvegardé" : "Sauvegarder"}
+    </button>
   );
 }

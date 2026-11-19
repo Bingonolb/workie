@@ -7,7 +7,6 @@ import { useEtatFiche } from "./EtatFiche";
 import { SaveButton } from "@/components/SaveButton";
 import { GuestSaveButton } from "@/components/GuestSaveButton";
 import { MenuFiche } from "./MenuFiche";
-import { GuestContentGate } from "@/components/GuestContentGate";
 import { BoutonVueEntreprise } from "./BoutonVueEntreprise";
 
 /**
@@ -41,14 +40,8 @@ export function ActionsFiche({ companyId, companyName, slug = null, gerable = fa
         </Link>
       )}
       {isAdmin && <BoutonVueEntreprise companyId={companyId} />}
-      {isLoggedIn ? <SaveButton companyId={companyId} initialFav={isFav} /> : <GuestSaveButton />}
+      {isLoggedIn ? <SaveButton companyId={companyId} initialFav={isFav} /> : <GuestSaveButton companyId={companyId} />}
       <MenuFiche companyId={companyId} companyName={companyName} slug={slug} gerable={gerable} isLoggedIn={isLoggedIn} />
     </>
   );
-}
-
-/** Contenu réservé : flouté pour un visiteur, entier une fois connecté. */
-export function PorteInvite({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useEtatFiche();
-  return <GuestContentGate isGuest={!isLoggedIn}>{children}</GuestContentGate>;
 }

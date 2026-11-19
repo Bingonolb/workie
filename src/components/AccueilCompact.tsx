@@ -28,7 +28,7 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
       <StylesLanding />
       <style>{`
         .ae { overflow-x: clip; }
-        .ae-hero { text-align: center; padding: 88px 24px 0; }
+        .ae-hero { text-align: center; padding: 88px 24px 104px; }
         .ae-titre { font-size: clamp(40px, 6.4vw, 84px); font-weight: 800; letter-spacing: -0.045em; line-height: 1.02;
           max-width: 980px; margin: 0 auto; text-wrap: balance; }
         .ae-titre em { font-style: normal; color: var(--brand); }
@@ -39,7 +39,18 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
         .ae-lien { font-size: 16px; font-weight: 600; color: var(--brand); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
         .ae-lien:hover { text-decoration: underline; text-underline-offset: 4px; }
 
-        .ae-bloc { padding: 120px 0 0; }
+        /* Chaque idée a son bandeau, avec ses marges en haut et en bas : un fond
+           teinté, un fond sombre, un fond clair. C'est l'alternance qui délimite,
+           pas des traits. */
+        .ae-bloc { padding: 96px 0; }
+        .ae-bande-douce { background: var(--surface2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .ae-bande-sombre { background: #0e1015; color: #fff; }
+        .ae-bande-sombre .ae-trois h3 { color: #fff; }
+        .ae-bande-sombre .ae-trois p { color: rgba(255,255,255,0.68); }
+        .ae-bande-sombre .ae-eyebrow { color: rgba(255,255,255,0.55); }
+        :root[data-theme="dark"] .ae-bande-sombre { background: #05060a; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ae-bande-sombre { background: #05060a; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); } }
+        .ae-eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); max-width: 1180px; margin: 0 auto 26px; padding: 0 24px; }
         .ae-tete { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
         /* Les titres de section restent nettement sous le titre d'accueil :
            une seule voix forte par page, les autres l'accompagnent. */
@@ -69,13 +80,14 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
           color: var(--text); text-decoration: none; background: var(--surface); border: 1px solid var(--border); transition: border-color .15s, transform .15s; }
         .ae-secteurs a:hover { border-color: var(--text); transform: translateY(-1px); }
 
-        .ae-pro { margin-top: 120px; border-top: 1px solid var(--border); }
+        .ae-pro { border-top: 1px solid var(--border); background: var(--surface2); }
         .ae-pro-in { max-width: 1180px; margin: 0 auto; padding: 36px 24px; display: flex; align-items: center; justify-content: space-between; gap: 14px 32px; flex-wrap: wrap; }
 
         @media (max-width: 760px) {
-          .ae-hero { padding: 48px 20px 0; }
+          .ae-hero { padding: 48px 20px 64px; }
           .ae-actions { grid-template-columns: minmax(0, 340px); }
-          .ae-bloc { padding-top: 84px; }
+          .ae-bloc { padding: 64px 0; }
+          .ae-eyebrow { padding: 0 20px; margin-bottom: 20px; }
           .ae-tete { padding: 0 20px; }
           .ae-h2 { font-size: 26px; }
           .ae-rail { --marge: 20px; padding: 24px 20px 8px; gap: 12px; }
@@ -87,7 +99,7 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
             gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 0 20px 4px; margin-top: 24px; overscroll-behavior-x: contain; }
           .ae-secteurs::-webkit-scrollbar { display: none; }
           .ae-secteurs a { height: 42px; font-size: 14.5px; }
-          .ae-pro { margin-top: 84px; }
+
           .ae-pro-in { padding: 28px 20px; }
         }
         @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
@@ -109,7 +121,7 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
 
       {/* 2 ── La vitrine */}
       {vitrine.length > 0 && (
-        <section className="ae-bloc" aria-labelledby="ae-vitrine">
+        <section className="ae-bloc ae-bande-douce" aria-labelledby="ae-vitrine">
           <div className="ae-tete">
             <h2 id="ae-vitrine" className="ae-h2">{total.toLocaleString("fr-CH")} employeurs. Rencontrez&#8209;les d&apos;abord.</h2>
             <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
@@ -137,7 +149,8 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
       )}
 
       {/* 3 ── Trois phrases */}
-      <section className="ae-bloc" aria-label="Ce qui change">
+      <section className="ae-bloc ae-bande-sombre" aria-label="Ce qui change">
+        <p className="ae-eyebrow">Pourquoi Workie</p>
         <div className="ae-trois">
           <div>
             <h3>Des entreprises, pas des annonces.</h3>
@@ -162,11 +175,10 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
         </nav>
       </section>
 
-      <div style={{ height: 120 }} aria-hidden="true" />
       <LandingFaq />
 
       {/* 5 ── Les entreprises, discrètement */}
-      <section className="ae-pro" style={{ marginTop: 0 }} aria-label="Pour les entreprises">
+      <section className="ae-pro" aria-label="Pour les entreprises">
         <div className="ae-pro-in">
           <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
             <strong style={{ color: "var(--text)", fontWeight: 650 }}>Vous recrutez ?</strong> Présentez votre entreprise et suivez qui s&apos;y intéresse.

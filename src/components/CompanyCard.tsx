@@ -14,6 +14,7 @@ import { CoverImage } from "@/components/CoverImage";
 import { logoAffichable } from "@/lib/logo";
 import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
 import { urlFiche } from "@/lib/urlFiche";
+import { useFavorisInvite, basculerFavoriInvite } from "@/lib/favorisInvite";
 
 const SECTOR_GRADIENTS: Record<string, string> = {
   "Tech":                  "linear-gradient(135deg, #6d28d9 0%, #1e40af 100%)",
@@ -64,7 +65,10 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   // Suit la propriété : sur /explore, page statique, le favori n'est connu
   // qu'après l'arrivée du contexte. Figé, l'état laissait la flamme éteinte
   // sur une entreprise pourtant enregistrée.
-  const [fav, setFav] = useEtatSynchronise(isFav);
+  const [favCompte, setFav] = useEtatSynchronise(isFav);
+  // Sans compte, le favori vit dans le navigateur (lib/favorisInvite).
+  const favorisInvite = useFavorisInvite();
+  const fav = isLoggedIn ? favCompte : favorisInvite.has(company.id);
   const [score, setScore] = useEtatSynchronise(Number(company.score));
   const [coverFailed, setCoverFailed] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
@@ -74,7 +78,9 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
 
   const handleFav = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!isLoggedIn) { window.location.href = "/login"; return; }
+    // Le clic ne doit jamais ouvrir la fiche (la carte entière est un lien).
+    e.stopPropagation();
+    if (!isLoggedIn) { basculerFavoriInvite(company.id); return; }
     const prev = fav;
     const prevScore = score;
     const next = !fav;

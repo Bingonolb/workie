@@ -34,6 +34,34 @@ export async function toggleFavorite(companyId: string): Promise<void> {
   } catch (e) { captureServerError(e, { action: "toggleFavorite" }); }
 }
 
+/**
+ * Les favoris gardés dans le navigateur avant d'avoir un compte rejoignent le
+ * compte, à la première connexion. Sans doublon (clé primaire), en ignorant
+ * les identifiants invalides ou les entreprises disparues.
+ *
+ * Pas de flamme ici : un visiteur pourrait sinon fabriquer des centaines de
+ * points de classement depuis un navigateur, puis les encaisser en créant un
+ * compte. Les flammes se gagnent par des gestes faits en étant connecté.
+ */
+export async function importerFavorisInvite(ids: string[]): Promise<{ ajoutes: number }> {
+  try {
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const propres = [...new Set((Array.isArray(ids) ? ids : []).filter(x => typeof x === "string" && UUID.test(x)))].slice(0, 300);
+    if (!propres.length) return { ajoutes: 0 };
+    const [user, supabase] = await Promise.all([getUser(), createClient()]);
+    if (!user) return { ajoutes: 0 };
+    // Seulement les entreprises qui existent et sont visibles.
+    const { data: existantes } = await supabase.from("companies").select("id").in("id", propres);
+    const valides = (existantes ?? []).map(c => c.id);
+    if (!valides.length) return { ajoutes: 0 };
+    const { data, error } = await supabase.from("favorites")
+      .upsert(valides.map(company_id => ({ user_id: user.id, company_id })), { onConflict: "user_id,company_id", ignoreDuplicates: true })
+      .select("company_id");
+    if (error) { captureServerError(error, { action: "importerFavorisInvite" }); return { ajoutes: 0 }; }
+    return { ajoutes: data?.length ?? 0 };
+  } catch (e) { captureServerError(e, { action: "importerFavorisInvite" }); return { ajoutes: 0 }; }
+}
+
 export async function getFavorites(): Promise<Company[]> {
   try {
     // getUser() est mis en cache pour la durée de la requête, contrairement à

@@ -13,7 +13,7 @@ import type { Company } from "@/lib/types";
 import { SECTOR_COLORS, lieuAffiche } from "@/lib/types";
 import { prechargerCouvertures } from "@/components/CoverImage";
 import { largeurCouverture, styleCadrage } from "@/lib/coverUrl";
-import { GuestModal } from "@/components/GuestModal";
+import { ajouterFavoriInvite, idsFavorisInvite } from "@/lib/favorisInvite";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 import { rafraichirFiches } from "@/lib/rafraichirFiches";
@@ -99,12 +99,13 @@ export function SwipeView({
   });
 
   const [index, setIndex] = useState<number>(() => sauvegarde?.index ?? 0);
-  const [favIds, setFavIds] = useState<Set<string>>(new Set(initialFavIds));
-  const [flameIds, setFlameIds] = useState<Set<string>>(new Set(initialFlameIds));
+  // Sans compte, les favoris gardés dans le navigateur allument aussi la flamme.
+  const [favIds, setFavIds] = useState<Set<string>>(() => new Set([...initialFavIds, ...(isLoggedIn ? [] : idsFavorisInvite())]));
+  const [flameIds, setFlameIds] = useState<Set<string>>(() => new Set([...initialFlameIds, ...(isLoggedIn ? [] : idsFavorisInvite())]));
   // Initialisé depuis le serveur, et non vide : sans cela le bouton oubliait
   const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
-  const [showGuestModal, setShowGuestModal] = useState(false);
+
 
   // Entreprises déjà vues : restaurées pour ne pas les reproposer.
   useEffect(() => {
@@ -133,7 +134,7 @@ export function SwipeView({
   // sur un composant démonté.
   const transitionRef = useRef(false);
   const minuteursRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const swipeCountRef = useRef(0);
+
   const fetchingRef = useRef(false);
   // Départ à un offset aléatoire pour varier le pool plutôt que de resservir
   // toujours les mieux notées. Mais uniquement SANS filtre : un filtre réduit
@@ -293,7 +294,7 @@ export function SwipeView({
     setTimeout(() => setToast(null), 1800);
   };
 
-  const requireLogin = useCallback(() => setShowGuestModal(true), []);
+
 
   const markActed = (id: string) => actedIds.current.add(id);
 
@@ -362,29 +363,26 @@ export function SwipeView({
       return;
     }
 
-    // Sortie anticipée : le verrou doit être relâché, sinon le visiteur qui
-    // atteint la limite ne peut plus jamais swiper.
-    if (!isLoggedIn && swipeCountRef.current >= 1) {
-      transitionRef.current = false;
-      requireLogin(); setDrag(0); return;
-    }
-    if (!isLoggedIn) { swipeCountRef.current += 1; }
+    // Plus de limite pour les visiteurs : le swipe est ouvert à tous. Sans
+    // compte, le favori est gardé dans le navigateur et rejoindra le compte à
+    // l'inscription.
     markActed(current.id);
     setGone(dir);
-    if (dir === "right" && isLoggedIn) {
-      setFavIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
-      // toggleFavorite now internally calls addFlame when saving — no separate addFlame call needed
-      toggleFavorite((current as Company).id);
-      setFlameIds(prev => { const n = new Set(prev); n.add((current as Company).id); return n; });
+    if (dir === "right") {
+      const id = (current as Company).id;
+      setFavIds(prev => { const n = new Set(prev); n.add(id); return n; });
+      setFlameIds(prev => { const n = new Set(prev); n.add(id); return n; });
+      // Avec compte : toggleFavorite pose aussi la flamme. Un favori déjà
+      // présent ne doit pas être retiré par un swipe à droite.
+      if (isLoggedIn) { if (!favIds.has(id)) toggleFavorite(id); }
+      else ajouterFavoriInvite(id);
       showToast("Enregistré", "#f97316");
-    } else if (dir === "right") {
-      showToast("Découverte", "#6b7280");
     } else {
       showToast("Passé", "#ef4444");
     }
     programmerAvance();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, gone, isLoggedIn, requireLogin]);
+  }, [current, gone, isLoggedIn, favIds]);
 
   // Ces quatre références servent à retrouver la dernière valeur connue depuis
   // un minuteur, un gestionnaire de touche ou le démontage. Elles étaient
@@ -687,7 +685,7 @@ export function SwipeView({
         </p>
       </div>
 
-      {showGuestModal && !isLoggedIn && <GuestModal open onClose={() => setShowGuestModal(false)} />}
+
 
 
       <style>{`

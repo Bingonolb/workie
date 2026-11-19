@@ -16,6 +16,7 @@ import { CoverImage } from "@/components/CoverImage";
 import { Flame, Megaphone, Download, ChevronRight, Building2 } from "lucide-react";
 import { revendicationOuverte } from "@/lib/ouverture";
 import { urlFiche } from "@/lib/urlFiche";
+import { ProfilVisiteur } from "./ProfilVisiteur";
 
 type Donnees = {
   authentifie: boolean;
@@ -53,6 +54,7 @@ export function ProfilClient() {
   });
   const [d, setD] = useState<Donnees | null>(depuisMemoire);
   const [echec, setEchec] = useState(false);
+  const [invite, setInvite] = useState(false);
 
   /*
    * La derniere reponse connue, avant meme de peindre.
@@ -86,7 +88,15 @@ export function ProfilClient() {
         // page est en cache, elle a donc pu être servie à quelqu'un qui n'a
         // plus de session valide. On repasse par la déconnexion, qui purge
         // les cookies avant d'envoyer vers la connexion.
-        if (statut === 401) { window.location.href = "/api/auth/signout?next=/login"; return; }
+        if (statut === 401) {
+          // Session expirée d'un compte : déconnexion propre puis connexion.
+          // Un visiteur sans compte, lui, voit le profil visiteur.
+          let etaitConnecte = false;
+          try { etaitConnecte = localStorage.getItem("workie_connecte") === "1"; } catch { /* inconnu */ }
+          if (etaitConnecte) { window.location.href = "/api/auth/signout?next=/login"; return; }
+          if (!annule) setInvite(true);
+          return;
+        }
         if (donnees && !annule) { setD(donnees); ecrirePersistant(CLE_PROFIL, donnees); }
         else if (!donnees && !annule) setEchec(true);
       })
@@ -102,6 +112,8 @@ export function ProfilClient() {
   // Déclaré avant tout retour anticipé : placé après `if (echec)`, ce hook
   // n'était pas appelé dans le cas d'erreur, et React plantait la page.
   const [attendu] = useState(() => depuisMemoire === null && lirePersistant<Donnees>(CLE_PROFIL) === null);
+
+  if (invite) return <ProfilVisiteur />;
 
   if (echec) {
     return (

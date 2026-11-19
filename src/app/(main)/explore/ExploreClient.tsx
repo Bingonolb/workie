@@ -41,8 +41,6 @@ const DUREE_GRAINE_MS = 30 * 60 * 1000;
 /** Où l'on en était dans la grille, pour y revenir. */
 const CLE_DEFILEMENT = "workie_grille_defilement";
 
-const GUEST_VISIBLE = 12;
-const GUEST_BLUR = 6;
 
 // Les cantons, en ordre alphabetique de leur nom affiche.
 //
@@ -142,9 +140,7 @@ export function ExploreClient({
   const [sort, setSort] = useState(() => (parametres.get("sort") ?? initialSort ?? "recent"));
 
   // null = auth not yet resolved (loading). Avoids flash of cadenas for logged-in users.
-  const [authReady, setAuthReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
-  const [isGuest, setIsGuest] = useState(false); // optimistic false until auth resolves
   const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
   // Repris de la mémoire : sans cela les flammes partaient éteintes à chaque
   // navigation et s'allumaient une fois le réseau revenu, souvent après les
@@ -372,15 +368,13 @@ export function ExploreClient({
       fetch(`/api/ads/active?${sectorParam}`).then(r => r.json()),
     ]).then(([ctx, ads]) => {
       setIsLoggedIn(ctx.isLoggedIn);
-      setIsGuest(!ctx.isLoggedIn);  // only lock after we know for sure
-      setAuthReady(true);
       setIsAdmin(ctx.isAdmin);
       ecrireCache(CLE_CONTEXTE, ctx);
       setFavIds(ctx.favIds);
       setFlameIds(ctx.flameIds);
       if (ads.squareAds) setSquareAdsState(ads.squareAds);
       if (ads.swipeAds) setSwipeAdsState(ads.swipeAds);
-    }).catch(() => { setAuthReady(true); /* leave defaults */ });
+    }).catch(() => { /* leave defaults */ });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -696,7 +690,7 @@ export function ExploreClient({
   // grille, puis retirées dès qu'on apprenait que le visiteur n'est pas
   // connecté : deux remaniements de la grille coup sur coup, et une secousse
   // mesurée à 0,079 sur /explore en visiteur. On attend de savoir.
-  const adsForGrid = authReady && !isGuest ? squareAdsState : [];
+  const adsForGrid = squareAdsState;
   const adSlotMap = useMemo((): Map<number, number> => {
     if (adsForGrid.length === 0 || companies.length < decalagePub + 1) return new Map();
     const map = new Map<number, number>();
@@ -745,11 +739,9 @@ export function ExploreClient({
     );
   }
 
-  // Guest: show first GUEST_VISIBLE, blur GUEST_BLUR, hide the rest
-  // Only apply guest restrictions after auth is confirmed (avoids flash of cadenas for logged-in users)
-  const guestActive = authReady && isGuest;
-  const visibleCompanies = guestActive ? companies.slice(0, GUEST_VISIBLE) : companies;
-  const blurCompanies    = guestActive ? companies.slice(GUEST_VISIBLE, GUEST_VISIBLE + GUEST_BLUR) : [];
+  // Plus de mur pour les visiteurs : toute la grille, la pagination et les
+  // publicités, comme pour un compte.
+  const visibleCompanies = companies;
 
   return (
     <>
@@ -863,47 +855,9 @@ export function ExploreClient({
               })()}
             </div>
 
-            {/* Blurred preview + CTA for guests */}
-            {guestActive && blurCompanies.length > 0 && (
-              <>
-                <div style={{ position: "relative", marginTop: 20, overflow: "hidden" }}>
-                  <div aria-hidden="true" className="guest-blur-preview">
-                    {blurCompanies.map(c => (
-                      <CompanyCard key={c.id} company={c} isFav={false} isLoggedIn={false} priority={false} />
-                    ))}
-                  </div>
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "linear-gradient(to bottom, transparent 38%, var(--bg) 88%)",
-                    pointerEvents: "none",
-                  }} />
-                </div>
-
-                <div className="guest-gate-cta">
-                  <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", marginBottom: 6, letterSpacing: "-0.025em" }}>
-                    {total - GUEST_VISIBLE} entreprises de plus
-                  </p>
-                  <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 22, maxWidth: 300, lineHeight: 1.6 }}>
-                    Créez un compte pour voir toutes les entreprises et garder vos favoris. Gratuit.
-                  </p>
-                  <a href="/signup" style={{
-                    display: "inline-block", padding: "13px 28px", borderRadius: 12,
-                    background: "var(--brand)",
-                    color: "#fff", fontWeight: 700, fontSize: 14, textDecoration: "none",
-                  }}>
-                    Créer un compte, gratuit
-                  </a>
-                  <a href="/login" style={{
-                    marginTop: 12, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", fontWeight: 500,
-                  }}>
-                    Déjà un compte ? <span style={{ color: "#8b5cf6", fontWeight: 600 }}>Se connecter</span>
-                  </a>
-                </div>
-              </>
-            )}
 
             {/* Load more for logged-in users */}
-            {!guestActive && hasMore && (
+            {hasMore && (
               <div style={{ textAlign: "center", marginTop: 40 }}>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
                   <span style={{ color: "var(--text)", fontWeight: 700 }}>{companies.length}</span> sur <span style={{ fontWeight: 700 }}>{total}</span> entreprises

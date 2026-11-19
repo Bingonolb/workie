@@ -15,6 +15,9 @@ export function SignOutButton() {
     // pour éviter de les recharger à chaque retour sur le profil. Elles doivent
     // disparaître ici, sans quoi le compte suivant verrait celles du précédent.
     viderCache();
+    // Plus connecté : sans cela, profil et favoris prendraient la prochaine
+    // visite pour une session expirée au lieu d'un visiteur.
+    try { localStorage.setItem("workie_connecte", "0"); } catch { /* sans conséquence */ }
     await signOut();
   };
 
@@ -71,7 +74,7 @@ export function SignOutButton() {
               Se déconnecter ?
             </p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 24 }}>
-              Vous devrez vous reconnecter pour accéder à votre profil et à vos favoris.
+              Vos favoris restent dans votre compte. Vous les retrouverez en vous reconnectant.
             </p>
 
             <div style={{ display: "flex", gap: 10 }}>
