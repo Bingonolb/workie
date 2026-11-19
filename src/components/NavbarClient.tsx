@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Shield, Building2 } from "lucide-react";
 import { NavLinks } from "./NavLinks";
@@ -39,7 +40,21 @@ async function fusionnerFavorisInvite() {
   finally { fusionEnCours = false; }
 }
 
+/**
+ * Les menus de l'application (Explorer, Swipe, Favoris, Recherche, Profil,
+ * Classement) n'ont leur place que dans l'application. Les pages pour les
+ * entreprises, la publicité, les textes légaux ou l'administration gardent
+ * une barre réduite au logo : un visiteur venu lire une offre commerciale ne
+ * doit pas se retrouver dans la navigation du chercheur d'emploi.
+ */
+const PAGES_APPLI = ["/explore", "/favorites", "/ranking", "/profile", "/company", "/entreprise", "/emploi", "/notifications"];
+function estPageAppli(chemin: string) {
+  if (chemin === "/profile/ads" || chemin.startsWith("/profile/ads/")) return false;
+  return PAGES_APPLI.some(p => chemin === p || chemin.startsWith(p + "/"));
+}
+
 export function NavbarClient() {
+  const menus = estPageAppli(usePathname() ?? "");
   // Repris de la mémoire s'il y est : la barre s'affiche alors dans le bon
   // état dès le premier rendu, sans attendre le réseau.
   const [ctx, setCtx] = useState<UserCtx | null>(() => lireCache<UserCtx>(CLE_CONTEXTE) ?? null);
@@ -103,7 +118,7 @@ export function NavbarClient() {
         {/* Menus et recherche pour tous : le site se parcourt entièrement sans
             compte (favoris gardés dans le navigateur, profil visiteur). */}
         <div className="nav-links-desktop" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <NavLinks />
+          {menus && <NavLinks />}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -130,7 +145,7 @@ export function NavbarClient() {
               <span className="nav-label">Mon entreprise</span>
             </Link>
           )}
-          <ClassementBouton />
+          {menus && <ClassementBouton />}
           {/* Cloche retirée : aucune notification n'a jamais été émise — table vide —
               et un bouton qui ne mène à rien coûte de l'attention. La page et la
               table restent en place, il suffira de rétablir cette ligne. */}
@@ -147,7 +162,7 @@ export function NavbarClient() {
         </div>
       </nav>
 
-      <BottomNav />
+      {menus && <BottomNav />}
       <RechercheHote />
       <div id="main-content" tabIndex={-1} style={{ outline: "none" }} />
     </>
