@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Shield, Building2 } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
-import { SearchButton } from "./SearchButton";
+import { ClassementBouton, RechercheHote } from "./SearchButton";
 import { obtenir, lireCache, ecrireCache, oublier, CLE_PROFIL, CLE_FAVORIS, CLE_CONTEXTE } from "@/lib/cacheSession";
 import { idsFavorisInvite, viderFavorisInvite } from "@/lib/favorisInvite";
 import { importerFavorisInvite } from "@/lib/actions/favorites";
@@ -130,7 +130,7 @@ export function NavbarClient() {
               <span className="nav-label">Mon entreprise</span>
             </Link>
           )}
-          <SearchButton />
+          <ClassementBouton />
           {/* Cloche retirée : aucune notification n'a jamais été émise — table vide —
               et un bouton qui ne mène à rien coûte de l'attention. La page et la
               table restent en place, il suffira de rétablir cette ligne. */}
@@ -148,6 +148,7 @@ export function NavbarClient() {
       </nav>
 
       <BottomNav />
+      <RechercheHote />
       <div id="main-content" tabIndex={-1} style={{ outline: "none" }} />
     </>
   );
