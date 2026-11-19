@@ -52,11 +52,10 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
         :root[data-theme="dark"] .ae-bande-sombre { background: #05060a; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
         @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ae-bande-sombre { background: #05060a; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); } }
         .ae-manifeste { text-align: center; padding: 120px 24px; }
-        .ae-manifeste-titre { font-size: clamp(32px, 5vw, 64px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; color: #fff; max-width: 900px; margin: 0 auto; text-wrap: balance; }
-        .ae-manifeste-sous { font-size: clamp(16px, 1.6vw, 20px); color: rgba(255,255,255,0.62); margin-top: 18px; }
-        .ae-chiffres { display: flex; justify-content: center; gap: clamp(36px, 8vw, 110px); margin: 64px 0 0; }
-        .ae-chiffres dt { font-size: clamp(40px, 5.4vw, 68px); font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
-        .ae-chiffres dd { margin: 10px 0 0; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+        .ae-points { list-style: none; margin: 0 auto; padding: 0; max-width: 1040px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; text-align: left; }
+        .ae-points svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+        .ae-points h3 { font-size: clamp(22px, 2.2vw, 28px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.12; color: #fff; margin: 22px 0 10px; }
+        .ae-points p { font-size: 15px; line-height: 1.5; color: rgba(255,255,255,0.58); margin: 0; }
         .ae-eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); max-width: 1180px; margin: 0 auto 26px; padding: 0 24px; }
         .ae-tete { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
         /* Les titres de section restent nettement sous le titre d'accueil :
@@ -97,11 +96,10 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
           .ae-actions { grid-template-columns: minmax(0, 340px); }
           .ae-bloc { padding: 64px 0; }
           .ae-manifeste { text-align: center; padding: 120px 24px; }
-        .ae-manifeste-titre { font-size: clamp(32px, 5vw, 64px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; color: #fff; max-width: 900px; margin: 0 auto; text-wrap: balance; }
-        .ae-manifeste-sous { font-size: clamp(16px, 1.6vw, 20px); color: rgba(255,255,255,0.62); margin-top: 18px; }
-        .ae-chiffres { display: flex; justify-content: center; gap: clamp(36px, 8vw, 110px); margin: 64px 0 0; }
-        .ae-chiffres dt { font-size: clamp(40px, 5.4vw, 68px); font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
-        .ae-chiffres dd { margin: 10px 0 0; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+        .ae-points { list-style: none; margin: 0 auto; padding: 0; max-width: 1040px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; text-align: left; }
+        .ae-points svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+        .ae-points h3 { font-size: clamp(22px, 2.2vw, 28px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.12; color: #fff; margin: 22px 0 10px; }
+        .ae-points p { font-size: 15px; line-height: 1.5; color: rgba(255,255,255,0.58); margin: 0; }
         .ae-eyebrow { padding: 0 20px; margin-bottom: 20px; }
           .ae-tete { padding: 0 20px; }
           .ae-h2 { font-size: 26px; }
@@ -117,7 +115,7 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
 
           .ae-pro-in { padding: 28px 20px; }
           .ae-manifeste { padding: 80px 20px; }
-          .ae-chiffres { margin-top: 44px; }
+          .ae-points { grid-template-columns: 1fr; gap: 44px; max-width: 340px; }
         }
         @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
       `}</style>
@@ -167,13 +165,23 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
 
       {/* 3 ── Une phrase, trois chiffres. Rien à lire, tout à voir. */}
       <section className="ae-bloc ae-bande-sombre ae-manifeste" aria-label="Workie en bref">
-        <h2 className="ae-manifeste-titre">Des entreprises, pas des annonces.</h2>
-        <p className="ae-manifeste-sous">Vous postulez directement chez l&apos;employeur.</p>
-        <dl className="ae-chiffres">
-          <div><dt>26</dt><dd>cantons</dd></div>
-          <div><dt>{secteurs.length}</dt><dd>secteurs</dd></div>
-          <div><dt>4</dt><dd>langues</dd></div>
-        </dl>
+        <ul className="ae-points">
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M14 9h5a1 1 0 0 1 1 1v11M3 21h18M8 8h2M8 12h2M8 16h2"/></svg>
+            <h3>Des entreprises,<br />pas des annonces.</h3>
+            <p>Découvrez où vous aimeriez travailler.</p>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <h3>Directement<br />chez l&apos;employeur.</h3>
+            <p>Vous postulez sur son site, sans intermédiaire.</p>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+            <h3>Chaque fiche<br />vérifiée.</h3>
+            <p>Des faits, rien d&apos;autre.</p>
+          </li>
+        </ul>
       </section>
 
       {/* 4 ── Les secteurs */}
