@@ -41,15 +41,15 @@ export default function MentionsLegalesPage() {
             ou font l&apos;objet d&apos;une licence accordée à Workie. Toute reproduction, distribution ou utilisation sans autorisation écrite préalable est interdite.
           </p>
           <p style={{ marginTop: 12 }}>
-            Les noms, marques et visuels des entreprises référencées appartiennent à leurs titulaires : ils ne sont cités qu'à des fins
-            d'information. Les visuels fournis par un annonceur restent sa propriété, sous licence non exclusive limitée à sa campagne.
+            Les noms, marques et visuels des entreprises référencées appartiennent à leurs titulaires : ils ne sont cités qu&apos;à des fins
+            d&apos;information. Les visuels fournis par un annonceur restent sa propriété, sous licence non exclusive limitée à sa campagne.
           </p>
         </Section>
 
         <Section title="Responsabilité des contenus">
           <p>
-            Les fiches d'entreprise sont établies par Workie à partir d'informations publiques. Les offres d'emploi sont publiées par les
-            employeurs sur leurs propres sites. Workie s'engage à corriger ou retirer, dans les meilleurs délais, toute information signalée comme
+            Les fiches d&apos;entreprise sont établies par Workie à partir d&apos;informations publiques, ou par l&apos;entreprise elle-même
+            lorsqu&apos;elle gère sa fiche. Les offres d&apos;emploi sont publiées par les employeurs, sur Workie ou sur leurs propres sites. Workie s&apos;engage à corriger ou retirer, dans les meilleurs délais, toute information signalée comme
             inexacte ou illicite.
           </p>
           <p style={{ marginTop: 12 }}>

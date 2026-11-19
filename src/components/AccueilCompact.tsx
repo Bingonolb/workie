@@ -44,7 +44,8 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
            pas des traits. */
         .ae-bloc { padding: 96px 0; }
         .ae-bande-douce { background: var(--surface2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-        .ae-bande-sombre { background: #0e1015; color: #fff; }
+        /* Le même noir que le bandeau du profil et l'en-tête des e-mails. */
+        .ae-bande-sombre { background: #101319; color: #fff; }
         .ae-bande-sombre .ae-trois h3 { color: #fff; }
         .ae-bande-sombre .ae-trois p { color: rgba(255,255,255,0.68); }
         .ae-bande-sombre .ae-eyebrow { color: rgba(255,255,255,0.55); }
@@ -71,7 +72,7 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
         .ae-carte-nom { font-size: 22px; font-weight: 750; letter-spacing: -0.02em; line-height: 1.15; margin-top: 4px; }
         .ae-carte-lieu { font-size: 13px; opacity: .75; margin-top: 4px; }
 
-        .ae-trois { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; }
+        .ae-trois { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px; }
         .ae-trois h3 { font-size: clamp(19px, 1.8vw, 23px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
         .ae-trois p { font-size: 16px; color: var(--text-muted); line-height: 1.55; margin-top: 12px; }
 
@@ -83,6 +84,8 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
         .ae-pro { border-top: 1px solid var(--border); background: var(--surface2); }
         .ae-pro-in { max-width: 1180px; margin: 0 auto; padding: 36px 24px; display: flex; align-items: center; justify-content: space-between; gap: 14px 32px; flex-wrap: wrap; }
 
+        /* Quatre colonnes sur ordinateur, deux sur tablette, une sur téléphone. */
+        @media (max-width: 1000px) and (min-width: 761px) { .ae-trois { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 760px) {
           .ae-hero { padding: 48px 20px 64px; }
           .ae-actions { grid-template-columns: minmax(0, 340px); }
@@ -162,7 +165,11 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
           </div>
           <div>
             <h3>Des faits, vérifiés.</h3>
-            <p>Chaque fiche est relue à la main. Le jugement vous appartient.</p>
+            <p>Chaque fiche est vérifiée avant d&apos;être publiée. Le jugement vous appartient.</p>
+          </div>
+          <div>
+            <h3>Libre, sans compte.</h3>
+            <p>Explorez, swipez et gardez vos favoris, gratuitement. Un compte les garde sur tous vos appareils.</p>
           </div>
         </div>
       </section>

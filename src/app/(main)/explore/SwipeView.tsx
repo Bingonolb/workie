@@ -76,15 +76,6 @@ export function SwipeView({
     } catch { return null; }
   });
 
-  // Un paquet restitué peut contenir des fiches modifiées depuis : on le remet
-  // à jour une fois, juste après l'affichage, sans toucher à l'ordre.
-  useEffect(() => {
-    if (!sauvegarde?.deck) return;
-    void rafraichirFiches(sauvegarde.deck as Array<SwipeItem & { id?: string }>).then(frais => {
-      if (frais) setCompanies(frais as SwipeItem[]);
-    });
-  }, [sauvegarde]);
-
   // Build the initial deck: restore from sessionStorage if recent, otherwise shuffle fresh
   const [companies, setCompanies] = useState<SwipeItem[]>(() => {
     if (sauvegarde) return sauvegarde.deck!;
@@ -97,6 +88,16 @@ export function SwipeView({
     }
     return shuffled;
   });
+
+  // Un paquet restitué peut contenir des fiches modifiées depuis : on le remet
+  // à jour une fois, juste après l'affichage, sans toucher à l'ordre.
+  // (Déclaré après le paquet qu'il met à jour.)
+  useEffect(() => {
+    if (!sauvegarde?.deck) return;
+    void rafraichirFiches(sauvegarde.deck as Array<SwipeItem & { id?: string }>).then(frais => {
+      if (frais) setCompanies(frais as SwipeItem[]);
+    });
+  }, [sauvegarde]);
 
   const [index, setIndex] = useState<number>(() => sauvegarde?.index ?? 0);
   // Sans compte, les favoris gardés dans le navigateur allument aussi la flamme.
