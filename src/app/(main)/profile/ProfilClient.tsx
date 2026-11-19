@@ -13,7 +13,7 @@ import { CoverImage } from "@/components/CoverImage";
 // appartient au systeme d'exploitation : il change d'un appareil a l'autre,
 // n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
 // le site, et se colore tout seul en travers de la teinte de la tuile.
-import { Flame, Megaphone, Download, ChevronRight, Building2 } from "lucide-react";
+import { Flame, TrendingUp, Megaphone, Download, ChevronRight, Building2 } from "lucide-react";
 import { revendicationOuverte } from "@/lib/ouverture";
 import { urlFiche } from "@/lib/urlFiche";
 import { ProfilVisiteur } from "./ProfilVisiteur";
@@ -424,6 +424,11 @@ export function ProfilClient() {
               >
                 <Megaphone size={15} strokeWidth={2} aria-hidden="true" />
                 Mes publicités
+              </Link>
+
+              <Link href="/ranking" style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--text-muted)", fontWeight: 600, fontSize: 13.5, textDecoration: "none", width: "fit-content" }}>
+                <TrendingUp size={15} strokeWidth={2} aria-hidden="true" />
+                Classement des entreprises
               </Link>
 
               {/* Porte vers l'offre entreprise, rangée dans les réglages : un

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, Megaphone, Building2, ChevronRight, Check } from "lucide-react";
+import { Flame, TrendingUp, Megaphone, Building2, ChevronRight, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useFavorisInvite } from "@/lib/favorisInvite";
 import { revendicationOuverte } from "@/lib/ouverture";
@@ -63,6 +63,11 @@ export function ProfilVisiteur() {
           <span>Thème</span>
           <ThemeToggle />
         </div>
+        <Link href="/ranking" style={{ ...ligne, borderBottom: "1px solid var(--border)" }}>
+          <TrendingUp size={18} color="var(--brand)" aria-hidden="true" />
+          <span style={{ flex: 1 }}>Classement des entreprises</span>
+          <ChevronRight size={18} color="var(--text-muted)" aria-hidden="true" />
+        </Link>
         <Link href="/annonceurs" style={{ ...ligne, borderBottom: revendicationOuverte ? "1px solid var(--border)" : "none" }}>
           <Megaphone size={18} color="var(--brand)" aria-hidden="true" />
           <span style={{ flex: 1 }}>Faire de la publicité</span>

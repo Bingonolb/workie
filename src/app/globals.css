@@ -1723,3 +1723,13 @@ body { overscroll-behavior-y: none; }
 
 /* Classement sans compte : les lignes au-delà des 50 premiers se devinent. */
 .ranking-floue { filter: blur(5px); pointer-events: none; user-select: none; opacity: 0.7; }
+
+/* ─── Hauteur des pages sous la barre du haut ───────────────────────
+   .page-root fait au moins un écran (100dvh), mais la barre de 56 px est
+   posée au-dessus, hors de lui : toute page courte (un favori, un profil
+   visiteur) dépassait de 56 px, devenait défilable pour rien, et rebondissait.
+   Sous la barre, la page occupe donc l'écran moins la barre, ni plus ni moins.
+   Le fond de <html> suit celui de la page, pour qu'un rebond éventuel (iOS)
+   ne découvre jamais une autre couleur. */
+html { background: var(--bg); }
+#main-content ~ .page-root { min-height: calc(100vh - 56px); min-height: calc(100dvh - 56px); }

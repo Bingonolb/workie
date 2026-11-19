@@ -74,6 +74,9 @@ const CANTONS = [
   { code: "VD", name: "Vaud" },
   { code: "ZG", name: "Zug" },
   { code: "ZH", name: "Zürich" },
+  // Pas un canton : les enseignes présentes dans tout le pays (canton « CH »).
+  // En dernier, à part de l'ordre alphabétique.
+  { code: "CH", name: "Multi-sites" },
 ];
 
 
