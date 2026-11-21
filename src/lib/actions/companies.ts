@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Company } from "@/lib/types";
 import { CANTON_NAMES } from "@/lib/types";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
+import { offresSynchro } from "@/lib/ouverture";
 
 function stripAccents(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -254,14 +255,17 @@ export const getCachedCompany = unstable_cache(
 export const getCachedJobOffers = unstable_cache(
   async (companyId: string) => {
     const admin = createAdminClient();
-    const { data } = await admin
+    let q = admin
       .from("job_offers")
       .select("id, title, location, contract_type, work_mode, experience_level, apply_url, description, missions, requirements, avantages, taux_min, taux_max, entree, langues, created_at")
       .eq("company_id", companyId)
       .eq("is_active", true)
       // Une offre expirée ne s'affiche plus (au pire 5 minutes de retard, le temps du cache).
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-      .order("created_at", { ascending: false });
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+    // Offres synchronisées depuis le site de l'employeur : à l'essai, visibles
+    // seulement là où OFFRES_SYNCHRO = 1. La base est commune à l'essai et au site.
+    if (!offresSynchro) q = q.is("source", null);
+    const { data } = await q.order("created_at", { ascending: false });
     return data ?? [];
   },
   ["job-offers"],

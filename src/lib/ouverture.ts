@@ -13,3 +13,6 @@ export const revendicationOuverte = (process.env.NEXT_PUBLIC_REVENDICATION_OUVER
 export const accueilCompact = (process.env.NEXT_PUBLIC_ACCUEIL_COMPACT ?? "").trim() === "1";
 
 export const creationOuverte = revendicationOuverte && (process.env.NEXT_PUBLIC_CREATION_OUVERTE ?? "").trim() === "1";
+
+/** Offres synchronisées depuis le site de l'employeur : OFFRES_SYNCHRO = 1 (adresse d'essai seulement). */
+export const offresSynchro = (process.env.OFFRES_SYNCHRO ?? "").trim() === "1";
