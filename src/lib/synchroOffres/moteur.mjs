@@ -28,6 +28,8 @@ const EN_PARALLELE = 10; // entreprises traitées en même temps (chacune sur so
 
 // ─── Outils communs ──────────────────────────────────────────────────
 const pause = ms => new Promise(r => setTimeout(r, ms));
+// Texte d'un fragment HTML : balises retirées, codes décodés, espaces resserrées.
+const propreHtml = s => entites((s ?? "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
 /**
  * Requête HTTP simple, comme `curl` : seulement les en-têtes qu'on écrit.
  * `fetch` de Node ajoute de lui-même des en-têtes de navigateur
@@ -347,6 +349,41 @@ const LECTEURS = {
     // Entreprise présente seulement en Suisse : toutes ses offres. Sinon, une
     // offre au lieu étranger est écartée ici ; sans lieu, la page tranchera.
     return offres.filter(o => cantons || !o.lieu || lieuEnSuisse(o.lieu) || SUISSE.test(o.lieu));
+  },
+
+  // Refline (outil suisse) : la liste publique du compte, puis, pour chaque
+  // offre, son bloc « JobPosting » (lieu exact, type de contrat, texte).
+  // `exiger` : pour un compte partagé (le canton de Lucerne publie toutes ses
+  // administrations), un motif que l'employeur ou le texte doit contenir.
+  async refline({ compte, exiger, hote = "apply.refline.ch" }) {
+    const motif = exiger ? new RegExp(exiger, "i") : null;
+    const html = await (await lireUrl(`https://${hote}/${compte}/search.html?form.buttons.listAll=1&lang=fr`)).text();
+    const liens = [...new Set([...html.matchAll(new RegExp(`/${compte}/(\\d+)/pub/(\\d+)/index\\.html`, "g"))].map(m => m[0]))];
+    return liens.map(chemin => {
+      const ref = chemin.split("/")[2];
+      // Titre lu dans la liste (le lien qui pointe vers l'offre).
+      const titre = propreHtml(html.match(new RegExp(`href="[^"]*${chemin.replace(/[.]/g, "\\.")}"[^>]*>([\\s\\S]*?)</a>`))?.[1] ?? "");
+      return {
+        ref, titre: titre || ref, url: `https://apply.refline.ch${chemin}`,
+        detail: async () => {
+          const page = await (await lireUrl(`https://apply.refline.ch${chemin}`)).text();
+          for (const m of page.matchAll(/<script[^>]*ld\+json[^>]*>([\s\S]*?)<\/script>/g)) {
+            let o; try { o = JSON.parse(m[1]); } catch { continue; }
+            if (o["@type"] !== "JobPosting") continue;
+            const a = o.jobLocation?.address ?? (Array.isArray(o.jobLocation) ? o.jobLocation[0]?.address : undefined) ?? {};
+            // Offre d'une autre administration du même compte : écartée.
+            if (motif && !motif.test(`${o.hiringOrganization?.name ?? ""} ${o.title ?? ""} ${o.description ?? ""}`)) return { suisse: false };
+            return {
+              titre: o.title, html: o.description ?? "", date: o.datePosted,
+              contrat: [].concat(o.employmentType ?? []).join(" "),
+              lieu: a.addressLocality,
+              suisse: !a.addressCountry || /^(CH|CHE|switzerland|schweiz|suisse)$/i.test(a.addressCountry),
+            };
+          }
+          return { html: "" };
+        },
+      };
+    });
   },
 
   // Recruitee : API publique des offres.

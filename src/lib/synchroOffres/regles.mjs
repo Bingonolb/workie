@@ -112,7 +112,10 @@ function presenteEntreprise(l, entreprise) {
     // « Als eines der vier Häuser der Tschuggen Collection… », « Wir ermöglichen
     // unseren Versicherten… » : l'entreprise parle d'elle, pas du poste.
     || /^(als (eines|einer|eine|ein) der|en tant que l.un des|as one of the)\b/.test(b)
-    || /^wir (ermöglichen|verzaubern|begeistern|gestalten|stehen|sind stolz|entwickeln und produzieren|produzieren|bieten unseren kunden)/.test(b)
+    || /^wir (ermöglichen|verzaubern|begeistern|gestalten|stehen|sind stolz|entwickeln und produzieren|produzieren|bieten unseren kunden|vereinen|setzen uns|sind ein|sind eine|sind das|sind die|zählen zu|gehören zu)/.test(b)
+    || /^(nous (réunissons|sommes un|sommes une|comptons parmi)|we (are a|are an|are one of|combine|unite))\b/.test(b)
+    // « The Swiss Federal Institute … WSL is part of the ETH Domain ».
+    || (/\b(is part of the|fait partie (du|de la|des)|ist teil (der|des)|gehört zu(r|m)?)\b/.test(b) && !/\b(you|your|vous|votre|du|dich|dein|sie werden)\b/.test(b))
     // Un groupe ou une coopérative qui se décrit, sans un mot pour le candidat :
     // « Die LANDI Genossenschaften unterstützen die Schweizer Bäuerinnen… ».
     || (/^(die|der|das|le|la|les|the) [^.]{0,40}(genossenschaft|gruppe|group|groupe|unternehmen|konzern|firma|holding|coopérative|société)/.test(b)

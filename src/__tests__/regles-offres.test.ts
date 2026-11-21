@@ -225,3 +225,11 @@ describe("derniers lieux de magasins", () => {
   ])("%s", (brut, attendu) => expect(lieuPropre(brut, attendu === "Coop City Fusterie" ? "Genève" : undefined)).toBe(attendu === "Coop City Fusterie" ? "Genève" : attendu));
   it("hôtel", () => expect(lieuPropre("Hotel Pullman", "Bâle")).toBe("Bâle"));
 });
+
+describe("Refline : présentations (cas réels)", () => {
+  it.each([
+    ["Institut fédéral de recherches WSL", "<p>The Swiss Federal Institute for Forest, Snow and Landscape Research WSL is part of the ETH Domain.</p><p>You develop automated methods for biodiversity monitoring with camera traps.</p>", /^You develop/],
+    ["Hiestand", "<p>Wir vereinen Leidenschaft für einzigartige Backwaren mit Pioniergeist.</p><p>Du betreust Gastronomiekunden im Kanton Graubünden und baust das Geschäft aus.</p>", /^Du betreust/],
+    ["Burckhardt Immobilien", "<p>Wir setzen uns für überzeugende Architektur ein.</p><p>Du unterstützt das Projektteam bei Entwürfen und Plänen.</p>", /^Du unterstützt/],
+  ])("%s", (e, html, attendu) => expect(resume(html, e, "Poste")).toMatch(attendu));
+});
