@@ -26,6 +26,7 @@ type Job = {
   entree?: string | null;
   langues?: string[] | null;
   created_at: string;
+  source?: string | null;
 };
 
 const PUCE = /^\s*[-•*·–]\s+/;
@@ -231,7 +232,9 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
                 onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.opacity = "0.9"}
                 onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.opacity = "1"}
               >
-                Postuler <ExternalLink size={15} aria-hidden="true" />
+                {/* Offre synchronisée : Workie n'en montre qu'un résumé, la
+                    suite (et la candidature) est chez l'employeur. */}
+                {job.source ? "En savoir plus" : "Postuler"} <ExternalLink size={15} aria-hidden="true" />
               </a>
             ) : (
               <p style={{ textAlign: "center", fontSize: 13, color: "var(--text-muted)" }}>

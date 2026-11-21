@@ -33,23 +33,30 @@ const SOURCES = [
 // ─── Personio ────────────────────────────────────────────────────────
 // Tous les bureaux de ces comptes sont en Suisse ; un bureau hors de Suisse
 // se reconnaîtrait à son nom et serait écarté ici.
-const CANDIDATURE_SPONTANEE = /initiativ|spontan|unsolicited|open application/i;
+const CANDIDATURE_SPONTANEE = /initiativ|wildcard|spontan|unsolicited|open application/i;
 const HORS_SUISSE = /\b(deutschland|germany|london|paris|wien|vienna|milano|madrid|new york|singapore|hong kong|dubai)\b/i;
 async function lirePersonio(s) {
-  const r = await fetch(`https://${s.compte}.jobs.personio.com/xml?language=fr`, { headers: { "User-Agent": "Mozilla/5.0 (compatible; WorkieSync/1.0; +https://www.workie.ch)" } });
-  if (!r.ok) throw new Error(`${r.status} flux Personio`);
-  const xml = await r.text();
+  // Deux lectures : en français d'abord, puis dans la langue d'origine. Une
+  // offre rédigée en allemand n'a pas de texte dans le flux français.
+  const lire = async q => {
+    const r = await fetch(`https://${s.compte}.jobs.personio.com/xml${q}`, { headers: { "User-Agent": "Mozilla/5.0 (compatible; WorkieSync/1.0; +https://www.workie.ch)" } });
+    if (!r.ok) throw new Error(`${r.status} flux Personio`);
+    return r.text();
+  };
+  const [xml, origine] = [await lire("?language=fr"), await lire("")];
   const champ = (bloc, nom) => (bloc.match(new RegExp(`<${nom}>([\\s\\S]*?)</${nom}>`)) ?? [])[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim() ?? null;
+  const premierTexte = b => champ((b.match(/<jobDescription>([\s\S]*?)<\/jobDescription>/) ?? [])[1] ?? "", "value");
+  const texteOrigine = new Map([...origine.matchAll(/<position>([\s\S]*?)<\/position>/g)].map(([, b]) => [champ(b, "id"), premierTexte(b)]));
+  const CONTRATS = { permanent: "CDI", temporary: "CDD", intern: "Stage", trainee: "Alternance", freelance: "Freelance" };
   return [...xml.matchAll(/<position>([\s\S]*?)<\/position>/g)].map(([, b]) => {
     const titre = champ(b, "name").replace(/&amp;/g, "&");
-    const premier = (b.match(/<jobDescription>([\s\S]*?)<\/jobDescription>/) ?? [])[1] ?? "";
+    const premier = `<value>${premierTexte(b) || texteOrigine.get(champ(b, "id")) || ""}</value>`;
     const [tmin, tmax] = taux(titre);
-    const sched = champ(b, "schedule");
     return {
       source_ref: champ(b, "id"),
       title: titre,
       location: champ(b, "office"),
-      contract_type: contrat(titre, sched === "part-time" ? "part time" : null),
+      contract_type: CONTRATS[champ(b, "employmentType")] ?? contrat(titre, null),
       taux_min: tmin, taux_max: tmax,
       description: resume(champ(premier, "value"), s.entreprise),
       apply_url: `https://${s.compte}.jobs.personio.com/job/${champ(b, "id")}?language=fr`,
@@ -94,17 +101,15 @@ function resume(html, entreprise) {
   return r || null;
 }
 function taux(titre) {
-  const m = titre.match(/(\d{2,3})\s*(?:%\s*)?[-–]\s*(\d{2,3})\s*%|(\d{2,3})\s*%/);
-  if (!m) return [null, null];
-  const a = Number(m[1] ?? m[3]), b = Number(m[2] ?? m[3]);
-  return a >= 10 && b <= 100 ? [a, b] : [null, null];
+  // « 80-100% », « 100% ou 80% », « 50% » : le plus petit et le plus grand taux cités.
+  const n = [...titre.matchAll(/(\d{2,3})\s*(?=%|\s*[-–]\s*\d{2,3}\s*%)/g)].map(m => Number(m[1])).filter(x => x >= 10 && x <= 100);
+  return n.length ? [Math.min(...n), Math.max(...n)] : [null, null];
 }
 function contrat(titre, temps) {
   const t = titre.toLowerCase();
-  if (/apprenti|lehrstelle|lernende|apprentice|\bcfc\b|\befz\b/.test(t)) return "Apprentissage";
+  if (/apprenti|lehrstelle|lernende|apprentice|\bcfc\b|\befz\b/.test(t)) return "Alternance";
   if (/intern\b|internship|stage|stagiaire|praktik/.test(t)) return "Stage";
   if (/contract|temporary|fixed.term|befristet|\bcdd\b|limited/.test(t)) return "CDD";
-  if (/part.time|teilzeit/i.test(temps ?? "")) return "Temps partiel";
   return null;
 }
 
