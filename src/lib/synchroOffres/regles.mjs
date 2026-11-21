@@ -204,7 +204,16 @@ function taux(titre) {
 }
 function contrat(titre, indice) {
   const t = `${titre} ${indice ?? ""}`.toLowerCase();
-  if (/apprenti|lehrstelle|lernende|apprentice|\bcfc\b|\befz\b|\beba\b/.test(t)) return "Apprentissage";
+  // Apprentissage : dit explicitement (titre ou outil de recrutement). Un
+  // diplôme seul (« Elektroinstallateur EFZ 80-100% ») est une exigence du
+  // poste, pas un apprentissage ; il ne l'est qu'avec une année de début et
+  // sans taux (« Logistiker:in EFZ 2027 »).
+  const titreSeul = titre.toLowerCase();
+  // Ce que dit le titre passe avant les filtres de l'outil : « Praktikant:in »
+  // est un stage, même si l'offre est rangée sous « Stage / Trainee / alternance ».
+  if (/praktik|stagiaire|\bintern\b|internship|\bstage\b/.test(titreSeul) && !/apprenti|lehrstelle|lernende/.test(titreSeul)) return "Stage";
+  if (/apprenti|lehrstelle|lehre\b|lernende|lernender|apprentice|azubi|berufslehre|apprendista|tirocinio/.test(t)) return "Apprentissage";
+  if (/\b(cfc|efz|eba|afp)\b/.test(titreSeul) && /\b20\d\d\b|ab (august|sommer)|rentrée/.test(titreSeul) && !/\d\s*%/.test(titreSeul)) return "Apprentissage";
   if (/intern\b|internship|\bstage\b|stagiaire|praktik|praktikum|trainee|substitut|volontariat/.test(t)) return "Stage";
   if (/freelance|freiberuf/.test(t)) return "Freelance";
   if (/working student|werkstudent|job étudiant|studentenjob/.test(t)) return "Temporaire";
@@ -279,7 +288,7 @@ const VILLES_FR = {
   luzern: "Lucerne", lucerna: "Lucerne", "st. gallen": "Saint-Gall", "st.gallen": "Saint-Gall", "sankt gallen": "Saint-Gall",
   freiburg: "Fribourg", "neuenburg": "Neuchâtel", "biel": "Bienne", "biel/bienne": "Bienne", "solothurn": "Soleure",
   "schaffhausen": "Schaffhouse", "chur": "Coire", "sitten": "Sion",
-  remote: "Télétravail", "home office": "Télétravail", "homeoffice": "Télétravail",
+  remote: "Télétravail", westschweiz: "Suisse romande", romandie: "Suisse romande", zentralschweiz: "Suisse centrale", ostschweiz: "Suisse orientale", nordwestschweiz: "Suisse du Nord-Ouest", deutschschweiz: "Suisse alémanique", tessin: "Tessin", "home office": "Télétravail", "homeoffice": "Télétravail",
 };
 const offre = (o, entreprise, villeEntreprise) => {
   const titre = titrePropre(o.titre);

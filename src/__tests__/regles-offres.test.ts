@@ -233,3 +233,22 @@ describe("Refline : présentations (cas réels)", () => {
     ["Burckhardt Immobilien", "<p>Wir setzen uns für überzeugende Architektur ein.</p><p>Du unterstützt das Projektteam bei Entwürfen und Plänen.</p>", /^Du unterstützt/],
   ])("%s", (e, html, attendu) => expect(resume(html, e, "Poste")).toMatch(attendu));
 });
+
+describe("apprentissage : dit, pas deviné", () => {
+  it.each([
+    ["Elektroinstallateur oder Servicetechniker EFZ", undefined, null],
+    ["Motorradmechaniker/in EFZ 80 - 100%", undefined, null],
+    ["Installatrice ou installateur électricien·ne CFC 80-100%", undefined, null],
+    ["Lehrstelle als Kauffrau:mann EFZ", undefined, "Apprentissage"],
+    ["Place d'apprentissage Mécatronicien/ne d'automobiles CFC 2027", undefined, "Apprentissage"],
+    ["Logistiker:in EFZ 2027", undefined, "Apprentissage"],
+    ["Detailhandelsfachfrau:mann EFZ", "Festanstellung Apprentissage Vente", "Apprentissage"],
+  ])("%s", (titre, indice, attendu) => expect(contrat(titre, indice)).toBe(attendu));
+});
+
+describe("stage avant apprentissage", () => {
+  it("Praktikant:in rangé sous « alternance » reste un stage", () => {
+    expect(contrat("Praktikant:in 60 %", "Stage / Trainee / Études en alternance Apprentissage")).toBe("Stage");
+    expect(contrat("Lehrstelle Kauffrau:mann EFZ", "Stage / Trainee")).toBe("Apprentissage");
+  });
+});

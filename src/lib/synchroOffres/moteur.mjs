@@ -239,7 +239,9 @@ const LECTEURS = {
         const min = Number(z["sza_pensum.min"]), max = Number(z["sza_pensum.max"]);
         return {
           ref: j.id, titre: z.sza_title || j.title, lieu: z["sza_location.city"] || z["sza_workplace.city"] || (attributPays ? null : (j.attributes?.["20"] ?? [])[0]),
-          contrat: z.sza_employment_type, date: j.start_date,
+          // Type de contrat et filtres de l'offre : chez Coop, « Apprentissage »
+          // ou « Lehrstelle » n'apparaissent que dans les filtres.
+          contrat: [z.sza_employment_type, ...Object.values(j.attributes ?? {}).flat()].filter(v => v && !/keine (lehrstelle|schnupperlehre)/i.test(v)).join(" "), date: j.start_date,
           // La rubrique « tâches » est l'aperçu idéal ; à défaut, la description courte.
           html: z.sza_tasks || z.sza_short_description || z.sza_introduction || "",
           url: j.links?.directlink ?? z.sza_apply_link,
@@ -386,6 +388,52 @@ const LECTEURS = {
     });
   },
 
+  // rexx : portail carrière de l'entreprise (jobs.<entreprise>.ch). La page de
+  // liste renvoie vers des offres « …-j908.html », chacune avec son bloc
+  // JobPosting, dont la rubrique « responsibilities » (les tâches).
+  // `employeur` : pour un portail de groupe (Frutiger), le motif du nom de
+  // l'employeur à garder.
+  // `liste` : une adresse ou plusieurs (chaque langue du portail ne liste
+  // que ses propres offres : jobs.frutiger.com/fr en a 11, /de 25).
+  async rexx({ liste, employeur }) {
+    const motif = employeur ? new RegExp(employeur, "i") : null;
+    // Lien et texte du lien (le titre), une entrée par offre (par numéro).
+    const titres = new Map();
+    for (const adresse of [].concat(liste)) {
+      const html = await (await lireUrl(adresse)).text();
+      const origine = new URL(adresse).origin;
+      for (const m of html.matchAll(/<a[^>]*href="([^"]*-j(\d+)\.html)[^"]*"[^>]*>([\s\S]*?)<\/a>/g)) {
+        const url = new URL(m[1], adresse).href.replace(/\?.*$/, "");
+        const t = propreHtml(m[3]);
+        if (!url.startsWith(origine)) continue;
+        const prec = titres.get(m[2]);
+        if (!prec || t.length > prec.titre.length) titres.set(m[2], { url, titre: t });
+      }
+      await pause(300);
+    }
+    return [...titres.entries()].map(([ref, { url, titre }]) => ({
+      ref, titre: titre || url.split("/").pop().replace(/-[a-z]{2}-j\d+\.html$/, "").replace(/-/g, " "), url,
+      detail: async () => {
+        const page = await (await lireUrl(url)).text();
+        for (const m of page.matchAll(/<script[^>]*ld\+json[^>]*>([\s\S]*?)<\/script>/g)) {
+          let o; try { o = [].concat(JSON.parse(m[1])).find(x => x?.["@type"] === "JobPosting"); } catch { continue; }
+          if (!o) continue;
+          if (motif && !motif.test(o.hiringOrganization?.name ?? "")) return { suisse: false };
+          const lieux = [].concat(o.jobLocation ?? []).map(l => l?.address ?? {});
+          const a = lieux.find(x => /^(CH|CHE|switzerland|schweiz|suisse)$/i.test(x.addressCountry ?? "")) ?? lieux[0] ?? {};
+          return {
+            titre: o.title, date: o.datePosted, contrat: [].concat(o.employmentType ?? []).join(" "),
+            // Les tâches d'abord : c'est l'aperçu voulu ; à défaut, la description.
+            html: o.responsibilities || o.description || "",
+            lieu: a.addressLocality,
+            suisse: !a.addressCountry || /^(CH|CHE|switzerland|schweiz|suisse)$/i.test(a.addressCountry),
+          };
+        }
+        return { suisse: false }; // page sans offre lisible : on ne publie rien plutôt qu'un titre vide
+      },
+    }));
+  },
+
   // Recruitee : API publique des offres.
   async recruitee({ compte }) {
     const d = await json(`https://${compte}.recruitee.com/api/offers/`);
@@ -451,7 +499,12 @@ async function synchroniser(src, essai) {
     const o = offre(b, entreprise, ville);
     // Détail non relu : ce qu'il avait apporté (lien exact, contrat) reste
     // celui déjà en base, sinon l'offre paraîtrait modifiée à chaque passage.
-    if (!detailLu && ex) { o.apply_url = ex.apply_url; o.contract_type = ex.contract_type ?? o.contract_type; }
+    // Pour les outils dont la page d'offre apporte le lieu exact, le titre
+    // officiel, le taux ou le contrat (Workday, rexx, Refline, Umantis…),
+    // une passe sans relecture garde tout ce que la page avait apporté. Sans
+    // cela, la nuit remplaçait le lieu lu sur la page par celui, plus pauvre,
+    // de la liste : les données se dégradaient à chaque passe.
+    if (!detailLu && ex) for (const k of CHAMPS) o[k] = ex[k];
     bilan.lues++;
     parRef.delete(o.source_ref);
     if (!ex) {
@@ -464,6 +517,9 @@ async function synchroniser(src, essai) {
     }
     const descriptionChange = o.description !== undefined && (ex.description ?? null) !== (o.description ?? null);
     if (!ex.is_active || descriptionChange || CHAMPS.some(k => (ex[k] ?? null) !== (o[k] ?? null))) {
+      if (process.env.SYNCHRO_DEBUG && bilan.modifiees.length < 3) {
+        console.log(`[diff] ${entreprise} · ${o.title}`, JSON.stringify(Object.fromEntries([...CHAMPS, "description"].filter(k => o[k] !== undefined && (ex[k] ?? null) !== (o[k] ?? null)).map(k => [k, [ex[k], o[k]]]))).slice(0, 400));
+      }
       bilan.modifiees.push(o.title);
       if (!essai) {
         const { created_at, description, ...maj } = o; void created_at;
