@@ -211,6 +211,52 @@ const LECTEURS = {
     }).filter(o => lieuEnSuisse(o.lieu, { cantons }));
   },
 
+  // Prospective (outil suisse) : interface publique du « career center » que la
+  // page carrière de l'entreprise charge elle-même. Les groupes (Coop, fenaco)
+  // publient toutes leurs sociétés dans un même flux : `attribut` désigne le
+  // champ « entreprise », `garder` / `exclure` les sociétés à prendre ou non.
+  // `attributPays` : chez certains (Bühler), le champ « pays » donne le pays du
+  // siège pour toutes les offres ; le vrai pays est dans un filtre du site.
+  async prospective({ medium, attribut, garder, exclure, cantons, attributPays }) {
+    const jobs = [];
+    for (let offset = 0; offset < 5000; offset += 100) {
+      const page = await json(`https://ohws.prospective.ch/public/v1/medium/${medium}/jobs?lang=fr&offset=${offset}&limit=100`);
+      jobs.push(...(page.jobs ?? []));
+      if ((page.jobs ?? []).length < 100 || jobs.length >= page.total) break;
+      await pause(300);
+    }
+    const societes = j => (attribut ? j.attributes?.[attribut] ?? [] : []);
+    return jobs
+      .filter(j => !garder || societes(j).some(s => garder.includes(s)))
+      .filter(j => !exclure || !societes(j).some(s => exclure.includes(s)))
+      // Pays donné : il doit être la Suisse. Pays absent : accepté pour une
+      // entreprise présente seulement en Suisse, sinon la ville doit être suisse.
+      .filter(j => {
+        if (attributPays) return (j.attributes?.[attributPays] ?? []).some(p => /^(suisse|schweiz|switzerland|svizzera)$/i.test(p));
+        const z = j.szas ?? {};
+        const pays = z["sza_location.country"];
+        if (pays) return /schweiz|suisse|switzerland|svizzera/i.test(pays);
+        return cantons || SUISSE.test(z["sza_location.city"] ?? z["sza_workplace.city"] ?? "");
+      })
+      // Journée découverte, stage d'essai : pas des offres d'emploi.
+      // Le titre ne le dit pas toujours (« Detailhandelsfachfrau:mann » chez
+      // Coop) : on regarde aussi les filtres de l'offre.
+      .filter(j => !/schnupper|journée (découverte|d.essai)|stage d.orientation|giornata|stage d.observation/i.test(
+        [j.szas?.sza_title || j.title, ...Object.values(j.attributes ?? {}).flat()].join(" | ").replace(/keine schnupperlehre/gi, "")))
+      .map(j => {
+        const z = j.szas ?? {};
+        const min = Number(z["sza_pensum.min"]), max = Number(z["sza_pensum.max"]);
+        return {
+          ref: j.id, titre: z.sza_title || j.title, lieu: z["sza_location.city"] || z["sza_workplace.city"] || (attributPays ? null : (j.attributes?.["20"] ?? [])[0]),
+          contrat: z.sza_employment_type, date: j.start_date,
+          // La rubrique « tâches » est l'aperçu idéal ; à défaut, la description courte.
+          html: z.sza_tasks || z.sza_short_description || z.sza_introduction || "",
+          url: j.links?.directlink ?? z.sza_apply_link,
+          taux: min >= 10 && max <= 100 && max >= min ? [min, max] : undefined,
+        };
+      });
+  },
+
   // Recruitee : API publique des offres.
   async recruitee({ compte }) {
     const d = await json(`https://${compte}.recruitee.com/api/offers/`);
@@ -229,8 +275,23 @@ async function synchroniser(src, essai) {
   const lecteur = LECTEURS[outil];
   if (!lecteur) throw new Error(`outil non pris en charge : ${outil}`);
 
-  const brutes = (await lecteur(params, entreprise)).filter(o => o.ref && o.titre && !CANDIDATURE_SPONTANEE.test(o.titre));
-  const { data: existantes } = await db.from("job_offers").select("id,source_ref,is_active,description," + CHAMPS.join(",")).eq("company_id", company_id).eq("source", outil);
+  // Certains flux listent la même offre deux fois (une par lieu ou par
+  // langue) : une référence, une offre.
+  const vues = new Set();
+  const brutes = (await lecteur(params, entreprise))
+    .filter(o => o.ref && o.titre && !CANDIDATURE_SPONTANEE.test(o.titre))
+    .filter(o => !vues.has(String(o.ref)) && vues.add(String(o.ref)));
+  // Lecture par pages : la base rend au plus 1000 lignes à la fois, et Coop a
+  // plus de deux mille offres. Sans cela, les offres au-delà de la millième
+  // paraissaient nouvelles à chaque passage.
+  const existantes = [];
+  for (let de = 0; ; de += 1000) {
+    const { data, error } = await db.from("job_offers").select("id,source_ref,is_active,description," + CHAMPS.join(","))
+      .eq("company_id", company_id).eq("source", outil).order("id").range(de, de + 999);
+    if (error) throw new Error(`lecture des offres existantes : ${error.message}`);
+    existantes.push(...data);
+    if (data.length < 1000) break;
+  }
   const parRef = new Map((existantes ?? []).map(o => [o.source_ref, o]));
   const actives = (existantes ?? []).filter(o => o.is_active).length;
 

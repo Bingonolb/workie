@@ -84,6 +84,13 @@ describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
     expect(lieuPropre("Wetzikon ZH")).toBe("Wetzikon");
     expect(lieuPropre("Paketzentrum Frauenfeld")).toBe("Frauenfeld");
     expect(lieuPropre("CH", "Bâle")).toBeNull();
+    expect(lieuPropre("Salinenstrasse 70", "Bâle")).toBe("Bâle");
+    expect(lieuPropre("Luzern Bahnhofshopping")).toBe("Lucerne");
+    expect(lieuPropre("Volketswil Volkiland")).toBe("Volketswil");
+    expect(lieuPropre("Root D4")).toBe("Root");
+    expect(lieuPropre("Lugano e home")).toBe("Lugano");
+    expect(lieuPropre("Le Grand-Saconnex")).toBe("Le Grand-Saconnex");
+    expect(lieuPropre("Sankt Niklaus")).toBe("Sankt Niklaus");
     expect(lieuPropre("Bern, Canton de Berne, Switzerland")).toBe("Berne");
     expect(lieuPropre("Zürich / Genferstrasse 27")).toBe("Zurich");
     expect(lieuPropre("Zurich - Lowenstrasse")).toBe("Zurich");

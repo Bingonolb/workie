@@ -182,7 +182,7 @@ function contrat(titre, indice) {
   if (/temporary|temporär|temporaire|tempor/.test(t)) return "Temporaire";
   if (/contract|fixed.term|befristet|\bcdd\b|limited|durée déterminée/.test(t)) return "CDD";
   // « Temps plein » ne dit rien de la durée du contrat : pas de CDI deviné.
-  if (/permanent|unbefristet|\bcdi\b|festanstellung/.test(t)) return "CDI";
+  if (/permanent|unbefristet|\bcdi\b|festanstellung|indéterminée?/.test(t)) return "CDI";
   return null;
 }
 /**
@@ -204,8 +204,14 @@ function lieuPropre(lieu, villeEntreprise) {
     .replace(/\s+(business center|campus|office|headquarters|hq|site)$/i, "")
     .trim();
   if (l === l.toUpperCase() && l.length > 3) l = l.toLowerCase().replace(/(^|[\s-])\p{L}/gu, c => c.toUpperCase());
+  // Une adresse de rue (« Salinenstrasse 70 ») n'est pas une ville.
+  if (/\d/.test(l) && /(strasse|str\.|weg|gasse|platz|rue |avenue|chemin|route |via )/i.test(l)) return villeEntreprise ?? null;
+  // Centre commercial ou bâtiment après la ville : « Luzern Bahnhofshopping »,
+  // « Volketswil Volkiland », « Root D4 », « Lugano e home ».
+  l = l.replace(/\s+(\S*(shopping|center|centre|park|land|markt|city|zentrum|galerie|bahnhof)\S*|[A-Z]\d+|e home|und home|et home|\+ home)$/i, "").trim();
   if (/^\d+ (locations|standorte|lieux)/i.test(l)) return villeEntreprise ?? null;
-  if (!SUISSE.test(l) && (l.length <= 4 || l === l.toUpperCase())) return villeEntreprise ?? null;
+  // Code interne en capitales (« CWR ») : pas une ville. « Root » en est une.
+  if (!SUISSE.test(l) && l === l.toUpperCase()) return villeEntreprise ?? null;
   return VILLES_FR[l.toLowerCase()] ?? (l || villeEntreprise || null);
 }
 // Le site est en français : une même ville s'écrit d'une seule façon, sinon
@@ -221,7 +227,8 @@ const VILLES_FR = {
 };
 const offre = (o, entreprise, villeEntreprise) => {
   const titre = titrePropre(o.titre);
-  const [tmin, tmax] = taux(titre);
+  // Taux fourni par l'outil quand il le donne, sinon lu dans le titre.
+  const [tmin, tmax] = o.taux ?? taux(titre);
   return {
     source_ref: String(o.ref),
     title: titre,
