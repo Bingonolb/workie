@@ -90,7 +90,7 @@ async function lireUrl(url, init = {}, essais = 4) {
 }
 const json = async (url, init) => (await lireUrl(url, { ...init, headers: { "Content-Type": "application/json", Accept: "application/json", ...(init?.headers ?? {}) } })).json();
 
-import { NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre } from "./regles-offres.mjs";
+import { lieuEnSuisse, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre } from "./regles-offres.mjs";
 
 // ─── Lecteurs, un par outil ──────────────────────────────────────────
 // Chacun rend la liste des offres en Suisse. `html` peut être omis quand le
@@ -199,6 +199,18 @@ const LECTEURS = {
     }));
   },
 
+  // SAP SuccessFactors (sites carrière « Career Site Builder ») : le fichier
+  // /sitemal.xml est le flux d'offres publié pour Google Jobs, texte compris.
+  // Une seule requête par entreprise.
+  async successfactors({ site, cantons }) {
+    const xml = await (await lireUrl(`${site.replace(/\/$/, "")}/sitemal.xml`)).text();
+    const champ = (b, n) => (b.match(new RegExp(`<${n}>([\\s\\S]*?)</${n}>`)) ?? [])[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim() ?? "";
+    return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(([, b]) => {
+      const lieu = champ(b, "g:location");
+      return { lieu, ref: champ(b, "g:id") || champ(b, "guid"), titre: champ(b, "title").replace(/\s*\([^()]*\)\s*$/, ""), html: entites(champ(b, "description")), url: champ(b, "link") };
+    }).filter(o => lieuEnSuisse(o.lieu, { cantons }));
+  },
+
   // Recruitee : API publique des offres.
   async recruitee({ compte }) {
     const d = await json(`https://${compte}.recruitee.com/api/offers/`);
@@ -242,6 +254,10 @@ async function synchroniser(src, essai) {
     }
     // Ville de repli quand le lieu de l'offre est illisible (pas « Multi-sites »).
     const ville = /multi/i.test(src.companies.city ?? "") ? null : src.companies.city;
+    // Flux qui ne donne que le pays (« CH ») : pour une entreprise présente
+    // seulement en Suisse, sa ville est la bonne réponse ; pour un groupe
+    // présent partout (Avolta), mieux vaut aucun lieu qu'un lieu faux.
+    if (/^\s*CH\s*$/.test(b.lieu ?? "") && params.cantons && ville) b.lieu = ville;
     const o = offre(b, entreprise, ville);
     // Détail non relu : ce qu'il avait apporté (lien exact, contrat) reste
     // celui déjà en base, sinon l'offre paraîtrait modifiée à chaque passage.

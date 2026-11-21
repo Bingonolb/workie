@@ -42,6 +42,12 @@ function titrePropre(t) {
     // « f/m/d » sans parenthèses, crochets de conditions, « - Switzerland » final.
     .replace(/\s+\(?[mwfhd](?:\s*\/\s*[mwfhdx]+){1,3}\.?\)?(?=\s|$)/gi, "")
     .replace(/\s*[-–]?\s*\[[^\]]*\]\s*$/, "")
+    // Marque en tête : « [Universal Genève] - Client Advisor » (la fiche dit déjà qui recrute).
+    .replace(/^\s*\[[^\]]*\]\s*[-–]?\s*/, "")
+    // Villes en fin de titre : « (Zurich, Bern oder Basel) » (le lieu s'affiche à part).
+    .replace(/\s*\(([^()]+)\)\s*$/, (m, dedans) => dedans.split(/\s*(?:,|\/|\boder\b|\bund\b|\bou\b|\bet\b|\bor\b|\band\b)\s*/).filter(Boolean).every(v => SUISSE.test(v)) ? "" : m)
+    // Lieu collé en fin de titre : « (Geneva (GVA), CH, 33999) », « (Lausanne, CH) ».
+    .replace(/\s*\((?:[^()]|\([^()]*\))*,\s*(?:CH|[A-Z]{2})\b(?:[^()]|\([^()]*\))*\)\s*$/, "")
     .replace(/\s*[-–]\s*(switzerland|schweiz|suisse|svizzera)\s*$/i, "")
     .replace(/\s+([,.)])/g, "$1").replace(/\(\s*\)/g, "").replace(/\s{2,}/g, " ")
     .replace(/[\s.]*[-–|:]?\s*$/, "").replace(/%\.$/, "%").trim();
@@ -50,6 +56,33 @@ function titrePropre(t) {
 // Mots entiers seulement : « Bern » ne doit pas prendre « Bernalillo », ni
 // « Wil » « Wilmington ». Fribourg seul (Freiburg est aussi en Allemagne).
 const SUISSE = /(?<![\p{L}])(switzerland|schweiz|suisse|svizzera|svizra|zürich|zurich|genève|geneva|genf|lausanne|bern|berne|basel|bâle|lugano|luzern|lucerne|st\.? ?gallen|winterthur|zug|fribourg|neuchâtel|sion|aarau|thun|chur|biel|bienne|schaffhausen|solothurn|olten|yverdon|montreux|vevey|nyon|morges|meyrin|plan-les-ouates|renens|locarno|bellinzona|rapperswil|frauenfeld|kloten|opfikon|dübendorf|schlieren|allschwil|pratteln|muttenz|rotkreuz|gland|crissier|steinhausen|zuchwil|horgen)(?![\p{L}])|,\s*CH\b|\bCH-\d{4}/iu;
+
+/**
+ * Lieu structuré « Ville, CH, 8152 », « Ville, TI », « Ville, CH » : suisse
+ * si un segment est le code pays CH ou un code de canton, sans autre pays.
+ * Sinon, on retombe sur la reconnaissance des noms (SUISSE).
+ */
+const CANTONS = new Set("AG AI AR BE BL BS FR GE GL GR JU LU NE NW OW SG SH SO SZ TG TI UR VD VS ZG ZH".split(" "));
+// Codes de canton qui ne sont le code d'aucun pays : sans ambiguïté.
+const CANTONS_SURS = new Set("JU NW OW TI UR VD VS ZG ZH".split(" "));
+// `cantons: true` pour une entreprise présente seulement en Suisse : tout
+// code de canton y désigne un canton.
+function lieuEnSuisse(lieu, { cantons = false } = {}) {
+  const segments = (lieu ?? "").split(",").map(s => s.trim()).filter(Boolean);
+  if (!segments.length) return false;
+  // Le pays est le dernier code à deux lettres (avant un éventuel code postal) :
+  // « Berlin, BE, DE, 10117 » est en Allemagne même si « BE » est aussi Berne.
+  const codes = segments.filter(s => /^[A-Z]{2}$/.test(s));
+  const pays = codes.at(-1);
+  if (/^(switzerland|schweiz|suisse|svizzera)$/i.test(segments.at(-1)) || pays === "CH") return true;
+  if (pays) {
+    // Le dernier code est un canton (« Lugano, TI ») : beaucoup de codes de
+    // canton sont aussi des pays (BE, AR, FR, GE, AG, GR, LU, SG…), donc la
+    // ville doit être reconnue comme suisse.
+    return CANTONS.has(pays) && (cantons || CANTONS_SURS.has(pays) || SUISSE.test(segments[0]));
+  }
+  return SUISSE.test(lieu ?? "");
+}
 
 // Intertitres qui annoncent le poste lui-même, dans les langues des offres suisses.
 const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|die stelle|your (role|challenge|tasks|responsibilities|mission|impact)|the role|responsibilit|what you.ll do|compiti|mansioni/i;
@@ -68,7 +101,12 @@ function presenteEntreprise(l, entreprise) {
   if (/^(über uns|about us|à propos|qui sommes-nous|wer wir sind|who we are|en tant qu.entreprise|as a (family|global|leading|world)|als (familienunternehmen|führende|global)|faire carrière chez|working at|arbeiten bei|travailler chez)/.test(b)) return true;
   return (b.includes(nom) && /^(at |chez |bei |join |über |about |depuis |seit |founded|fondée|gegründet)|est l[’']une? des|ist eine?r? der|is one of|est un[e]? (leader|acteur|entreprise)|ist (ein|eine) (führend|internation|unternehmen|tochter)|is a (leading|global|company)|est une entreprise/.test(b))
     || /^(wir sind|nous sommes|we are|bei uns|chez nous|at our company)[ ,]/.test(b)
-    || /^(unser (hauptsitz|unternehmen|team besteht)|notre (siège|entreprise)|our (headquarters|company) )/.test(b);
+    || /^(unser (hauptsitz|unternehmen|team besteht)|notre (siège|entreprise)|our (headquarters|company) )/.test(b)
+    || /^(our|unsere|nos|notre) (holistic |)(products|produkte|produits|offerings|angebote|mission|vision|purpose|values|werte|valeurs|history|geschichte|histoire|brands|marken|marques)\b/.test(b)
+    // Histoire et taille de l'entreprise, sans un mot pour le candidat :
+    // « Since 1967, Jet Aviation… », « Mit ca. 63.000 Mitarbeitenden… ».
+    || (!/\b(du|dich|dein|sie werden|ihre aufgabe|you|your|vous|votre|tu|ton)\b/.test(b)
+      && (/\b(since|seit|depuis|founded in|gegründet|fondée? en) \d{4}\b/.test(b) || /\d[\d.,' ]*\s*(mitarbeitende|mitarbeiter|employees|collaborat|salariés|beschäftigte)/.test(b)));
 }
 
 /**
@@ -77,9 +115,24 @@ function presenteEntreprise(l, entreprise) {
  * proprement.
  */
 // Lignes administratives sans rapport avec le travail (organisations internationales…).
-const ADMINISTRATIF = /^(deadline for applications|hardship level|family type|residential location|grade\b|job location|location\b|lieu\b|standort\b|reference|référence|job id|req(uisition)? id|posting date|date de publication)/i;
+const ADMINISTRATIF = /^(deadline for applications|hardship level|family type|residential location|grade\b|job location|location\b|lieu\b|standort\b|reference|référence|job id|req(uisition)? id|posting date|date de publication|no\.? du poste|vacancy (no|notice)|date de clôture|closing date)/i;
+// Ligne-fiche en tête d'annonce : « 138104 | 80 - 100% | Oerlikon | Hybrid »,
+// « Versicherung / Baden / Unbefristet / 80% », « 📍 Aarau, Chur… ».
+const LIGNE_FICHE = l => (l.match(/\s\|\s/g) ?? []).length >= 2 || (l.match(/\s\/\s/g) ?? []).length >= 3 || /^\p{Extended_Pictographic}/u.test(l);
+// Signature d'un recruteur : « Christian Sturm People & Transformation Lead ».
+const SIGNATURE = l => l.length < 70 && !/[.!?:]/.test(l) && /^\p{Lu}\p{Ll}+ \p{Lu}\p{Ll}+(-\p{Lu}\p{Ll}+)? .*(lead|manager|recruit|talent|partner|hr|personal|rh|consultant)/iu.test(l);
+// Intitulé de rubrique collé au texte qui suit.
+const RUBRIQUE_COLLEE = /^(introduction|deine rolle|ihre rolle|deine aufgaben|ihre aufgaben|your role|the role|votre rôle|vos missions|vos tâches|description|nous allons réaliser ensemble|was dich erwartet|was sie erwartet|what you will do|ce que vous ferez)\s*:?\s+(?=\p{Lu})/iu;
 function resume(html, entreprise, titre = "") {
-  const lignes = texte(html).filter(l => !ADMINISTRATIF.test(l));
+  const norm = x => x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+  const lignes = texte(html)
+    .filter(l => !ADMINISTRATIF.test(l) && !LIGNE_FICHE(l) && !SIGNATURE(l))
+    // Ligne qui commence par le titre de l'offre suivi de ses conditions
+    // (« Key Account Manager Retail 100% Lenzburg, AG Du willst… ») : on
+    // garde ce qui vient après, à partir de la première vraie phrase.
+    .map(l => titre && norm(l).startsWith(norm(titre)) ? (l.match(/\s((?:Du|Sie|Wir|Vous|Tu|Nous|You|We|In|Als|En|As)\s.*)$/)?.[1] ?? "") : l)
+    .map(l => l.replace(RUBRIQUE_COLLEE, ""))
+    .filter(Boolean);
   const intertitre = l => l.length < 70 && (l === l.toUpperCase() || /[:?]$/.test(l) || TACHES.test(l) && l.split(" ").length <= 6);
   let depart = lignes.findIndex(l => intertitre(l) && TACHES.test(l));
   depart = depart >= 0 ? depart + 1 : 0;
@@ -87,8 +140,10 @@ function resume(html, entreprise, titre = "") {
   for (let l of lignes.slice(depart)) {
     if (intertitre(l)) { if (out.length) break; else continue; }
     if (!out.length) {
-      const phrases = l.split(/(?<=[.!?])\s+/);
-      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]))) phrases.shift();
+      // Fin de phrase : pas après une abréviation courte (« ca. », « No. », « Dr. »).
+      const phrases = l.split(/(?<=(?:\p{L}{3,}|\d|[)»”"])[.!?]|[!?])\s+(?=[\p{Lu}\d«“"])/u);
+      // … et le débris d'une phrase coupée (« 1 for its customers… »).
+      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || /^\d+\s+\p{Ll}/u.test(phrases[0]))) phrases.shift();
       l = phrases.join(" ");
       if (!l) continue;
     }
@@ -102,9 +157,10 @@ function resume(html, entreprise, titre = "") {
     const fin = Math.max(coupe.lastIndexOf(". "), coupe.lastIndexOf("! "));
     r = fin > 200 ? coupe.slice(0, fin + 1) : coupe.replace(/\s+\S*$/, "") + "…";
   }
+  // Une liste reprise en cours (« zur Weiterentwicklung… ») commence en minuscule.
+  r = r.replace(/^\p{Ll}/u, c => c.toUpperCase());
   // Trop court pour dire quoi que ce soit, ou simple répétition du titre :
   // mieux vaut pas d'aperçu (la fenêtre invite alors à lire l'offre complète).
-  const norm = x => x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
   if (r.length < 25 || (titre && norm(r).startsWith(norm(titre)) && r.length < titre.length + 30)) return null;
   return r || null;
 }
@@ -134,8 +190,13 @@ function contrat(titre, indice) {
 function lieuPropre(lieu, villeEntreprise) {
   let l = entites(lieu ?? "").trim();
   if (!l) return villeEntreprise ?? null;
+  // Pays seul (« CH ») : on ne sait pas où, et la ville du siège induirait en erreur.
+  if (/^(CH|switzerland|schweiz|suisse)$/i.test(l)) return null;
   l = l.replace(/^CHE?-([^-]+)-.*$/i, "$1")
-    .split(/\s*(?:,|\s*\/\s+|\s[-–]\s|\()\s*/)[0]
+    .split(/\s*(?:,|\s*\/\s+|\s[-–]\s|\(|\s(?:oder|und|sowie|ou|et|or|and|o)\s)\s*/)[0]
+    .replace(/^\d{4}\s+/, "")
+    .replace(/^(paketzentrum|briefzentrum|logistikzentrum|distributionsbasis|filiale|agence de|succursale de)\s+/i, "")
+    .replace(/\s+(AG|AI|AR|BE|BL|BS|FR|GE|GL|GR|JU|LU|NE|NW|OW|SG|SH|SO|SZ|TG|TI|UR|VD|VS|ZG|ZH)$/, "")
     .replace(/\s+(business center|campus|office|headquarters|hq|site)$/i, "")
     .trim();
   if (l === l.toUpperCase() && l.length > 3) l = l.toLowerCase().replace(/(^|[\s-])\p{L}/gu, c => c.toUpperCase());
@@ -170,4 +231,4 @@ const offre = (o, entreprise, villeEntreprise) => {
   };
 };
 
-export { lieuPropre, ADMINISTRATIF, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre };
+export { lieuEnSuisse, CANTONS, lieuPropre, ADMINISTRATIF, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre };

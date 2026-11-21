@@ -1,7 +1,7 @@
 // Règles des offres synchronisées, sur des cas réels rencontrés.
 // Modèle validé par Luc : Kellerhals Carrard (2026-11-21).
 import { describe, it, expect } from "vitest";
-import { titrePropre, resume, taux, contrat, lieuPropre, CANDIDATURE_SPONTANEE, SUISSE } from "../../scripts/regles-offres.mjs";
+import { titrePropre, resume, taux, contrat, lieuPropre, lieuEnSuisse, CANDIDATURE_SPONTANEE, SUISSE } from "../../scripts/regles-offres.mjs";
 
 describe("titrePropre", () => {
   it.each([
@@ -78,6 +78,12 @@ describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
     expect(lieuPropre("Genève/ Rue du Rhône 31")).toBe("Genève");
     expect(lieuPropre("Solothurn/Zuchwil")).toBe("Solothurn/Zuchwil");
     expect(lieuPropre("Remote")).toBe("Télétravail");
+    expect(lieuPropre("8755 Ennenda")).toBe("Ennenda");
+    expect(lieuPropre("Bern oder Neuenburg sowie Home")).toBe("Berne");
+    expect(lieuPropre("Reichenburg SZ und Uznach SG")).toBe("Reichenburg");
+    expect(lieuPropre("Wetzikon ZH")).toBe("Wetzikon");
+    expect(lieuPropre("Paketzentrum Frauenfeld")).toBe("Frauenfeld");
+    expect(lieuPropre("CH", "Bâle")).toBeNull();
     expect(lieuPropre("Bern, Canton de Berne, Switzerland")).toBe("Berne");
     expect(lieuPropre("Zürich / Genferstrasse 27")).toBe("Zurich");
     expect(lieuPropre("Zurich - Lowenstrasse")).toBe("Zurich");
@@ -97,5 +103,50 @@ describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
     expect(resume("<p>Job Location</p>", "Procter & Gamble")).toBeNull();
     expect(resume("<p>Risk Officer - Derivatives</p>", "Centalion", "Risk Officer - Derivatives")).toBeNull();
     expect(resume("<p>Deadline for Applications November 23, 2026</p><p>Grade</p>", "ONU")).toBeNull();
+  });
+});
+
+describe("lieux structurés SuccessFactors", () => {
+  it.each([
+    ["Lausanne, CH", true], ["Zürich, CH, 8152", true], ["Lugano, TI", true], ["Bern, BE, CH", true],
+    ["Fribourg, FR", true], ["Brussels, BE", false], ["Singapore, SG", false],
+    ["Diegem, BE, 1831", false], ["Berlin, BE, DE, 10117", false], ["CABA, B, AR, 1001", false], ["Tbilisi, GE", false], ["Zurich, CH, 8005", true], ["CH", true],
+    ["Basadingen, TG", false], ["Sion, VS", true],
+    ["Neuenstadt am Kocher, BW, DE", false], ["Amsterdam, NL", false], ["Madrid, ES", false], ["Paris, FR, 75001", false],
+  ])("%s", (l, attendu) => expect(lieuEnSuisse(l)).toBe(attendu));
+});
+
+describe("entreprise présente seulement en Suisse", () => {
+  it("accepte tous les codes de canton", () => {
+    expect(lieuEnSuisse("Basadingen, TG", { cantons: true })).toBe(true);
+    expect(lieuEnSuisse("Neuenstadt am Kocher, BW, DE", { cantons: true })).toBe(false);
+  });
+});
+
+describe("SuccessFactors : débris en tête d'annonce (cas réels)", () => {
+  it("titre avec lieu collé", () => {
+    expect(titrePropre("Identity Specialist (Open-Source Technologies) (Geneva (GVA), CH, 33999)")).toBe("Identity Specialist (Open-Source Technologies)");
+  });
+  it.each([
+    ["Feldschlösschen", "Agency Account & Project Lead", "<p>Agency Account & Project Lead (m/w/d) Ab sofort | Pensum: 80% - 100% | unbefristet | Marketing</p><p>Du entwickelst Kampagnen mit unseren Agenturen und steuerst die Budgets der Marken.</p>", /^Du entwickelst/],
+    ["Zurich Insurance", "Spezialist Kundensupport", "<p>138104 | 80 - 100% | Oerlikon, Zürich | Hybrid</p><p>Du berätst unsere Kundinnen und Kunden am Telefon zu ihren Lebensversicherungen.</p>", /^Du berätst/],
+    ["Rolex", "Technicien de maintenance", "<p>Introduction Pour notre division Achats, nous recherchons un technicien qui assure la maintenance des installations.</p>", /^Pour notre division/],
+    ["Atos", "Java Engineer", "<p>Mit ca. 63.000 Mitarbeitenden agiert das Unternehmen in 61 Ländern.</p><p>Sie entwickeln Webanwendungen in Java für unsere Kunden aus der Finanzbranche.</p>", /^Sie entwickeln/],
+    ["Jet Aviation", "Apprentice", "<p>Since 1967, Jet Aviation has been crafting flight in its smoothest form.</p><p>Als Lernende:r baust du Anlagen und Apparate aus Blech und lernst schweissen.</p>", /^Als Lernende/],
+    ["Poste Suisse", "EngOps Engineer", "<p>Christian Sturm People & Transformation Lead</p><p>Du betreibst und automatisierst unsere Windows-Arbeitsplätze für 30 000 Mitarbeitende.</p>", /^Du betreibst/],
+    ["Bilfinger", "Sales Manager", "<p>Bilfinger is the No. 1 for its customers in enhancing efficiency. You develop the pharma business in Switzerland and lead key accounts.</p>", /^You develop/],
+    ["OIT", "Directeur", "<p>No. du poste: DC/ISSA/D/2026/01 Date de clôture: 2 janvier 2026</p><p>Vous dirigez la branche Développement de la sécurité sociale et son équipe.</p>", /^Vous dirigez/],
+  ])("%s", (entreprise, titre, html, attendu) => expect(resume(html, entreprise, titre)).toMatch(attendu));
+});
+
+describe("titres : marque et villes en trop", () => {
+  it.each([
+    ["[Universal Genève] - Client Advisor - Geneva Flagship", "Client Advisor - Geneva Flagship"],
+    ["[Universal Genève] Senior Social Media Manager", "Senior Social Media Manager"],
+    ["Manager - Tax Services - Indirect Tax/VAT (Zurich, Bern oder Basel)", "Manager - Tax Services - Indirect Tax/VAT"],
+    ["Identity Specialist (Open-Source Technologies)", "Identity Specialist (Open-Source Technologies)"],
+  ])("%s", (brut, attendu) => expect(titrePropre(brut)).toBe(attendu));
+  it("Weleda : présentation des produits écartée", () => {
+    expect(resume("<p>Our holistic offerings are designed to enhance individual health.</p><p>You advise managers on all HR topics for the Arlesheim site.</p>", "Weleda")).toMatch(/^You advise/);
   });
 });

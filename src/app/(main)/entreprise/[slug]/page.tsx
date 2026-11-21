@@ -22,6 +22,7 @@ function titreFiche(c: { name: string; city: string | null; sector: string; subs
 import { MapPin, Users, ArrowLeft, TrendingUp, CheckCircle, Languages } from "lucide-react";
 import { ShareButton } from "@/components/ShareButton";
 import { JobOfferCard } from "@/components/JobOfferCard";
+import { ListeOffres } from "@/components/company/ListeOffres";
 import { ViewTracker } from "@/components/ViewTracker";
 import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
 import { ActionsFiche } from "@/components/company/Interactions";
@@ -137,7 +138,7 @@ function BlocOffresEmploi({ url, companyId, companyName, jobs, slug, revendicabl
       </h3>
       {jobs.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: href ? 14 : 0 }}>
-          {jobs.map(job => <JobOfferCard key={job.id} job={job} companyName={companyName} companyId={companyId} />)}
+          <ListeOffres jobs={jobs} companyName={companyName} companyId={companyId} />
         </div>
       )}
       {href && <LienOffres href={href} companyId={companyId} />}
