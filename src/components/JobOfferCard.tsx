@@ -40,10 +40,10 @@ const PUCE = /^\s*[-•*·–]\s+/;
 function Section({ titre, texte }: { titre: string; texte: string | null | undefined }) {
   const blocs = (texte ?? "").replace(/\r/g, "").split(/\n\s*\n/).map(b => b.split("\n").filter(l => l.trim())).filter(b => b.length);
   if (blocs.length === 0) return null;
-  const txt: React.CSSProperties = { fontSize: 16, color: "var(--text-muted)", lineHeight: 1.65 };
+  const txt: React.CSSProperties = { fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.65 };
   return (
     <section style={{ marginBottom: 26 }}>
-      <h3 style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>{titre}</h3>
+      <h3 className="jo-h3" style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>{titre}</h3>
       <div style={{ display: "grid", gap: 12 }}>
         {blocs.map((lignes, i) => {
           // Lignes consécutives à puce : une liste ; le reste : du texte, retours gardés.
@@ -69,8 +69,8 @@ function Section({ titre, texte }: { titre: string; texte: string | null | undef
 
 function Badge({ label, color }: { label: string; color: string }) {
   return (
-    <span style={{
-      fontSize: 12.5, fontWeight: 700, padding: "4px 11px", borderRadius: 50,
+    <span className="jo-badge" style={{
+      fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 50,
       background: `${color}18`, color, border: `1px solid ${color}33`,
     }}>{label}</span>
   );
@@ -108,7 +108,7 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
         aria-label={`Voir l'offre : ${job.title}`}
         style={{
           width: "100%", textAlign: "left", borderRadius: 10,
-          background: "var(--surface2)", padding: "14px 16px",
+          background: "var(--surface2)", padding: "12px 14px",
           border: "1px solid var(--border2)", cursor: "pointer",
           transition: "border-color 0.15s, background 0.15s",
         }}
@@ -121,18 +121,18 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
           (e.currentTarget as HTMLButtonElement).style.background = "var(--surface2)";
         }}
       >
-        <p style={{ fontSize: 15.5, fontWeight: 700, color: "var(--text)", lineHeight: 1.35, marginBottom: 8 }}>{job.title}</p>
+        <p className="jo-titre" style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{job.title}</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
           {taux && <Badge label={taux} color="#0ea5e9" />}
           {job.contract_type && <Badge label={job.contract_type} color="#8b5cf6" />}
           {job.work_mode && <Badge label={job.work_mode} color="#10b981" />}
           {job.location && (
-            <span style={{ fontSize: 13, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
-              <MapPin size={13} aria-hidden="true" /> {job.location}
+            <span className="jo-lieu" style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 3 }}>
+              <MapPin size={11} aria-hidden="true" /> {job.location}
             </span>
           )}
         </div>
-        <p style={{ fontSize: 13.5, color: "#8b5cf6", marginTop: 10, fontWeight: 600 }}>Voir l&apos;offre →</p>
+        <p className="jo-lien" style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>Voir l&apos;offre →</p>
       </button>
 
       {/* Modal — portaled to document.body to escape sticky/transform stacking contexts */}
@@ -161,7 +161,7 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
               <div>
-                <p style={{ fontSize: 12.5, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{companyName}</p>
+                <p className="jo-entreprise" style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{companyName}</p>
                 <h2 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>{job.title}</h2>
               </div>
               <button
@@ -191,19 +191,19 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
 
             {/* Description */}
             {job.description && (
-              <p style={{ fontSize: 16, color: "var(--text)", lineHeight: 1.7, marginBottom: 22 }}>{lignesRiches(job.description)}</p>
+              <p className="jo-texte" style={{ fontSize: 14.5, color: "var(--text)", lineHeight: 1.7, marginBottom: 22 }}>{lignesRiches(job.description)}</p>
             )}
             <Section titre="Vos missions" texte={job.missions} />
             <Section titre="Votre profil" texte={job.requirements} />
             <Section titre="Ce que nous offrons" texte={job.avantages} />
             {(job.entree || (job.langues?.length ?? 0) > 0) && (
-              <dl style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15, marginBottom: 22 }}>
+              <dl style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 14, marginBottom: 22 }}>
                 {job.entree && <><dt style={{ color: "var(--text-muted)" }}>Entrée en fonction</dt><dd style={{ margin: 0, fontWeight: 600 }}>{job.entree}</dd></>}
                 {(job.langues?.length ?? 0) > 0 && <><dt style={{ color: "var(--text-muted)" }}>Langues</dt><dd style={{ margin: 0, fontWeight: 600 }}>{job.langues!.map(nomLangue).join(", ")}</dd></>}
               </dl>
             )}
             {!job.description && !job.missions && !job.requirements && !job.avantages && (
-              <p style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 24 }}>
+              <p className="jo-texte" style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 24 }}>
                 {job.source
                   ? <>Le détail du poste se trouve sur le site de l&apos;entreprise. Cliquez sur « En savoir plus » pour le lire et y postuler directement.</>
                   : <>Cliquez sur « Postuler » pour lire l&apos;offre complète et envoyer votre candidature directement à l&apos;entreprise.</>}
@@ -211,7 +211,7 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
             )}
 
             {/* Date */}
-            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>
+            <p className="jo-date" style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 24 }}>
               Publiée le {new Date(job.created_at).toLocaleDateString("fr-CH", { day: "numeric", month: "long", year: "numeric" })}
             </p>
 
@@ -227,7 +227,7 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                   padding: "14px 0", borderRadius: 12,
                   background: "var(--brand)",
-                  color: "#fff", fontWeight: 800, fontSize: 16, textDecoration: "none",
+                  color: "#fff", fontWeight: 800, fontSize: 15, textDecoration: "none",
                   boxShadow: "0 4px 20px rgba(139,92,246,0.35)",
                   transition: "opacity 0.15s",
                 }}
@@ -256,6 +256,19 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
         .job-modal::-webkit-scrollbar-track { background: transparent; }
         .job-modal::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
         .job-modal { overscroll-behavior: contain; }
+        /* Sur téléphone, tailles des sites d'emploi ; l'ordinateur garde les tailles compactes. */
+        @media (max-width: 640px) {
+          .jo-titre { font-size: 15.5px !important; line-height: 1.35; margin-bottom: 8px !important; }
+          .jo-badge { font-size: 12.5px !important; padding: 4px 11px !important; }
+          .jo-lieu { font-size: 13px !important; gap: 4px !important; }
+          .jo-lien { font-size: 13.5px !important; margin-top: 10px !important; }
+          .jo-texte { font-size: 16px !important; }
+          .jo-h3 { font-size: 17px !important; }
+          .jo-date { font-size: 13px !important; }
+          .jo-entreprise { font-size: 12.5px !important; }
+          .job-modal li, .job-modal dl { font-size: 16px !important; }
+          .job-cta a { font-size: 16px !important; }
+        }
         /* Sur téléphone, l'offre prend tout l'écran : rien d'autre à voir ni à toucher. */
         @media (max-width: 640px) {
           .job-modal-overlay { padding: 0 !important; align-items: stretch !important; }
