@@ -204,7 +204,9 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
             )}
             {!job.description && !job.missions && !job.requirements && !job.avantages && (
               <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 24 }}>
-                Cliquez sur « Postuler » pour lire l&apos;offre complète et envoyer votre candidature directement à l&apos;entreprise.
+                {job.source
+                  ? <>Le détail du poste se trouve sur le site de l&apos;entreprise. Cliquez sur « En savoir plus » pour le lire et y postuler directement.</>
+                  : <>Cliquez sur « Postuler » pour lire l&apos;offre complète et envoyer votre candidature directement à l&apos;entreprise.</>}
               </p>
             )}
 
