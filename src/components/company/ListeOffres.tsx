@@ -13,13 +13,20 @@ type Offre = Parameters<typeof JobOfferCard>[0]["job"];
 // panneau avec recherche et filtre par ville, comme sur les sites d'emploi.
 const SEUIL = 6;
 const APERCU = 4;
+const PAR_TRANCHE = 60;
 
 const sansAccents = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
-export function ListeOffres({ jobs, companyName, companyId }: { jobs: Offre[]; companyName: string; companyId: string }) {
+/**
+ * `jobs` : les premières offres, envoyées avec la page. `total` : le nombre
+ * réel. Au-delà de SEUIL, le panneau charge toutes les offres à son ouverture
+ * (Coop en a près de deux mille : les mettre dans la page l'alourdissait d'un
+ * mégaoctet pour chaque visiteur).
+ */
+export function ListeOffres({ jobs, total, companyName, companyId }: { jobs: Offre[]; total: number; companyName: string; companyId: string }) {
   const [ouvert, setOuvert] = useState(false);
 
-  if (jobs.length <= SEUIL) {
+  if (total <= SEUIL) {
     return <>{jobs.map(job => <JobOfferCard key={job.id} job={job} companyName={companyName} companyId={companyId} />)}</>;
   }
   return (
@@ -28,18 +35,39 @@ export function ListeOffres({ jobs, companyName, companyId }: { jobs: Offre[]; c
         {jobs.slice(0, APERCU).map(job => <JobOfferCard key={job.id} ligne job={job} companyName={companyName} companyId={companyId} />)}
       </div>
       <button type="button" className="btn btn-encre" onClick={() => setOuvert(true)} style={{ width: "100%", justifyContent: "center", minHeight: 46 }}>
-        Voir les {jobs.length} offres
+        Voir les {total} offres
       </button>
-      {ouvert && <PanneauOffres jobs={jobs} companyName={companyName} companyId={companyId} fermer={() => setOuvert(false)} />}
+      {ouvert && <PanneauOffres apercu={jobs} total={total} companyName={companyName} companyId={companyId} fermer={() => setOuvert(false)} />}
       <style>{STYLES}</style>
     </>
   );
 }
 
-function PanneauOffres({ jobs, companyName, companyId, fermer }: { jobs: Offre[]; companyName: string; companyId: string; fermer: () => void }) {
+// Offres déjà chargées, par entreprise : rouvrir le panneau ne refait pas la requête.
+const memoire = new Map<string, Offre[]>();
+
+function PanneauOffres({ apercu, total, companyName, companyId, fermer }: { apercu: Offre[]; total: number; companyName: string; companyId: string; fermer: () => void }) {
   const [recherche, setRecherche] = useState("");
   const [ville, setVille] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<Offre[]>(() => memoire.get(companyId) ?? apercu);
+  const [etat, setEtat] = useState<"charge" | "pret" | "erreur">(() => memoire.has(companyId) ? "pret" : "charge");
   useVerrouDefilement(true);
+
+  useEffect(() => {
+    if (memoire.has(companyId)) return;
+    let annule = false;
+    fetch(`/api/company/${companyId}/offres`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(({ offres }: { offres: (Offre & { created_at: string | null })[] }) => {
+        if (annule) return;
+        const liste = offres.map(o => ({ ...o, created_at: o.created_at ?? "" }));
+        memoire.set(companyId, liste);
+        setJobs(liste);
+        setEtat("pret");
+      })
+      .catch(() => { if (!annule) setEtat("erreur"); });
+    return () => { annule = true; };
+  }, [companyId]);
 
   useEffect(() => {
     // Échap ferme le panneau, sauf si une offre est ouverte par-dessus (elle se ferme d'abord).
@@ -62,13 +90,28 @@ function PanneauOffres({ jobs, companyName, companyId, fermer }: { jobs: Offre[]
       (!q || sansAccents(`${j.title} ${j.location ?? ""} ${j.contract_type ?? ""}`).includes(q)));
   }, [jobs, recherche, ville]);
 
+  // Affichage progressif : 60 lignes, puis 60 de plus à l'approche du bas.
+  // Deux mille lignes d'un coup ralentissaient le téléphone.
+  const [montrees, setMontrees] = useState(PAR_TRANCHE);
+  const [repere, setRepere] = useState<HTMLDivElement | null>(null);
+  // Nouvelle recherche ou nouvelle ville : on repart du haut de la liste.
+  const cle = `${recherche}|${ville}`;
+  const [cleVue, setCleVue] = useState(cle);
+  if (cle !== cleVue) { setCleVue(cle); setMontrees(PAR_TRANCHE); }
+  useEffect(() => {
+    if (!repere) return;
+    const obs = new IntersectionObserver(e => { if (e[0].isIntersecting) setMontrees(n => n + PAR_TRANCHE); }, { rootMargin: "600px" });
+    obs.observe(repere);
+    return () => obs.disconnect();
+  }, [repere]);
+
   return createPortal(
     <div className="jo-panneau-fond" onClick={e => { if (e.target === e.currentTarget) fermer(); }}>
       <div className="jo-panneau" role="dialog" aria-modal="true" aria-label={`Offres d'emploi chez ${companyName}`}>
         <header className="jo-panneau-tete">
           <div>
             <p className="jo-panneau-sur">{companyName}</p>
-            <h2 className="jo-panneau-titre">{jobs.length} offres d&apos;emploi</h2>
+            <h2 className="jo-panneau-titre">{total} offres d&apos;emploi</h2>
           </div>
           <button type="button" className="jo-fermer" onClick={fermer} aria-label="Fermer"><X size={18} aria-hidden="true" /></button>
         </header>
@@ -77,7 +120,7 @@ function PanneauOffres({ jobs, companyName, companyId, fermer }: { jobs: Offre[]
           <Search size={17} aria-hidden="true" />
           <input
             type="search" value={recherche} onChange={e => setRecherche(e.target.value)}
-            placeholder={`Rechercher parmi ${jobs.length} offres`} aria-label="Rechercher une offre"
+            placeholder={`Rechercher parmi ${total} offres`} aria-label="Rechercher une offre"
           />
         </label>
 
@@ -90,12 +133,15 @@ function PanneauOffres({ jobs, companyName, companyId, fermer }: { jobs: Offre[]
           </div>
         )}
 
-        <div className="jo-panneau-liste">
+        <div className="jo-panneau-liste" aria-busy={etat === "charge"}>
+          {etat === "charge" && <p className="jo-etat">Chargement des {total} offres…</p>}
+          {etat === "erreur" && <p className="jo-etat">Les autres offres n&apos;ont pas pu être chargées. Fermez puis rouvrez pour réessayer.</p>}
           {visibles.length ? (
             <div className="jo-liste">
-              {visibles.map(job => <JobOfferCard key={job.id} ligne job={job} companyName={companyName} companyId={companyId} />)}
+              {visibles.slice(0, montrees).map(job => <JobOfferCard key={job.id} ligne job={job} companyName={companyName} companyId={companyId} />)}
+              {montrees < visibles.length && <div ref={setRepere} style={{ height: 1 }} aria-hidden="true" />}
             </div>
-          ) : (
+          ) : etat !== "charge" && (
             <p className="jo-vide">Aucune offre ne correspond. Essayez un autre mot ou une autre ville.</p>
           )}
         </div>
@@ -154,6 +200,7 @@ const STYLES = `
   .jo-villes button.actif { background: var(--encre); border-color: var(--encre); color: var(--encre-texte); }
   .jo-panneau-liste { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 24px 24px; border-top: 1px solid var(--border); }
   .jo-panneau-liste .jo-liste { margin-bottom: 0; }
+  .jo-etat { font-size: 13.5px; color: var(--text-muted); padding: 12px 0 4px; margin: 0; }
   .jo-vide { font-size: 15px; color: var(--text-muted); text-align: center; padding: 48px 12px; margin: 0; }
   @keyframes joFondu { from { opacity: 0 } to { opacity: 1 } }
 

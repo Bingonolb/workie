@@ -264,17 +264,24 @@ type OffrePublique = {
 export const getCachedJobOffers = unstable_cache(
   async (companyId: string) => {
     const admin = createAdminClient();
-    let q = admin
-      .from("job_offers")
-      .select("id, title, location, contract_type, work_mode, experience_level, apply_url, description, missions, requirements, avantages, taux_min, taux_max, entree, langues, created_at, source")
-      .eq("company_id", companyId)
-      .eq("is_active", true)
-      // Une offre expirée ne s'affiche plus (au pire 5 minutes de retard, le temps du cache).
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
-    // Offres synchronisées depuis le site de l'employeur : à l'essai, visibles
-    // seulement là où OFFRES_SYNCHRO = 1. La base est commune à l'essai et au site.
-    if (!offresSynchro) q = q.is("source", null);
-    const { data } = await q.order("created_at", { ascending: false });
+    // Lecture par pages : la base rend au plus 1000 lignes à la fois, et Coop
+    // a près de deux mille offres (la fiche affichait « 1000 offres »).
+    const data: unknown[] = [];
+    for (let de = 0; de < 10000; de += 1000) {
+      let q = admin
+        .from("job_offers")
+        .select("id, title, location, contract_type, work_mode, experience_level, apply_url, description, missions, requirements, avantages, taux_min, taux_max, entree, langues, created_at, source")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        // Une offre expirée ne s'affiche plus (au pire 5 minutes de retard, le temps du cache).
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+      // Offres synchronisées depuis le site de l'employeur : visibles là où
+      // OFFRES_SYNCHRO = 1. La base est commune à l'essai et au site.
+      if (!offresSynchro) q = q.is("source", null);
+      const { data: page } = await q.order("created_at", { ascending: false }).order("id").range(de, de + 999);
+      data.push(...(page ?? []));
+      if ((page ?? []).length < 1000) break;
+    }
     // `source` est récente : les types générés de la base ne la connaissent pas encore.
     // Regroupées par langue (français, allemand, anglais, italien), les plus
     // récentes d'abord dans chaque groupe (tri stable).

@@ -128,17 +128,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  * l'un en haut avec le lien, l'autre tout en bas avec les offres : sur
  * téléphone, les offres arrivaient après toute la page.
  */
-function BlocOffresEmploi({ url, companyId, companyName, jobs, slug, revendicable, className, style }: { url: string | null; companyId: string; companyName: string; jobs: Parameters<typeof JobOfferCard>[0]["job"][]; slug?: string | null; revendicable?: boolean; className?: string; style?: React.CSSProperties }) {
+function BlocOffresEmploi({ url, companyId, companyName, jobs, total, slug, revendicable, className, style }: { url: string | null; companyId: string; companyName: string; jobs: Parameters<typeof JobOfferCard>[0]["job"][]; total: number; slug?: string | null; revendicable?: boolean; className?: string; style?: React.CSSProperties }) {
   const href = url ? (/^https?:\/\//.test(url) ? url : `https://${url}`) : null;
   return (
     <div className={className} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", ...style }}>
       <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
         Offres d&apos;emploi
-        {jobs.length > 0 && <span style={{ fontSize: 12.5, fontWeight: 700, background: "var(--surface3)", color: "var(--text)", borderRadius: 50, padding: "2px 8px" }}>{jobs.length}</span>}
+        {total > 0 && <span style={{ fontSize: 12.5, fontWeight: 700, background: "var(--surface3)", color: "var(--text)", borderRadius: 50, padding: "2px 8px" }}>{total}</span>}
       </h3>
-      {jobs.length > 0 && (
+      {total > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: href ? 14 : 0 }}>
-          <ListeOffres jobs={jobs} companyName={companyName} companyId={companyId} />
+          <ListeOffres jobs={jobs} total={total} companyName={companyName} companyId={companyId} />
         </div>
       )}
       {href && <LienOffres href={href} companyId={companyId} />}
@@ -171,7 +171,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
     getCachedSuggestions(company.id, company.sector, company.subsector ?? null, company.canton ?? null).catch(() => []),
   ]);
 
-  const offres = jobs.map(j => ({ ...j, created_at: j.created_at ?? "" }));
+  // La page n'emporte que les premières offres ; le panneau charge le reste à la demande.
+  const totalOffres = jobs.length;
+  const offres = jobs.slice(0, 6).map(j => ({ ...j, created_at: j.created_at ?? "" }));
 
   // Ce qui est saisi l'emporte sur ce qui est deduit.
   const saisies = (company as { langues?: string[] | null }).langues ?? [];
@@ -354,7 +356,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 après les avis. Or c'est ce qu'on vient y chercher : il remonte
                 donc ici, et la version de droite est masquée à cette taille. */}
             {(company.website_url || offres.length > 0) && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} slug={company.slug} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} total={totalOffres} slug={company.slug} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
             )}
 
             {/* Key stats — seules les données réellement disponibles sont
@@ -410,7 +412,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             )}
 
             {(company.website_url || offres.length > 0) && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} slug={company.slug} className="liens-desktop" />
+              <BlocOffresEmploi url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} total={totalOffres} slug={company.slug} className="liens-desktop" />
             )}
 
             {/* Le bloc « Tags » a été retiré.

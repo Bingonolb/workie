@@ -1,6 +1,21 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCachedJobOffers } from "@/lib/actions/companies";
+
+/**
+ * Toutes les offres d'une entreprise, pour le panneau « Voir les N offres ».
+ *
+ * La fiche n'envoie que les premières offres dans sa page : Coop en a près de
+ * deux mille, ce qui alourdissait chaque visite d'un mégaoctet. Le reste n'est
+ * chargé qu'à l'ouverture du panneau. Données publiques, mises en cache.
+ */
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ offres: [] }, { status: 400 });
+  const offres = await getCachedJobOffers(id).catch(() => []);
+  return NextResponse.json({ offres }, { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } });
+}
 
 /**
  * Clic sur le lien « Offres d'emploi » d'une fiche : 20 points au classement,
