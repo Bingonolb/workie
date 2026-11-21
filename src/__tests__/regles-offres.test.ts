@@ -252,3 +252,9 @@ describe("stage avant apprentissage", () => {
     expect(contrat("Lehrstelle Kauffrau:mann EFZ", "Stage / Trainee")).toBe("Apprentissage");
   });
 });
+
+describe("symboles nommés", () => {
+  it("décode °, ·, •, ®, ², ½, tiret conditionnel", () => {
+    expect(entites("360&deg;-Beratung &middot; Teamplayer &bull; Excel&reg; m&sup2; &frac12; Stelle Ab&shy;teilung")).toBe("360°-Beratung · Teamplayer • Excel® m² ½ Stelle Abteilung");
+  });
+});

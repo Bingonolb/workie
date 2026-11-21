@@ -2,7 +2,7 @@
 // poste, taux, contrat, pays. Séparées du script pour être testées
 // (src/__tests__/regles-offres.test.ts). Modèle validé : Kellerhals Carrard.
 
-const NOMMEES = { nbsp: " ", amp: "&", quot: '"', lt: "<", gt: ">", apos: "’", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", ndash: "–", mdash: "—", hellip: "…", laquo: "«", raquo: "»", euro: "€", eacute: "é", egrave: "è", agrave: "à", uuml: "ü", ouml: "ö", auml: "ä", szlig: "ß" };
+const NOMMEES = { nbsp: " ", amp: "&", quot: '"', lt: "<", gt: ">", apos: "’", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", ndash: "–", mdash: "—", hellip: "…", laquo: "«", raquo: "»", euro: "€", deg: "°", middot: "·", bull: "•", reg: "®", copy: "©", trade: "™", sup1: "¹", sup2: "²", sup3: "³", frac12: "½", frac14: "¼", frac34: "¾", times: "×", divide: "÷", plusmn: "±", shy: "", sect: "§", para: "¶", micro: "µ", pound: "£", yen: "¥", cent: "¢", iexcl: "¡", iquest: "¿", lsaquo: "‹", rsaquo: "›", sbquo: "‚", bdquo: "„", dagger: "†", permil: "‰", thinsp: " ", ensp: " ", emsp: " ", zwnj: "", zwj: "", lrm: "", rlm: "", ordf: "ª", ordm: "º", acute: "´", cedil: "¸", macr: "¯", uml: "¨", not: "¬", brvbar: "¦", curren: "¤", minus: "−", larr: "←", rarr: "→", check: "✓", eacute: "é", egrave: "è", agrave: "à", uuml: "ü", ouml: "ö", auml: "ä", szlig: "ß" };
 // Toutes les lettres accentuées écrites en code HTML (« &acirc; », « &Eacute; »,
 // « &ccedil; ») : la lettre de base plus son accent, recomposés en un caractère.
 const ACCENTS = { acute: "́", grave: "̀", circ: "̂", uml: "̈", cedil: "̧", tilde: "̃", ring: "̊" };
@@ -12,7 +12,7 @@ const entites = s => s
   .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
   .replace(/&([a-zA-Z])(acute|grave|circ|uml|cedil|tilde|ring);/g, (_, l, a) => (l + ACCENTS[a]).normalize("NFC"))
   .replace(/&(aelig|AElig|oelig|OElig|oslash|Oslash);/g, (_, n) => LIGATURES[n])
-  .replace(/&([a-z]+);/gi, (m, n) => NOMMEES[n.toLowerCase()] ?? m)
+  .replace(/&([a-z][a-z0-9]*);/gi, (m, n) => NOMMEES[n] ?? NOMMEES[n.toLowerCase()] ?? m)
   .replace(/ /g, " ");
 // Les éléments de liste deviennent des phrases : sans ponctuation, deux puces
 // mises bout à bout se lisaient comme une seule phrase sans fin.
