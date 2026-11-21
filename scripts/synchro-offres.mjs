@@ -55,7 +55,7 @@ async function lirePersonio(s) {
     return (sections.find(x => !presenteEntreprise(texte(x.html)[0] ?? "", s.entreprise)) ?? sections[0]).html;
   };
   const texteOrigine = new Map([...origine.matchAll(/<position>([\s\S]*?)<\/position>/g)].map(([, b]) => [champ(b, "id"), premierTexte(b)]));
-  const CONTRATS = { permanent: "CDI", temporary: "CDD", intern: "Stage", trainee: "Alternance", freelance: "Freelance" };
+  const CONTRATS = { permanent: "CDI", temporary: "CDD", intern: "Stage", trainee: "Apprentissage", freelance: "Freelance" };
   return [...xml.matchAll(/<position>([\s\S]*?)<\/position>/g)].map(([, b]) => {
     const titre = champ(b, "name").replace(/&amp;/g, "&");
     const premier = `<value>${premierTexte(b) || texteOrigine.get(champ(b, "id")) || ""}</value>`;
@@ -144,7 +144,7 @@ function taux(titre) {
 }
 function contrat(titre, temps) {
   const t = titre.toLowerCase();
-  if (/apprenti|lehrstelle|lernende|apprentice|\bcfc\b|\befz\b/.test(t)) return "Alternance";
+  if (/apprenti|lehrstelle|lernende|apprentice|\bcfc\b|\befz\b/.test(t)) return "Apprentissage";
   if (/intern\b|internship|stage|stagiaire|praktik/.test(t)) return "Stage";
   if (/contract|temporary|fixed.term|befristet|\bcdd\b|limited/.test(t)) return "CDD";
   return null;

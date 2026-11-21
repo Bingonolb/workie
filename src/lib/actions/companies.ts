@@ -7,6 +7,7 @@ import type { Company } from "@/lib/types";
 import { CANTON_NAMES } from "@/lib/types";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { offresSynchro } from "@/lib/ouverture";
+import { langueOffre, ORDRE_LANGUES } from "@/lib/offres";
 
 function stripAccents(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -275,7 +276,10 @@ export const getCachedJobOffers = unstable_cache(
     if (!offresSynchro) q = q.is("source", null);
     const { data } = await q.order("created_at", { ascending: false });
     // `source` est récente : les types générés de la base ne la connaissent pas encore.
-    return (data ?? []) as unknown as OffrePublique[];
+    // Regroupées par langue (français, allemand, anglais, italien), les plus
+    // récentes d'abord dans chaque groupe (tri stable).
+    const rang = (o: OffrePublique) => ORDRE_LANGUES.indexOf(langueOffre(o.title, o.description ?? o.missions));
+    return ((data ?? []) as unknown as OffrePublique[]).sort((a, b) => rang(a) - rang(b));
   },
   ["job-offers"],
   { revalidate: 300, tags: ["companies"] }
