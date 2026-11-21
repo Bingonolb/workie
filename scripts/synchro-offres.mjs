@@ -45,7 +45,15 @@ async function lirePersonio(s) {
   };
   const [xml, origine] = [await lire("?language=fr"), await lire("")];
   const champ = (bloc, nom) => (bloc.match(new RegExp(`<${nom}>([\\s\\S]*?)</${nom}>`)) ?? [])[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim() ?? null;
-  const premierTexte = b => champ((b.match(/<jobDescription>([\s\S]*?)<\/jobDescription>/) ?? [])[1] ?? "", "value");
+  // La section qui décrit le poste (« Vos tâches », « Ihre Aufgaben »…), sinon
+  // la première qui ne présente pas l'entreprise, sinon la première.
+  const premierTexte = b => {
+    const sections = [...b.matchAll(/<jobDescription>([\s\S]*?)<\/jobDescription>/g)].map(([, x]) => ({ nom: champ(x, "name") ?? "", html: champ(x, "value") ?? "" }));
+    if (!sections.length) return "";
+    const poste = sections.find(x => TACHES.test(x.nom));
+    if (poste) return poste.html;
+    return (sections.find(x => !presenteEntreprise(texte(x.html)[0] ?? "", s.entreprise)) ?? sections[0]).html;
+  };
   const texteOrigine = new Map([...origine.matchAll(/<position>([\s\S]*?)<\/position>/g)].map(([, b]) => [champ(b, "id"), premierTexte(b)]));
   const CONTRATS = { permanent: "CDI", temporary: "CDD", intern: "Stage", trainee: "Alternance", freelance: "Freelance" };
   return [...xml.matchAll(/<position>([\s\S]*?)<\/position>/g)].map(([, b]) => {
@@ -85,19 +93,48 @@ const texte = html => (html ?? "")
  * paragraphe de présentation générique de l'entreprise (« At Julius Baer… »),
  * identique sur toutes les offres, et l'on s'arrête au premier intertitre.
  */
+// Intertitres qui annoncent le poste lui-même, dans les langues des offres suisses.
+const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|ihr profil?\b.*aufgab|die stelle|your (role|challenge|tasks|responsibilities|mission)|the role|responsibilit|compiti|mansioni/i;
+// Phrase d'accroche publicitaire, qui ne dit rien du travail.
+const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion/i;
+// Paragraphe de présentation de l'entreprise : déjà présenté sur sa fiche Workie.
+function presenteEntreprise(l, entreprise) {
+  const nom = entreprise.split(" ")[0].toLowerCase();
+  const b = l.toLowerCase();
+  return (b.includes(nom) && /^(at |chez |bei |join |über |about |depuis |seit |founded|fondée|gegründet)|est l[’']une? des|ist eine?r? der|is one of|est un[e]? (leader|acteur)|ist (ein|eine) (führend|internation)/.test(b))
+    || /^(wir sind|nous sommes|we are) /.test(b);
+}
+/**
+ * Aperçu du poste : la partie qui décrit le travail (tâches, rôle), jamais la
+ * présentation de l'entreprise, déjà faite par sa fiche Workie. Deux ou trois
+ * phrases, coupées proprement.
+ */
 function resume(html, entreprise) {
   const lignes = texte(html);
-  const nom = entreprise.split(" ")[0].toLowerCase();
+  const intertitre = l => l.length < 70 && (l === l.toUpperCase() || /[:?]$/.test(l) || TACHES.test(l) && l.split(" ").length <= 6);
+  // 1. Après un intertitre « tâches / rôle », s'il y en a un.
+  let depart = lignes.findIndex(l => intertitre(l) && TACHES.test(l));
+  depart = depart >= 0 ? depart + 1 : 0;
   const out = [];
-  for (const l of lignes) {
-    const intertitre = l.length < 60 && (l === l.toUpperCase() || /:$/.test(l));
-    if (intertitre) { if (out.length) break; else continue; }
-    if (!out.length && l.toLowerCase().includes(nom) && /^(at|chez|bei|join|über|about)\b/i.test(l)) continue;
-    out.push(l);
-    if (out.join(" ").length > 220) break;
+  for (let l of lignes.slice(depart)) {
+    if (intertitre(l)) { if (out.length) break; else continue; }
+    // Au début de l'aperçu, on retire phrase par phrase l'accroche et la
+    // présentation de l'entreprise ; la suite du paragraphe est gardée.
+    if (!out.length) {
+      const phrases = l.split(/(?<=[.!?])\s+/);
+      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]))) phrases.shift();
+      l = phrases.join(" ");
+      if (!l) continue;
+    }
+    out.push(l.replace(/^[-•·]\s*/, ""));
+    if (out.join(" ").length > 300) break;
   }
-  let r = out.join(" ");
-  if (r.length > 320) r = r.slice(0, 320).replace(/\s+\S*$/, "") + "…";
+  let r = out.join(" ").replace(/\s+/g, " ").trim();
+  if (r.length > 420) {
+    const coupe = r.slice(0, 420);
+    const fin = Math.max(coupe.lastIndexOf(". "), coupe.lastIndexOf("! "));
+    r = fin > 200 ? coupe.slice(0, fin + 1) : coupe.replace(/\s+\S*$/, "") + "…";
+  }
   return r || null;
 }
 function taux(titre) {
