@@ -3,9 +3,15 @@
 // (src/__tests__/regles-offres.test.ts). Modèle validé : Kellerhals Carrard.
 
 const NOMMEES = { nbsp: " ", amp: "&", quot: '"', lt: "<", gt: ">", apos: "’", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", ndash: "–", mdash: "—", hellip: "…", laquo: "«", raquo: "»", euro: "€", eacute: "é", egrave: "è", agrave: "à", uuml: "ü", ouml: "ö", auml: "ä", szlig: "ß" };
+// Toutes les lettres accentuées écrites en code HTML (« &acirc; », « &Eacute; »,
+// « &ccedil; ») : la lettre de base plus son accent, recomposés en un caractère.
+const ACCENTS = { acute: "́", grave: "̀", circ: "̂", uml: "̈", cedil: "̧", tilde: "̃", ring: "̊" };
+const LIGATURES = { aelig: "æ", AElig: "Æ", oelig: "œ", OElig: "Œ", oslash: "ø", Oslash: "Ø", eszett: "ß" };
 const entites = s => s
   .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
   .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+  .replace(/&([a-zA-Z])(acute|grave|circ|uml|cedil|tilde|ring);/g, (_, l, a) => (l + ACCENTS[a]).normalize("NFC"))
+  .replace(/&(aelig|AElig|oelig|OElig|oslash|Oslash);/g, (_, n) => LIGATURES[n])
   .replace(/&([a-z]+);/gi, (m, n) => NOMMEES[n.toLowerCase()] ?? m)
   .replace(/ /g, " ");
 // Les éléments de liste deviennent des phrases : sans ponctuation, deux puces
@@ -17,7 +23,7 @@ const texte = html => entites((html ?? "")
   .filter(Boolean);
 
 // Une candidature spontanée, un événement de recrutement : ce ne sont pas des offres.
-const CANDIDATURE_SPONTANEE = /initiativ|wildcard|spontan|unsolicited|open application|blindbewerbung|talent pool|talentpool|workshop|brown bag|webinar|info.?(session|abend|anlass)|career (day|event)|meets? |\bx\b.*\b(club|society)\b|recruiting event|messe|bclubb|boost your/i;
+const CANDIDATURE_SPONTANEE = /initiativ|wildcard|spontan|unsolicited|open application|blindbewerbung|talent pool|talentpool|workshop|brown bag|webinar|info.?(session|abend|anlass)|career (day|event)|meets? |\bx\b.*\b(club|society)\b|recruiting event|messe|\bclub\b|boost your/i;
 
 /**
  * Titre propre : sans code de référence (« REF297441C »), sans mention de genre
@@ -27,7 +33,9 @@ const CANDIDATURE_SPONTANEE = /initiativ|wildcard|spontan|unsolicited|open appli
 function titrePropre(t) {
   // Titre tout en capitales : remis en casse normale (« INTERNATIONAL TRAINEES »).
   // Les lieux après « - » ou « / » gardent leur majuscule (« - Geneva/Zurich »).
-  t = entites(t);
+  // Retour à la ligne dans le titre (« Gesamtleistungen<br/>für die Region… ») :
+  // une espace ; autres balises retirées ; virgule finale retirée.
+  t = entites(t).replace(/\s*<br\s*\/?>\s*/gi, " ").replace(/<[^>]+>/g, "").replace(/[\s,;]+$/, "");
   if (t === t.toUpperCase() && /[A-Z]{4}/.test(t)) {
     t = t.toLowerCase().replace(/^\p{L}/u, c => c.toUpperCase());
     t = t.replace(/(\s[-–]\s+)([^()]+)$/u, (_, sep, lieux) => sep + lieux.replace(/(^|\/)\s*(\p{L})/gu, (m, a, c) => a + c.toUpperCase()));
@@ -55,7 +63,7 @@ function titrePropre(t) {
 // Suisse : nom du pays dans les langues usuelles, ou une ville suisse connue.
 // Mots entiers seulement : « Bern » ne doit pas prendre « Bernalillo », ni
 // « Wil » « Wilmington ». Fribourg seul (Freiburg est aussi en Allemagne).
-const SUISSE = /(?<![\p{L}])(switzerland|schweiz|suisse|svizzera|svizra|zürich|zurich|genève|geneva|genf|lausanne|bern|berne|basel|bâle|lugano|luzern|lucerne|st\.? ?gallen|winterthur|zug|fribourg|neuchâtel|sion|aarau|thun|chur|biel|bienne|schaffhausen|solothurn|olten|yverdon|montreux|vevey|nyon|morges|meyrin|plan-les-ouates|renens|locarno|bellinzona|rapperswil|frauenfeld|kloten|opfikon|dübendorf|schlieren|allschwil|pratteln|muttenz|rotkreuz|gland|crissier|steinhausen|zuchwil|horgen)(?![\p{L}])|,\s*CH\b|\bCH-\d{4}/iu;
+const SUISSE = /(?<![\p{L}])(switzerland|schweiz|suisse|svizzera|svizra|zürich|zurich|genève|geneva|genf|lausanne|bern|berne|basel|bâle|lugano|luzern|lucerne|st\.? ?gallen|winterthur|zug|fribourg|neuchâtel|sion|aarau|thun|chur|biel|bienne|schaffhausen|solothurn|olten|yverdon|montreux|vevey|nyon|morges|meyrin|plan-les-ouates|renens|locarno|bellinzona|rapperswil|frauenfeld|kloten|opfikon|dübendorf|schlieren|allschwil|pratteln|muttenz|graubünden|grisons|grigioni|wallis|valais|vallese|tessin|ticino|aargau|argovie|thurgau|thurgovie|st.? ?moritz|arosa|davos|klosters|zermatt|saas-fee|gstaad|interlaken|grindelwald|wengen|verbier|crans-montana|villars-sur-ollon|engelberg|flims|laax|lenzerheide|pontresina|samedan|ascona|brissago|bürgenstock|nottwil|uzwil|sursee|emmen|kriens|baar|cham|wädenswil|uster|wetzikon|dietikon|bülach|kloten|wallisellen|zollikon|küsnacht|meilen|thalwil|adliswil|liestal|reinach|münchenstein|binningen|riehen|langenthal|burgdorf|köniz|ostermundigen|spiez|brig|visp|monthey|martigny|sierre|bulle|delémont|porrentruy|la chaux-de-fonds|le locle|yverdon-les-bains|pully|prilly|ecublens|carouge|lancy|vernier|onex|thônex|chêne-bourg|mendrisio|chiasso|zofingen|wohlen|lenzburg|brugg|rheinfelden|wil|gossau|herisau|appenzell|rorschach|arbon|kreuzlingen|weinfelden|amriswil|schwyz|einsiedeln|altdorf|stans|sarnen|glarus|näfels|buchs|sargans|rapperswil-jona|pfäffikon|freienbach|lachen|gland|crissier|horgen|rotkreuz|hünenberg|steinhausen|zuchwil)(?![\p{L}])|,\s*CH\b|\bCH-\d{4}/iu;
 
 /**
  * Lieu structuré « Ville, CH, 8152 », « Ville, TI », « Ville, CH » : suisse
@@ -87,7 +95,7 @@ function lieuEnSuisse(lieu, { cantons = false } = {}) {
 // Intertitres qui annoncent le poste lui-même, dans les langues des offres suisses.
 const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|die stelle|your (role|challenge|tasks|responsibilities|mission|impact)|the role|responsibilit|what you.ll do|compiti|mansioni/i;
 // Phrase d'accroche publicitaire, qui ne dit rien du travail.
-const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue/i;
+const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil/i;
 // Présentation de l'entreprise : déjà faite par sa fiche Workie.
 function presenteEntreprise(l, entreprise) {
   const nom = entreprise.split(/[\s(]/)[0].toLowerCase();
@@ -101,6 +109,14 @@ function presenteEntreprise(l, entreprise) {
   if (/^(über uns|about us|à propos|qui sommes-nous|wer wir sind|who we are|en tant qu.entreprise|as a (family|global|leading|world)|als (familienunternehmen|führende|global)|faire carrière chez|working at|arbeiten bei|travailler chez)/.test(b)) return true;
   return (b.includes(nom) && /^(at |chez |bei |join |über |about |depuis |seit |founded|fondée|gegründet)|est l[’']une? des|ist eine?r? der|is one of|est un[e]? (leader|acteur|entreprise)|ist (ein|eine) (führend|internation|unternehmen|tochter)|is a (leading|global|company)|est une entreprise/.test(b))
     || /^(wir sind|nous sommes|we are|bei uns|chez nous|at our company)[ ,]/.test(b)
+    // « Als eines der vier Häuser der Tschuggen Collection… », « Wir ermöglichen
+    // unseren Versicherten… » : l'entreprise parle d'elle, pas du poste.
+    || /^(als (eines|einer|eine|ein) der|en tant que l.un des|as one of the)\b/.test(b)
+    || /^wir (ermöglichen|verzaubern|begeistern|gestalten|stehen|sind stolz|entwickeln und produzieren|produzieren|bieten unseren kunden)/.test(b)
+    // Un groupe ou une coopérative qui se décrit, sans un mot pour le candidat :
+    // « Die LANDI Genossenschaften unterstützen die Schweizer Bäuerinnen… ».
+    || (/^(die|der|das|le|la|les|the) [^.]{0,40}(genossenschaft|gruppe|group|groupe|unternehmen|konzern|firma|holding|coopérative|société)/.test(b)
+      && !/\b(du|dich|dein|sie werden|deine|you|your|vous|votre|tu|ton|ta)\b/.test(b))
     || /^(unser (hauptsitz|unternehmen|team besteht)|notre (siège|entreprise)|our (headquarters|company) )/.test(b)
     || /^(our|unsere|nos|notre) (holistic |)(products|produkte|produits|offerings|angebote|mission|vision|purpose|values|werte|valeurs|history|geschichte|histoire|brands|marken|marques)\b/.test(b)
     // Histoire et taille de l'entreprise, sans un mot pour le candidat :
@@ -115,7 +131,9 @@ function presenteEntreprise(l, entreprise) {
  * proprement.
  */
 // Lignes administratives sans rapport avec le travail (organisations internationales…).
-const ADMINISTRATIF = /^(deadline for applications|hardship level|family type|residential location|grade\b|job location|location\b|lieu\b|standort\b|reference|référence|job id|req(uisition)? id|posting date|date de publication|no\.? du poste|vacancy (no|notice)|date de clôture|closing date)/i;
+const ADMINISTRATIF = /^(deadline for applications|hardship level|family type|residential location|grade\b|job location|location\b|lieu\b|standort\b|reference|référence|job id|req(uisition)? id|posting date|date de publication|no\.? du poste|vacancy (no|notice)|date de clôture|closing date|arbeitsort|einsatzort|lieu de travail|place of work|luogo di lavoro|online seit|en ligne depuis|online since|publiziert am|publié le)/i;
+// En-tête de page d'offre : « Graubündner Kantonalbank | online seit: 16.04.2026 ».
+const EN_TETE = l => /\|\s*(online seit|en ligne depuis|online since|publiziert|publié)/i.test(l);
 // Ligne-fiche en tête d'annonce : « 138104 | 80 - 100% | Oerlikon | Hybrid »,
 // « Versicherung / Baden / Unbefristet / 80% », « 📍 Aarau, Chur… ».
 const LIGNE_FICHE = l => (l.match(/\s\|\s/g) ?? []).length >= 2 || (l.match(/\s\/\s/g) ?? []).length >= 3 || /^\p{Extended_Pictographic}/u.test(l);
@@ -126,11 +144,18 @@ const RUBRIQUE_COLLEE = /^(introduction|deine rolle|ihre rolle|deine aufgaben|ih
 function resume(html, entreprise, titre = "") {
   const norm = x => x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
   const lignes = texte(html)
-    .filter(l => !ADMINISTRATIF.test(l) && !LIGNE_FICHE(l) && !SIGNATURE(l))
+    .filter(l => !ADMINISTRATIF.test(l) && !LIGNE_FICHE(l) && !SIGNATURE(l) && !EN_TETE(l))
     // Ligne qui commence par le titre de l'offre suivi de ses conditions
-    // (« Key Account Manager Retail 100% Lenzburg, AG Du willst… ») : on
-    // garde ce qui vient après, à partir de la première vraie phrase.
-    .map(l => titre && norm(l).startsWith(norm(titre)) ? (l.match(/\s((?:Du|Sie|Wir|Vous|Tu|Nous|You|We|In|Als|En|As)\s.*)$/)?.[1] ?? "") : l)
+    // (« Key Account Manager Retail 100% Lenzburg, AG Du willst… », « Senior
+    // IT/OT Systems Engineer (w/m/d) 80% - 100% Du möchtest… ») : on garde ce
+    // qui vient après, à partir de la première vraie phrase. Le titre est
+    // comparé nettoyé, sans mention de genre ni taux.
+    .map(l => {
+      if (!titre) return l;
+      const debut = norm(titrePropre(l)).slice(0, Math.max(12, norm(titre).length - 6));
+      if (!norm(titre).startsWith(debut.slice(0, 12)) || !norm(titrePropre(l)).startsWith(norm(titre).slice(0, Math.min(norm(titre).length, 30)))) return l;
+      return l.match(/\s((?:Du|Sie|Wir|Vous|Tu|Nous|You|We|In|Als|En|As|Bei|Chez|At)\s.*)$/)?.[1] ?? "";
+    })
     .map(l => l.replace(RUBRIQUE_COLLEE, ""))
     .filter(Boolean);
   // Intertitre : en capitales, terminé par « : », annonçant les tâches, ou
@@ -155,7 +180,8 @@ function resume(html, entreprise, titre = "") {
     out.push(l.replace(/^[-•·]\s*/, "").replace(/^(\d+|[a-z])[.)]\s+/, "").replace(/^(job description|description du poste|stellenbeschreibung)\s*:?\s*/i, ""));
     if (out.join(" ").length > 300) break;
   }
-  let r = out.join(" ").replace(/\s+/g, " ").trim();
+  // Espace avant une virgule ou un point (« (H/F) , prêt ») : faute de frappe de la source.
+  let r = out.join(" ").replace(/\s+/g, " ").replace(/\s+([,.](?:\s|$))/g, "$1").trim();
   if (r.length > 420) {
     const coupe = r.slice(0, 420);
     const fin = Math.max(coupe.lastIndexOf(". "), coupe.lastIndexOf("! "));
@@ -196,6 +222,12 @@ function lieuPropre(lieu, villeEntreprise) {
   if (!l) return villeEntreprise ?? null;
   // Pays seul (« CH ») : on ne sait pas où, et la ville du siège induirait en erreur.
   if (/^(CH|switzerland|schweiz|suisse)$/i.test(l)) return null;
+  // Débris : « --> Consultant » (flèche de menu), lieu générique sans ville.
+  if (/^[-=>\s]+/.test(l) && !/^\p{L}/u.test(l)) return villeEntreprise ?? null;
+  if (/^(central|zentral|diverse|divers|various|plusieurs|mehrere|schweiz ?weit|toute la suisse|ganze schweiz)$/i.test(l)) return villeEntreprise ?? null;
+  // « Hauptsitz Chur », « Region Arosa », « Grossraum Zürich », « Rüfenacht b. Bern ».
+  l = l.replace(/^(hauptsitz|siège( de)?|headquarters|region|région|grossraum|raum|kanton|canton|bezirk)\s+/i, "")
+    .replace(/\s+(b\.|bei|près de|près)\s+.+$/i, "");
   l = l.replace(/^CHE?-([^-]+)-.*$/i, "$1")
     .split(/\s*(?:,|\s*\/\s+|\s[-–]\s|\(|\s(?:oder|und|sowie|ou|et|or|and|o)\s)\s*/)[0]
     .replace(/^\d{4}\s+/, "")
@@ -212,13 +244,34 @@ function lieuPropre(lieu, villeEntreprise) {
   if (/^\d+ (locations|standorte|lieux)/i.test(l)) return villeEntreprise ?? null;
   // Code interne en capitales (« CWR ») : pas une ville. « Root » en est une.
   if (!SUISSE.test(l) && l === l.toUpperCase()) return villeEntreprise ?? null;
+  // Nom de magasin ou de quartier après la ville : « Aarau City Restaurant »,
+  // « Bern Bahnhof to go », « Bellinzona Nord », « Basel Aeschenplatz ».
+  // On retire les mots de magasin en fin, puis, si le début est une ville
+  // suisse connue, on garde la ville seule.
+  // Préfixes de magasin ou d'annonce : « Neueröffnung Andermatt », « Coop City
+  // Fusterie », « VZ Castione ». Un nom d'hôtel seul n'est pas un lieu.
+  if (/^hotel\s/i.test(l)) return villeEntreprise ?? null;
+  const magasin = /^(coop city|coop pronto|coop|filiale|magasin|store)\s+/i.test(l);
+  l = l.replace(/^(neueröffnung|eröffnung|nouvelle ouverture|coop city|coop pronto|coop|vz|filiale|magasin|store)\s+/i, "");
+  // « Coop City Fusterie » : ce qui reste est le nom du magasin, pas une ville.
+  if (magasin && !SUISSE.test(l)) return villeEntreprise ?? null;
+  l = l.replace(/\s+(ipermercato|supermercato|personalrestaurant|stadtgarten|einkaufszentrum)\b.*$/i, "");
+  l = l.replace(/(\s+(restaurant|to go|city|nord|sud|süd|ost|west|est|ouest|dorf|zentrum|center|centre|bahnhof|gare|bhf|shop|filiale|markt|telli|pfauen|reuss|fusterie))+$/i, "").trim();
+  const mots = l.split(/\s+/);
+  for (let n = Math.min(mots.length, 4); n >= 1 && mots.length > 1; n--) {
+    const debut = mots.slice(0, n).join(" ");
+    if (n < mots.length && new RegExp(`^(?:${SUISSE.source})$`, "iu").test(debut)) { l = debut; break; }
+  }
+  // Débris sans ville (« Am », « Bahnhof ») ou service itinérant.
+  if (/^(am|an|im|in|bahnhof|gare|zentrale|centrale)$/i.test(l)) return villeEntreprise ?? null;
+  if (/aussendienst|service externe|field service|mobile/i.test(l)) return "Service externe";
   return VILLES_FR[l.toLowerCase()] ?? (l || villeEntreprise || null);
 }
 // Le site est en français : une même ville s'écrit d'une seule façon, sinon
 // « Geneva » et « Genève » apparaîtraient comme deux lieux.
 const VILLES_FR = {
-  geneva: "Genève", genf: "Genève", ginevra: "Genève", "genève": "Genève",
-  "zürich": "Zurich", zuerich: "Zurich", zurigo: "Zurich",
+  geneva: "Genève", genf: "Genève", ginebra: "Genève", genebra: "Genève", wintethur: "Winterthur", winterhur: "Winterthur", ginevra: "Genève", "genève": "Genève",
+  "zürich": "Zurich", zuerich: "Zurich", zurigo: "Zurich", zug: "Zoug", zugo: "Zoug", "st. moritz": "Saint-Moritz", "st.moritz": "Saint-Moritz", "sankt moritz": "Saint-Moritz", tessin: "Tessin", ticino: "Tessin",
   bern: "Berne", berna: "Berne", basel: "Bâle", basilea: "Bâle",
   luzern: "Lucerne", lucerna: "Lucerne", "st. gallen": "Saint-Gall", "st.gallen": "Saint-Gall", "sankt gallen": "Saint-Gall",
   freiburg: "Fribourg", "neuenburg": "Neuchâtel", "biel": "Bienne", "biel/bienne": "Bienne", "solothurn": "Soleure",

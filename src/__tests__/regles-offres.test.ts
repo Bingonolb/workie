@@ -1,7 +1,7 @@
 // Règles des offres synchronisées, sur des cas réels rencontrés.
 // Modèle validé par Luc : Kellerhals Carrard (2026-11-21).
 import { describe, it, expect } from "vitest";
-import { titrePropre, resume, taux, contrat, lieuPropre, lieuEnSuisse, CANDIDATURE_SPONTANEE, SUISSE } from "../lib/synchroOffres/regles.mjs";
+import { titrePropre, resume, taux, contrat, lieuPropre, lieuEnSuisse, entites, CANDIDATURE_SPONTANEE, SUISSE } from "../lib/synchroOffres/regles.mjs";
 
 describe("titrePropre", () => {
   it.each([
@@ -170,4 +170,58 @@ describe("BCV", () => {
     const html = "<p>Et si votre histoire professionnelle se poursuivait à la BCV ?</p><p>Mettez vos ambitions managériales au service d’une performance saine en rejoignant la première banque du canton.</p><p>Vos missions principales:</p><ul><li>piloter le portefeuille de projets du domaine</li><li>conduire une équipe d’une quinzaine de collaborateurs</li></ul>";
     expect(resume(html, "Banque Cantonale Vaudoise (BCV)", "Responsable")).toBe("Piloter le portefeuille de projets du domaine. Conduire une équipe d’une quinzaine de collaborateurs.");
   });
+});
+
+describe("Umantis : propreté (cas réels)", () => {
+  it("décode toutes les lettres accentuées", () => {
+    expect(entites("État de Neuch&acirc;tel, Z&uuml;rich, Gen&egrave;ve, fran&ccedil;ais, &Eacute;cole, c&oelig;ur")).toBe("État de Neuchâtel, Zürich, Genève, français, École, cœur");
+  });
+  it("lieux", () => {
+    expect(lieuPropre("--> Consultant", "Zurich")).toBe("Zurich");
+    expect(lieuPropre("Hauptsitz Chur")).toBe("Coire");
+    expect(lieuPropre("Region Arosa")).toBe("Arosa");
+    expect(lieuPropre("Rüfenacht b. Bern")).toBe("Rüfenacht");
+    expect(lieuPropre("Central", "Zoug")).toBe("Zoug");
+    expect(lieuPropre("Zug")).toBe("Zoug");
+    expect(lieuPropre("St. Moritz, Graubünden")).toBe("Saint-Moritz");
+  });
+  it("aperçus : ni en-tête, ni présentation, ni titre répété", () => {
+    expect(resume("<p>Graubündner Kantonalbank | online seit: 16.04.2026</p><p>Du leitest Projekte im Bereich Digitalisierung und koordinierst die Teams.</p>", "Banque cantonale des Grisons (GKB)", "Senior Projektleiter:in")).toMatch(/^Du leitest/);
+    expect(resume("<p>Arbeitsort: Zürich - Rehalp</p><p>Du führst ein Team von Umweltfachleuten und begleitest Bauprojekte.</p>", "Basler & Hofmann", "Teamleiter:in")).toMatch(/^Du führst/);
+    expect(resume("<p>Als eines der vier Häuser der The Tschuggen Collection bietet unser Haus 128 Zimmer.</p><p>Du betreust die Reservationen und optimierst die Belegung des Hotels.</p>", "Tschuggen Grand Hotel", "Reservation Manager")).toMatch(/^Du betreust/);
+    expect(resume("<p>Werde Teil von etwas Grösserem – werde Teil der Schweizer Paraplegiker Gruppe.</p><p>Du begleitest Patientinnen und Patienten im Alltag und unterstützt das Pflegeteam.</p>", "Paraplegiker-Zentrum Nottwil", "Assistent*in")).toMatch(/^Du begleitest/);
+    expect(resume("<p>Senior IT/OT Systems Engineer (w/m/d) 80% - 100% Du möchtest die Zukunft einer modernen Produktion mitgestalten.</p>", "CMSA", "Senior IT/OT Systems Engineer 80% - 100%")).toMatch(/^Du möchtest/);
+    expect(resume("<p>Lust, dich weiterzuentwickeln? Bei uns findest du ein dynamisches Umfeld.</p><p>Du bearbeitest Dienstbarkeiten und berätst interne Stellen in Rechtsfragen.</p>", "Energie 360°", "Paralegal")).toMatch(/^Du bearbeitest/);
+  });
+});
+
+describe("magasins, titres sur deux lignes, coopératives (cas réels)", () => {
+  it("lieux de magasins", () => {
+    expect(lieuPropre("Aarau City Restaurant")).toBe("Aarau");
+    expect(lieuPropre("Bern Bahnhof to go")).toBe("Berne");
+    expect(lieuPropre("Basel City Pfauen Restaurant")).toBe("Bâle");
+    expect(lieuPropre("Bellinzona Nord")).toBe("Bellinzona");
+    expect(lieuPropre("Basel Aeschenplatz")).toBe("Bâle");
+    expect(lieuPropre("Bahnhof", "Bâle")).toBe("Bâle");
+    expect(lieuPropre("Aussendienst Schweiz")).toBe("Service externe");
+    expect(lieuPropre("La Chaux-de-Fonds")).toBe("La Chaux-de-Fonds");
+    expect(lieuPropre("Le Grand-Saconnex")).toBe("Le Grand-Saconnex");
+  });
+  it("titres", () => {
+    expect(titrePropre("Verantwortlicher Gesamtleistungen<br/>für die Region Südschweiz")).toBe("Verantwortlicher Gesamtleistungen für die Region Südschweiz");
+    expect(titrePropre("Laborant:in,<br/>vor- und nachgeburtliche genetische Diagnostik,")).toBe("Laborant:in, vor- und nachgeburtliche genetische Diagnostik");
+  });
+  it("coopérative qui se présente, espace avant virgule", () => {
+    expect(resume("<p>Die LANDI Genossenschaften unterstützen die Schweizer Bäuerinnen und Bauern.</p><p>Du berätst unsere Kundschaft im TopShop und bedienst die Kasse.</p>", "fenaco", "Verkaufsmitarbeiter/in")).toMatch(/^Du berätst/);
+    expect(resume("<p>Nous recherchons un responsable (H/F) , prêt à suivre l'activité du site de Bulle .</p>", "Rolex", "Responsable")).toBe("Nous recherchons un responsable (H/F), prêt à suivre l'activité du site de Bulle.");
+  });
+});
+
+describe("derniers lieux de magasins", () => {
+  it.each([
+    ["Neueröffnung Andermatt Reuss", "Andermatt"], ["Schafisheim Personalrestaurant", "Schafisheim"],
+    ["Losone Ipermercato Cattori", "Losone"], ["Coop City Fusterie", "Coop City Fusterie"], ["VZ Castione", "Castione"],
+    ["Ginebra", "Genève"], ["Wintethur Stadtgarten", "Winterthur"], ["Kölliken", "Kölliken"],
+  ])("%s", (brut, attendu) => expect(lieuPropre(brut, attendu === "Coop City Fusterie" ? "Genève" : undefined)).toBe(attendu === "Coop City Fusterie" ? "Genève" : attendu));
+  it("hôtel", () => expect(lieuPropre("Hotel Pullman", "Bâle")).toBe("Bâle"));
 });

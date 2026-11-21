@@ -246,6 +246,109 @@ const LECTEURS = {
       });
   },
 
+  // Umantis (Abacus) : la page publique /Jobs/All liste toutes les offres,
+  // avec des champs étiquetés (lieu, taux, type de contrat). Le détail d'une
+  // offre est souvent repris sur le site du client, différent d'un client à
+  // l'autre : on n'y lit que le bloc « JobPosting » quand il existe.
+  //
+  // Deux mises en page selon le client : liste à champs étiquetés
+  // (« Art : unbefristet ») ou ligne à segments séparés par « | »
+  // (« Befristung: Unbefristet | Basel »). La liste est paginée (10 par page).
+  // `garder` : pour un compte partagé (Tschuggen Collection), le nom de la
+  // société en tête de ligne qui désigne l'entreprise.
+  async umantis({ base, cantons, garder }) {
+    const propre = s => entites((s ?? "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+    let html = await (await lireUrl(`${base}/Jobs/All`)).text();
+    const pages = [html];
+    // Page suivante : lien « ?tc…=p2 » dans la page, ou, dans la nouvelle
+    // navigation, construit à partir du tableau et de son jeton de recherche.
+    const vus = new Set();
+    for (let p = 2; p <= 40; p++) {
+      let suite = html.match(new RegExp(`href="(\\?tc\\d+=p${p}[^"]*)"`))?.[1];
+      if (!suite) {
+        const table = html.match(/connectortable_(\d+)/)?.[1];
+        const jeton = html.match(/search_token(?:&quot;|")\s*:\s*(?:&quot;|")(\d+)/)?.[1];
+        const total = Number(html.match(/(\d+)\s*(?:Treffer|résultats|results|Stellen|offres)/i)?.[1] ?? 0);
+        if (!table || !jeton || (total && (p - 1) * 10 >= total)) break;
+        suite = `?tc${table}=p${p}&_search_token${table}=${jeton}`;
+      }
+      await pause(400);
+      html = await (await lireUrl(`${base}/Jobs/All${entites(suite).replace(/#.*$/, "")}`)).text();
+      // Page déjà vue (la navigation renvoie la dernière page) : fin.
+      const premier = html.match(/\/Vacancies\/(\d+)\/Description/)?.[1];
+      if (!premier || vus.has(premier)) break;
+      vus.add(premier);
+      pages.push(html);
+    }
+    const lignes = pages.flatMap(h => h.split(/<tr class="(?:table-as-list__contentrow|tableaslist_contentrow)/).slice(1));
+    const offres = [];
+    for (const l of lignes) {
+      const lien = l.match(/href="(\/Vacancies\/(\d+)\/Description\/\d+)"[^>]*>([\s\S]*?)<\/a>/);
+      if (!lien) continue;
+      const champs = {};
+      // Mise en page 1 : étiquette + valeur.
+      for (const m of l.matchAll(/id="column_label_\d+">([^<]*)<\/span>[\s\S]*?<span class="column-value"[^>]*>([\s\S]*?)<\/span>/g)) {
+        champs[propre(m[1]).toLowerCase()] = propre(m[2]);
+      }
+      // Mise en page 2 : segments « | Étiquette: valeur » ou « | valeur ».
+      const segments = [...l.matchAll(/<span class="tableaslist_(?:text|subtitle)[^"]*">([\s\S]*?)<\/span>/g)].map(m => propre(m[1]).replace(/^\|\s*/, "")).filter(Boolean);
+      const societe = segments[0] ?? propre(l.match(/aria-label="([^"]+)"[^>]*>\s*<span class="visually-hidden"/)?.[1]);
+      const libres = [];
+      for (const s of segments.slice(1)) {
+        if (/Jetzt bewerben|Postuler|Apply|online seit|en ligne depuis/i.test(s) || s === propre(lien[3])) continue;
+        // « Étiquette: valeur » : deux-points suivis d'une espace, sinon
+        // « Produktmanager:in » serait pris pour une étiquette.
+        const kv = s.match(/^([^:]{2,30}):\s+(.+)$/);
+        if (kv) champs[kv[1].toLowerCase()] = kv[2]; else libres.push(s);
+      }
+      const valeur = re => Object.entries(champs).find(([k]) => re.test(k))?.[1];
+      // Lieu non étiqueté : le segment libre qui ressemble à une ville.
+      if (!valeur(/ort|lieu|location|standort|luogo/)) {
+        // Seulement une ville reconnue : un segment comme « Banking » n'est pas un lieu.
+        const ville = libres.find(s => s.length < 40 && s !== societe && (SUISSE.test(s) || lieuEnSuisse(s)));
+        if (ville) champs.ort = ville;
+      }
+      // Compte partagé : seulement les offres de la société (ou de la station) voulue.
+      if (garder && !garder.some(g => [societe ?? "", ...Object.values(champs)].some(v => v.toLowerCase().includes(g.toLowerCase())))) continue;
+      const lieuListe = valeur(/^(arbeits)?ort$|^ort|lieu|location|standort|arbeitsort|luogo/);
+      const listeSuisse = Boolean(lieuListe && (lieuEnSuisse(lieuListe) || SUISSE.test(lieuListe)));
+      const pensum = valeur(/pensum|taux|beschäftigung|arbeitspensum|grado/);
+      const n = [...(pensum ?? "").matchAll(/\d{2,3}/g)].map(x => Number(x[0])).filter(x => x >= 10 && x <= 100);
+      offres.push({
+        ref: lien[2], titre: entites(lien[3].replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim(),
+        lieu: lieuListe,
+        contrat: valeur(/^art$|anstellung|contrat|vertrag|type|befrist/),
+        taux: n.length ? [Math.min(...n), Math.max(...n)] : undefined,
+        url: `${base}${lien[1]}`,
+        detail: async () => {
+          const page = await (await lireUrl(`${base}${lien[1]}`)).text();
+          for (const m of page.matchAll(/<script[^>]*ld\+json[^>]*>([\s\S]*?)<\/script>/g)) {
+            try {
+              const o = JSON.parse(m[1]);
+              if (o["@type"] === "JobPosting") return { html: o.description ?? "", date: o.datePosted };
+            } catch { /* bloc illisible : on passe */ }
+          }
+          // Page restée chez Umantis : on lit son contenu (les règles d'aperçu
+          // y trouvent la rubrique des tâches). Redirigée vers le site du
+          // client, sa mise en page est inconnue : pas d'aperçu.
+          if (!/umantis/i.test(page) || !/\/Vacancies\//.test(page)) return { html: "" };
+          const corps = page.replace(/<(script|style|nav|header|footer)[\s\S]*?<\/\1>/gi, "");
+          const debut = corps.search(/<h1[\s>]/i);
+          const contenu = debut >= 0 ? corps.slice(debut) : corps;
+          // Lieu écrit sur la page : « Arbeitsort: Bern », « Lieu de travail : Genève ».
+          const lieu = texte(contenu).map(l => l.match(/^(?:arbeitsort|standort|einsatzort|lieu de travail|lieu|workplace|location|place of work|luogo di lavoro)\s*:\s*(.{2,60})$/i)?.[1]).find(Boolean);
+          // Entreprise internationale sans lieu dans la liste : c'est la page
+          // qui tranche ; sans lieu suisse reconnu, l'offre est écartée.
+          const suisse = cantons || listeSuisse ? undefined : Boolean(lieu && (lieuEnSuisse(lieu) || SUISSE.test(lieu)));
+          return { html: contenu.replace(/<h1[\s\S]*?<\/h1>/i, ""), ...(lieu ? { lieu } : {}), ...(suisse === false ? { suisse } : {}) };
+        },
+      });
+    }
+    // Entreprise présente seulement en Suisse : toutes ses offres. Sinon, une
+    // offre au lieu étranger est écartée ici ; sans lieu, la page tranchera.
+    return offres.filter(o => cantons || !o.lieu || lieuEnSuisse(o.lieu) || SUISSE.test(o.lieu));
+  },
+
   // Recruitee : API publique des offres.
   async recruitee({ compte }) {
     const d = await json(`https://${compte}.recruitee.com/api/offers/`);
@@ -409,3 +512,6 @@ export async function synchroniserTout({ client, essai = false, complet: relireT
     echec: erreurs.length > Math.max(2, resultats.length / 5),
   };
 }
+
+// Lecteurs exposés pour les essais (scripts, tests).
+export { LECTEURS };
