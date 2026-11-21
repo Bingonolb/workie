@@ -150,3 +150,17 @@ describe("titres : marque et villes en trop", () => {
     expect(resume("<p>Our holistic offerings are designed to enhance individual health.</p><p>You advise managers on all HR topics for the Arlesheim site.</p>", "Weleda")).toMatch(/^You advise/);
   });
 });
+
+describe("intertitres isolés", () => {
+  it("« Introduction » et « Responsabilités » ne font pas partie de l'aperçu", () => {
+    const html = "<p>Introduction</p><p>Pour le groupe Masses MP, nous recherchons un responsable de groupe qui encadre une équipe de production.</p><p>Responsabilités</p><ul><li>Encadrer l'équipe</li></ul>";
+    expect(resume(html, "Rolex", "Responsable de groupe")).toBe("Pour le groupe Masses MP, nous recherchons un responsable de groupe qui encadre une équipe de production.");
+  });
+});
+
+describe("BCV", () => {
+  it("saute l'accroche en question et l'invitation", () => {
+    const html = "<p>Et si votre histoire professionnelle se poursuivait à la BCV ?</p><p>Mettez vos ambitions managériales au service d’une performance saine en rejoignant la première banque du canton.</p><p>Vos missions principales:</p><ul><li>piloter le portefeuille de projets du domaine</li><li>conduire une équipe d’une quinzaine de collaborateurs</li></ul>";
+    expect(resume(html, "Banque Cantonale Vaudoise (BCV)", "Responsable")).toBe("Piloter le portefeuille de projets du domaine. Conduire une équipe d’une quinzaine de collaborateurs.");
+  });
+});

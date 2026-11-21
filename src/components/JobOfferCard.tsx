@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, MapPin, ExternalLink } from "lucide-react";
+import { X, MapPin, ExternalLink, ChevronRight } from "lucide-react";
 import { trackJobApplyClick } from "@/lib/actions/analytics";
 import { libelleTaux, nomLangue } from "@/lib/offres";
 import { useVerrouDefilement } from "@/lib/useVerrouDefilement";
@@ -76,7 +76,11 @@ function Badge({ label, color }: { label: string; color: string }) {
   );
 }
 
-export function JobOfferCard({ job, companyName, companyId }: { job: Job; companyName: string; companyId: string }) {
+/**
+ * `ligne` : forme compacte, pour les longues listes (une ligne par offre,
+ * séparées par un filet), comme sur les grands sites d'emploi.
+ */
+export function JobOfferCard({ job, companyName, companyId, ligne = false }: { job: Job; companyName: string; companyId: string; ligne?: boolean }) {
   const [open, setOpen] = useState(false);
   const taux = libelleTaux(job.taux_min, job.taux_max);
   // Le clic sur « Postuler » compte pour l'entreprise (statistiques) et pour le
@@ -101,7 +105,17 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
 
   return (
     <>
-      {/* Card — clickable to open modal */}
+      {ligne ? (
+        <button type="button" className="jo-ligne" onClick={() => setOpen(true)} aria-label={`Voir l'offre : ${job.title}`}>
+          <span className="jo-ligne-texte">
+            <span className="jo-ligne-titre">{job.title}</span>
+            <span className="jo-ligne-meta">
+              {[job.location, job.contract_type, taux].filter(Boolean).join(" · ")}
+            </span>
+          </span>
+          <ChevronRight size={18} aria-hidden="true" className="jo-ligne-fleche" />
+        </button>
+      ) : (
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -134,6 +148,7 @@ export function JobOfferCard({ job, companyName, companyId }: { job: Job; compan
         </div>
         <p className="jo-lien" style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>Voir l&apos;offre →</p>
       </button>
+      )}
 
       {/* Modal — portaled to document.body to escape sticky/transform stacking contexts */}
       {open && mounted && createPortal(

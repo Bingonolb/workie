@@ -13,7 +13,7 @@ const entites = s => s
 const texte = html => entites((html ?? "")
   .replace(/<\/li>/gi, "¶\n").replace(/<\/(p|h\d|div|ul|ol)>|<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, " "))
   .replace(/[ \t]+/g, " ").split("\n").map(s => s.trim())
-  .map(s => s.endsWith("¶") ? s.slice(0, -1).trim().replace(/([^.!?:;,…])$/, "$1.") : s)
+  .map(s => s.endsWith("¶") ? s.slice(0, -1).trim().replace(/[,;]$/, "").replace(/([^.!?:…])$/, "$1.").replace(/^\p{Ll}/u, c => c.toUpperCase()) : s)
   .filter(Boolean);
 
 // Une candidature spontanée, un événement de recrutement : ce ne sont pas des offres.
@@ -87,7 +87,7 @@ function lieuEnSuisse(lieu, { cantons = false } = {}) {
 // Intertitres qui annoncent le poste lui-même, dans les langues des offres suisses.
 const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|die stelle|your (role|challenge|tasks|responsibilities|mission|impact)|the role|responsibilit|what you.ll do|compiti|mansioni/i;
 // Phrase d'accroche publicitaire, qui ne dit rien du travail.
-const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position/i;
+const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue/i;
 // Présentation de l'entreprise : déjà faite par sa fiche Workie.
 function presenteEntreprise(l, entreprise) {
   const nom = entreprise.split(/[\s(]/)[0].toLowerCase();
@@ -133,7 +133,11 @@ function resume(html, entreprise, titre = "") {
     .map(l => titre && norm(l).startsWith(norm(titre)) ? (l.match(/\s((?:Du|Sie|Wir|Vous|Tu|Nous|You|We|In|Als|En|As)\s.*)$/)?.[1] ?? "") : l)
     .map(l => l.replace(RUBRIQUE_COLLEE, ""))
     .filter(Boolean);
-  const intertitre = l => l.length < 70 && (l === l.toUpperCase() || /[:?]$/.test(l) || TACHES.test(l) && l.split(" ").length <= 6);
+  // Intertitre : en capitales, terminé par « : », annonçant les tâches, ou
+  // ligne très courte sans ponctuation (« Introduction », « Responsabilités »).
+  // Les éléments de liste, eux, reçoivent un point dans texte() : ils ne sont
+  // jamais pris pour des intertitres.
+  const intertitre = l => l.length < 70 && (l === l.toUpperCase() || /[:?]$/.test(l) || TACHES.test(l) && l.split(" ").length <= 6 || (l.split(/\s+/).length <= 3 && !/[.!?,;…]$/.test(l)));
   let depart = lignes.findIndex(l => intertitre(l) && TACHES.test(l));
   depart = depart >= 0 ? depart + 1 : 0;
   const out = [];
