@@ -1,7 +1,7 @@
 // Règles des offres synchronisées, sur des cas réels rencontrés.
 // Modèle validé par Luc : Kellerhals Carrard (2026-11-21).
 import { describe, it, expect } from "vitest";
-import { titrePropre, resume, taux, contrat, lieuPropre, lieuEnSuisse, CANDIDATURE_SPONTANEE, SUISSE } from "../../scripts/regles-offres.mjs";
+import { titrePropre, resume, taux, contrat, lieuPropre, lieuEnSuisse, CANDIDATURE_SPONTANEE, SUISSE } from "../lib/synchroOffres/regles.mjs";
 
 describe("titrePropre", () => {
   it.each([
