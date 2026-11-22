@@ -342,3 +342,12 @@ describe("BKB « Dein neuer Job », profil et avantages Volg", () => {
     expect(resume("<p>Familiäre Teams. Persönlicher Kundenkontakt. Digitales Lernen.</p><p>Real- oder Sekundarschulabschluss.</p><p>Du lernst, unsere Kundschaft im Dorfladen zu beraten und die Ware zu präsentieren.</p>", "Volg", "Lernende/r Detailhandel")).toMatch(/^Du lernst/);
   });
 });
+
+describe("sites maison : questions, profil, accroche", () => {
+  it.each([
+    ["Denner", "<p>Karriereziel Filialleiter*in? Dann haben wir das perfekte Sprungbrett für dich.</p><p>Du führst die Filiale in Abwesenheit der Leitung und planst die Einsätze.</p>", /^Dann haben wir|^Du führst/],
+    ["Mandarin Oriental Genève", "<p>Are you a master of your craft? Do you thrive in a team that succeeds together?</p><p>You will supervise the evening housekeeping team and inspect the rooms.</p>", /^You will supervise/],
+    ["Banque cantonale de Thurgovie (TKB)", "<p>Du hast eine gymnasiale Maturität, vorzugsweise mit Schwerpunkt Wirtschaft.</p><p>Im Bankeinstieg lernst du alle Bereiche der Bank kennen.</p>", /^Im Bankeinstieg/],
+    ["Rugenbräu", "<p>Zur Erweiterung unseres Teams suchen wir für das Marktgebiet Bern eine Persönlichkeit.</p><p>Sie betreuen unsere Gastronomiekunden und gewinnen neue Kunden.</p>", /^Sie betreuen/],
+  ])("%s", (e, html, attendu) => expect(resume(html, e, "Poste")).toMatch(attendu));
+});

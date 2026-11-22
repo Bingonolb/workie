@@ -101,11 +101,11 @@ function lieuEnSuisse(lieu, { cantons = false } = {}) {
 // Intertitres qui annoncent le poste lui-même, dans les langues des offres suisses.
 const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|die stelle|your (role|challenge|tasks|responsibilities|mission|impact)|the role|responsibilit|what you.ll do|compiti|mansioni|das erwartet dich|das erwartet sie|dein neuer job|il tuo nuovo (lavoro|posto|impiego)|i tuoi compiti|le tue mansioni|i suoi compiti|le sue mansioni|ihr neuer job|deine neue (rolle|stelle)|votre nouveau poste|ton nouveau (poste|job)|your new (job|role)|deine herausforderungen?|ihre herausforderungen?|ce qui t.attend|ce qui vous attend|vos défis|what awaits you/i;
 // Phrase d'accroche publicitaire, qui ne dit rien du travail.
-const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil|^zur verstärkung unseres? teams?|^schliessen sie sich|^épanouissez-vous|^join [A-Z]{2,}|^de nouveaux collaborateurs|das ist unsere mission|^das sagt [^:]{3,80}(zur stelle|über die stelle)|^voici ce qu.en dit|^here.s what [^:]{3,60} says|^[«"„“]|c.est notre mission|that.s our mission|^der traum vom|^le rêve de|offers a wide range of|propose un large éventail|bietet eine vielzahl (an|von) (attraktiven )?stellen|^we partner with|^nous accompagnons nos clients|^wir begleiten unsere kunden/i;
+const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil|^zur verstärkung unseres? teams?|^zur erweiterung unseres? teams?|^schliessen sie sich|^épanouissez-vous|^join [A-Z]{2,}|^de nouveaux collaborateurs|das ist unsere mission|^das sagt [^:]{3,80}(zur stelle|über die stelle)|^voici ce qu.en dit|^here.s what [^:]{3,60} says|^[«"„“]|c.est notre mission|that.s our mission|^der traum vom|^le rêve de|offers a wide range of|propose un large éventail|bietet eine vielzahl (an|von) (attraktiven )?stellen|^we partner with|^nous accompagnons nos clients|^wir begleiten unsere kunden/i;
 // Profil demandé (« Real- oder Sekundarschulabschluss », « Abgeschlossene
 // kaufmännische Berufsbildung », « Sehr gute Deutschkenntnisse ») : ce que le
 // poste exige, pas ce qu'il est. Écarté en tête d'aperçu.
-const PROFIL = /^(abgeschlossene|erfolgreich abgeschlossene|real- oder sekundarschul|sekundarschul|matura|berufserfahrung|mehrjährige (berufs)?erfahrung|sehr gute (deutsch|englisch|französisch|kenntnisse)|gute (deutsch|englisch|französisch)kenntnisse|fliessende|fundierte|diplôme|cfc de|formation (de base|commerciale|terminée)|expérience (de|d.au moins|confirmée|professionnelle)|maîtrise (du|de la|des)|excellentes connaissances|bonnes connaissances|completed (degree|apprenticeship|vocational)|degree in|bachelor|master.s degree|several years of experience|\d+\+? (years|jahre|ans) )/i;
+const PROFIL = /^(du hast (eine|einen|ein) [^.]{0,40}(matur|ausbildung|abschluss|lehre|studium|erfahrung)|sie haben (eine|einen|ein) [^.]{0,40}(ausbildung|abschluss|studium|erfahrung)|vous (avez|disposez d.une?) [^.]{0,30}(formation|diplôme|expérience)|you have (a|an) [^.]{0,30}(degree|diploma|experience)|abgeschlossene|erfolgreich abgeschlossene|real- oder sekundarschul|sekundarschul|matura|berufserfahrung|mehrjährige (berufs)?erfahrung|sehr gute (deutsch|englisch|französisch|kenntnisse)|gute (deutsch|englisch|französisch)kenntnisse|fliessende|fundierte|diplôme|cfc de|formation (de base|commerciale|terminée)|expérience (de|d.au moins|confirmée|professionnelle)|maîtrise (du|de la|des)|excellentes connaissances|bonnes connaissances|completed (degree|apprenticeship|vocational)|degree in|bachelor|master.s degree|several years of experience|\d+\+? (years|jahre|ans) )/i;
 // Avantages offerts (« 6 Wochen Ferien pro Jahr », « CHF 1'500.- für deine
 // Fahrstunden », « une aide pour tes leçons de conduite ») : utiles, mais pas
 // le rôle. Écartés en tête d'aperçu.
@@ -241,7 +241,7 @@ function resume(html, entreprise, titre = "", communes = null) {
     if (!out.length) {
       const phrases = phrasesDe(l);
       // … et le débris d'une phrase coupée (« 1 for its customers… »).
-      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || AVANTAGE.test(phrases[0]) || PROFIL.test(phrases[0]) || /^\d+\s+\p{Ll}/u.test(phrases[0]))) phrases.shift();
+      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || AVANTAGE.test(phrases[0]) || PROFIL.test(phrases[0]) || /\?[»”"]?$/.test(phrases[0].trim()) || /^\d+\s+\p{Ll}/u.test(phrases[0]))) phrases.shift();
       l = phrases.join(" ");
       if (!l) continue;
     }
@@ -369,7 +369,8 @@ const offre = (o, entreprise, villeEntreprise, communes = null) => {
     taux_min: tmin, taux_max: tmax,
     description: o.html !== undefined ? resume(o.html, entreprise, titre, communes) : undefined,
     apply_url: o.url,
-    created_at: o.date ? new Date(o.date).toISOString() : undefined,
+    // Date illisible (« Invalid Date ») : ignorée plutôt que de faire échouer l'offre.
+    created_at: o.date && !Number.isNaN(new Date(o.date).getTime()) ? new Date(o.date).toISOString() : undefined,
   };
 };
 

@@ -486,6 +486,50 @@ const LECTEURS = {
       }));
   },
 
+  // Site carrière « maison » qui publie ses offres au format JobPosting (le
+  // format lu par Google). On lit la page carrière, on suit les liens qui
+  // mènent à des offres (`motif` : le chemin de ces liens), et chaque page
+  // d'offre donne son bloc JobPosting. Le lien publié est la page de l'offre.
+  async jsonld({ liste, motif }) {
+    const re = new RegExp(motif ?? "job|stelle|offre|emploi|vacanc|position|poste|annonce|ausschreibung|lavoro", "i");
+    const offres = new Map();
+    for (const adresse of [].concat(liste)) {
+      const html = await (await lireUrl(adresse)).text();
+      const origine = new URL(adresse).origin;
+      for (const m of html.matchAll(/<a[^>]*href="([^"#]+)"[^>]*>([\s\S]*?)<\/a>/g)) {
+        // Identifiant de session (« ;jsessionid=… ») retiré : il change à chaque
+        // visite, l'offre aurait paru nouvelle chaque nuit et le lien expirerait.
+        let url; try { url = new URL(entites(m[1]).replace(/;jsessionid=[^?#/]*/i, ""), adresse).href; } catch { continue; }
+        if (!url.startsWith(origine) || url === adresse || !re.test(new URL(url).pathname)) continue;
+        if (/\.(pdf|jpg|png|svg)$|login|register|alert|abo|newsletter|initiativ|spontan|datenschutz|privacy|cookie/i.test(url)) continue;
+        const titre = propreHtml(m[2]);
+        if (!offres.has(url) || titre.length > offres.get(url).length) offres.set(url, titre);
+      }
+      await pause(300);
+    }
+    return [...offres.entries()].map(([url, titre]) => ({
+      ref: new URL(url).pathname.replace(/\/$/, "").slice(-120), titre: titre || "offre", url,
+      detail: async () => {
+        const page = await (await lireUrl(url)).text();
+        for (const m of page.matchAll(/<script[^>]*ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+          let o; try { o = JSON.parse(m[1].trim()); } catch { continue; }
+          const jp = [].concat(o, o?.["@graph"] ?? []).flat().find(x => x && [].concat(x["@type"]).includes("JobPosting"));
+          if (!jp) continue;
+          const lieux = [].concat(jp.jobLocation ?? []).map(l => l?.address ?? {});
+          const pays = a => a.addressCountry?.name ?? a.addressCountry ?? "";
+          const a = lieux.find(x => /^(CH|CHE|switzerland|schweiz|suisse|svizzera)$/i.test(pays(x))) ?? lieux[0] ?? {};
+          return {
+            titre: jp.title, date: jp.datePosted, contrat: [].concat(jp.employmentType ?? []).join(" "),
+            html: [jp.responsibilities, jp.description].filter(Boolean).join("<p></p>"),
+            lieu: a.addressLocality, suisse: !pays(a) || /^(CH|CHE|switzerland|schweiz|suisse|svizzera)$/i.test(pays(a)),
+          };
+        }
+        // Pas de bloc JobPosting : ce n'est pas une page d'offre (ou on ne sait pas la lire).
+        return { suisse: false };
+      },
+    }));
+  },
+
   // Recruitee : API publique des offres.
   async recruitee({ compte }) {
     const d = await json(`https://${compte}.recruitee.com/api/offers/`);
