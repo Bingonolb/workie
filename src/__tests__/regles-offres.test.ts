@@ -1,7 +1,7 @@
 // Règles des offres synchronisées, sur des cas réels rencontrés.
 // Modèle validé par Luc : Kellerhals Carrard (2026-11-21).
 import { describe, it, expect } from "vitest";
-import { titrePropre, resume, taux, contrat, lieuPropre, lieuEnSuisse, entites, CANDIDATURE_SPONTANEE, SUISSE } from "../lib/synchroOffres/regles.mjs";
+import { titrePropre, resume, taux, contrat, lieuPropre, lieuEnSuisse, entites, phrasesCommunes, CANDIDATURE_SPONTANEE, SUISSE } from "../lib/synchroOffres/regles.mjs";
 
 describe("titrePropre", () => {
   it.each([
@@ -256,5 +256,45 @@ describe("stage avant apprentissage", () => {
 describe("symboles nommés", () => {
   it("décode °, ·, •, ®, ², ½, tiret conditionnel", () => {
     expect(entites("360&deg;-Beratung &middot; Teamplayer &bull; Excel&reg; m&sup2; &frac12; Stelle Ab&shy;teilung")).toBe("360°-Beratung · Teamplayer • Excel® m² ½ Stelle Abteilung");
+  });
+});
+
+describe("phrases communes : jamais le rôle", () => {
+  const offres = [
+    ["Mécatronicien", "<p>Une aide de CHF 1'500.- pour tes leçons de conduite.</p><p>Tu répares les véhicules de nos clients et poses les diagnostics.</p>"],
+    ["Carrossier", "<p>Une aide de CHF 1'500.- pour tes leçons de conduite.</p><p>Tu remets en forme les carrosseries endommagées.</p>"],
+    ["Peintre", "<p>Une aide de CHF 1'500.- pour tes leçons de conduite.</p><p>Tu prépares et peins les pièces de carrosserie.</p>"],
+    ["Logisticien", "<p>Une aide de CHF 1'500.- pour tes leçons de conduite.</p><p>Tu réceptionnes et ranges les pièces détachées.</p>"],
+    ["Vendeur A", "<p>Du berätst unsere Kundschaft im Laden.</p>"], ["Vendeur B", "<p>Du berätst unsere Kundschaft im Laden.</p>"],
+    ["Vendeur C", "<p>Du berätst unsere Kundschaft im Laden.</p>"], ["Vendeur D", "<p>Du berätst unsere Kundschaft im Laden.</p>"],
+  ].map(([titre, html]) => ({ titre, html }));
+  const communes = phrasesCommunes(offres);
+  it("écarte l'avantage répété et garde le rôle", () => {
+    expect(resume(offres[0].html, "AMAG", "Mécatronicien", communes)).toBe("Tu répares les véhicules de nos clients et poses les diagnostics.");
+  });
+  it("garde une tâche partagée écrite pour le candidat", () => {
+    expect(resume(offres[4].html, "Coop", "Vendeur A", communes)).toBe("Du berätst unsere Kundschaft im Laden.");
+  });
+});
+
+describe("avantage seul en tête de ligne", () => {
+  it("une aide pour les leçons de conduite n'est pas le rôle", () => {
+    expect(resume("<p>Une aide de CHF 1'500.- pour tes leçons de conduite. Tu répares les véhicules de nos clients.</p>", "AMAG", "Mécatronicien")).toBe("Tu répares les véhicules de nos clients.");
+  });
+});
+
+describe("derniers cas répétés", () => {
+  it.each([
+    ["AMAG", "<p>Der Übernahme deiner Lehrmittelkosten.</p><p>Als Lernende:r wartest und reparierst du Fahrzeuge.</p>", /^Als Lernende/],
+    ["Ramseier", "<p>In einem bodenständigen Umfeld mit flachen Hierarchien arbeiten Sie selbständig.</p><p>Sie führen die Abfüllanlage und sichern die Qualität.</p>", /^Sie führen/],
+    ["Jet Aviation", "<p>Der Traum vom Fliegen fasziniert seit je her die Menschen.</p><p>Als Lernende:r baust du Flugzeugteile.</p>", /^Als Lernende/],
+    ["Université de Zurich (UZH)", "<p>The University of Zurich offers a wide range of attractive positions in various fields.</p><p>You coordinate the clinical study and manage the data.</p>", /^You coordinate/],
+  ])("%s", (e, html, attendu) => expect(resume(html, e, "Poste")).toMatch(attendu));
+});
+
+describe("AMAG apprentissage en français", () => {
+  it("passe les avantages, prend le métier", () => {
+    const html = "<ul><li>La prise en charge de vos frais de scolarité</li><li>Travailler sur les marques les plus connues</li></ul><p></p><p>En tant qu'apprenti·e mécatronicien·ne, tu entretiens et répares les véhicules de nos clients.</p>";
+    expect(resume(html, "AMAG", "Place d'apprentissage Mécatronicien CFC")).toMatch(/^En tant qu'apprenti/);
   });
 });

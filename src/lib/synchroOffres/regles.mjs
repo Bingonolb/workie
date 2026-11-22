@@ -95,7 +95,11 @@ function lieuEnSuisse(lieu, { cantons = false } = {}) {
 // Intertitres qui annoncent le poste lui-même, dans les langues des offres suisses.
 const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|die stelle|your (role|challenge|tasks|responsibilities|mission|impact)|the role|responsibilit|what you.ll do|compiti|mansioni/i;
 // Phrase d'accroche publicitaire, qui ne dit rien du travail.
-const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil/i;
+const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil|^zur verstärkung unseres? teams?|^schliessen sie sich|^épanouissez-vous|^join [A-Z]{2,}|^de nouveaux collaborateurs|das ist unsere mission|c.est notre mission|that.s our mission|^der traum vom|^le rêve de|offers a wide range of|propose un large éventail|bietet eine vielzahl (an|von) (attraktiven )?stellen|^we partner with|^nous accompagnons nos clients|^wir begleiten unsere kunden/i;
+// Avantages offerts (« 6 Wochen Ferien pro Jahr », « CHF 1'500.- für deine
+// Fahrstunden », « une aide pour tes leçons de conduite ») : utiles, mais pas
+// le rôle. Écartés en tête d'aperçu.
+const AVANTAGE = /(?<![\p{L}\d])(\d+\s*wochen ferien|ferientage|semaines de vacances|jours de vacances|weeks? of (holiday|vacation)|fahrstunden|leçons de conduite|driving lessons|mitarbeiterrabatt|personalrabatt|rabais|réduction(s)? (sur|pour le personnel)|staff discount|gratis|kostenlos|gratuit|vergünstigung|mentoring.?programm|programme de mentorat|talent förderprogramm|life long learning|wir beteiligen uns an deiner weiterbildung|nous participons à ta formation|übernahme (deiner|der|von) [^.]{0,30}kosten|prise en charge (de vos|de tes|des) frais|travailler sur les (marques|véhicules)|arbeit an den modernsten|work(ing)? on the (latest|most modern)|flache(n)? hierarchien|flat hierarch|hiérarchie(s)? plate|bodenständigen umfeld|chf\s*[\d']+\.?-?\s*(für|pour|for))/iu;
 // Présentation de l'entreprise : déjà faite par sa fiche Workie.
 function presenteEntreprise(l, entreprise) {
   const nom = entreprise.split(/[\s(]/)[0].toLowerCase();
@@ -144,8 +148,46 @@ const LIGNE_FICHE = l => (l.match(/\s\|\s/g) ?? []).length >= 2 || (l.match(/\s\
 const SIGNATURE = l => l.length < 70 && !/[.!?:]/.test(l) && /^\p{Lu}\p{Ll}+ \p{Lu}\p{Ll}+(-\p{Lu}\p{Ll}+)? .*(lead|manager|recruit|talent|partner|hr|personal|rh|consultant)/iu.test(l);
 // Intitulé de rubrique collé au texte qui suit.
 const RUBRIQUE_COLLEE = /^(introduction|deine rolle|ihre rolle|deine aufgaben|ihre aufgaben|your role|the role|votre rôle|vos missions|vos tâches|description|nous allons réaliser ensemble|was dich erwartet|was sie erwartet|what you will do|ce que vous ferez)\s*:?\s+(?=\p{Lu})/iu;
-function resume(html, entreprise, titre = "") {
+// Découpe en phrases : pas après une abréviation courte (« ca. », « No. », « Dr. »).
+const phrasesDe = l => l.split(/(?<=(?:\p{L}{3,}|\d|[)»”"])[.!?]|[!?])\s+(?=[\p{Lu}\d«“"])/u);
+// Clé d'une phrase, pour la reconnaître d'une offre à l'autre.
+const clePhrase = p => p.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "").slice(0, 140);
+// Une phrase qui décrit le poste à la deuxième personne (« Du berätst… »,
+// « Vous gérez… ») reste, même répétée : des postes voisins partagent leurs tâches.
+const DIT_LE_POSTE = /^(du|sie|vous|tu|you|ti|lei)\s+\p{L}+(st|en|ez|es|s|e|i)?\b/iu;
+
+/**
+ * Phrases « communes » d'une entreprise : répétées mot pour mot dans au moins
+ * quatre offres de titres différents. Ce sont des avantages (« 6 Wochen
+ * Ferien »), des slogans (« Entdecke die Vielfalt von über 100 Berufen »), des
+ * en-têtes (« People & Transformation Lead ») ou la présentation de la maison :
+ * jamais le rôle. L'aperçu les saute et prend la phrase suivante.
+ */
+function phrasesCommunes(offres) {
+  const vues = new Map(); // clé → titres distincts
+  for (const { html, titre } of offres) {
+    if (!html) continue;
+    const t = clePhrase(titre ?? "").slice(0, 24);
+    for (const l of texte(html).slice(0, 40)) for (const p of phrasesDe(l)) {
+      if (p.length < 12 || DIT_LE_POSTE.test(p)) continue;
+      const k = clePhrase(p);
+      if (!vues.has(k)) vues.set(k, new Set());
+      vues.get(k).add(t);
+    }
+  }
+  return new Set([...vues].filter(([, titres]) => titres.size >= 4).map(([k]) => k));
+}
+
+/**
+ * @param {string} html
+ * @param {string} entreprise
+ * @param {string} [titre]
+ * @param {Set<string> | null} [communes] phrases communes de l'entreprise, écartées
+ */
+function resume(html, entreprise, titre = "", communes = null) {
   const norm = x => x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+  // Phrases communes retirées partout, avant tout le reste.
+  const sansCommunes = l => (communes?.size ? phrasesDe(l).filter(p => !communes.has(clePhrase(p))).join(" ") : l);
   const lignes = texte(html)
     .filter(l => !ADMINISTRATIF.test(l) && !LIGNE_FICHE(l) && !SIGNATURE(l) && !EN_TETE(l))
     // Ligne qui commence par le titre de l'offre suivi de ses conditions
@@ -159,7 +201,7 @@ function resume(html, entreprise, titre = "") {
       if (!norm(titre).startsWith(debut.slice(0, 12)) || !norm(titrePropre(l)).startsWith(norm(titre).slice(0, Math.min(norm(titre).length, 30)))) return l;
       return l.match(/\s((?:Du|Sie|Wir|Vous|Tu|Nous|You|We|In|Als|En|As|Bei|Chez|At)\s.*)$/)?.[1] ?? "";
     })
-    .map(l => l.replace(RUBRIQUE_COLLEE, ""))
+    .map(l => sansCommunes(l.replace(RUBRIQUE_COLLEE, "")))
     .filter(Boolean);
   // Intertitre : en capitales, terminé par « : », annonçant les tâches, ou
   // ligne très courte sans ponctuation (« Introduction », « Responsabilités »).
@@ -172,10 +214,9 @@ function resume(html, entreprise, titre = "") {
   for (let l of lignes.slice(depart)) {
     if (intertitre(l)) { if (out.length) break; else continue; }
     if (!out.length) {
-      // Fin de phrase : pas après une abréviation courte (« ca. », « No. », « Dr. »).
-      const phrases = l.split(/(?<=(?:\p{L}{3,}|\d|[)»”"])[.!?]|[!?])\s+(?=[\p{Lu}\d«“"])/u);
+      const phrases = phrasesDe(l);
       // … et le débris d'une phrase coupée (« 1 for its customers… »).
-      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || /^\d+\s+\p{Ll}/u.test(phrases[0]))) phrases.shift();
+      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || AVANTAGE.test(phrases[0]) || /^\d+\s+\p{Ll}/u.test(phrases[0]))) phrases.shift();
       l = phrases.join(" ");
       if (!l) continue;
     }
@@ -290,7 +331,7 @@ const VILLES_FR = {
   "schaffhausen": "Schaffhouse", "chur": "Coire", "sitten": "Sion",
   remote: "Télétravail", westschweiz: "Suisse romande", romandie: "Suisse romande", zentralschweiz: "Suisse centrale", ostschweiz: "Suisse orientale", nordwestschweiz: "Suisse du Nord-Ouest", deutschschweiz: "Suisse alémanique", tessin: "Tessin", "home office": "Télétravail", "homeoffice": "Télétravail",
 };
-const offre = (o, entreprise, villeEntreprise) => {
+const offre = (o, entreprise, villeEntreprise, communes = null) => {
   const titre = titrePropre(o.titre);
   // Taux fourni par l'outil quand il le donne, sinon lu dans le titre.
   const [tmin, tmax] = o.taux ?? taux(titre);
@@ -301,10 +342,10 @@ const offre = (o, entreprise, villeEntreprise) => {
     // Le contrat se lit sur le titre complet, avant nettoyage.
     contract_type: contrat(entites(o.titre), o.contrat),
     taux_min: tmin, taux_max: tmax,
-    description: o.html !== undefined ? resume(o.html, entreprise, titre) : undefined,
+    description: o.html !== undefined ? resume(o.html, entreprise, titre, communes) : undefined,
     apply_url: o.url,
     created_at: o.date ? new Date(o.date).toISOString() : undefined,
   };
 };
 
-export { lieuEnSuisse, CANTONS, lieuPropre, ADMINISTRATIF, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre };
+export { phrasesCommunes, clePhrase, lieuEnSuisse, CANTONS, lieuPropre, ADMINISTRATIF, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre };

@@ -17,7 +17,7 @@
 import http from "node:http";
 import https from "node:https";
 import zlib from "node:zlib";
-import { lieuEnSuisse, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre } from "./regles.mjs";
+import { phrasesCommunes, lieuEnSuisse, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre } from "./regles.mjs";
 
 // Base et options de la passe en cours (une passe à la fois par processus).
 let db;
@@ -163,7 +163,10 @@ const LECTEURS = {
       detail: async () => {
         const d = await json(`https://api.smartrecruiters.com/v1/companies/${compte}/postings/${p.id}`);
         const s = d.jobAd?.sections ?? {};
-        return { html: `${s.jobDescription?.text ?? ""}`, url: d.applyUrl ?? d.postingUrl ?? undefined };
+        // L'offre elle-même, jamais le formulaire : `applyUrl` et le paramètre
+        // « oga » mènent droit au formulaire de candidature en un clic.
+        const page = (d.postingUrl ?? "").replace(/\?.*$/, "");
+        return { html: `${s.jobDescription?.text ?? ""}`, url: page || undefined };
       },
     }));
   },
@@ -260,8 +263,25 @@ const LECTEURS = {
   // (« Befristung: Unbefristet | Basel »). La liste est paginée (10 par page).
   // `garder` : pour un compte partagé (Tschuggen Collection), le nom de la
   // société en tête de ligne qui désigne l'entreprise.
-  async umantis({ base, cantons, garder }) {
+  //
+  // `siteClient` : chez certains clients (Atupri, Energie 360°), l'offre
+  // Umantis renvoie vers la page générale de leur site. Leur page carrière a
+  // une page par offre, au même numéro (« …-1119 », « /1001-… ») : on y mène
+  // directement, et l'aperçu est lu sur cette page. Sans page à ce numéro,
+  // l'offre n'est pas publiée (un lien doit ouvrir l'offre elle-même).
+  async umantis({ base, cantons, garder, siteClient }) {
     const propre = s => entites((s ?? "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+    const pagesClient = new Map();
+    if (siteClient) {
+      const h = await (await lireUrl(siteClient)).text();
+      // Tous les nombres de l'adresse, pas le premier : dans
+      // « /arbeiten-bei-energie-360/jobs/1001-technikerin/ », c'est 1001.
+      for (const m of h.matchAll(/href="([^"#]+)"/g)) {
+        for (const n of m[1].matchAll(/(?<=^|[-/])(\d{3,6})(?=[-/]|\/?$)/g)) {
+          if (!pagesClient.has(n[1])) pagesClient.set(n[1], new URL(entites(m[1]), siteClient).href);
+        }
+      }
+    }
     let html = await (await lireUrl(`${base}/Jobs/All`)).text();
     const pages = [html];
     // Page suivante : lien « ?tc…=p2 » dans la page, ou, dans la nouvelle
@@ -323,9 +343,16 @@ const LECTEURS = {
         lieu: lieuListe,
         contrat: valeur(/^art$|anstellung|contrat|vertrag|type|befrist/),
         taux: n.length ? [Math.min(...n), Math.max(...n)] : undefined,
-        url: `${base}${lien[1]}`,
+        url: siteClient ? pagesClient.get(lien[2]) : `${base}${lien[1]}`,
         detail: async () => {
-          const page = await (await lireUrl(`${base}${lien[1]}`)).text();
+          const adresse = siteClient ? pagesClient.get(lien[2]) : `${base}${lien[1]}`;
+          const page = await (await lireUrl(adresse)).text();
+          // Page de l'offre sur le site du client : son contenu principal.
+          if (siteClient) {
+            const corps = page.replace(/<(script|style|nav|header|footer|aside)[\s\S]*?<\/\1>/gi, "");
+            const debut = corps.search(/<h1[\s>]/i);
+            return { html: (debut >= 0 ? corps.slice(debut) : corps).replace(/<h1[\s\S]*?<\/h1>/i, "") };
+          }
           for (const m of page.matchAll(/<script[^>]*ld\+json[^>]*>([\s\S]*?)<\/script>/g)) {
             try {
               const o = JSON.parse(m[1]);
@@ -350,7 +377,10 @@ const LECTEURS = {
     }
     // Entreprise présente seulement en Suisse : toutes ses offres. Sinon, une
     // offre au lieu étranger est écartée ici ; sans lieu, la page tranchera.
-    return offres.filter(o => cantons || !o.lieu || lieuEnSuisse(o.lieu) || SUISSE.test(o.lieu));
+    return offres
+      // Pas de page propre à l'offre chez le client : pas de lien direct, pas de publication.
+      .filter(o => o.url)
+      .filter(o => cantons || !o.lieu || lieuEnSuisse(o.lieu) || SUISSE.test(o.lieu));
   },
 
   // Refline (outil suisse) : la liste publique du compte, puis, pour chaque
@@ -424,7 +454,9 @@ const LECTEURS = {
           return {
             titre: o.title, date: o.datePosted, contrat: [].concat(o.employmentType ?? []).join(" "),
             // Les tâches d'abord : c'est l'aperçu voulu ; à défaut, la description.
-            html: o.responsibilities || o.description || "",
+            // Puis la description : quand la rubrique des tâches ne contient
+            // que des avantages (apprentissages AMAG), l'aperçu passe au texte.
+            html: [o.responsibilities, o.description].filter(Boolean).join("<p></p>"),
             lieu: a.addressLocality,
             suisse: !a.addressCountry || /^(CH|CHE|switzerland|schweiz|suisse)$/i.test(a.addressCountry),
           };
@@ -478,25 +510,45 @@ async function synchroniser(src, essai) {
 
   const maintenant = new Date().toISOString();
   const bilan = { lues: 0, ajoutees: [], modifiees: [], fermees: [], inchangees: 0 };
+
+  // 1. Lecture des pages d'offre utiles. Le détail (texte, date) ne se lit que
+  // pour une offre nouvelle ou dont le titre a changé : d'un jour à l'autre,
+  // l'essentiel ne bouge pas.
   for (const b of brutes) {
     const ex = parRef.get(String(b.ref));
-    // Le détail (texte, date) ne se lit que pour une offre nouvelle ou dont
-    // le titre a changé : d'un jour à l'autre, l'essentiel ne bouge pas.
-    let detailLu = !b.detail;
+    b._detailLu = !b.detail;
     if (b.detail && (complet || !ex || ex.title !== titrePropre(b.titre) || !ex.description)) {
       const d = await b.detail();
-      if (d.suisse === false) continue;
+      if (d.suisse === false) { b._ecartee = true; continue; }
       Object.assign(b, Object.fromEntries(Object.entries(d).filter(([, v]) => v !== undefined)));
-      detailLu = true;
+      b._detailLu = true;
       await pause(150);
     }
+  }
+
+  // 2. Phrases communes de l'entreprise (avantages, slogans, présentation),
+  // calculées quand assez de textes sont lus, et gardées pour les passes où
+  // seules quelques offres nouvelles le sont.
+  const avecTexte = brutes.filter(b => !b._ecartee && b.html).map(b => ({ html: b.html, titre: b.titre }));
+  let communes;
+  if (avecTexte.length >= 8) {
+    communes = phrasesCommunes(avecTexte);
+    if (!essai) await db.from("sources_offres").update({ phrases_communes: [...communes] }).eq("company_id", company_id);
+  } else {
+    communes = new Set(src.phrases_communes ?? []);
+  }
+
+  for (const b of brutes) {
+    if (b._ecartee) continue;
+    const ex = parRef.get(String(b.ref));
+    const detailLu = b._detailLu;
     // Ville de repli quand le lieu de l'offre est illisible (pas « Multi-sites »).
     const ville = /multi/i.test(src.companies.city ?? "") ? null : src.companies.city;
     // Flux qui ne donne que le pays (« CH ») : pour une entreprise présente
     // seulement en Suisse, sa ville est la bonne réponse ; pour un groupe
     // présent partout (Avolta), mieux vaut aucun lieu qu'un lieu faux.
     if (/^\s*CH\s*$/.test(b.lieu ?? "") && params.cantons && ville) b.lieu = ville;
-    const o = offre(b, entreprise, ville);
+    const o = offre(b, entreprise, ville, communes);
     // Détail non relu : ce qu'il avait apporté (lien exact, contrat) reste
     // celui déjà en base, sinon l'offre paraîtrait modifiée à chaque passage.
     // Pour les outils dont la page d'offre apporte le lieu exact, le titre
@@ -552,7 +604,7 @@ export async function synchroniserTout({ client, essai = false, complet: relireT
   complet = relireTout;
   const debut = Date.now();
   const { data: sources, error } = await db.from("sources_offres")
-    .select("company_id,outil,params,derniere_synchro,companies(name,city)")
+    .select("company_id,outil,params,derniere_synchro,phrases_communes,companies(name,city)")
     .eq("actif", true)
     .order("derniere_synchro", { ascending: true, nullsFirst: true });
   if (error) throw new Error(error.message);

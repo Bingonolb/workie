@@ -29,7 +29,7 @@ const ALIAS = { "Ramseier Suisse AG": "Ramseier", "Provins": "Provins Valais" };
 const AILLEURS = n => /^(transgourmet|volg$)/i.test(n) || /^landi\b/i.test(n);
 
 // Les comptes propres d'abord : une entreprise qui a son propre flux le garde.
-const PROPRES = [["Banque Cantonale Bernoise (BCBE)", "1509"], ["Banque cantonale de Lucerne (LUKB)", "660"], ["Bühler", "1008005"], ["Halter", "1005677"], ["HSLU", "1005622"], ["KPT Krankenkasse", "1007102"], ["Université de Zurich (UZH)", "1002007"], ["Volg", "1006840"], ["ZHAW", "1002929"], ["Transgourmet", "1003623"]];
+const PROPRES = [["Banque Cantonale Bernoise (BCBE)", "1509"], ["Banque cantonale de Lucerne (LUKB)", "660"], ["Bühler", "1008005"], ["Halter", "1005677"], ["HSLU", "1005622"], ["KPT Krankenkasse", "1007102"], ["Université de Zurich (UZH)", "1002007"], ["Volg", "1006840"], ["ZHAW", "1002929"], ["Transgourmet", "1003623"], ["KPMG", "1693"]];
 const lignes = [];
 for (const [nom, medium] of PROPRES) {
   const c = trouver(nom);

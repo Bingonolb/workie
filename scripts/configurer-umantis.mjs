@@ -17,7 +17,7 @@ const env = Object.fromEntries(fs.readFileSync(new URL("../.env.local", import.m
 const db = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
 const SOURCES = [
-  ["Atupri", "recruitingapp-2699", { cantons: true }],
+  ["Atupri", "recruitingapp-2699", { cantons: true, siteClient: "https://atupri.ch/de/karriere-jobs" }],
   ["Banque Cantonale de Bâle (BKB)", "recruitingapp-2839", { cantons: true }],
   ["Banque cantonale des Grisons (GKB)", "recruitingapp-2607", { cantons: true }],
   ["Basler & Hofmann", "recruitingapp-2852", {}],
@@ -26,13 +26,12 @@ const SOURCES = [
   ["Hotel Eden Roc", "recruitingapp-2904", { cantons: true, garder: ["Ascona"] }],
   ["Tschuggen Grand Hotel", "recruitingapp-2904", { cantons: true, garder: ["Arosa"] }],
   ["CMSA", "recruitingapp-2890", { cantons: true }],
-  ["Energie 360°", "recruitingapp-2785", { cantons: true }],
+  ["Energie 360°", "recruitingapp-2785", { cantons: true, siteClient: "https://www.energie360.ch/de/arbeiten-bei-energie-360/jobs/" }],
   ["J. Safra Sarasin", "jsafrasarasin", {}],
-  ["KPMG", "recruitingapp-2791", { cantons: true }],
-  ["Paraplegiker-Zentrum Nottwil", "recruitingapp-2782", { cantons: true }],
+  // KPMG : passée sur Prospective (lien direct vers chaque offre).
+  // Nottwil et V-Zug : pas de page par offre lisible, écartés.
   ["Police neuchâteloise", "recruitingapp-2702", { cantons: true }],
   ["Ricola", "recruitingapp-2747", { cantons: true }],
-  ["V-Zug", "recruitingapp-2727", { cantons: true }],
 ];
 
 const { data: toutes } = await db.from("companies").select("id,name");
