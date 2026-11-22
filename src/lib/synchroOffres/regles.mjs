@@ -27,7 +27,7 @@ const texte = html => entites((html ?? "")
   .filter(Boolean);
 
 // Une candidature spontanée, un événement de recrutement : ce ne sont pas des offres.
-const CANDIDATURE_SPONTANEE = /initiativ|wildcard|spontan|unsolicited|open application|blindbewerbung|talent pool|talentpool|workshop|brown bag|webinar|info.?(session|abend|anlass)|career (day|event)|meets? |\bx\b.*\b(club|society)\b|recruiting event|messe|\bclub\b|boost your/i;
+const CANDIDATURE_SPONTANEE = /initiativ|wildcard|spontan|unsolicited|open application|blindbewerbung|talent pool|talentpool|workshop|brown bag|webinar|info.?(session|abend|anlass)|career (day|event)|meets? |\bx\b.*\b(club|society)\b|recruiting event|messe|\bclub\b|boost your|pipeline posting|talent pipeline|talent community/i;
 
 /**
  * Titre propre : sans code de référence (« REF297441C »), sans mention de genre

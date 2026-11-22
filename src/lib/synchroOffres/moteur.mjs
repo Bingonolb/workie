@@ -87,7 +87,8 @@ const json = async (url, init) => (await lireUrl(url, { ...init, headers: { "Con
 // Chacun rend la liste des offres en Suisse. `html` peut être omis quand le
 // détail coûte une requête par offre : on ne le lit alors que pour les
 // nouvelles offres (voir `detail`).
-const SUISSE_WORKDAY = "187134fccb084a0ea9b4b95f23890dbe";
+const DETAILS_WORKDAY = new Map();
+const SUISSE_WORKDAY ="187134fccb084a0ea9b4b95f23890dbe";
 const LECTEURS = {
   // https://<compte>.jobs.personio.com/xml : flux public complet.
   async personio({ compte }, entreprise) {
@@ -110,30 +111,38 @@ const LECTEURS = {
   },
 
   // Workday : interface publique de la page carrière, filtre pays = Suisse.
-  async workday({ hote, tenant, site }) {
+  // `employeur` : pour un portail de groupe (Richemont), le motif du nom de
+  // l'employeur (hiringOrganization) à garder ; les détails sont mis en
+  // mémoire pour que chaque Maison ne relise pas les offres des autres.
+  async workday({ hote, tenant, site, employeur }) {
+    const motifEmployeur = employeur ? new RegExp(employeur, "i") : null;
     const base = `https://${hote}/wday/cxs/${tenant}/${site}`;
     // Le filtre « pays » n'a pas le même nom partout (Location_Country,
     // locationCountry, ou un filtre de lieux). On demande d'abord la liste des
     // filtres de ce site et l'on y cherche la valeur « Suisse ».
     const filtres = (await json(`${base}/jobs`, { method: "POST", body: JSON.stringify({ appliedFacets: {}, limit: 1, offset: 0, searchText: "" }) })).facets ?? [];
-    let filtre = null;
+    // Toutes les valeurs « Suisse », même imbriquées (Richemont range le pays
+    // sous locationMainGroup) ; un paramètre de pays passe avant les autres.
+    const candidats = [];
     const chercher = (liste, parametre) => {
       for (const f of liste ?? []) {
         const p = f.facetParameter ?? parametre;
-        if (f.id && /^(switzerland|suisse|schweiz|svizzera)$/i.test((f.descriptor ?? "").trim()) && p) { filtre ??= { [p]: [f.id] }; return; }
+        if (f.id && /^(switzerland|suisse|schweiz|svizzera)$/i.test((f.descriptor ?? "").trim()) && p) candidats.push({ [p]: [f.id] });
         chercher(f.values, p);
       }
     };
-    chercher(filtres.filter(f => /country/i.test(f.facetParameter ?? "")));
-    if (!filtre) chercher(filtres);
+    chercher(filtres);
+    const filtre = candidats.find(c => /country/i.test(Object.keys(c)[0])) ?? candidats[0] ?? null;
     // Sans filtre de pays (certains sites ne proposent que des villes), on
     // parcourt toutes les offres et l'on garde celles situées en Suisse ;
     // une offre « 3 Locations » est vérifiée sur son détail.
-    let liste = [];
+    // Workday ne donne le total qu'à la première page (0 ensuite) : on le garde.
+    let liste = [], total = Infinity;
     for (let offset = 0; offset < 2000; offset += 20) {
       const page = await json(`${base}/jobs`, { method: "POST", body: JSON.stringify({ appliedFacets: filtre ?? {}, limit: 20, offset, searchText: "" }) });
       liste.push(...(page.jobPostings ?? []));
-      if ((page.jobPostings ?? []).length < 20 || liste.length >= page.total) break;
+      if (offset === 0 && page.total) total = page.total;
+      if ((page.jobPostings ?? []).length < 20 || liste.length >= total) break;
       await pause(300);
     }
     if (!filtre) liste = liste.filter(p => SUISSE.test(p.locationsText ?? "") || /^\d+ (locations|standorte|lieux)/i.test(p.locationsText ?? ""));
@@ -141,7 +150,10 @@ const LECTEURS = {
       ref: (p.bulletFields?.[0] ?? p.externalPath).toString(), titre: p.title, lieu: p.locationsText,
       url: `https://${hote}/${site}${p.externalPath}`,
       detail: async () => {
-        const { jobPostingInfo: j } = await json(`${base}${p.externalPath}`);
+        const cle = `${base}${p.externalPath}`;
+        if (!DETAILS_WORKDAY.has(cle)) DETAILS_WORKDAY.set(cle, json(cle));
+        const { jobPostingInfo: j, hiringOrganization: h } = await DETAILS_WORKDAY.get(cle);
+        if (motifEmployeur && !motifEmployeur.test((h?.name ?? "").replace(/^C\d+\s+/, ""))) return { suisse: false };
         const lieuxSuisses = [j.location, ...(j.additionalLocations ?? [])].filter(l => l && SUISSE.test(l));
         const suisse = j.country?.id ? j.country.id === SUISSE_WORKDAY || lieuxSuisses.length > 0 : SUISSE.test(p.locationsText ?? "") || lieuxSuisses.length > 0;
         return { html: j.jobDescription, contrat: j.timeType, date: j.startDate, url: j.externalUrl ?? undefined, suisse, lieu: lieuxSuisses[0] ?? j.location };
@@ -505,6 +517,13 @@ const LECTEURS = {
         const titre = propreHtml(m[2]);
         if (!offres.has(url) || titre.length > offres.get(url).length) offres.set(url, titre);
       }
+      // Liste au format RSS (Avature…) : chaque <item> donne son titre et son lien.
+      for (const [, item] of html.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+        const lien = (item.match(/<link>([^<]+)<\/link>/) ?? [])[1]?.trim();
+        if (!lien || !re.test(lien)) continue;
+        const titre = propreHtml((item.match(/<title>([\s\S]*?)<\/title>/) ?? [])[1]?.replace(/<!\[CDATA\[|\]\]>/g, "") ?? "");
+        offres.set(new URL(entites(lien), adresse).href, titre);
+      }
       await pause(300);
     }
     return [...offres.entries()].map(([url, titre]) => ({
@@ -530,9 +549,39 @@ const LECTEURS = {
     }));
   },
 
+  // Teamtailor : flux RSS public <site>/jobs.rss, avec lieux et pays.
+  async teamtailor({ site }) {
+    const xml = await (await lireUrl(`${site.replace(/\/$/, "")}/jobs.rss`)).text();
+    const champ = (b, n) => entites((b.match(new RegExp(`<${n}>([\\s\\S]*?)</${n}>`)) ?? [])[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim() ?? "");
+    return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(([, b]) => {
+      const lieux = [...b.matchAll(/<tt:location>([\s\S]*?)<\/tt:location>/g)].map(([, l]) => ({ ville: champ(l, "tt:city") || champ(l, "tt:name"), pays: champ(l, "tt:country") }));
+      const suisse = lieux.find(l => /^(switzerland|schweiz|suisse|svizzera|ch)$/i.test(l.pays));
+      return suisse ? { ref: champ(b, "guid"), titre: champ(b, "title"), lieu: suisse.ville, contrat: champ(b, "tt:role"), date: champ(b, "pubDate"), html: champ(b, "description"), url: champ(b, "link") } : null;
+    }).filter(Boolean);
+  },
+
+  // Jibe (sites carrière d'Aon, d'AXA…) : interface publique /api/jobs.
+  // Son champ « apply_url » mène à un formulaire de connexion : jamais
+  // publié. Le lien est la page de l'offre, `${page}/${slug}`.
+  async jibe({ site, filtre, page }) {
+    const jobs = [];
+    for (let n = 1; n <= 20; n++) {
+      const r = await json(`${site}/api/jobs?${filtre}&limit=100&page=${n}`);
+      jobs.push(...(r.jobs ?? []).map(j => j.data));
+      if ((r.jobs ?? []).length < 100) break;
+      await pause(400);
+    }
+    return jobs.filter(d => d.country_code === "CH" || /switzerland|schweiz|suisse/i.test(d.country ?? "")).map(d => ({
+      ref: d.req_id ?? d.slug, titre: d.title, lieu: d.city, contrat: [d.employment_type, ...(d.tags2 ?? [])].filter(Boolean).join(" "),
+      date: d.posted_date, html: [d.responsibilities, d.description].filter(Boolean).join("<p></p>"),
+      url: `${page}/${d.slug}${d.language ? `?lang=${d.language}` : ""}`,
+    }));
+  },
+
   // Recruitee : API publique des offres.
   async recruitee({ compte }) {
-    const d = await json(`https://${compte}.recruitee.com/api/offers/`);
+    // Compte (« neho ») ou domaine propre au client (« careers.neho.ch »).
+    const d = await json(`https://${compte.includes(".") ? compte : `${compte}.recruitee.com`}/api/offers/`);
     return (d.offers ?? []).filter(o => o.country_code === "CH" || SUISSE.test(`${o.city ?? ""} ${o.location ?? ""}`)).map(o => ({
       ref: o.id, titre: o.title, lieu: o.city ?? o.location, contrat: o.employment_type_code, date: o.created_at,
       html: o.description ?? "", url: o.careers_url,
@@ -672,7 +721,9 @@ export async function synchroniserTout({ client, essai = false, complet: relireT
     .eq("actif", true)
     .order("derniere_synchro", { ascending: true, nullsFirst: true });
   if (error) throw new Error(error.message);
-  const choisies = sources.filter(s => !filtre || s.companies.name.toLowerCase().includes(filtre.toLowerCase()));
+  // Plusieurs noms possibles, séparés par « | ».
+  const noms = (filtre ?? "").toLowerCase().split("|").map(x => x.trim()).filter(Boolean);
+  const choisies = sources.filter(s => !noms.length || noms.some(n => s.companies.name.toLowerCase().includes(n)));
 
   const resultats = [];
   let i = 0;
