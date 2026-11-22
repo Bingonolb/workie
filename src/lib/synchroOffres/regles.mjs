@@ -5,18 +5,22 @@
 const NOMMEES = { nbsp: " ", amp: "&", quot: '"', lt: "<", gt: ">", apos: "’", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", ndash: "–", mdash: "—", hellip: "…", laquo: "«", raquo: "»", euro: "€", deg: "°", middot: "·", bull: "•", reg: "®", copy: "©", trade: "™", sup1: "¹", sup2: "²", sup3: "³", frac12: "½", frac14: "¼", frac34: "¾", times: "×", divide: "÷", plusmn: "±", shy: "", sect: "§", para: "¶", micro: "µ", pound: "£", yen: "¥", cent: "¢", iexcl: "¡", iquest: "¿", lsaquo: "‹", rsaquo: "›", sbquo: "‚", bdquo: "„", dagger: "†", permil: "‰", thinsp: " ", ensp: " ", emsp: " ", zwnj: "", zwj: "", lrm: "", rlm: "", ordf: "ª", ordm: "º", acute: "´", cedil: "¸", macr: "¯", uml: "¨", not: "¬", brvbar: "¦", curren: "¤", minus: "−", larr: "←", rarr: "→", check: "✓", eacute: "é", egrave: "è", agrave: "à", uuml: "ü", ouml: "ö", auml: "ä", szlig: "ß" };
 // Toutes les lettres accentuées écrites en code HTML (« &acirc; », « &Eacute; »,
 // « &ccedil; ») : la lettre de base plus son accent, recomposés en un caractère.
-const ACCENTS = { acute: "́", grave: "̀", circ: "̂", uml: "̈", cedil: "̧", tilde: "̃", ring: "̊" };
+const ACCENTS = { caron: "̌", acute: "́", grave: "̀", circ: "̂", uml: "̈", cedil: "̧", tilde: "̃", ring: "̊" };
 const LIGATURES = { aelig: "æ", AElig: "Æ", oelig: "œ", OElig: "Œ", oslash: "ø", Oslash: "Ø", eszett: "ß" };
 const entites = s => s
   .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
   .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
-  .replace(/&([a-zA-Z])(acute|grave|circ|uml|cedil|tilde|ring);/g, (_, l, a) => (l + ACCENTS[a]).normalize("NFC"))
+  .replace(/&([a-zA-Z])(acute|grave|circ|uml|cedil|tilde|ring|caron);/g, (_, l, a) => (l + ACCENTS[a]).normalize("NFC"))
   .replace(/&(aelig|AElig|oelig|OElig|oslash|Oslash);/g, (_, n) => LIGATURES[n])
   .replace(/&([a-z][a-z0-9]*);/gi, (m, n) => NOMMEES[n] ?? NOMMEES[n.toLowerCase()] ?? m)
   .replace(/ /g, " ");
 // Les éléments de liste deviennent des phrases : sans ponctuation, deux puces
 // mises bout à bout se lisaient comme une seule phrase sans fin.
 const texte = html => entites((html ?? "")
+  // Un bloc qui s'ouvre commence une ligne : sans cela, « <strong>Deine
+  // Aufgaben</strong><ul><li>Du betreust… » collait l'intertitre au premier
+  // élément, et la rubrique des tâches passait inaperçue.
+  .replace(/<(ul|ol|li|p|h\d|div|table|tr)(\s[^>]*)?>/gi, "\n")
   .replace(/<\/li>/gi, "¶\n").replace(/<\/(p|h\d|div|ul|ol)>|<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, " "))
   .replace(/[ \t]+/g, " ").split("\n").map(s => s.trim())
   .map(s => s.endsWith("¶") ? s.slice(0, -1).trim().replace(/[,;]$/, "").replace(/([^.!?:…])$/, "$1.").replace(/^\p{Ll}/u, c => c.toUpperCase()) : s)
@@ -57,6 +61,8 @@ function titrePropre(t) {
     // Lieu collé en fin de titre : « (Geneva (GVA), CH, 33999) », « (Lausanne, CH) ».
     .replace(/\s*\((?:[^()]|\([^()]*\))*,\s*(?:CH|[A-Z]{2})\b(?:[^()]|\([^()]*\))*\)\s*$/, "")
     .replace(/\s*[-–]\s*(switzerland|schweiz|suisse|svizzera)\s*$/i, "")
+    // Raison sociale en fin de titre : « … - Eberhard Bau AG » (la fiche dit déjà qui recrute).
+    .replace(/\s+[-–]\s+[^-–()]{2,50}\s(AG|SA|GmbH|Sàrl|Ltd|S\.A\.|SE)\s*$/, "")
     .replace(/\s+([,.)])/g, "$1").replace(/\(\s*\)/g, "").replace(/\s{2,}/g, " ")
     .replace(/[\s.]*[-–|:]?\s*$/, "").replace(/%\.$/, "%").trim();
 }
@@ -93,13 +99,17 @@ function lieuEnSuisse(lieu, { cantons = false } = {}) {
 }
 
 // Intertitres qui annoncent le poste lui-même, dans les langues des offres suisses.
-const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|die stelle|your (role|challenge|tasks|responsibilities|mission|impact)|the role|responsibilit|what you.ll do|compiti|mansioni/i;
+const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|die stelle|your (role|challenge|tasks|responsibilities|mission|impact)|the role|responsibilit|what you.ll do|compiti|mansioni|das erwartet dich|das erwartet sie|dein neuer job|il tuo nuovo (lavoro|posto|impiego)|i tuoi compiti|le tue mansioni|i suoi compiti|le sue mansioni|ihr neuer job|deine neue (rolle|stelle)|votre nouveau poste|ton nouveau (poste|job)|your new (job|role)|deine herausforderungen?|ihre herausforderungen?|ce qui t.attend|ce qui vous attend|vos défis|what awaits you/i;
 // Phrase d'accroche publicitaire, qui ne dit rien du travail.
-const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil|^zur verstärkung unseres? teams?|^schliessen sie sich|^épanouissez-vous|^join [A-Z]{2,}|^de nouveaux collaborateurs|das ist unsere mission|c.est notre mission|that.s our mission|^der traum vom|^le rêve de|offers a wide range of|propose un large éventail|bietet eine vielzahl (an|von) (attraktiven )?stellen|^we partner with|^nous accompagnons nos clients|^wir begleiten unsere kunden/i;
+const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil|^zur verstärkung unseres? teams?|^schliessen sie sich|^épanouissez-vous|^join [A-Z]{2,}|^de nouveaux collaborateurs|das ist unsere mission|^das sagt [^:]{3,80}(zur stelle|über die stelle)|^voici ce qu.en dit|^here.s what [^:]{3,60} says|^[«"„“]|c.est notre mission|that.s our mission|^der traum vom|^le rêve de|offers a wide range of|propose un large éventail|bietet eine vielzahl (an|von) (attraktiven )?stellen|^we partner with|^nous accompagnons nos clients|^wir begleiten unsere kunden/i;
+// Profil demandé (« Real- oder Sekundarschulabschluss », « Abgeschlossene
+// kaufmännische Berufsbildung », « Sehr gute Deutschkenntnisse ») : ce que le
+// poste exige, pas ce qu'il est. Écarté en tête d'aperçu.
+const PROFIL = /^(abgeschlossene|erfolgreich abgeschlossene|real- oder sekundarschul|sekundarschul|matura|berufserfahrung|mehrjährige (berufs)?erfahrung|sehr gute (deutsch|englisch|französisch|kenntnisse)|gute (deutsch|englisch|französisch)kenntnisse|fliessende|fundierte|diplôme|cfc de|formation (de base|commerciale|terminée)|expérience (de|d.au moins|confirmée|professionnelle)|maîtrise (du|de la|des)|excellentes connaissances|bonnes connaissances|completed (degree|apprenticeship|vocational)|degree in|bachelor|master.s degree|several years of experience|\d+\+? (years|jahre|ans) )/i;
 // Avantages offerts (« 6 Wochen Ferien pro Jahr », « CHF 1'500.- für deine
 // Fahrstunden », « une aide pour tes leçons de conduite ») : utiles, mais pas
 // le rôle. Écartés en tête d'aperçu.
-const AVANTAGE = /(?<![\p{L}\d])(\d+\s*wochen ferien|ferientage|semaines de vacances|jours de vacances|weeks? of (holiday|vacation)|fahrstunden|leçons de conduite|driving lessons|mitarbeiterrabatt|personalrabatt|rabais|réduction(s)? (sur|pour le personnel)|staff discount|gratis|kostenlos|gratuit|vergünstigung|mentoring.?programm|programme de mentorat|talent förderprogramm|life long learning|wir beteiligen uns an deiner weiterbildung|nous participons à ta formation|übernahme (deiner|der|von) [^.]{0,30}kosten|prise en charge (de vos|de tes|des) frais|travailler sur les (marques|véhicules)|arbeit an den modernsten|work(ing)? on the (latest|most modern)|flache(n)? hierarchien|flat hierarch|hiérarchie(s)? plate|bodenständigen umfeld|chf\s*[\d']+\.?-?\s*(für|pour|for))/iu;
+const AVANTAGE = /(?<![\p{L}\d])(\d+\s*wochen ferien|ferientage|semaines de vacances|jours de vacances|weeks? of (holiday|vacation)|fahrstunden|leçons de conduite|driving lessons|mitarbeiterrabatt|personalrabatt|rabais|réduction(s)? (sur|pour le personnel)|staff discount|gratis|kostenlos|gratuit|vergünstigung|mentoring.?programm|programme de mentorat|talent förderprogramm|life long learning|wir beteiligen uns an deiner weiterbildung|nous participons à ta formation|übernahme (deiner|der|von) [^.]{0,30}kosten|prise en charge (de vos|de tes|des) frais|travailler sur les (marques|véhicules)|arbeit an den modernsten|work(ing)? on the (latest|most modern)|flache(n)? hierarchien|familiäre teams?|digitales lernen|persönlicher kundenkontakt|selbständiges arbeiten.|flat hierarch|hiérarchie(s)? plate|bodenständigen umfeld|chf\s*[\d']+\.?-?\s*(für|pour|for))/iu;
 // Présentation de l'entreprise : déjà faite par sa fiche Workie.
 function presenteEntreprise(l, entreprise) {
   const nom = entreprise.split(/[\s(]/)[0].toLowerCase();
@@ -139,6 +149,9 @@ function presenteEntreprise(l, entreprise) {
  */
 // Lignes administratives sans rapport avec le travail (organisations internationales…).
 const ADMINISTRATIF = /^(deadline for applications|hardship level|family type|residential location|grade\b|job location|location\b|lieu\b|standort\b|reference|référence|job id|req(uisition)? id|posting date|date de publication|no\.? du poste|vacancy (no|notice)|date de clôture|closing date|arbeitsort|einsatzort|lieu de travail|place of work|luogo di lavoro|online seit|en ligne depuis|online since|publiziert am|publié le)/i;
+// Citation d'un responsable sur le poste, sur toute sa ligne : « Das sagt Daniel
+// Eberhard, Leiter Bau zur Stelle: "Bauen ist deine Leidenschaft? …" ».
+const CITATION = /^(das sagt|voici ce qu.en dit|here.s what)[^:]{3,90}:/i;
 // En-tête de page d'offre : « Graubündner Kantonalbank | online seit: 16.04.2026 ».
 const EN_TETE = l => /\|\s*(online seit|en ligne depuis|online since|publiziert|publié)/i.test(l);
 // Ligne-fiche en tête d'annonce : « 138104 | 80 - 100% | Oerlikon | Hybrid »,
@@ -167,9 +180,14 @@ function phrasesCommunes(offres) {
   const vues = new Map(); // clé → titres distincts
   for (const { html, titre } of offres) {
     if (!html) continue;
-    const t = clePhrase(titre ?? "").slice(0, 24);
+    // Le métier, pas le lieu : « Verkäufer/in Volg Herznach » et « … Zermatt »
+    // sont le même poste ; leurs tâches communes sont bien le rôle.
+    const t = clePhrase(titre ?? "").slice(0, 12);
     for (const l of texte(html).slice(0, 40)) for (const p of phrasesDe(l)) {
-      if (p.length < 12 || DIT_LE_POSTE.test(p)) continue;
+      // Un intertitre (« Deine Aufgaben », « Tes tâches : ») revient dans toutes
+      // les offres : c'est un repère, pas du remplissage. Il ne doit jamais
+      // être écarté, sinon la rubrique des tâches devient introuvable.
+      if (p.length < 12 || DIT_LE_POSTE.test(p) || (p.split(/\s+/).length <= 6 && !/[.!]$/.test(p))) continue;
       const k = clePhrase(p);
       if (!vues.has(k)) vues.set(k, new Set());
       vues.get(k).add(t);
@@ -189,7 +207,7 @@ function resume(html, entreprise, titre = "", communes = null) {
   // Phrases communes retirées partout, avant tout le reste.
   const sansCommunes = l => (communes?.size ? phrasesDe(l).filter(p => !communes.has(clePhrase(p))).join(" ") : l);
   const lignes = texte(html)
-    .filter(l => !ADMINISTRATIF.test(l) && !LIGNE_FICHE(l) && !SIGNATURE(l) && !EN_TETE(l))
+    .filter(l => !ADMINISTRATIF.test(l) && !LIGNE_FICHE(l) && !SIGNATURE(l) && !EN_TETE(l) && !CITATION.test(l))
     // Ligne qui commence par le titre de l'offre suivi de ses conditions
     // (« Key Account Manager Retail 100% Lenzburg, AG Du willst… », « Senior
     // IT/OT Systems Engineer (w/m/d) 80% - 100% Du möchtest… ») : on garde ce
@@ -211,12 +229,19 @@ function resume(html, entreprise, titre = "", communes = null) {
   let depart = lignes.findIndex(l => intertitre(l) && TACHES.test(l));
   depart = depart >= 0 ? depart + 1 : 0;
   const out = [];
-  for (let l of lignes.slice(depart)) {
+  const suite = lignes.slice(depart);
+  for (let i = 0; i < suite.length; i++) {
+    let l = suite[i];
+    // Fiche technique : « Arbeitsort: » puis « Basel », « Stellenantritt: »
+    // puis « 01.12.2026 oder nach Vereinbarung ». La valeur courte sous une
+    // étiquette n'est pas du texte. Débris sans lettre (« --> ») ignorés.
+    if (!/\p{L}{2}/u.test(l)) continue;
+    if (i > 0 && /:$/.test(suite[i - 1]) && suite[i - 1].length < 40 && l.length < 50 && !/[.!?]$/.test(l)) continue;
     if (intertitre(l)) { if (out.length) break; else continue; }
     if (!out.length) {
       const phrases = phrasesDe(l);
       // … et le débris d'une phrase coupée (« 1 for its customers… »).
-      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || AVANTAGE.test(phrases[0]) || /^\d+\s+\p{Ll}/u.test(phrases[0]))) phrases.shift();
+      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || AVANTAGE.test(phrases[0]) || PROFIL.test(phrases[0]) || /^\d+\s+\p{Ll}/u.test(phrases[0]))) phrases.shift();
       l = phrases.join(" ");
       if (!l) continue;
     }

@@ -362,7 +362,9 @@ const LECTEURS = {
           // Page restée chez Umantis : on lit son contenu (les règles d'aperçu
           // y trouvent la rubrique des tâches). Redirigée vers le site du
           // client, sa mise en page est inconnue : pas d'aperçu.
-          if (!/umantis/i.test(page) || !/\/Vacancies\//.test(page)) return { html: "" };
+          // (Les pages Umantis portent souvent la marque du client, sans le mot
+          // « umantis » : c'est le lien vers l'offre qui les reconnaît.)
+          if (!/\/Vacancies\//.test(page)) return { html: "" };
           const corps = page.replace(/<(script|style|nav|header|footer)[\s\S]*?<\/\1>/gi, "");
           const debut = corps.search(/<h1[\s>]/i);
           const contenu = debut >= 0 ? corps.slice(debut) : corps;
@@ -464,6 +466,24 @@ const LECTEURS = {
         return { suisse: false }; // page sans offre lisible : on ne publie rien plutôt qu'un titre vide
       },
     }));
+  },
+
+  // Softgarden : flux public jobs.feed.json (offres complètes au format
+  // JobPosting, lien direct vers chaque offre). `employeur` : pour un compte
+  // partagé (K2 Sports et Völkl), le motif du nom de l'employeur.
+  async softgarden({ compte, employeur }) {
+    const motif = employeur ? new RegExp(employeur, "i") : null;
+    const flux = await json(`https://${compte}.career.softgarden.de/jobs.feed.json`);
+    return (flux.dataFeedElement ?? []).map(e => e.item ?? e)
+      .filter(o => o?.["@type"] === "JobPosting")
+      .filter(o => !motif || motif.test(`${o.hiringOrganization?.name ?? ""} ${o.identifier?.name ?? ""}`))
+      .map(o => ({ o, a: [].concat(o.jobLocation ?? []).map(l => l?.address ?? {}).find(x => /^(CH|CHE|schweiz|switzerland|suisse|svizzera)$/i.test(x.addressCountry ?? "")) }))
+      .filter(({ a }) => a)
+      .map(({ o, a }) => ({
+        ref: o.identifier?.value ?? o.url, titre: o.title, lieu: a.addressLocality,
+        contrat: [].concat(o.employmentType ?? []).join(" "), date: o.datePosted,
+        html: o.description ?? "", url: o.url,
+      }));
   },
 
   // Recruitee : API publique des offres.

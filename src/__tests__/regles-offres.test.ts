@@ -298,3 +298,47 @@ describe("AMAG apprentissage en français", () => {
     expect(resume(html, "AMAG", "Place d'apprentissage Mécatronicien CFC")).toMatch(/^En tant qu'apprenti/);
   });
 });
+
+describe("Softgarden / Eberhard (cas réels)", () => {
+  it("intertitre collé à la liste, citation du chef", () => {
+    const html = "<p><strong>Über uns</strong></p><p>Tauche ein in die Welt der Pioniere. Als Familienunternehmen setzen wir neue Massstäbe.</p><p>Das sagt Daniel Eberhard, Leiter Bau zur Stelle: \"Bauen ist deine Leidenschaft?\"</p><p><strong>Deine Aufgaben</strong><ul><li>Du betreust deine Bauprojekte von der Akquisition bis zur Bauabnahme</li><li>Du führst deine Poliere</li></ul></p>";
+    expect(resume(html, "Eberhard Bau", "Bauführer")).toBe("Du betreust deine Bauprojekte von der Akquisition bis zur Bauabnahme. Du führst deine Poliere.");
+  });
+  it("raison sociale en fin de titre", () => {
+    expect(titrePropre("Bauführer Wasser- und Erdbau 80-100% (w/m/d) - Eberhard Bau AG")).toBe("Bauführer Wasser- und Erdbau 80-100%");
+    expect(titrePropre("Chef de projet senior sites contaminés 80-100% - Ebiox AG")).toBe("Chef de projet senior sites contaminés 80-100%");
+  });
+});
+
+describe("háček, citation entière, « Das erwartet dich »", () => {
+  it("&Scaron;KODA", () => expect(entites("&Scaron;KODA &ccaron;")).toBe("ŠKODA č"));
+  it("citation sur toute sa ligne, puis la rubrique", () => {
+    const html = "<p>Das sagt Daniel Eberhard, Leiter Bau zur Stelle: \"Bauen ist deine Leidenschaft? Für dich sind Nachhaltigkeit und Kreislaufwirtschaft mehr als Schlagwörter.\"</p><p>Mit modernster Technik sorgen wir für saubere Böden.</p><h3>Das erwartet dich</h3><ul><li>Du leitest Sanierungsprojekte</li></ul>";
+    expect(resume(html, "Eberhard Bau", "Projektleiter")).toBe("Du leitest Sanierungsprojekte.");
+  });
+});
+
+describe("les intertitres ne sont jamais des phrases communes", () => {
+  it("« Deine Aufgaben » répété dans toutes les offres reste un repère", () => {
+    const offres = ["A", "B", "C", "D", "E"].map(t => ({ titre: `Poste ${t} différent`, html: `<p>Über uns</p><p>Tauche ein in die Welt der Pioniere.</p><p>Deine Aufgaben</p><ul><li>Du leitest die Baustelle ${t} und koordinierst das Team</li></ul>` }));
+    const communes = phrasesCommunes(offres);
+    expect(resume(offres[0].html, "Eberhard Bau", "Poste A différent", communes)).toBe("Du leitest die Baustelle A und koordinierst das Team.");
+  });
+});
+
+describe("fiche technique en tête (BKB)", () => {
+  it("ignore « Étiquette: » + valeur courte et les débris", () => {
+    const html = "<p>Bereich/Abteilung:</p><p>Vertrieb Privatkunden/</p><p>Arbeitsort:</p><p>Basel</p><p>Stellenantritt:</p><p>01.12.2026 oder nach Vereinbarung</p><p>--></p><p>Schwarz und Wyss - unsere Lieblingsfarben seit 1899.</p><p>Ihre Aufgaben</p><ul><li>Sie beraten Privatkundinnen und -kunden am Telefon und im Chat</li></ul>";
+    expect(resume(html, "Banque Cantonale de Bâle (BKB)", "Kundenberaterin Services")).toBe("Sie beraten Privatkundinnen und -kunden am Telefon und im Chat.");
+  });
+});
+
+describe("BKB « Dein neuer Job », profil et avantages Volg", () => {
+  it("BKB", () => {
+    const html = "<p>Schwarz und Wyss - unsere Lieblingsfarben seit 1899. Schlicht. Elegant. Gradlinig.</p><p>Karin und weitere Kollegen suchen Verstärkung.</p><p>Dein neuer Job</p><ul><li>Entgegennehmen und Bearbeiten von telefonischen Kundenanfragen</li></ul><p>Davon profitieren wir</p><ul><li>Abgeschlossene kaufmännische Berufsbildung</li></ul>";
+    expect(resume(html, "Banque Cantonale de Bâle (BKB)", "Kundenberaterin")).toBe("Entgegennehmen und Bearbeiten von telefonischen Kundenanfragen.");
+  });
+  it("Volg : profil et avantages passés", () => {
+    expect(resume("<p>Familiäre Teams. Persönlicher Kundenkontakt. Digitales Lernen.</p><p>Real- oder Sekundarschulabschluss.</p><p>Du lernst, unsere Kundschaft im Dorfladen zu beraten und die Ware zu präsentieren.</p>", "Volg", "Lernende/r Detailhandel")).toMatch(/^Du lernst/);
+  });
+});
