@@ -46,6 +46,9 @@ function titrePropre(t) {
   }
   return t
     .replace(/\s*[-–]?\s*\bREF\s?\d+[A-Z]?\b/gi, "")
+    // « Consultant, Switzerland », « … BCG Platinion Zurich, Switzerland » :
+    // le lieu s'affiche à part.
+    .replace(/\s*(?:\b(?:Zurich|Zürich|Geneva|Genève|Basel|Bern|Lausanne|Zug)\s*)?,\s*(?:Switzerland|Schweiz|Suisse)\s*$/i, "")
     // Annonce dupliquée dans l'outil : « … - copy ».
     .replace(/\s*[-–]\s*(copy|copie|kopie)\s*$/i, "")
     .replace(/\s*\((?:[mwfhdx]\s*\/\s*){1,3}[mwfhdx]+\.?(?:iv\.?)?\/?\)|\s*\((?:all|alle)(?: genders?)?\)|\s*\(m\/w\/div\.?\)|\s*\(f\/m\/div\.?\)|\s*\(w\/m\/div\.?\)|\s*\(gn\)|\s*\(all\)/gi, "")

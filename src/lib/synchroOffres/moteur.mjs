@@ -90,6 +90,39 @@ const json = async (url, init) => (await lireUrl(url, { ...init, headers: { "Con
 const DETAILS_WORKDAY = new Map();
 const SUISSE_WORKDAY ="187134fccb084a0ea9b4b95f23890dbe";
 const LECTEURS = {
+  // Phenom : la recherche publique que la page carrière interroge elle-même
+  // (/widgets, « refineSearch »), filtrée sur la Suisse quand le site a un
+  // filtre de pays. Le texte vient de la page de l'offre, qui est aussi le lien.
+  // `toutSuisse` : site d'une entreprise seulement suisse (Sunrise), sans filtre.
+  // `employeur` : motif de l'entité qui recrute (Allianz Suisse parmi Allianz).
+  async phenom({ hote, chemin, langue, pays = "global", filtre, toutSuisse, employeur }) {
+    const motif = employeur ? new RegExp(employeur, "i") : null;
+    const liste = [];
+    for (let de = 0; de < 3000; de += 50) {
+      const r = await json(`https://${hote}/widgets`, { method: "POST", body: JSON.stringify({ lang: langue, deviceType: "desktop", country: pays, pageName: "search-results", ddoKey: "refineSearch", sortBy: "", subsearch: "", from: de, jobs: true, counts: true, all_fields: [], size: 50, clearAll: false, jdsource: "facets", isSliderEnable: false, pageId: "page20", siteType: "external", keywords: "", global: true, selected_fields: filtre ?? {}, locationData: {} }) });
+      const lot = r.refineSearch?.data?.jobs ?? [];
+      liste.push(...lot);
+      if (lot.length < 50 || liste.length >= (r.refineSearch?.totalHits ?? 0)) break;
+      await pause(300);
+    }
+    return liste
+      .filter(o => filtre || toutSuisse || SUISSE.test(`${o.country ?? ""} ${o.cityStateCountry ?? ""}`))
+      .filter(o => !motif || motif.test(o.employingEntity ?? ""))
+      .map(o => {
+        const url = `https://${hote}/${chemin}/job/${o.jobSeqNo}`;
+        return {
+          ref: String(o.jobSeqNo), titre: o.title, lieu: o.city, contrat: o.type, date: o.postedDate, url,
+          detail: async () => {
+            const page = await (await lireUrl(url)).text();
+            const ddo = page.match(/phApp\.ddo\s*=\s*(\{[\s\S]*?\});\s*phApp/)?.[1];
+            let html = "";
+            try { html = JSON.parse(ddo).jobDetail?.data?.job?.description ?? ""; } catch { /* page sans détail lisible */ }
+            return { html };
+          },
+        };
+      });
+  },
+
   // Cornerstone (csod.com) : la page carrière publique porte le jeton
   // anonyme que son propre moteur de recherche utilise ; on fait la même
   // recherche qu'elle. Lien = la page de l'offre, jamais le formulaire.

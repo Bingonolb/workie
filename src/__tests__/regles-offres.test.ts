@@ -69,6 +69,8 @@ describe("titres longs de Workday", () => {
 
 describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
   it("titres", () => {
+    expect(titrePropre("AI Architect - BCG Platinion Zurich, Switzerland")).toBe("AI Architect - BCG Platinion");
+    expect(titrePropre("Consultant, Switzerland")).toBe("Consultant");
     expect(titrePropre("Chef de projet Tunnel (h/f/) 80-100 %")).toBe("Chef de projet Tunnel 80-100 %");
     expect(titrePropre("R&D Senior Hardware Engineer (80 - 100%) f/m/d")).toBe("R&D Senior Hardware Engineer (80 - 100%)");
     expect(titrePropre("Intern – DCFO P&BS 100% - [Fixed-Term Contract of 5-6 months / Julius Baer’s Intern Programme]")).toBe("Intern – DCFO P&BS 100%");
