@@ -128,12 +128,15 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
         .ae-chiffres > div:first-child { border-left: none; }
         .ae-chiffre { font-size: clamp(40px, 5.2vw, 72px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
         .ae-chiffre-lib { font-size: 15px; color: var(--text-muted); margin-top: 10px; line-height: 1.4; }
+        .ae-chiffres-bas { display: none; }
         @media (max-width: 760px) {
-          .ae-chiffres-cadre { margin-top: -16px; padding: 0 12px 64px; }
-          .ae-chiffres > div { padding: 2px 4px; }
-          .ae-chiffre { font-size: clamp(22px, 7vw, 30px); letter-spacing: -0.035em; }
-          .ae-chiffre-lib { font-size: 12px; margin-top: 6px; white-space: nowrap; }
-          .ae-chiffre-suite { display: none; }
+          .ae-chiffres-haut { display: none; }
+          /* Après la vitrine, au calme : deux par deux, sans filet. */
+          .ae-chiffres-bas { display: block; margin: 0; padding: 64px 20px; }
+          .ae-chiffres-bas .ae-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 12px; }
+          .ae-chiffres-bas .ae-chiffres > div { border-left: none; padding: 0; }
+          .ae-chiffres-bas .ae-chiffre { font-size: 44px; }
+          .ae-chiffres-bas .ae-chiffre-lib { font-size: 14px; margin-top: 8px; }
         }
         @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
       `}</style>
@@ -152,7 +155,7 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
         </div>
       </section>
 
-      <section className="ae-chiffres-cadre" aria-label="Workie en chiffres">
+      <section className="ae-chiffres-cadre ae-chiffres-haut" aria-label="Workie en chiffres">
         <div className="ae-chiffres">
           {[
             { v: chiffres.offres, l: "offres", suite: " d'emploi" },
@@ -170,9 +173,10 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
 
       {/* 2 ── La vitrine */}
       {vitrine.length > 0 && (
-        <section className="ae-bloc ae-bande-douce" aria-label="Entreprises à découvrir">
+        <section className="ae-bloc ae-bande-douce" aria-labelledby="ae-vitrine">
           <div className="ae-tete">
-            <Link style={{ marginLeft: "auto" }} href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
+            <h2 id="ae-vitrine" className="ae-h2">Les employeurs</h2>
+            <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
           <RailVitrine>
             {vitrine.map((c, i) => (
@@ -195,6 +199,24 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
           </RailVitrine>
         </section>
       )}
+
+      {/* Sur téléphone, les chiffres viennent après la vitrine : sous le titre,
+          ils chargeaient le premier écran. */}
+      <section className="ae-chiffres-cadre ae-chiffres-bas" aria-hidden="true">
+        <div className="ae-chiffres">
+          {[
+            { v: chiffres.offres, l: "offres", suite: " d'emploi" },
+            { v: chiffres.entreprises, l: "entreprises" },
+            { v: chiffres.cantons, l: "cantons" },
+            { v: 4, l: "langues" },
+          ].map(({ v, l, suite }: { v: number; l: string; suite?: string }) => (
+            <div key={l}>
+              <p className="ae-chiffre">{v.toLocaleString("fr-CH")}</p>
+              <p className="ae-chiffre-lib">{l}{suite && <span className="ae-chiffre-suite">{suite}</span>}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* 3 ── Une phrase, trois chiffres. Rien à lire, tout à voir. */}
       <section className="ae-bloc ae-bande-sombre ae-manifeste" aria-label="Workie en bref">
