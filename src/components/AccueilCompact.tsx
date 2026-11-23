@@ -172,7 +172,7 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
       {vitrine.length > 0 && (
         <section className="ae-bloc ae-bande-douce" aria-labelledby="ae-vitrine">
           <div className="ae-tete">
-            <h2 id="ae-vitrine" className="ae-h2">Rencontrez&#8209;les d&apos;abord.</h2>
+            <h2 id="ae-vitrine" className="ae-h2">Rencontrez les employeurs d&apos;abord.</h2>
             <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
           <RailVitrine>
