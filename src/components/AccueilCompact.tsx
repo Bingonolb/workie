@@ -19,7 +19,7 @@ import type { Company } from "@/lib/types";
  *   4. les secteurs, en un geste ;
  *   5. la FAQ, puis les entreprises, discrètement, au-dessus du pied de page.
  */
-export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
+export function AccueilCompact({ entreprises, secteurs, chiffres }: {
   entreprises: Company[]; total: number; secteurs: string[];
   chiffres: { offres: number; entreprises: number; cantons: number };
 }) {
@@ -119,30 +119,21 @@ export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
           .ae-points { grid-template-columns: 1fr; gap: 44px; max-width: 340px; }
         }
         /* Les chiffres du site, en grand : calculés à chaque mise à jour. */
-        /* Un panneau sombre, le même noir que le bandeau du profil : les
-           quatre chiffres s'y lisent comme un seul tableau de bord. Les
-           cases sont séparées par l'écart d'1 px laissé sur le fond. */
-        .ae-chiffres-cadre { max-width: 1132px; margin: -40px auto 96px; padding: 0 24px; }
-        .ae-chiffres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: rgba(255,255,255,0.08);
-          border-radius: 24px; overflow: hidden; box-shadow: 0 24px 60px -28px rgba(16,19,25,0.55); }
-        .ae-chiffres > div { background: #101319; color: #fff; padding: 34px 30px 30px; display: flex; flex-direction: column; gap: 14px; }
-        .ae-chiffre-lib { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
-        .ae-chiffre { font-size: clamp(38px, 4.4vw, 60px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
-        .ae-chiffre-trait { width: 28px; height: 3px; border-radius: 2px; background: var(--brand); }
-        :root[data-theme="dark"] .ae-chiffres { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
-        :root[data-theme="dark"] .ae-chiffres > div { background: #05060a; }
-        @media (prefers-color-scheme: dark) {
-          :root:not([data-theme="light"]) .ae-chiffres { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
-          :root:not([data-theme="light"]) .ae-chiffres > div { background: #05060a; }
-        }
+        /* Une seule rangée, centrée sous le titre, filets fins entre les
+           chiffres. Sur téléphone, la même rangée en plus petit : quatre
+           colonnes tiennent, et la page garde la même voix sur les deux. */
+        .ae-chiffres-cadre { max-width: 980px; margin: -24px auto 0; padding: 0 24px 96px; }
+        .ae-chiffres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); text-align: center; }
+        .ae-chiffres > div { padding: 0 16px; border-left: 1px solid var(--border); }
+        .ae-chiffres > div:first-child { border-left: none; }
+        .ae-chiffre { font-size: clamp(40px, 5.2vw, 72px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
+        .ae-chiffre-lib { font-size: 15px; color: var(--text-muted); margin-top: 10px; line-height: 1.4; }
         @media (max-width: 760px) {
-          .ae-chiffres-cadre { margin: -24px auto 64px; padding: 0 20px; }
-          .ae-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 20px; }
-          .ae-chiffres > div { padding: 24px 20px 22px; gap: 10px; }
-          /* Libellés sur une ligne, pour que les quatre chiffres s'alignent. */
+          .ae-chiffres-cadre { margin-top: -16px; padding: 0 12px 64px; }
+          .ae-chiffres > div { padding: 2px 4px; }
+          .ae-chiffre { font-size: clamp(22px, 7vw, 30px); letter-spacing: -0.035em; }
+          .ae-chiffre-lib { font-size: 12px; margin-top: 6px; white-space: nowrap; }
           .ae-chiffre-suite { display: none; }
-          .ae-chiffre-lib { white-space: nowrap; font-size: 11px; }
-          .ae-chiffre { font-size: 40px; }
         }
         @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
       `}</style>
@@ -164,15 +155,14 @@ export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
       <section className="ae-chiffres-cadre" aria-label="Workie en chiffres">
         <div className="ae-chiffres">
           {[
-            { v: chiffres.offres, l: "Offres", suite: " d'emploi" },
-            { v: chiffres.entreprises, l: "Entreprises" },
-            { v: chiffres.cantons, l: "Cantons" },
-            { v: 4, l: "Langues" },
+            { v: chiffres.offres, l: "offres", suite: " d'emploi" },
+            { v: chiffres.entreprises, l: "entreprises" },
+            { v: chiffres.cantons, l: "cantons" },
+            { v: 4, l: "langues" },
           ].map(({ v, l, suite }: { v: number; l: string; suite?: string }) => (
             <div key={l}>
-              <p className="ae-chiffre-lib">{l}{suite && <span className="ae-chiffre-suite">{suite}</span>}</p>
               <p className="ae-chiffre">{v.toLocaleString("fr-CH")}</p>
-              <span className="ae-chiffre-trait" aria-hidden="true" />
+              <p className="ae-chiffre-lib">{l}{suite && <span className="ae-chiffre-suite">{suite}</span>}</p>
             </div>
           ))}
         </div>
@@ -182,7 +172,7 @@ export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
       {vitrine.length > 0 && (
         <section className="ae-bloc ae-bande-douce" aria-labelledby="ae-vitrine">
           <div className="ae-tete">
-            <h2 id="ae-vitrine" className="ae-h2">{total.toLocaleString("fr-CH")} employeurs. Rencontrez&#8209;les d&apos;abord.</h2>
+            <h2 id="ae-vitrine" className="ae-h2">Rencontrez&#8209;les d&apos;abord.</h2>
             <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
           <RailVitrine>

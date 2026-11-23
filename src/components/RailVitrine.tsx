@@ -65,9 +65,46 @@ export function RailVitrine({ children }: { children: React.ReactNode }) {
     } catch { /* stockage indisponible : on repart du début */ }
   }, []);
 
-  const noter = () => {
+  // 3. À la souris, le rail se tire comme au doigt. L'aimantation est
+  //    suspendue pendant le geste puis rendue, pour que la carte se cale ; un
+  //    geste qui a glissé n'ouvre pas la carte sous le curseur.
+  const geste = useRef<{ x: number; depart: number; bouge: boolean } | null>(null);
+  const aBouge = useRef(false);
+  const presser = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse" || e.button !== 0 || !rail.current) return;
+    geste.current = { x: e.clientX, depart: rail.current.scrollLeft, bouge: false };
+    aBouge.current = false;
+  };
+  const deplacer = (e: React.PointerEvent<HTMLDivElement>) => {
+    const g = geste.current, r = rail.current;
+    if (!g || !r) return;
+    const dx = e.clientX - g.x;
+    if (!g.bouge && Math.abs(dx) < 5) return;
+    if (!g.bouge) { g.bouge = true; r.setPointerCapture(e.pointerId); r.style.scrollSnapType = "none"; r.style.cursor = "grabbing"; }
+    r.scrollLeft = g.depart - dx;
+  };
+  const relacher = () => {
+    const g = geste.current, r = rail.current;
+    geste.current = null;
+    if (!g?.bouge || !r) return;
+    aBouge.current = true;
+    r.style.cursor = "";
+    // L'aimantation revient et cale la carte la plus proche.
+    const x = r.scrollLeft;
+    r.style.scrollSnapType = "";
+    r.scrollLeft = x;
+  };
+
+  const noter = (e: React.MouseEvent) => {
+    if (aBouge.current) { e.preventDefault(); e.stopPropagation(); aBouge.current = false; return; }
     try { if (rail.current) sessionStorage.setItem(CLE, String(Math.round(rail.current.scrollLeft))); } catch { /* sans gravité */ }
   };
 
-  return <div ref={rail} className="ae-rail" onClickCapture={noter}>{children}</div>;
+  return (
+    <div ref={rail} className="ae-rail" onClickCapture={noter}
+      onPointerDown={presser} onPointerMove={deplacer} onPointerUp={relacher} onPointerCancel={relacher}
+      onDragStart={e => e.preventDefault()}>
+      {children}
+    </div>
+  );
 }
