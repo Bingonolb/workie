@@ -19,8 +19,9 @@ import type { Company } from "@/lib/types";
  *   4. les secteurs, en un geste ;
  *   5. la FAQ, puis les entreprises, discrètement, au-dessus du pied de page.
  */
-export function AccueilCompact({ entreprises, total, secteurs }: {
+export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
   entreprises: Company[]; total: number; secteurs: string[];
+  chiffres: { offres: number; entreprises: number; cantons: number };
 }) {
   const vitrine = entreprises.filter(c => c.cover_url).slice(0, 20);
   return (
@@ -117,6 +118,17 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
           .ae-manifeste { padding: 80px 20px; }
           .ae-points { grid-template-columns: 1fr; gap: 44px; max-width: 340px; }
         }
+        /* Les chiffres du site, en grand : calculés à chaque mise à jour. */
+        .ae-chiffres { max-width: 1180px; margin: 0 auto; padding: 0 24px 96px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .ae-chiffres > div { padding: 0 28px; border-left: 1px solid var(--border); }
+        .ae-chiffres > div:first-child { border-left: none; padding-left: 0; }
+        .ae-chiffre { font-size: clamp(40px, 5.2vw, 72px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
+        .ae-chiffre-lib { font-size: 15px; color: var(--text-muted); margin-top: 10px; line-height: 1.4; }
+        @media (max-width: 760px) {
+          .ae-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 0; padding: 0 20px 64px; }
+          .ae-chiffres > div { padding: 0 0 0 20px; }
+          .ae-chiffres > div:nth-child(odd) { border-left: none; padding-left: 0; }
+        }
         @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
       `}</style>
       <NavLanding />
@@ -132,6 +144,20 @@ export function AccueilCompact({ entreprises, total, secteurs }: {
           <Link href="/explore" className="btn btn-marque btn-lg ae-bouton">Découvrir les entreprises</Link>
           <Link href="/explore?view=swipe" className="btn btn-clair btn-lg ae-bouton">Essayer le swipe</Link>
         </div>
+      </section>
+
+      <section className="ae-chiffres" aria-label="Workie en chiffres">
+        {[
+          { v: chiffres.offres, l: "offres d'emploi" },
+          { v: chiffres.entreprises, l: "entreprises" },
+          { v: 4, l: "langues" },
+          { v: chiffres.cantons, l: "cantons" },
+        ].map(({ v, l }) => (
+          <div key={l}>
+            <p className="ae-chiffre">{v.toLocaleString("fr-CH")}</p>
+            <p className="ae-chiffre-lib">{l}</p>
+          </div>
+        ))}
       </section>
 
       {/* 2 ── La vitrine */}

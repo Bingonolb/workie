@@ -23,14 +23,24 @@ const getLandingCounts = unstable_cache(
   async () => {
     const admin = createAdminClient();
     const enLigne = await getSecteursEnLigne();
-    const [{ count: companyCount }, { count: reviewCount }] = await Promise.all([
+    const [{ count: companyCount }, { count: reviewCount }, { count: offresCount }] = await Promise.all([
       admin.from("companies").select("*", { count: "exact", head: true }).in("sector", enLigne),
       admin.from("reviews").select("*", { count: "exact", head: true }),
+      // Offres actives des seules entreprises visibles sur le site.
+      admin.from("job_offers").select("id, companies!inner(sector)", { count: "exact", head: true })
+        .eq("is_active", true).in("companies.sector", enLigne),
     ]);
-    return { companies: companyCount ?? 0, reviews: reviewCount ?? 0 };
+    // Cantons réellement couverts : « CH » (présence nationale) ne compte pas.
+    const cantons = new Set<string>();
+    for (let de = 0; ; de += 1000) {
+      const { data } = await admin.from("companies").select("canton").in("sector", enLigne).range(de, de + 999);
+      for (const c of data ?? []) if (c.canton && c.canton !== "CH") cantons.add(c.canton);
+      if (!data || data.length < 1000) break;
+    }
+    return { companies: companyCount ?? 0, reviews: reviewCount ?? 0, offres: offresCount ?? 0, cantons: cantons.size };
   },
-  ["landing-counts-v2"],
-  { revalidate: 300, tags: ["landing-counts-v2"] }
+  ["landing-counts-v3"],
+  { revalidate: 300, tags: ["landing-counts-v2", "companies"] }
 );
 
 export const metadata: Metadata = {
@@ -63,6 +73,7 @@ export default async function Home() {
       fetchGridPage({}, 0).catch(() => ({ companies: [] as Company[], total: 0 })),
     ]);
     return <AccueilCompact entreprises={grille.companies} total={counts.companies}
+      chiffres={{ offres: counts.offres, entreprises: counts.companies, cantons: counts.cantons }}
       secteurs={[...secteurs].sort((a, b) => a.localeCompare(b, "fr"))} />;
   }
 
