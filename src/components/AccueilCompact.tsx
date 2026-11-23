@@ -170,10 +170,9 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
 
       {/* 2 ── La vitrine */}
       {vitrine.length > 0 && (
-        <section className="ae-bloc ae-bande-douce" aria-labelledby="ae-vitrine">
+        <section className="ae-bloc ae-bande-douce" aria-label="Entreprises à découvrir">
           <div className="ae-tete">
-            <h2 id="ae-vitrine" className="ae-h2">Rencontrez les employeurs d&apos;abord.</h2>
-            <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
+            <Link style={{ marginLeft: "auto" }} href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
           <RailVitrine>
             {vitrine.map((c, i) => (
