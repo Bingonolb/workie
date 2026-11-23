@@ -119,15 +119,15 @@ export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
           .ae-points { grid-template-columns: 1fr; gap: 44px; max-width: 340px; }
         }
         /* Les chiffres du site, en grand : calculés à chaque mise à jour. */
-        .ae-chiffres { max-width: 1180px; margin: 0 auto; padding: 0 24px 96px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-        .ae-chiffres > div { padding: 0 28px; border-left: 1px solid var(--border); }
-        .ae-chiffres > div:first-child { border-left: none; padding-left: 0; }
+        .ae-chiffres { max-width: 1180px; margin: 0 auto; padding: 0 24px 96px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); text-align: center; }
+        .ae-chiffres > div { padding: 0 16px; border-left: 1px solid var(--border); }
+        .ae-chiffres > div:first-child { border-left: none; }
         .ae-chiffre { font-size: clamp(40px, 5.2vw, 72px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
         .ae-chiffre-lib { font-size: 15px; color: var(--text-muted); margin-top: 10px; line-height: 1.4; }
         @media (max-width: 760px) {
           .ae-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 0; padding: 0 20px 64px; }
-          .ae-chiffres > div { padding: 0 0 0 20px; }
-          .ae-chiffres > div:nth-child(odd) { border-left: none; padding-left: 0; }
+          .ae-chiffres > div { padding: 0 12px; }
+          .ae-chiffres > div:nth-child(odd) { border-left: none; }
         }
         @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
       `}</style>
