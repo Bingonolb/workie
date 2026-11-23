@@ -90,6 +90,37 @@ const json = async (url, init) => (await lireUrl(url, { ...init, headers: { "Con
 const DETAILS_WORKDAY = new Map();
 const SUISSE_WORKDAY ="187134fccb084a0ea9b4b95f23890dbe";
 const LECTEURS = {
+  // Cornerstone (csod.com) : la page carrière publique porte le jeton
+  // anonyme que son propre moteur de recherche utilise ; on fait la même
+  // recherche qu'elle. Lien = la page de l'offre, jamais le formulaire.
+  async cornerstone({ compte, site = 1 }) {
+    const page = await (await lireUrl(`https://${compte}.csod.com/ux/ats/careersite/${site}/home?c=${compte}`)).text();
+    const jeton = page.match(/"token":"([^"]+)/)?.[1], nuage = page.match(/"cloud":"([^"]+)/)?.[1];
+    const cultureId = Number(page.match(/"cultureID":(\d+)/)?.[1] ?? 1), cultureName = page.match(/"cultureName":"([^"]+)/)?.[1] ?? "en-US";
+    if (!jeton || !nuage) throw new Error("Cornerstone : jeton introuvable");
+    const offres = [];
+    for (let n = 1; n < 40; n++) {
+      const r = await json(`${nuage}rec-job-search/external/jobs`, { method: "POST", headers: { Authorization: `Bearer ${jeton}` }, body: JSON.stringify({ careerSiteId: site, careerSitePageId: site, pageNumber: n, pageSize: 50, cultureId, cultureName, searchText: "", states: [], countryCodes: [], cities: [], placeID: "", radius: null, postingsWithinDays: null, customFieldCheckboxKeys: [], customFieldDropdowns: [], customFieldRadios: [] }) });
+      const lot = r.data?.requisitions ?? [];
+      offres.push(...lot);
+      if (lot.length < 50 || offres.length >= (r.data?.totalCount ?? 0)) break;
+      await pause(300);
+    }
+    return offres
+      .map(o => ({ o, l: (o.locations ?? []).find(l => !l.country || /^ch$/i.test(l.country)) }))
+      .filter(({ o, l }) => l && ((o.locations ?? []).some(x => /^ch$/i.test(x.country ?? "")) || lieuEnSuisse(`${l.city}, ${l.state ?? ""}`, { cantons: true })))
+      .map(({ o, l }) => ({
+        // Texte à plat : la rubrique d'ouverture (« Votre mission ») et un
+        // avertissement administratif en tête sont retirés.
+        ref: String(o.requisitionId), titre: o.displayJobTitle, lieu: l.city,
+        html: (o.externalDescription ?? "")
+          .replace(/^\s*Information importante au préalable[\s\S]*?formation dans le métier suivant\s*:\s*[\s\S]*?\b(?:CFC|AFP)\s+/i, "")
+          .replace(/^\s*Information importante au préalable[\s\S]*?(?=Votre mission|Ihre Mission|Your mission)/i, "")
+          .replace(/^\s*(Mission du poste|Votre mission|Ihre Mission|Your mission|Vos missions|Ihre Aufgaben|Mission)\s*:?\s*(?=\p{Lu})/iu, ""),
+        url: `https://${compte}.csod.com/ux/ats/careersite/${site}/home/requisition/${o.requisitionId}?c=${compte}`,
+      }));
+  },
+
   // https://<compte>.jobs.personio.com/xml : flux public complet.
   async personio({ compte }, entreprise) {
     const lire = async q => (await lireUrl(`https://${compte}.jobs.personio.com/xml${q}`)).text();

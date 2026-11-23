@@ -46,7 +46,9 @@ function titrePropre(t) {
   }
   return t
     .replace(/\s*[-–]?\s*\bREF\s?\d+[A-Z]?\b/gi, "")
-    .replace(/\s*\((?:[mwfhdx]\s*\/\s*){1,3}[mwfhdx]+\.?(?:iv\.?)?\)|\s*\((?:all|alle)(?: genders?)?\)|\s*\(m\/w\/div\.?\)|\s*\(f\/m\/div\.?\)|\s*\(w\/m\/div\.?\)|\s*\(gn\)|\s*\(all\)/gi, "")
+    // Annonce dupliquée dans l'outil : « … - copy ».
+    .replace(/\s*[-–]\s*(copy|copie|kopie)\s*$/i, "")
+    .replace(/\s*\((?:[mwfhdx]\s*\/\s*){1,3}[mwfhdx]+\.?(?:iv\.?)?\/?\)|\s*\((?:all|alle)(?: genders?)?\)|\s*\(m\/w\/div\.?\)|\s*\(f\/m\/div\.?\)|\s*\(w\/m\/div\.?\)|\s*\(gn\)|\s*\(all\)/gi, "")
     .replace(/\s*[-–]\s*(bewirb dich|apply|postulez).*$/i, "")
     // Longue parenthèse de conditions en fin de titre (« - (Contract through our
     // external payroll partner…) ») : le badge de contrat le dit déjà.
