@@ -214,8 +214,10 @@ export function ProfilClient() {
               l'accompagner. Le reduire assez pour l'eviter en ferait une
               vignette illisible, et la barre de navigation porte deja la
               marque soixante pixels plus haut. */}
+          {/* Seulement une fois le compte connu : affiché dans le squelette,
+              il apparaissait un instant au visiteur sans compte. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {d && <img
             className="profil-filigrane"
             src="/workie-mot.svg"
             alt=""
@@ -229,7 +231,7 @@ export function ProfilClient() {
               pointerEvents: "none",
               userSelect: "none",
             }}
-          />
+          />}
           {/* Accent line */}
           <div style={{
             width: 32, height: 3, borderRadius: 2,
