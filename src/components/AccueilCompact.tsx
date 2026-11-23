@@ -119,15 +119,26 @@ export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
           .ae-points { grid-template-columns: 1fr; gap: 44px; max-width: 340px; }
         }
         /* Les chiffres du site, en grand : calculés à chaque mise à jour. */
-        .ae-chiffres { max-width: 1180px; margin: 0 auto; padding: 0 24px 96px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); text-align: center; }
-        .ae-chiffres > div { padding: 0 16px; border-left: 1px solid var(--border); }
-        .ae-chiffres > div:first-child { border-left: none; }
-        .ae-chiffre { font-size: clamp(40px, 5.2vw, 72px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
-        .ae-chiffre-lib { font-size: 15px; color: var(--text-muted); margin-top: 10px; line-height: 1.4; }
+        /* Un panneau sombre, le même noir que le bandeau du profil : les
+           quatre chiffres s'y lisent comme un seul tableau de bord. Les
+           cases sont séparées par l'écart d'1 px laissé sur le fond. */
+        .ae-chiffres-cadre { max-width: 1132px; margin: -40px auto 96px; padding: 0 24px; }
+        .ae-chiffres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: rgba(255,255,255,0.08);
+          border-radius: 24px; overflow: hidden; box-shadow: 0 24px 60px -28px rgba(16,19,25,0.55); }
+        .ae-chiffres > div { background: #101319; color: #fff; padding: 34px 30px 30px; display: flex; flex-direction: column; gap: 14px; }
+        .ae-chiffre-lib { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); }
+        .ae-chiffre { font-size: clamp(38px, 4.4vw, 60px); font-weight: 800; letter-spacing: -0.045em; line-height: 1; font-variant-numeric: tabular-nums; }
+        .ae-chiffre-trait { width: 28px; height: 3px; border-radius: 2px; background: var(--brand); }
+        :root[data-theme="dark"] .ae-chiffres { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+        :root[data-theme="dark"] .ae-chiffres > div { background: #05060a; }
+        @media (prefers-color-scheme: dark) {
+          :root:not([data-theme="light"]) .ae-chiffres { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+          :root:not([data-theme="light"]) .ae-chiffres > div { background: #05060a; }
+        }
         @media (max-width: 760px) {
-          .ae-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 0; padding: 0 20px 64px; }
-          .ae-chiffres > div { padding: 0 12px; }
-          .ae-chiffres > div:nth-child(odd) { border-left: none; }
+          .ae-chiffres-cadre { margin: -24px auto 64px; padding: 0 20px; }
+          .ae-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 20px; }
+          .ae-chiffres > div { padding: 24px 20px 22px; gap: 10px; }
         }
         @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
       `}</style>
@@ -146,18 +157,21 @@ export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
         </div>
       </section>
 
-      <section className="ae-chiffres" aria-label="Workie en chiffres">
-        {[
-          { v: chiffres.offres, l: "offres d'emploi" },
-          { v: chiffres.entreprises, l: "entreprises" },
-          { v: 4, l: "langues" },
-          { v: chiffres.cantons, l: "cantons" },
-        ].map(({ v, l }) => (
-          <div key={l}>
-            <p className="ae-chiffre">{v.toLocaleString("fr-CH")}</p>
-            <p className="ae-chiffre-lib">{l}</p>
-          </div>
-        ))}
+      <section className="ae-chiffres-cadre" aria-label="Workie en chiffres">
+        <div className="ae-chiffres">
+          {[
+            { v: chiffres.offres, l: "Offres d'emploi" },
+            { v: chiffres.entreprises, l: "Entreprises" },
+            { v: chiffres.cantons, l: "Cantons" },
+            { v: 4, l: "Langues" },
+          ].map(({ v, l }) => (
+            <div key={l}>
+              <p className="ae-chiffre-lib">{l}</p>
+              <p className="ae-chiffre">{v.toLocaleString("fr-CH")}</p>
+              <span className="ae-chiffre-trait" aria-hidden="true" />
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* 2 ── La vitrine */}
