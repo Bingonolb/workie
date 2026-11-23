@@ -195,7 +195,11 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
     history.pushState({ recherche: true }, "");
     const retour = () => onClose();
     window.addEventListener("popstate", retour);
-    return () => window.removeEventListener("popstate", retour);
+    // Un bouton de la barre du bas, sur mobile, ferme la recherche avant de
+    // mener ailleurs : la navigation qui suit remplace l'entrée d'historique.
+    const parBarre = () => { if (history.state?.recherche) history.replaceState(null, ""); onClose(); };
+    window.addEventListener("workie:recherche-fermer", parBarre);
+    return () => { window.removeEventListener("popstate", retour); window.removeEventListener("workie:recherche-fermer", parBarre); };
   }, [onClose]);
 
   // Les 3 premiers résultats sont ceux qu'on ouvre presque toujours : on les
@@ -217,6 +221,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
 
   return createPortal(
     <div
+      className="recherche-globale"
       style={{
         position: "fixed", inset: 0,
         zIndex: 10100,

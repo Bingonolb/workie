@@ -20,6 +20,10 @@ function BottomNavInner() {
   const PROFIL = { href: "/profile", Icon: User, label: "Profil", active: pathname.startsWith("/profile") };
 
   const handleClick = (href: string, active: boolean) => (e: React.MouseEvent) => {
+    // La recherche ouverte se ferme d'abord : le bouton mène là où il dit.
+    const rechercheOuverte = !!document.querySelector(".recherche-globale");
+    if (rechercheOuverte) window.dispatchEvent(new Event("workie:recherche-fermer"));
+    if (rechercheOuverte && active) { e.preventDefault(); return; }
     if (pathname === "/explore" && (href === "/explore" || href === "/explore?view=swipe")) {
       e.preventDefault();
       const targetView = href.includes("swipe") ? "swipe" : "grid";
@@ -44,7 +48,7 @@ function BottomNavInner() {
   return (
     <nav className="bottom-nav">
       {[...USER_LINKS, null, PROFIL].map((l) => l === null ? (
-        <button key="recherche" type="button" className="bottom-nav-item" onClick={ouvrirRecherche}
+        <button key="recherche" type="button" className="bottom-nav-item" onClick={() => document.querySelector(".recherche-globale") ? window.dispatchEvent(new Event("workie:recherche-fermer")) : ouvrirRecherche()}
           style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", color: "inherit" }}>
           <Search size={22} strokeWidth={1.8} aria-hidden="true" />
           <span>Recherche</span>

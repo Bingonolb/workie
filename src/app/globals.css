@@ -509,6 +509,13 @@ main, .page-main, .page-main-sm, .page-main-md {
   .page-main-md { padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
 }
 
+/* Sur mobile, la barre du bas reste visible au-dessus de la recherche ; sur
+   ordinateur il n'y a pas de barre du bas. La liste laisse sa place en bas. */
+@media (max-width: 768px) {
+  body:has(.recherche-globale) .bottom-nav { z-index: 10101; }
+  .recherche-globale { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
+}
+
 /* When virtual keyboard is open (any input/textarea focused), hide bottom nav.
    Prevents the "flying nav" jump caused by viewport shrinking on keyboard open.
    :has() is supported on Chrome 105+, Safari 16.4+, Firefox 121+. */
