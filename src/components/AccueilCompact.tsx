@@ -139,6 +139,10 @@ export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
           .ae-chiffres-cadre { margin: -24px auto 64px; padding: 0 20px; }
           .ae-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); border-radius: 20px; }
           .ae-chiffres > div { padding: 24px 20px 22px; gap: 10px; }
+          /* Libellés sur une ligne, pour que les quatre chiffres s'alignent. */
+          .ae-chiffre-suite { display: none; }
+          .ae-chiffre-lib { white-space: nowrap; font-size: 11px; }
+          .ae-chiffre { font-size: 40px; }
         }
         @media (prefers-reduced-motion: reduce) { .ae-carte img, .ae-secteurs a { transition: none; } }
       `}</style>
@@ -160,13 +164,13 @@ export function AccueilCompact({ entreprises, total, secteurs, chiffres }: {
       <section className="ae-chiffres-cadre" aria-label="Workie en chiffres">
         <div className="ae-chiffres">
           {[
-            { v: chiffres.offres, l: "Offres d'emploi" },
+            { v: chiffres.offres, l: "Offres", suite: " d'emploi" },
             { v: chiffres.entreprises, l: "Entreprises" },
             { v: chiffres.cantons, l: "Cantons" },
             { v: 4, l: "Langues" },
-          ].map(({ v, l }) => (
+          ].map(({ v, l, suite }: { v: number; l: string; suite?: string }) => (
             <div key={l}>
-              <p className="ae-chiffre-lib">{l}</p>
+              <p className="ae-chiffre-lib">{l}{suite && <span className="ae-chiffre-suite">{suite}</span>}</p>
               <p className="ae-chiffre">{v.toLocaleString("fr-CH")}</p>
               <span className="ae-chiffre-trait" aria-hidden="true" />
             </div>
