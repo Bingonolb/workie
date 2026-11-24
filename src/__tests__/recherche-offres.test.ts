@@ -11,7 +11,7 @@ describe("recherche d'offres", () => {
     expect(b.groupes[0]).toEqual(expect.arrayContaining(["comptab", "accountant"]));
   });
   it("ignore accents et majuscules", () => {
-    expect(analyser("Développeur", vocab).groupes[0]).toEqual(expect.arrayContaining(["entwickl", "develop"]));
+    expect(analyser("Développeur", vocab).groupes[0]).toEqual(expect.arrayContaining(["entwickler", "developer"]));
   });
   it("comprend le taux, la langue, le contrat", () => {
     const r = analyser("comptable CDI anglais 80%", vocab);

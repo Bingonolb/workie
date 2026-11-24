@@ -17,18 +17,18 @@
 
 /** Groupes de racines équivalentes. La première sert d'étiquette. */
 const GROUPES: string[][] = [
-  ["vend", "verkauf", "verkaeuf", "sales", "vendit", "detailhandel", "retail", "commerc", "kundenberat", "conseiller de vente"],
+  ["vend", "verkauf", "verkaeuf", "sales", "vendit", "detailhandel", "retail", "conseiller de vente"],
   ["caissi", "kassier", "kasse", "cashier", "cassier"],
   ["comptab", "buchhalt", "accountant", "accounting", "contabil", "finanzbuchhalt"],
   ["controll", "controleur de gestion", "controller"],
   ["finan", "finanz", "finance", "finanzia"],
-  ["develop", "developp", "entwickl", "programm", "software", "sviluppat"],
+  ["developpeu", "developer", "entwickler", "programmeu", "programmier", "software engineer", "software develop", "sviluppator", "fullstack", "full stack", "frontend", "backend"],
   ["informati", "informatik", "ict", " it ", "it-", "systemtechni", "system engineer", "ingegnere informatico"],
   ["ingenieur", "ingenieu", "engineer", "ingegner"],
   ["technici", "techniker", "technician", "tecnic"],
   ["mecani", "mechanik", "mechanic", "meccanic", "polymechan", "automatik", "automaticien"],
   ["electric", "elektr", "electrician", "elettric", "elektroinstall"],
-  ["infirmi", "pflege", "nurse", "nursing", "infermier", "fage", "assc"],
+  ["infirmi", "pflegefach", "pflegehelf", "pflegeassist", "pflegeexpert", "dipl. pflege", "pflegepersonal", "nurse", "nursing", "infermier", "fage", "assc", "soins"],
   ["medec", "arzt", "aerzt", "doctor", "physician", "medic"],
   ["pharmac", "apothek", "pharma", "farmac"],
   ["cuisin", "koch", "koech", "cook", "chef de cuisine", "cuoc", "commis de cuisine", "kuech"],
@@ -192,8 +192,9 @@ export function analyser(saisie: string, vocabulaire: Set<string> = new Set()): 
       const rr = r.trim();
       return rr.length >= 2 && (mot.startsWith(rr) || (mot.length >= 4 && rr.startsWith(mot)));
     }));
-    const variantes = new Set<string>([racine(mot)]);
-    if (groupe) for (const r of groupe) variantes.add(r);
+    // Métier reconnu : ses racines seules (la racine du mot tapé,
+    // « developp », prendrait aussi « Development »). Sinon, la racine du mot.
+    const variantes = new Set<string>(groupe ? groupe : [racine(mot)]);
     const propres = [...variantes].map(v => v.replace(/[^a-z0-9 -]/g, "")).filter(v => v.trim().length >= 2);
     groupes.push(propres);
     if (groupe || mot !== brut) {
