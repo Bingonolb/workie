@@ -166,7 +166,7 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
           type="search"
           value={saisie}
           onChange={e => setSaisie(e.target.value)}
-          placeholder="Métier, taux, langue… ex. vendeuse 80% allemand"
+          placeholder="Rechercher un poste"
           aria-label="Rechercher une offre : métier, taux, langue ou contrat"
           enterKeyHint="search"
           autoComplete="off"
