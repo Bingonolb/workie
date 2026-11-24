@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import type { OffreAffichee } from "@/lib/offresTypes";
 import { CarteOffre, StylesCartesOffre } from "@/components/offres/CarteOffre";
+import { useT } from "@/i18n/FournisseurLangue";
+import { riche } from "@/i18n/riche";
+
+const GRAS = { b: (c: React.ReactNode) => <strong style={{ color: "var(--text)" }}>{c}</strong> };
 
 /**
  * La vue « Offres » d'Explorer : la recherche, la liste filtrée, et le
@@ -17,6 +21,7 @@ type Compris = { equivalences: { mot: string; corrige?: string; traduit: boolean
 export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: string; onQ: (q: string) => void }) {
   // Ce qui est tapé s'affiche aussitôt ; la recherche part après une courte
   // pause dans la frappe, pas à chaque lettre.
+  const t = useT();
   const [saisie, setSaisie] = useState(q);
   useEffect(() => {
     if (saisie === q) return;
@@ -94,13 +99,13 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
           inputMode="search"
           value={saisie}
           onChange={e => setSaisie(e.target.value)}
-          placeholder="Rechercher un poste"
-          aria-label="Rechercher une offre : métier, taux, langue ou contrat"
+          placeholder={t("offres.placeholder")}
+          aria-label={t("offres.rechercheAria")}
           enterKeyHint="search"
           autoComplete="off"
         />
         {saisie && (
-          <button type="button" onClick={() => { setSaisie(""); onQ(""); }} aria-label="Effacer la recherche">
+          <button type="button" onClick={() => { setSaisie(""); onQ(""); }} aria-label={t("offres.effacerRecherche")}>
             <X size={16} aria-hidden="true" />
           </button>
         )}
@@ -112,8 +117,8 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
           {compris.compris.map(c => <span key={c} className="carte-offre-pastille">{c}</span>)}
           {compris.equivalences.map(e => (
             <span key={e.mot}>
-              {e.corrige ? <>« {e.mot} » compris comme « {e.corrige} »{e.traduit ? ", " : ""}</> : null}
-              {e.traduit ? <>{e.corrige ? "cherché" : `« ${e.mot} » cherché`} aussi en allemand, anglais et italien</> : null}
+              {e.corrige ? <>{t("offres.comprisComme", { mot: e.mot, corrige: e.corrige })}{e.traduit ? ", " : ""}</> : null}
+              {e.traduit ? (e.corrige ? t("offres.traduitApres") : t("offres.traduit", { mot: e.mot })) : null}
             </span>
           ))}
         </p>
@@ -125,8 +130,8 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
     return (
       <>{styles}<StylesCartesOffre />{champ}
       <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
-        <p style={{ fontSize: 17, fontWeight: 600, marginBottom: 14 }}>Les offres n&apos;ont pas pu être chargées.</p>
-        <button type="button" className="btn btn-clair" onClick={() => void charger(0, false)}>Réessayer</button>
+        <p style={{ fontSize: 17, fontWeight: 600, marginBottom: 14 }}>{t("offres.erreur")}</p>
+        <button type="button" className="btn btn-clair" onClick={() => void charger(0, false)}>{t("offres.reessayer")}</button>
       </div>
       </>
     );
@@ -136,8 +141,8 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
     return (
       <>{styles}<StylesCartesOffre />{champ}
       <div style={{ textAlign: "center", padding: "64px 0", color: "var(--text-muted)" }}>
-        <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{q.trim() ? `Aucune offre pour « ${q.trim()} »` : "Aucune offre pour ces filtres"}</p>
-        <p style={{ fontSize: 14 }}>{q.trim() ? "Essayez un autre mot, ou retirez le taux ou la langue." : "Essayez d'élargir le canton ou la langue."}</p>
+        <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{q.trim() ? t("offres.aucunePour", { q: q.trim() }) : t("offres.aucuneFiltres")}</p>
+        <p style={{ fontSize: 14 }}>{q.trim() ? t("offres.conseilQ") : t("offres.conseilFiltres")}</p>
       </div>
       </>
     );
@@ -150,7 +155,7 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
       {champ}
 
       <p aria-live="polite" style={{ fontSize: 14, color: "var(--text-muted)", margin: "0 0 14px" }}>
-        {etat === "chargement" && offres.length === 0 ? "Chargement des offres…" : <><strong style={{ color: "var(--text)" }}>{total.toLocaleString("fr-CH")}</strong> offres</>}
+        {etat === "chargement" && offres.length === 0 ? t("offres.chargement") : riche(t("offres.total", { n: total }), GRAS)}
       </p>
 
       <div className="offres-grille" style={{ opacity: etat === "chargement" && offres.length > 0 ? 0.5 : 1, transition: "opacity .15s" }}>
@@ -162,10 +167,10 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
       {offres.length > 0 && offres.length < total && (
         <div style={{ textAlign: "center", marginTop: 36 }}>
           <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginBottom: 14 }}>
-            <strong style={{ color: "var(--text)" }}>{offres.length.toLocaleString("fr-CH")}</strong> sur <strong style={{ color: "var(--text)" }}>{total.toLocaleString("fr-CH")}</strong> offres
+            {riche(t("offres.surTotal", { n: offres.length, total }), GRAS)}
           </p>
           <button type="button" className="btn btn-clair" disabled={etat === "plus"} onClick={() => void charger(page + 1, true)}>
-            {etat === "plus" ? "Chargement…" : `Voir ${Math.min(24, total - offres.length)} offres de plus`}
+            {etat === "plus" ? t("offres.chargementCourt") : t("offres.plus", { n: Math.min(24, total - offres.length) })}
           </button>
         </div>
       )}

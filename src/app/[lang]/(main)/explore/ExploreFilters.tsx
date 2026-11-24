@@ -13,14 +13,13 @@ function abonnerTelephone(rappel: () => void) {
 }
 import { SECTOR_COLORS } from "@/lib/types";
 import { useVerrouDefilement } from "@/lib/useVerrouDefilement";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomSecteur } from "@/i18n/secteurs";
+import { nomCanton } from "@/i18n/cantons";
 
 /** Les quatre langues de travail que les fiches peuvent porter. */
-const LANGUES = [
-  { code: "FR", nom: "Français" },
-  { code: "DE", nom: "Allemand" },
-  { code: "IT", nom: "Italien" },
-  { code: "EN", nom: "Anglais" },
-];
+const LANGUES = ["FR", "DE", "IT", "EN"] as const;
+const CONTRATS = ["CDI", "CDD", "Stage", "Apprentissage", "Temporaire", "Non précisé"] as const;
 
 /** « GE,VD » devient ["GE", "VD"]. */
 function liste(valeur: string | undefined): string[] {
@@ -46,6 +45,8 @@ export function ExploreFilters({
   /** Vue Offres : rubrique « Contrat », langue de l'annonce, pas de tri. */
   offres?: boolean;
 }) {
+  const t = useT();
+  const langueSite = useLangue();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -113,7 +114,7 @@ export function ExploreFilters({
   const contenu = (
     <>
             {/* Sectors */}
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Secteur</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>{t("filtres.secteur")}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
               {sectors.map(s => {
                 const color = SECTOR_COLORS[s] ?? "var(--brand)";
@@ -126,14 +127,14 @@ export function ExploreFilters({
                       background: active ? `color-mix(in srgb, ${color} 15%, transparent)` : "transparent",
                       color: active ? color : "var(--text-muted)", transition: "all 0.1s",
                     }}>
-                    {s}
+                    {nomSecteur(s, langueSite)}
                   </button>
                 );
               })}
             </div>
       
             {/* Cantons */}
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Canton</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>{t("filtres.canton")}</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))", gap: 5, marginBottom: view !== "swipe" ? 18 : 0 }}>
               {cantons.map(c => {
                 const active = cantonsActifs.includes(c.code);
@@ -148,7 +149,7 @@ export function ExploreFilters({
                     }}>
                     {/* « CH » n'est pas un canton : Multi-sites s'affiche seul. */}
                     {c.code !== "CH" && <div style={{ fontSize: 9, opacity: 0.5 }}>{c.code}</div>}
-                    {c.name}
+                    {nomCanton(c.code, langueSite, c.name)}
                   </button>
                 );
               })}
@@ -158,9 +159,9 @@ export function ExploreFilters({
                 Une offre à Zurich ne sert à rien à qui ne parle pas
                 allemand : après le lieu, c'est la première chose qui
                 décide si une entreprise est atteignable. */}
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "18px 0 10px" }}>{offres ? "Langue de l'annonce" : "Langue de travail"}</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "18px 0 10px" }}>{offres ? t("filtres.langueAnnonce") : t("filtres.langueTravail")}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: view !== "swipe" ? 18 : 0 }}>
-              {LANGUES.map(({ code, nom }) => {
+              {LANGUES.map(code => {
                 const active = languesActives.includes(code);
                 return (
                   <button key={code} onClick={() => basculer("langue", languesActives, code)}
@@ -170,7 +171,7 @@ export function ExploreFilters({
                       background: active ? "rgba(59,130,246,0.15)" : "transparent",
                       color: active ? "#3b82f6" : "var(--text-muted)", transition: "all 0.1s",
                     }}>
-                    {nom}
+                    {t(`filtres.${code}`)}
                   </button>
                 );
               })}
@@ -179,10 +180,10 @@ export function ExploreFilters({
             {/* Contrat : vue Offres seulement */}
             {offres && (
               <>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Contrat</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>{t("filtres.contrat")}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {/* « Non précisé » : l'employeur n'a pas indiqué le contrat (un tiers des offres). */}
-                  {["CDI", "CDD", "Stage", "Apprentissage", "Temporaire", "Non précisé"].map(c => {
+                  {CONTRATS.map(c => {
                     const active = contratsActifs.includes(c);
                     return (
                       <button key={c} onClick={() => basculer("contrat", contratsActifs, c)}
@@ -192,7 +193,7 @@ export function ExploreFilters({
                           background: active ? "var(--surface2)" : "transparent",
                           color: active ? "#8b5cf6" : "var(--text-muted)", transition: "all 0.1s",
                         }}>
-                        {c}
+                        {t(`contrat.${c}`)}
                       </button>
                     );
                   })}
@@ -203,13 +204,13 @@ export function ExploreFilters({
             {/* Sort — grid only */}
             {view !== "swipe" && !offres && (
               <>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Trier par</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>{t("filtres.trier")}</p>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {([
-                    { v: "recent", label: "Récentes" },
-                    { v: "score", label: "Score" },
-                    { v: "name", label: "A → Z" },
-                  ] as const).map(({ v, label }) => (
+                    { v: "recent", label: t("filtres.recentes") },
+                    { v: "score", label: t("filtres.score") },
+                    { v: "name", label: t("filtres.az") },
+                  ]).map(({ v, label }) => (
                     <button key={v} onClick={() => push("sort", v === "recent" ? undefined : v)}
                       style={{
                         padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
@@ -248,7 +249,7 @@ export function ExploreFilters({
             }}
           >
             <SlidersHorizontal size={15} aria-hidden="true" />
-            <span>Filtres</span>
+            <span>{t("filtres.bouton")}</span>
             {activeCount > 0 && (
               <span style={{ background: "#8b5cf6", color: "#fff", borderRadius: 50, fontSize: 10, fontWeight: 800, padding: "1px 6px", minWidth: 18, textAlign: "center" }}>
                 {activeCount}
@@ -257,15 +258,15 @@ export function ExploreFilters({
           </button>
 
           {showPanel && !estMobile && (
-            <div ref={panelRef} id="filter-panel" className="filter-panel" role="dialog" aria-label="Filtres">
+            <div ref={panelRef} id="filter-panel" className="filter-panel" role="dialog" aria-label={t("filtres.bouton")}>
               {contenu}
               {activeCount > 0 && (
                 <div style={{ borderTop: "1px solid var(--border)", marginTop: 18, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <button type="button" onClick={clearAll} style={{ fontSize: 12, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
-                    Tout réinitialiser
+                    {t("filtres.reinitialiser")}
                   </button>
                   <button type="button" onClick={() => setShowPanel(false)} style={{ padding: "7px 18px", borderRadius: 9, background: "var(--encre)", color: "var(--encre-texte)", fontWeight: 700, fontSize: 13, border: "none", cursor: "pointer" }}>
-                    Voir les résultats
+                    {t("filtres.voirResultats")}
                   </button>
                 </div>
               )}
@@ -277,20 +278,20 @@ export function ExploreFilters({
               pied. Plus d'éléments « collants » dans une zone qui défile : c'est
               ce qui faisait accrocher le glissé. */}
           {showPanel && estMobile && createPortal(
-            <div className="feuille-filtres" role="dialog" aria-modal="true" aria-label="Filtres">
+            <div className="feuille-filtres" role="dialog" aria-modal="true" aria-label={t("filtres.bouton")}>
               <div className="feuille-entete">
-                <p style={{ fontSize: 18, fontWeight: 800, color: "var(--text)" }}>Filtres</p>
-                <button type="button" onClick={() => setShowPanel(false)} aria-label="Fermer les filtres" className="feuille-fermer">
+                <p style={{ fontSize: 18, fontWeight: 800, color: "var(--text)" }}>{t("filtres.bouton")}</p>
+                <button type="button" onClick={() => setShowPanel(false)} aria-label={t("filtres.fermer")} className="feuille-fermer">
                   <X size={18} aria-hidden="true" />
                 </button>
               </div>
               <div className="feuille-corps">{contenu}</div>
               <div className="feuille-pied">
                 <button type="button" onClick={clearAll} disabled={activeCount === 0} className="btn btn-fantome" style={{ opacity: activeCount === 0 ? 0.4 : 1 }}>
-                  Tout effacer
+                  {t("filtres.effacer")}
                 </button>
                 <button type="button" onClick={() => setShowPanel(false)} className="btn btn-encre" style={{ flex: 1 }}>
-                  Voir les résultats
+                  {t("filtres.voirResultats")}
                 </button>
               </div>
             </div>,

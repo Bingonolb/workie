@@ -5,6 +5,7 @@ import { catalogueEmploi, CANTONS, type Page } from "@/lib/pagesEmploi";
 import { tServeur, langueDeLaPage } from "@/i18n/page";
 import { nomCanton } from "@/i18n/cantons";
 import { LOCALE_INTL } from "@/i18n/config";
+import { ChoixLangue } from "@/i18n/ChoixLangue";
 
 /**
  * Pied de page de l'accueil, des pages Annonceurs et Pour les entreprises.
@@ -93,7 +94,7 @@ export async function PiedAccueil() {
         .pied-cantons-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin-top: 10px; }
         .pied-cantons-grille a { font-size: 12.5px; line-height: 1.35; overflow-wrap: anywhere; }
         .pied-bas { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between;
-          flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text-muted); }
+          flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
         .pied-mobile { display: none; }
 
         @media (max-width: 760px) {
@@ -113,7 +114,7 @@ export async function PiedAccueil() {
           .pied-acc .pied-cantons { margin: 0 0 12px; }
           .pied-acc .pied-cantons summary { min-height: 40px; font-size: 14px; }
           .pied-acc .pied-cantons-grille a { font-size: 13.5px; padding: 6px 0; }
-          .pied-bas { margin-top: 18px; border-top: none; padding-top: 0; flex-direction: column; gap: 4px; }
+          .pied-bas { margin-top: 18px; border-top: none; padding-top: 0; flex-direction: column; align-items: flex-start; gap: 10px; }
         }
         @media (prefers-reduced-motion: reduce) { .pied-chevron { transition: none; } }
       `}</style>
@@ -151,6 +152,7 @@ export async function PiedAccueil() {
 
         <div className="pied-bas">
           <span>© 2026 Workie</span>
+          <ChoixLangue compact />
           <span>{t("pied.hebergement")}</span>
         </div>
       </div>

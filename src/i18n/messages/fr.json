@@ -96,5 +96,62 @@
     "entreprisesCanton": "Entreprises : {canton}",
     "slogan": "Chercher du travail devient passionnant.",
     "hebergement": "Plateforme suisse, données hébergées en Europe"
+  },
+  "filtres": {
+    "bouton": "Filtres",
+    "secteur": "Secteur",
+    "canton": "Canton",
+    "langueAnnonce": "Langue de l'annonce",
+    "langueTravail": "Langue de travail",
+    "contrat": "Contrat",
+    "trier": "Trier par",
+    "recentes": "Récentes",
+    "score": "Score",
+    "az": "A → Z",
+    "reinitialiser": "Tout réinitialiser",
+    "effacer": "Tout effacer",
+    "voirResultats": "Voir les résultats",
+    "fermer": "Fermer les filtres",
+    "FR": "Français",
+    "DE": "Allemand",
+    "IT": "Italien",
+    "EN": "Anglais"
+  },
+  "contrat": {
+    "CDI": "CDI",
+    "CDD": "CDD",
+    "Stage": "Stage",
+    "Apprentissage": "Apprentissage",
+    "Temporaire": "Temporaire",
+    "Non précisé": "Non précisé"
+  },
+  "offres": {
+    "cloturee": "Offre clôturée",
+    "voir": "Voir l'offre",
+    "voirFiche": "Voir la fiche de {nom}",
+    "voirOffre": "Voir l'offre : {titre}",
+    "placeholder": "Rechercher un poste",
+    "rechercheAria": "Rechercher une offre : métier, taux, langue ou contrat",
+    "effacerRecherche": "Effacer la recherche",
+    "comprisComme": "« {mot} » compris comme « {corrige} »",
+    "traduitApres": "cherché aussi en allemand, anglais et italien",
+    "traduit": "« {mot} » cherché aussi en allemand, anglais et italien",
+    "erreur": "Les offres n'ont pas pu être chargées.",
+    "reessayer": "Réessayer",
+    "aucunePour": "Aucune offre pour « {q} »",
+    "aucuneFiltres": "Aucune offre pour ces filtres",
+    "conseilQ": "Essayez un autre mot, ou retirez le taux ou la langue.",
+    "conseilFiltres": "Essayez d'élargir le canton ou la langue.",
+    "chargement": "Chargement des offres…",
+    "chargementCourt": "Chargement…",
+    "total": {
+      "one": "<b>{n}</b> offre",
+      "other": "<b>{n}</b> offres"
+    },
+    "surTotal": "<b>{n}</b> sur <b>{total}</b> offres",
+    "plus": {
+      "one": "Voir {n} offre de plus",
+      "other": "Voir {n} offres de plus"
+    }
   }
 }

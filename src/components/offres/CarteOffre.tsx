@@ -9,6 +9,9 @@ import { urlFiche } from "@/lib/urlFiche";
 import { largeurCouverture } from "@/lib/coverUrl";
 import { libelleTaux } from "@/lib/offres";
 import { lieuAffiche } from "@/lib/types";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomSecteur } from "@/i18n/secteurs";
+import type { CleMessage } from "@/i18n/traduire";
 
 /**
  * La carte d'une offre d'emploi, partout où des offres se listent (Explorer,
@@ -24,6 +27,7 @@ import { lieuAffiche } from "@/lib/types";
  * aucun classement : la flamme reste réservée aux entreprises.
  */
 
+const CONTRATS = new Set(["CDI", "CDD", "Stage", "Apprentissage", "Temporaire"]);
 const CODE_LANGUE: Record<string, string> = { fr: "FR", de: "DE", en: "EN", it: "IT" };
 
 function initiales(nom: string) {
@@ -32,28 +36,32 @@ function initiales(nom: string) {
 }
 
 export function CarteOffre({ o }: { o: OffreAffichee }) {
+  const t = useT();
+  const langueSite = useLangue();
   const e = o.entreprise;
   const taux = libelleTaux(o.taux_min, o.taux_max);
   const lieu = o.location || (e.city ? lieuAffiche(e.city, e.canton) : null);
-  const faits = [o.contract_type, taux, o.langue ? CODE_LANGUE[o.langue] : null].filter(Boolean) as string[];
+  // Les contrats connus se traduisent ; une valeur inattendue s'affiche telle quelle.
+  const contrat = o.contract_type && CONTRATS.has(o.contract_type) ? t(`contrat.${o.contract_type}` as CleMessage) : o.contract_type;
+  const faits = [contrat, taux, o.langue ? CODE_LANGUE[o.langue] : null].filter(Boolean) as string[];
 
   const contenu = (
     <>
-      {o.cloturee && <span className="carte-offre-cloturee">Offre clôturée</span>}
+      {o.cloturee && <span className="carte-offre-cloturee">{t("offres.cloturee")}</span>}
       <h3 className="carte-offre-titre">{o.title}</h3>
       {o.apercu && <p className="carte-offre-apercu">{o.apercu}</p>}
       <span className="carte-offre-faits">
         {lieu && <span className="carte-offre-lieu"><MapPin size={14} strokeWidth={2} aria-hidden="true" />{lieu}</span>}
         {faits.map(f => <span key={f} className="carte-offre-pastille">{f}</span>)}
       </span>
-      {!o.cloturee && <span className="carte-offre-voir">Voir l&apos;offre <ChevronRight size={16} aria-hidden="true" /></span>}
+      {!o.cloturee && <span className="carte-offre-voir">{t("offres.voir")} <ChevronRight size={16} aria-hidden="true" /></span>}
     </>
   );
 
   return (
     <article className={`carte-offre${o.cloturee ? " carte-offre--cloturee" : ""}`}>
       <div className="carte-offre-tete">
-        <Link href={urlFiche(e)} className="carte-offre-ent" aria-label={`Voir la fiche de ${e.name}`}>
+        <Link href={urlFiche(e)} className="carte-offre-ent" aria-label={t("offres.voirFiche", { nom: e.name })}>
           <span className="carte-offre-vignette" style={{ background: e.cover_color ?? "var(--surface2)" }}>
             {e.cover_url
               // eslint-disable-next-line @next/next/no-img-element
@@ -62,7 +70,7 @@ export function CarteOffre({ o }: { o: OffreAffichee }) {
           </span>
           <span style={{ minWidth: 0 }}>
             <span className="carte-offre-nom">{e.name}</span>
-            <span className="carte-offre-sect">{e.subsector || e.sector}</span>
+            <span className="carte-offre-sect">{e.subsector || nomSecteur(e.sector, langueSite)}</span>
           </span>
         </Link>
         <BoutonSignet offreId={o.id} titre={o.title} />
@@ -78,7 +86,7 @@ export function CarteOffre({ o }: { o: OffreAffichee }) {
           companyName={e.name}
           companyId={e.id}
           declencheur={ouvrir => (
-            <button type="button" onClick={ouvrir} className="carte-offre-corps" aria-label={`Voir l'offre : ${o.title}`}>
+            <button type="button" onClick={ouvrir} className="carte-offre-corps" aria-label={t("offres.voirOffre", { titre: o.title })}>
               {contenu}
             </button>
           )}

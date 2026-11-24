@@ -96,5 +96,62 @@
     "entreprisesCanton": "Unternehmen: {canton}",
     "slogan": "Jobsuche wird spannend.",
     "hebergement": "Schweizer Plattform, Daten in Europa gespeichert"
+  },
+  "filtres": {
+    "bouton": "Filter",
+    "secteur": "Branche",
+    "canton": "Kanton",
+    "langueAnnonce": "Sprache des Inserats",
+    "langueTravail": "Arbeitssprache",
+    "contrat": "Vertrag",
+    "trier": "Sortieren nach",
+    "recentes": "Neueste",
+    "score": "Punkte",
+    "az": "A → Z",
+    "reinitialiser": "Alles zurücksetzen",
+    "effacer": "Alles löschen",
+    "voirResultats": "Ergebnisse anzeigen",
+    "fermer": "Filter schliessen",
+    "FR": "Französisch",
+    "DE": "Deutsch",
+    "IT": "Italienisch",
+    "EN": "Englisch"
+  },
+  "contrat": {
+    "CDI": "Unbefristet",
+    "CDD": "Befristet",
+    "Stage": "Praktikum",
+    "Apprentissage": "Lehre",
+    "Temporaire": "Temporär",
+    "Non précisé": "Nicht angegeben"
+  },
+  "offres": {
+    "cloturee": "Stelle besetzt",
+    "voir": "Zum Inserat",
+    "voirFiche": "Profil von {nom} ansehen",
+    "voirOffre": "Zum Inserat: {titre}",
+    "placeholder": "Stelle suchen",
+    "rechercheAria": "Stelle suchen: Beruf, Pensum, Sprache oder Vertrag",
+    "effacerRecherche": "Suche löschen",
+    "comprisComme": "«{mot}» verstanden als «{corrige}»",
+    "traduitApres": "auch auf Französisch, Englisch und Italienisch gesucht",
+    "traduit": "«{mot}» auch auf Französisch, Englisch und Italienisch gesucht",
+    "erreur": "Die Stellen konnten nicht geladen werden.",
+    "reessayer": "Erneut versuchen",
+    "aucunePour": "Keine Stellen für «{q}»",
+    "aucuneFiltres": "Keine Stellen für diese Filter",
+    "conseilQ": "Versuchen Sie ein anderes Wort oder entfernen Sie Pensum oder Sprache.",
+    "conseilFiltres": "Erweitern Sie den Kanton oder die Sprache.",
+    "chargement": "Stellen werden geladen…",
+    "chargementCourt": "Wird geladen…",
+    "total": {
+      "one": "<b>{n}</b> Stelle",
+      "other": "<b>{n}</b> Stellen"
+    },
+    "surTotal": "<b>{n}</b> von <b>{total}</b> Stellen",
+    "plus": {
+      "one": "{n} weitere Stelle anzeigen",
+      "other": "{n} weitere Stellen anzeigen"
+    }
   }
 }
