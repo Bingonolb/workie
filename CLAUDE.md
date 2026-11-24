@@ -38,7 +38,7 @@ All `position: fixed` modals must be ≥ 10002 or they are hidden behind the bot
 
 - Use `overflow-x: clip` (not `overflow-x: hidden`) on all scroll-containing ancestors. `hidden` creates a new scroll container that traps `position: fixed` children. `clip` does not.
 - All `<input>`, `<select>`, `<textarea>` must have `font-size: 16px` on mobile (≤768px) to prevent iOS/Android auto-zoom on focus. A global rule in `globals.css` handles this; don't override with smaller inline values.
-- The bottom nav hides when a keyboard-triggering element is focused, via `body:has(input:focus, ...) .bottom-nav { display: none }`.
+- The bottom nav hides when a keyboard-triggering element is focused, via the `html.clavier-ouvert` class set by `BottomNav` (focusin/focusout). **Never use `body:has(...)`**: it is re-evaluated on every DOM change, and during a swipe that made images flash and the motion stutter. State that the whole page needs goes in a class on `<html>`, set by code (`recherche-ouverte` from `GlobalSearch`).
 - Minimum touch target: 48×48px (buttons, icons).
 
 ## Supabase client usage

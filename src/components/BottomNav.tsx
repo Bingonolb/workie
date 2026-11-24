@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Compass, Search, Flame, User, Layers } from "lucide-react";
@@ -74,7 +74,34 @@ function BottomNavInner() {
   );
 }
 
+// Un champ qui ouvre le clavier a le focus : la barre se retire. Suivi par
+// événements plutôt que par `body:has(:focus)`, que le navigateur réévalue à
+// chaque changement de la page (le swipe en provoque des dizaines par seconde).
+const SANS_CLAVIER = new Set(["checkbox", "radio", "range", "button", "submit", "file", "reset", "color", "image"]);
+function ouvreClavier(el: EventTarget | null) {
+  if (el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) return true;
+  if (el instanceof HTMLInputElement) return !SANS_CLAVIER.has(el.type);
+  return el instanceof HTMLElement && el.isContentEditable;
+}
+function useClavier() {
+  useEffect(() => {
+    const racine = document.documentElement;
+    const maj = () => racine.classList.toggle("clavier-ouvert", ouvreClavier(document.activeElement));
+    // focusout part avant que le focus suivant soit posé : on relit au tour suivant.
+    const sortie = () => setTimeout(maj, 0);
+    document.addEventListener("focusin", maj);
+    document.addEventListener("focusout", sortie);
+    maj();
+    return () => {
+      document.removeEventListener("focusin", maj);
+      document.removeEventListener("focusout", sortie);
+      racine.classList.remove("clavier-ouvert");
+    };
+  }, []);
+}
+
 export function BottomNav() {
+  useClavier();
   return (
     <Suspense fallback={
       <nav className="bottom-nav" aria-hidden="true">

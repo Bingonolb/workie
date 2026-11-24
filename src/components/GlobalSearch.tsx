@@ -65,6 +65,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
      * cette méthode provoquait vient d'un retour à zéro ; on retient donc la
      * position et on la rétablit.
      */
+    document.documentElement.classList.add("recherche-ouverte");
     const y = window.scrollY;
     const style = document.body.style;
     const memoire = { position: style.position, top: style.top, left: style.left, right: style.right, width: style.width };
@@ -77,6 +78,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
 
     return () => {
       document.removeEventListener("keydown", onKey);
+      document.documentElement.classList.remove("recherche-ouverte");
       document.documentElement.style.overflow = "";
       style.position = memoire.position;
       style.top = memoire.top;

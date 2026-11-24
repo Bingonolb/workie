@@ -511,20 +511,16 @@ main, .page-main, .page-main-sm, .page-main-md {
 
 /* Sur mobile, la barre du bas reste visible au-dessus de la recherche ; sur
    ordinateur il n'y a pas de barre du bas. La liste laisse sa place en bas. */
+/* Pas de `body:has(...)` ici : un tel sélecteur oblige le navigateur à
+   réévaluer toute la page à chaque changement du DOM. Pendant un swipe, des
+   dizaines de changements par seconde : images qui clignotaient, mouvement
+   perdu. Deux classes posées sur <html> par du code (BottomNav,
+   GlobalSearch) disent la même chose sans aucun coût. */
 @media (max-width: 768px) {
-  body:has(.recherche-globale) .bottom-nav { z-index: 10101; }
+  html.recherche-ouverte .bottom-nav { z-index: 10101; }
   .recherche-globale { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
-}
-
-/* When virtual keyboard is open (any input/textarea focused), hide bottom nav.
-   Prevents the "flying nav" jump caused by viewport shrinking on keyboard open.
-   :has() is supported on Chrome 105+, Safari 16.4+, Firefox 121+. */
-@media (max-width: 768px) {
-  /* Seuls les champs qui ouvrent un clavier comptent : une case à cocher ou
-     un interrupteur qui prend le focus faisait disparaître la barre. */
-  body:has(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="file"]):focus, textarea:focus, select:focus) .bottom-nav {
-    display: none;
-  }
+  /* Clavier ouvert : la barre se retire, sinon elle saute au-dessus du clavier. */
+  html.clavier-ouvert .bottom-nav { display: none; }
 }
 
 /* ─── Business dashboard pages ─────────────────────────────────── */
