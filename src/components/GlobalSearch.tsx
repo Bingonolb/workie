@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
@@ -39,10 +39,16 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
    * la recherche, le demontage revenait en arriere, et le clic se perdait. On
    * repartait sur Explorer au lieu d'ouvrir la fiche.
    */
+  // onClose passe par une référence : les effets ci-dessous ne doivent
+  // tourner qu'une fois par ouverture, quel que soit le rendu du parent.
+  const fermerRef = useRef(onClose);
+  // Vrai quand on quitte vers une autre page : pas de retour au défilement d'avant.
+  const quitteRef = useRef(false);
+  useEffect(() => { fermerRef.current = onClose; }, [onClose]);
   const fermer = useCallback(() => {
     if (history.state?.recherche) history.back();
-    else onClose();
-  }, [onClose]);
+    else fermerRef.current();
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -85,9 +91,31 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       style.left = memoire.left;
       style.right = memoire.right;
       style.width = memoire.width;
-      window.scrollTo(0, y);
+      // Vers une autre page : elle s'ouvre en haut, pas à la position de l'ancienne.
+      window.scrollTo(0, quitteRef.current ? 0 : y);
     };
   }, [fermer]);
+
+  /*
+   * Quitter vers une autre page depuis la barre du bas.
+   *
+   * La recherche reste affichée pendant que la page suivante se prépare, puis
+   * s'efface quand elle est là. Revenir d'abord sur la page d'en dessous la
+   * faisait réapparaître un instant, avec son défilement : un flash entre deux
+   * onglets. La nouvelle page a remplacé l'entrée d'historique de la
+   * recherche : il n'y a rien à consommer.
+   */
+  const cheminDepart = useRef<string | null>(null);
+  const chemin = usePathname();
+  useEffect(() => {
+    if (cheminDepart.current === null) { cheminDepart.current = chemin; return; }
+    if (chemin !== cheminDepart.current) { quitteRef.current = true; fermerRef.current(); }
+  }, [chemin]);
+  useEffect(() => {
+    const quitter = () => { quitteRef.current = true; fermerRef.current(); };
+    window.addEventListener("workie:recherche-quitter", quitter);
+    return () => window.removeEventListener("workie:recherche-quitter", quitter);
+  }, []);
 
   /*
    * Seule la dernière frappe décide de ce qui s'affiche.
@@ -195,14 +223,16 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
    */
   useEffect(() => {
     history.pushState({ recherche: true }, "");
-    const retour = () => onClose();
+    const retour = () => fermerRef.current();
     window.addEventListener("popstate", retour);
-    // Un bouton de la barre du bas, sur mobile, ferme la recherche avant de
-    // mener ailleurs : la navigation qui suit remplace l'entrée d'historique.
-    const parBarre = () => { if (history.state?.recherche) history.replaceState(null, ""); onClose(); };
-    window.addEventListener("workie:recherche-fermer", parBarre);
-    return () => { window.removeEventListener("popstate", retour); window.removeEventListener("workie:recherche-fermer", parBarre); };
-  }, [onClose]);
+    // Fermeture demandée par la barre du bas quand l'entrée d'historique n'est
+    // plus là (rare) ; sinon elle passe par un retour en arrière, comme ici.
+    window.addEventListener("workie:recherche-fermer", retour);
+    return () => { window.removeEventListener("popstate", retour); window.removeEventListener("workie:recherche-fermer", retour); };
+    // Une seule fois par ouverture : relancé à chaque rendu du parent (la
+    // fonction onClose change d'identité), il empilait une entrée d'historique
+    // de plus à chaque fois.
+  }, []);
 
   // Les 3 premiers résultats sont ceux qu'on ouvre presque toujours : on les
   // prépare dès qu'ils s'affichent, après une courte pause dans la frappe.
@@ -216,7 +246,10 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
 
   const ouvrir = (e: Suggestion) => {
     setRecentes(ajouterRecente({ id: e.id, name: e.name, city: e.city, sector: e.sector }));
-    onClose();
+    // La recherche reste affichée jusqu'à ce que la fiche soit là : elle
+    // s'efface au changement de page (voir « Quitter vers une autre page »).
+    // Déjà sur cette fiche : aucun changement ne viendra, on ferme.
+    if (urlFiche(e) === window.location.pathname) fermer();
   };
 
   if (!mounted) return null;
@@ -272,7 +305,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => {
-              if (e.key === "Enter" && suggestions[0]) { ouvrir(suggestions[0]); router.push(urlFiche(suggestions[0])); }
+              if (e.key === "Enter" && suggestions[0]) { ouvrir(suggestions[0]); router.replace(urlFiche(suggestions[0])); }
               if (e.key === "Escape") fermer();
             }}
             placeholder="Rechercher une entreprise…"
@@ -363,6 +396,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           <Link
             key={s.id}
             href={urlFiche(s)}
+            replace
             prefetch={false}
             onClick={() => ouvrir(s)}
             className="gs-row"
@@ -400,6 +434,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
               <div key={r.id} className="gs-row" style={{ cursor: "default" }}>
                 <Link
                   href={urlFiche(r)}
+                  replace
                   prefetch={false}
                   onClick={() => ouvrir({ ...r, logo_url: null })}
                   style={{ flex: 1, minWidth: 0, textDecoration: "none" }}
