@@ -376,13 +376,21 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 company.employee_range ? { Icone: Users, value: company.employee_range, label: "Employés" } : null,
                 // Les langues remplacent la note : on ne postule pas dans une
                 // langue qu'on ne parle pas.
-                langues.length > 0 ? { Icone: Languages, value: langues.map(abregeLangue).join(" · "), label: "Langues" } : null,
-              ].filter(Boolean) as { Icone: typeof MapPin; value: string; label: string }[]).map(({ Icone, value, label }) => (
+                langues.length > 0 ? { Icone: Languages, value: "", codes: langues.map(abregeLangue), label: "Langues" } : null,
+              ].filter(Boolean) as { Icone: typeof MapPin; value: string; codes?: string[]; label: string }[]).map(({ Icone, value, codes, label }) => (
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 16px", minWidth: 0 }}>
                   <p style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.2 }}>
                     <Icone size={15} strokeWidth={2} aria-hidden="true" />{label}
                   </p>
-                  <p style={{ marginTop: 8, fontSize: 17, fontWeight: 700, letterSpacing: "-0.01em", color: "var(--text)", lineHeight: 1.25, overflowWrap: "anywhere" }}>{value}</p>
+                  {codes ? (
+                    // Une pastille par langue : elles passent à la ligne entières,
+                    // jamais « FR · ALL · » puis « ANG » sur un petit téléphone.
+                    <p style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 5 }}>
+                      {codes.map(c => <span key={c} style={{ fontSize: 14, fontWeight: 700, lineHeight: 1, padding: "5px 7px", borderRadius: 7, background: "var(--surface2)", color: "var(--text)", letterSpacing: "0.02em" }}>{c}</span>)}
+                    </p>
+                  ) : (
+                    <p style={{ marginTop: 8, fontSize: 17, fontWeight: 700, letterSpacing: "-0.01em", color: "var(--text)", lineHeight: 1.25, overflowWrap: "anywhere" }}>{value}</p>
+                  )}
                 </div>
               ))}
             </div>
