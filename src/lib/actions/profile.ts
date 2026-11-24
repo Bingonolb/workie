@@ -1,7 +1,7 @@
 "use server";
 
+import { revaliderPage } from "@/lib/revaliderPage";
 import { randomUUID } from "crypto";
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export async function updateProfile(formData: FormData): Promise<{ error?: string }> {
@@ -43,6 +43,6 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
     .eq("id", user.id);
 
   if (error) return { error: error.message };
-  revalidatePath("/profile");
+  revaliderPage("/profile");
   return {};
 }

@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revaliderPage } from "@/lib/revaliderPage";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { randomUUID } from "crypto";
 import { headers } from "next/headers";
 import { createClient, getNiveauAal } from "@/lib/supabase/server";
@@ -239,7 +240,7 @@ export async function createUserCampaign(
     }).select("id").single();
 
     if (error || !inserted) return { error: error?.message ?? "Erreur lors de la création de la campagne" };
-    revalidatePath("/profile/ads");
+    revaliderPage("/profile/ads");
     return { campaignId: inserted.id };
   } catch (e) { return { error: (e as Error).message }; }
 }
@@ -404,7 +405,7 @@ export async function pauseUserCampaign(id: string): Promise<{ error?: string }>
       .select("id");
     if (error) return { error: "La mise en pause a échoué. Réessayez." };
     if (!data?.length) return { error: "Cette campagne ne peut pas être mise en pause." };
-    revalidatePath("/profile/ads");
+    revaliderPage("/profile/ads");
     revalidateTag("ad-campaigns", {});
     return {};
   } catch (e) { return { error: (e as Error).message }; }
@@ -456,7 +457,7 @@ export async function reprendreCampagne(id: string): Promise<{ error?: string }>
       .select("id");
     if (error) return { error: "La relance a échoué. Réessayez." };
     if (!maj?.length) return { error: "Cette campagne ne peut pas être relancée." };
-    revalidatePath("/profile/ads");
+    revaliderPage("/profile/ads");
     revalidateTag("ad-campaigns", {});
     return {};
   } catch (e) { return { error: (e as Error).message }; }
@@ -497,7 +498,7 @@ export async function deleteUserCampaign(id: string): Promise<{ error?: string }
       const { count } = await admin.from("ad_campaigns").select("id", { count: "exact", head: true }).eq("image_url", image);
       if (!count) await admin.storage.from("covers").remove([decodeURIComponent(chemin)]);
     }
-    revalidatePath("/profile/ads");
+    revaliderPage("/profile/ads");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
@@ -615,8 +616,8 @@ export async function adminSetCampaignStatus(
       .update({ status, admin_note: note ?? null })
       .eq("id", campaignId);
     if (error) return { error: error.message };
-    revalidatePath("/admin/ads");
-    revalidatePath("/explore");
+    revaliderPage("/admin/ads");
+    revaliderPage("/explore");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }

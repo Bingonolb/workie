@@ -1,6 +1,7 @@
+import { revaliderPage } from "@/lib/revaliderPage";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { revalidateTag, revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendAbonnementActif } from "@/lib/email";
 import { creerFicheDepuisDemande } from "@/lib/creationFiche";
@@ -156,7 +157,7 @@ export async function POST(req: NextRequest) {
     // résiliation. Événements rares, coût négligeable.
     if (event.type.startsWith("customer.subscription.") || event.type === "checkout.session.completed") {
       revalidateTag("companies", {});
-      revalidatePath("/entreprise/[slug]", "page");
+      revaliderPage("/entreprise/[slug]", "page");
     }
   } catch (e) {
     console.error("[webhook] handler error:", e);

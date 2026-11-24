@@ -6,8 +6,8 @@ import { modifierFiche, type FicheGeree } from "@/lib/actions/espaceEntreprise";
 import { EMPLOYEE_RANGES, LANGUES_SAISIE } from "@/lib/types";
 import { abregeLangue } from "@/lib/langues";
 import { lireCadrage, CADRAGE_NEUTRE, type Cadrage } from "@/lib/coverUrl";
-import { RecadrageBanniere } from "@/app/admin/company/RecadrageBanniere";
-import { ChampLogo } from "@/app/admin/company/ChampLogo";
+import { RecadrageBanniere } from "@/app/[lang]/admin/company/RecadrageBanniere";
+import { ChampLogo } from "@/app/[lang]/admin/company/ChampLogo";
 
 const lbl: React.CSSProperties = { display: "block", fontSize: 12.5, fontWeight: 700, color: "var(--text-muted)", marginBottom: 6 };
 const inp: React.CSSProperties = { width: "100%", padding: "11px 13px", borderRadius: 11, border: "1px solid var(--border)", background: "var(--surface2)", color: "var(--text)", fontSize: 15 };

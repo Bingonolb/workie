@@ -1,7 +1,8 @@
 "use server";
 
+import { revaliderPage } from "@/lib/revaliderPage";
 import { headers } from "next/headers";
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
@@ -259,9 +260,9 @@ export async function submitReview(_prev: ReviewState, formData: FormData): Prom
     void notifyAdminFlaggedReview(companyExists.name, flag_reason!, `${job_title ?? "poste non précisé"} · note ${rating_overall}/5`).catch(() => {});
   }
 
-  revalidatePath(`/company/${company_id}`);
-  revalidatePath("/profile");
-  revalidatePath("/ranking");
+  revaliderPage(`/company/${company_id}`);
+  revaliderPage("/profile");
+  revaliderPage("/ranking");
   revalidateTag("companies", {});
   revalidateTag("reviews", {});
   revalidateTag("top-companies", {});
@@ -335,7 +336,7 @@ export async function voteHelpful(reviewId: string): Promise<{ error?: string; a
   }
 
   const { data: rev } = await supabase.from("reviews").select("company_id").eq("id", reviewId).maybeSingle();
-  if (rev?.company_id) revalidatePath(`/company/${rev.company_id}`);
+  if (rev?.company_id) revaliderPage(`/company/${rev.company_id}`);
   revalidateTag("reviews", {});
 
   return {};

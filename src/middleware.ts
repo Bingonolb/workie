@@ -2,6 +2,31 @@ import { createServerClient } from "@supabase/ssr";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { type NextRequest, NextResponse } from "next/server";
+import { LANGUES, COOKIE_LANGUE, LANGUE_PAR_DEFAUT, estOuverte, type Langue } from "@/i18n/config";
+
+/**
+ * Langue de la page demandée.
+ *
+ * Les adresses ne changent pas : workie.ch/explore reste workie.ch/explore.
+ * La langue vient du préfixe s'il y en a un (/de/explore, adresse que Google
+ * indexe), sinon du choix mémorisé (cookie), sinon du français. La page est
+ * ensuite servie en coulisse depuis /<langue>/… : chaque langue a sa propre
+ * version en cache, aussi rapide que l'actuelle.
+ *
+ * Ne concerne que les pages : ni l'API, ni les fichiers (robots.txt,
+ * sitemap, icônes, manifeste).
+ */
+function langueDe(request: NextRequest): { lang: Langue; chemin: string; prefixe: Langue | null } {
+  const { pathname } = request.nextUrl;
+  const premier = pathname.split("/")[1];
+  if ((LANGUES as readonly string[]).includes(premier)) {
+    const chemin = pathname.slice(premier.length + 1) || "/";
+    return { lang: premier as Langue, chemin, prefixe: premier as Langue };
+  }
+  const choisie = request.cookies.get(COOKIE_LANGUE)?.value;
+  return { lang: estOuverte(choisie) ? choisie : LANGUE_PAR_DEFAUT, chemin: pathname, prefixe: null };
+}
+const estPage = (chemin: string) => !chemin.startsWith("/api") && !chemin.startsWith("/_next") && !/.[a-z0-9]+$/i.test(chemin);
 
 // Lazy init — if UPSTASH env vars are missing (e.g. Vercel plan migration), rate limiting is
 // disabled rather than crashing the Edge Function for every request.
@@ -118,8 +143,24 @@ function etatSession(request: NextRequest): "valide" | "a_rafraichir" | "absente
 
 export async function middleware(request: NextRequest) {
   try {
-    const { pathname } = request.nextUrl;
+    const { lang, chemin: pathname, prefixe } = langueDe(request);
     const method = request.method;
+    const page = estPage(pathname);
+    // « /fr/… » n'existe pas en adresse : le français est à la racine.
+    if (prefixe === "fr") {
+      const url = request.nextUrl.clone();
+      url.pathname = pathname;
+      return NextResponse.redirect(url, 308);
+    }
+    /** La page dans sa langue, servie en coulisse ; le reste passe tel quel. */
+    const suite = () => {
+      if (!page) return suite();
+      const url = request.nextUrl.clone();
+      url.pathname = `/${lang}${pathname === "/" ? "" : pathname}`;
+      return NextResponse.rewrite(url, { request });
+    };
+    /** Une redirection garde le préfixe de langue de l'adresse d'origine. */
+    const vers = (cible: string) => { const url = request.nextUrl.clone(); url.pathname = prefixe ? `/${prefixe}${cible}` : cible; return url; };
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
     const isServerAction = method === "POST" && !!request.headers.get("next-action");
 
@@ -183,7 +224,7 @@ export async function middleware(request: NextRequest) {
     // Fast path: public routes that don't need logged-in redirect → skip Supabase entirely
     // This eliminates ~100ms of auth latency for 80%+ of traffic (browse, explore, company pages)
     if (isPublic && !isAuthRoute) {
-      return NextResponse.next({ request });
+      return suite();
     }
 
     // Décision sans réseau tant que le jeton est valide. Voir etatSession :
@@ -192,26 +233,23 @@ export async function middleware(request: NextRequest) {
 
     if (etat === "absente") {
       if (!isPublic && !ouverteAuxVisiteurs) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/login";
-        url.searchParams.set("next", pathname + request.nextUrl.search);
+        const url = vers("/login");
+        url.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
         return NextResponse.redirect(url);
       }
-      return NextResponse.next({ request });
+      return suite();
     }
 
     if (etat === "valide") {
       if (isAuthRoute) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/explore";
-        return NextResponse.redirect(url);
+        return NextResponse.redirect(vers("/explore"));
       }
-      return NextResponse.next({ request });
+      return suite();
     }
 
     // Jeton proche de l'expiration ou illisible : là seulement on passe par
     // Supabase, qui valide et réécrit les cookies rafraîchis.
-    let response = NextResponse.next({ request });
+    let response = suite();
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -221,7 +259,7 @@ export async function middleware(request: NextRequest) {
           getAll() { return request.cookies.getAll(); },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-            response = NextResponse.next({ request });
+            response = suite();
             cookiesToSet.forEach(({ name, value, options }) =>
               response.cookies.set(name, value, options)
             );
@@ -234,21 +272,24 @@ export async function middleware(request: NextRequest) {
     const loggedIn = !!user;
 
     if (!loggedIn && !isPublic && !ouverteAuxVisiteurs) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("next", pathname + request.nextUrl.search);
+      const url = vers("/login");
+      url.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
       return NextResponse.redirect(url);
     }
 
     if (loggedIn && isAuthRoute) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/explore";
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(vers("/explore"));
     }
 
     return response;
   } catch {
-    return NextResponse.next();
+    // Filet de secours : la page en français plutôt qu'une page introuvable
+    // (les pages n'existent que sous /<langue>/…).
+    const { pathname } = request.nextUrl;
+    if (!estPage(pathname) || /^\/(fr|de|en|it)(\/|$)/.test(pathname)) return NextResponse.next();
+    const url = request.nextUrl.clone();
+    url.pathname = `/fr${pathname === "/" ? "" : pathname}`;
+    return NextResponse.rewrite(url);
   }
 }
 

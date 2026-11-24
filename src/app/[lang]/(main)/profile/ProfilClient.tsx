@@ -1,5 +1,6 @@
 "use client";
 
+import { ChoixLangue } from "@/i18n/ChoixLangue";
 import { useEffect, useLayoutEffect, useState } from "react";
 import Link from "next/link";
 import { ProfileForm } from "@/components/ProfileForm";
@@ -408,6 +409,7 @@ export function ProfilClient() {
                     ne change pas le geste. */}
                 Télécharger mes données
               </a>
+              <div style={{ padding: "6px 0 4px" }}><ChoixLangue /></div>
               <SignOutButton />
 
               {/* La regie publicitaire, toujours atteignable.

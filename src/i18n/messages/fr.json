@@ -11,5 +11,9 @@
     "offres": "Offres",
     "ceQueVousExplorez": "Ce que vous explorez",
     "vosFavoris": "Vos favoris"
+  },
+  "langue": {
+    "titre": "Langue",
+    "aide": "La langue du site. Les offres d'emploi restent dans la langue où l'entreprise les a publiées."
   }
 }

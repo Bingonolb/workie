@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revaliderPage } from "@/lib/revaliderPage";
 import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendRevendicationAcceptee, sendRevendicationRefusee } from "@/lib/email";
@@ -60,7 +60,7 @@ export async function deciderRevendication(id: string, accepter: boolean, note: 
     const lien = r.entreprise ? `${base}/revendiquer/${r.entreprise.slug}` : `${base}/creer-entreprise`;
     if (nomFiche && accepter) await sendRevendicationAcceptee(r.email_pro, r.prenom, nomFiche, lien);
     else if (nomFiche) await sendRevendicationRefusee(r.email_pro, r.prenom, nomFiche);
-    revalidatePath("/admin/revendications");
+    revaliderPage("/admin/revendications");
     return {};
   } catch (e) {
     return { error: (e as Error).message };

@@ -9,6 +9,8 @@ import fr from "./messages/fr.json";
  */
 const DICTIONNAIRES: Partial<Record<Langue, () => Promise<Messages>>> = {
   fr: async () => fr,
+  // Un dictionnaire incomplet est permis : chaque clé absente retombe sur le français.
+  de: async () => (await import("./messages/de.json")).default as Messages,
 };
 
 export async function messagesDe(langue: Langue): Promise<Messages> {

@@ -1,0 +1,19 @@
+{
+  "menu": {
+    "explorer": "Entdecken",
+    "swipe": "Swipe",
+    "favoris": "Favoriten",
+    "recherche": "Suche",
+    "profil": "Profil"
+  },
+  "vue": {
+    "entreprises": "Unternehmen",
+    "offres": "Stellen",
+    "ceQueVousExplorez": "Was Sie entdecken",
+    "vosFavoris": "Ihre Favoriten"
+  },
+  "langue": {
+    "titre": "Sprache",
+    "aide": "Die Sprache der Benutzeroberfläche. Stellenangebote bleiben in der Sprache, in der das Unternehmen sie veröffentlicht hat."
+  }
+}

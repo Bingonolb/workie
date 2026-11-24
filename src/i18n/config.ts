@@ -11,8 +11,21 @@ export type Langue = (typeof LANGUES)[number];
 
 export const LANGUE_PAR_DEFAUT: Langue = "fr";
 
-/** Langues réellement proposées aux visiteurs. Étape 0 : le français seul. */
-export const OUVERTES: readonly Langue[] = ["fr"];
+/**
+ * Langues réellement servies et proposées. Réglées par environnement
+ * (NEXT_PUBLIC_LANGUES, ex. « fr,de ») : on ouvre une langue sur le site
+ * d'essai pour la relire, avant de l'ouvrir en production. Le français est
+ * toujours ouvert.
+ */
+export const OUVERTES: readonly Langue[] = [...new Set<Langue>([
+  "fr",
+  ...(process.env.NEXT_PUBLIC_LANGUES ?? "").split(",").map(s => s.trim()).filter(estLangueBrute),
+])];
+function estLangueBrute(x: string): x is Langue { return (LANGUES as readonly string[]).includes(x); }
+export const estOuverte = (x: unknown): x is Langue => typeof x === "string" && (OUVERTES as readonly string[]).includes(x);
+
+/** Cookie qui garde la langue choisie (visiteur comme compte). */
+export const COOKIE_LANGUE = "workie_langue";
 
 export const estLangue = (x: unknown): x is Langue => typeof x === "string" && (LANGUES as readonly string[]).includes(x);
 

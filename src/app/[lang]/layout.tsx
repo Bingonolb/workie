@@ -12,7 +12,11 @@ export const viewport: Viewport = {
   ],
 };
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
+import { notFound } from "next/navigation";
+import { OUVERTES, estOuverte, LOCALE_INTL } from "@/i18n/config";
+import { messagesDe } from "@/i18n/serveur";
+import { FournisseurLangue } from "@/i18n/FournisseurLangue";
 import { Suspense } from "react";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -106,9 +110,22 @@ const orgSchema = {
   contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "contact@workie.ch", availableLanguage: ["French", "German"] },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+/**
+ * Une version de chaque page par langue ouverte, générée et mise en cache
+ * séparément. Une langue non ouverte (ou inventée) répond 404 : elle n'est
+ * jamais servie à moitié traduite.
+ */
+export function generateStaticParams() {
+  return OUVERTES.map(lang => ({ lang }));
+}
+export const dynamicParams = false;
+
+export default async function RootLayout({ children, params }: { children: React.ReactNode; params: Promise<{ lang: string }> }) {
+  const { lang } = await params;
+  if (!estOuverte(lang)) notFound();
+  const messages = await messagesDe(lang);
   return (
-    <html lang="fr" className={inter.variable}>
+    <html lang={LOCALE_INTL[lang]} className={inter.variable}>
       <head>
         <link rel="preconnect" href="https://xtbdxfzbbuedlktpqpna.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://xtbdxfzbbuedlktpqpna.supabase.co" />
@@ -128,12 +145,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main-content" className="skip-to-main">
           Aller au contenu principal
         </a>
+        <FournisseurLangue langue={lang} messages={messages}>
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>
           <SessionKeepAlive />
           <CookieBanner />
           <Suspense><WelcomeModal /></Suspense>
         </ThemeProvider>
+        </FournisseurLangue>
       </body>
     </html>
   );

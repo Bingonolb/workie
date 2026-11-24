@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revaliderPage } from "@/lib/revaliderPage";
 import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -101,7 +101,7 @@ export async function changerBlocage(cibleId: string, bloquer: boolean, motif: s
       origine: "service_role",
     });
 
-    revalidatePath("/admin/utilisateurs");
+    revaliderPage("/admin/utilisateurs");
     return {};
   } catch (e) {
     return { error: (e as Error).message };

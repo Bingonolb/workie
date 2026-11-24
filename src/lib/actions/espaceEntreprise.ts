@@ -1,7 +1,8 @@
 "use server";
 
+import { revaliderPage } from "@/lib/revaliderPage";
 import Stripe from "stripe";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -137,8 +138,8 @@ export async function modifierFiche(formData: FormData): Promise<{ error?: strin
     const { error } = await admin.from("companies").update(champs as never).eq("id", c.id);
     if (error) return { error: "L'enregistrement a échoué. Réessayez." };
 
-    revalidatePath("/entreprise/[slug]", "page");
-    revalidatePath("/espace-entreprise");
+    revaliderPage("/entreprise/[slug]", "page");
+    revaliderPage("/espace-entreprise");
     revalidateTag("companies", {});
     const avertissement = depot.avertissement ?? logo.avertissement;
     return avertissement ? { avertissement } : {};
@@ -186,8 +187,8 @@ export async function listerOffres(): Promise<Offre[]> {
 }
 
 function rafraichirFiche() {
-  revalidatePath("/entreprise/[slug]", "page");
-  revalidatePath("/espace-entreprise/offres");
+  revaliderPage("/entreprise/[slug]", "page");
+  revaliderPage("/espace-entreprise/offres");
   revalidateTag("companies", {});
 }
 

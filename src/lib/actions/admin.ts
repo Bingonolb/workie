@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revaliderPage } from "@/lib/revaliderPage";
+import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -61,9 +62,9 @@ export async function adminUpdateCompany(id: string, formData: FormData): Promis
     const { error } = await admin.from("companies").update(fields).eq("id", id);
     if (error) return { error: error.message };
 
-    revalidatePath("/entreprise/[slug]", "page");
-    revalidatePath("/explore");
-    revalidatePath("/admin/companies");
+    revaliderPage("/entreprise/[slug]", "page");
+    revaliderPage("/explore");
+    revaliderPage("/admin/companies");
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
     // Le texte est bien enregistré ; l'avertissement ne concerne que l'image.
@@ -148,8 +149,8 @@ export async function adminAddCompany(formData: FormData): Promise<{ error?: str
       await notifyNewCompany(created.id, fields.name, fields.sector, fields.city);
     }
 
-    revalidatePath("/explore");
-    revalidatePath("/admin/companies");
+    revaliderPage("/explore");
+    revaliderPage("/admin/companies");
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
     // La fiche est créée ; l'avertissement ne concerne que l'image.
@@ -186,8 +187,8 @@ export async function adminDeleteCompany(id: string): Promise<{ error?: string }
 
     const { error } = await admin.from("companies").delete().eq("id", id);
     if (error) return { error: error.message };
-    revalidatePath("/explore");
-    revalidatePath("/admin/companies");
+    revaliderPage("/explore");
+    revaliderPage("/admin/companies");
     revalidateTag("companies", {});
     revalidateTag("top-companies", {});
     revalidateTag("landing-counts", {});

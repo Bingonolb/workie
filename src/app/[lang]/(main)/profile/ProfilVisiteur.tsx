@@ -1,5 +1,6 @@
 "use client";
 
+import { ChoixLangue } from "@/i18n/ChoixLangue";
 import Link from "next/link";
 import { Flame, TrendingUp, Megaphone, Building2, ChevronRight, Check } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -56,6 +57,10 @@ export function ProfilVisiteur() {
           <Link href="/signup?next=/profile" className="btn btn-marque" style={{ flex: "1 1 180px", justifyContent: "center" }}>Créer un compte gratuit</Link>
           <Link href="/login?next=/profile" className="btn btn-clair" style={{ flex: "1 1 140px", justifyContent: "center" }}>Se connecter</Link>
         </div>
+      </div>
+
+      <div style={{ ...carte, padding: "18px 20px" }}>
+        <ChoixLangue />
       </div>
 
       <div style={{ ...carte, overflow: "hidden" }}>

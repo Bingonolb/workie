@@ -9,7 +9,7 @@ import { LandingFaq } from "@/components/LandingFaq";
 import { ApercuSwipe } from "@/components/ApercuSwipe";
 import { PiedAccueil } from "@/components/PiedAccueil";
 import { StylesLanding, NavLanding } from "@/components/StylesLanding";
-import { RechercheRevendication } from "@/app/pour-les-entreprises/RechercheRevendication";
+import { RechercheRevendication } from "@/app/[lang]/pour-les-entreprises/RechercheRevendication";
 import { getApercuEntreprises } from "@/lib/apercuAccueil";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { revendicationOuverte, accueilCompact, offresSynchro } from "@/lib/ouverture";
