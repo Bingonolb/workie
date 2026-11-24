@@ -80,7 +80,12 @@ function Badge({ label, color }: { label: string; color: string }) {
  * `ligne` : forme compacte, pour les longues listes (une ligne par offre,
  * séparées par un filet), comme sur les grands sites d'emploi.
  */
-export function JobOfferCard({ job, companyName, companyId, ligne = false }: { job: Job; companyName: string; companyId: string; ligne?: boolean }) {
+/**
+ * `declencheur` : un autre élément pour ouvrir l'aperçu (la carte d'offre
+ * d'Explorer). L'aperçu est le même partout : on lit l'offre chez Workie,
+ * puis « En savoir plus » mène au site de l'employeur.
+ */
+export function JobOfferCard({ job, companyName, companyId, ligne = false, declencheur }: { job: Job; companyName: string; companyId: string; ligne?: boolean; declencheur?: (ouvrir: () => void) => React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const taux = libelleTaux(job.taux_min, job.taux_max);
   // Le clic sur « Postuler » compte pour l'entreprise (statistiques) et pour le
@@ -105,7 +110,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false }: { j
 
   return (
     <>
-      {ligne ? (
+      {declencheur ? declencheur(() => setOpen(true)) : ligne ? (
         <button type="button" className="jo-ligne" onClick={() => setOpen(true)} aria-label={`Voir l'offre : ${job.title}`}>
           <span className="jo-ligne-texte">
             <span className="jo-ligne-titre">{job.title}</span>

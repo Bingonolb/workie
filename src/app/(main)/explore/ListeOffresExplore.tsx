@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, MapPin } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
+import { JobOfferCard } from "@/components/JobOfferCard";
 import type { OffreExplorer } from "@/app/api/offres/route";
 import { urlFiche } from "@/lib/urlFiche";
 import { largeurCouverture } from "@/lib/coverUrl";
@@ -47,15 +48,25 @@ function CarteOffre({ o }: { o: OffreExplorer }) {
         </span>
       </Link>
 
-      <a href={o.apply_url ?? urlFiche(e)} target={o.apply_url ? "_blank" : undefined} rel="noopener noreferrer" className="carte-offre-corps">
-        <h3 className="carte-offre-titre">{o.title}</h3>
-        {o.apercu && <p className="carte-offre-apercu">{o.apercu}</p>}
-        <span className="carte-offre-faits">
-          {lieu && <span className="carte-offre-lieu"><MapPin size={14} strokeWidth={2} aria-hidden="true" />{lieu}</span>}
-          {faits.map(f => <span key={f} className="carte-offre-pastille">{f}</span>)}
-        </span>
-        <span className="carte-offre-voir">Voir l&apos;offre <ArrowUpRight size={15} aria-hidden="true" /></span>
-      </a>
+      {/* Le clic ouvre l'aperçu de l'offre, le même que sur la fiche
+          entreprise ; « En savoir plus » y mène ensuite au site de
+          l'employeur. Arriver directement chez l'employeur était trop brusque. */}
+      <JobOfferCard
+        job={{ ...o, created_at: o.created_at ?? "" }}
+        companyName={e.name}
+        companyId={e.id}
+        declencheur={ouvrir => (
+          <button type="button" onClick={ouvrir} className="carte-offre-corps" aria-label={`Voir l'offre : ${o.title}`}>
+            <h3 className="carte-offre-titre">{o.title}</h3>
+            {o.apercu && <p className="carte-offre-apercu">{o.apercu}</p>}
+            <span className="carte-offre-faits">
+              {lieu && <span className="carte-offre-lieu"><MapPin size={14} strokeWidth={2} aria-hidden="true" />{lieu}</span>}
+              {faits.map(f => <span key={f} className="carte-offre-pastille">{f}</span>)}
+            </span>
+            <span className="carte-offre-voir">Voir l&apos;offre <ChevronRight size={16} aria-hidden="true" /></span>
+          </button>
+        )}
+      />
     </article>
   );
 }
@@ -126,7 +137,9 @@ export function ListeOffresExplore({ filtres }: { filtres: Filtres }) {
         .carte-offre-nom { display: block; font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .carte-offre-sect { display: block; font-size: 13px; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .carte-offre-ent:hover .carte-offre-nom { text-decoration: underline; text-underline-offset: 3px; }
-        .carte-offre-corps { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px 18px 18px; text-decoration: none; color: inherit; }
+        .carte-offre-corps { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px 18px 18px; text-decoration: none; color: inherit;
+          width: 100%; text-align: left; background: none; border: 0; font: inherit; cursor: pointer; }
+        .carte-offre-corps:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
         .carte-offre-titre { font-size: 17.5px; font-weight: 750; letter-spacing: -0.015em; line-height: 1.3; color: var(--text); margin: 0;
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .carte-offre-apercu { font-size: 14.5px; line-height: 1.55; color: var(--text-muted); margin: 0;

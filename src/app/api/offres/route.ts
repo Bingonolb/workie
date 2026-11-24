@@ -26,6 +26,9 @@ export type OffreExplorer = {
   id: string; title: string; location: string | null; contract_type: string | null;
   taux_min: number | null; taux_max: number | null; langue: string | null;
   apply_url: string | null; apercu: string | null; created_at: string | null;
+  // Pour l'aperçu de l'offre, le même que sur la fiche entreprise.
+  description: string | null; missions: string | null; requirements: string | null; avantages: string | null;
+  work_mode: string | null; experience_level: string | null; entree: string | null; langues: string[] | null; source: string | null;
   entreprise: {
     id: string; slug: string | null; name: string; logo_url: string | null; cover_url: string | null;
     cover_color: string | null; sector: string | null; subsector: string | null; city: string | null; canton: string | null;
@@ -44,7 +47,7 @@ export async function GET(req: Request) {
   const admin = createAdminClient();
   let q = admin
     .from("offres_explorer" as "job_offers")
-    .select("id, title, location, contract_type, taux_min, taux_max, langue, apply_url, description, missions, created_at, companies!inner(id, slug, name, logo_url, cover_url, cover_color, sector, subsector, city, canton)", { count: "exact" })
+    .select("id, title, location, contract_type, taux_min, taux_max, langue, apply_url, description, missions, requirements, avantages, work_mode, experience_level, entree, langues, source, created_at, companies!inner(id, slug, name, logo_url, cover_url, cover_color, sector, subsector, city, canton)", { count: "exact" })
     .in("companies.sector", secteurs.length ? secteurs : enLigne);
   if (!offresSynchro) q = q.is("source", null);
   if (cantons.length) q = q.in("companies.canton", cantons);
@@ -67,8 +70,8 @@ export async function GET(req: Request) {
     return t.length > 220 ? `${t.slice(0, 220).replace(/\s+\S*$/, "")}…` : t;
   };
   // Champs récents (langue) et jointure : hors des types générés.
-  const offres: OffreExplorer[] = ((data ?? []) as unknown as (Omit<OffreExplorer, "apercu" | "entreprise"> & { description: string | null; missions: string | null; companies: OffreExplorer["entreprise"] })[])
-    .map(({ description, missions, companies, ...o }) => ({ ...o, apercu: court(description ?? missions), entreprise: companies }));
+  const offres: OffreExplorer[] = ((data ?? []) as unknown as (Omit<OffreExplorer, "apercu" | "entreprise"> & { companies: OffreExplorer["entreprise"] })[])
+    .map(({ companies, ...o }) => ({ ...o, apercu: court(o.description ?? o.missions), entreprise: companies }));
 
   return NextResponse.json({ offres, total: count ?? offres.length, parPage: PAR_PAGE }, {
     headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" },
