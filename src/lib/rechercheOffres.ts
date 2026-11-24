@@ -128,8 +128,11 @@ const VIDES = new Set(["de", "du", "des", "la", "le", "les", "et", "en", "a", "a
 export type Recherche = {
   /** Groupes de variantes : une offre doit correspondre à chaque groupe (ET), à une variante au moins (OU). */
   groupes: string[][];
-  /** Ce qu'on montre à la personne : « vendeur → Verkauf, Sales… ». */
-  equivalences: { mot: string; aussi: string[] }[];
+  /**
+   * Ce qu'on montre à la personne : le mot a-t-il été corrigé (« vendeue » →
+   * « vendeuse ») et cherché dans les autres langues ?
+   */
+  equivalences: { mot: string; corrige?: string; traduit: boolean }[];
   /** Taux voulu (« 80% ») : l'offre doit le permettre. « temps partiel » : moins de 100 %. */
   taux?: number;
   partiel?: boolean;
@@ -197,9 +200,7 @@ export function analyser(saisie: string, vocabulaire: Set<string> = new Set()): 
     const variantes = new Set<string>(groupe ? groupe : [racine(mot)]);
     const propres = [...variantes].map(v => v.replace(/[^a-z0-9 -]/g, "")).filter(v => v.trim().length >= 2);
     groupes.push(propres);
-    if (groupe || mot !== brut) {
-      equivalences.push({ mot: brut, aussi: [...new Set([...(mot !== brut ? [mot] : []), ...(groupe ?? []).map(r => r.trim()).filter(r => !mot.startsWith(r))])].slice(0, 5) });
-    }
+    if (groupe || mot !== brut) equivalences.push({ mot: brut, ...(mot !== brut ? { corrige: mot } : {}), traduit: !!groupe });
   }
   return { groupes, equivalences, taux, partiel, langues, contrats, compris };
 }

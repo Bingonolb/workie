@@ -71,7 +71,7 @@ function CarteOffre({ o }: { o: OffreExplorer }) {
   );
 }
 
-type Compris = { equivalences: { mot: string; aussi: string[] }[]; compris: string[] } | null;
+type Compris = { equivalences: { mot: string; corrige?: string; traduit: boolean }[]; compris: string[] } | null;
 
 export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: string; onQ: (q: string) => void }) {
   // Ce qui est tapé s'affiche aussitôt ; la recherche part après une courte
@@ -183,7 +183,10 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
         <p className="recherche-offres-compris">
           {compris.compris.map(c => <span key={c} className="carte-offre-pastille">{c}</span>)}
           {compris.equivalences.map(e => (
-            <span key={e.mot}>« {e.mot} » cherche aussi {e.aussi.map(a => a.trim()).join(", ")}</span>
+            <span key={e.mot}>
+              {e.corrige ? <>« {e.mot} » compris comme « {e.corrige} »{e.traduit ? ", " : ""}</> : null}
+              {e.traduit ? <>{e.corrige ? "cherché" : `« ${e.mot} » cherché`} aussi en allemand, anglais et italien</> : null}
+            </span>
           ))}
         </p>
       )}
