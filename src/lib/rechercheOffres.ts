@@ -27,7 +27,7 @@ const GROUPES: string[][] = [
   ["ingenieur", "ingenieu", "engineer", "ingegner"],
   ["technici", "techniker", "technician", "tecnic"],
   ["mecani", "mechanik", "mechanic", "meccanic", "polymechan", "automatik", "automaticien"],
-  ["electric", "elektr", "electrician", "elettric", "elektroinstall"],
+  ["electrici", "elektriker", "electrician", "elettricist", "elektroinstall", "elektromonteur", "montage-elektr", "netzelektr", "automaticien", "elektroplan"],
   ["infirmi", "pflegefach", "pflegehelf", "pflegeassist", "pflegeexpert", "dipl. pflege", "pflegepersonal", "nurse", "nursing", "infermier", "fage", "assc", "soins"],
   ["medec", "arzt", "aerzt", "doctor", "physician", "medic"],
   ["pharmac", "apothek", "pharma", "farmac"],
