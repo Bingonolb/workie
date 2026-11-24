@@ -246,8 +246,11 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
 
       {offres.length > 0 && offres.length < total && (
         <div style={{ textAlign: "center", marginTop: 36 }}>
+          <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginBottom: 14 }}>
+            <strong style={{ color: "var(--text)" }}>{offres.length.toLocaleString("fr-CH")}</strong> sur <strong style={{ color: "var(--text)" }}>{total.toLocaleString("fr-CH")}</strong> offres
+          </p>
           <button type="button" className="btn btn-clair" disabled={etat === "plus"} onClick={() => void charger(page + 1, true)}>
-            {etat === "plus" ? "Chargement…" : "Voir plus d'offres"}
+            {etat === "plus" ? "Chargement…" : `Voir ${Math.min(24, total - offres.length)} offres de plus`}
           </button>
         </div>
       )}
