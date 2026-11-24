@@ -45,6 +45,9 @@ function titrePropre(t) {
     t = t.replace(/(\s[-–]\s+)([^()]+)$/u, (_, sep, lieux) => sep + lieux.replace(/(^|\/)\s*(\p{L})/gu, (m, a, c) => a + c.toUpperCase()));
   }
   return t
+    // Texte mal décodé à la source (Belloni : « chantier â Second Åuvre ») :
+    // le tiret et l'Œ d'origine sont rendus.
+    .replace(/\sâ\s/g, " – ").replace(/Åuvre/g, "Œuvre").replace(/Å“/g, "œ")
     .replace(/\s*[-–]?\s*\bREF\s?\d+[A-Z]?\b/gi, "")
     // « Consultant, Switzerland », « … BCG Platinion Zurich, Switzerland » :
     // le lieu s'affiche à part.

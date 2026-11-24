@@ -69,6 +69,7 @@ describe("titres longs de Workday", () => {
 
 describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
   it("titres", () => {
+    expect(titrePropre("Technicienne de chantier â Second Åuvre (d) 100%")).toBe("Technicienne de chantier – Second Œuvre (d) 100%");
     expect(titrePropre("AI Architect - BCG Platinion Zurich, Switzerland")).toBe("AI Architect - BCG Platinion");
     expect(titrePropre("Consultant, Switzerland")).toBe("Consultant");
     expect(titrePropre("Chef de projet Tunnel (h/f/) 80-100 %")).toBe("Chef de projet Tunnel 80-100 %");

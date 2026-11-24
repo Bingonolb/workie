@@ -43,10 +43,8 @@ export async function GET(req: Request) {
 
   const admin = createAdminClient();
   let q = admin
-    .from("job_offers")
-    .select("id, title, location, contract_type, taux_min, taux_max, langue, apply_url, description, missions, created_at, companies!inner(id, slug, name, logo_url, cover_url, cover_color, sector, subsector, city, canton)", { count: "estimated" })
-    .eq("is_active", true)
-    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+    .from("offres_explorer" as "job_offers")
+    .select("id, title, location, contract_type, taux_min, taux_max, langue, apply_url, description, missions, created_at, companies!inner(id, slug, name, logo_url, cover_url, cover_color, sector, subsector, city, canton)", { count: "exact" })
     .in("companies.sector", secteurs.length ? secteurs : enLigne);
   if (!offresSynchro) q = q.is("source", null);
   if (cantons.length) q = q.in("companies.canton", cantons);
@@ -54,7 +52,10 @@ export async function GET(req: Request) {
   if (contrats.length) q = q.in("contract_type", contrats);
 
   const { data, count, error } = await q
-    .order("created_at", { ascending: false })
+    // Vue offres_explorer : la plus récente de chaque entreprise d'abord,
+    // puis la deuxième de chacune… Les employeurs alternent à l'écran.
+    .order("rang_entreprise" as "created_at")
+    .order("melange" as "created_at")
     .order("id")
     .range(page * PAR_PAGE, page * PAR_PAGE + PAR_PAGE - 1);
   if (error) return NextResponse.json({ offres: [], total: 0 }, { status: 500 });
