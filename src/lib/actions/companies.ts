@@ -1,6 +1,8 @@
 "use server";
 
 import { unstable_cache } from "next/cache";
+import { localiserEntreprises } from "@/lib/traductionsEntreprises";
+import type { Langue } from "@/i18n/config";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Company } from "@/lib/types";
@@ -31,7 +33,8 @@ export async function getAllCompaniesForSwipe(filters?: {
 // Appelé depuis le client pour charger le prochain batch
 export async function fetchSwipePage(
   filters: { sector?: string; canton?: string; langue?: string; search?: string } | undefined,
-  offset: number
+  offset: number,
+  langue: Langue = "fr",
 ) {
   const supabase = await createClient();
   let q = supabase
@@ -75,7 +78,7 @@ export async function fetchSwipePage(
   // retirer ses etiquettes, la faisait disparaitre du swipe. Sur quarante
   // entreprises en Alimentation, trente-cinq etaient invisibles, precisement
   // les mieux tenues.
-  return (data ?? []).filter(c => c.city?.trim()) as Company[];
+  return localiserEntreprises((data ?? []).filter(c => c.city?.trim()) as Company[], langue);
 }
 
 
@@ -227,9 +230,11 @@ const _fetchGridPageCached = unstable_cache(
  */
 export async function fetchGridPage(
   filters: { sector?: string; canton?: string; langue?: string; sort?: string; graine?: number },
-  page: number
+  page: number,
+  langue: Langue = "fr",
 ): Promise<{ companies: Company[]; total: number }> {
-  return _fetchGridPageCached(filters, page);
+  const r = await _fetchGridPageCached(filters, page);
+  return { ...r, companies: await localiserEntreprises(r.companies, langue) };
 }
 
 export const getCachedCompany = unstable_cache(

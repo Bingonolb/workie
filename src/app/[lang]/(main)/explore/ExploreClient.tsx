@@ -7,7 +7,12 @@ import { prechargerCouvertures } from "@/components/CoverImage";
 import { ExploreFilters } from "./ExploreFilters";
 import { AdSquareCard } from "@/components/AdSquareCard";
 import { SwipeView } from "./SwipeView";
-import { fetchGridPage, fetchSwipePage } from "@/lib/actions/companies";
+import { fetchGridPage as grilleServeur, fetchSwipePage as swipeServeur } from "@/lib/actions/companies";
+import { langueDocument } from "@/i18n/langueDocument";
+
+// Les fiches arrivent dans la langue de la page (description, sous-secteur).
+const fetchGridPage: typeof grilleServeur = (f, p) => grilleServeur(f, p, langueDocument());
+const fetchSwipePage: typeof swipeServeur = (f, o) => swipeServeur(f, o, langueDocument());
 import { GRID_PAGE_SIZE } from "@/lib/actions/columns";
 import { SECTORS } from "@/lib/types";
 import type { Company } from "@/lib/types";

@@ -38,6 +38,8 @@ import { logoAffichable } from "@/lib/logo";
 import { LigneSuggestion } from "@/components/company/LigneSuggestion";
 import { fondDensite, lireCadrage, styleCadrageFond, sourcesBandeau } from "@/lib/coverUrl";
 import { revendicationOuverte } from "@/lib/ouverture";
+import { langueDeLaPage } from "@/i18n/page";
+import { localiserEntreprise } from "@/lib/traductionsEntreprises";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -73,7 +75,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const id = await idDeFiche((await params).slug);
-  const company = await getCachedCompany(id);
+  const company = await localiserEntreprise(await getCachedCompany(id), await langueDeLaPage());
   if (!company) return { title: "Entreprise introuvable" };
   const desc = company.description
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
@@ -161,7 +163,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
   // le cache. Ce qui dépend du visiteur est chargé par FournisseurEtatFiche.
   // Les avis ne sont plus lus : ils ne sont ni affichés ni résumés, et une
   // donnée qu'on ne montre pas ne doit pas être envoyée avec la page.
-  const company = await getCachedCompany(id).catch(() => null);
+  const company = await getCachedCompany(id).then(async c => localiserEntreprise(c, await langueDeLaPage())).catch(() => null);
 
   if (!company) notFound();
 

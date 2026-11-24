@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
+import { localiserEntreprises } from "@/lib/traductionsEntreprises";
+import { estOuverte } from "@/i18n/config";
 
 /**
  * Les fiches publiques d'une liste d'entreprises, pour les favoris d'un
@@ -16,6 +18,9 @@ const COLONNES = "id,slug,name,sector,subsector,city,canton,employee_range,avg_r
 export async function GET(req: Request) {
   const sansCache = { headers: { "Cache-Control": "private, no-store" } };
   try {
+    const parametres = new URL(req.url).searchParams;
+    const demandee = parametres.get("langue");
+    const langue = estOuverte(demandee) ? demandee : "fr";
     const ids = [...new Set((new URL(req.url).searchParams.get("ids") ?? "").split(",").map(s => s.trim()).filter(s => UUID.test(s)))].slice(0, 300);
     if (!ids.length) return NextResponse.json({ companies: [] }, sansCache);
     const [enLigne, { data }] = await Promise.all([
@@ -23,7 +28,8 @@ export async function GET(req: Request) {
       createAdminClient().from("companies").select(COLONNES).in("id", ids),
     ]);
     const parId = new Map((data ?? []).filter(c => enLigne.includes(c.sector)).map(c => [c.id, c]));
-    return NextResponse.json({ companies: ids.map(id => parId.get(id)).filter(Boolean) }, sansCache);
+    const liste = ids.map(id => parId.get(id)).filter(<T,>(c: T | undefined): c is T => Boolean(c));
+    return NextResponse.json({ companies: await localiserEntreprises(liste, langue) }, sansCache);
   } catch {
     return NextResponse.json({ companies: [] }, { status: 500, ...sansCache });
   }

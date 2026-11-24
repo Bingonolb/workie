@@ -26,12 +26,13 @@ import { ExploreClient } from "./ExploreClient";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import type { Company } from "@/lib/types";
 import { urlFiche } from "@/lib/urlFiche";
+import { langueDeLaPage } from "@/i18n/page";
 
 export default async function ExplorePage() {
   // No searchParams — ISR requires no dynamic input.
   // Filters are applied client-side via ExploreClient → fetchGridPage (cached).
   const [{ companies: initialCompanies, total: initialTotal }, secteurs] = await Promise.all([
-    fetchGridPage({}, 0).catch(() => ({ companies: [] as Company[], total: 0 })),
+    langueDeLaPage().then(l => fetchGridPage({}, 0, l)).catch(() => ({ companies: [] as Company[], total: 0 })),
     getSecteursEnLigne().catch(() => [] as string[]),
   ]);
 

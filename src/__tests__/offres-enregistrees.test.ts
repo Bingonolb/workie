@@ -151,6 +151,8 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/offresAffichage", () => ({ offresParIds: async (ids: string[]) => ids.map(id => ({ id })) }));
 
 describe("signets : route privée", () => {
+  // Premier import de la route, lent quand tous les fichiers tournent en parallèle.
+  beforeAll(async () => { await import("@/app/api/user/offres-enregistrees/route"); }, 60_000);
   beforeEach(() => { serveur.user = null; serveur.lignes = []; });
 
   it("répond 401 sans session, jamais une liste vide", async () => {

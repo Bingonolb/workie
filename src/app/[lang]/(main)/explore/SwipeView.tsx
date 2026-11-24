@@ -4,7 +4,11 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Users, X, Flame, Info, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
-import { fetchSwipePage } from "@/lib/actions/companies";
+import { fetchSwipePage as swipeServeur } from "@/lib/actions/companies";
+import { langueDocument } from "@/i18n/langueDocument";
+
+// Les fiches arrivent dans la langue de la page (description, sous-secteur).
+const fetchSwipePage: typeof swipeServeur = (f, o) => swipeServeur(f, o, langueDocument());
 import type { Company } from "@/lib/types";
 import { SECTOR_COLORS, lieuAffiche } from "@/lib/types";
 import { prechargerCouvertures } from "@/components/CoverImage";

@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { SelecteurVue, type VueListe } from "@/components/offres/SelecteurVue";
 import { FavorisOffres } from "./FavorisOffres";
 import { useT } from "@/i18n/FournisseurLangue";
+import { langueDocument } from "@/i18n/langueDocument";
 
 /**
  * Les favoris : entreprises (flamme) ou offres (signet), au choix du même
@@ -78,7 +79,7 @@ function FavorisEntreprises() {
           setInvite(true);
           const ids = idsFavorisInvite();
           if (!ids.length) { setCompanies([]); return; }
-          fetch(`/api/companies/par-ids?ids=${ids.join(",")}`)
+          fetch(`/api/companies/par-ids?ids=${ids.join(",")}&langue=${langueDocument()}`)
             .then(r => r.json())
             .then(d => { if (!annule) setCompanies(Array.isArray(d.companies) ? d.companies : []); })
             .catch(() => { if (!annule) setEchec(true); });

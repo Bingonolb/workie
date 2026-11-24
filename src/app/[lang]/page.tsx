@@ -16,6 +16,7 @@ import { revendicationOuverte, accueilCompact, offresSynchro } from "@/lib/ouver
 import { AccueilCompact } from "@/components/AccueilCompact";
 import { fetchGridPage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
+import { langueDeLaPage } from "@/i18n/page";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
@@ -76,7 +77,7 @@ export default async function Home() {
   if (accueilCompact) {
     const [counts, secteurs, grille] = await Promise.all([
       getLandingCounts(), getSecteursEnLigne(),
-      fetchGridPage({}, 0).catch(() => ({ companies: [] as Company[], total: 0 })),
+      langueDeLaPage().then(l => fetchGridPage({}, 0, l)).catch(() => ({ companies: [] as Company[], total: 0 })),
     ]);
     return <AccueilCompact entreprises={grille.companies} total={counts.companies}
       chiffres={{ offres: counts.offres, entreprises: counts.companies, cantons: counts.cantons }}
