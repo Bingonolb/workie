@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/i18n/FournisseurLangue";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -55,6 +56,7 @@ function estPageAppli(chemin: string) {
 }
 
 export function NavbarClient() {
+  const t = useT();
   const menus = estPageAppli(usePathname() ?? "");
   // Repris de la mémoire s'il y est : la barre s'affiche alors dans le bon
   // état dès le premier rendu, sans attendre le réseau.
@@ -138,16 +140,16 @@ export function NavbarClient() {
               relit en base. `isAdmin` part de faux et ne devient vrai que si le
               serveur l'affirme. */}
           {isLoggedIn && isAdmin && (
-            <Link href="/admin" className="nav-admin" aria-label="Administration">
+            <Link href="/admin" className="nav-admin" aria-label={t("menu.administration")}>
               <Shield size={14} aria-hidden="true" />
               <span className="nav-label">Admin</span>
             </Link>
           )}
           {/* Accès à l'espace entreprise, pour un compte qui gère une fiche. */}
           {isLoggedIn && ctx?.estEntreprise && (
-            <Link href="/espace-entreprise" className="nav-admin" aria-label="Espace entreprise">
+            <Link href="/espace-entreprise" className="nav-admin" aria-label={t("menu.espaceEntreprise")}>
               <Building2 size={14} aria-hidden="true" />
-              <span className="nav-label">Mon entreprise</span>
+              <span className="nav-label">{t("menu.monEntreprise")}</span>
             </Link>
           )}
           {menus && <ClassementBouton />}
@@ -161,7 +163,7 @@ export function NavbarClient() {
               background: "var(--brand)",
               color: "#fff", borderRadius: 8, padding: "7px 14px",
             }}>
-              S&apos;inscrire
+              {t("menu.inscrire")}
             </Link>
           )}
         </div>

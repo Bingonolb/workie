@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { revendicationOuverte } from "@/lib/ouverture";
+import { tServeur } from "@/i18n/page";
+import { riche, sansBalises } from "@/i18n/riche";
+import type { CleMessage, Traduire } from "@/i18n/traduire";
 
 /**
  * Foire aux questions de la page d'accueil.
@@ -18,160 +21,37 @@ import { revendicationOuverte } from "@/lib/ouverture";
  * par un moteur de recherche.
  */
 
-type Entree = { q: string; r: React.ReactNode; texte: string };
+export type Entree = { q: string; r: React.ReactNode; texte: string };
 
-const ENTREES: Entree[] = [
-  {
-    q: "C'est quoi Workie ?",
-    texte:
-      "Une façon moderne de chercher du travail : la recherche commence par les entreprises elles-mêmes. En quelques secondes, vous voyez ce que fait l'une d'elles, où elle est et dans quelle langue on y travaille, puis vous arrivez sur ses offres, à la source.",
-    r: (
-      <>
-        Une façon moderne de chercher du travail : ici, la recherche commence par les
-        entreprises elles-mêmes. En quelques secondes, vous voyez ce que fait l&apos;une
-        d&apos;elles, où elle se trouve et dans quelle langue on y travaille.
-        <br /><br />
-        Un geste pour la garder, un clic pour arriver sur ses offres, à la source, sur son
-        propre site. Vous voyez tous ses postes ouverts, tels qu&apos;elle vient de les
-        publier.
-      </>
-    ),
-  },
-  {
-    q: "Pourquoi je ne retrouve pas dix fois la même offre ?",
-    texte:
-      "Parce que Workie classe des entreprises, pas des annonces. Une entreprise apparaît une fois, et ses offres viennent d'elle : publiées par l'entreprise sur Workie, ou sur son propre site.",
-    r: (
-      <>
-        Parce qu&apos;ici, on classe des entreprises. Une entreprise apparaît une fois,
-        quel que soit le nombre de postes qu&apos;elle publie.
-        <br /><br />
-        Et ses offres viennent d&apos;elle : publiées par l&apos;entreprise sur Workie, ou
-        sur son propre site. Jamais recopiées par un intermédiaire.
-      </>
-    ),
-  },
-  {
-    q: "D'où viennent les informations ?",
-    texte:
-      "De sources publiques et librement consultables, Zefix et les sites officiels des entreprises. Chaque fiche est écrite à la main, une par une. Aucune information confidentielle.",
-    r: (
-      <>
-        De sources publiques et librement consultables : le registre du commerce (Zefix) et
-        les sites officiels des entreprises.
-        <br /><br />
-        Chaque fiche est ensuite écrite à la main, une par une : le nom tel que les gens le
-        disent, le secteur, la ville et le canton, et l&apos;adresse de la{" "}
-        <strong>page carrière du site officiel</strong>.
-        <br /><br />
-        Aucune information confidentielle, aucune donnée interne, rien qui ne soit déjà
-        public.
-      </>
-    ),
-  },
-  {
-    q: "Comment fonctionne le classement ?",
-    texte:
-      "Il suit l'intérêt des visiteurs : un favori vaut 10 points, une visite 1, un clic vers les offres d'emploi 20. Aucune place ne s'achète.",
-    r: (
-      <>
-        Il suit l&apos;intérêt des visiteurs. Un favori vaut 10 points, une visite 1, un clic vers les
-        offres d&apos;emploi 20 (une fois par compte et par entreprise).
-        <br /><br />
-        Aucune place ne s&apos;achète.
-      </>
-    ),
-  },
-  {
-    q: "Je représente une entreprise, je veux corriger notre fiche.",
-    texte:
-      "Écrivez à contact@workie.ch : correction, complément ou retrait, les demandes sont traitées à la main.",
-    r: (
-      <>
-        Écrivez à{" "}
-        <a href="mailto:contact@workie.ch" style={{ color: "var(--brand)" }}>contact@workie.ch</a>.
-        Correction, complément, changement d&apos;adresse ou retrait : chaque demande est
-        traitée à la main.
-      </>
-    ),
-  },
-  {
-    q: "Où sont hébergées les données ?",
-    texte:
-      "Workie est opéré depuis la Suisse. L'application est servie par Vercel, la base de données par Supabase sur des serveurs situés en Europe, et la messagerie par Infomaniak, en Suisse.",
-    r: (
-      <>
-        Workie est opéré depuis la Suisse, pour les 26 cantons.
-        <br /><br />
-        L&apos;application est servie par Vercel, la base de données par Supabase sur des
-        serveurs situés en Europe, et la messagerie par Infomaniak, en Suisse. Le détail
-        figure dans les{" "}
-        <Link href="/mentions-legales" style={{ color: "var(--brand)" }}>mentions légales</Link> et
-        dans la{" "}
-        <Link href="/confidentialite" style={{ color: "var(--brand)" }}>politique de confidentialité</Link>.
-      </>
-    ),
-  },
-  revendicationOuverte ? {
-    q: "Est-ce payant ?",
-    texte:
-      "Pas pour chercher du travail : chercher, sauvegarder des entreprises et gérer son compte sont gratuits. Les entreprises peuvent s'abonner pour gérer leur fiche (129 CHF par mois ou 1 290 CHF par an), et le site se finance aussi par la publicité. Ni l'un ni l'autre n'influence le classement.",
-    r: (
-      <>
-        Pas pour chercher du travail. Chercher, sauvegarder des entreprises, gérer son
-        compte : tout est gratuit, sans abonnement.
-        <br /><br />
-        Les entreprises peuvent s&apos;abonner pour gérer leur fiche (129 CHF par mois ou
-        1 290 CHF par an), et le site se finance aussi par la publicité, toujours signalée
-        comme telle. Ni l&apos;un ni l&apos;autre n&apos;influence le classement.
-      </>
-    ),
-  } : {
-    q: "Est-ce payant ?",
-    texte:
-      "Non. Chercher, sauvegarder des entreprises et gérer son compte sont gratuits, sans abonnement. Le site se finance par la publicité, qui n'influence pas le classement.",
-    r: (
-      <>
-        Non, et il n&apos;y a pas d&apos;abonnement. Chercher, sauvegarder des entreprises,
-        gérer son compte : tout est gratuit.
-        <br /><br />
-        Le site se finance par la publicité. Les annonces sont signalées comme telles et
-        n&apos;entrent pas dans le classement.
-      </>
-    ),
-  },
-  {
-    q: "Comment récupérer ou supprimer mes données ?",
-    texte:
-      "Depuis les réglages de votre profil : téléchargez l'ensemble de vos données, ou supprimez votre compte. La suppression efface vos favoris, votre historique et l'adresse IP conservée contre les abus.",
-    r: (
-      <>
-        Depuis les réglages de votre profil : téléchargez l&apos;ensemble de vos données, ou
-        supprimez votre compte.
-        <br /><br />
-        La suppression efface vos favoris, votre historique de consultation et
-        l&apos;adresse IP conservée contre les abus.
-      </>
-    ),
-  },
-];
+const lien = { color: "var(--brand)" } as const;
+const BALISES = {
+  b: (c: React.ReactNode) => <strong>{c}</strong>,
+  email: (c: React.ReactNode) => <a href="mailto:contact@workie.ch" style={lien}>{c}</a>,
+  mentions: (c: React.ReactNode) => <Link href="/mentions-legales" style={lien}>{c}</Link>,
+  confidentialite: (c: React.ReactNode) => <Link href="/confidentialite" style={lien}>{c}</Link>,
+  pro: (c: React.ReactNode) => <Link href="/pour-les-entreprises" style={{ ...lien, fontWeight: 600 }}>{c}</Link>,
+};
 
-/** Les questions des employeurs, ajoutées quand l'offre entreprise est ouverte. */
-const ENTREPRISES: Entree[] = [
-  {
-    q: "Je travaille pour une entreprise présente sur Workie : puis-je gérer sa fiche ?",
-    texte: "Oui. Depuis la page Pour les entreprises, retrouvez votre fiche et faites la demande. Avec une adresse e-mail de l'entreprise, la vérification est immédiate ; sinon, notre équipe vérifie la demande à la main. L'abonnement coûte 129 CHF par mois ou 1 290 CHF par an, sans engagement.",
-    r: <>Oui. Depuis la page <a href="/pour-les-entreprises" style={{ color: "var(--brand)", fontWeight: 600 }}>Pour les entreprises</a>, retrouvez votre fiche et faites la demande. Avec une adresse e-mail de l&apos;entreprise, la vérification est immédiate ; sinon, notre équipe vérifie la demande à la main. L&apos;abonnement coûte 129 CHF par mois ou 1 290 CHF par an, sans engagement.</>,
-  },
-  {
-    q: "Une entreprise peut-elle payer pour être mieux classée ?",
-    texte: "Non. Le classement suit l'intérêt des visiteurs. Un abonnement permet de tenir sa fiche à jour et de voir sa fréquentation, pas de monter dans le classement.",
-    r: <>Non. Le classement suit l&apos;intérêt des visiteurs. Un abonnement permet de tenir sa fiche à jour et de voir sa fréquentation, pas de monter dans le classement.</>,
-  },
-];
+/** Les questions et réponses, dans la langue de la page. */
+function entrees(t: Traduire): Entree[] {
+  const e = (q: CleMessage, r: CleMessage): Entree => ({ q: t(q), r: riche(t(r), BALISES), texte: sansBalises(t(r)) });
+  const base = [
+    e("faq.workieQ", "faq.workieR"),
+    e("faq.doublonQ", "faq.doublonR"),
+    e("faq.sourcesQ", "faq.sourcesR"),
+    e("faq.classementQ", "faq.classementR"),
+    e("faq.corrigerQ", "faq.corrigerR"),
+    e("faq.donneesQ", "faq.donneesR"),
+    e("faq.payantQ", revendicationOuverte ? "faq.payantRAbonnement" : "faq.payantR"),
+    e("faq.mesDonneesQ", "faq.mesDonneesR"),
+  ];
+  // Les questions des employeurs, ajoutées quand l'offre entreprise est ouverte.
+  return revendicationOuverte ? [...base, e("faq.gererQ", "faq.gererR"), e("faq.payerQ", "faq.payerR")] : base;
+}
 
-export function LandingFaq({ items: itemsRecus, titre = "Questions fréquentes", sousTitre }: { items?: Entree[]; titre?: string; sousTitre?: string } = {}) {
-  const items = itemsRecus ?? (revendicationOuverte ? [...ENTREES, ...ENTREPRISES] : ENTREES);
+export async function LandingFaq({ items: itemsRecus, titre, sousTitre }: { items?: Entree[]; titre?: string; sousTitre?: string } = {}) {
+  const t = await tServeur();
+  const items = itemsRecus ?? entrees(t);
   return (
     <section
       className="landing-section landing-ton"
@@ -202,10 +82,10 @@ export function LandingFaq({ items: itemsRecus, titre = "Questions fréquentes",
           id="faq-titre"
           style={{ textAlign: "center", fontSize: "clamp(24px, 5vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 12 }}
         >
-          {titre}
+          {titre ?? t("faq.titre")}
         </h2>
         <p style={{ textAlign: "center", fontSize: 15, color: "var(--text-muted)", marginBottom: 40 }}>
-          {sousTitre ?? <>Ce que vous trouverez ici, d&apos;où viennent les informations, et ce que ça coûte.</>}
+          {sousTitre ?? t("faq.sousTitre")}
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

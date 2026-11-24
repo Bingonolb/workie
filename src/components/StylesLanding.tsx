@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Logo } from "@/components/Logo";
 
 /**
  * Styles et barre de navigation de la landing, partagés avec les pages
@@ -260,19 +257,5 @@ export function StylesLanding() {
   return <style>{CSS}</style>;
 }
 
-export function NavLanding() {
-  return (
-    <nav className="landing-nav" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 100 }}>
-      <Link href="/" aria-label="Workie, accueil"><Logo taille={30} /></Link>
-      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-        <ThemeToggle />
-        <Link href="/login" className="nav-login-link" style={{ padding: "9px 16px", borderRadius: 8, border: "1px solid var(--border2)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
-          Connexion
-        </Link>
-        <Link href="/signup" style={{ padding: "9px 18px", borderRadius: 8, fontWeight: 650, fontSize: 14, textDecoration: "none", background: "var(--brand)", color: "#fff" }}>
-          S&apos;inscrire
-        </Link>
-      </div>
-    </nav>
-  );
-}
+// Le menu, traduit, vit dans son propre composant navigateur.
+export { NavLanding } from "@/components/NavLanding";

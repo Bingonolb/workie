@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/i18n/FournisseurLangue";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,9 +34,10 @@ const CARRE: React.CSSProperties = {
 
 /** Accès au classement, en haut à droite. */
 export function ClassementBouton() {
+  const t = useT();
   const actif = usePathname().startsWith("/ranking");
   return (
-    <Link href="/ranking" aria-label="Classement" title="Classement"
+    <Link href="/ranking" aria-label={t("menu.classement")} title={t("menu.classement")}
       aria-current={actif ? "page" : undefined}
       style={{ ...CARRE, background: actif ? "var(--surface3, var(--surface2))" : "var(--surface2)", textDecoration: "none" }}>
       <TrendingUp size={20} strokeWidth={actif ? 2.5 : 2} aria-hidden="true" />
@@ -44,10 +46,11 @@ export function ClassementBouton() {
 }
 
 export function SearchButton() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} aria-label="Rechercher" title="Rechercher"
+      <button type="button" onClick={() => setOpen(true)} aria-label={t("menu.rechercher")} title={t("menu.rechercher")}
         style={{ ...CARRE, background: "var(--surface2)" }}>
         <Search size={20} aria-hidden="true" />
       </button>

@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { revendicationOuverte } from "@/lib/ouverture";
 import { catalogueEmploi, CANTONS, type Page } from "@/lib/pagesEmploi";
+import { tServeur, langueDeLaPage } from "@/i18n/page";
+import { nomCanton } from "@/i18n/cantons";
+import { LOCALE_INTL } from "@/i18n/config";
 
 /**
  * Pied de page de l'accueil, des pages Annonceurs et Pour les entreprises.
@@ -16,46 +19,53 @@ import { catalogueEmploi, CANTONS, type Page } from "@/lib/pagesEmploi";
  * sont listées : jamais de lien mort.
  */
 export async function PiedAccueil() {
+  const t = await tServeur();
+  const langue = await langueDeLaPage();
+  const nom = (code: string) => nomCanton(code, langue, CANTONS[code as keyof typeof CANTONS].nom);
   const cantons = await catalogueEmploi()
     .then(({ pages }) => pages
       .filter((p): p is Extract<Page, { type: "canton" }> => p.type === "canton")
-      .sort((a, b) => CANTONS[a.canton].nom.localeCompare(CANTONS[b.canton].nom, "fr")))
+      .sort((a, b) => nom(a.canton).localeCompare(nom(b.canton), LOCALE_INTL[langue])))
     .catch(() => []);
 
   const rubriques = [
     {
-      titre: "Explorer",
+      // La rubrique qui porte la liste des cantons.
+      cantons: true,
+      titre: t("pied.explorer"),
       liens: [
-        { href: "/explore", label: "Entreprises" },
-        { href: "/ranking", label: "Classement" },
-        { href: "/emploi", label: "Emploi par secteur" },
+        { href: "/explore", label: t("pied.entreprises") },
+        { href: "/ranking", label: t("pied.classement") },
+        { href: "/emploi", label: t("pied.emploiSecteur") },
       ],
     },
     {
-      titre: "Entreprises",
+      cantons: false,
+      titre: t("pied.pourEntreprises"),
       liens: [
-        ...(revendicationOuverte ? [{ href: "/pour-les-entreprises", label: "Gérer votre fiche" }] : []),
-        { href: "/annonceurs", label: "Faire de la publicité" },
+        ...(revendicationOuverte ? [{ href: "/pour-les-entreprises", label: t("pied.gererFiche") }] : []),
+        { href: "/annonceurs", label: t("pied.publicite") },
       ],
     },
     {
+      cantons: false,
       titre: "Workie",
       liens: [
-        { href: "/cgu", label: "Conditions d'utilisation" },
-        { href: "/confidentialite", label: "Confidentialité" },
-        { href: "/mentions-legales", label: "Mentions légales" },
+        { href: "/cgu", label: t("pied.cgu") },
+        { href: "/confidentialite", label: t("pied.confidentialite") },
+        { href: "/mentions-legales", label: t("pied.mentions") },
       ],
     },
   ];
 
   const ParCanton = cantons.length > 0 && (
     <details className="pied-cantons">
-      <summary>Par canton <svg aria-hidden="true" className="pied-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg></summary>
+      <summary>{t("pied.parCanton")} <svg aria-hidden="true" className="pied-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg></summary>
       <div className="pied-cantons-grille">
         {cantons.map(p => (
           // Explorer filtré sur le canton : c'est ce qu'on attend en touchant un
           // canton. Les pages /emploi/… restent liées depuis /emploi et le plan du site.
-          <Link key={p.slug} href={`/explore?canton=${p.canton}`} title={`Entreprises ${CANTONS[p.canton].dans}`}>{CANTONS[p.canton].nom}</Link>
+          <Link key={p.slug} href={`/explore?canton=${p.canton}`} title={t("pied.entreprisesCanton", { canton: nom(p.canton) })}>{nom(p.canton)}</Link>
         ))}
       </div>
     </details>
@@ -111,7 +121,7 @@ export async function PiedAccueil() {
         <div className="pied-haut">
           <div className="pied-marque">
             <Logo taille={24} className="logo-pied" />
-            <p>Chercher du travail devient passionnant.</p>
+            <p>{t("pied.slogan")}</p>
           </div>
 
           {/* Ordinateur : colonnes. */}
@@ -121,7 +131,7 @@ export async function PiedAccueil() {
               <div className="pied-liste">
                 {r.liens.map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}
               </div>
-              {r.titre === "Explorer" && ParCanton}
+              {r.cantons && ParCanton}
             </nav>
           ))}
 
@@ -133,7 +143,7 @@ export async function PiedAccueil() {
                 <div className="pied-liste">
                   {r.liens.map(l => <Link key={l.href} href={l.href}>{l.label}</Link>)}
                 </div>
-                {r.titre === "Explorer" && ParCanton}
+                {r.cantons && ParCanton}
               </details>
             ))}
           </div>
@@ -141,7 +151,7 @@ export async function PiedAccueil() {
 
         <div className="pied-bas">
           <span>© 2026 Workie</span>
-          <span>Plateforme suisse, données hébergées en Europe</span>
+          <span>{t("pied.hebergement")}</span>
         </div>
       </div>
     </footer>

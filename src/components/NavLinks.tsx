@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/i18n/FournisseurLangue";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Compass, Flame, User, Search, Layers } from "lucide-react";
@@ -7,16 +8,17 @@ import { ouvrirRecherche } from "./SearchButton";
 import { Suspense } from "react";
 
 function NavLinksInner() {
+  const t = useT();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isSwipe = pathname === "/explore" && searchParams.get("view") === "swipe";
 
   const LINKS = [
-    { href: "/explore",            label: "Explorer",    icon: <Compass size={15} aria-hidden="true" />, active: pathname === "/explore" && !isSwipe },
-    { href: "/explore?view=swipe", label: "Swipe",       icon: <Layers  size={15} aria-hidden="true" />, active: isSwipe },
-    { href: "/favorites",          label: "Favoris",     icon: <Flame   size={15} aria-hidden="true" />, active: pathname.startsWith("/favorites") },
+    { href: "/explore",            label: t("menu.explorer"), icon: <Compass size={15} aria-hidden="true" />, active: pathname === "/explore" && !isSwipe },
+    { href: "/explore?view=swipe", label: t("menu.swipe"), icon: <Layers  size={15} aria-hidden="true" />, active: isSwipe },
+    { href: "/favorites",          label: t("menu.favoris"), icon: <Flame   size={15} aria-hidden="true" />, active: pathname.startsWith("/favorites") },
   ];
-  const PROFIL = { href: "/profile", label: "Profil", icon: <User size={15} aria-hidden="true" />, active: pathname.startsWith("/profile") };
+  const PROFIL = { href: "/profile", label: t("menu.profil"), icon: <User size={15} aria-hidden="true" />, active: pathname.startsWith("/profile") };
   const style = (active: boolean): React.CSSProperties => ({
     display: "flex", alignItems: "center", gap: 5,
     padding: "8px 10px", borderRadius: 8,
@@ -52,8 +54,8 @@ function NavLinksInner() {
           {icon} <span className="nav-label">{label}</span>
         </Link>
       ))}
-      <button type="button" title="Recherche" onClick={ouvrirRecherche} style={style(false)}>
-        <Search size={15} aria-hidden="true" /> <span className="nav-label">Recherche</span>
+      <button type="button" title={t("menu.recherche")} onClick={ouvrirRecherche} style={style(false)}>
+        <Search size={15} aria-hidden="true" /> <span className="nav-label">{t("menu.recherche")}</span>
       </button>
       <Link href={PROFIL.href} title={PROFIL.label} aria-current={PROFIL.active ? "page" : undefined}
         onClick={handleClick(PROFIL.href, PROFIL.active)} style={style(PROFIL.active)}>

@@ -8,6 +8,9 @@ import { largeurCouverture } from "@/lib/coverUrl";
 import { urlFiche } from "@/lib/urlFiche";
 import { revendicationOuverte } from "@/lib/ouverture";
 import type { Company } from "@/lib/types";
+import { tServeur, langueDeLaPage } from "@/i18n/page";
+import { nomSecteur } from "@/i18n/secteurs";
+import { LOCALE_INTL } from "@/i18n/config";
 
 /**
  * Accueil épuré (essai, derrière NEXT_PUBLIC_ACCUEIL_COMPACT).
@@ -19,11 +22,20 @@ import type { Company } from "@/lib/types";
  *   4. les secteurs, en un geste ;
  *   5. la FAQ, puis les entreprises, discrètement, au-dessus du pied de page.
  */
-export function AccueilCompact({ entreprises, secteurs, chiffres }: {
+export async function AccueilCompact({ entreprises, secteurs, chiffres }: {
   entreprises: Company[]; total: number; secteurs: string[];
   chiffres: { offres: number; entreprises: number; cantons: number };
 }) {
   const vitrine = entreprises.filter(c => c.cover_url).slice(0, 20);
+  const t = await tServeur();
+  const langue = await langueDeLaPage();
+  const nombre = (v: number) => v.toLocaleString(LOCALE_INTL[langue]);
+  const chiffresLigne = [
+    { v: chiffres.offres, l: t("accueil.chiffreOffres"), suite: t("accueil.chiffreOffresSuite") },
+    { v: chiffres.entreprises, l: t("accueil.chiffreEntreprises") },
+    { v: chiffres.cantons, l: t("accueil.chiffreCantons") },
+    { v: 4, l: t("accueil.chiffreLangues") },
+  ];
   return (
     <main className="landing-tons ae" style={{ minHeight: "100dvh", background: "var(--bg)", color: "var(--text)", display: "flex", flexDirection: "column" }}>
       <StylesLanding />
@@ -144,27 +156,22 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
 
       {/* 1 ── Le titre, et le produit */}
       <section className="ae-hero">
-        <h1 className="ae-titre">Chercher du travail devient <em>passionnant.</em></h1>
-        <p className="ae-sous">Les employeurs suisses, en un regard. Et le chemin le plus court vers leurs offres.</p>
+        <h1 className="ae-titre">{t("accueil.titre")} <em>{t("accueil.titreAccent")}</em></h1>
+        <p className="ae-sous">{t("accueil.sousTitre")}</p>
         {/* Deux portes d'entrée, côte à côte et de même poids visuel : la
             grille ou le swipe. La pile de démonstration a été retirée, elle
             redisait ce que le second bouton propose. */}
         <div className="ae-actions">
-          <Link href="/explore" className="btn btn-marque btn-lg ae-bouton">Découvrir les entreprises</Link>
-          <Link href="/explore?view=swipe" className="btn btn-clair btn-lg ae-bouton">Essayer le swipe</Link>
+          <Link href="/explore" className="btn btn-marque btn-lg ae-bouton">{t("accueil.decouvrir")}</Link>
+          <Link href="/explore?view=swipe" className="btn btn-clair btn-lg ae-bouton">{t("accueil.essayerSwipe")}</Link>
         </div>
       </section>
 
-      <section className="ae-chiffres-cadre ae-chiffres-haut" aria-label="Workie en chiffres">
+      <section className="ae-chiffres-cadre ae-chiffres-haut" aria-label={t("accueil.enChiffres")}>
         <div className="ae-chiffres">
-          {[
-            { v: chiffres.offres, l: "offres", suite: " d'emploi" },
-            { v: chiffres.entreprises, l: "entreprises" },
-            { v: chiffres.cantons, l: "cantons" },
-            { v: 4, l: "langues" },
-          ].map(({ v, l, suite }: { v: number; l: string; suite?: string }) => (
+          {chiffresLigne.map(({ v, l, suite }: { v: number; l: string; suite?: string }) => (
             <div key={l}>
-              <p className="ae-chiffre">{v.toLocaleString("fr-CH")}</p>
+              <p className="ae-chiffre">{nombre(v)}</p>
               <p className="ae-chiffre-lib">{l}{suite && <span className="ae-chiffre-suite">{suite}</span>}</p>
             </div>
           ))}
@@ -175,8 +182,8 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
       {vitrine.length > 0 && (
         <section className="ae-bloc ae-bande-douce" aria-labelledby="ae-vitrine">
           <div className="ae-tete">
-            <h2 id="ae-vitrine" className="ae-h2">Les employeurs</h2>
-            <Link href="/explore" className="ae-lien">Tout voir <ArrowRight size={16} aria-hidden="true" /></Link>
+            <h2 id="ae-vitrine" className="ae-h2">{t("accueil.employeurs")}</h2>
+            <Link href="/explore" className="ae-lien">{t("accueil.toutVoir")} <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
           <RailVitrine>
             {vitrine.map((c, i) => (
@@ -190,7 +197,7 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
                   srcSet={[640, 940, 1280, 1920].map(w => `${largeurCouverture(c.cover_url!, w)} ${w}w`).join(", ")}
                   sizes="(max-width: 760px) 171vw, 790px" alt="" loading={i < 3 ? "eager" : "lazy"} decoding="async" fetchPriority={i === 0 ? "high" : "auto"} />
                 <span className="ae-carte-txt">
-                  <span className="ae-carte-sect" style={{ display: "block" }}>{c.subsector || c.sector}</span>
+                  <span className="ae-carte-sect" style={{ display: "block" }}>{c.subsector || nomSecteur(c.sector, langue)}</span>
                   <span className="ae-carte-nom" style={{ display: "block" }}>{c.name}</span>
                   <span className="ae-carte-lieu" style={{ display: "block" }}>{c.city}</span>
                 </span>
@@ -204,14 +211,9 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
           ils chargeaient le premier écran. */}
       <section className="ae-chiffres-cadre ae-chiffres-bas" aria-hidden="true">
         <div className="ae-chiffres">
-          {[
-            { v: chiffres.offres, l: "offres", suite: " d'emploi" },
-            { v: chiffres.entreprises, l: "entreprises" },
-            { v: chiffres.cantons, l: "cantons" },
-            { v: 4, l: "langues" },
-          ].map(({ v, l, suite }: { v: number; l: string; suite?: string }) => (
+          {chiffresLigne.map(({ v, l, suite }: { v: number; l: string; suite?: string }) => (
             <div key={l}>
-              <p className="ae-chiffre">{v.toLocaleString("fr-CH")}</p>
+              <p className="ae-chiffre">{nombre(v)}</p>
               <p className="ae-chiffre-lib">{l}{suite && <span className="ae-chiffre-suite">{suite}</span>}</p>
             </div>
           ))}
@@ -219,45 +221,45 @@ export function AccueilCompact({ entreprises, secteurs, chiffres }: {
       </section>
 
       {/* 3 ── Une phrase, trois chiffres. Rien à lire, tout à voir. */}
-      <section className="ae-bloc ae-bande-sombre ae-manifeste" aria-label="Workie en bref">
+      <section className="ae-bloc ae-bande-sombre ae-manifeste" aria-label={t("accueil.enBref")}>
         <ul className="ae-points">
           <li>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M14 9h5a1 1 0 0 1 1 1v11M3 21h18M8 8h2M8 12h2M8 16h2"/></svg>
-            <h3>Des entreprises,<br />pas des annonces.</h3>
-            <p>Découvrez où vous aimeriez travailler.</p>
+            <h3>{t("accueil.point1a")}<br />{t("accueil.point1b")}</h3>
+            <p>{t("accueil.point1")}</p>
           </li>
           <li>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            <h3>Directement<br />chez l&apos;employeur.</h3>
-            <p>Vous postulez sur son site, sans intermédiaire.</p>
+            <h3>{t("accueil.point2a")}<br />{t("accueil.point2b")}</h3>
+            <p>{t("accueil.point2")}</p>
           </li>
           <li>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
-            <h3>Chaque fiche<br />vérifiée.</h3>
-            <p>Des faits, rien d&apos;autre.</p>
+            <h3>{t("accueil.point3a")}<br />{t("accueil.point3b")}</h3>
+            <p>{t("accueil.point3")}</p>
           </li>
         </ul>
       </section>
 
       {/* 4 ── Les secteurs */}
       <section className="ae-bloc" aria-labelledby="ae-secteurs">
-        <div className="ae-tete"><h2 id="ae-secteurs" className="ae-h2">Commencez par votre métier.</h2></div>
-        <nav className="ae-secteurs" aria-label="Secteurs">
-          {secteurs.map(s => <Link key={s} href={`/explore?sector=${encodeURIComponent(s)}`}>{s}</Link>)}
+        <div className="ae-tete"><h2 id="ae-secteurs" className="ae-h2">{t("accueil.metier")}</h2></div>
+        <nav className="ae-secteurs" aria-label={t("accueil.secteurs")}>
+          {secteurs.map(s => <Link key={s} href={`/explore?sector=${encodeURIComponent(s)}`}>{nomSecteur(s, langue)}</Link>)}
         </nav>
       </section>
 
       <LandingFaq />
 
       {/* 5 ── Les entreprises, discrètement */}
-      <section className="ae-pro" aria-label="Pour les entreprises">
+      <section className="ae-pro" aria-label={t("accueil.pourEntreprises")}>
         <div className="ae-pro-in">
           <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
-            <strong style={{ color: "var(--text)", fontWeight: 650 }}>Vous recrutez ?</strong> Présentez votre entreprise et suivez qui s&apos;y intéresse.
+            <strong style={{ color: "var(--text)", fontWeight: 650 }}>{t("accueil.recrutez")}</strong> {t("accueil.recrutezTexte")}
           </p>
           <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
-            {revendicationOuverte && <Link href="/pour-les-entreprises" className="ae-lien">Gérer votre fiche <ArrowRight size={15} aria-hidden="true" /></Link>}
-            <Link href="/annonceurs" className="ae-lien">Faire de la publicité <ArrowRight size={15} aria-hidden="true" /></Link>
+            {revendicationOuverte && <Link href="/pour-les-entreprises" className="ae-lien">{t("accueil.gererFiche")} <ArrowRight size={15} aria-hidden="true" /></Link>}
+            <Link href="/annonceurs" className="ae-lien">{t("accueil.publicite")} <ArrowRight size={15} aria-hidden="true" /></Link>
           </div>
         </div>
       </section>
