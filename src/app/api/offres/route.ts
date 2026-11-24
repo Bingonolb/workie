@@ -4,7 +4,7 @@ import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { offresSynchro } from "@/lib/ouverture";
 import { CONTRATS } from "@/lib/offres";
 import { unstable_cache } from "next/cache";
-import { analyser, motsDe } from "@/lib/rechercheOffres";
+import { analyser, motsDe, pertinence } from "@/lib/rechercheOffres";
 
 /**
  * Les offres d'emploi d'Explorer, vue « Offres ».
@@ -67,35 +67,64 @@ export async function GET(req: Request) {
   const contrats = tous.filter(c => (CONTRATS as readonly string[]).includes(c));
 
   const admin = createAdminClient();
-  let q = admin
-    .from("offres_explorer" as "job_offers")
-    .select("id, title, location, contract_type, taux_min, taux_max, langue, apply_url, description, missions, requirements, avantages, work_mode, experience_level, entree, langues, source, created_at, companies!inner(id, slug, name, logo_url, cover_url, cover_color, sector, subsector, city, canton)", { count: "exact" })
-    .in("companies.sector", secteurs.length ? secteurs : enLigne);
-  if (!offresSynchro) q = q.is("source", null);
-  if (cantons.length) q = q.in("companies.canton", cantons);
-  if (langues.length) q = q.in("langue", langues);
   // Recherche « intelligente » (« vendeur 80% anglais ») : chaque métier
   // cherché dans les quatre langues, taux, langue et contrat compris.
   const saisie = (p.get("q") ?? "").slice(0, 120);
   const recherche = saisie.trim() ? analyser(saisie, new Set(await vocabulaire())) : null;
-  if (recherche) {
-    for (const g of recherche.groupes) q = q.or(g.map(v => `titre_norm.ilike."*${v}*"`).join(","));
-    if (recherche.taux) q = q.lte("taux_min", recherche.taux).gte("taux_max", recherche.taux);
-    if (recherche.partiel) q = q.lt("taux_min", 100);
-    if (recherche.langues.length) q = q.in("langue", recherche.langues);
-    if (recherche.contrats.length) q = q.in("contract_type", recherche.contrats);
-  }
-  if (sansContrat) q = q.or(["contract_type.is.null", ...(contrats.length ? [`contract_type.in.(${contrats.join(",")})`] : [])].join(","));
-  else if (contrats.length) q = q.in("contract_type", contrats);
 
-  const { data, count, error } = await q
+  // Les mêmes filtres, pour la liste légère (classement) comme pour la page.
+  const COMPLET = "id, title, location, contract_type, taux_min, taux_max, langue, apply_url, description, missions, requirements, avantages, work_mode, experience_level, entree, langues, source, created_at, companies!inner(id, slug, name, logo_url, cover_url, cover_color, sector, subsector, city, canton)";
+  const construire = (colonnes: string) => {
+    let q = admin
+      .from("offres_explorer" as "job_offers")
+      .select(colonnes, { count: "exact" })
+      .in("companies.sector", secteurs.length ? secteurs : enLigne);
+    if (!offresSynchro) q = q.is("source", null);
+    if (cantons.length) q = q.in("companies.canton", cantons);
+    if (langues.length) q = q.in("langue", langues);
+    if (recherche) {
+      for (const g of recherche.groupes) q = q.or(g.map(v => `titre_norm.ilike."*${v}*"`).join(","));
+      if (recherche.taux) q = q.lte("taux_min", recherche.taux).gte("taux_max", recherche.taux);
+      if (recherche.partiel) q = q.lt("taux_min", 100);
+      if (recherche.langues.length) q = q.in("langue", recherche.langues);
+      if (recherche.contrats.length) q = q.in("contract_type", recherche.contrats);
+    }
+    if (sansContrat) q = q.or(["contract_type.is.null", ...(contrats.length ? [`contract_type.in.(${contrats.join(",")})`] : [])].join(","));
+    else if (contrats.length) q = q.in("contract_type", contrats);
     // Vue offres_explorer : la plus récente de chaque entreprise d'abord,
     // puis la deuxième de chacune… Les employeurs alternent à l'écran.
-    .order("rang_entreprise" as "created_at")
-    .order("melange" as "created_at")
-    .order("id")
-    .range(page * PAR_PAGE, page * PAR_PAGE + PAR_PAGE - 1);
-  if (error) return NextResponse.json({ offres: [], total: 0 }, { status: 500 });
+    return q.order("rang_entreprise" as "created_at").order("melange" as "created_at").order("id");
+  };
+
+  let data: unknown[] | null = null, count: number | null = null;
+  if (recherche?.groupes.length) {
+    // Avec un métier cherché : classement par pertinence (le mot tapé avant
+    // ses équivalents), l'alternance des employeurs départageant les égalités.
+    // On classe toutes les offres trouvées sur une liste légère, puis on ne
+    // charge en entier que celles de la page.
+    const legere: { id: string; titre_norm: string | null }[] = [];
+    for (let de = 0; de < 5000; de += 1000) {
+      const { data: lot, error } = await construire("id, titre_norm, companies!inner(sector)").range(de, de + 999);
+      if (error) return NextResponse.json({ offres: [], total: 0 }, { status: 500 });
+      legere.push(...(lot as unknown as { id: string; titre_norm: string | null }[]));
+      if ((lot ?? []).length < 1000) break;
+    }
+    const classees = legere
+      .map((o, i) => ({ id: o.id, s: pertinence(o.titre_norm ?? "", recherche), i }))
+      .sort((a, b) => b.s - a.s || a.i - b.i);
+    const ids = classees.slice(page * PAR_PAGE, page * PAR_PAGE + PAR_PAGE).map(o => o.id);
+    count = classees.length;
+    if (ids.length) {
+      const { data: pageData, error } = await construire(COMPLET).in("id", ids);
+      if (error) return NextResponse.json({ offres: [], total: 0 }, { status: 500 });
+      const rang = new Map(ids.map((id, i) => [id, i]));
+      data = ((pageData ?? []) as unknown as { id: string }[]).sort((a, b) => (rang.get(a.id) ?? 0) - (rang.get(b.id) ?? 0));
+    } else data = [];
+  } else {
+    const r = await construire(COMPLET).range(page * PAR_PAGE, page * PAR_PAGE + PAR_PAGE - 1);
+    if (r.error) return NextResponse.json({ offres: [], total: 0 }, { status: 500 });
+    data = r.data; count = r.count;
+  }
 
   // Un aperçu court suffit à la carte : le texte complet reste sur l'offre.
   const court = (s: string | null) => {

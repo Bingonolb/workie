@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { analyser, corriger } from "@/lib/rechercheOffres";
+import { analyser, corriger, pertinence } from "@/lib/rechercheOffres";
 
 const vocab = new Set(["vendeuse", "verkaufer", "developer", "comptable", "koch", "infirmiere"]);
 
@@ -22,6 +22,12 @@ describe("recherche d'offres", () => {
     expect(analyser("infirmière 60-80 %", vocab).taux).toBe(80);
     expect(analyser("vente temps partiel", vocab).partiel).toBe(true);
     expect(analyser("Lehrstelle Koch", vocab).contrats).toEqual(["Apprentissage"]);
+  });
+  it("classe le mot tapé avant ses équivalents", () => {
+    const r = analyser("manager", vocab);
+    const titres = ["head of dach", "payroll manager 80-100%", "manager operations", "teamleiter verkauf"];
+    const classes = [...titres].sort((a, b) => pertinence(b, r) - pertinence(a, r));
+    expect(classes.slice(0, 2)).toEqual(["manager operations", "payroll manager 80-100%"]);
   });
   it("corrige une faute de frappe", () => {
     expect(corriger("vendeue", vocab)).toBe("vendeuse");

@@ -128,6 +128,8 @@ const VIDES = new Set(["de", "du", "des", "la", "le", "les", "et", "en", "a", "a
 export type Recherche = {
   /** Groupes de variantes : une offre doit correspondre à chaque groupe (ET), à une variante au moins (OU). */
   groupes: string[][];
+  /** Les mots tapés (corrigés, sans accents), pour classer : le mot exact passe avant ses équivalents. */
+  mots: string[];
   /**
    * Ce qu'on montre à la personne : le mot a-t-il été corrigé (« vendeue » →
    * « vendeuse ») et cherché dans les autres langues ?
@@ -184,6 +186,7 @@ export function analyser(saisie: string, vocabulaire: Set<string> = new Set()): 
   }
   const mots = texte.replace(/[^a-z0-9\s-]/g, " ").split(/\s+/).filter(m => m.length >= 2 && !VIDES.has(m)).slice(0, 6);
   const groupes: string[][] = [];
+  const motsCherches: string[] = [];
   const equivalences: Recherche["equivalences"] = [];
   for (const brut of mots) {
     const langue = LANGUES_MOTS.find(([re]) => re.test(brut));
@@ -200,9 +203,28 @@ export function analyser(saisie: string, vocabulaire: Set<string> = new Set()): 
     const variantes = new Set<string>(groupe ? groupe : [racine(mot)]);
     const propres = [...variantes].map(v => v.replace(/[^a-z0-9 -]/g, "")).filter(v => v.trim().length >= 2);
     groupes.push(propres);
+    motsCherches.push(mot);
     if (groupe || mot !== brut) equivalences.push({ mot: brut, ...(mot !== brut ? { corrige: mot } : {}), traduit: !!groupe });
   }
-  return { groupes, equivalences, taux, partiel, langues, contrats, compris };
+  return { groupes, mots: motsCherches, equivalences, taux, partiel, langues, contrats, compris };
+}
+
+/**
+ * Pertinence d'un titre pour une recherche : le mot tapé lui-même compte
+ * plus que ses équivalents. « manager » montre d'abord les « … Manager », puis
+ * les « Head of » et « Teamleiter ». Plus haut encore si le titre commence
+ * par ce mot.
+ */
+export function pertinence(titreNorm: string, r: Recherche): number {
+  let score = 0;
+  r.mots.forEach((mot, i) => {
+    const debutMot = new RegExp(`(^|[^a-z0-9])${mot.replace(/[^a-z0-9]/g, "")}`);
+    if (debutMot.test(titreNorm)) {
+      score += 10;
+      if (titreNorm.startsWith(mot)) score += 3;
+    } else if (r.groupes[i]?.some(v => titreNorm.includes(v.trim()))) score += 2;
+  });
+  return score;
 }
 
 /** Mots d'un titre normalisé, pour le vocabulaire de correction. */

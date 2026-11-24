@@ -152,6 +152,10 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
         .recherche-offres-champ:focus-within { border-color: var(--brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent); }
         .recherche-offres-champ input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 16px; }
         .recherche-offres-champ input::-webkit-search-cancel-button { display: none; }
+        /* La règle globale des champs (bordure et halo violets au focus) dessinait
+           un second cadre à l'intérieur de la boîte : c'est la boîte qui s'allume. */
+        .recherche-offres-champ input, .recherche-offres-champ input:focus, .recherche-offres-champ input:focus-visible {
+          border: 0 !important; box-shadow: none !important; outline: none !important; padding: 0; border-radius: 0; -webkit-appearance: none; appearance: none; }
         .recherche-offres-champ button { flex: none; width: 40px; height: 40px; border-radius: 10px; border: 0; background: var(--surface2); color: var(--text-muted); display: grid; place-items: center; cursor: pointer; }
         .recherche-offres-compris { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 10px 2px 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.45; }
       `}</style>;
