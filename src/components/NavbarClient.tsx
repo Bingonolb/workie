@@ -12,6 +12,7 @@ import { idsFavorisInvite, viderFavorisInvite } from "@/lib/favorisInvite";
 import { importerFavorisInvite } from "@/lib/actions/favorites";
 import { collecterCouvertures, prechargerVignettes, prechargerCartes } from "@/components/CoverImage";
 import { Logo } from "@/components/Logo";
+import { chargerSignets, idsOffresAppareil } from "@/lib/offresEnregistrees";
 
 type UserCtx = {
   isLoggedIn: boolean;
@@ -87,6 +88,10 @@ export function NavbarClient() {
         // textes, puis leurs photos une à une.
         if (data.isLoggedIn) {
           void fusionnerFavorisInvite();
+          // Offres gardées comme visiteur : la reprise dans le compte se fait
+          // au chargement des signets. Seulement s'il y en a, pour ne pas
+          // ajouter une requête à chaque session.
+          if (idsOffresAppareil().length) void chargerSignets();
           obtenir(CLE_PROFIL, "/api/user/profile")
             .then(({ donnees }) => prechargerVignettes(collecterCouvertures(donnees)))
             .catch(() => { /* sans conséquence */ });

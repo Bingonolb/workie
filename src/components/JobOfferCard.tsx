@@ -7,6 +7,7 @@ import { trackJobApplyClick } from "@/lib/actions/analytics";
 import { libelleTaux, nomLangue } from "@/lib/offres";
 import { useVerrouDefilement } from "@/lib/useVerrouDefilement";
 import { texteRiche, lignesRiches } from "@/lib/texteRiche";
+import { BoutonSignet } from "@/components/offres/BoutonSignet";
 
 type Job = {
   id: string;
@@ -184,14 +185,17 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
                 <p className="jo-entreprise" style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>{companyName}</p>
                 <h2 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>{job.title}</h2>
               </div>
+              <div style={{ display: "flex", gap: 8, flexShrink: 0, marginLeft: 12 }}>
+              <BoutonSignet offreId={job.id} titre={job.title} className="jo-signet" />
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Fermer"
-                style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}
+                style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}
               >
                 <X size={16} aria-hidden="true" />
               </button>
+              </div>
             </div>
 
             {/* Badges */}
@@ -276,6 +280,11 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
         .job-modal::-webkit-scrollbar-track { background: transparent; }
         .job-modal::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
         .job-modal { overscroll-behavior: contain; }
+        /* Le signet, même forme que la croix voisine. */
+        .jo-signet { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border2); background: var(--surface2); color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .jo-signet svg { width: 17px; height: 17px; }
+        .jo-signet[aria-pressed="true"] { color: var(--brand); border-color: color-mix(in srgb, var(--brand) 45%, transparent); }
+        .jo-signet:disabled { opacity: .4; cursor: default; }
         /* Sur téléphone, tailles des sites d'emploi ; l'ordinateur garde les tailles compactes. */
         @media (max-width: 640px) {
           .jo-titre { font-size: 15.5px !important; line-height: 1.35; margin-bottom: 8px !important; }
@@ -294,7 +303,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
           .job-modal-overlay { padding: 0 !important; align-items: stretch !important; }
           .job-modal { max-width: none !important; max-height: none !important; height: 100% !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; padding: calc(20px + env(safe-area-inset-top)) 20px 28px !important; animation: fadeIn 0.18s ease !important; }
           .job-cta { margin: 0 -20px -28px !important; padding-left: 20px !important; padding-right: 20px !important; }
-          .job-modal button[aria-label="Fermer"] { width: 44px !important; height: 44px !important; }
+          .job-modal button[aria-label="Fermer"], .job-modal .jo-signet { width: 44px !important; height: 44px !important; }
         }
       `}</style>
     </>

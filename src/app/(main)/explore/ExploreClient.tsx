@@ -16,29 +16,7 @@ import { lireCache, ecrireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
 import { useTirerPourMelanger, SEUIL_TIRAGE } from "@/lib/useTirerPourMelanger";
 import { rafraichirFiches } from "@/lib/rafraichirFiches";
 import { ListeOffresExplore } from "./ListeOffresExplore";
-
-/**
- * Entreprises | Offres : ce qu'on explore. Deux positions, même poids, posées
- * à côté du bouton Filtres : on le voit sans chercher, sans ajouter de bouton
- * au menu. Les filtres communs (secteur, canton, langue) suivent d'une vue à
- * l'autre.
- */
-function SelecteurVueListe({ vue, onChange }: { vue: "entreprises" | "offres"; onChange: (v: "entreprises" | "offres") => void }) {
-  return (
-    <div role="group" aria-label="Ce que vous explorez" className="selecteur-vue">
-      <style>{`
-        .selecteur-vue { display: inline-flex; height: 42px; padding: 3px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border); }
-        .selecteur-vue button { height: 100%; padding: 0 16px; border: 0; border-radius: 9px; background: transparent; color: var(--text-muted);
-          font: inherit; font-size: 13.5px; font-weight: 650; cursor: pointer; transition: background .15s, color .15s; }
-        .selecteur-vue button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(16,19,25,.12); }
-        .selecteur-vue button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
-        @media (max-width: 380px) { .selecteur-vue button { padding: 0 12px; font-size: 13px; } }
-      `}</style>
-      <button type="button" aria-pressed={vue === "entreprises"} onClick={() => onChange("entreprises")}>Entreprises</button>
-      <button type="button" aria-pressed={vue === "offres"} onClick={() => onChange("offres")}>Offres</button>
-    </div>
-  );
-}
+import { SelecteurVue } from "@/components/offres/SelecteurVue";
 
 // Guests see the first 12 companies + 6 blurred
 /**
@@ -803,7 +781,7 @@ export function ExploreClient({
     );
   }
 
-  const selecteur = <SelecteurVueListe vue={vueListe} onChange={changerVueListe} />;
+  const selecteur = <SelecteurVue vue={vueListe} onChange={changerVueListe} />;
 
   if (vueListe === "offres") {
     return (

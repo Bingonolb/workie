@@ -7,9 +7,32 @@ import { CompanyCard } from "@/components/CompanyCard";
 import type { Company } from "@/lib/types";
 import { lireCache, obtenir, CLE_FAVORIS } from "@/lib/cacheSession";
 import { idsFavorisInvite, useFavorisInvite } from "@/lib/favorisInvite";
+import { useRouter, useSearchParams } from "next/navigation";
+import { SelecteurVue, type VueListe } from "@/components/offres/SelecteurVue";
+import { FavorisOffres } from "./FavorisOffres";
 
 /**
- * Liste des favoris, chargée après affichage.
+ * Les favoris : entreprises (flamme) ou offres (signet), au choix du même
+ * sélecteur qu'Explorer. Le choix est dans l'adresse (« ?vue=offres ») : un
+ * lien peut mener droit aux offres enregistrées, et le retour le retrouve.
+ */
+export function FavorisClient() {
+  const parametres = useSearchParams();
+  const router = useRouter();
+  const vue: VueListe = parametres.get("vue") === "offres" ? "offres" : "entreprises";
+  const changer = (v: VueListe) => router.replace(v === "offres" ? "/favorites?vue=offres" : "/favorites", { scroll: false });
+  return (
+    <>
+      <div style={{ marginBottom: 20 }}>
+        <SelecteurVue vue={vue} onChange={changer} label="Vos favoris" />
+      </div>
+      {vue === "offres" ? <FavorisOffres /> : <FavorisEntreprises />}
+    </>
+  );
+}
+
+/**
+ * Entreprises favorites, chargées après affichage.
  *
  * La page était rendue à la demande : chaque visite attendait la validation du
  * jeton auprès de Supabase, puis la requête en base, avant de renvoyer le
@@ -20,7 +43,7 @@ import { idsFavorisInvite, useFavorisInvite } from "@/lib/favorisInvite";
  * vraies. C'est ce qui évite le sursaut : sans elles, la page passerait d'un
  * écran vide à une grille pleine, en poussant tout vers le bas.
  */
-export function FavorisClient() {
+function FavorisEntreprises() {
   // On relit la réponse brute de l'API, la même forme que celle rangée par le
   // préchargement du lien. Les deux écrivaient auparavant des formes
   // différentes — un objet d'un côté, un tableau de l'autre — et le composant

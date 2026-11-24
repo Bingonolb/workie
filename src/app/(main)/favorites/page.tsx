@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { FavorisClient } from "./FavorisClient";
 
 /**
@@ -23,7 +24,11 @@ export default function FavoritesPage() {
   return (
     <div className="page-root">
       <main className="page-main-md">
-        <FavorisClient />
+        {/* Le choix Entreprises | Offres se lit dans l'adresse : sur une page
+            statique, cette lecture doit être enveloppée. */}
+        <Suspense fallback={null}>
+          <FavorisClient />
+        </Suspense>
       </main>
     </div>
   );

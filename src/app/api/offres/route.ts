@@ -5,6 +5,7 @@ import { offresSynchro } from "@/lib/ouverture";
 import { CONTRATS } from "@/lib/offres";
 import { unstable_cache } from "next/cache";
 import { analyser, motsDe, pertinence } from "@/lib/rechercheOffres";
+import { COLONNES_OFFRE, versOffreAffichee } from "@/lib/offresAffichage";
 
 /**
  * Les offres d'emploi d'Explorer, vue « Offres ».
@@ -40,18 +41,6 @@ const vocabulaire = unstable_cache(async () => {
 const LANGUES = new Set(["fr", "de", "en", "it"]);
 const liste = (v: string | null) => (v ?? "").split(",").map(s => s.trim()).filter(Boolean);
 
-export type OffreExplorer = {
-  id: string; title: string; location: string | null; contract_type: string | null;
-  taux_min: number | null; taux_max: number | null; langue: string | null;
-  apply_url: string | null; apercu: string | null; created_at: string | null;
-  // Pour l'aperçu de l'offre, le même que sur la fiche entreprise.
-  description: string | null; missions: string | null; requirements: string | null; avantages: string | null;
-  work_mode: string | null; experience_level: string | null; entree: string | null; langues: string[] | null; source: string | null;
-  entreprise: {
-    id: string; slug: string | null; name: string; logo_url: string | null; cover_url: string | null;
-    cover_color: string | null; sector: string | null; subsector: string | null; city: string | null; canton: string | null;
-  };
-};
 
 export async function GET(req: Request) {
   const p = new URL(req.url).searchParams;
@@ -73,7 +62,6 @@ export async function GET(req: Request) {
   const recherche = saisie.trim() ? analyser(saisie, new Set(await vocabulaire())) : null;
 
   // Les mêmes filtres, pour la liste légère (classement) comme pour la page.
-  const COMPLET = "id, title, location, contract_type, taux_min, taux_max, langue, apply_url, description, missions, requirements, avantages, work_mode, experience_level, entree, langues, source, created_at, companies!inner(id, slug, name, logo_url, cover_url, cover_color, sector, subsector, city, canton)";
   const construire = (colonnes: string) => {
     let q = admin
       .from("offres_explorer" as "job_offers")
@@ -115,26 +103,18 @@ export async function GET(req: Request) {
     const ids = classees.slice(page * PAR_PAGE, page * PAR_PAGE + PAR_PAGE).map(o => o.id);
     count = classees.length;
     if (ids.length) {
-      const { data: pageData, error } = await construire(COMPLET).in("id", ids);
+      const { data: pageData, error } = await construire(COLONNES_OFFRE).in("id", ids);
       if (error) return NextResponse.json({ offres: [], total: 0 }, { status: 500 });
       const rang = new Map(ids.map((id, i) => [id, i]));
       data = ((pageData ?? []) as unknown as { id: string }[]).sort((a, b) => (rang.get(a.id) ?? 0) - (rang.get(b.id) ?? 0));
     } else data = [];
   } else {
-    const r = await construire(COMPLET).range(page * PAR_PAGE, page * PAR_PAGE + PAR_PAGE - 1);
+    const r = await construire(COLONNES_OFFRE).range(page * PAR_PAGE, page * PAR_PAGE + PAR_PAGE - 1);
     if (r.error) return NextResponse.json({ offres: [], total: 0 }, { status: 500 });
     data = r.data; count = r.count;
   }
 
-  // Un aperçu court suffit à la carte : le texte complet reste sur l'offre.
-  const court = (s: string | null) => {
-    if (!s) return null;
-    const t = s.replace(/\s+/g, " ").trim();
-    return t.length > 220 ? `${t.slice(0, 220).replace(/\s+\S*$/, "")}…` : t;
-  };
-  // Champs récents (langue) et jointure : hors des types générés.
-  const offres: OffreExplorer[] = ((data ?? []) as unknown as (Omit<OffreExplorer, "apercu" | "entreprise"> & { companies: OffreExplorer["entreprise"] })[])
-    .map(({ companies, ...o }) => ({ ...o, apercu: court(o.description ?? o.missions), entreprise: companies }));
+  const offres = (data ?? []).map(versOffreAffichee);
 
   return NextResponse.json({
     offres, total: count ?? offres.length, parPage: PAR_PAGE,

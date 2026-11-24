@@ -239,3 +239,4 @@ export function precharger(cle: string, url: string): void {
 export const CLE_CONTEXTE = "contexte";
 export const CLE_PROFIL = "profil";
 export const CLE_FAVORIS = "favoris";
+export const CLE_OFFRES_ENREGISTREES = "offres-enregistrees";
