@@ -374,7 +374,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             {(() => {
               const lieu = lieuAffiche(company.city, company.canton);
               const lignes = ([
-                { Icone: MapPin, label: "Où", value: lieu === "Multi-sites" || company.canton === "CH" ? "Dans toute la Suisse" : lieu },
+                { Icone: MapPin, label: "Lieu", value: lieu === "Multi-sites" || company.canton === "CH" ? "Dans toute la Suisse" : lieu },
                 company.employee_range ? { Icone: Users, label: "Taille", value: `${company.employee_range} employés` } : null,
                 // Les langues remplacent la note : on ne postule pas dans une
                 // langue qu'on ne parle pas, et c'est la première chose qu'un
