@@ -27,7 +27,7 @@ const texte = html => entites((html ?? "")
   .filter(Boolean);
 
 // Une candidature spontanée, un événement de recrutement : ce ne sont pas des offres.
-const CANDIDATURE_SPONTANEE = /initiativ|wildcard|spontan|unsolicited|open application|blindbewerbung|talent pool|talentpool|workshop|brown bag|webinar|info.?(session|abend|anlass)|career (day|event)|meets? |\bx\b.*\b(club|society)\b|recruiting event|messe|\bclub\b|boost your|pipeline posting|talent pipeline|talent community/i;
+const CANDIDATURE_SPONTANEE = /^candidatures?\b|initiativ|wildcard|spontan|unsolicited|open application|blindbewerbung|talent pool|talentpool|workshop|brown bag|webinar|info.?(session|abend|anlass)|career (day|event)|meets? |\bx\b.*\b(club|society)\b|recruiting event|messe|\bclub\b|boost your|pipeline posting|talent pipeline|talent community/i;
 
 /**
  * Titre propre : sans code de référence (« REF297441C »), sans mention de genre
@@ -39,7 +39,9 @@ function titrePropre(t) {
   // Les lieux après « - » ou « / » gardent leur majuscule (« - Geneva/Zurich »).
   // Retour à la ligne dans le titre (« Gesamtleistungen<br/>für die Region… ») :
   // une espace ; autres balises retirées ; virgule finale retirée.
-  t = entites(t).replace(/\s*<br\s*\/?>\s*/gi, " ").replace(/<[^>]+>/g, "").replace(/[\s,;]+$/, "");
+  // Décodé deux fois : certains flux encodent déjà le texte encodé
+  // (« R&amp;amp;D » chez Mettler-Toledo).
+  t = entites(entites(t)).replace(/\s*<br\s*\/?>\s*/gi, " ").replace(/<[^>]+>/g, "").replace(/[\s,;]+$/, "");
   if (t === t.toUpperCase() && /[A-Z]{4}/.test(t)) {
     t = t.toLowerCase().replace(/^\p{L}/u, c => c.toUpperCase());
     t = t.replace(/(\s[-–]\s+)([^()]+)$/u, (_, sep, lieux) => sep + lieux.replace(/(^|\/)\s*(\p{L})/gu, (m, a, c) => a + c.toUpperCase()));
@@ -307,9 +309,13 @@ function contrat(titre, indice) {
   if (/freelance|freiberuf/.test(t)) return "Freelance";
   if (/working student|werkstudent|job étudiant|studentenjob/.test(t)) return "Temporaire";
   if (/temporary|temporär|temporaire|tempor/.test(t)) return "Temporaire";
-  if (/contract|fixed.term|befristet|\bcdd\b|limited|durée déterminée/.test(t)) return "CDD";
+  // CDI d'abord : « unbefristet » contient « befristet », « unlimited »
+  // contient « limited », « permanent contract » contient « contract ». Testé
+  // après, le CDD les avalait : 1 900 offres de Coop, Volg ou AXA étaient
+  // affichées en CDD alors qu'elles sont à durée indéterminée.
   // « Temps plein » ne dit rien de la durée du contrat : pas de CDI deviné.
-  if (/permanent|unbefristet|\bcdi\b|festanstellung|indéterminée?/.test(t)) return "CDI";
+  if (/permanent|unbefristet|unlimited|\bcdi\b|festanstellung|indéterminée?|indeterminato/.test(t)) return "CDI";
+  if (/fixed.term|(?<!un)befristet|\bcdd\b|(?<!un)limited|durée déterminée|\bcontract\b|\bcontractor\b|determinato/.test(t)) return "CDD";
   return null;
 }
 /**

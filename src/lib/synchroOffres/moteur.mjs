@@ -569,9 +569,21 @@ const LECTEURS = {
   async jsonld({ liste, motif }) {
     const re = new RegExp(motif ?? "job|stelle|offre|emploi|vacanc|position|poste|annonce|ausschreibung|lavoro", "i");
     const offres = new Map();
-    for (const adresse of [].concat(liste)) {
+    // Les pages suivantes de la liste (« ?page=2 », « &page=3 »…) sont lues
+    // aussi : jobs.migros.ch n'en montre que 32 par page, et Denner en a 249.
+    // Sans elles, on ne voyait qu'un échantillon qui changeait d'une nuit à
+    // l'autre : la moitié des offres paraissaient fermées puis rouvertes.
+    const aLire = [].concat(liste);
+    const vues = new Set(aLire);
+    for (let i = 0; i < aLire.length && i < 40; i++) {
+      const adresse = aLire[i];
       const html = await (await lireUrl(adresse)).text();
       const origine = new URL(adresse).origin;
+      const chemin = new URL(adresse).pathname;
+      for (const m of html.matchAll(/href="([^"#]+)"/g)) {
+        let u; try { u = new URL(entites(m[1]), adresse); } catch { continue; }
+        if (u.origin === origine && u.pathname === chemin && /^\d+$/.test(u.searchParams.get("page") ?? "") && !vues.has(u.href)) { vues.add(u.href); aLire.push(u.href); }
+      }
       for (const m of html.matchAll(/<a[^>]*href="([^"#]+)"[^>]*>([\s\S]*?)<\/a>/g)) {
         // Identifiant de session (« ;jsessionid=… ») retiré : il change à chaque
         // visite, l'offre aurait paru nouvelle chaque nuit et le lien expirerait.

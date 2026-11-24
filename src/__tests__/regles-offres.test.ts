@@ -69,6 +69,12 @@ describe("titres longs de Workday", () => {
 
 describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
   it("titres", () => {
+    expect(contrat("Verkäufer:in", "Unbefristet")).toBe("CDI");
+    expect(contrat("Engineer", "Unlimited")).toBe("CDI");
+    expect(contrat("Engineer", "Permanent contract")).toBe("CDI");
+    expect(contrat("Assistant", "Befristet")).toBe("CDD");
+    expect(contrat("Analyst", "Fixed-term")).toBe("CDD");
+    expect(titrePropre("Project Leader R&amp;amp;D")).toBe("Project Leader R&D");
     expect(titrePropre("Door Attendant 100% (w/m/i)")).toBe("Door Attendant 100%");
     expect(titrePropre("(Senior) Account Executive Health & Benefits (f/m/d, 80-100%)")).toBe("(Senior) Account Executive Health & Benefits (80-100%)");
     expect(titrePropre("Tecnico elettronico turnista (m/f/ - 100%)")).toBe("Tecnico elettronico turnista (100%)");
