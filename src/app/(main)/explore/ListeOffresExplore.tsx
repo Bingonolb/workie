@@ -154,7 +154,12 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
         .recherche-offres-champ input::-webkit-search-cancel-button { display: none; }
         /* La règle globale des champs (bordure et halo violets au focus) dessinait
            un second cadre à l'intérieur de la boîte : c'est la boîte qui s'allume. */
-        .recherche-offres-champ input, .recherche-offres-champ input:focus, .recherche-offres-champ input:focus-visible {
+        /* Sélecteur volontairement plus précis que la règle globale
+           « input:not(…):not(…):not(…):focus » : à !important égal, c'est la
+           plus précise qui gagne, et la globale gardait son halo de 3 px. */
+        .recherche-offres .recherche-offres-champ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+        .recherche-offres .recherche-offres-champ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+        .recherche-offres .recherche-offres-champ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visible {
           border: 0 !important; box-shadow: none !important; outline: none !important; padding: 0; border-radius: 0; -webkit-appearance: none; appearance: none;
           /* En mode sombre, le navigateur peignait son propre fond de champ :
              un second rectangle, plus clair, dans la boîte. */
