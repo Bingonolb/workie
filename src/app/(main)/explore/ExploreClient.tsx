@@ -15,6 +15,30 @@ import type { PublicAdCampaign } from "@/lib/actions/ads";
 import { lireCache, ecrireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
 import { useTirerPourMelanger, SEUIL_TIRAGE } from "@/lib/useTirerPourMelanger";
 import { rafraichirFiches } from "@/lib/rafraichirFiches";
+import { ListeOffresExplore } from "./ListeOffresExplore";
+
+/**
+ * Entreprises | Offres : ce qu'on explore. Deux positions, même poids, posées
+ * à côté du bouton Filtres : on le voit sans chercher, sans ajouter de bouton
+ * au menu. Les filtres communs (secteur, canton, langue) suivent d'une vue à
+ * l'autre.
+ */
+function SelecteurVueListe({ vue, onChange }: { vue: "entreprises" | "offres"; onChange: (v: "entreprises" | "offres") => void }) {
+  return (
+    <div role="group" aria-label="Ce que vous explorez" className="selecteur-vue">
+      <style>{`
+        .selecteur-vue { display: inline-flex; height: 42px; padding: 3px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border); }
+        .selecteur-vue button { height: 100%; padding: 0 16px; border: 0; border-radius: 9px; background: transparent; color: var(--text-muted);
+          font: inherit; font-size: 13.5px; font-weight: 650; cursor: pointer; transition: background .15s, color .15s; }
+        .selecteur-vue button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(16,19,25,.12); }
+        .selecteur-vue button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+        @media (max-width: 380px) { .selecteur-vue button { padding: 0 12px; font-size: 13px; } }
+      `}</style>
+      <button type="button" aria-pressed={vue === "entreprises"} onClick={() => onChange("entreprises")}>Entreprises</button>
+      <button type="button" aria-pressed={vue === "offres"} onClick={() => onChange("offres")}>Offres</button>
+    </div>
+  );
+}
 
 // Guests see the first 12 companies + 6 blurred
 /**
@@ -141,6 +165,16 @@ export function ExploreClient({
   const [canton, setCanton] = useState(() => (parametres.get("canton") ?? initialCanton ?? ""));
   const [langue, setLangue] = useState(() => (parametres.get("langue") ?? ""));
   const [sort, setSort] = useState(() => (parametres.get("sort") ?? initialSort ?? "recent"));
+  // Ce qu'on explore : les entreprises ou leurs offres (« ?vue=offres »).
+  // Même ajustement pendant le rendu que pour `view` : l'adresse fait foi.
+  const vueListeUrl: "entreprises" | "offres" = parametres.get("vue") === "offres" ? "offres" : "entreprises";
+  const [vueListe, setVueListe] = useState(vueListeUrl);
+  const [vueListeUrlPrec, setVueListeUrlPrec] = useState(vueListeUrl);
+  if (vueListeUrl !== vueListeUrlPrec) {
+    setVueListeUrlPrec(vueListeUrl);
+    setVueListe(vueListeUrl);
+  }
+  const [contrat, setContrat] = useState(() => parametres.get("contrat") ?? "");
 
   // null = auth not yet resolved (loading). Avoids flash of cadenas for logged-in users.
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
@@ -392,12 +426,14 @@ export function ExploreClient({
   // L'ancienne version réécrivait « /explore » ou « /explore?view=swipe » en
   // dur, ce qui effaçait sector/canton/sort : un lien filtré n'était pas
   // partageable et un rechargement perdait les filtres.
-  const syncUrl = useCallback((s: string, c: string, l: string, so: string, v: string) => {
+  const syncUrl = useCallback((s: string, c: string, l: string, so: string, v: string, vl: string, ct: string) => {
     const p = new URLSearchParams();
+    if (vl === "offres" && v !== "swipe") p.set("vue", "offres");
     if (s) p.set("sector", s);
     if (c) p.set("canton", c);
     if (l) p.set("langue", l);
-    if (so && so !== "recent") p.set("sort", so);
+    if (vl === "offres" && ct) p.set("contrat", ct);
+    if (so && so !== "recent" && vl !== "offres") p.set("sort", so);
     if (v === "swipe") p.set("view", "swipe");
     const qs = p.toString();
     const target = `/explore${qs ? `?${qs}` : ""}`;
@@ -411,8 +447,8 @@ export function ExploreClient({
   const didMountRef = useRef(false);
   useEffect(() => {
     if (!didMountRef.current) { didMountRef.current = true; return; }
-    syncUrl(sector, canton, langue, sort, view);
-  }, [sector, canton, langue, sort, view, syncUrl]);
+    syncUrl(sector, canton, langue, sort, view, vueListe, contrat);
+  }, [sector, canton, langue, sort, view, vueListe, contrat, syncUrl]);
 
   // La vue swipe occupe exactement l'écran et ne défile pas.
   //
@@ -507,16 +543,37 @@ export function ExploreClient({
   }, [melangeEnCours, sector, canton, langue, sort]);
 
   const handleFilter = useCallback((key: string, value: string | undefined) => {
+    // Vue Offres : les filtres changent l'état, la liste d'offres se recharge
+    // d'elle-même ; inutile de recharger les entreprises qu'on ne voit pas.
+    if (vueListe === "offres") {
+      if (key === "contrat") setContrat(value ?? "");
+      else if (key === "sector") setSector(value ?? "");
+      else if (key === "canton") setCanton(value ?? "");
+      else if (key === "langue") setLangue(value ?? "");
+      return;
+    }
     const newSector = key === "sector" ? (value ?? "") : sector;
     const newCanton = key === "canton" ? (value ?? "") : canton;
     const newLangue = key === "langue" ? (value ?? "") : langue;
     const newSort   = key === "sort"   ? (value ?? "recent") : sort;
     applyFilters(newSector, newCanton, newLangue, newSort);
-  }, [sector, canton, langue, sort, applyFilters]);
+  }, [sector, canton, langue, sort, applyFilters, vueListe]);
 
   const handleClear = useCallback(() => {
+    setContrat("");
+    if (vueListe === "offres") { setSector(""); setCanton(""); setLangue(""); return; }
     applyFilters("", "", "", "recent");
-  }, [applyFilters]);
+  }, [applyFilters, vueListe]);
+
+  // Bascule Entreprises | Offres. Les filtres communs sont gardés ; en
+  // revenant aux entreprises, leur liste est rechargée avec ces filtres
+  // (ils ont pu changer pendant qu'on regardait les offres).
+  const changerVueListe = useCallback((v: "entreprises" | "offres") => {
+    if (v === vueListe) return;
+    setVueListe(v);
+    if (v === "entreprises") applyFilters(sector, canton, langue, sort);
+    window.scrollTo(0, 0);
+  }, [vueListe, applyFilters, sector, canton, langue, sort]);
 
 
   /**
@@ -742,6 +799,25 @@ export function ExploreClient({
     );
   }
 
+  const selecteur = <SelecteurVueListe vue={vueListe} onChange={changerVueListe} />;
+
+  if (vueListe === "offres") {
+    return (
+      <>
+        <ExploreFilters
+          sectors={secteurs}
+          cantons={CANTONS}
+          current={{ ...current, contrat: contrat || undefined }}
+          onFilter={handleFilter}
+          onClear={handleClear}
+          avant={selecteur}
+          offres
+        />
+        <ListeOffresExplore filtres={{ sector, canton, langue, contrat }} />
+      </>
+    );
+  }
+
   // Plus de mur pour les visiteurs : toute la grille, la pagination et les
   // publicités, comme pour un compte.
   const visibleCompanies = companies;
@@ -754,6 +830,7 @@ export function ExploreClient({
         current={current}
         onFilter={handleFilter}
         onClear={handleClear}
+        avant={selecteur}
       />
 
       {/* Le bandeau « 1020 entreprises disponibles » a été retiré.

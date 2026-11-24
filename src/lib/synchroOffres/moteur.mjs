@@ -17,7 +17,7 @@
 import http from "node:http";
 import https from "node:https";
 import zlib from "node:zlib";
-import { phrasesCommunes, lieuEnSuisse, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre } from "./regles.mjs";
+import { langueOffre, phrasesCommunes, lieuEnSuisse, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre } from "./regles.mjs";
 
 // Base et options de la passe en cours (une passe à la fois par processus).
 let db;
@@ -654,7 +654,7 @@ const LECTEURS = {
 };
 
 // ─── Synchronisation d'une entreprise ────────────────────────────────
-const CHAMPS = ["title", "location", "contract_type", "taux_min", "taux_max", "apply_url"];
+const CHAMPS = ["langue", "title", "location", "contract_type", "taux_min", "taux_max", "apply_url"];
 async function synchroniser(src, essai) {
   const { company_id, outil, params } = src;
   const entreprise = src.companies.name;
@@ -734,6 +734,8 @@ async function synchroniser(src, essai) {
     // cela, la nuit remplaçait le lieu lu sur la page par celui, plus pauvre,
     // de la liste : les données se dégradaient à chaque passe.
     if (!detailLu && ex) for (const k of CHAMPS) o[k] = ex[k];
+    // Langue de l'annonce, pour le filtre d'Explorer.
+    o.langue = langueOffre(o.title, o.description ?? ex?.description ?? "");
     bilan.lues++;
     parRef.delete(o.source_ref);
     if (!ex) {

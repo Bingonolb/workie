@@ -379,4 +379,32 @@ const offre = (o, entreprise, villeEntreprise, communes = null) => {
   };
 };
 
-export { phrasesCommunes, clePhrase, lieuEnSuisse, CANTONS, lieuPropre, ADMINISTRATIF, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre };
+/**
+ * Langue dans laquelle une offre est écrite, devinée sur son titre et son
+ * texte : les mots courants de chaque langue se comptent. Sert au filtre
+ * « langue » d'Explorer et à l'ordre des offres d'une fiche (FR, DE, EN, IT).
+ */
+const MOTS_LANGUE = {
+  fr: /\b(le|la|les|des|du|vous|votre|vos|nous|et|pour|avec|dans|une?|à|au|aux|est|sont|poste|avocat|collaborat|stagiaire)\b/gi,
+  de: /:in\b|\/-?in\b|\b(der|die|das|und|mit|für|sie|ihre?|wir|unser|im|in der|bei|zur|zum|ein|eine|als|rechtsanw\w*|mitarbeiter\w*|praktik\w*)\b/gi,
+  en: /\b(the|and|with|for|you|your|our|we|of|to|is|are|lawyer|developer|engineer|intern)\b/gi,
+  it: /\b(il|lo|gli|della|delle|con|per|una?|che|sono|siamo|nostro|vostro|collaborator\w*)\b/gi,
+};
+/**
+ * @param {string} titre
+ * @param {string | null} [texte]
+ * @returns {"fr" | "de" | "en" | "it"}
+ */
+function langueOffre(titre, texte) {
+  const t = `${titre} ${texte ?? ""}`;
+  /** @type {"fr" | "de" | "en" | "it"} */
+  let meilleure = "fr";
+  let score = -1;
+  for (const l of /** @type {const} */ (["fr", "de", "en", "it"])) {
+    const n = t.match(MOTS_LANGUE[l])?.length ?? 0;
+    if (n > score) { score = n; meilleure = l; }
+  }
+  return meilleure;
+}
+
+export { langueOffre, phrasesCommunes, clePhrase, lieuEnSuisse, CANTONS, lieuPropre, ADMINISTRATIF, NOMMEES, entites, texte, CANDIDATURE_SPONTANEE, titrePropre, SUISSE, TACHES, ACCROCHE, presenteEntreprise, resume, taux, contrat, offre };

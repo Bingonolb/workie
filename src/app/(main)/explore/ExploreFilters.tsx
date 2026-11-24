@@ -33,12 +33,18 @@ export function ExploreFilters({
   current,
   onFilter,
   onClear,
+  avant,
+  offres = false,
 }: {
   sectors: readonly string[];
   cantons: { code: string; name: string }[];
-  current: { sector?: string; canton?: string; langue?: string; view?: string; sort?: string };
+  current: { sector?: string; canton?: string; langue?: string; view?: string; sort?: string; contrat?: string };
   onFilter?: (key: string, value: string | undefined) => void;
   onClear?: () => void;
+  /** Posé avant le bouton Filtres, sur la même ligne (le choix Entreprises | Offres). */
+  avant?: React.ReactNode;
+  /** Vue Offres : rubrique « Contrat », langue de l'annonce, pas de tri. */
+  offres?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -68,12 +74,13 @@ export function ExploreFilters({
   const secteursActifs = liste(current.sector);
   const cantonsActifs = liste(current.canton);
   const languesActives = liste(current.langue);
+  const contratsActifs = liste(current.contrat);
   const basculer = (cle: string, actuels: string[], valeur: string) => {
     const suite = actuels.includes(valeur) ? actuels.filter(v => v !== valeur) : [...actuels, valeur];
     push(cle, suite.join(",") || undefined);
   };
   const activeCount = secteursActifs.length + cantonsActifs.length + languesActives.length
-    + (sort !== "recent" && view !== "swipe" ? 1 : 0);
+    + (offres ? contratsActifs.length : (sort !== "recent" && view !== "swipe" ? 1 : 0));
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -151,7 +158,7 @@ export function ExploreFilters({
                 Une offre à Zurich ne sert à rien à qui ne parle pas
                 allemand : après le lieu, c'est la première chose qui
                 décide si une entreprise est atteignable. */}
-            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "18px 0 10px" }}>Langue de travail</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "18px 0 10px" }}>{offres ? "Langue de l'annonce" : "Langue de travail"}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: view !== "swipe" ? 18 : 0 }}>
               {LANGUES.map(({ code, nom }) => {
                 const active = languesActives.includes(code);
@@ -169,8 +176,31 @@ export function ExploreFilters({
               })}
             </div>
       
+            {/* Contrat : vue Offres seulement */}
+            {offres && (
+              <>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Contrat</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {["CDI", "CDD", "Stage", "Apprentissage", "Temporaire"].map(c => {
+                    const active = contratsActifs.includes(c);
+                    return (
+                      <button key={c} onClick={() => basculer("contrat", contratsActifs, c)}
+                        style={{
+                          padding: "5px 13px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                          border: active ? "1.5px solid #8b5cf6" : "1px solid var(--border2)",
+                          background: active ? "var(--surface2)" : "transparent",
+                          color: active ? "#8b5cf6" : "var(--text-muted)", transition: "all 0.1s",
+                        }}>
+                        {c}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
             {/* Sort — grid only */}
-            {view !== "swipe" && (
+            {view !== "swipe" && !offres && (
               <>
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Trier par</p>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -198,6 +228,7 @@ export function ExploreFilters({
   return (
     <div style={{ marginBottom: 20, opacity: isPending ? 0.65 : 1, transition: "opacity 0.15s" }}>
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+        {avant}
 
         {/* Filtres button */}
         <div style={{ position: "relative" }}>
