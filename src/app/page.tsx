@@ -12,7 +12,7 @@ import { StylesLanding, NavLanding } from "@/components/StylesLanding";
 import { RechercheRevendication } from "@/app/pour-les-entreprises/RechercheRevendication";
 import { getApercuEntreprises } from "@/lib/apercuAccueil";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
-import { revendicationOuverte, accueilCompact } from "@/lib/ouverture";
+import { revendicationOuverte, accueilCompact, offresSynchro } from "@/lib/ouverture";
 import { AccueilCompact } from "@/components/AccueilCompact";
 import { fetchGridPage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
@@ -26,9 +26,15 @@ const getLandingCounts = unstable_cache(
     const [{ count: companyCount }, { count: reviewCount }, { count: offresCount }] = await Promise.all([
       admin.from("companies").select("*", { count: "exact", head: true }).in("sector", enLigne),
       admin.from("reviews").select("*", { count: "exact", head: true }),
-      // Offres actives des seules entreprises visibles sur le site.
-      admin.from("job_offers").select("id, companies!inner(sector)", { count: "exact", head: true })
-        .eq("is_active", true).in("companies.sector", enLigne),
+      // Exactement les offres qu'Explorer montre : même vue (actives, non
+      // expirées), mêmes secteurs en ligne. Compter job_offers directement
+      // donnait un autre chiffre qu'Explorer (les offres expirées en plus).
+      (() => {
+        let q = admin.from("offres_explorer" as "job_offers").select("id, companies!inner(sector)", { count: "exact", head: true })
+          .in("companies.sector", enLigne);
+        if (!offresSynchro) q = q.is("source", null);
+        return q;
+      })(),
     ]);
     // Cantons réellement couverts : « CH » (présence nationale) ne compte pas.
     const cantons = new Set<string>();
@@ -39,7 +45,7 @@ const getLandingCounts = unstable_cache(
     }
     return { companies: companyCount ?? 0, reviews: reviewCount ?? 0, offres: offresCount ?? 0, cantons: cantons.size };
   },
-  ["landing-counts-v3"],
+  ["landing-counts-v4"],
   { revalidate: 300, tags: ["landing-counts-v2", "companies"] }
 );
 

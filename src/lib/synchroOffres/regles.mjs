@@ -7,13 +7,50 @@ const NOMMEES = { nbsp: " ", amp: "&", quot: '"', lt: "<", gt: ">", apos: "’",
 // « &ccedil; ») : la lettre de base plus son accent, recomposés en un caractère.
 const ACCENTS = { caron: "̌", acute: "́", grave: "̀", circ: "̂", uml: "̈", cedil: "̧", tilde: "̃", ring: "̊" };
 const LIGATURES = { aelig: "æ", AElig: "Æ", oelig: "œ", OElig: "Œ", oslash: "ø", Oslash: "Ø", eszett: "ß" };
-const entites = s => s
+// Octets 0x80 à 0x9F tels que Windows-1252 les affiche (« € », « – », « Œ »…) :
+// un texte UTF-8 lu en Windows-1252 en est plein (« â€“ » pour « – »).
+const CP1252 = [0x20AC, 0, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0, 0x017D, 0,
+  0, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014, 0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0, 0x017E, 0x0178];
+const versOctet = c => { const n = c.codePointAt(0) ?? 0; if (n < 256) return n; const i = CP1252.indexOf(n); return i >= 0 ? 0x80 + i : -1; };
+// Invisibles : espaces de largeur nulle, marques de sens d'écriture, trait
+// d'union conditionnel, caractères de contrôle (sauf tabulation et retour).
+const INVISIBLE = n => (n >= 0x200B && n <= 0x200F) || (n >= 0x202A && n <= 0x202E) || n === 0x2060 || n === 0xFEFF || n === 0xAD
+  || (n < 32 && n !== 9 && n !== 10 && n !== 13) || (n >= 0x7F && n <= 0x9F);
+/**
+ * Texte propre, quel que soit l'état où la source l'envoie.
+ * 1. Séquences UTF-8 lues comme du Latin-1 ou du Windows-1252 (« Ã© »,
+ *    « â€“ », « Åuvre » dont un octet est devenu invisible) : chaque séquence
+ *    est redécodée seule, et gardée seulement si elle donne un caractère
+ *    valide. Un vrai « é » voisin, ou « Åland », ne bougent pas.
+ * 2. Caractères invisibles retirés ; séparateurs de ligne Unicode → retour.
+ * @param {string} s
+ */
+function reparer(s) {
+  let out = "";
+  for (let i = 0; i < s.length;) {
+    const n = s.charCodeAt(i);
+    const lg = n >= 0xC2 && n <= 0xDF ? 2 : n >= 0xE0 && n <= 0xEF ? 3 : 0;
+    if (lg) {
+      const octets = [...s.slice(i, i + lg)].map(versOctet);
+      if (octets.length === lg && octets.slice(1).every(o => o >= 0x80 && o <= 0xBF)) {
+        const r = Buffer.from(octets).toString("utf8");
+        if (r.length === 1 && r.charCodeAt(0) !== 0xFFFD) { out += r; i += lg; continue; }
+      }
+    }
+    const c = s.charCodeAt(i);
+    if (c === 0x2028 || c === 0x2029) out += String.fromCharCode(10);
+    else if (!INVISIBLE(c)) out += s[i];
+    i++;
+  }
+  return out;
+}
+const entites = s => reparer(reparer(s)
   .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
   .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
   .replace(/&([a-zA-Z])(acute|grave|circ|uml|cedil|tilde|ring|caron);/g, (_, l, a) => (l + ACCENTS[a]).normalize("NFC"))
   .replace(/&(aelig|AElig|oelig|OElig|oslash|Oslash);/g, (_, n) => LIGATURES[n])
   .replace(/&([a-z][a-z0-9]*);/gi, (m, n) => NOMMEES[n] ?? NOMMEES[n.toLowerCase()] ?? m)
-  .replace(/ /g, " ");
+  .replace(/ /g, " "));
 // Les éléments de liste deviennent des phrases : sans ponctuation, deux puces
 // mises bout à bout se lisaient comme une seule phrase sans fin.
 const texte = html => entites((html ?? "")
@@ -56,7 +93,7 @@ function titrePropre(t) {
     .replace(/\s*(?:\b(?:Zurich|Zürich|Geneva|Genève|Basel|Bern|Lausanne|Zug)\s*)?,\s*(?:Switzerland|Schweiz|Suisse)\s*$/i, "")
     // Annonce dupliquée dans l'outil : « … - copy ».
     .replace(/\s*[-–]\s*(copy|copie|kopie)\s*$/i, "")
-    .replace(/\s*\((?:[mwfhdx]\s*\/\s*){1,3}[mwfhdx]+\.?(?:iv\.?)?\/?\)|\s*\((?:all|alle)(?: genders?)?\)|\s*\(m\/w\/div\.?\)|\s*\(f\/m\/div\.?\)|\s*\(w\/m\/div\.?\)|\s*\(gn\)|\s*\(all\)/gi, "")
+    .replace(/\s*\((?:[mwfhdx]\s*\/\s*){1,3}[mwfhdx]+\.?(?:iv\.?)?\/?\)|\s*\((?:all|alle)(?: genders?)?\)|\s*\(m\/w\/div\.?\)|\s*\(f\/m\/div\.?\)|\s*\(w\/m\/div\.?\)|\s*\(gn\)|\s*\(all\)|\s*\(d\)(?=\s|$)/gi, "")
     // Mentions de genre dans une parenthèse qui porte aussi autre chose :
     // « (f/m/d, 80-100%) » → « (80-100%) », « (m/f/ - 100%) » → « (100%) »,
     // et les variantes « w/m/i », « h/f/a », « H/F/N », « m/v/x ».

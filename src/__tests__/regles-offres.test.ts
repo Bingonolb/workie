@@ -74,12 +74,16 @@ describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
     expect(contrat("Engineer", "Permanent contract")).toBe("CDI");
     expect(contrat("Assistant", "Befristet")).toBe("CDD");
     expect(contrat("Analyst", "Fixed-term")).toBe("CDD");
+    expect(titrePropre("Technicienne de chantier â\u0080\u0093 Second Å\u0092uvre (d) 100%")).toBe("Technicienne de chantier – Second Œuvre 100%");
+    expect(titrePropre("​​Exchange Engineer 80–100 %")).toBe("Exchange Engineer 80–100 %");
+    expect(titrePropre("Ingénieur Ã©lectricien")).toBe("Ingénieur électricien");
+    expect(titrePropre("Åland Office Manager")).toBe("Åland Office Manager");
     expect(titrePropre("Project Leader R&amp;amp;D")).toBe("Project Leader R&D");
     expect(titrePropre("Door Attendant 100% (w/m/i)")).toBe("Door Attendant 100%");
     expect(titrePropre("(Senior) Account Executive Health & Benefits (f/m/d, 80-100%)")).toBe("(Senior) Account Executive Health & Benefits (80-100%)");
     expect(titrePropre("Tecnico elettronico turnista (m/f/ - 100%)")).toBe("Tecnico elettronico turnista (100%)");
     expect(titrePropre("Technicien(ne) de laboratoire (H/F/N)")).toBe("Technicien(ne) de laboratoire");
-    expect(titrePropre("Technicienne de chantier â Second Åuvre (d) 100%")).toBe("Technicienne de chantier – Second Œuvre (d) 100%");
+    expect(titrePropre("Technicienne de chantier â Second Åuvre (d) 100%")).toBe("Technicienne de chantier – Second Œuvre 100%");
     expect(titrePropre("AI Architect - BCG Platinion Zurich, Switzerland")).toBe("AI Architect - BCG Platinion");
     expect(titrePropre("Consultant, Switzerland")).toBe("Consultant");
     expect(titrePropre("Chef de projet Tunnel (h/f/) 80-100 %")).toBe("Chef de projet Tunnel 80-100 %");
