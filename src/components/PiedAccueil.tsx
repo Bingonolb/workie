@@ -114,7 +114,7 @@ export async function PiedAccueil() {
           .pied-acc .pied-cantons { margin: 0 0 12px; }
           .pied-acc .pied-cantons summary { min-height: 40px; font-size: 14px; }
           .pied-acc .pied-cantons-grille a { font-size: 13.5px; padding: 6px 0; }
-          .pied-bas { margin-top: 18px; border-top: none; padding-top: 0; flex-direction: column; align-items: flex-start; gap: 10px; }
+          .pied-bas { margin-top: 18px; border-top: none; padding-top: 0; flex-direction: column; align-items: flex-start; gap: 4px; }
         }
         @media (prefers-reduced-motion: reduce) { .pied-chevron { transition: none; } }
       `}</style>
@@ -152,7 +152,7 @@ export async function PiedAccueil() {
 
         <div className="pied-bas">
           <span>© 2026 Workie</span>
-          <ChoixLangue compact />
+          <ChoixLangue texte />
           <span>{t("pied.hebergement")}</span>
         </div>
       </div>

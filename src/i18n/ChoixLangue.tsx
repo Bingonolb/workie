@@ -23,12 +23,33 @@ function passerEn(l: Langue) {
   location.assign(chemin + location.search);
 }
 
-export function ChoixLangue({ compact = false }: { compact?: boolean }) {
+export function ChoixLangue({ compact = false, texte = false }: { compact?: boolean; texte?: boolean }) {
   const t = useT();
   const actuelle = useLangue();
   if (OUVERTES.length < 2) return null;
 
   const choisir = (l: Langue) => { if (l !== actuelle) passerEn(l); };
+
+  // Pied de page : de simples mots, dans le style des autres liens du pied.
+  if (texte) {
+    return (
+      <span role="group" aria-label={t("langue.titre")} className="choix-langue-texte">
+        <style>{`
+          .choix-langue-texte { display: inline-flex; align-items: center; gap: 6px; }
+          .choix-langue-texte button { background: none; border: 0; padding: 0; font: inherit; color: var(--text-muted); cursor: pointer; transition: color .15s; }
+          .choix-langue-texte button:hover { color: var(--text); }
+          .choix-langue-texte button[aria-pressed="true"] { color: var(--text); cursor: default; }
+          .choix-langue-texte button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 2px; }
+        `}</style>
+        {OUVERTES.map((l, i) => (
+          <span key={l} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {i > 0 && <span aria-hidden="true">·</span>}
+            <button type="button" lang={l} aria-pressed={l === actuelle} onClick={() => choisir(l)}>{NOM_LANGUE[l]}</button>
+          </span>
+        ))}
+      </span>
+    );
+  }
 
   return (
     <div className={`choix-langue${compact ? " choix-langue--compact" : ""}`}>
