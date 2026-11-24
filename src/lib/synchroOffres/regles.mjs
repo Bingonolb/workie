@@ -457,11 +457,18 @@ const offre = (o, entreprise, villeEntreprise, communes = null) => {
  * texte : les mots courants de chaque langue se comptent. Sert au filtre
  * « langue » d'Explorer et à l'ordre des offres d'une fiche (FR, DE, EN, IT).
  */
+// Mots courants propres à chaque langue. Limites de mot qui comprennent les
+// accents (« à », « für » n'étaient jamais reconnus avec \b), et aucun mot
+// partagé : « du » est français (de le) et allemand (tu), il ne compte pas.
+// Le registre familier allemand des offres (« du », « dein », « kannst »)
+// passait inaperçu : « Hier kannst du beweisen… » sortait en français.
+const MOT = mots => new RegExp(`(?<![\\p{L}])(?:${mots})(?![\\p{L}])`, "giu");
 const MOTS_LANGUE = {
-  fr: /\b(le|la|les|des|du|vous|votre|vos|nous|et|pour|avec|dans|une?|à|au|aux|est|sont|poste|avocat|collaborat|stagiaire)\b/gi,
-  de: /:in\b|\/-?in\b|\b(der|die|das|und|mit|für|sie|ihre?|wir|unser|im|in der|bei|zur|zum|ein|eine|als|rechtsanw\w*|mitarbeiter\w*|praktik\w*)\b/gi,
-  en: /\b(the|and|with|for|you|your|our|we|of|to|is|are|lawyer|developer|engineer|intern)\b/gi,
-  it: /\b(il|lo|gli|della|delle|con|per|una?|che|sono|siamo|nostro|vostro|collaborator\w*)\b/gi,
+  fr: MOT("le|la|les|des|vous|votre|vos|nous|notre|nos|et|pour|avec|dans|une|un|à|au|aux|est|sont|sur|par|ton|ta|tes|tu|qui|que|ou|en tant que|poste|collaborat\\p{L}*|stagiaire|entreprise|équipe"),
+  // En plus des mots : l'écriture inclusive allemande (« Verkäufer:in », « *in »).
+  de: new RegExp(`[:*/]-?in(?![\\p{L}])|${MOT("der|die|das|und|mit|für|sie|ihre?|wir|uns|unser\\p{L}*|dein\\p{L}*|dich|dir|bist|hast|kannst|wirst|ist|sind|auf|von|zu|zur|zum|bei|nicht|auch|oder|werden|ein|eine|einen|als|im|des|dem|den|mitarbeiter\\p{L}*|praktik\\p{L}*").source}`, "giu"),
+  en: MOT("the|and|with|you|your|our|we|of|to|is|are|will|be|this|that|as|on|an|at|from|team|role|experience|lawyer|developer|engineer|intern|internship|analyst"),
+  it: MOT("il|lo|gli|della|delle|degli|del|dei|nel|nella|con|per|una|uno|che|sono|siamo|nostro|nostra|vostro|tuo|tua|di|ed|collaborator\\p{L}*"),
 };
 /**
  * @param {string} titre

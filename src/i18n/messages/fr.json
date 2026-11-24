@@ -1,0 +1,15 @@
+{
+  "menu": {
+    "explorer": "Explorer",
+    "swipe": "Swipe",
+    "favoris": "Favoris",
+    "recherche": "Recherche",
+    "profil": "Profil"
+  },
+  "vue": {
+    "entreprises": "Entreprises",
+    "offres": "Offres",
+    "ceQueVousExplorez": "Ce que vous explorez",
+    "vosFavoris": "Vos favoris"
+  }
+}

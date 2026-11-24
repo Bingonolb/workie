@@ -5,20 +5,22 @@ import Link from "next/link";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Compass, Search, Flame, User, Layers } from "lucide-react";
 import { ouvrirRecherche } from "./SearchButton";
+import { useT } from "@/i18n/FournisseurLangue";
 import { precharger, CLE_PROFIL, CLE_FAVORIS } from "@/lib/cacheSession";
 
 function BottomNavInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const t = useT();
   const isSwipeActive = pathname === "/explore" && searchParams.get("view") === "swipe";
 
   const USER_LINKS = [
-    { href: "/explore",            Icon: Compass,    label: "Explorer",    active: pathname === "/explore" && !isSwipeActive },
-    { href: "/explore?view=swipe", Icon: Layers,     label: "Swipe",       active: isSwipeActive },
-    { href: "/favorites",          Icon: Flame,      label: "Favoris",     active: pathname.startsWith("/favorites") },
+    { href: "/explore",            Icon: Compass,    label: t("menu.explorer"), active: pathname === "/explore" && !isSwipeActive },
+    { href: "/explore?view=swipe", Icon: Layers,     label: t("menu.swipe"), active: isSwipeActive },
+    { href: "/favorites",          Icon: Flame,      label: t("menu.favoris"), active: pathname.startsWith("/favorites") },
   ];
-  const PROFIL = { href: "/profile", Icon: User, label: "Profil", active: pathname.startsWith("/profile") };
+  const PROFIL = { href: "/profile", Icon: User, label: t("menu.profil"), active: pathname.startsWith("/profile") };
 
   const handleClick = (href: string, active: boolean) => (e: React.MouseEvent) => {
     // Recherche ouverte : on ne revient pas d'abord sur la page d'en dessous
@@ -64,7 +66,7 @@ function BottomNavInner() {
         <button key="recherche" type="button" className="bottom-nav-item" onClick={() => { if (rechercheOuverte()) fermerRecherche(); else ouvrirRecherche(); }}
           style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", color: "inherit" }}>
           <Search size={22} strokeWidth={1.8} aria-hidden="true" />
-          <span>Recherche</span>
+          <span>{t("menu.recherche")}</span>
         </button>
       ) : (({ href, Icon, label, active }) => (
         <Link

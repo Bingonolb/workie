@@ -9,6 +9,11 @@ describe("langueOffre", () => {
     ["Office Manager:in (80-100%)", "Sie schaffen Möglichkeiten, Sie können Multitasking, Sie mögen Menschen", "de"],
     ["Substitut/-in Banking, Finance & Fintech und Kapitalmarktrecht", "Sie sind in den Bereichen Banking tätig und unterstützen uns", "de"],
     ["Collaboratore amministrativo", "Siamo alla ricerca di una persona con esperienza per il nostro ufficio", "it"],
+    // Registre familier allemand : il sortait en français.
+    ["Assistent*in Filialleitung", "Hier kannst du beweisen, was du draufhast. Dein Wissen weitergeben.", "de"],
+    // « du », « à » : ni l'un ni l'autre ne doivent faire basculer la langue.
+    ["Vendeuse", "Tu conseilles notre clientèle et tu es responsable de la marchandise à la caisse.", "fr"],
+    ["Montatore/trice di ascensori", "Ogni giorno, oltre due miliardi di persone si affidano a Schindler.", "it"],
     ["Senior Fullstack Java Developer 100% (f/m/d)", "Develop and maintain Java-based solutions for the regulatory reporting platforms", "en"],
   ])("%s", (titre, texte, attendu) => {
     expect(langueOffre(titre, texte)).toBe(attendu);

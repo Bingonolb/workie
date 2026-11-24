@@ -10,6 +10,7 @@ import { idsFavorisInvite, useFavorisInvite } from "@/lib/favorisInvite";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SelecteurVue, type VueListe } from "@/components/offres/SelecteurVue";
 import { FavorisOffres } from "./FavorisOffres";
+import { useT } from "@/i18n/FournisseurLangue";
 
 /**
  * Les favoris : entreprises (flamme) ou offres (signet), au choix du même
@@ -20,11 +21,12 @@ export function FavorisClient() {
   const parametres = useSearchParams();
   const router = useRouter();
   const vue: VueListe = parametres.get("vue") === "offres" ? "offres" : "entreprises";
+  const t = useT();
   const changer = (v: VueListe) => router.replace(v === "offres" ? "/favorites?vue=offres" : "/favorites", { scroll: false });
   return (
     <>
       <div style={{ marginBottom: 20 }}>
-        <SelecteurVue vue={vue} onChange={changer} label="Vos favoris" />
+        <SelecteurVue vue={vue} onChange={changer} label={t("vue.vosFavoris")} />
       </div>
       {vue === "offres" ? <FavorisOffres /> : <FavorisEntreprises />}
     </>
