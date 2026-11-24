@@ -78,6 +78,12 @@ describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
     expect(titrePropre("​​Exchange Engineer 80–100 %")).toBe("Exchange Engineer 80–100 %");
     expect(titrePropre("Ingénieur Ã©lectricien")).toBe("Ingénieur électricien");
     expect(titrePropre("Åland Office Manager")).toBe("Åland Office Manager");
+    expect(titrePropre("Bauführer Holzbau,, 80-100%")).toBe("Bauführer Holzbau, 80-100%");
+    expect(titrePropre("Strategy Specialist - Group Strategy (100%,")).toBe("Strategy Specialist - Group Strategy (100%)");
+    expect(titrePropre("EHS Manager - Your next role?")).toBe("EHS Manager");
+    expect(titrePropre("zukünftige Führungstalente Verkauf")).toBe("Zukünftige Führungstalente Verkauf");
+    expect(titrePropre("e-Learning Intern")).toBe("e-Learning Intern");
+    expect(titrePropre("Senior Executive Assistant 80% - 100%, Geneva,")).toBe("Senior Executive Assistant 80% - 100%, Geneva");
     expect(titrePropre("Project Leader R&amp;amp;D")).toBe("Project Leader R&D");
     expect(titrePropre("Door Attendant 100% (w/m/i)")).toBe("Door Attendant 100%");
     expect(titrePropre("(Senior) Account Executive Health & Benefits (f/m/d, 80-100%)")).toBe("(Senior) Account Executive Health & Benefits (80-100%)");

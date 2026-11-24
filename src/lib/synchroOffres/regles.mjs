@@ -80,7 +80,10 @@ function titrePropre(t) {
   // (« R&amp;amp;D » chez Mettler-Toledo).
   t = entites(entites(t)).replace(/\s*<br\s*\/?>\s*/gi, " ").replace(/<[^>]+>/g, "").replace(/[\s,;]+$/, "");
   if (t === t.toUpperCase() && /[A-Z]{4}/.test(t)) {
-    t = t.toLowerCase().replace(/^\p{L}/u, c => c.toUpperCase());
+    // Les sigles courts restent en capitales (« CDS », « HR », « IT ») ; pas
+    // les petits mots (« DE », « ET », « UND »).
+    const PETITS = /^(de|du|la|le|les|des|et|en|au|aux|und|der|die|das|für|im|in|of|and|the|for|to|or|ou|à)$/i;
+    t = t.split(/(\s+)/).map(m => /^\p{Lu}{2,3}$/u.test(m) && !PETITS.test(m) ? m : m.toLowerCase()).join("").replace(/^\p{L}/u, c => c.toUpperCase());
     t = t.replace(/(\s[-–]\s+)([^()]+)$/u, (_, sep, lieux) => sep + lieux.replace(/(^|\/)\s*(\p{L})/gu, (m, a, c) => a + c.toUpperCase()));
   }
   return t
@@ -114,8 +117,17 @@ function titrePropre(t) {
     .replace(/\s*[-–]\s*(switzerland|schweiz|suisse|svizzera)\s*$/i, "")
     // Raison sociale en fin de titre : « … - Eberhard Bau AG » (la fiche dit déjà qui recrute).
     .replace(/\s+[-–]\s+[^-–()]{2,50}\s(AG|SA|GmbH|Sàrl|Ltd|S\.A\.|SE)\s*$/, "")
+    // Accroche en fin de titre : « EHS Manager - Your next role? ».
+    .replace(/\s*[-–]\s*(your next (role|step|challenge|career move)|dein nächster schritt|ton prochain défi)\s*\??\s*$/i, "")
+    // « Bauführer Holzbau,, 80-100% » ; virgule finale (« … Geneva, »).
+    .replace(/,{2,}/g, ",").replace(/[\s,;]+$/, "")
     .replace(/\s+([,.)])/g, "$1").replace(/\(\s*\)/g, "").replace(/\s{2,}/g, " ")
-    .replace(/[\s.]*[-–|:]?\s*$/, "").replace(/%\.$/, "%").trim();
+    .replace(/[\s.]*[-–|:]?\s*$/, "").replace(/%\.$/, "%").trim()
+    // Parenthèse ouverte jamais refermée (« Group Strategy (100% ») : refermée.
+    .replace(/^(.*\([^()]*)$/, "$1)")
+    // Minuscule en tête (« zukünftige Führungstalente ») : majuscule, sauf
+    // les mots qui s'écrivent ainsi (« e-Learning », « iOS »).
+    .replace(/^(\p{Ll})(?![-A-Z])/u, c => c.toUpperCase());
 }
 // Suisse : nom du pays dans les langues usuelles, ou une ville suisse connue.
 // Mots entiers seulement : « Bern » ne doit pas prendre « Bernalillo », ni
