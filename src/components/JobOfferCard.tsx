@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, MapPin, ExternalLink, ChevronRight } from "lucide-react";
 import { trackJobApplyClick } from "@/lib/actions/analytics";
@@ -86,8 +86,18 @@ function Badge({ label, color }: { label: string; color: string }) {
  * d'Explorer). L'aperçu est le même partout : on lit l'offre chez Workie,
  * puis « En savoir plus » mène au site de l'employeur.
  */
-export function JobOfferCard({ job, companyName, companyId, ligne = false, declencheur }: { job: Job; companyName: string; companyId: string; ligne?: boolean; declencheur?: (ouvrir: () => void) => React.ReactNode }) {
-  const [open, setOpen] = useState(false);
+export function JobOfferCard({ job, companyName, companyId, ligne = false, declencheur, ouvert, onFermer }: {
+  job: Job; companyName: string; companyId: string; ligne?: boolean;
+  declencheur?: (ouvrir: () => void) => React.ReactNode;
+  /** Mode contrôlé (swipe) : l'appelant décide de l'ouverture, et est prévenu de la fermeture. */
+  ouvert?: boolean; onFermer?: () => void;
+}) {
+  const [ouvertInterne, setOuvertInterne] = useState(false);
+  const controle = ouvert !== undefined;
+  const open = controle ? ouvert : ouvertInterne;
+  const setOpen = useCallback((v: boolean) => {
+    if (controle) { if (!v) onFermer?.(); } else setOuvertInterne(v);
+  }, [controle, onFermer]);
   const taux = libelleTaux(job.taux_min, job.taux_max);
   // Le clic sur « Postuler » compte pour l'entreprise (statistiques) et pour le
   // classement (une fois par compte). Rien n'est attendu : le site s'ouvre aussitôt.
@@ -101,7 +111,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, setOpen]);
   useVerrouDefilement(open);
 
   const [mounted, setMounted] = useState(false);

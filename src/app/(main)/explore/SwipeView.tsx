@@ -2,11 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-// Une tete de mort et un eclair pour noter un employeur : le registre est
-// celui du jeu video, pas d'un service ou les entreprises sont aussi
-// clientes. Les fleches de tendance disent la meme chose, et disent en plus
-// dans quel sens le score bouge.
-import { MapPin, Users, TrendingUp, TrendingDown, X, Flame, Info, ExternalLink } from "lucide-react";
+import { MapPin, Users, X, Flame, Info, ExternalLink } from "lucide-react";
 import { toggleFavorite } from "@/lib/actions/favorites";
 import { fetchSwipePage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
@@ -17,9 +13,9 @@ import { ajouterFavoriInvite, idsFavorisInvite } from "@/lib/favorisInvite";
 import { trackAdImpression, trackAdClick } from "@/lib/actions/ads";
 import type { PublicAdCampaign } from "@/lib/actions/ads";
 import { rafraichirFiches } from "@/lib/rafraichirFiches";
+import { PileSwipe, TamponSwipe, type Direction } from "@/components/swipe/PileSwipe";
 import { urlFiche } from "@/lib/urlFiche";
 
-const SWIPE_THRESHOLD = 90;
 const PREFETCH_AHEAD = 25;
 const AD_SESSION_KEY = "workie_swipe_ad_shown";
 const STATE_TTL_MS = 30 * 60 * 1000; // 30 minutes
@@ -103,8 +99,6 @@ export function SwipeView({
   // Sans compte, les favoris gardés dans le navigateur allument aussi la flamme.
   const [favIds, setFavIds] = useState<Set<string>>(() => new Set([...initialFavIds, ...(isLoggedIn ? [] : idsFavorisInvite())]));
   const [flameIds, setFlameIds] = useState<Set<string>>(() => new Set([...initialFlameIds, ...(isLoggedIn ? [] : idsFavorisInvite())]));
-  // Initialisé depuis le serveur, et non vide : sans cela le bouton oubliait
-  const [gone, setGone] = useState<"left" | "right" | null>(null);
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
 
 
@@ -118,23 +112,8 @@ export function SwipeView({
   // Track all companies seen/acted on this session to avoid re-showing them in new batches
   const actedIds = useRef<Set<string>>(new Set([...initialFavIds, ...initialFlameIds]));
 
-  const dragStart = useRef<{ x: number; y: number } | null>(null);
-  const [drag, setDrag] = useState(0);
-  // Vrai pendant l'image où la carte de devant reprend sa position de repos
-  // après un swipe. Voir programmerAvance.
-  const [sautSansAnimation, setSautSansAnimation] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  // Mirror mutable values in refs so touch event closures don't go stale
-  const goneRef = useRef(gone);
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const advanceRef = useRef<(dir: "left" | "right") => void>(() => {});
-  const currentRef = useRef<typeof companies[0] | undefined>(undefined);
-  // Verrou de transition et minuteurs en cours. Les seconds n'étaient jamais
-  // annulés : un swipe suivi d'une navigation laissait un setState s'exécuter
-  // sur un composant démonté.
-  const transitionRef = useRef(false);
-  const minuteursRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Le geste (glisser, lancer, relève sans flash, verrou contre les doubles
+  // swipes) est dans PileSwipe, commun à toutes les piles. Ici : le paquet.
 
   const fetchingRef = useRef(false);
   // Départ à un offset aléatoire pour varier le pool plutôt que de resservir
@@ -268,27 +247,11 @@ export function SwipeView({
     setExhausted(false);
     setCompanies([]);
     setIndex(0);
-    setGone(null);
-    transitionRef.current = false;
-    setDrag(0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deckEmpty]);
   /* eslint-enable react-hooks/set-state-in-effect, react-hooks/immutability */
 
-  // Deux images d'attente : la première applique le transform de repos sans
-  // transition, la seconde rétablit la transition pour les gestes suivants.
-  // Une seule ne suffit pas, le navigateur n'ayant pas encore peint.
-  useEffect(() => {
-    if (!sautSansAnimation) return;
-    let second = 0;
-    const premier = requestAnimationFrame(() => {
-      second = requestAnimationFrame(() => setSautSansAnimation(false));
-    });
-    return () => { cancelAnimationFrame(premier); cancelAnimationFrame(second); };
-  }, [sautSansAnimation]);
-
   const next = companies[index + 1];
-  const totalSeen = index;
 
   const showToast = (msg: string, color: string) => {
     setToast({ msg, color });
@@ -299,35 +262,13 @@ export function SwipeView({
 
   const markActed = (id: string) => actedIds.current.add(id);
 
-  /** Fait glisser la carte puis passe à la suivante, en relâchant le verrou. */
-  const programmerAvance = useCallback(() => {
-    const t = setTimeout(() => {
-      setIndex(i => i + 1);
-      setGone(null);
-      setDrag(0);
-      // La carte de devant est un seul nœud du DOM, réutilisé d'une carte à
-      // l'autre. À cet instant il porte encore le transform de celle qui vient
-      // de partir, translateX(±650px) et sa rotation. Lui rendre sa position
-      // de repos avec la transition active revenait à rejouer le swipe à
-      // l'envers : la carte suivante rentrait en glissant depuis le bord au
-      // lieu de simplement prendre la place laissée libre.
-      //
-      // On coupe donc la transition le temps de la relève. Le saut est
-      // invisible puisque la carte qui monte occupe déjà cette position.
-      setSautSansAnimation(true);
-      transitionRef.current = false;
-    }, 280);
-    minuteursRef.current.push(t);
-  }, []);
-
   // Instantané courant, relu au démontage. L'enregistrement ne se déclenchait
   // que sur changement d'index : quitter la vue sans swiper, ou juste après un
   // swipe, laissait la sauvegarde en retard d'une carte.
   const instantaneRef = useRef<{ deck: SwipeItem[]; index: number } | null>(null);
+  useEffect(() => { instantaneRef.current = { deck: companies, index }; });
 
   useEffect(() => () => {
-    minuteursRef.current.forEach(clearTimeout);
-    minuteursRef.current = [];
     const inst = instantaneRef.current;
     if (!inst?.deck.length) return;
     try {
@@ -342,35 +283,22 @@ export function SwipeView({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const advance = useCallback((dir: "left" | "right") => {
-    // Verrou synchrone. `gone` est un état React : entre l'appel et le rendu
-    // suivant il vaut encore null dans cette closure, donc deux swipes
-    // rapprochés franchissaient tous les deux le garde-fou, programmaient deux
-    // minuteurs et incrémentaient l'index deux fois — une carte sautée à chaque
-    // fois, et un « enregistré » attribué à la mauvaise entreprise. Un ref est
-    // écrit immédiatement, avant tout rendu.
-    if (!current || gone || transitionRef.current) return;
-    transitionRef.current = true;
-
-    // Ad card: swipe freely (no login gate), track click on right swipe
-    if (isAd(current)) {
+  /** Ce que veut dire le geste, pour une entreprise ou une publicité. */
+  const decider = useCallback((item: SwipeItem, dir: Direction) => {
+    if (isAd(item)) {
       sessionStorage.setItem(AD_SESSION_KEY, "1");
       if (dir === "right") {
-        trackAdClick(current.campaign.id);
-        window.open(current.campaign.cta_url, "_blank", "noopener,noreferrer");
+        trackAdClick(item.campaign.id);
+        window.open(item.campaign.cta_url, "_blank", "noopener,noreferrer");
       }
-      setGone(dir);
-      programmerAvance();
       return;
     }
-
     // Plus de limite pour les visiteurs : le swipe est ouvert à tous. Sans
     // compte, le favori est gardé dans le navigateur et rejoindra le compte à
     // l'inscription.
-    markActed(current.id);
-    setGone(dir);
+    markActed(item.id);
     if (dir === "right") {
-      const id = (current as Company).id;
+      const id = item.id;
       setFavIds(prev => { const n = new Set(prev); n.add(id); return n; });
       setFlameIds(prev => { const n = new Set(prev); n.add(id); return n; });
       // Avec compte : toggleFavorite pose aussi la flamme. Un favori déjà
@@ -381,323 +309,88 @@ export function SwipeView({
     } else {
       showToast("Passé", "#ef4444");
     }
-    programmerAvance();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, gone, isLoggedIn, favIds]);
+  }, [isLoggedIn, favIds]);
 
-  // Ces quatre références servent à retrouver la dernière valeur connue depuis
-  // un minuteur, un gestionnaire de touche ou le démontage. Elles étaient
-  // écrites pendant le rendu, ce que React interdit : une ref n'est pas une
-  // valeur d'affichage, et rien ne garantit que le rendu en cours sera
-  // conservé — React peut l'abandonner, laissant la ref en avance sur ce qui
-  // est affiché.
-  //
-  // Écrites après le rendu, elles portent exactement la valeur affichée. Le
-  // comportement ne change pas : elles ne sont jamais lues pendant le rendu,
-  // seulement dans des rappels qui surviennent après.
-  useEffect(() => {
-    goneRef.current = gone;
-    currentRef.current = current;
-    instantaneRef.current = { deck: companies, index };
-    advanceRef.current = advance;
-  });
+  const avancer = useCallback(() => setIndex(i => i + 1), []);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") advance("right");
-      else if (e.key === "ArrowLeft") advance("left");
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [advance]);
-
-  // Native touch handlers — React touch events are passive by default on iOS,
-  // meaning e.preventDefault() is ignored and the browser hijacks the gesture
-  // as a scroll. We attach manually with { passive: false } to fix this.
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el) return;
-
-    // "h" = horizontal, "v" = vertical, null = undecided
-    let directionLock: "h" | "v" | null = null;
-
-    const onTouchStart = (e: TouchEvent) => {
-      if (goneRef.current) return;
-      const t = e.touches[0];
-      dragStart.current = { x: t.clientX, y: t.clientY };
-      directionLock = null;
-      setIsDragging(true);
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (!dragStart.current || goneRef.current) return;
-      const t = e.touches[0];
-      const dx = t.clientX - dragStart.current.x;
-      const dy = t.clientY - dragStart.current.y;
-
-      // Lock direction after 5px of movement — never re-evaluate mid-gesture
-      if (directionLock === null && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
-        directionLock = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
-      }
-
-      // Vertical gesture: let the browser scroll, don't touch it
-      if (directionLock === "v") return;
-
-      // Horizontal gesture: take over and prevent page scroll
-      if (directionLock === "h") {
-        e.preventDefault();
-        setDrag(dx * 0.92);
-      }
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      if (!dragStart.current) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - dragStart.current.x;
-      const dy = t.clientY - dragStart.current.y;
-      dragStart.current = null;
-      setIsDragging(false);
-      if (Math.abs(dx) < 12 && Math.abs(dy) < 12) {
-        // If tap landed on a button, let the button handle it
-        const target = e.target as HTMLElement;
-        if (target.closest("button")) { setDrag(0); return; }
-        const c = currentRef.current;
-        if (c && isAd(c)) {
-          trackAdClick(c.campaign.id);
-          window.open(c.campaign.cta_url, "_blank", "noopener,noreferrer");
-        } else if (c && !isAd(c)) {
-          router.push(urlFiche(c));
-        }
-        setDrag(0);
-        return;
-      }
-      if (dx * 0.92 > SWIPE_THRESHOLD) advanceRef.current("right");
-      else if (dx * 0.92 < -SWIPE_THRESHOLD) advanceRef.current("left");
-      else setDrag(0);
-    };
-
-    // Android Chrome fires a synthetic click ~300ms after touchend.
-    // We block it on the card to prevent double-navigation on tap.
-    // Exception: let button clicks through so skull/boost/info/flame work.
-    const onClickCapture = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest("button")) return;
-      if (!dragStart.current) e.stopPropagation();
-    };
-
-    const onTouchCancel = () => {
-      dragStart.current = null;
-      setIsDragging(false);
-      setDrag(0);
-    };
-
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
-    el.addEventListener("touchend", onTouchEnd, { passive: true });
-    el.addEventListener("touchcancel", onTouchCancel, { passive: true });
-    el.addEventListener("click", onClickCapture, { capture: true });
-    return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchmove", onTouchMove);
-      el.removeEventListener("touchend", onTouchEnd);
-      el.removeEventListener("touchcancel", onTouchCancel);
-      el.removeEventListener("click", onClickCapture, { capture: true });
-    };
-  // Re-attach when card changes (new company) so currentRef is always fresh.
-  // Also re-attach when companies first load (index stays 0 but cardRef was null on mount).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, companies.length > 0]);
-
-  // Desktop mouse handlers (pointer events work fine without passive concern)
-  const onMouseDown = (e: React.MouseEvent) => {
-    if (gone) return;
-    dragStart.current = { x: e.clientX, y: e.clientY };
-    setIsDragging(true);
-  };
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!dragStart.current || gone) return;
-    setDrag((e.clientX - dragStart.current.x) * 0.92);
-  };
-  const onMouseUp = (e: React.MouseEvent) => {
-    if (!dragStart.current) return;
-    const dx = (e.clientX - dragStart.current.x) * 0.92;
-    const dy = e.clientY - dragStart.current.y;
-    dragStart.current = null;
-    setIsDragging(false);
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
-      const c = currentRef.current;
-      if (c && isAd(c)) {
-        trackAdClick(c.campaign.id);
-        window.open(c.campaign.cta_url, "_blank", "noopener,noreferrer");
-      } else if (c && !isAd(c)) {
-        router.push(urlFiche(c));
-      }
-      setDrag(0);
-      return;
-    }
-    if (dx > SWIPE_THRESHOLD) advance("right");
-    else if (dx < -SWIPE_THRESHOLD) advance("left");
-    else setDrag(0);
-  };
+  /** Un toucher sur la carte : la fiche, ou le site de l'annonceur. */
+  const ouvrir = useCallback((item: SwipeItem) => {
+    if (isAd(item)) {
+      trackAdClick(item.campaign.id);
+      window.open(item.campaign.cta_url, "_blank", "noopener,noreferrer");
+    } else router.push(urlFiche(item));
+  }, [router]);
 
   if (!current) return null;
 
-  const rotate = drag / 14;
-  const overlayOpacity = Math.min(Math.abs(drag) / SWIPE_THRESHOLD, 1);
-  const isRight = drag > 20;
-  const isLeft = drag < -20;
-
   return (
-    <div className="swipe-container" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, paddingTop: "clamp(8px, 3vh, 24px)" }}>
-      {/* Card stack */}
-      <div style={{ position: "relative", width: "min(420px, 96vw)", height: "clamp(300px, calc(100svh - 340px), 490px)", touchAction: "pan-y" }}>
-        {/* Toast — top of card, smooth slide-in */}
-        {toast && (
-          <div key={toast.msg} style={{
-            position: "absolute", top: 20, left: "50%",
-            transform: "translateX(-50%)",
-            background: toast.color, color: "#fff", fontWeight: 800, fontSize: 15,
-            padding: "9px 26px", borderRadius: 50, zIndex: 10,
-            boxShadow: `0 6px 24px ${toast.color}88`,
-            animation: "toastSlide 1.8s cubic-bezier(0.34,1.56,0.64,1) forwards",
-            whiteSpace: "nowrap", pointerEvents: "none",
-          }}>
-            {toast.msg}
+    <PileSwipe<SwipeItem>
+      courant={current}
+      suivant={next}
+      cle={item => isAd(item) ? `pub-${item.campaign.id}` : item.id}
+      onDecision={decider}
+      onAvance={avancer}
+      onTouche={ouvrir}
+      toast={toast}
+      rendu={(item, r) => isAd(item)
+        ? <AdSwipeCard campaign={item.campaign} overlayDir={r.direction} overlayOpacity={r.intensite} />
+        : <SwipeCard company={item} flameIds={flameIds} overlayDir={r.direction} overlayOpacity={r.intensite} />}
+      boutons={(agir, occupe) => (
+        <>
+          {/* Les trois boutons ne bougent pas pendant qu'une carte s'en va :
+              c'est la carte qui part, eux restent. Ils sont désactivés le
+              temps de l'animation, pour qu'un second appui n'avance pas de
+              deux cartes. */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+            <BoutonRond taille={64} couleur="239,68,68" onClick={() => agir("left")} disabled={occupe} label="Passer cette entreprise">
+              <X size={26} strokeWidth={2.5} aria-hidden="true" />
+            </BoutonRond>
+            <BoutonRond taille={48} couleur="99,102,241" teinte="#818cf8" onClick={() => !isAd(current) && router.push(urlFiche(current))} disabled={occupe || isAd(current)} label="Voir la fiche entreprise">
+              <Info size={18} strokeWidth={2} aria-hidden="true" />
+            </BoutonRond>
+            <BoutonRond taille={64} couleur="249,115,22" onClick={() => agir("right")} disabled={occupe} label="Sauvegarder cette entreprise"
+              plein={!isAd(current) && flameIds.has(current.id)}>
+              <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} aria-hidden="true" />
+            </BoutonRond>
           </div>
-        )}
-        {/* Les deux cartes vivent dans une même liste, repérées par l'entreprise.
-            Quand celle de devant s'en va, celle de derrière n'est pas recréée :
-            c'est le même élément, image déjà chargée, qui passe au premier
-            plan. Auparavant, la carte du dessous était jetée puis reconstruite
-            à l'avant ; son image se rechargeait une fraction de seconde, et l'on
-            apercevait la carte suivante à travers. */}
-        {[next, current].filter((c): c is NonNullable<typeof current> => !!c).map(item => {
-          const devant = item === current;
-          const cle = isAd(item) ? `pub-${item.campaign.id}` : item.id;
-          if (!devant) {
-            return (
-              <div key={cle} style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-                {isAd(item)
-                  ? <AdSwipeCard campaign={item.campaign} overlayDir={null} overlayOpacity={0} />
-                  : <SwipeCard company={item} flameIds={flameIds} overlayDir={null} overlayOpacity={0} />}
-              </div>
-            );
-          }
-          return (
-            <div
-              key={cle}
-              ref={cardRef}
-              style={{
-                position: "absolute", inset: 0, zIndex: 1,
-                transform: gone
-                  ? `translateX(${gone === "right" ? 650 : -650}px) rotate(${gone === "right" ? 22 : -22}deg)`
-                  : `translateX(${drag}px) rotate(${rotate}deg)`,
-                transition: isDragging || sautSansAnimation
-                  ? "none"
-                  : gone
-                    ? "transform 0.26s cubic-bezier(0.4, 0, 1, 1)"
-                    : "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                cursor: isDragging ? "grabbing" : "pointer",
-                touchAction: "pan-y",
-              }}
-              onMouseDown={onMouseDown}
-              onMouseMove={onMouseMove}
-              onMouseUp={onMouseUp}
-              onMouseLeave={e => { if (dragStart.current) onMouseUp(e as React.MouseEvent); }}
-            >
-              {isAd(item)
-                ? <AdSwipeCard campaign={item.campaign} overlayDir={isRight ? "right" : isLeft ? "left" : null} overlayOpacity={overlayOpacity} />
-                : <SwipeCard company={item} flameIds={flameIds} overlayDir={isRight ? "right" : isLeft ? "left" : null} overlayOpacity={overlayOpacity} />}
-            </div>
-          );
-        })}      </div>
+          {/* Légende, masquée sur téléphone : ce que les boutons ne disent pas
+              (on peut aussi glisser, et se servir des flèches du clavier). */}
+          <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
+            <p style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
+              Glissez la carte à droite pour sauvegarder, à gauche pour passer
+              {" "}&nbsp;·{" "}<Touche>←</Touche>{" "}<Touche>→</Touche>
+            </p>
+          </div>
+        </>
+      )}
+    />
+  );
+}
 
-      {/* Les trois boutons ne bougent pas pendant qu'une carte s'en va.
-          Ils s'eteignaient a moitie le temps de l'animation puis revenaient :
-          c'est la carte qui part, eux restent. Ils sont toujours desactives
-          pendant ce court instant, pour qu'un second appui n'avance pas de
-          deux entreprises, mais cela ne se voit plus. */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+/** Touche de clavier, dans la légende. */
+export function Touche({ children }: { children: React.ReactNode }) {
+  return <kbd style={{ fontSize: 10, padding: "1px 5px", borderRadius: 4, background: "var(--surface3)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontFamily: "monospace" }}>{children}</kbd>;
+}
 
-        <button type="button" onClick={() => advance("left")} disabled={!!gone} aria-label="Passer cette entreprise"
-          style={{
-          width: 64, height: 64, borderRadius: "50%",
-          background: "var(--surface)",
-          border: "2px solid rgba(239,68,68,0.4)",
-          color: "#ef4444", display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer",
-          boxShadow: "0 6px 24px rgba(239,68,68,0.15)",
-          transition: "all 0.18s",
-        }}
-          onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        >
-          <X size={26} strokeWidth={2.5} aria-hidden="true" />
-        </button>
-
-        <button type="button" onClick={() => !isAd(current) && current && router.push(urlFiche(current))} disabled={!!gone || isAd(current)} aria-label="Voir la fiche entreprise"
-          style={{
-          width: 48, height: 48, borderRadius: "50%",
-          background: "var(--surface)",
-          border: "2px solid rgba(99,102,241,0.45)",
-          color: "#818cf8", display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer",
-          boxShadow: "0 4px 18px rgba(99,102,241,0.15)",
-          transition: "all 0.18s",
-        }}
-          onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        >
-          <Info size={18} strokeWidth={2} aria-hidden="true" />
-        </button>
-
-        <button type="button" onClick={() => advance("right")} disabled={!!gone} aria-label="Sauvegarder cette entreprise"
-          style={{
-          width: 64, height: 64, borderRadius: "50%",
-          background: !isAd(current) && flameIds.has(current.id)
-            ? "linear-gradient(135deg, #f97316, #ea580c)"
-            : "var(--surface)",
-          border: !isAd(current) && flameIds.has(current.id) ? "2px solid rgba(249,115,22,0.8)" : "2px solid rgba(249,115,22,0.4)",
-          color: !isAd(current) && flameIds.has(current.id) ? "#fff" : "#f97316",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer",
-          boxShadow: !isAd(current) && flameIds.has(current.id) ? "0 6px 28px rgba(249,115,22,0.5)" : "0 6px 24px rgba(249,115,22,0.15)",
-          transition: "all 0.18s",
-        }}
-          onMouseEnter={e => { if (!gone) (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.1)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        >
-          <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} aria-hidden="true" />
-        </button>
-
-      </div>
-
-      {/* Legende, masquee sur telephone.
-
-          Elle nommait les cinq boutons un par un, juste sous les cinq
-          boutons, puis une phrase reexpliquait le geste : trois fois la
-          meme chose. Ne reste que ce que les boutons ne peuvent pas dire,
-          c'est-a-dire qu'on peut aussi glisser la carte et se servir des
-          fleches du clavier. */}
-      <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
-        <p style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
-          Glissez la carte à droite pour sauvegarder, à gauche pour passer
-          {" "}&nbsp;·{" "}<kbd style={{ fontSize: 10, padding: "1px 5px", borderRadius: 4, background: "var(--surface3)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontFamily: "monospace" }}>←</kbd>{" "}<kbd style={{ fontSize: 10, padding: "1px 5px", borderRadius: 4, background: "var(--surface3)", border: "1px solid var(--border2)", color: "var(--text-muted)", fontFamily: "monospace" }}>→</kbd>
-        </p>
-      </div>
-
-
-
-
-      <style>{`
-        @keyframes toastSlide {
-          0%   { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.85); }
-          18%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-          75%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-          100% { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(0.95); }
-        }
-      `}</style>
-    </div>
+/** Bouton rond sous la pile (passer, voir, garder). `couleur` : « r,g,b ». */
+export function BoutonRond({ taille, couleur, teinte, plein = false, onClick, disabled, label, children }: {
+  taille: number; couleur: string; teinte?: string; plein?: boolean;
+  onClick: () => void; disabled?: boolean; label: string; children: React.ReactNode;
+}) {
+  return (
+    <button type="button" onClick={onClick} disabled={disabled} aria-label={label} className="bouton-rond-swipe"
+      style={{
+        width: taille, height: taille, borderRadius: "50%",
+        background: plein ? `rgb(${couleur})` : "var(--surface)",
+        border: `2px solid rgba(${couleur},${plein ? 0.8 : 0.4})`,
+        color: plein ? "#fff" : (teinte ?? `rgb(${couleur})`),
+        display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+        boxShadow: `0 6px 24px rgba(${couleur},${plein ? 0.45 : 0.15})`,
+        transition: "transform 0.18s, background 0.18s, box-shadow 0.18s",
+      }}>
+      {children}
+      <style>{`.bouton-rond-swipe:not(:disabled):hover { transform: scale(1.1); }`}</style>
+    </button>
   );
 }
 
@@ -749,20 +442,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           />}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.8))" }} />
 
-        {overlayDir === "right" && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(249,115,22,${overlayOpacity * 0.35})` }}>
-            <div style={{ border: `4px solid rgba(249,115,22,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(-12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: `rgba(249,115,22,${overlayOpacity})` }}>🔥 SAVE</span>
-            </div>
-          </div>
-        )}
-        {overlayDir === "left" && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(239,68,68,${overlayOpacity * 0.35})` }}>
-            <div style={{ border: `4px solid rgba(239,68,68,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: `rgba(239,68,68,${overlayOpacity})` }}>✕ PASS</span>
-            </div>
-          </div>
-        )}
+        <TamponSwipe direction={overlayDir} intensite={overlayOpacity} droite={{ texte: "🔥 SAVE", rgb: "249,115,22" }} gauche={{ texte: "✕ PASS", rgb: "239,68,68" }} />
 
         {/* Même pastille que sur la fiche : la couleur du secteur, éclaircie pour
             le texte, en verre teinté sombre pour le fond. Posée en haut de la
@@ -830,20 +510,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.0) 20%, rgba(0,0,0,0.75))" }} />
 
         {/* Swipe overlays */}
-        {overlayDir === "right" && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(139,92,246,${overlayOpacity * 0.35})` }}>
-            <div style={{ border: `4px solid rgba(139,92,246,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(-12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: `rgba(139,92,246,${overlayOpacity})` }}>↗ VOIR</span>
-            </div>
-          </div>
-        )}
-        {overlayDir === "left" && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(239,68,68,${overlayOpacity * 0.35})` }}>
-            <div style={{ border: `4px solid rgba(239,68,68,${overlayOpacity})`, borderRadius: 16, padding: "10px 22px", transform: `rotate(12deg) scale(${0.8 + overlayOpacity * 0.2})` }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: `rgba(239,68,68,${overlayOpacity})` }}>✕ PASSER</span>
-            </div>
-          </div>
-        )}
+        <TamponSwipe direction={overlayDir} intensite={overlayOpacity} droite={{ texte: "↗ VOIR", rgb: "139,92,246" }} gauche={{ texte: "✕ PASSER", rgb: "239,68,68" }} />
 
         {/* Sponsored badge — gradient, more visible */}
         <div style={{ position: "absolute", top: 14, left: 14, background: "var(--brand)", borderRadius: 50, padding: "4px 12px", display: "flex", alignItems: "center", gap: 5 }}>

@@ -16,6 +16,7 @@ import { lireCache, ecrireCache, CLE_CONTEXTE } from "@/lib/cacheSession";
 import { useTirerPourMelanger, SEUIL_TIRAGE } from "@/lib/useTirerPourMelanger";
 import { rafraichirFiches } from "@/lib/rafraichirFiches";
 import { ListeOffresExplore } from "./ListeOffresExplore";
+import { SwipeOffres } from "./SwipeOffres";
 import { SelecteurVue } from "@/components/offres/SelecteurVue";
 
 // Guests see the first 12 companies + 6 blurred
@@ -408,7 +409,7 @@ export function ExploreClient({
   // partageable et un rechargement perdait les filtres.
   const syncUrl = useCallback((s: string, c: string, l: string, so: string, v: string, vl: string, ct: string, rq: string) => {
     const p = new URLSearchParams();
-    if (vl === "offres" && v !== "swipe") p.set("vue", "offres");
+    if (vl === "offres") p.set("vue", "offres");
     if (vl === "offres" && rq.trim()) p.set("q", rq.trim());
     if (s) p.set("sector", s);
     if (c) p.set("canton", c);
@@ -753,7 +754,27 @@ export function ExploreClient({
 
   const tirage = useTirerPourMelanger(view === "grid" && pretAAfficher, remelanger);
 
+  const selecteur = <SelecteurVue vue={vueListe} onChange={changerVueListe} />;
+
   if (view === "swipe") {
+    // Swipe des offres : mêmes filtres que la liste d'offres, même sélecteur.
+    // Le paquet repart de zéro quand un filtre change (clé).
+    if (vueListe === "offres") {
+      return (
+        <>
+          <ExploreFilters
+            sectors={secteurs}
+            cantons={CANTONS}
+            current={{ ...current, contrat: contrat || undefined }}
+            onFilter={handleFilter}
+            onClear={handleClear}
+            avant={selecteur}
+            offres
+          />
+          <SwipeOffres key={`${sector}|${canton}|${langue}|${contrat}`} filtres={{ sector, canton, langue, contrat }} />
+        </>
+      );
+    }
     return (
       <>
         <ExploreFilters
@@ -766,6 +787,7 @@ export function ExploreClient({
             else if (key === "langue") applyFilters(sector, canton, value ?? "", sort);
           }}
           onClear={() => applyFilters("", "", "", sort)}
+          avant={selecteur}
         />
         <SwipeView
           key={`${sector}-${canton}-${langue}`}
@@ -780,8 +802,6 @@ export function ExploreClient({
       </>
     );
   }
-
-  const selecteur = <SelecteurVue vue={vueListe} onChange={changerVueListe} />;
 
   if (vueListe === "offres") {
     return (
