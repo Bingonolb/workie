@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { offresSynchro } from "@/lib/ouverture";
 import { CONTRATS } from "@/lib/offres";
+import { unstable_cache } from "next/cache";
+import { analyser, motsDe } from "@/lib/rechercheOffres";
 
 /**
  * Les offres d'emploi d'Explorer, vue « Offres ».
@@ -19,6 +21,22 @@ import { CONTRATS } from "@/lib/offres";
  * Données publiques, mises en cache deux minutes.
  */
 const PAR_PAGE = 24;
+
+/**
+ * Les mots réellement présents dans les titres d'offres : la correction des
+ * fautes de frappe s'appuie sur eux (« vendeue » → « vendeuse »). Lu une fois
+ * toutes les dix minutes.
+ */
+const vocabulaire = unstable_cache(async () => {
+  const admin = createAdminClient();
+  const mots = new Set<string>();
+  for (let de = 0; de < 20000; de += 1000) {
+    const { data } = await admin.from("offres_explorer" as "job_offers").select("titre_norm").range(de, de + 999);
+    for (const r of (data ?? []) as unknown as { titre_norm: string | null }[]) for (const m of motsDe(r.titre_norm ?? "")) mots.add(m);
+    if ((data ?? []).length < 1000) break;
+  }
+  return [...mots];
+}, ["vocabulaire-offres"], { revalidate: 600, tags: ["companies"] });
 const LANGUES = new Set(["fr", "de", "en", "it"]);
 const liste = (v: string | null) => (v ?? "").split(",").map(s => s.trim()).filter(Boolean);
 
@@ -56,6 +74,17 @@ export async function GET(req: Request) {
   if (!offresSynchro) q = q.is("source", null);
   if (cantons.length) q = q.in("companies.canton", cantons);
   if (langues.length) q = q.in("langue", langues);
+  // Recherche « intelligente » (« vendeur 80% anglais ») : chaque métier
+  // cherché dans les quatre langues, taux, langue et contrat compris.
+  const saisie = (p.get("q") ?? "").slice(0, 120);
+  const recherche = saisie.trim() ? analyser(saisie, new Set(await vocabulaire())) : null;
+  if (recherche) {
+    for (const g of recherche.groupes) q = q.or(g.map(v => `titre_norm.ilike."*${v}*"`).join(","));
+    if (recherche.taux) q = q.lte("taux_min", recherche.taux).gte("taux_max", recherche.taux);
+    if (recherche.partiel) q = q.lt("taux_min", 100);
+    if (recherche.langues.length) q = q.in("langue", recherche.langues);
+    if (recherche.contrats.length) q = q.in("contract_type", recherche.contrats);
+  }
   if (sansContrat) q = q.or(["contract_type.is.null", ...(contrats.length ? [`contract_type.in.(${contrats.join(",")})`] : [])].join(","));
   else if (contrats.length) q = q.in("contract_type", contrats);
 
@@ -78,7 +107,11 @@ export async function GET(req: Request) {
   const offres: OffreExplorer[] = ((data ?? []) as unknown as (Omit<OffreExplorer, "apercu" | "entreprise"> & { companies: OffreExplorer["entreprise"] })[])
     .map(({ companies, ...o }) => ({ ...o, apercu: court(o.description ?? o.missions), entreprise: companies }));
 
-  return NextResponse.json({ offres, total: count ?? offres.length, parPage: PAR_PAGE }, {
+  return NextResponse.json({
+    offres, total: count ?? offres.length, parPage: PAR_PAGE,
+    // Ce que la recherche a compris, montré sous le champ.
+    recherche: recherche ? { equivalences: recherche.equivalences, compris: recherche.compris } : null,
+  }, {
     headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" },
   });
 }

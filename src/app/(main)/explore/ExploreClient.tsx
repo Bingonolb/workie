@@ -175,6 +175,8 @@ export function ExploreClient({
     setVueListe(vueListeUrl);
   }
   const [contrat, setContrat] = useState(() => parametres.get("contrat") ?? "");
+  // Recherche libre de la vue Offres (« vendeur 80% anglais »).
+  const [rechercheOffres, setRechercheOffres] = useState(() => parametres.get("q") ?? "");
 
   // null = auth not yet resolved (loading). Avoids flash of cadenas for logged-in users.
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
@@ -426,9 +428,10 @@ export function ExploreClient({
   // L'ancienne version réécrivait « /explore » ou « /explore?view=swipe » en
   // dur, ce qui effaçait sector/canton/sort : un lien filtré n'était pas
   // partageable et un rechargement perdait les filtres.
-  const syncUrl = useCallback((s: string, c: string, l: string, so: string, v: string, vl: string, ct: string) => {
+  const syncUrl = useCallback((s: string, c: string, l: string, so: string, v: string, vl: string, ct: string, rq: string) => {
     const p = new URLSearchParams();
     if (vl === "offres" && v !== "swipe") p.set("vue", "offres");
+    if (vl === "offres" && rq.trim()) p.set("q", rq.trim());
     if (s) p.set("sector", s);
     if (c) p.set("canton", c);
     if (l) p.set("langue", l);
@@ -447,8 +450,8 @@ export function ExploreClient({
   const didMountRef = useRef(false);
   useEffect(() => {
     if (!didMountRef.current) { didMountRef.current = true; return; }
-    syncUrl(sector, canton, langue, sort, view, vueListe, contrat);
-  }, [sector, canton, langue, sort, view, vueListe, contrat, syncUrl]);
+    syncUrl(sector, canton, langue, sort, view, vueListe, contrat, rechercheOffres);
+  }, [sector, canton, langue, sort, view, vueListe, contrat, rechercheOffres, syncUrl]);
 
   // La vue swipe occupe exactement l'écran et ne défile pas.
   //
@@ -561,7 +564,8 @@ export function ExploreClient({
 
   const handleClear = useCallback(() => {
     setContrat("");
-    if (vueListe === "offres") { setSector(""); setCanton(""); setLangue(""); return; }
+    if (vueListe === "offres") {
+      setRechercheOffres(""); setSector(""); setCanton(""); setLangue(""); return; }
     applyFilters("", "", "", "recent");
   }, [applyFilters, vueListe]);
 
@@ -813,7 +817,7 @@ export function ExploreClient({
           avant={selecteur}
           offres
         />
-        <ListeOffresExplore filtres={{ sector, canton, langue, contrat }} />
+        <ListeOffresExplore filtres={{ sector, canton, langue, contrat }} q={rechercheOffres} onQ={setRechercheOffres} />
       </>
     );
   }
