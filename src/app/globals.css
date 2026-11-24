@@ -330,6 +330,12 @@ main, .page-main, .page-main-sm, .page-main-md {
   width: min(480px, 92vw);
   /* Filet de sécurité si le bouton se retrouve un jour plus à droite */
   max-width: calc(100vw - 24px);
+  /* Jamais plus haut que l'écran : sur le swipe, la page ne défile pas, et la
+     fin du panneau (langue, contrat) devenait inatteignable. Il défile seul. */
+  max-height: calc(100vh - 200px);
+  max-height: calc(100dvh - 200px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 /* Filtres sur téléphone : feuille plein écran, rendue hors de la page.
    Trois étages : en-tête et pied immobiles, une seule zone qui défile. */
