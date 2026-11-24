@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
 
 /**
  * Favoris d'un visiteur sans compte, gardés dans le navigateur.
@@ -31,6 +31,9 @@ async function charger(s: ReturnType<typeof stockage>) {
 }
 
 describe("favoris de visiteur", () => {
+  // Premier chargement (compilation) fait à part : en parallèle avec toute la
+  // suite, il pouvait dépasser les 5 s du premier test.
+  beforeAll(async () => { await import("@/lib/favorisInvite"); }, 60_000);
   beforeEach(() => { vi.unstubAllGlobals(); });
 
   it("ajoute, bascule et retire, sans doublon, le plus récent en tête", async () => {

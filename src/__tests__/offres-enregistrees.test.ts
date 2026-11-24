@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
 
 /**
  * Offres enregistrées (signet) : cloisonnement et robustesse.
@@ -43,6 +43,9 @@ function repondre(statut: number, corps: unknown) {
 }
 
 describe("signets : magasin du navigateur", () => {
+  // Premier chargement (compilation) fait à part : quand toute la suite tourne
+  // en parallèle, il dépassait les 5 s du premier test, qui échouait au hasard.
+  beforeAll(async () => { await import("@/lib/offresEnregistrees"); }, 60_000);
   beforeEach(() => {
     cookie = ""; stockage.clear(); stockageEnPanne = false;
     for (const f of Object.values(actions)) f.mockReset();
