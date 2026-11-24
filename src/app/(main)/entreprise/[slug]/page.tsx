@@ -29,7 +29,7 @@ import { ActionsFiche } from "@/components/company/Interactions";
 import { BoutonRetour } from "@/components/company/BoutonRetour";
 
 import { SECTOR_COLORS, lieuAffiche } from "@/lib/types";
-import { languesDeTravail, abregeLangue } from "@/lib/langues";
+import { languesDeTravail, abregeLangue, nomLangue } from "@/lib/langues";
 import type { Review } from "@/lib/types";
 // Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
 // d'avis et les tests de colonnes s'appuient sur la même liste.
@@ -366,26 +366,37 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 manquante alors qu'aucune n'a jamais existé). */}
             {/* auto-fit : le nombre de tuiles varie selon les données réellement
                 disponibles (1 à 4), la grille s'ajuste au lieu d'être figée à 3. */}
-            <div className="company-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, marginBottom: 32 }}>
-              {([
-                { icon: <MapPin size={18} color="#8b5cf6" aria-hidden="true" />, value: lieuAffiche(company.city, company.canton), label: "Localisation" },
-                company.employee_range
-                  ? { icon: <Users size={18} color="#f97316" aria-hidden="true" />, value: company.employee_range, label: "Employés" }
-                  : null,
+            {/* L'essentiel, en une carte de lignes. Les tuiles colorées
+                donnaient trois petits encarts à lire séparément, des icônes de
+                trois couleurs et des abréviations (« ALL · ANG ») qu'il faut
+                décoder. Ici : une question à gauche, la réponse en toutes
+                lettres, des icônes neutres. Lisible d'un coup d'œil, à tout âge. */}
+            {(() => {
+              const lieu = lieuAffiche(company.city, company.canton);
+              const lignes = ([
+                { Icone: MapPin, label: "Où", value: lieu === "Multi-sites" || company.canton === "CH" ? "Dans toute la Suisse" : lieu },
+                company.employee_range ? { Icone: Users, label: "Taille", value: `${company.employee_range} employés` } : null,
                 // Les langues remplacent la note : on ne postule pas dans une
                 // langue qu'on ne parle pas, et c'est la première chose qu'un
                 // candidat romand veut savoir d'une entreprise alémanique.
-                langues.length > 0
-                  ? { icon: <Languages size={18} color="#06b6d4" aria-hidden="true" />, value: langues.map(abregeLangue).join(" · "), label: "Langues de travail" }
-                  : null,
-              ].filter(Boolean) as { icon: React.ReactNode; value: string; label: string }[]).map(({ icon, value, label }) => (
-                <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px" }}>
-                  <div style={{ marginBottom: 8 }}>{icon}</div>
-                  <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 2 }}>{value}</p>
-                  <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>{label}</p>
-                </div>
-              ))}
-            </div>
+                langues.length > 0 ? { Icone: Languages, label: "Langues de travail", value: langues.map(nomLangue).join(", ") } : null,
+              ].filter(Boolean) as { Icone: typeof MapPin; label: string; value: string }[]);
+              return (
+                <dl className="fiche-essentiel" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, margin: "0 0 32px", padding: "4px 20px" }}>
+                  {lignes.map(({ Icone, label, value }, i) => (
+                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 0", borderTop: i ? "1px solid var(--border)" : "none" }}>
+                      <span aria-hidden="true" style={{ flex: "none", width: 40, height: 40, borderRadius: 12, background: "var(--surface2)", display: "grid", placeItems: "center", color: "var(--text-sub)" }}>
+                        <Icone size={19} strokeWidth={1.8} />
+                      </span>
+                      <div style={{ minWidth: 0 }}>
+                        <dt style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.3 }}>{label}</dt>
+                        <dd style={{ margin: "2px 0 0", fontSize: 16.5, fontWeight: 650, color: "var(--text)", lineHeight: 1.35 }}>{value}</dd>
+                      </div>
+                    </div>
+                  ))}
+                </dl>
+              );
+            })()}
 
             {/* Les entreprises voisines, en liste et par groupes.
                 En grille, quatre vignettes se regardent en même temps et

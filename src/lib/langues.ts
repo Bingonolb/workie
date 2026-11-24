@@ -74,6 +74,12 @@ export function languesDeTravail(
  */
 const ABREGE_FR: Record<string, string> = { FR: "FR", DE: "ALL", EN: "ANG", IT: "IT" };
 
+/** Nom complet, pour les endroits où l'on a la place : lisible par tous. */
+const NOM_FR: Record<string, string> = { FR: "Français", DE: "Allemand", EN: "Anglais", IT: "Italien" };
+export function nomLangue(code: string): string {
+  return NOM_FR[code.toUpperCase()] ?? code;
+}
+
 export function abregeLangue(code: string): string {
   return ABREGE_FR[code.toUpperCase()] ?? code;
 }
