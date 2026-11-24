@@ -155,7 +155,11 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
         /* La règle globale des champs (bordure et halo violets au focus) dessinait
            un second cadre à l'intérieur de la boîte : c'est la boîte qui s'allume. */
         .recherche-offres-champ input, .recherche-offres-champ input:focus, .recherche-offres-champ input:focus-visible {
-          border: 0 !important; box-shadow: none !important; outline: none !important; padding: 0; border-radius: 0; -webkit-appearance: none; appearance: none; }
+          border: 0 !important; box-shadow: none !important; outline: none !important; padding: 0; border-radius: 0; -webkit-appearance: none; appearance: none;
+          /* En mode sombre, le navigateur peignait son propre fond de champ :
+             un second rectangle, plus clair, dans la boîte. */
+          background: transparent !important; background-color: transparent !important; }
+        .recherche-offres-champ input:-webkit-autofill { -webkit-box-shadow: 0 0 0 40px var(--surface) inset !important; -webkit-text-fill-color: var(--text); }
         .recherche-offres-champ button { flex: none; width: 40px; height: 40px; border-radius: 10px; border: 0; background: var(--surface2); color: var(--text-muted); display: grid; place-items: center; cursor: pointer; }
         .recherche-offres-compris { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 10px 2px 0; font-size: 13.5px; color: var(--text-muted); line-height: 1.45; }
       `}</style>;
@@ -167,7 +171,8 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
       <div className="recherche-offres-champ">
         <Search size={18} aria-hidden="true" />
         <input
-          type="search"
+          type="text"
+          inputMode="search"
           value={saisie}
           onChange={e => setSaisie(e.target.value)}
           placeholder="Rechercher un poste"
