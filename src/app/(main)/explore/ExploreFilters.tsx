@@ -181,7 +181,8 @@ export function ExploreFilters({
               <>
                 <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Contrat</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {["CDI", "CDD", "Stage", "Apprentissage", "Temporaire"].map(c => {
+                  {/* « Non précisé » : l'employeur n'a pas indiqué le contrat (un tiers des offres). */}
+                  {["CDI", "CDD", "Stage", "Apprentissage", "Temporaire", "Non précisé"].map(c => {
                     const active = contratsActifs.includes(c);
                     return (
                       <button key={c} onClick={() => basculer("contrat", contratsActifs, c)}

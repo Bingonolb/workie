@@ -42,7 +42,11 @@ export async function GET(req: Request) {
   const secteurs = liste(p.get("sector")).filter(s => enLigne.includes(s));
   const cantons = liste(p.get("canton")).filter(c => /^[A-Z]{2}$/.test(c));
   const langues = liste(p.get("langue")).map(l => l.toLowerCase()).filter(l => LANGUES.has(l));
-  const contrats = liste(p.get("contrat")).filter(c => (CONTRATS as readonly string[]).includes(c));
+  // « Non précisé » : l'employeur n'a pas indiqué le contrat (colonne vide).
+  const NON_PRECISE = "Non précisé";
+  const tous = liste(p.get("contrat"));
+  const sansContrat = tous.includes(NON_PRECISE);
+  const contrats = tous.filter(c => (CONTRATS as readonly string[]).includes(c));
 
   const admin = createAdminClient();
   let q = admin
@@ -52,7 +56,8 @@ export async function GET(req: Request) {
   if (!offresSynchro) q = q.is("source", null);
   if (cantons.length) q = q.in("companies.canton", cantons);
   if (langues.length) q = q.in("langue", langues);
-  if (contrats.length) q = q.in("contract_type", contrats);
+  if (sansContrat) q = q.or(["contract_type.is.null", ...(contrats.length ? [`contract_type.in.(${contrats.join(",")})`] : [])].join(","));
+  else if (contrats.length) q = q.in("contract_type", contrats);
 
   const { data, count, error } = await q
     // Vue offres_explorer : la plus récente de chaque entreprise d'abord,
