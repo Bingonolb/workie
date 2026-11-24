@@ -19,6 +19,20 @@ import { CarteOffre, StylesCartesOffre } from "@/components/offres/CarteOffre";
  * Une offre fermée depuis par l'employeur reste, grisée (« Offre clôturée »),
  * plutôt que de disparaître sans explication.
  */
+/** Carte d'attente, à la forme d'une vraie carte : en-tête entreprise, puis le poste. */
+function CarteAttente() {
+  const barre = (l: string, h = 12) => <div style={{ height: h, width: l, borderRadius: 4, background: "var(--surface3)" }} />;
+  return (
+    <div className="carte-offre" aria-hidden="true">
+      <div className="carte-offre-tete" style={{ padding: "16px 18px 14px", gap: 12 }}>
+        <div className="img-placeholder" style={{ width: 44, height: 44, borderRadius: 12, flex: "none" }} />
+        <div style={{ flex: 1, display: "grid", gap: 7 }}>{barre("45%")}{barre("30%", 10)}</div>
+      </div>
+      <div style={{ padding: "16px 18px 18px", display: "grid", gap: 10 }}>{barre("80%", 16)}{barre("95%")}{barre("60%")}</div>
+    </div>
+  );
+}
+
 export function FavorisOffres() {
   const { pret, connecte, ids } = useOffresEnregistrees();
   const [offres, setOffres] = useState<OffreAffichee[] | null>(null);
@@ -50,17 +64,21 @@ export function FavorisOffres() {
     );
   }
 
-  if (offres === null) {
+  // Pendant le chargement : autant de cartes d'attente que d'offres gardées
+  // (le nombre est connu avant leur contenu), et aucune s'il n'y en a pas.
+  // Quatre cartes grises fixes annonçaient quatre offres à qui n'en avait qu'une.
+  if (offres === null && !(pret && ids.size === 0)) {
+    if (!pret) return null;
     return (
       <><StylesCartesOffre />
-      <div className="offres-grille">
-        {Array.from({ length: 4 }, (_, i) => <div key={i} className="carte-offre img-placeholder" style={{ height: 250 }} aria-hidden="true" />)}
+      <div className="offres-grille" aria-busy="true">
+        {Array.from({ length: Math.min(ids.size, 6) }, (_, i) => <CarteAttente key={i} />)}
       </div></>
     );
   }
 
   // La liste suit les signets en direct : en retirer un retire la carte.
-  const liste = offres.filter(o => ids.has(o.id));
+  const liste = (offres ?? []).filter(o => ids.has(o.id));
 
   const bandeauVisiteur = !connecte && (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap",
