@@ -69,6 +69,10 @@ describe("titres longs de Workday", () => {
 
 describe("propreté au niveau Kellerhals (cas réels Workday)", () => {
   it("titres", () => {
+    expect(titrePropre("Door Attendant 100% (w/m/i)")).toBe("Door Attendant 100%");
+    expect(titrePropre("(Senior) Account Executive Health & Benefits (f/m/d, 80-100%)")).toBe("(Senior) Account Executive Health & Benefits (80-100%)");
+    expect(titrePropre("Tecnico elettronico turnista (m/f/ - 100%)")).toBe("Tecnico elettronico turnista (100%)");
+    expect(titrePropre("Technicien(ne) de laboratoire (H/F/N)")).toBe("Technicien(ne) de laboratoire");
     expect(titrePropre("Technicienne de chantier â Second Åuvre (d) 100%")).toBe("Technicienne de chantier – Second Œuvre (d) 100%");
     expect(titrePropre("AI Architect - BCG Platinion Zurich, Switzerland")).toBe("AI Architect - BCG Platinion");
     expect(titrePropre("Consultant, Switzerland")).toBe("Consultant");

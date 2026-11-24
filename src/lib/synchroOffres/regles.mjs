@@ -55,6 +55,10 @@ function titrePropre(t) {
     // Annonce dupliquée dans l'outil : « … - copy ».
     .replace(/\s*[-–]\s*(copy|copie|kopie)\s*$/i, "")
     .replace(/\s*\((?:[mwfhdx]\s*\/\s*){1,3}[mwfhdx]+\.?(?:iv\.?)?\/?\)|\s*\((?:all|alle)(?: genders?)?\)|\s*\(m\/w\/div\.?\)|\s*\(f\/m\/div\.?\)|\s*\(w\/m\/div\.?\)|\s*\(gn\)|\s*\(all\)/gi, "")
+    // Mentions de genre dans une parenthèse qui porte aussi autre chose :
+    // « (f/m/d, 80-100%) » → « (80-100%) », « (m/f/ - 100%) » → « (100%) »,
+    // et les variantes « w/m/i », « h/f/a », « H/F/N », « m/v/x ».
+    .replace(/\(\s*(?:[mwfhdxianv]\s*\/\s*)+[mwfhdxianv]?(?![a-z])\.?\s*\/?\s*[,\-–]?\s*/gi, "(").replace(/\s*\(\s*\)/g, "")
     .replace(/\s*[-–]\s*(bewirb dich|apply|postulez).*$/i, "")
     // Longue parenthèse de conditions en fin de titre (« - (Contract through our
     // external payroll partner…) ») : le badge de contrat le dit déjà.
@@ -109,7 +113,7 @@ function lieuEnSuisse(lieu, { cantons = false } = {}) {
 // Intertitres qui annoncent le poste lui-même, dans les langues des offres suisses.
 const TACHES = /t[âa]ches|missions?|votre r[ôo]le|le poste|vos responsabilit|aufgaben|ihre rolle|die stelle|your (role|challenge|tasks|responsibilities|mission|impact)|the role|responsibilit|what you.ll do|compiti|mansioni|das erwartet dich|das erwartet sie|dein neuer job|il tuo nuovo (lavoro|posto|impiego)|i tuoi compiti|le tue mansioni|i suoi compiti|le sue mansioni|ihr neuer job|deine neue (rolle|stelle)|votre nouveau poste|ton nouveau (poste|job)|your new (job|role)|deine herausforderungen?|ihre herausforderungen?|ce qui t.attend|ce qui vous attend|vos défis|what awaits you/i;
 // Phrase d'accroche publicitaire, qui ne dit rien du travail.
-const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil|^zur verstärkung unseres? teams?|^zur erweiterung unseres? teams?|^schliessen sie sich|^épanouissez-vous|^join [A-Z]{2,}|^de nouveaux collaborateurs|das ist unsere mission|^das sagt [^:]{3,80}(zur stelle|über die stelle)|^voici ce qu.en dit|^here.s what [^:]{3,60} says|^[«"„“]|c.est notre mission|that.s our mission|^der traum vom|^le rêve de|offers a wide range of|propose un large éventail|bietet eine vielzahl (an|von) (attraktiven )?stellen|^we partner with|^nous accompagnons nos clients|^wir begleiten unsere kunden/i;
+const ACCROCHE = /^(wir bieten|nous (vous )?offrons|we offer)|genau richtig|au bon endroit|right place|willkommen|bienvenue|welcome|dann suchen wir sie|alors rejoignez|then join us|perfekte kombination|passion|^kick.?start|^are you (ready|about|looking)|^do you (thrive|love|want)|^bist du bereit|^êtes-vous prêt|^envie de|^lust auf|^in this role, you.ll help run what runs|seeking candidates for the following position|^et si (votre|vous)|^what if you|^mettez vos (ambitions|compétences|talents)|^envie d.un nouveau défi|^lust auf eine neue|^lust,|^werde teil|^deviens? (membre|partie)|^become part of|^join (our|the) team|^rejoins?(-nous| notre)|^möchtest du teil|^zur verstärkung unseres? teams?|^zur erweiterung unseres? teams?|^schliessen sie sich|^épanouissez-vous|^join [A-Z]{2,}|^de nouveaux collaborateurs|das ist unsere mission|^das sagt [^:]{3,80}(zur stelle|über die stelle)|^voici ce qu.en dit|^here.s what [^:]{3,60} says|^[«"„“]|c.est notre mission|that.s our mission|^der traum vom|^le rêve de|offers a wide range of|propose un large éventail|bietet eine vielzahl (an|von) (attraktiven )?stellen|^we partner with|^nous accompagnons nos clients|^wir begleiten unsere kunden|^(hallo|hello|hi|salut|bonjour|grüezi|hey)\b|^(perfekt|super|genial|parfait|great|bravo)[,!.]|^erlebe den|^gemeinsam ein stockwerk|^un travail sur les marques|^wir suchen dich|^dann bewirb|^alors (une|un|rejoins|postule)|^des tâches responsabilisantes|^work-life-balance|^einfach\. nachhaltig|profitierst du von|tu profites d|you.ll benefit from|profitieren sie von|^find out more about|^n.hésite pas à|^zögere nicht|^poste basé à|^staff member \/|^du mit uns/i;
 // Profil demandé (« Real- oder Sekundarschulabschluss », « Abgeschlossene
 // kaufmännische Berufsbildung », « Sehr gute Deutschkenntnisse ») : ce que le
 // poste exige, pas ce qu'il est. Écarté en tête d'aperçu.
@@ -129,7 +133,7 @@ function presenteEntreprise(l, entreprise) {
   const commenceParLeNom = new RegExp(`^(the |die |der |das |le |la |les |l[’']|le groupe |la société )?${nomEchappe}`).test(b);
   if (nom.length >= 3 && commenceParLeNom && !/^\S+(?: \S+)? (is|ist|est) (seeking|looking|searching|hiring|à la recherche|auf der suche)/.test(b)) return true;
   if (/^(über uns|about us|à propos|qui sommes-nous|wer wir sind|who we are|en tant qu.entreprise|as a (family|global|leading|world)|als (familienunternehmen|führende|global)|faire carrière chez|working at|arbeiten bei|travailler chez)/.test(b)) return true;
-  return (b.includes(nom) && /^(at |chez |bei |join |über |about |depuis |seit |founded|fondée|gegründet)|est l[’']une? des|ist eine?r? der|is one of|est un[e]? (leader|acteur|entreprise)|ist (ein|eine) (führend|internation|unternehmen|tochter)|is a (leading|global|company)|est une entreprise/.test(b))
+  return (b.includes(nom) && /^(at |chez |bei |join |über |about |depuis |seit |founded|fondée|gegründet|ausserdem |außerdem |de plus )|est l[’']une? des|ist eine?r? der|is one of|est un[e]? (leader|acteur|entreprise|lieu|endroit)|ist (ein|eine) (führend|internation|unternehmen|tochter|ort)|is a (leading|global|company|place)|est une entreprise/.test(b))
     || /^(wir sind|nous sommes|we are|bei uns|chez nous|at our company)[ ,]/.test(b)
     // « Als eines der vier Häuser der Tschuggen Collection… », « Wir ermöglichen
     // unseren Versicherten… » : l'entreprise parle d'elle, pas du poste.
@@ -184,6 +188,7 @@ const DIT_LE_POSTE = /^(du|sie|vous|tu|you|ti|lei)\s+\p{L}+(st|en|ez|es|s|e|i)?\
  * en-têtes (« People & Transformation Lead ») ou la présentation de la maison :
  * jamais le rôle. L'aperçu les saute et prend la phrase suivante.
  */
+const INTERTITRE = /profil|qualifi|angebot|wir bieten|bringst|mitbringen|voraussetz|anforderung|kompetenz|comp[ée]tences|skills|requirements|offrons|offre|benefits|vorteile|avantages|about|über uns|à propos|qui sommes|who we are|what we|ce que nous|kontakt|contact|interess|bewerb|postuler|apply|standort|lieu|arbeitsort|pensum|taux|eintritt|entrée|start/i;
 function phrasesCommunes(offres) {
   const vues = new Map(); // clé → titres distincts
   for (const { html, titre } of offres) {
@@ -195,7 +200,13 @@ function phrasesCommunes(offres) {
       // Un intertitre (« Deine Aufgaben », « Tes tâches : ») revient dans toutes
       // les offres : c'est un repère, pas du remplissage. Il ne doit jamais
       // être écarté, sinon la rubrique des tâches devient introuvable.
-      if (p.length < 12 || DIT_LE_POSTE.test(p) || (p.split(/\s+/).length <= 6 && !/[.!]$/.test(p))) continue;
+      // Une ligne courte sans point n'est épargnée que si c'est vraiment un
+      // intertitre. Sinon elle compte : la signature d'un recruteur (« People
+      // & Transformation Lead », son nom) ou une amorce (« Gemeinsam ein
+      // Stockwerk nach oben als ») revient sous tous les titres et devenait
+      // l'aperçu de trente offres de La Poste ou de Schindler.
+      if (p.length < 12 || DIT_LE_POSTE.test(p)) continue;
+      if (p.split(/\s+/).length <= 6 && !/[.!]$/.test(p) && (TACHES.test(p) || INTERTITRE.test(p))) continue;
       const k = clePhrase(p);
       if (!vues.has(k)) vues.set(k, new Set());
       vues.get(k).add(t);
@@ -249,7 +260,11 @@ function resume(html, entreprise, titre = "", communes = null) {
     if (!out.length) {
       const phrases = phrasesDe(l);
       // … et le débris d'une phrase coupée (« 1 for its customers… »).
-      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || AVANTAGE.test(phrases[0]) || PROFIL.test(phrases[0]) || /\?[»”"]?$/.test(phrases[0].trim()) || /^\d+\s+\p{Ll}/u.test(phrases[0]))) phrases.shift();
+      // … et une ligne courte sans ponctuation en tête : le nom ou la fonction
+      // d'un recruteur (« David Miguel Martins Neves », « Head of Pension &
+      // Insurance Journeys »), un slogan. Un aperçu commence par une phrase.
+      const ligneSeule = (p) => p.split(/\s+/).length <= 6 && !/[.!:;,]$/.test(p.trim()) && !DIT_LE_POSTE.test(p);
+      while (phrases.length && (presenteEntreprise(phrases[0], entreprise) || ACCROCHE.test(phrases[0]) || AVANTAGE.test(phrases[0]) || PROFIL.test(phrases[0]) || /\?[»”"]?$/.test(phrases[0].trim()) || /^\d+\s+\p{Ll}/u.test(phrases[0]) || (phrases.length === 1 && ligneSeule(phrases[0])))) phrases.shift();
       l = phrases.join(" ");
       if (!l) continue;
     }
