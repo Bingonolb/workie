@@ -26,7 +26,8 @@ function langueDe(request: NextRequest): { lang: Langue; chemin: string; prefixe
   const choisie = request.cookies.get(COOKIE_LANGUE)?.value;
   return { lang: estOuverte(choisie) ? choisie : LANGUE_PAR_DEFAUT, chemin: pathname, prefixe: null };
 }
-const estPage = (chemin: string) => !chemin.startsWith("/api") && !chemin.startsWith("/_next") && !/.[a-z0-9]+$/i.test(chemin);
+// Un fichier a une extension (« /robots.txt », « /icon.png ») ; une page non.
+const estPage = (chemin: string) => !chemin.startsWith("/api") && !chemin.startsWith("/_next") && !/\.[a-z0-9]+$/i.test(chemin);
 
 // Lazy init — if UPSTASH env vars are missing (e.g. Vercel plan migration), rate limiting is
 // disabled rather than crashing the Edge Function for every request.

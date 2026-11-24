@@ -118,7 +118,9 @@ const orgSchema = {
 export function generateStaticParams() {
   return OUVERTES.map(lang => ({ lang }));
 }
-export const dynamicParams = false;
+// Pas de `dynamicParams = false` ici : il s'appliquerait aussi aux segments
+// en dessous, et refuserait toute fiche d'entreprise non générée d'avance.
+// Une langue fermée est refusée plus bas (notFound).
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode; params: Promise<{ lang: string }> }) {
   const { lang } = await params;
