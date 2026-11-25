@@ -1,11 +1,14 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { useState } from "react";
 import { signOut } from "@/lib/actions/auth";
 import { LogOut, X } from "lucide-react";
 import { viderCache } from "@/lib/cacheSession";
 
 export function SignOutButton() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -32,7 +35,7 @@ export function SignOutButton() {
         className="btn btn-clair btn-sm"
         style={{ width: "100%", justifyContent: "flex-start" }}
       >
-        <LogOut size={14} aria-hidden="true" /> Se déconnecter
+        <LogOut size={14} aria-hidden="true" /> {t("profil.deconnecter")}
       </button>
 
       {open && (
@@ -47,7 +50,7 @@ export function SignOutButton() {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Confirmer la déconnexion"
+            aria-label={t("profil.confirmerDeconnexion")}
             onClick={e => e.stopPropagation()}
             style={{
               background: "var(--surface)", border: "1px solid var(--border)",
@@ -63,7 +66,7 @@ export function SignOutButton() {
                 type="button"
                 onClick={() => setOpen(false)}
                 disabled={pending}
-                aria-label="Fermer"
+                aria-label={t("profil.fermer")}
                 style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}
               >
                 <X size={18} aria-hidden="true" />
@@ -71,10 +74,10 @@ export function SignOutButton() {
             </div>
 
             <p style={{ fontSize: 18, fontWeight: 900, color: "var(--text)", marginBottom: 8 }}>
-              Se déconnecter ?
+              {t("profil.deconnecterQ")}
             </p>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 24 }}>
-              Vos favoris restent dans votre compte. Vous les retrouverez en vous reconnectant.
+              {t("profil.deconnecterAide")}
             </p>
 
             <div style={{ display: "flex", gap: 10 }}>
@@ -88,7 +91,7 @@ export function SignOutButton() {
                   color: "var(--text-muted)", fontWeight: 600, fontSize: 14, cursor: "pointer",
                 }}
               >
-                Annuler
+                {t("profil.annuler")}
               </button>
               <button
                 type="button"
@@ -102,7 +105,7 @@ export function SignOutButton() {
                   opacity: pending ? 0.7 : 1,
                 }}
               >
-                {pending ? "Déconnexion…" : "Confirmer"}
+                {pending ? t("profil.deconnexion") : t("profil.confirmer")}
               </button>
             </div>
           </div>

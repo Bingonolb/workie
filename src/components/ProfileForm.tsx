@@ -1,5 +1,8 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomCanton } from "@/i18n/cantons";
+
 import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfile } from "@/lib/actions/profile";
@@ -17,6 +20,8 @@ const lbl: React.CSSProperties = {
 };
 
 export function ProfileForm({ profile, email }: { profile: Profile | null; email: string }) {
+  const t = useT();
+  const langue = useLangue();
   const [pending, startTransition] = useTransition();
   const [success, setSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -34,7 +39,7 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
         router.refresh();
         setTimeout(() => setSuccess(false), 3000);
       } catch (err) {
-        setSaveError((err as Error).message ?? "Une erreur est survenue.");
+        setSaveError((err as Error).message ?? t("profil.erreurInconnue"));
       }
     });
   };
@@ -44,16 +49,16 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
 
       <div className="profile-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div style={{ gridColumn: "1 / -1" }}>
-          <label htmlFor="full_name" style={lbl}>Nom complet</label>
+          <label htmlFor="full_name" style={lbl}>{t("profil.nomComplet")}</label>
           <input id="full_name" name="full_name" defaultValue={profile?.full_name ?? ""} placeholder="Alex Martin" style={inp}
             onFocus={e => (e.target.style.borderColor = "#8b5cf6")}
             onBlur={e => (e.target.style.borderColor = "var(--border)")}
           />
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
-          <label htmlFor="city" style={lbl}>Canton</label>
+          <label htmlFor="city" style={lbl}>{t("profil.canton")}</label>
           <select id="city" name="city" defaultValue={profile?.city ?? ""} style={{ ...inp, appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 36 }}>
-            <option value="">Choisir un canton</option>
+            <option value="">{t("profil.choisirCanton")}</option>
             {[
               ["ZH","Zürich"],["BE","Bern"],["LU","Lucerne"],["UR","Uri"],["SZ","Schwyz"],
               ["OW","Obwalden"],["NW","Nidwalden"],["GL","Glaris"],["ZG","Zoug"],
@@ -62,13 +67,13 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
               ["SG","Saint-Gall"],["GR","Grisons"],["AG","Argovie"],["TG","Thurgovie"],
               ["TI","Tessin"],["VD","Vaud"],["VS","Valais"],["NE","Neuchâtel"],
               ["GE","Genève"],["JU","Jura"],
-            ].map(([code, name]) => <option key={code} value={name}>{name} ({code})</option>)}
+            ].map(([code, name]) => <option key={code} value={name}>{nomCanton(code, langue, name)} ({code})</option>)}
           </select>
         </div>
       </div>
 
       <div style={{ fontSize: 13, color: "var(--text-muted)", padding: "10px 14px", background: "rgba(255,255,255,0.02)", borderRadius: 10, border: "1px solid var(--border)" }}>
-        Email : <span style={{ color: "var(--text)" }}>{email}</span>
+        {t("profil.email")} <span style={{ color: "var(--text)" }}>{email}</span>
       </div>
 
       {saveError && (
@@ -78,7 +83,7 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
       )}
       {success && (
         <div role="status" style={{ padding: "12px 16px", background: "rgba(16,185,129,0.12)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 10, fontSize: 14, fontWeight: 600, color: "#10b981", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-          <Check size={14} strokeWidth={2.6} aria-hidden="true" style={{ flexShrink: 0 }} /> Profil mis à jour
+          <Check size={14} strokeWidth={2.6} aria-hidden="true" style={{ flexShrink: 0 }} /> {t("profil.misAJour")}
         </div>
       )}
 
@@ -86,7 +91,7 @@ export function ProfileForm({ profile, email }: { profile: Profile | null; email
           son nom n'est pas un moment ou l'on veut tirer la main, c'est un
           geste qu'on accomplit. */}
       <button type="submit" disabled={pending} className="btn btn-encre btn-bloc">
-        {pending ? "Enregistrement..." : "Enregistrer les modifications"}
+        {pending ? t("profil.enregistrement") : t("profil.enregistrer")}
       </button>
     </form>
   );

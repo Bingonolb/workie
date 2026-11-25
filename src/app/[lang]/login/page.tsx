@@ -3,18 +3,19 @@ import Link from "next/link";
 import { signIn, signInWithGoogle } from "@/lib/actions/auth";
 import { AuthFormWorkie } from "@/components/AuthFormWorkie";
 import { Logo } from "@/components/Logo";
+import { tServeur } from "@/i18n/page";
+import type { CleMessage } from "@/i18n/traduire";
 
-export const metadata: Metadata = {
-  title: "Connexion",
-  description: "Connectez-vous pour retrouver les employeurs suisses que vous avez gardés et vos recherches récentes.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await tServeur();
+  return { title: t("auth.connexion"), description: t("auth.metaConnexion"), robots: { index: false, follow: false } };
+}
 
 /** Ce qui ramène ici après un lien d'e-mail ou une connexion Google ratés. */
-const ERREURS: Record<string, string> = {
-  oauth: "Ce lien n'est plus valide : il a expiré ou a déjà servi. Connectez-vous, ou demandez un nouveau lien.",
-  invite: "Ce lien n'est plus valide : il a expiré ou a déjà servi. Connectez-vous, ou demandez un nouveau lien.",
-  google: "La connexion avec Google n'a pas abouti. Réessayez, ou connectez-vous avec votre e-mail.",
+const ERREURS: Record<string, CleMessage> = {
+  oauth: "auth.lienInvalide",
+  invite: "auth.lienInvalide",
+  google: "auth.googleEchec",
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
@@ -22,7 +23,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   // Sans destination demandée, signIn choisit : espace entreprise ou Explorer.
   const demande = rawNext && /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "";
   const next = demande || "/explore";
-  const message = error ? ERREURS[error] : undefined;
+  const t = await tServeur();
+  const message = error && ERREURS[error] ? t(ERREURS[error]) : undefined;
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 40 }}>
@@ -30,12 +32,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       </Link>
 
       <div className="auth-card" style={{ width: "100%", maxWidth: 400, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>Connexion</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>{t("auth.connexion")}</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
-          Pas encore de compte ?{" "}
-          <Link href={next !== "/explore" ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} style={{ color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>S&apos;inscrire</Link>
+          {t("auth.pasDeCompte")}{" "}
+          <Link href={next !== "/explore" ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} style={{ color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>{t("auth.sInscrire")}</Link>
           {" · "}
-          <Link href="/forgot-password" style={{ color: "var(--text-muted)", textDecoration: "none" }}>Mot de passe oublié ?</Link>
+          <Link href="/forgot-password" style={{ color: "var(--text-muted)", textDecoration: "none" }}>{t("auth.oublie")}</Link>
         </p>
 
         {message && (

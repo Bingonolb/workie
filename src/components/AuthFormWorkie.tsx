@@ -2,6 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { CANTONS_SAISIE } from "@/lib/types";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomCanton } from "@/i18n/cantons";
 
 type ActionResult = { error?: string } | undefined;
 
@@ -22,6 +24,8 @@ export function AuthFormWorkie({
   googleAction: (formData: FormData) => Promise<void>;
   next?: string;
 }) {
+  const t = useT();
+  const langue = useLangue();
   const [state, formAction, pending] = useActionState(action, undefined);
   const [email, setEmail] = useState("");
   const [emailConfirm, setEmailConfirm] = useState("");
@@ -50,42 +54,44 @@ export function AuthFormWorkie({
             <path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.95A9 9 0 0 0 0 9c0 1.45.35 2.83.95 4.05l3.02-2.33z" />
             <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.95l3.02 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
           </svg>
-          Continuer avec Google
+          {t("auth.google")}
         </button>
       </form>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <div style={{ flex: 1, height: 1, background: "var(--border2)" }} />
-        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>ou</span>
+        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{t("auth.ou")}</span>
         <div style={{ flex: 1, height: 1, background: "var(--border2)" }} />
       </div>
 
       <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <input type="hidden" name="next" value={next} />
+        {/* La langue des messages d'erreur renvoyés par le serveur. */}
+        <input type="hidden" name="langue" value={langue} />
         {mode === "signup" && (
           <>
             <div style={{ display: "flex", gap: 10 }}>
               <div style={{ flex: 1 }}>
-                <label htmlFor="first_name" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Prénom *</label>
-                <input id="first_name" name="first_name" required placeholder="Alice" style={inp} />
+                <label htmlFor="first_name" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>{t("auth.prenom")}</label>
+                <input id="first_name" name="first_name" required placeholder={t("auth.placeholderPrenom")} style={inp} />
               </div>
               <div style={{ flex: 1 }}>
-                <label htmlFor="last_name" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Nom *</label>
-                <input id="last_name" name="last_name" required placeholder="Dupont" style={inp} />
+                <label htmlFor="last_name" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>{t("auth.nom")}</label>
+                <input id="last_name" name="last_name" required placeholder={t("auth.placeholderNom")} style={inp} />
               </div>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <div style={{ flex: 1 }}>
-                <label htmlFor="canton" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Canton *</label>
+                <label htmlFor="canton" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>{t("auth.canton")}</label>
                 <select id="canton" name="canton" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
-                  <option value="">Choisir</option>
-                  {CANTONS.map(c => <option key={c.code} value={c.code}>{c.nom}</option>)}
+                  <option value="">{t("auth.choisir")}</option>
+                  {CANTONS.map(c => <option key={c.code} value={c.code}>{nomCanton(c.code, langue, c.nom)}</option>)}
                 </select>
               </div>
               <div style={{ flex: 1 }}>
-                <label htmlFor="birth_year" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Année de naissance *</label>
+                <label htmlFor="birth_year" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>{t("auth.naissance")}</label>
                 <select id="birth_year" name="birth_year" required style={{ ...inp, appearance: "none", WebkitAppearance: "none", cursor: "pointer" }}>
-                  <option value="">Année</option>
+                  <option value="">{t("auth.annee")}</option>
                   {BIRTH_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
               </div>
@@ -93,9 +99,9 @@ export function AuthFormWorkie({
           </>
         )}
         <div>
-          <label htmlFor="email" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Email {mode === "signup" ? "*" : ""}</label>
+          <label htmlFor="email" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>{t("auth.email")} {mode === "signup" ? "*" : ""}</label>
           <input
-            id="email" type="email" name="email" required placeholder="vous@exemple.ch"
+            id="email" type="email" name="email" required placeholder={t("auth.placeholderEmail")}
             style={inp} autoComplete="email"
             value={mode === "signup" ? email : undefined}
             onChange={mode === "signup" ? e => setEmail(e.target.value) : undefined}
@@ -103,9 +109,9 @@ export function AuthFormWorkie({
         </div>
         {mode === "signup" && (
           <div>
-            <label htmlFor="email_confirm" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Confirmez votre adresse *</label>
+            <label htmlFor="email_confirm" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>{t("auth.confirmerEmail")}</label>
             <input
-              id="email_confirm" type="email" name="email_confirm" required placeholder="vous@exemple.ch"
+              id="email_confirm" type="email" name="email_confirm" required placeholder={t("auth.placeholderEmail")}
               style={{ ...inp, border: `1px solid ${emailMismatch ? "#ef4444" : "var(--border2)"}` }}
               autoComplete="off"
               value={emailConfirm}
@@ -113,13 +119,13 @@ export function AuthFormWorkie({
             />
             {emailMismatch && (
               <p role="alert" style={{ margin: "6px 0 0", fontSize: 12, color: "#ef4444" }}>
-                Les adresses email ne correspondent pas.
+                {t("auth.emailsDifferents")}
               </p>
             )}
           </div>
         )}
         <div>
-          <label htmlFor="password" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Mot de passe</label>
+          <label htmlFor="password" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>{t("auth.motDePasse")}</label>
           <input id="password" type="password" name="password" required minLength={mode === "signup" ? 8 : undefined} placeholder="••••••••" autoComplete={mode === "signup" ? "new-password" : "current-password"} style={inp} />
         </div>
 
@@ -130,7 +136,7 @@ export function AuthFormWorkie({
         )}
 
         <button type="submit" disabled={pending || emailMismatch} className="btn btn-encre btn-lg btn-bloc" style={{ marginTop: 4 }}>
-          {pending ? "..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
+          {pending ? "..." : mode === "login" ? t("auth.seConnecter") : t("auth.creerMonCompte")}
         </button>
       </form>
     </div>

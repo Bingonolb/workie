@@ -1,10 +1,18 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { riche } from "@/i18n/riche";
+
+const GRAS = { b: (c: React.ReactNode) => <strong style={{ color: "var(--text)" }}>{c}</strong> };
+
 import { useState, useTransition, useEffect } from "react";
 import { deleteAccount } from "@/lib/actions/auth";
 import { X } from "lucide-react";
 
 export function DeleteAccountButton() {
+  const t = useT();
+  // Le mot à taper suit la langue (« SUPPRIMER », « LÖSCHEN »).
+  const MOT = t("profil.motConfirmation");
   const [open, setOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +26,7 @@ export function DeleteAccountButton() {
   }, [open, pending]);
 
   const handleDelete = () => {
-    if (confirm !== "SUPPRIMER") return;
+    if (confirm !== MOT) return;
     setError(null);
     startTransition(async () => {
       const res = await deleteAccount();
@@ -39,7 +47,7 @@ export function DeleteAccountButton() {
           fontFamily: "inherit", width: "fit-content",
         }}
       >
-        Supprimer mon compte
+        {t("profil.supprimerCompte")}
       </button>
 
       {open && (
@@ -51,7 +59,7 @@ export function DeleteAccountButton() {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Supprimer le compte"
+            aria-label={t("profil.supprimerLeCompte")}
             onClick={e => e.stopPropagation()}
             style={{
               background: "var(--surface)", border: "1px solid rgba(239,68,68,0.3)",
@@ -60,26 +68,26 @@ export function DeleteAccountButton() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
               <div>
-                <p style={{ fontSize: 18, fontWeight: 900, color: "#ef4444", marginBottom: 4 }}>Supprimer le compte</p>
+                <p style={{ fontSize: 18, fontWeight: 900, color: "#ef4444", marginBottom: 4 }}>{t("profil.supprimerLeCompte")}</p>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                  Cette action est <strong style={{ color: "var(--text)" }}>irréversible</strong>. Votre profil, vos favoris et toutes vos données seront définitivement supprimés.
+                  {riche(t("profil.irreversible"), GRAS)}
                 </p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}>
+              <button type="button" onClick={() => setOpen(false)} aria-label={t("profil.fermer")} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}>
                 <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             <div style={{ marginBottom: 20 }}>
               <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
-                Tape <strong style={{ color: "var(--text)" }}>SUPPRIMER</strong> pour confirmer :
+                {riche(t("profil.tapez", { mot: MOT }), GRAS)}
               </p>
               <input
                 type="text"
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
-                placeholder="SUPPRIMER"
-                aria-label="Confirmer la suppression, tapez SUPPRIMER"
+                placeholder={MOT}
+                aria-label={t("profil.confirmerSuppression", { mot: MOT })}
                 autoComplete="off"
                 style={{
                   width: "100%", padding: "10px 14px", borderRadius: 10,
@@ -101,21 +109,21 @@ export function DeleteAccountButton() {
                 onClick={() => setOpen(false)}
                 style={{ flex: 1, padding: "11px", borderRadius: 10, background: "var(--surface2)", border: "1px solid var(--border)", color: "var(--text-muted)", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
               >
-                Annuler
+                {t("profil.annuler")}
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
-                disabled={confirm !== "SUPPRIMER" || pending}
+                disabled={confirm !== MOT || pending}
                 style={{
                   flex: 1, padding: "11px", borderRadius: 10,
-                  background: confirm === "SUPPRIMER" ? "#ef4444" : "rgba(239,68,68,0.2)",
+                  background: confirm === MOT ? "#ef4444" : "rgba(239,68,68,0.2)",
                   border: "none", color: "#fff", fontWeight: 700, fontSize: 14,
-                  cursor: confirm === "SUPPRIMER" ? "pointer" : "not-allowed",
+                  cursor: confirm === MOT ? "pointer" : "not-allowed",
                   opacity: pending ? 0.6 : 1, transition: "all 0.15s",
                 }}
               >
-                {pending ? "Suppression…" : "Supprimer définitivement"}
+                {pending ? t("profil.suppression") : t("profil.supprimerDefinitivement")}
               </button>
             </div>
           </div>

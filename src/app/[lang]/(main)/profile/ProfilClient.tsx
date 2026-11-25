@@ -1,5 +1,8 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { LOCALE_INTL } from "@/i18n/config";
+
 import { ChoixLangue } from "@/i18n/ChoixLangue";
 import { useEffect, useLayoutEffect, useState } from "react";
 import Link from "next/link";
@@ -45,6 +48,8 @@ type Donnees = {
  * contenu saute quand les données arrivent.
  */
 export function ProfilClient() {
+  const t = useT();
+  const langue = useLangue();
   // On repart de la dernière réponse connue : au retour sur la page, le
   // contenu est là avant même le premier rendu, plus de squelette à revoir.
   // Forme vérifiée avant usage : une valeur inattendue en mémoire ne doit
@@ -119,8 +124,8 @@ export function ProfilClient() {
   if (echec) {
     return (
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "48px 32px", textAlign: "center" }}>
-        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger votre profil</p>
-        <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 20 }}>Vos données sont intactes. Rechargez la page pour réessayer.</p>
+        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>{t("profil.erreur")}</p>
+        <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 20 }}>{t("profil.erreurAide")}</p>
         <button
           onClick={() => window.location.reload()}
           style={{
@@ -129,7 +134,7 @@ export function ProfilClient() {
             fontSize: 14, cursor: "pointer",
           }}
         >
-          Réessayer
+          {t("profil.reessayer")}
         </button>
       </div>
     );
@@ -140,7 +145,7 @@ export function ProfilClient() {
   const adsActives = d?.adsActives ?? 0;
   const displayName = profile?.full_name || profile?.username || (d ? "Workie User" : " ");
   const memberSince = d?.creeLe
-    ? new Date(d.creeLe).toLocaleDateString("fr-CH", { month: "long", year: "numeric" })
+    ? new Date(d.creeLe).toLocaleDateString(LOCALE_INTL[langue], { month: "long", year: "numeric" })
     : "—";
   // Le fondu ne se joue que si les données ont dû être attendues. Il se jouait
   // auparavant à chaque visite, mémoire comprise : la classe était présente dès
@@ -157,7 +162,7 @@ export function ProfilClient() {
   //
   // Les campagnes s'affichent toujours, même à 0 (choix de Luc).
   const tuiles: { Icone: typeof Flame; value: string; label: string; color: string; href: string | null }[] = [
-    { Icone: Flame, value: d ? String(d.favCount) : "—", label: "Entreprises sauvegardées", color: "#f97316", href: "/favorites" },
+    { Icone: Flame, value: d ? String(d.favCount) : "—", label: t("profil.sauvegardees"), color: "#f97316", href: "/favorites" },
     // Toujours affichée, même à 0 : demandé par Luc le 2026-11-15. La tuile
     // sert aussi de porte vers la régie, sur mobile comme sur ordinateur.
     { Icone: Megaphone, value: d ? String(adsActives) : "—", label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" },
@@ -267,7 +272,7 @@ export function ProfilClient() {
             « Membre depuis » reste : c'est le seul fait de cette carte qui ne
             se modifie pas, donc le seul qui n'a pas de champ. */}
         <div className="profil-infos">
-          Membre depuis {memberSince}
+          {t("profil.membreDepuis", { date: memberSince })}
         </div>
         {/* Les chiffres, dans la meme carte que le nom.
 
@@ -310,22 +315,22 @@ export function ProfilClient() {
           borderRadius: 14, overflow: "hidden",
         }}>
           <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
-            <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Reprendre où vous en étiez</p>
+            <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>{t("profil.reprendre")}</p>
           </div>
 
           {!d ? (
             <div style={{ height: 180 }} aria-hidden="true" />
           ) : recentes.length === 0 ? (
             <div style={{ padding: "36px 24px", textAlign: "center" }}>
-              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Rien encore</p>
+              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{t("profil.rienEncore")}</p>
               <p style={{ fontSize: 13.5, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
-                Les entreprises que vous ouvrez se retrouvent ici.
+                {t("profil.rienEncoreAide")}
               </p>
               <Link href="/explore" style={{
                 display: "inline-block", padding: "10px 22px", borderRadius: 11,
                 background: "var(--encre)", color: "var(--encre-texte)", fontWeight: 700, fontSize: 14, textDecoration: "none",
               }}>
-                Explorer
+                {t("profil.explorer")}
               </Link>
             </div>
           ) : (
@@ -369,7 +374,7 @@ export function ProfilClient() {
             borderRadius: 14, overflow: "hidden",
           }}>
             <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
-              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Modifier le profil</p>
+              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>{t("profil.modifier")}</p>
             </div>
             <div style={{ padding: 22 }}>
               {/* Monté seulement une fois les valeurs connues : le formulaire
@@ -385,7 +390,7 @@ export function ProfilClient() {
             borderRadius: 14, overflow: "hidden",
           }}>
             <div style={{ padding: "16px 22px", borderBottom: "1px solid var(--border)" }}>
-              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>Réglages</p>
+              <p style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>{t("profil.reglages")}</p>
             </div>
             <div style={{ padding: 22, display: "flex", flexDirection: "column", gap: 16 }}>
               <ThemeToggle />
@@ -407,7 +412,7 @@ export function ProfilClient() {
                     part, parce qu'il nomme le règlement plutot que l'action. Ce
                     qu'on veut, c'est ses données ; sous quelle loi on y a droit
                     ne change pas le geste. */}
-                Télécharger mes données
+                {t("profil.telecharger")}
               </a>
               <div style={{ padding: "6px 0 4px" }}><ChoixLangue /></div>
               <SignOutButton />
@@ -427,12 +432,12 @@ export function ProfilClient() {
                 }}
               >
                 <Megaphone size={15} strokeWidth={2} aria-hidden="true" />
-                Mes publicités
+                {t("profil.mesPublicites")}
               </Link>
 
               <Link href="/ranking" style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--text-muted)", fontWeight: 600, fontSize: 13.5, textDecoration: "none", width: "fit-content" }}>
                 <TrendingUp size={15} strokeWidth={2} aria-hidden="true" />
-                Classement des entreprises
+                {t("profil.classement")}
               </Link>
 
               {/* Porte vers l'offre entreprise, rangée dans les réglages : un
@@ -440,12 +445,12 @@ export function ProfilClient() {
               {(profile as { claimed_company_id?: string | null } | null)?.claimed_company_id ? (
                 <Link href="/espace-entreprise" style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--text-muted)", fontWeight: 600, fontSize: 13.5, textDecoration: "none", width: "fit-content" }}>
                   <Building2 size={15} strokeWidth={2} aria-hidden="true" />
-                  Mon espace entreprise
+                  {t("profil.espaceEntreprise")}
                 </Link>
               ) : revendicationOuverte ? (
                 <Link href="/pour-les-entreprises" style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "var(--text-muted)", fontWeight: 600, fontSize: 13.5, textDecoration: "none", width: "fit-content" }}>
                   <Building2 size={15} strokeWidth={2} aria-hidden="true" />
-                  Vous représentez une entreprise ?
+                  {t("profil.representez")}
                 </Link>
               ) : null}
 
@@ -459,14 +464,14 @@ export function ProfilClient() {
               }}>
                 {[
                   { href: "/cgu", label: "CGU" },
-                  { href: "/confidentialite", label: "Confidentialité" },
-                  { href: "/mentions-legales", label: "Mentions légales" },
+                  { href: "/confidentialite", label: t("profil.confidentialite") },
+                  { href: "/mentions-legales", label: t("profil.mentions") },
                 ].map(({ href, label }) => (
                   <Link key={href} href={href} style={{ fontSize: 12.5, color: "var(--text-muted)", textDecoration: "none" }}>
                     {label}
                   </Link>
                 ))}
-                <a href="mailto:contact@workie.ch" style={{ fontSize: 12.5, color: "var(--text-muted)", textDecoration: "none" }}>Contact</a>
+                <a href="mailto:contact@workie.ch" style={{ fontSize: 12.5, color: "var(--text-muted)", textDecoration: "none" }}>{t("profil.contact")}</a>
                 {/* En bas, en gris, comme les pages légales : on la trouve
                     quand on la cherche, elle n'attire pas l'oeil. */}
                 <DeleteAccountButton />
