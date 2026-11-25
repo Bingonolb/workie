@@ -159,9 +159,22 @@ export function tarifJournalier(cantons: string[], sectors: string[]): number {
   return Math.ceil(PRIX_JOUR_NATIONAL * (PART_FIXE + (1 - PART_FIXE) * Math.sqrt(couverture)));
 }
 
+/**
+ * Prix de test, pour payer une vraie campagne sur l'adresse d'essai sans payer
+ * le vrai tarif. Réglé par NEXT_PUBLIC_PRIX_PUB_TEST (en CHF, pour toute la
+ * campagne), posé dans Vercel pour l'essai seulement : jamais en production.
+ */
+const brut = Number(process.env.NEXT_PUBLIC_PRIX_PUB_TEST ?? "");
+export const PRIX_PUB_TEST: number | null = Number.isFinite(brut) && brut >= 5 ? brut : null;
+
 /** Le prix d'une campagne : un tarif journalier, une durée. */
 export function prixForfait(cantons: string[], sectors: string[], jours: number): number {
-  return tarifJournalier(cantons, sectors) * jours;
+  return PRIX_PUB_TEST ?? tarifJournalier(cantons, sectors) * jours;
+}
+
+/** Le tarif d'un jour tel qu'il est facturé (le prix de test réparti sur la durée). */
+export function tarifEffectif(cantons: string[], sectors: string[], jours: number): number {
+  return PRIX_PUB_TEST !== null ? Math.round((PRIX_PUB_TEST / jours) * 100) / 100 : tarifJournalier(cantons, sectors);
 }
 
 /** Vrai si la durée tient dans les bornes proposées. */

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSign, Eye, MousePointer, Clock, AlertTriangle, Check, CreditCard } from "lucide-react";
 // ExternalLink used for CTA URL field only
 import { createUserCampaign } from "@/lib/actions/ads";
-import { tarifJournalier, prixForfait, DUREE_MIN, DUREE_MAX, dateDeFin } from "@/lib/ads/pricing";
+import { tarifEffectif, prixForfait, DUREE_MIN, DUREE_MAX, dateDeFin } from "@/lib/ads/pricing";
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
 import { useT, useLangue } from "@/i18n/FournisseurLangue";
 import { nomCanton } from "@/i18n/cantons";
@@ -113,7 +113,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   // Le prix est reconstruit ici pour être montré, et recalculé par l'action
   // avant l'encaissement : ce qui vient du navigateur ne décide pas d'un
   // montant.
-  const tarifJour = tarifJournalier(selectedCantons, []);
+  const tarifJour = tarifEffectif(selectedCantons, [], durationDays);
   const prix = prixForfait(selectedCantons, [], durationDays);
 
   const today = new Date().toISOString().slice(0, 10);

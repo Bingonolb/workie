@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { createClient, getNiveauAal } from "@/lib/supabase/server";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { tarifJournalier, dureeValide, dateDeFin } from "@/lib/ads/pricing";
+import { tarifEffectif, prixForfait, dureeValide, dateDeFin } from "@/lib/ads/pricing";
 import { verifierAnnonce } from "@/lib/ads/moderation";
 import { estSuspendueParSignalements, decalerFin, montantARembourser } from "@/lib/ads/remboursement";
 import Stripe from "stripe";
@@ -184,8 +184,8 @@ export async function createUserCampaign(
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
     const end_date = dateDeFin(start_date, duree_jours);
 
-    const daily_budget_chf = tarifJournalier(target_cantons, target_sectors);
-    const total_budget_chf = daily_budget_chf * duree_jours;
+    const daily_budget_chf = tarifEffectif(target_cantons, target_sectors, duree_jours);
+    const total_budget_chf = prixForfait(target_cantons, target_sectors, duree_jours);
 
     // Aucun coût par affichage : on vend du temps, pas du volume. La campagne
     // s'arrête à sa date de fin, jamais par épuisement d'un budget.
@@ -556,8 +556,8 @@ export async function createCampaign(
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
     const end_date = dateDeFin(start_date, duree_jours);
 
-    const daily_budget_chf = tarifJournalier(target_cantons, target_sectors);
-    const total_budget_chf = daily_budget_chf * duree_jours;
+    const daily_budget_chf = tarifEffectif(target_cantons, target_sectors, duree_jours);
+    const total_budget_chf = prixForfait(target_cantons, target_sectors, duree_jours);
 
     // Aucun coût par affichage : on vend du temps, pas du volume. La campagne
     // s'arrête à sa date de fin, jamais par épuisement d'un budget.
