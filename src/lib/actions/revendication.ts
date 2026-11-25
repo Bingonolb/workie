@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { domaineOfficiel, emailDuDomaine, emailValide } from "@/lib/domaineEntreprise";
 import { sendCodeRevendication, sendRevendicationAValider } from "@/lib/email";
 import { ABONNEMENT, type Formule } from "@/lib/tarifs";
+import { langueRequete } from "@/i18n/requete";
 
 /**
  * Revendiquer une fiche, en quatre temps :
@@ -190,7 +191,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
     const { data: rev, error } = await table().insert({
       company_id: companyId, user_id: userId, prenom, nom, fonction, email_pro: email,
       methode: parDomaine ? "domaine" : "manuel", statut: "code_envoye",
-      empreinte_ip: ip, compte_cree: compteCree,
+      empreinte_ip: ip, compte_cree: compteCree, langue: await langueRequete(),
     }).select("id").single();
     if (error || !rev) return { error: "La demande n'a pas pu être enregistrée. Réessayez." };
 
@@ -200,7 +201,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
       code_expire: new Date(Date.now() + DUREE_CODE_MIN * 60_000).toISOString(),
       essais: 0,
     }).eq("id", rev.id);
-    const parti = await sendCodeRevendication(email, prenom, c.name, code);
+    const parti = await sendCodeRevendication(email, prenom, c.name, code, await langueRequete());
     if (!parti) return { error: "Le courriel n'a pas pu partir. Vérifiez l'adresse et réessayez." };
 
     if (!user) {

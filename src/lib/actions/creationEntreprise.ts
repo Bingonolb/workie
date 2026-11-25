@@ -10,6 +10,7 @@ import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { cantonValide, EMPLOYEE_RANGES, LANGUES_SAISIE } from "@/lib/types";
 import { creationOuverte } from "@/lib/ouverture";
 import type { EtatRevendication } from "@/lib/actions/revendication";
+import { langueRequete } from "@/i18n/requete";
 
 /**
  * Créer la fiche d'une entreprise absente de Workie.
@@ -177,7 +178,7 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
 
     const { data: rev, error } = await table().insert({
       company_id: null, fiche, user_id: userId, prenom, nom, fonction, email_pro: email,
-      methode: "manuel", statut: "code_envoye", empreinte_ip: ip, compte_cree: compteCree,
+      methode: "manuel", statut: "code_envoye", empreinte_ip: ip, compte_cree: compteCree, langue: await langueRequete(),
     }).select("id").single();
     if (error || !rev) return { error: "La demande n'a pas pu être enregistrée. Réessayez." };
 
@@ -185,7 +186,7 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
     await table().update({
       code_hash: hacher(code, rev.id), code_expire: new Date(Date.now() + DUREE_CODE_MIN * 60_000).toISOString(), essais: 0,
     }).eq("id", rev.id);
-    if (!(await sendCodeRevendication(email, prenom, fiche.name, code))) {
+    if (!(await sendCodeRevendication(email, prenom, fiche.name, code, await langueRequete()))) {
       return { error: "Le courriel n'a pas pu partir. Vérifiez l'adresse et réessayez." };
     }
     // Sans session : la vérification du code reconnaît la demande par ce cookie

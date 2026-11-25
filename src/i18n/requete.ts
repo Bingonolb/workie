@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { COOKIE_LANGUE } from "./config";
+import { COOKIE_LANGUE, estOuverte, type Langue } from "./config";
 import { traducteur } from "./serveur";
 import type { Traduire } from "./traduire";
 
@@ -11,4 +11,10 @@ import type { Traduire } from "./traduire";
  */
 export async function tRequete(envoyee?: unknown): Promise<Traduire> {
   return traducteur(typeof envoyee === "string" && envoyee ? envoyee : (await cookies()).get(COOKIE_LANGUE)?.value);
+}
+
+/** La langue gardée dans le cookie du visiteur, si elle est ouverte ; « fr » à défaut. */
+export async function langueRequete(): Promise<Langue> {
+  const l = (await cookies()).get(COOKIE_LANGUE)?.value;
+  return estOuverte(l) ? l : "fr";
 }

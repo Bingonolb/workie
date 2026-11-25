@@ -1,6 +1,9 @@
 "use server";
 
 import { Resend } from "resend";
+import { traducteur } from "@/i18n/serveur";
+import { estOuverte, type Langue } from "@/i18n/config";
+import type { Traduire } from "@/i18n/traduire";
 
 /**
  * Les courriels de Workie, sous un seul gabarit.
@@ -37,6 +40,12 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+/** La langue d’un destinataire, si elle est ouverte sur ce site ; « fr » sinon. */
+const langueDe = (l: unknown): Langue => (estOuverte(l) ? l : "fr");
+/** Une page du site dans la langue du destinataire (« /explore » → « /de/explore »). */
+const lien = (chemin: string, langue: Langue) => `${BASE}${langue === "fr" ? "" : `/${langue}`}${chemin}`;
+const gras = (texte: string) => `<strong style="color:${TEXTE};">${escapeHtml(texte)}</strong>`;
+
 type Gabarit = {
   /** Titre du document, lu par certaines messageries. */
   titre: string;
@@ -47,9 +56,11 @@ type Gabarit = {
   cta?: { libelle: string; href: string };
   /** Petite ligne sous le bouton, facultative. */
   apres?: string;
+  langue: Langue;
+  t: Traduire;
 };
 
-function gabarit({ titre, accroche, paragraphes, cta, apres }: Gabarit): string {
+function gabarit({ titre, accroche, paragraphes, cta, apres, langue, t }: Gabarit): string {
   const corps = paragraphes
     .map(p => `<p style="margin:0 0 16px;font-size:15px;line-height:1.65;color:${DISCRET};">${p}</p>`)
     .join("");
@@ -65,7 +76,7 @@ function gabarit({ titre, accroche, paragraphes, cta, apres }: Gabarit): string 
     : "";
 
   return `<!DOCTYPE html>
-<html lang="fr">
+<html lang="${langue}">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -92,8 +103,8 @@ function gabarit({ titre, accroche, paragraphes, cta, apres }: Gabarit): string 
   <tr>
     <td style="padding:22px 36px;border-top:1px solid ${FILET};">
       <p style="margin:0;font-size:12px;line-height:1.6;color:${DISCRET};">
-        Workie · Chercher du travail devient passionnant ·
-        <a href="${BASE}/confidentialite" style="color:${DISCRET};">Confidentialité</a>
+        ${t("mail.pied")}
+        <a href="${lien("/confidentialite", langue)}" style="color:${DISCRET};">${t("mail.confidentialite")}</a>
       </p>
     </td>
   </tr>
@@ -106,23 +117,26 @@ function gabarit({ titre, accroche, paragraphes, cta, apres }: Gabarit): string 
 
 // ── Les messages ────────────────────────────────────────────────────────────
 
-export async function sendWelcomeEmail(email: string, username: string): Promise<void> {
+export async function sendWelcomeEmail(email: string, username: string, langueRecue?: unknown): Promise<void> {
   if (!resend) return;
+  const langue = langueDe(langueRecue);
+  const t = await traducteur(langue);
   const nom = escapeHtml(username);
   try {
     await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `Bienvenue sur Workie, ${username}`,
+      subject: t("mail.bienvenueSujet", { nom: username }),
       html: gabarit({
-        titre: "Bienvenue sur Workie",
-        accroche: `Bienvenue, ${nom}.`,
+        langue, t,
+        titre: t("mail.bienvenueTitre"),
+        accroche: t("mail.bienvenueAccroche", { nom }),
         paragraphes: [
-          "Votre compte est prêt.",
-          "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
-          `<strong style="color:${TEXTE};">26 cantons · 4 langues</strong>`,
+          t("mail.bienvenueP1"),
+          t("mail.bienvenueP2"),
+          gras(t("mail.bienvenueP3")),
         ],
-        cta: { libelle: "Commencer", href: `${BASE}/explore` },
+        cta: { libelle: t("mail.commencer"), href: lien("/explore", langue) },
       }),
     });
   } catch { /* un courriel qui échoue ne doit pas bloquer l'inscription */ }
@@ -131,22 +145,25 @@ export async function sendWelcomeEmail(email: string, username: string): Promise
 // ── Revendication d'une fiche ─────────────────────────────────────────────
 
 /** Le code à 6 chiffres qui prouve l'accès à l'adresse professionnelle. */
-export async function sendCodeRevendication(email: string, prenom: string, entreprise: string, code: string): Promise<boolean> {
+export async function sendCodeRevendication(email: string, prenom: string, entreprise: string, code: string, langueRecue?: unknown): Promise<boolean> {
   if (!resend) return false;
+  const langue = langueDe(langueRecue);
+  const t = await traducteur(langue);
   try {
     const { error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `${code} : votre code pour gérer ${entreprise} sur Workie`,
+      subject: t("mail.codeSujet", { code, entreprise }),
       html: gabarit({
-        titre: "Votre code de vérification",
-        accroche: `Bonjour ${escapeHtml(prenom)},`,
+        langue, t,
+        titre: t("mail.codeTitre"),
+        accroche: t("mail.bonjour", { prenom: escapeHtml(prenom) }),
         paragraphes: [
-          `Voici votre code pour confirmer que vous représentez <strong style="color:${TEXTE};">${escapeHtml(entreprise)}</strong> :`,
+          t("mail.codeP1", { entreprise: gras(entreprise) }),
           `<span style="display:inline-block;font-size:32px;font-weight:800;letter-spacing:0.25em;color:${TEXTE};font-variant-numeric:tabular-nums;">${escapeHtml(code)}</span>`,
-          "Il est valable 30 minutes.",
+          t("mail.codeValide"),
         ],
-        apres: "Vous n'avez rien demandé ? Ignorez simplement ce courriel : rien ne se passera.",
+        apres: t("mail.codeIgnorez"),
       }),
     });
     return !error;
@@ -165,6 +182,7 @@ export async function sendRevendicationAValider(entreprise: string, demandeur: s
       to: destinataire,
       subject: creation ? `Nouvelle entreprise à valider : ${entreprise}` : `Revendication à valider : ${entreprise}`,
       html: gabarit({
+        langue: "fr", t: await traducteur("fr"),
         titre: creation ? "Nouvelle entreprise à valider" : "Revendication à valider",
         accroche: `${escapeHtml(entreprise)}`,
         paragraphes: [
@@ -179,63 +197,72 @@ export async function sendRevendicationAValider(entreprise: string, demandeur: s
 }
 
 /** La demande manuelle est acceptée : il ne reste qu'à s'abonner. */
-export async function sendRevendicationAcceptee(email: string, prenom: string, entreprise: string, lien: string): Promise<void> {
+export async function sendRevendicationAcceptee(email: string, prenom: string, entreprise: string, adresse: string, langueRecue?: unknown): Promise<void> {
   if (!resend) return;
+  const langue = langueDe(langueRecue);
+  const t = await traducteur(langue);
   try {
     await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `Votre demande pour ${entreprise} est acceptée`,
+      subject: t("mail.accepteeSujet", { entreprise }),
       html: gabarit({
-        titre: "Demande acceptée",
-        accroche: `C'est bon, ${escapeHtml(prenom)}.`,
+        langue, t,
+        titre: t("mail.accepteeTitre"),
+        accroche: t("mail.accepteeAccroche", { prenom: escapeHtml(prenom) }),
         paragraphes: [
-          `Votre demande pour <strong style="color:${TEXTE};">${escapeHtml(entreprise)}</strong> est acceptée. Il reste à activer l'abonnement pour ouvrir votre espace entreprise.`,
+          t("mail.accepteeP1", { entreprise: gras(entreprise) }),
         ],
-        cta: { libelle: "Activer l'abonnement", href: lien },
+        cta: { libelle: t("mail.activer"), href: adresse },
       }),
     });
   } catch { /* le lien reste accessible depuis la fiche */ }
 }
 
 /** La demande manuelle n'est pas retenue : la personne le sait, avec une porte de sortie. */
-export async function sendRevendicationRefusee(email: string, prenom: string, entreprise: string): Promise<void> {
+export async function sendRevendicationRefusee(email: string, prenom: string, entreprise: string, langueRecue?: unknown): Promise<void> {
   if (!resend) return;
+  const langue = langueDe(langueRecue);
+  const t = await traducteur(langue);
   try {
     await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `Votre demande pour ${entreprise}`,
+      subject: t("mail.refuseeSujet", { entreprise }),
       html: gabarit({
-        titre: "Demande non retenue",
-        accroche: `Bonjour ${escapeHtml(prenom)},`,
+        langue, t,
+        titre: t("mail.refuseeTitre"),
+        accroche: t("mail.bonjour", { prenom: escapeHtml(prenom) }),
         paragraphes: [
-          `Nous n'avons pas pu confirmer votre lien avec <strong style="color:${TEXTE};">${escapeHtml(entreprise)}</strong> à partir des informations reçues.`,
-          "Le plus simple : recommencez la demande avec une adresse e-mail de l'entreprise. La vérification est alors immédiate.",
+          t("mail.refuseeP1", { entreprise: gras(entreprise) }),
+          t("mail.refuseeP2"),
         ],
-        apres: "Une question ? Répondez simplement à ce courriel.",
+        apres: t("mail.question"),
       }),
     });
   } catch { /* la décision reste visible sur la page de revendication */ }
 }
 
 /** Confirmation : l'abonnement est actif, l'espace entreprise est ouvert. */
-export async function sendAbonnementActif(email: string, prenom: string, entreprise: string): Promise<void> {
+export async function sendAbonnementActif(email: string, prenom: string, entreprise: string, langueRecue?: unknown): Promise<void> {
   if (!resend) return;
+  const langue = langueDe(langueRecue);
+  const t = await traducteur(langue);
   try {
     await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `Bienvenue : ${entreprise} est à vous sur Workie`,
+      subject: t("mail.aboSujet", { entreprise }),
       html: gabarit({
-        titre: "Abonnement actif",
-        accroche: `Bienvenue, ${escapeHtml(prenom)}.`,
+        langue, t,
+        titre: t("mail.aboTitre"),
+        accroche: t("mail.aboAccroche", { prenom: escapeHtml(prenom) }),
         paragraphes: [
-          `Vous gérez désormais <strong style="color:${TEXTE};">${escapeHtml(entreprise)}</strong> sur Workie. Le badge vérifié est visible sur la fiche.`,
-          "Depuis votre espace entreprise, vous pouvez mettre la fiche à jour et suivre sa fréquentation.",
+          t("mail.aboP1", { entreprise: gras(entreprise) }),
+          t("mail.aboP2"),
         ],
-        cta: { libelle: "Ouvrir mon espace", href: `${BASE}/espace-entreprise` },
-        apres: "Une question ? Répondez simplement à ce courriel.",
+        cta: { libelle: t("mail.ouvrirEspace"), href: lien("/espace-entreprise", langue) },
+        apres: t("mail.question"),
       }),
     });
   } catch { /* sans conséquence pour l'abonnement */ }

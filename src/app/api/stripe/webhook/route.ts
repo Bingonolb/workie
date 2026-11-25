@@ -98,13 +98,13 @@ export async function POST(req: NextRequest) {
         if (revId && userId) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const revs = supabase.from("revendications" as any) as any;
-          const { data: rev } = await revs.select("prenom, email_pro, user_id, company_id")
+          const { data: rev } = await revs.select("prenom, email_pro, user_id, company_id, langue")
             .eq("id", revId).maybeSingle();
           if (rev && rev.user_id === userId && rev.company_id === companyId) {
             await revs.update({ statut: "active", activee_le: new Date().toISOString() }).eq("id", revId);
             await supabase.from("profiles").update({ claimed_company_id: companyId }).eq("id", userId);
             const { data: c } = await supabase.from("companies").select("name").eq("id", companyId).maybeSingle();
-            await sendAbonnementActif(rev.email_pro, rev.prenom, c?.name ?? "votre entreprise");
+            await sendAbonnementActif(rev.email_pro, rev.prenom, c?.name ?? "Workie", rev.langue);
           }
         }
         break;

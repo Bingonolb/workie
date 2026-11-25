@@ -44,7 +44,7 @@ export async function deciderRevendication(id: string, accepter: boolean, note: 
     if (!/^[0-9a-f-]{36}$/i.test(id)) return { error: "Demande invalide." };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const revs = createAdminClient().from("revendications" as any) as any;
-    const { data: r } = await revs.select("id, statut, prenom, email_pro, fiche, entreprise:companies(name, slug)").eq("id", id).maybeSingle();
+    const { data: r } = await revs.select("id, statut, prenom, email_pro, fiche, langue, entreprise:companies(name, slug)").eq("id", id).maybeSingle();
     if (!r || r.statut !== "en_attente") return { error: "Cette demande n'attend plus de décision." };
 
     await revs.update({
@@ -57,9 +57,11 @@ export async function deciderRevendication(id: string, accepter: boolean, note: 
     // l'entreprise retrouve l'étape du paiement.
     const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
     const nomFiche: string | undefined = r.entreprise?.name ?? r.fiche?.name;
-    const lien = r.entreprise ? `${base}/revendiquer/${r.entreprise.slug}` : `${base}/creer-entreprise`;
-    if (nomFiche && accepter) await sendRevendicationAcceptee(r.email_pro, r.prenom, nomFiche, lien);
-    else if (nomFiche) await sendRevendicationRefusee(r.email_pro, r.prenom, nomFiche);
+    // Le lien mène à la version du site dans la langue du demandeur.
+    const prefixe = r.langue && r.langue !== "fr" ? `/${r.langue}` : "";
+    const lien = r.entreprise ? `${base}${prefixe}/revendiquer/${r.entreprise.slug}` : `${base}${prefixe}/creer-entreprise`;
+    if (nomFiche && accepter) await sendRevendicationAcceptee(r.email_pro, r.prenom, nomFiche, lien, r.langue);
+    else if (nomFiche) await sendRevendicationRefusee(r.email_pro, r.prenom, nomFiche, r.langue);
     revaliderPage("/admin/revendications");
     return {};
   } catch (e) {

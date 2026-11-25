@@ -1,4 +1,4 @@
-import { LANGUE_PAR_DEFAUT, estLangue, type Langue } from "./config";
+import { LANGUE_PAR_DEFAUT, estOuverte, type Langue } from "./config";
 import { creerTraducteur, type Messages, type Traduire } from "./traduire";
 import fr from "./messages/fr.json";
 
@@ -18,6 +18,7 @@ export async function messagesDe(langue: Langue): Promise<Messages> {
 }
 
 export async function traducteur(langue: unknown = LANGUE_PAR_DEFAUT): Promise<Traduire> {
-  const l = estLangue(langue) ? langue : LANGUE_PAR_DEFAUT;
+  // Une langue fermée sur ce site (cookie resté d’un essai) retombe sur le français.
+  const l = estOuverte(langue) ? langue : LANGUE_PAR_DEFAUT;
   return creerTraducteur(l, await messagesDe(l), fr);
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendWelcomeEmail } from "@/lib/email";
+import { langueRequete } from "@/i18n/requete";
 
 function extractGeo(request: Request) {
   const h = request.headers;
@@ -103,7 +104,7 @@ export async function GET(request: Request) {
         await upsertProfileGeo(user.id);
         const isNew = await premierPassage();
         if (isNew) {
-          void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
+          void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0], await langueRequete());
           // Une inscription commencée ailleurs (ex. revendiquer une fiche) y revient.
           return NextResponse.redirect(`${origin}${next || "/explore?welcome=1"}`);
         }
@@ -127,7 +128,7 @@ export async function GET(request: Request) {
         await upsertProfileGeo(user.id);
         const isNew = await premierPassage();
         if (isNew) {
-          void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0]);
+          void sendWelcomeEmail(user.email!, user.user_metadata?.username as string ?? user.email!.split("@")[0], await langueRequete());
         }
         if (next) return NextResponse.redirect(`${origin}${next}`);
         if (isNew) return NextResponse.redirect(`${origin}/explore?welcome=1`);
