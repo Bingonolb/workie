@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { FICHES_TEST, fichesTestActives } from "@/lib/fichesTest";
 
 /**
  * Recherche d'entreprises.
@@ -66,11 +68,20 @@ export async function GET(request: Request) {
     return NextResponse.json({ companies: [], error: true }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 
-  const companies: Resultat[] = (data ?? []).map(
+  let companies: Resultat[] = (data ?? []).map(
     (r: Resultat & { rang: number; ressemblance: number }) => ({
       id: r.id, slug: r.slug, name: r.name, city: r.city, sector: r.sector, logo_url: r.logo_url,
     })
   );
+
+  // Hors production, les fiches de test se trouvent comme les autres : la
+  // recherche en base ne voit que les catégories publiées.
+  if (fichesTestActives) {
+    const terme = q.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").trim();
+    const { data: tests } = await createAdminClient().from("companies")
+      .select("id, slug, name, city, sector, logo_url").in("slug", [...FICHES_TEST]).ilike("nom_normalise", `%${terme}%`);
+    companies = [...((tests ?? []) as Resultat[]), ...companies.filter(c => !FICHES_TEST.has(c.slug ?? ""))];
+  }
 
   if (cache.size >= MAX_ENTREES) purger();
   cache.set(cle, { data: companies, expire: Date.now() + DUREE_CACHE });
