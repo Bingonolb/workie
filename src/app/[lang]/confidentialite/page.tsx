@@ -79,6 +79,7 @@ function ConfidentialiteFr() {
           <li><strong>Resend</strong> : envoi des e-mails du site</li>
           <li><strong>Sentry</strong> : rapports d&apos;erreurs techniques, sans enregistrement de vos sessions</li>
           <li><strong>Google</strong> : seulement si vous choisissez de vous connecter avec Google</li>
+          <li><strong>OpenAI</strong> : contrôle automatique du texte et du visuel des publicités, à leur création</li>
           <li><strong>Infomaniak</strong> : messagerie de contact@workie.ch, en Suisse</li>
         </ul>
         <p>Certains de ces prestataires sont établis hors de Suisse et de l&apos;UE. Ils sont contractuellement tenus de protéger vos données conformément à la LPD et au RGPD.</p>
@@ -179,6 +180,7 @@ function ConfidentialiteDe() {
           <li><strong>Resend</strong>: Versand der E-Mails der Website</li>
           <li><strong>Sentry</strong>: Berichte über technische Fehler, ohne Aufzeichnung Ihrer Sitzungen</li>
           <li><strong>Google</strong>: nur wenn Sie sich mit Google anmelden</li>
+          <li><strong>OpenAI</strong>: automatische Prüfung von Text und Bild der Werbungen bei ihrer Erstellung</li>
           <li><strong>Infomaniak</strong>: E-Mail-Postfach contact@workie.ch, in der Schweiz</li>
         </ul>
         <p>Einige dieser Dienstleister haben ihren Sitz ausserhalb der Schweiz und der EU. Sie sind vertraglich verpflichtet, Ihre Daten gemäss DSG und DSGVO zu schützen.</p>

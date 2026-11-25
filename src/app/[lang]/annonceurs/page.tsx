@@ -10,6 +10,9 @@ import { getApercuEntreprises } from "@/lib/apercuAccueil";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { melangerAvecAnnonces } from "@/lib/annoncesExemple";
 import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREE_MIN, DUREE_MAX } from "@/lib/ads/pricing";
+import { meta } from "@/i18n/meta";
+import { tServeur, langueDeLaPage } from "@/i18n/page";
+import { LOCALE_INTL } from "@/i18n/config";
 
 export const revalidate = 300;
 
@@ -29,20 +32,9 @@ const compterEmployeurs = unstable_cache(
 );
 
 
-export const metadata: Metadata = {
-  title: "Annoncer sur Workie",
-  description: "Diffusez vos publicités auprès de candidats suisses, ciblées par canton et par secteur. Un forfait de 7, 14 ou 30 jours, payé une fois, sans abonnement.",
-  alternates: { canonical: "https://www.workie.ch/annonceurs" },
-  openGraph: {
-    title: "Annoncer sur Workie",
-    description: "Ciblage par canton et par secteur, budget fixe, sans abonnement.",
-    url: "https://www.workie.ch/annonceurs",
-    siteName: "Workie",
-    type: "website",
-    locale: "fr_CH",
-    images: [{ url: "https://www.workie.ch/opengraph-image.png", width: 1200, height: 630, alt: "Annoncer sur Workie" }],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return meta({ titre: "annonceurs.metaTitre", description: "annonceurs.metaDescription", chemin: "/annonceurs", vars: { min: DUREE_MIN, max: DUREE_MAX } });
+}
 
 /*
  * La page des annonceurs.
@@ -51,16 +43,16 @@ export const metadata: Metadata = {
  * prix affiché en dur diverge de celui qui est facturé le jour où le module
  * change, et c'est le genre d'écart qu'un annonceur découvre sur sa facture.
  *
- * Le parcours décrit est celui du code. Une campagne payée
- * passe en attente et n'est diffusée qu'après validation : le taire ferait
- * croire à une mise en ligne immédiate.
+ * Le parcours décrit est celui du code : une campagne payée part aussitôt
+ * (le paiement Stripe la passe en « active »), après le filtre automatique
+ * appliqué à la création.
  */
 export default async function AnnonceursPage() {
-  const [employeurs, demo] = await Promise.all([compterEmployeurs(), getApercuEntreprises()]);
+  const [employeurs, demo, t, langue] = await Promise.all([compterEmployeurs(), getApercuEntreprises(), tServeur(), langueDeLaPage()]);
   const chiffres = [
-    { valeur: employeurs.toLocaleString("fr-CH"), libelle: "employeurs référencés" },
-    { valeur: String(Object.keys(CANTON_WEIGHTS).length), libelle: "cantons ciblables" },
-    { valeur: String(Object.keys(SECTOR_WEIGHTS).length), libelle: "secteurs ciblables" },
+    { valeur: employeurs.toLocaleString(LOCALE_INTL[langue]), libelle: t("annonceurs.employeurs") },
+    { valeur: String(Object.keys(CANTON_WEIGHTS).length), libelle: t("annonceurs.cantons") },
+    { valeur: String(Object.keys(SECTOR_WEIGHTS).length), libelle: t("annonceurs.secteurs") },
   ];
 
   return (
@@ -186,25 +178,22 @@ export default async function AnnonceursPage() {
         <section className="ann-section">
           <div className="ann-large ann-ouverture">
             <div>
-              <p className="ann-eyebrow">Annonceurs</p>
+              <p className="ann-eyebrow">{t("annonceurs.eyebrow")}</p>
               <h1 style={{ fontSize: "clamp(30px, 4.4vw, 46px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.035em", marginBottom: 18, maxWidth: 580 }}>
-                Votre publicité, entre les entreprises.
+                {t("annonceurs.titre")}
               </h1>
               <p style={{ fontSize: 16.5, color: "var(--text-sub)", lineHeight: 1.6, maxWidth: 480, marginBottom: 26 }}>
-                Votre publicité paraît au milieu des entreprises, avec le même soin qu&apos;une fiche :
-                on la lit comme le reste du site. Ici, chaque carte emmène sur un site
-                extérieur, celui de l&apos;employeur : arriver sur le vôtre se fait dans le
-                même geste.
+                {t("annonceurs.intro")}
               </p>
               <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
-                Créer une campagne <ArrowRight size={17} aria-hidden="true" />
+                {t("annonceurs.creer")} <ArrowRight size={17} aria-hidden="true" />
               </Link>
             </div>
 
             <div style={{ maxWidth: 380, width: "100%", justifySelf: "end" }}>
               <ApercuSwipe
                 entreprises={melangerAvecAnnonces(demo)}
-                fin={{ titre: "La prochaine carte pourrait être la vôtre.", libelle: "Créer une campagne", href: "/profile/ads/new" }}
+                fin={{ titre: t("annonceurs.finPile"), libelle: t("annonceurs.creer"), href: "/profile/ads/new" }}
               />
             </div>
           </div>
@@ -216,8 +205,8 @@ export default async function AnnonceursPage() {
             et elle passe donc avant le mecanisme. */}
         <section className="ann-section ann-ton">
           <div className="ann-large">
-            <p className="ann-eyebrow">Le terrain</p>
-            <h2 className="ann-h2">Ce que couvre une campagne.</h2>
+            <p className="ann-eyebrow">{t("annonceurs.terrainEyebrow")}</p>
+            <h2 className="ann-h2">{t("annonceurs.terrainTitre")}</h2>
 
             {/* Les cantons et les secteurs sont comptes dans le module de
                 tarification : ces nombres sont exactement ceux que le
@@ -241,18 +230,18 @@ export default async function AnnonceursPage() {
         {/* ── Les deux emplacements ── */}
         <section className="ann-section">
           <div className="ann-large">
-            <p className="ann-eyebrow">Emplacements</p>
-            <h2 className="ann-h2">Deux formats, un seul tarif.</h2>
+            <p className="ann-eyebrow">{t("annonceurs.emplEyebrow")}</p>
+            <h2 className="ann-h2">{t("annonceurs.emplTitre")}</h2>
             <p className="ann-chapo">
               {/* La phrase racontait pourquoi nous avions aligne les deux
                   tarifs. C'est notre histoire interne, pas celle de
                   l'annonceur, qui veut savoir ce qu'il choisit. */}
-              Prenez l&apos;un, l&apos;autre, ou les deux. Le prix ne change pas.
+              {t("annonceurs.emplChapo")}
             </p>
             <div className="ann-grille ann-deux">
               {[
-                { label: "Carré", ou: "Dans la grille des entreprises, entre les fiches.", forme: "carre" },
-                { label: "Plein écran", ou: "Dans le swipe, toutes les dix cartes.", forme: "plein" },
+                { label: t("annonceurs.carre"), ou: t("annonceurs.carreOu"), forme: "carre" },
+                { label: t("annonceurs.plein"), ou: t("annonceurs.pleinOu"), forme: "plein" },
               ].map(({ label, ou, forme }) => (
                 <div key={label} className="ann-carte" style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
                   <div className={`ann-apercu ann-${forme}`} aria-hidden="true">
@@ -282,7 +271,7 @@ export default async function AnnonceursPage() {
         <section className="ann-section" style={{ paddingTop: 0 }}>
           <div className="ann-large">
             <p style={{ fontSize: 12.5, color: "var(--text-muted)", opacity: 0.75 }}>
-              Les publicités montrées plus haut sont fictives. Aucun annonceur n&apos;est représenté.
+              {t("annonceurs.fictives")}
             </p>
           </div>
         </section>
@@ -290,8 +279,8 @@ export default async function AnnonceursPage() {
         {/* ── Le tarif ── */}
         <section className="ann-section ann-ton">
           <div className="ann-large">
-            <p className="ann-eyebrow">Tarif</p>
-            <h2 className="ann-h2">Ce que vous payez, et quand.</h2>
+            <p className="ann-eyebrow">{t("annonceurs.tarifEyebrow")}</p>
+            <h2 className="ann-h2">{t("annonceurs.tarifTitre")}</h2>
 
             {/* Aucun montant sur cette page.
                 Un prix posé ici ancre le lecteur sur le plus petit chiffre
@@ -302,27 +291,22 @@ export default async function AnnonceursPage() {
                 septante-sept. Le prix a un seul bon endroit, le formulaire, où
                 il découle des choix faits. */}
             <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, maxWidth: 580, marginBottom: 34 }}>
-              Deux choses déterminent le prix : la durée, de {DUREE_MIN} à {DUREE_MAX} jours,
-              et le nombre de cantons visés. Vous les réglez tous les deux au
-              moment de composer votre publicité, et le montant s&apos;affiche avant
-              que vous ne payiez quoi que ce soit.
+              {t("annonceurs.tarifChapo", { min: DUREE_MIN, max: DUREE_MAX })}
             </p>
 
             <div className="ann-grille ann-deux">
               <div className="ann-carte">
                 <CreditCard size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>Un paiement, pas un abonnement</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>{t("annonceurs.paiementTitre")}</h3>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.62 }}>
-                  Vous réglez le forfait une fois par carte. Rien ne se
-                  reconduit : à la fin, on vous propose de relancer, ou pas.
+                  {t("annonceurs.paiementTexte")}
                 </p>
               </div>
               <div className="ann-carte">
                 <Target size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
-                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>Les chiffres réels, jour par jour</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: "14px 0 8px" }}>{t("annonceurs.chiffresTitre")}</h3>
                 <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.62 }}>
-                  Vues, clics et répartition par canton, mis à jour pendant
-                  toute la diffusion.
+                  {t("annonceurs.chiffresTexte")}
                 </p>
               </div>
             </div>
@@ -332,19 +316,17 @@ export default async function AnnonceursPage() {
         {/* ── Le parcours ── */}
         <section className="ann-section">
           <div className="ann-large">
-            <p className="ann-eyebrow">Déroulement</p>
-            <h2 className="ann-h2">En quatre étapes.</h2>
+            <p className="ann-eyebrow">{t("annonceurs.deroulEyebrow")}</p>
+            <h2 className="ann-h2">{t("annonceurs.deroulTitre")}</h2>
             <p className="ann-chapo">
-              Aucune attente entre le paiement et la diffusion. Un filtre
-              automatique refuse à la création ce qui n&apos;a rien à faire ici, et
-              deux signalements suffisent ensuite à retirer une publicité.
+              {t("annonceurs.deroulChapo")}
             </p>
             <div className="ann-grille ann-quatre">
               {[
-                { n: "01", Icone: BarChart3, titre: "Vous composez", desc: "Visuel, titre, texte et lien de destination." },
-                { n: "02", Icone: Target, titre: "Vous ciblez", desc: "Cantons et secteurs. Le prix et la portée estimée s'affichent devant vous." },
-                { n: "03", Icone: CreditCard, titre: "Vous réglez", desc: "Paiement unique par carte, du budget total que vous avez fixé." },
-                { n: "04", Icone: ShieldCheck, titre: "Elle part aussitôt", desc: "Le compte des affichages et des clics commence, et vous recevez le bilan à la fin." },
+                { n: "01", Icone: BarChart3, titre: t("annonceurs.s1t"), desc: t("annonceurs.s1d") },
+                { n: "02", Icone: Target, titre: t("annonceurs.s2t"), desc: t("annonceurs.s2d") },
+                { n: "03", Icone: CreditCard, titre: t("annonceurs.s3t"), desc: t("annonceurs.s3d") },
+                { n: "04", Icone: ShieldCheck, titre: t("annonceurs.s4t"), desc: t("annonceurs.s4d") },
               ].map(({ n, Icone, titre, desc }) => (
                 <div key={n} className="ann-carte" style={{ position: "relative" }}>
                   <span style={{ position: "absolute", top: 22, right: 22, fontSize: 11.5, fontWeight: 700, color: "var(--border2)", letterSpacing: "0.06em", fontVariantNumeric: "tabular-nums" }}>{n}</span>
@@ -361,14 +343,13 @@ export default async function AnnonceursPage() {
         <section className="ann-section ann-accent" style={{ textAlign: "center" }}>
           <div style={{ maxWidth: 560, margin: "0 auto" }}>
             <h2 style={{ fontSize: "clamp(24px, 3.6vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 12 }}>
-              Lancez votre première publicité.
+              {t("annonceurs.ctaTitre")}
             </h2>
             <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 28 }}>
-              Une semaine sur un seul canton suffit à voir ce que ça donne, et
-              le montant s&apos;affiche avant le paiement.
+              {t("annonceurs.ctaTexte")}
             </p>
             <Link href="/profile/ads/new" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 28px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
-              Créer une campagne <ArrowRight size={17} aria-hidden="true" />
+              {t("annonceurs.creer")} <ArrowRight size={17} aria-hidden="true" />
             </Link>
           </div>
         </section>
