@@ -7,6 +7,7 @@ import { traducteur } from "@/i18n/serveur";
 import { COOKIE_LANGUE } from "@/i18n/config";
 import type { Traduire } from "@/i18n/traduire";
 import { AGE_MINIMUM } from "@/lib/ageMinimum";
+import { langueRequete } from "@/i18n/requete";
 
 /** La langue de la page qui a envoyé le formulaire, sinon celle gardée en cookie. */
 async function tAction(formData?: FormData): Promise<Traduire> {
@@ -134,7 +135,8 @@ export async function signUp(
     email,
     password,
     options: {
-      data: { username, full_name: fullName, first_name: firstName, last_name: lastName, canton, birth_year: birthYear },
+      // « langue » : lue par les modèles d’e-mail de Supabase (confirmation, mot de passe).
+      data: { username, full_name: fullName, first_name: firstName, last_name: lastName, canton, birth_year: birthYear, langue: await langueRequete() },
       // Avec `next`, la confirmation ramène là où l'inscription a commencé
       // (par exemple la revendication d'une fiche) ; sinon /explore?welcome=1.
       emailRedirectTo: `${RETOUR}${suiteInscription(formData)}`,
