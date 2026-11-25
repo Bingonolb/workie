@@ -662,5 +662,17 @@
     "s4d": "Die Zählung der Anzeigen und Klicks beginnt, und am Ende erhalten Sie die Bilanz.",
     "ctaTitre": "Starten Sie Ihre erste Werbung.",
     "ctaTexte": "Eine Woche in einem einzigen Kanton genügt, um zu sehen, was es bringt, und der Betrag wird vor der Zahlung angezeigt."
+  },
+  "apercu": {
+    "finIci": "Ihr nächster Arbeitgeber ist irgendwo hier.",
+    "finTotal": "Ihr nächster Arbeitgeber ist irgendwo unter den {n}.",
+    "creerCompte": "Konto erstellen",
+    "revoir": "Nochmals ansehen",
+    "sponsorise": "Gesponsert",
+    "voirOffres": "Stellenangebote ansehen",
+    "passer": "Überspringen",
+    "enSavoirPlus": "Mehr über {nom} erfahren",
+    "favoris": "Zu den Favoriten hinzufügen",
+    "aide": "Wischen Sie oder tippen Sie auf eine Schaltfläche."
   }
 }

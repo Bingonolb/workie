@@ -44,12 +44,22 @@ export const ANNONCES_EXEMPLE: AnnonceApercu[] = [
   },
 ];
 
+/** Les mêmes annonces, en allemand. Mêmes identifiants, mêmes images. */
+const TEXTES_DE: Record<string, Pick<AnnonceApercu, "titre" | "texte" | "cta" | "ciblage">> = {
+  "exemple-langue": { titre: "Das Deutsch, das Sie für diese Stelle brauchen", texte: "Abendkurse in Genf und Lausanne. Niveau B2 in 6 Monaten.", cta: "Kurse ansehen", ciblage: "Genf · Waadt" },
+  "exemple-recrutement": { titre: "12 Stellen für Entwickler in Lausanne", texte: "Ein Team von 40 Personen, 2 Tage Homeoffice pro Woche.", cta: "Stellen ansehen", ciblage: "Waadt · Informatik" },
+  "exemple-logement": { titre: "Eine Wohnung nahe Ihrer künftigen Arbeit", texte: "Mietwohnungen in der ganzen Westschweiz.", cta: "Wohnungen ansehen", ciblage: "Westschweiz" },
+  "exemple-formation": { titre: "Ein Master neben dem Job", texte: "Unterricht am Abend und am Samstag, in Zürich und Lausanne.", cta: "Programm ansehen", ciblage: "Zürich · Waadt" },
+  "exemple-entretien": { titre: "Ihr Vorstellungsgespräch, in 1 Stunde vorbereitet", texte: "Ein Online-Coach, an dem Tag, der Ihnen passt.", cta: "Buchen", ciblage: "Ganze Schweiz" },
+};
+
 /** Une entreprise, une annonce, une entreprise : cinq de chaque. */
-export function melangerAvecAnnonces(entreprises: EntrepriseApercu[]): CarteApercu[] {
+export function melangerAvecAnnonces(entreprises: EntrepriseApercu[], langue: string = "fr"): CarteApercu[] {
+  const annonces = langue === "de" ? ANNONCES_EXEMPLE.map(a => ({ ...a, ...(TEXTES_DE[a.id] ?? {}) })) : ANNONCES_EXEMPLE;
   const cartes: CarteApercu[] = [];
-  for (let i = 0; i < ANNONCES_EXEMPLE.length; i++) {
+  for (let i = 0; i < annonces.length; i++) {
     if (entreprises[i]) cartes.push(entreprises[i]);
-    cartes.push(ANNONCES_EXEMPLE[i]);
+    cartes.push(annonces[i]);
   }
   return cartes;
 }

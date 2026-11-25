@@ -662,5 +662,17 @@
     "s4d": "Le compte des affichages et des clics commence, et vous recevez le bilan à la fin.",
     "ctaTitre": "Lancez votre première publicité.",
     "ctaTexte": "Une semaine sur un seul canton suffit à voir ce que ça donne, et le montant s'affiche avant le paiement."
+  },
+  "apercu": {
+    "finIci": "Votre prochain employeur est quelque part ici.",
+    "finTotal": "Votre prochain employeur est quelque part dans les {n}.",
+    "creerCompte": "Créer un compte",
+    "revoir": "Revoir",
+    "sponsorise": "Sponsorisé",
+    "voirOffres": "Voir les offres d'emploi",
+    "passer": "Passer",
+    "enSavoirPlus": "En savoir plus sur {nom}",
+    "favoris": "Ajouter aux favoris",
+    "aide": "Glissez, ou touchez un bouton."
   }
 }

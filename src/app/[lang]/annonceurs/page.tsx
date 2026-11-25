@@ -6,7 +6,7 @@ import { PiedAccueil } from "@/components/PiedAccueil";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ApercuSwipe } from "@/components/ApercuSwipe";
-import { getApercuEntreprises } from "@/lib/apercuAccueil";
+import { getApercuEntreprises, localiserApercu } from "@/lib/apercuAccueil";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { melangerAvecAnnonces } from "@/lib/annoncesExemple";
 import { CANTON_WEIGHTS, SECTOR_WEIGHTS, DUREE_MIN, DUREE_MAX } from "@/lib/ads/pricing";
@@ -192,7 +192,7 @@ export default async function AnnonceursPage() {
 
             <div style={{ maxWidth: 380, width: "100%", justifySelf: "end" }}>
               <ApercuSwipe
-                entreprises={melangerAvecAnnonces(demo)}
+                entreprises={melangerAvecAnnonces(await localiserApercu(demo, langue), langue)}
                 fin={{ titre: t("annonceurs.finPile"), libelle: t("annonceurs.creer"), href: "/profile/ads/new" }}
               />
             </div>

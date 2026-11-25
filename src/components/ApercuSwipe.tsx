@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { X, Info, Flame, ArrowRight, ExternalLink } from "lucide-react";
 import { largeurCouverture, styleCadrageFond } from "@/lib/coverUrl";
 import { urlFiche } from "@/lib/urlFiche";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomSecteur } from "@/i18n/secteurs";
 
 /**
  * La pile de cartes de la page d'accueil, qui se manipule vraiment.
@@ -59,11 +61,6 @@ export type CarteApercu = ({ type?: "entreprise" } & EntrepriseApercu) | Annonce
 
 type Fin = { titre: string; libelle: string; href: string };
 
-const FIN_DEFAUT: Fin = {
-  titre: "Votre prochain employeur est quelque part ici.",
-  libelle: "Créer un compte",
-  href: "/signup",
-};
 
 const imageDe = (c: CarteApercu): string | null =>
   c.type === "annonce" ? c.image : c.cover_url ? largeurCouverture(c.cover_url, 940) : null;
@@ -72,9 +69,13 @@ const SEUIL = 90;
 
 export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises: CarteApercu[]; fin?: Fin; total?: number }) {
   // Le nombre d'entreprises vient de la base : un chiffre écrit en dur devient faux dès qu'une fiche est ajoutée ou retirée.
-  const fin = finRecue ?? (total
-    ? { ...FIN_DEFAUT, titre: `Votre prochain employeur est quelque part dans les ${total.toLocaleString("fr-CH")}.` }
-    : { ...FIN_DEFAUT, titre: "Votre prochain employeur est quelque part ici." });
+  const t = useT();
+  const langue = useLangue();
+  const fin = finRecue ?? {
+    titre: total ? t("apercu.finTotal", { n: total }) : t("apercu.finIci"),
+    libelle: t("apercu.creerCompte"),
+    href: "/signup",
+  };
   const [index, setIndex] = useState(0);
   const [glissement, setGlissement] = useState(0);
   const [partie, setPartie] = useState<"gauche" | "droite" | null>(null);
@@ -175,7 +176,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
             {fin.libelle} <ArrowRight size={17} aria-hidden="true" />
           </Link>
           <button type="button" onClick={() => setIndex(0)} className="apercu-fin-revoir">
-            Revoir
+            {t("apercu.revoir")}
           </button>
         </div>
       </div>
@@ -237,7 +238,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
               // Bleu plus profond : le blanc sur l'ancien bleu clair restait
               // sous le seuil de lisibilité pour un texte de cette taille.
               background: annonce ? "var(--brand)" : "rgba(37,99,235,0.92)", borderRadius: 50, padding: "4px 11px",
-            }}>{annonce ? "Sponsorisé" : entreprise!.sector}</span>
+            }}>{annonce ? t("apercu.sponsorise") : nomSecteur(entreprise!.sector, langue)}</span>
             <div style={{ position: "absolute", left: 20, right: 20, bottom: 16 }}>
               <p style={{ fontSize: 23, fontWeight: 800, color: "#fff", letterSpacing: "-0.025em", lineHeight: 1.15 }}>{nom}</p>
               {entreprise?.subsector && (
@@ -272,7 +273,7 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
               </span>
             ) : (
               <Link href={urlFiche(entreprise!)} className="btn btn-marque btn-bloc" style={{ textDecoration: "none" }}>
-                Voir les offres d&apos;emploi <ArrowRight size={15} aria-hidden="true" />
+                {t("apercu.voirOffres")} <ArrowRight size={15} aria-hidden="true" />
               </Link>
             )}
           </div>
@@ -280,13 +281,13 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
       </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 18 }}>
-        <BoutonRond onClick={() => avancer("gauche")} libelle="Passer" couleur="#ef4444" taille={56}>
+        <BoutonRond onClick={() => avancer("gauche")} libelle={t("apercu.passer")} couleur="#ef4444" taille={56}>
           <X size={24} strokeWidth={2} aria-hidden="true" />
         </BoutonRond>
         {entreprise ? (
           <Link
             href={urlFiche(entreprise)}
-            aria-label={`En savoir plus sur ${entreprise.name}`}
+            aria-label={t("apercu.enSavoirPlus", { nom: entreprise.name })}
             style={{
               width: 42, height: 42, borderRadius: "50%",
               background: "var(--surface)", border: "2px solid var(--border2)", color: "var(--text-muted)",
@@ -306,13 +307,13 @@ export function ApercuSwipe({ entreprises, fin: finRecue, total }: { entreprises
             <Info size={17} strokeWidth={2} aria-hidden="true" />
           </span>
         )}
-        <BoutonRond onClick={() => avancer("droite")} libelle="Ajouter aux favoris" couleur="#f97316" taille={56}>
+        <BoutonRond onClick={() => avancer("droite")} libelle={t("apercu.favoris")} couleur="#f97316" taille={56}>
           <Flame size={24} strokeWidth={2} aria-hidden="true" />
         </BoutonRond>
       </div>
 
       <p style={{ fontSize: 12.5, color: "var(--text-muted)", textAlign: "center", marginTop: 12 }}>
-        Glissez, ou touchez un bouton.
+        {t("apercu.aide")}
       </p>
     </div>
   );

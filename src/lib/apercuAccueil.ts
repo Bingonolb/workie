@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { languesDeTravail, abregeLangue } from "@/lib/langues";
 import { lieuAffiche } from "@/lib/types";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
+import { localiserEntreprises } from "@/lib/traductionsEntreprises";
+import type { Langue } from "@/i18n/config";
 
 /**
  * Les dix entreprises de la pile d'accueil.
@@ -57,11 +59,30 @@ export const getApercuEntreprises = unstable_cache(
         subsector: c.subsector,
         lieu: lieuAffiche(c.city, c.canton),
         langues: langues.map(l => abregeLangue(l)).join(" · "),
+        // De quoi refaire lieu et langues dans une autre langue (localiserApercu).
+        ville: c.city as string | null, canton: c.canton as string | null, codesLangues: langues,
         description: c.description,
         cover_url: c.cover_url,
       };
     });
   },
-  ["landing-apercu-v3"],
+  ["landing-apercu-v4"],
   { revalidate: 300, tags: ["companies"] }
 );
+
+/**
+ * La pile d'aperçu dans la langue de la page : lieu, langues de travail,
+ * description et sous-secteur. En français, rien ne change.
+ */
+export async function localiserApercu<T extends { id: string; description: string | null; subsector: string | null; ville: string | null; canton: string | null; codesLangues: string[]; lieu: string; langues: string }>(
+  entreprises: T[],
+  langue: Langue,
+): Promise<T[]> {
+  if (langue === "fr") return entreprises;
+  const traduites = await localiserEntreprises(entreprises, langue);
+  return traduites.map(e => ({
+    ...e,
+    lieu: lieuAffiche(e.ville, e.canton, langue),
+    langues: e.codesLangues.map(l => abregeLangue(l, langue)).join(" · "),
+  }));
+}
