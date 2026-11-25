@@ -13,6 +13,7 @@ import { estSuspendueParSignalements, decalerFin, montantARembourser } from "@/l
 import Stripe from "stripe";
 import type { AdFormat } from "@/lib/ads/pricing";
 import { captureServerError } from "@/lib/monitoring";
+import { tRequete } from "@/i18n/requete";
 
 async function getViewerGeo(): Promise<{ canton: string | null; city: string | null }> {
   try {
@@ -161,13 +162,13 @@ export async function createUserCampaign(
     const { supabase, user } = await requireUser();
 
     const format = String(formData.get("format") || "") as AdFormat;
-    if (!["square", "swipe"].includes(format)) return { error: "Format invalide." };
+    if (!["square", "swipe"].includes(format)) return { error: (await tRequete())("pubs.eFormat") };
 
     const headline = String(formData.get("headline") || "").trim();
-    if (!headline) return { error: "Le titre est requis." };
+    if (!headline) return { error: (await tRequete())("pubs.eTitre") };
 
     const rawCta = String(formData.get("cta_url") || "").trim();
-    if (!rawCta) return { error: "L'URL de destination est requise." };
+    if (!rawCta) return { error: (await tRequete())("pubs.eUrl") };
     const cta_url = /^https?:\/\//i.test(rawCta) ? rawCta : `https://${rawCta}`;
 
     let target_cantons: string[] = [];
@@ -178,7 +179,7 @@ export async function createUserCampaign(
     // Le prix est calculé ici, jamais lu dans le formulaire : un champ caché se
     // modifie, et celui-là dit combien on encaisse.
     const duree_jours = Number(formData.get("duree_jours") || 0);
-    if (!dureeValide(duree_jours)) return { error: "Durée invalide." };
+    if (!dureeValide(duree_jours)) return { error: (await tRequete())("pubs.eDuree") };
 
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
     const end_date = dateDeFin(start_date, duree_jours);
@@ -195,8 +196,8 @@ export async function createUserCampaign(
     if (imageFile instanceof File && imageFile.size > 0) {
       const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
       const MAX_BYTES = 10 * 1024 * 1024;
-      if (!ALLOWED_TYPES.includes(imageFile.type)) return { error: "Format non supporté. Utilisez JPG, PNG, WebP ou GIF." };
-      if (imageFile.size > MAX_BYTES) return { error: "Image trop lourde (max 10 MB)." };
+      if (!ALLOWED_TYPES.includes(imageFile.type)) return { error: (await tRequete())("pubs.eImageFormat") };
+      if (imageFile.size > MAX_BYTES) return { error: (await tRequete())("pubs.eImagePoids") };
       const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
       const ext = EXT_MAP[imageFile.type] ?? "jpg";
       const path = `ads/user_${user.id}/${randomUUID()}.${ext}`;
@@ -206,7 +207,7 @@ export async function createUserCampaign(
         image_url = pub.publicUrl;
       }
     }
-    if (!image_url) return { error: "Une image est requise (upload ou URL)." };
+    if (!image_url) return { error: (await tRequete())("pubs.eImage") };
 
     // Le filtre automatique passe avant l'insertion, donc avant tout paiement :
     // une annonce refusée ne doit pas laisser derrière elle une campagne à
@@ -405,8 +406,8 @@ export async function pauseUserCampaign(id: string): Promise<{ error?: string }>
       .eq("user_id", user.id)
       .in("status", ["active", "pending"])
       .select("id");
-    if (error) return { error: "La mise en pause a échoué. Réessayez." };
-    if (!data?.length) return { error: "Cette campagne ne peut pas être mise en pause." };
+    if (error) return { error: (await tRequete())("pubs.ePause") };
+    if (!data?.length) return { error: (await tRequete())("pubs.ePausePas") };
     revaliderPage("/profile/ads");
     revalidateTag("ad-campaigns", {});
     return {};
@@ -431,10 +432,10 @@ export async function reprendreCampagne(id: string): Promise<{ error?: string }>
       .eq("user_id", user.id)
       .eq("status", "paused")
       .maybeSingle();
-    if (!campagne) return { error: "Cette campagne n'est pas en pause." };
+    if (!campagne) return { error: (await tRequete())("pubs.ePasEnPause") };
     // Suspendue après signalements : c'est l'équipe qui tranche, pas l'annonceur.
     if (estSuspendueParSignalements((campagne as { admin_note?: string | null }).admin_note)) {
-      return { error: "Cette campagne a été signalée et est en cours d'examen." };
+      return { error: (await tRequete())("pubs.eSignalee") };
     }
 
     // Les types générés depuis la base ne connaissent pas encore paused_at :
@@ -461,8 +462,8 @@ export async function reprendreCampagne(id: string): Promise<{ error?: string }>
       .eq("status", "paused")
       .not("paid_at", "is", null)
       .select("id");
-    if (error) return { error: "La relance a échoué. Réessayez." };
-    if (!maj?.length) return { error: "Cette campagne ne peut pas être relancée." };
+    if (error) return { error: (await tRequete())("pubs.eRelance") };
+    if (!maj?.length) return { error: (await tRequete())("pubs.eRelancePas") };
     revaliderPage("/profile/ads");
     revalidateTag("ad-campaigns", {});
     return {};
@@ -493,9 +494,9 @@ export async function deleteUserCampaign(id: string): Promise<{ error?: string }
       .eq("user_id", user.id)
       .in("status", ["payment_pending", "completed", "rejected"])
       .select("image_url");
-    if (error) return { error: "La suppression a échoué. Réessayez." };
+    if (error) return { error: (await tRequete())("pubs.eSuppression") };
     if (!data?.length) {
-      return { error: "Cette campagne ne peut pas être supprimée tant qu'elle est en cours." };
+      return { error: (await tRequete())("pubs.eSuppressionPas") };
     }
     // Le visuel part aussi, sauf si une autre campagne (une relance) l'utilise encore.
     const image = data[0].image_url as string | null;
@@ -533,13 +534,13 @@ export async function createCampaign(
     const { supabase, companyId } = await requireBusiness();
 
     const format = String(formData.get("format") || "") as AdFormat;
-    if (!["square", "swipe"].includes(format)) return { error: "Format invalide." };
+    if (!["square", "swipe"].includes(format)) return { error: (await tRequete())("pubs.eFormat") };
 
     const headline = String(formData.get("headline") || "").trim();
-    if (!headline) return { error: "Le titre est requis." };
+    if (!headline) return { error: (await tRequete())("pubs.eTitre") };
 
     const rawCta = String(formData.get("cta_url") || "").trim();
-    if (!rawCta) return { error: "L'URL de destination est requise." };
+    if (!rawCta) return { error: (await tRequete())("pubs.eUrl") };
     const cta_url = /^https?:\/\//i.test(rawCta) ? rawCta : `https://${rawCta}`;
 
     let target_cantons: string[] = [];
@@ -550,7 +551,7 @@ export async function createCampaign(
     // Le prix est calculé ici, jamais lu dans le formulaire : un champ caché se
     // modifie, et celui-là dit combien on encaisse.
     const duree_jours = Number(formData.get("duree_jours") || 0);
-    if (!dureeValide(duree_jours)) return { error: "Durée invalide." };
+    if (!dureeValide(duree_jours)) return { error: (await tRequete())("pubs.eDuree") };
 
     const start_date = String(formData.get("start_date") || new Date().toISOString().slice(0, 10));
     const end_date = dateDeFin(start_date, duree_jours);
@@ -568,8 +569,8 @@ export async function createCampaign(
     if (imageFile instanceof File && imageFile.size > 0) {
       const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
       const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
-      if (!ALLOWED_TYPES.includes(imageFile.type)) return { error: "Format non supporté. Utilisez JPG, PNG, WebP ou GIF." };
-      if (imageFile.size > MAX_BYTES) return { error: "Image trop lourde (max 10 MB)." };
+      if (!ALLOWED_TYPES.includes(imageFile.type)) return { error: (await tRequete())("pubs.eImageFormat") };
+      if (imageFile.size > MAX_BYTES) return { error: (await tRequete())("pubs.eImagePoids") };
       const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
       const ext = EXT_MAP[imageFile.type] ?? "jpg";
       const path = `ads/${companyId}/${randomUUID()}.${ext}`;
@@ -579,7 +580,7 @@ export async function createCampaign(
         image_url = pub.publicUrl;
       }
     }
-    if (!image_url) return { error: "Une image est requise (upload ou URL)." };
+    if (!image_url) return { error: (await tRequete())("pubs.eImage") };
 
     const { data: inserted, error } = await supabase.from("ad_campaigns").insert({
       company_id: companyId,
@@ -620,8 +621,8 @@ export async function adminSetCampaignStatus(
       daily_budget_chf: number | string; total_budget_chf: number | string;
       stripe_session_id: string | null; paid_at: string | null;
     } | null;
-    if (!camp) return { error: "Campagne introuvable." };
-    if (status === "active" && camp.status === "payment_pending") return { error: "Cette campagne n'a pas encore été payée." };
+    if (!camp) return { error: (await tRequete())("pubs.eIntrouvable") };
+    if (status === "active" && camp.status === "payment_pending") return { error: (await tRequete())("pubs.eNonPayee") };
 
     const maj: Record<string, unknown> = { status, admin_note: note ?? null };
 

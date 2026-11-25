@@ -173,7 +173,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
         const username = `${prenom}${nom}`.normalize("NFD").replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 24) || "entreprise";
         const { data: cree, error } = await admin.auth.admin.createUser({
           email, password: motDePasse, email_confirm: false,
-          user_metadata: { full_name: `${prenom} ${nom}`, first_name: prenom, last_name: nom, username, compte_entreprise: true },
+          user_metadata: { full_name: `${prenom} ${nom}`, first_name: prenom, last_name: nom, username, compte_entreprise: true, langue: await langueRequete() },
         });
         if (error || !cree?.user) {
           const msg = (error?.message ?? "").toLowerCase();
@@ -288,11 +288,12 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
       : { type: "abonnement_entreprise", company_id: c.id, revendication_id: r.id, user_id: user.id };
     const session = await new Stripe(process.env.STRIPE_SECRET_KEY).checkout.sessions.create({
       mode: "subscription",
+      locale: (await langueRequete()) === "de" ? "de" : "fr",
       customer_email: r.email_pro,
       line_items: [{
         price_data: {
           currency: "chf",
-          product_data: { name: `Workie Entreprise : ${c.name}`, description: "Gestion de la fiche et statistiques de fréquentation" },
+          product_data: { name: t("stripe.aboNom", { nom: c.name }), description: t("stripe.aboDescription") },
           unit_amount: offre.chf * 100,
           recurring: { interval: offre.intervalle },
         },

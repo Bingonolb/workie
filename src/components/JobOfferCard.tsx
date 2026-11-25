@@ -168,7 +168,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
             </span>
           )}
         </div>
-        <p className="jo-lien" style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>Voir l&apos;offre →</p>
+        <p className="jo-lien" style={{ fontSize: 11, color: "#8b5cf6", marginTop: 8, fontWeight: 600 }}>{t("divers.voirOffre")}</p>
       </button>
       )}
 

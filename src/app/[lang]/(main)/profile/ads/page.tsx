@@ -1,6 +1,5 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = { title: "Mes publicités", robots: { index: false, follow: false } };
+import { meta } from "@/i18n/meta";
+export const generateMetadata = () => meta({ titre: "pubs.metaListe", indexer: false });
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -12,6 +11,7 @@ import { Plus, Eye, MousePointer, TrendingUp, CheckCircle, XCircle, ArrowLeft, M
 import type { AdCampaign } from "@/lib/actions/ads";
 import { CarteCampagne } from "./CarteCampagne";
 import { STATUS_CONFIG } from "./etat";
+import { tServeur, langueDeLaPage } from "@/i18n/page";
 
 
 function ctr(imp: number, clk: number) {
@@ -22,7 +22,8 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
   const [user, sp] = await Promise.all([getUser(), searchParams]);
   if (!user) redirect("/login?next=/profile/ads");
 
-  const { campaigns = [], error } = await getUserCampaigns();
+  const [{ campaigns = [], error }, t, langue] = await Promise.all([getUserCampaigns(), tServeur(), langueDeLaPage()]);
+  const loc = langue === "de" ? "de-CH" : "fr-CH";
   const activeTab = sp.tab ?? "all";
   const paymentSuccess = sp.payment === "success";
   const paymentCanceled = sp.payment === "canceled";
@@ -63,31 +64,31 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
       <main className="page-main-md" style={{ paddingTop: 24, paddingBottom: 48 }}>
 
         <Link href="/profile" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
-          <ArrowLeft size={14} aria-hidden="true" /> Mon profil
+          <ArrowLeft size={14} aria-hidden="true" /> {t("pubs.monProfil")}
         </Link>
 
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
           <div>
-            <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 4 }}>Mes publicités</h1>
+            <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 4 }}>{t("pubs.titre")}</h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
               {campaigns.length === 0
-                ? "Aucune campagne pour l'instant"
-                : `${campaigns.length} campagne${campaigns.length > 1 ? "s" : ""}${activeCampaigns.length > 0 ? `, ${activeCampaigns.length} active${activeCampaigns.length > 1 ? "s" : ""}` : ""}`}
+                ? t("pubs.aucune")
+                : t("pubs.nbCampagnes", { n: campaigns.length }) + (activeCampaigns.length > 0 ? t("pubs.nbActives", { n: activeCampaigns.length }) : "")}
             </p>
           </div>
           <Link href="/profile/ads/new" className="btn btn-marque">
-            <Plus size={16} aria-hidden="true" /> Nouvelle pub
+            <Plus size={16} aria-hidden="true" /> {t("pubs.nouvelle")}
           </Link>
         </div>
 
         {paymentSuccess && (
           <div role="status" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "14px 18px", color: "#10b981", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
-            <CheckCircle size={16} aria-hidden="true" /> Paiement reçu. Votre annonce est en ligne.
+            <CheckCircle size={16} aria-hidden="true" /> {t("pubs.payeOk")}
           </div>
         )}
         {paymentCanceled && (
           <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 18px", color: "#ef4444", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
-            <XCircle size={16} aria-hidden="true" /> Paiement annulé. Vous pouvez le reprendre depuis la liste ci-dessous.
+            <XCircle size={16} aria-hidden="true" /> {t("pubs.payeAnnule")}
           </div>
         )}
         {error && (
@@ -101,12 +102,12 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
             <div style={{ width: 72, height: 72, borderRadius: 20, background: "var(--surface2)", border: "1px solid var(--border2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
               <Megaphone size={30} color="var(--brand)" strokeWidth={1.7} aria-hidden="true" />
             </div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Aucune campagne pour l&apos;instant</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>{t("pubs.aucune")}</h2>
             <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 28px", lineHeight: 1.7 }}>
-              Touchez des milliers de candidats actifs en Suisse. Pas d&apos;abonnement : vous payez votre budget, rien d&apos;autre.
+              {t("pubs.aucuneTexte")}
             </p>
             <Link href="/profile/ads/new" className="btn btn-marque btn-lg">
-              <Plus size={16} aria-hidden="true" /> Créer ma première pub
+              <Plus size={16} aria-hidden="true" /> {t("pubs.premiere")}
             </Link>
           </div>
         ) : (
@@ -114,9 +115,9 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
             {chiffresUtiles && (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 24 }}>
                 {[
-                  { label: "Vues totales", value: totalImpressions.toLocaleString("fr-CH"), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
-                  { label: "Clics totaux", value: totalClicks.toLocaleString("fr-CH"), icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
-                  { label: "CTR moyen", value: ctr(totalImpressions, totalClicks), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
+                  { label: t("pubs.vuesTotales"), value: totalImpressions.toLocaleString(loc), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
+                  { label: t("pubs.clicsTotaux"), value: totalClicks.toLocaleString(loc), icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
+                  { label: t("pubs.ctrMoyen"), value: ctr(totalImpressions, totalClicks), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
                 ].map(({ label, value, icon, color }) => (
                   <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ width: 34, height: 34, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", color, flexShrink: 0 }}>{icon}</div>
@@ -130,20 +131,20 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
             )}
             {totalSpent > 0 && (
               <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
-                Budget total dépensé : <strong style={{ color: "var(--text)" }}>CHF {totalSpent.toFixed(2)}</strong>
+                {t("pubs.budgetDepense")} <strong style={{ color: "var(--text)" }}>CHF {totalSpent.toFixed(2)}</strong>
               </p>
             )}
 
             {filtresUtiles && (
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
                 {([
-                  ["all", "Toutes", counts.all],
-                  ["payment_pending", "À payer", counts.payment_pending],
-                  ["pending", "En révision", counts.pending],
-                  ["active", "Actives", counts.active],
-                  ["paused", "Pausées", counts.paused],
-                  ["completed", "Terminées", counts.completed],
-                  ["rejected", "Rejetées", counts.rejected],
+                  ["all", t("pubs.fToutes"), counts.all],
+                  ["payment_pending", t("pubs.fAPayer"), counts.payment_pending],
+                  ["pending", t("pubs.fRevision"), counts.pending],
+                  ["active", t("pubs.fActives"), counts.active],
+                  ["paused", t("pubs.fPause"), counts.paused],
+                  ["completed", t("pubs.fTerminees"), counts.completed],
+                  ["rejected", t("pubs.fRejetees"), counts.rejected],
                 ] as [string, string, number][]).filter(([s, , n]) => s === "all" || n > 0).map(([status, label, n]) => {
                   const isActive = filtreApplique === status;
                   return (
@@ -165,7 +166,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {filtered.map((c: AdCampaign) => (
-                <CarteCampagne key={c.id} c={c} onDelete={deleteUserCampaign} />
+                <CarteCampagne key={c.id} c={c} onDelete={deleteUserCampaign} t={t} langue={langue} />
               ))}
             </div>
 
@@ -175,7 +176,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
               border: "1.5px dashed var(--border2)", background: "var(--surface2)",
               color: "#8b5cf6", fontWeight: 700, fontSize: 14, textDecoration: "none",
             }}>
-              <Plus size={18} aria-hidden="true" /> Lancer une nouvelle campagne
+              <Plus size={18} aria-hidden="true" /> {t("pubs.lancer")}
             </Link>
           </>
         )}
@@ -183,14 +184,14 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
         <div style={{ marginTop: 28, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <Megaphone size={14} color="#8b5cf6" aria-hidden="true" />
-            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>Comment ça fonctionne</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{t("pubs.comment")}</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
             {[
-              { step: "1", text: "Créez votre campagne : visuel, canton et budget" },
-              { step: "2", text: "Réglez le forfait par Stripe" },
-              { step: "3", text: "Votre annonce part en diffusion aussitôt" },
-              { step: "4", text: "À la fin, vous recevez le bilan et pouvez relancer" },
+              { step: "1", text: t("pubs.etape1") },
+              { step: "2", text: t("pubs.etape2") },
+              { step: "3", text: t("pubs.etape3") },
+              { step: "4", text: t("pubs.etape4") },
             ].map(({ step, text }) => (
               <div key={step} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <div style={{ width: 20, height: 20, borderRadius: 6, background: "var(--surface3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 900, color: "var(--text)", flexShrink: 0 }}>{step}</div>

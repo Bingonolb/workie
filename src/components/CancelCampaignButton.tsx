@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { PauseCircle, X } from "lucide-react";
+import { useT } from "@/i18n/FournisseurLangue";
 
 interface Props {
   campaignId: string;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Props) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -48,7 +50,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
           color: "#ef4444", cursor: "pointer",
         }}
       >
-        <PauseCircle size={14} aria-hidden="true" /> Mettre en pause
+        <PauseCircle size={14} aria-hidden="true" /> {t("pubs.pause")}
       </button>
 
       {open && (
@@ -59,7 +61,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
         }}
           onClick={e => { if (e.target === e.currentTarget) setOpen(false); }}
         >
-          <div role="dialog" aria-modal="true" aria-label="Confirmer l'annulation de la campagne" style={{
+          <div role="dialog" aria-modal="true" aria-label={t("pubs.pauseConfirmer")} style={{
             background: "var(--surface)", border: "1px solid var(--border)",
             borderRadius: 20, padding: "28px 28px 24px", maxWidth: 400, width: "100%",
             boxShadow: "0 24px 64px rgba(0,0,0,0.35)",
@@ -70,18 +72,17 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
                   <PauseCircle size={20} color="#ef4444" aria-hidden="true" />
                 </div>
                 <div>
-                  <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Mettre en pause ?</p>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>Cette action est réversible</p>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>{t("pubs.pauseQ")}</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{t("pubs.reversible")}</p>
                 </div>
               </div>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4 }}>
+              <button type="button" onClick={() => setOpen(false)} aria-label={t("pubs.fermer")} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4 }}>
                 <X size={18} aria-hidden="true" />
               </button>
             </div>
 
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 22 }}>
-              Votre campagne sera mise en pause et n&apos;apparaîtra plus sur Workie. Le budget non consommé est conservé.
-              Vous pouvez contacter notre équipe pour la réactiver.
+              {t("pubs.pauseTexte")}
             </p>
 
             {error && (
@@ -100,7 +101,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
                   color: "var(--text)", cursor: "pointer",
                 }}
               >
-                Annuler
+                {t("pubs.annuler")}
               </button>
               <button
                 type="button"
@@ -114,7 +115,7 @@ export function CancelCampaignButton({ campaignId, onCancel, redirectAfter }: Pr
                   borderWidth: 1, borderStyle: "solid", borderColor: "rgba(239,68,68,0.25)",
                 }}
               >
-                {isPending ? "En cours…" : "Confirmer la pause"}
+                {isPending ? t("pubs.enCours") : t("pubs.confirmerPause")}
               </button>
             </div>
           </div>

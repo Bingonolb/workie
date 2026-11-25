@@ -1,6 +1,5 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = { title: "Statistiques de la publicité", robots: { index: false, follow: false } };
+import { meta } from "@/i18n/meta";
+export const generateMetadata = () => meta({ titre: "pubs.metaStats", indexer: false });
 
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
@@ -14,8 +13,9 @@ import Image from "next/image";
 import { ArrowLeft, Eye, MousePointer, TrendingUp, ExternalLink, AlertTriangle } from "lucide-react";
 
 
-const pourcent = (n: number) => `${n.toLocaleString("fr-CH", { minimumFractionDigits: 1, maximumFractionDigits: 2 })} %`;
-const chf = (n: number) => `CHF ${n.toLocaleString("fr-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+let LOC = "fr-CH";
+const pourcent = (n: number) => `${n.toLocaleString(LOC, { minimumFractionDigits: 1, maximumFractionDigits: 2 })} %`;
+const chf = (n: number) => `CHF ${n.toLocaleString(LOC, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 /** Part des vues qui ont mené à un clic. */
 function ctr(imp: number, clk: number) { return imp ? pourcent((clk / imp) * 100) : "–"; }
 function cpc(clk: number, spent: number) { return clk ? chf(spent / clk) : "–"; }
@@ -23,6 +23,10 @@ function cpc(clk: number, spent: number) { return clk ? chf(spent / clk) : "–"
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
 import { etat, jour } from "../etat";
 import { SECTORS } from "@/lib/types";
+import { tServeur, langueDeLaPage } from "@/i18n/page";
+import { riche } from "@/i18n/riche";
+import { nomCanton } from "@/i18n/cantons";
+import { nomSecteur } from "@/i18n/secteurs";
 
 
 /** Les vingt-six cantons : au complet, la liste ne dit rien de plus que le pays. */
@@ -39,16 +43,17 @@ const CANTONS_SUISSES = 26;
  * En dessous de cinq, la liste est l'information : ce sont les cantons qu'on a
  * choisis, et il y a une raison de les nommer.
  */
-function listeCourte(valeurs: string[], total: number, tout: string, nom: string): string {
+function listeCourte(valeurs: string[], total: number, tout: string, resume: (n: number, total: number) => string): string {
   if (valeurs.length === 0 || valeurs.length >= total) return tout;
-  if (valeurs.length > 5) return `${valeurs.length} ${nom} sur ${total}`;
+  if (valeurs.length > 5) return resume(valeurs.length, total);
   return valeurs.join(", ");
 }
 
 export default async function UserCampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await getUser();
+  const [user, t, langue] = await Promise.all([getUser(), tServeur(), langueDeLaPage()]);
   if (!user) redirect("/login?next=/profile/ads");
+  LOC = langue === "de" ? "de-CH" : "fr-CH";
 
   const [campaign, stats, cantonStats] = await Promise.all([
     getUserCampaignById(id),
@@ -57,7 +62,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
   ]);
   if (!campaign) notFound();
 
-  const e = etat(campaign);
+  const e = etat(campaign, t);
   const totalBudget = Number(campaign.total_budget_chf);
   const spentBudget = Number(campaign.spent_chf);
   const impCount = Number(campaign.impression_count);
@@ -112,7 +117,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
       <main className="page-main-md" style={{ paddingTop: 24, paddingBottom: 48 }}>
 
         <Link href="/profile/ads" className="ads-retour" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
-          <ArrowLeft size={14} aria-hidden="true" /> Mes publicités
+          <ArrowLeft size={14} aria-hidden="true" /> {t("pubs.titre")}
         </Link>
 
         {/* Header */}
@@ -132,7 +137,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                 </span>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 50, background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }}>
                   <SilhouetteFormat format={campaign.format === "square" ? "square" : "swipe"} taille={11} />
-                  {campaign.format === "square" ? "Carré" : "Plein écran"}
+                  {campaign.format === "square" ? t("pubs.carre") : t("pubs.pleinEcran")}
                 </span>
                 {(campaign.status === "active" || campaign.status === "pending") && (
                   <CancelCampaignButton campaignId={campaign.id} onCancel={pauseUserCampaign} redirectAfter="/profile/ads" />
@@ -140,9 +145,9 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
               </div>
               {campaign.body_text && <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>{campaign.body_text}</p>}
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 13, color: "var(--text-muted)" }}>
-                <span>{jour(campaign.start_date)}{campaign.end_date ? ` au ${jour(campaign.end_date)}` : ""}</span>
-                <span>{listeCourte(campaign.target_cantons, CANTONS_SUISSES, "Toute la Suisse", "cantons")}</span>
-                <span>{listeCourte(campaign.target_sectors, SECTORS.length, "Tous les secteurs", "secteurs")}</span>
+                <span>{campaign.end_date ? t("pubs.periodeAu", { du: jour(campaign.start_date, langue), au: jour(campaign.end_date, langue) }) : jour(campaign.start_date, langue)}</span>
+                <span>{listeCourte(campaign.target_cantons.map(k => nomCanton(k, langue, CANTON_NAMES[k] ?? k)), CANTONS_SUISSES, t("pubs.touteSuisse"), (n, total) => t("pubs.nCantons", { n, total }))}</span>
+                <span>{listeCourte(campaign.target_sectors.map(s => nomSecteur(s, langue)), SECTORS.length, t("pubs.tousSecteurs"), (n, total) => t("pubs.nSecteurs", { n, total }))}</span>
               </div>
               <a href={campaign.cta_url} target="_blank" rel="noopener noreferrer" className="ads-lien"
                 style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 10, fontSize: 13, color: "#8b5cf6", textDecoration: "none" }}>
@@ -152,7 +157,7 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
           </div>
           {campaign.admin_note && campaign.status === "rejected" && (
             <div style={{ margin: "0 24px 16px", padding: "10px 14px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 10, fontSize: 13, color: "#ef4444", display: "flex", alignItems: "center", gap: 7 }}>
-              <AlertTriangle size={13} strokeWidth={2.2} aria-hidden="true" style={{ flexShrink: 0 }} /> Raison du rejet : {campaign.admin_note}
+              <AlertTriangle size={13} strokeWidth={2.2} aria-hidden="true" style={{ flexShrink: 0 }} /> {t("pubs.raisonRejet", { note: campaign.admin_note })}
             </div>
           )}
         </div>
@@ -161,13 +166,13 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
         <div className="ads-kpi-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 20 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 20px" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>Performance totale</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>{t("pubs.perfTotale")}</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 {[
-                  { label: "Vues", value: impCount.toLocaleString("fr-CH"), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
-                  { label: "Clics", value: clkCount.toLocaleString("fr-CH"), icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
-                  { label: "Taux de clic", value: ctr(impCount, clkCount), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
-                  { label: "Coût par clic", value: cpc(clkCount, spentBudget), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#6b7280" },
+                  { label: t("pubs.vuesMaj"), value: impCount.toLocaleString(LOC), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
+                  { label: t("pubs.clicsMaj"), value: clkCount.toLocaleString(LOC), icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
+                  { label: t("pubs.tauxClic"), value: ctr(impCount, clkCount), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
+                  { label: t("pubs.coutClic"), value: cpc(clkCount, spentBudget), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#6b7280" },
                 ].map(({ label, value, icon, color }) => (
                   <div key={label}>
                     <div style={{ display: "flex", alignItems: "center", gap: 5, color, marginBottom: 3 }}>{icon}<span style={{ fontSize: 11, color: "var(--text-muted)" }}>{label}</span></div>
@@ -177,19 +182,19 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
               </div>
             </div>
             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 20px" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>Période récente</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", marginBottom: 12 }}>{t("pubs.recente")}</p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
                 {[
-                  { label: "Aujourd'hui", imp: today?.impressions ?? 0, clk: today?.clicks ?? 0 },
-                  { label: "7 derniers jours", imp: last7Imp, clk: last7Clk },
-                  { label: "Moy./jour", imp: avgDailyImp, clk: avgDailyClk },
+                  { label: t("pubs.aujourdhui"), imp: today?.impressions ?? 0, clk: today?.clicks ?? 0 },
+                  { label: t("pubs.sept"), imp: last7Imp, clk: last7Clk },
+                  { label: t("pubs.moyJour"), imp: avgDailyImp, clk: avgDailyClk },
                 ].map(({ label, imp, clk }) => (
                   <div key={label} style={{ textAlign: "center" }}>
                     <p style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 6 }}>{label}</p>
-                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)" }}>{imp.toLocaleString("fr-CH")}</p>
-                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>vues</p>
+                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)" }}>{imp.toLocaleString(LOC)}</p>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{t("pubs.vues")}</p>
                     <p style={{ fontSize: 14, fontWeight: 700, color: "#f97316", marginTop: 4 }}>{clk}</p>
-                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>clics</p>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{t("pubs.clics")}</p>
                   </div>
                 ))}
               </div>
@@ -197,26 +202,26 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
           </div>
 
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>Budget</p>
+            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)" }}>{t("pubs.budget")}</p>
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8 }}>
-                <span style={{ color: "var(--text-muted)" }}>Dépensé</span>
+                <span style={{ color: "var(--text-muted)" }}>{t("pubs.depense")}</span>
                 <span style={{ fontWeight: 800, color: "var(--text)" }}>{chf(spentBudget)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 12 }}>
-                <span style={{ color: "var(--text-muted)" }}>Total alloué</span>
+                <span style={{ color: "var(--text-muted)" }}>{t("pubs.totalAlloue")}</span>
                 <span style={{ fontWeight: 800, color: "var(--text)" }}>{chf(totalBudget)}</span>
               </div>
               <div style={{ height: 8, borderRadius: 50, background: "var(--surface2)", overflow: "hidden", marginBottom: 6 }}>
                 <div style={{ height: "100%", width: `${budgetPct}%`, background: budgetPct >= 90 ? "#ef4444" : "var(--brand)", borderRadius: 50 }} />
               </div>
-              <p style={{ fontSize: 12, color: budgetPct >= 90 ? "#ef4444" : "var(--text-muted)", textAlign: "right" }}>{budgetPct}% utilisé</p>
+              <p style={{ fontSize: 12, color: budgetPct >= 90 ? "#ef4444" : "var(--text-muted)", textAlign: "right" }}>{t("pubs.utilise", { pct: budgetPct })}</p>
             </div>
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { label: "Budget par jour", value: chf(Number(campaign.daily_budget_chf)) },
-                { label: "Prix pour 1 000 vues", value: chf(Number(campaign.cpm_chf)) },
-                { label: "Budget restant", value: chf(Math.max(0, totalBudget - spentBudget)) },
+                { label: t("pubs.budgetJour"), value: chf(Number(campaign.daily_budget_chf)) },
+                { label: t("pubs.prix1000"), value: chf(Number(campaign.cpm_chf)) },
+                { label: t("pubs.restant"), value: chf(Math.max(0, totalBudget - spentBudget)) },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
                   <span style={{ color: "var(--text-muted)" }}>{label}</span>
@@ -229,11 +234,11 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
 
         {stats.length > 0 && (
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 20px 4px", marginBottom: 20 }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>Les 30 derniers jours</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 12 }}>{t("pubs.trente")}</p>
             <div style={{ paddingBottom: 16 }}>
               <GraphiqueJours jours={stats.map(d => ({ jour: d.day, vues: Number(d.impressions), clics: Number(d.clicks) }))} series={[
-                { cle: "vues", libelle: "Vues", couleur: "#8b5cf6" },
-                { cle: "clics", libelle: "Clics", couleur: "#f97316" },
+                { cle: "vues", libelle: t("pubs.vuesMaj"), couleur: "#8b5cf6" },
+                { cle: "clics", libelle: t("pubs.clicsMaj"), couleur: "#f97316" },
               ]} />
             </div>
           </div>
@@ -242,9 +247,9 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
         {cantonStats.length > 0 && (
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "22px 24px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Répartition géographique</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{t("pubs.repartition")}</p>
               <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface2)", padding: "3px 10px", borderRadius: 50, border: "1px solid var(--border)" }}>
-                {cantonStats.reduce((s, c) => s + c.impressions, 0).toLocaleString("fr-CH")} vues localisées
+                {t("pubs.vuesLocalisees", { n: cantonStats.reduce((s, c) => s + c.impressions, 0).toLocaleString(LOC) })}
               </span>
             </div>
             {(() => {
@@ -256,12 +261,12 @@ export default async function UserCampaignDetailPage({ params }: { params: Promi
                     const isTargeted = campaign.target_cantons.length === 0 || campaign.target_cantons.includes(canton);
                     return (
                       <div key={canton} style={{ display: "grid", gridTemplateColumns: "minmax(80px, 130px) 1fr auto", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontSize: 13, fontWeight: 650, color: isTargeted ? "var(--text)" : "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{CANTON_NAMES[canton] ?? canton}</span>
+                        <span style={{ fontSize: 13, fontWeight: 650, color: isTargeted ? "var(--text)" : "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nomCanton(canton, langue, CANTON_NAMES[canton] ?? canton)}</span>
                         <div style={{ height: 7, borderRadius: 50, background: "var(--surface2)", overflow: "hidden" }}>
                           <div style={{ height: "100%", width: `${pct}%`, borderRadius: 50, background: isTargeted ? "var(--brand)" : "rgba(107,114,128,0.3)" }} />
                         </div>
                         <span style={{ fontSize: 12.5, color: "var(--text-muted)", textAlign: "right", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                          <strong style={{ color: "var(--text)" }}>{impressions.toLocaleString("fr-CH")}</strong> vues · {clicks.toLocaleString("fr-CH")} clics · {ctr(impressions, clicks)}
+                          {riche(t("pubs.ligneCanton", { vues: impressions.toLocaleString(LOC), clics: clicks.toLocaleString(LOC), ctr: ctr(impressions, clicks) }), { b: x => <strong style={{ color: "var(--text)" }}>{x}</strong> })}
                         </span>
                       </div>
                     );

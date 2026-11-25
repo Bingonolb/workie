@@ -29,9 +29,10 @@ export default function GlobalError({
   // Sans réseau, le message doit le dire. « Une erreur inattendue » laissait
   // croire que le site était cassé, alors que c'est la connexion.
   const horsLigne = typeof navigator !== "undefined" && navigator.onLine === false;
+  const de = typeof window !== "undefined" && /^\/de(\/|$)/.test(window.location.pathname);
 
   return (
-    <html lang="fr">
+    <html lang={de ? "de" : "fr"}>
       <body style={{
         margin: 0, minHeight: "100dvh", background: "#0c0d12", color: "#eceef4",
         display: "flex", alignItems: "center", justifyContent: "center",
@@ -42,12 +43,12 @@ export default function GlobalError({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/workie-logo.svg" alt="Workie" style={{ height: 30, width: "auto", marginBottom: 36 }} />
           <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 10px" }}>
-            {horsLigne ? "Vous êtes hors ligne" : "Un instant"}
+            {horsLigne ? (de ? "Sie sind offline" : "Vous êtes hors ligne") : (de ? "Einen Moment" : "Un instant")}
           </h1>
           <p style={{ fontSize: 14.5, color: "#8b90a3", lineHeight: 1.6, margin: "0 0 28px" }}>
             {horsLigne
-              ? "Workie reviendra dès que la connexion sera rétablie."
-              : "Quelque chose n'a pas répondu. Réessayez dans un moment."}
+              ? (de ? "Workie ist wieder da, sobald die Verbindung zurück ist." : "Workie reviendra dès que la connexion sera rétablie.")
+              : (de ? "Etwas hat nicht geantwortet. Versuchen Sie es gleich nochmals." : "Quelque chose n'a pas répondu. Réessayez dans un moment.")}
           </p>
           <button
             type="button"
@@ -57,7 +58,7 @@ export default function GlobalError({
               background: "#eceef4", color: "#0c0d12", fontWeight: 700, fontSize: 14.5, fontFamily: "inherit",
             }}
           >
-            Réessayer
+            {de ? "Erneut versuchen" : "Réessayer"}
           </button>
         </div>
       </body>

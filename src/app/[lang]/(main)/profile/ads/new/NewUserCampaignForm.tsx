@@ -7,6 +7,8 @@ import { ArrowLeft, Upload, ExternalLink, Info, Zap, Target, ImageIcon, DollarSi
 import { createUserCampaign } from "@/lib/actions/ads";
 import { tarifJournalier, prixForfait, DUREE_MIN, DUREE_MAX, dateDeFin } from "@/lib/ads/pricing";
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomCanton } from "@/i18n/cantons";
 
 const CANTONS = [
   { code: "GE", name: "Genève" }, { code: "VD", name: "Vaud" }, { code: "ZH", name: "Zürich" },
@@ -63,6 +65,8 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   /** Le canton du profil, pour ouvrir le formulaire sur un ciblage lisible. */
   cantonProfil?: string | null;
 }) {
+  const t = useT();
+  const langue = useLangue();
   const [state, action, pending] = useActionState(createUserCampaign, undefined);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
@@ -81,9 +85,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
       .then(r => r.json())
       .then(data => {
         if (data.url) { window.location.href = data.url; }
-        else { setCheckoutError(data.error ?? "Erreur Stripe"); setCheckoutLoading(false); }
+        else { setCheckoutError(data.error ?? t("pubs.erreurStripe")); setCheckoutLoading(false); }
       })
-      .catch(() => { setCheckoutError("Erreur réseau"); setCheckoutLoading(false); });
+      .catch(() => { setCheckoutError(t("pubs.erreurReseau")); setCheckoutLoading(false); });
   }, [state?.campaignId]);
 
   const [format, setFormat] = useState<"square" | "swipe">(prefillFormat ?? "square");
@@ -129,7 +133,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
   const [headline, setHeadline] = useState(prefillHeadline ?? "");
   const [bodyText, setBodyText] = useState("");
-  const [ctaLabel, setCtaLabel] = useState(prefillCtaLabel ?? "En savoir plus");
+  const [ctaLabel, setCtaLabel] = useState(prefillCtaLabel ?? t("pubForm.enSavoirPlus"));
 
 
 
@@ -147,9 +151,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   // atteindre cent mille. Les Grisons rejoignent en revanche le Tessin, les
   // vallées de Poschiavo et de Bregaglia étant italophones.
   const REGIONS: { nom: string; cantons: string[] }[] = [
-    { nom: "Suisse romande", cantons: ["GE", "VD", "VS", "FR", "NE", "JU"] },
-    { nom: "Suisse alémanique", cantons: ["ZH", "BE", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG", "SO", "BS", "BL", "SH", "AR", "AI", "SG", "GR", "AG", "TG", "FR", "VS"] },
-    { nom: "Suisse italienne", cantons: ["TI", "GR"] },
+    { nom: t("pubForm.romande"), cantons: ["GE", "VD", "VS", "FR", "NE", "JU"] },
+    { nom: t("pubForm.alemanique"), cantons: ["ZH", "BE", "LU", "UR", "SZ", "OW", "NW", "GL", "ZG", "SO", "BS", "BL", "SH", "AR", "AI", "SG", "GR", "AG", "TG", "FR", "VS"] },
+    { nom: t("pubForm.italienne"), cantons: ["TI", "GR"] },
   ];
 
   const memeEnsemble = (a: string[], b: string[]) =>
@@ -168,9 +172,6 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   const toggleCanton = useCallback((code: string) =>
     setSelectedCantons(p => p.includes(code) ? p.filter(c => c !== code) : [...p, code]), []);
 
-  const durationLabel = durationDays >= 30
-    ? `${Math.floor(durationDays / 30)} mois ${durationDays % 30 > 0 ? `${durationDays % 30}j` : ""}`
-    : `${durationDays} jours`;
 
   if (state?.campaignId) {
     return (
@@ -178,24 +179,24 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
         {checkoutError ? (
           <>
             <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}><AlertTriangle size={30} strokeWidth={1.7} color="#ef4444" aria-hidden="true" /></div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>Erreur de paiement</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>{t("pubForm.erreurPaiement")}</h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>{checkoutError}</p>
             <Link href="/profile/ads" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              Retour aux campagnes
+              {t("pubForm.retour")}
             </Link>
           </>
         ) : (
           <>
             <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}><CreditCard size={30} strokeWidth={1.7} color="var(--brand)" aria-hidden="true" /></div>
-            <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>Dernière étape : le paiement</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>{t("pubForm.derniereEtape")}</h1>
             {/* Rien n'annonce une campagne créée avant le paiement : le message
                 faisait croire que c'était payé alors que rien n'était fait. */}
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 8 }}>
               {checkoutLoading
-                ? "Ouverture du paiement sécurisé… Votre campagne démarrera dès le paiement confirmé."
-                : "Préparation du paiement…"}
+                ? t("pubForm.ouverture")
+                : t("pubForm.preparation")}
             </p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Propulsé par Stripe · Aucune donnée bancaire stockée sur Workie</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{t("pubForm.stripe")}</p>
           </>
         )}
       </div>
@@ -205,12 +206,12 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   return (
     <div style={{ maxWidth: 820 }}>
       <Link href="/profile/ads" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 24 }}>
-        <ArrowLeft size={14} aria-hidden="true" /> Mes publicités
+        <ArrowLeft size={14} aria-hidden="true" /> {t("pubs.titre")}
       </Link>
 
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>Nouvelle campagne</h1>
-        <p style={{ fontSize: 14, color: "var(--text-muted)" }}>Votre annonce sera visible par les utilisateurs de Workie selon votre ciblage.</p>
+        <h1 style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 6 }}>{t("pubForm.titre")}</h1>
+        <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{t("pubForm.sousTitre")}</p>
       </div>
 
       <form action={action}>
@@ -226,7 +227,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* FORMAT */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Zap size={18} aria-hidden="true" />} title="Format d'annonce" subtitle="Choisissez comment votre pub apparaîtra aux utilisateurs" />
+          <SectionHeader icon={<Zap size={18} aria-hidden="true" />} title={t("pubForm.format")} subtitle={t("pubForm.formatAide")} />
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             {(["square", "swipe"] as const).map(f => (
               <button key={f} type="button" onClick={() => setFormat(f)} style={{
@@ -247,11 +248,11 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 <div style={{ marginBottom: 12, color: "var(--text-muted)" }}>
                     <SilhouetteFormat format={f} taille={40} variante="illustration" />
                   </div>
-                <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>{f === "square" ? "Carré" : "Swipe"}</p>
+                <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>{f === "square" ? t("pubForm.carre") : t("pubForm.swipe")}</p>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
                   {f === "square"
-                    ? "S'intègre dans la grille d'exploration entre les fiches entreprise."
-                    : "Carte plein écran qui s'affiche tous les 10 swipes. Impact maximal."}
+                    ? t("pubForm.carreAide")
+                    : t("pubForm.swipeAide")}
                 </p>
                 {f === "swipe" && (
                   <div style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 50, background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)" }}>
@@ -265,7 +266,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* CREATIVE — avec aperçu en temps réel */}
         <div className="biz-form-card">
-          <SectionHeader icon={<ImageIcon size={18} aria-hidden="true" />} title="Visuel & contenu" subtitle="Une image HD capte 3× plus l'attention. Minimum 1200×800px recommandé." />
+          <SectionHeader icon={<ImageIcon size={18} aria-hidden="true" />} title={t("pubForm.visuel")} subtitle={t("pubForm.visuelAide")} />
 
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* Gauche : upload + URL */}
@@ -282,17 +283,17 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: imagePreview ? "#8b5cf6" : "var(--text)", marginBottom: 3 }}>
-                    {imagePreview ? "✓ Image chargée, changer" : "Uploader une image HD"}
+                    {imagePreview ? t("pubForm.imageChargee") : t("pubForm.uploader")}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                    {infoImage ?? "PNG, JPG, WebP : n'importe quelle taille, l'image est optimisée automatiquement"}
+                    {infoImage ?? t("pubForm.imageAide")}
                   </p>
                 </div>
                 <input ref={champImageRef} type="file" name="image_file" accept="image/*" style={{ display: "none" }}
                   onChange={async e => {
                     const f = e.target.files?.[0];
                     if (!f) return;
-                    setInfoImage("Optimisation…");
+                    setInfoImage(t("pubForm.optimisation"));
 
                     // Réduction dans le navigateur : la requête ne peut pas
                     // dépasser 8 Mo, et une photo d'appareil les dépasse
@@ -306,9 +307,9 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                       const dt = new DataTransfer();
                       dt.items.add(r.fichier);
                       champImageRef.current.files = dt.files;
-                      setInfoImage(`Optimisée : ${formaterPoids(r.avant)} → ${formaterPoids(r.apres)}`);
+                      setInfoImage(t("pubForm.optimisee", { avant: formaterPoids(r.avant), apres: formaterPoids(r.apres) }));
                     } else {
-                      setInfoImage(`${formaterPoids(r.apres)} · prête`);
+                      setInfoImage(t("pubForm.prete", { poids: formaterPoids(r.apres) }));
                     }
 
                     if (blobRef.current) URL.revokeObjectURL(blobRef.current);
@@ -323,7 +324,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             {/* Droite : aperçu en temps réel */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                Aperçu · Format {format === "square" ? "carré" : "swipe"}
+                {t("pubForm.apercu", { format: format === "square" ? t("pubForm.carreMin") : t("pubForm.swipeMin") })}
               </p>
 
               {format === "square" ? (
@@ -345,13 +346,13 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                           <ImageIcon size={24} color="var(--text-muted)" aria-hidden="true" style={{ opacity: 0.3 }} />
                         </div>
                       )}
-                      <div style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", borderRadius: 50, padding: "2px 7px", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sponsorisé</div>
+                      <div style={{ position: "absolute", top: 6, left: 6, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", borderRadius: 50, padding: "2px 7px", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{t("pubForm.sponsorise")}</div>
                     </div>
                     <div style={{ padding: "8px 10px 10px" }}>
-                      <p style={{ fontSize: 11, fontWeight: 800, color: "var(--text)", marginBottom: 5, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
+                      <p style={{ fontSize: 11, fontWeight: 800, color: "var(--text)", marginBottom: 5, lineHeight: 1.2 }}>{headline || t("pubForm.titreAnnonce")}</p>
                       {bodyText && <p style={{ fontSize: 9, color: "var(--text-muted)", marginBottom: 6, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{bodyText}</p>}
                       <div style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 7, background: "var(--brand)", fontSize: 9, fontWeight: 800, color: "#fff" }}>
-                        {ctaLabel || "En savoir plus"} →
+                        {ctaLabel || t("pubForm.enSavoirPlus")} →
                       </div>
                     </div>
                   </div>
@@ -362,7 +363,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                       </div>
                     ))}
                   </div>
-                  <p style={{ fontSize: 9, color: "var(--text-muted)", textAlign: "center", marginTop: 8 }}>Votre annonce dans la grille d&apos;exploration</p>
+                  <p style={{ fontSize: 9, color: "var(--text-muted)", textAlign: "center", marginTop: 8 }}>{t("pubForm.dansGrille")}</p>
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -375,11 +376,11 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                     <div style={{ width: 50, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.15)", margin: "0 auto 6px" }} />
                     <div style={{ borderRadius: 20, overflow: "hidden", background: "rgba(255,255,255,0.05)", position: "relative" }}>
                       <div style={{ height: 280, background: "rgba(255,255,255,0.03)", display: "flex", alignItems: "flex-end", padding: 10 }}>
-                        <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>Entreprise suivante…</p>
+                        <p style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.2)" }}>{t("pubForm.suivante")}</p>
                       </div>
                       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", display: "flex", flexDirection: "column" }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", background: "rgba(255,255,255,0.05)" }}>
-                          <span style={{ fontSize: 7, fontWeight: 800, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Sponsorisé</span>
+                          <span style={{ fontSize: 7, fontWeight: 800, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{t("pubForm.sponsorise")}</span>
                           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1 }}>✕</span>
                         </div>
                         <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
@@ -393,20 +394,20 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                           )}
                         </div>
                         <div style={{ padding: "10px 10px 12px" }}>
-                          <p style={{ fontSize: 10, fontWeight: 900, color: "#fff", marginBottom: 4, lineHeight: 1.2 }}>{headline || "Titre de votre annonce"}</p>
+                          <p style={{ fontSize: 10, fontWeight: 900, color: "#fff", marginBottom: 4, lineHeight: 1.2 }}>{headline || t("pubForm.titreAnnonce")}</p>
                           {bodyText && <p style={{ fontSize: 8, color: "rgba(255,255,255,0.65)", marginBottom: 8, lineHeight: 1.4 }}>{bodyText.slice(0, 60)}{bodyText.length > 60 ? "…" : ""}</p>}
                           <div style={{ display: "flex", gap: 5 }}>
                             <div style={{ flex: 1, padding: "5px 8px", borderRadius: 7, background: "var(--brand)", fontSize: 8, fontWeight: 800, color: "#fff", textAlign: "center" }}>
-                              {ctaLabel || "En savoir plus"}
+                              {ctaLabel || t("pubForm.enSavoirPlus")}
                             </div>
-                            <div style={{ padding: "5px 8px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.2)", fontSize: 8, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Ignorer</div>
+                            <div style={{ padding: "5px 8px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.2)", fontSize: 8, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>{t("pubForm.ignorer")}</div>
                           </div>
                         </div>
                       </div>
                     </div>
                     <div style={{ width: 44, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)", margin: "6px auto 0" }} />
                   </div>
-                  <p style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 10, textAlign: "center" }}>S&apos;affiche tous les 10 swipes</p>
+                  <p style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 10, textAlign: "center" }}>{t("pubForm.tous10")}</p>
                 </div>
               )}
             </div>
@@ -415,46 +416,46 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           {/* Champs texte */}
           <div className="biz-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Titre *</label>
-              <input name="headline" required style={inp} placeholder="Rejoignez notre équipe !" maxLength={60}
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("pubForm.champTitre")}</label>
+              <input name="headline" required style={inp} placeholder={t("pubForm.champTitreEx")} maxLength={60}
                 value={headline} onChange={e => setHeadline(e.target.value)} />
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, textAlign: "right" }}>{headline.length}/60</p>
             </div>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Texte du bouton</label>
-              <input name="cta_label" style={inp} placeholder="En savoir plus" maxLength={30}
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("pubForm.champBouton")}</label>
+              <input name="cta_label" style={inp} placeholder={t("pubForm.enSavoirPlus")} maxLength={30}
                 value={ctaLabel} onChange={e => setCtaLabel(e.target.value)} />
             </div>
           </div>
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Description <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>· optionnel</span>
+              {t("pubForm.champDescription")} <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>{t("pubForm.optionnel")}</span>
             </label>
             <textarea name="body_text" rows={2} style={{ ...inp, height: "auto", padding: "12px 16px", resize: "none", lineHeight: 1.5 }}
-              placeholder="Une courte accroche pour votre annonce… (max 120 car.)" maxLength={120}
+              placeholder={t("pubForm.champDescriptionEx")} maxLength={120}
               value={bodyText} onChange={e => setBodyText(e.target.value)} />
             <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, textAlign: "right" }}>{bodyText.length}/120</p>
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>URL de destination *</label>
+            <label style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("pubForm.champUrl")}</label>
             <div style={{ position: "relative" }}>
               <ExternalLink size={15} aria-hidden="true" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)", pointerEvents: "none" }} />
-              <input name="cta_url" required style={{ ...inp, paddingLeft: 42 }} placeholder="https://votre-site.ch" defaultValue={prefillCtaUrl ?? ""} />
+              <input name="cta_url" required style={{ ...inp, paddingLeft: 42 }} placeholder={t("pubForm.champUrlEx")} defaultValue={prefillCtaUrl ?? ""} />
             </div>
           </div>
         </div>
 
         {/* CIBLAGE CANTON */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title="Ciblage géographique" subtitle="Choisissez les cantons visés, ou tout le pays d'un bouton." />
+          <SectionHeader icon={<Target size={18} aria-hidden="true" />} title={t("pubForm.ciblage")} subtitle={t("pubForm.ciblageAide")} />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Cantons</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("pubForm.cantons")}</span>
             <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
               {couvreToutLePays
-                ? `${CANTONS.length} cantons`
+                ? t("pubForm.nCantons", { n: CANTONS.length })
                 : sansCiblage
-                  ? "Aucun canton choisi"
-                  : `${selectedCantons.length} sélectionné${selectedCantons.length > 1 ? "s" : ""}`}
+                  ? t("pubForm.aucunCanton")
+                  : t("pubForm.nSelectionnes", { n: selectedCantons.length })}
             </span>
           </div>
           {/* Les raccourcis de région, au-dessus des cantons.
@@ -473,7 +474,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               style={styleRegion(couvreToutLePays)}
             >
               {couvreToutLePays && <Check size={11} strokeWidth={2.8} aria-hidden="true" />}
-              Toute la Suisse
+              {t("pubForm.touteSuisse")}
             </button>
             {REGIONS.map(({ nom, cantons }) => {
               const active = !couvreToutLePays && memeEnsemble(selectedCantons, cantons);
@@ -496,7 +497,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             {CANTONS.map(c => {
               const sel = selectedCantons.includes(c.code);
               return (
-                <button key={c.code} type="button" onClick={() => toggleCanton(c.code)} title={c.name} style={{
+                <button key={c.code} type="button" onClick={() => toggleCanton(c.code)} title={nomCanton(c.code, langue, c.name)} style={{
                   padding: "6px 13px", borderRadius: 50, fontSize: 12, fontWeight: 700, cursor: "pointer",
                   border: sel ? "1.5px solid #f97316" : "1px solid rgba(255,255,255,0.1)",
                   background: sel ? "rgba(249,115,22,0.14)" : "transparent",
@@ -509,7 +510,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
         {/* DURÉE */}
         <div className="biz-form-card">
-          <SectionHeader icon={<Clock size={18} aria-hidden="true" />} title="Durée" subtitle="Choisissez combien de temps votre annonce reste affichée" />
+          <SectionHeader icon={<Clock size={18} aria-hidden="true" />} title={t("pubForm.duree")} subtitle={t("pubForm.dureeAide")} />
 
           {/* Un curseur, et non trois durées fermées.
               Le client qui voulait acheter plus n'avait aucun moyen de le
@@ -517,10 +518,10 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
           <div style={{ marginBottom: 22 }}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
               <div style={{ fontSize: 26, fontWeight: 900, color: "#8b5cf6", letterSpacing: "-0.02em" }}>
-                {durationDays} jours
+                {t("pubForm.jours", { n: durationDays })}
               </div>
               <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-                CHF {tarifJour} par jour
+                {t("pubForm.parJour", { n: tarifJour })}
               </div>
             </div>
             {/* Curseur non contrôlé, volontairement.
@@ -545,14 +546,14 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               style={{ width: "100%", accentColor: "#8b5cf6", height: 28, cursor: "pointer" }}
             />
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-              <span>{DUREE_MIN} jours</span><span>{DUREE_MAX} jours</span>
+              <span>{t("pubForm.jours", { n: DUREE_MIN })}</span><span>{t("pubForm.jours", { n: DUREE_MAX })}</span>
             </div>
           </div>
 
 
           <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
-              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Début</label>
+              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("pubForm.debut")}</label>
               <div style={{ overflow: "hidden", borderRadius: 12 }}>
                 <input name="start_date" type="date" min={today} value={startDate}
                   onChange={e => setStartDate(e.target.value)}
@@ -560,7 +561,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
               </div>
             </div>
             <div style={{ flex: "1 1 0px", minWidth: 0 }}>
-              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Fin</label>
+              <label style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>{t("pubForm.fin")}</label>
               {/* La fin se choisit aussi. Elle ne pilote pas une grandeur à
                   elle : elle fixe la même durée que le curseur, par l'autre
                   bout. Une date hors des bornes est ramenée dedans plutôt que
@@ -592,24 +593,23 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 reviendrait à chiffrer un choix que personne n'a fait. */}
             {sansCiblage ? (
               <>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Prix</div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>{t("pubForm.prix")}</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "-0.02em" }}>
-                  Choisissez un territoire
+                  {t("pubForm.choisirTerritoire")}
                 </div>
                 <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.55 }}>
-                  Une région, quelques cantons, ou toute la Suisse. Le prix
-                  s&apos;affiche dès que le territoire est choisi.
+                  {t("pubForm.territoireAide")}
                 </p>
               </>
             ) : (
               <>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Prix, payé une fois</div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>{t("pubForm.prixUneFois")}</div>
                 <div style={{ fontSize: 30, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em" }}>CHF {prix}</div>
                 <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.55 }}>
-                  CHF {tarifJour} par jour pendant {durationDays} jours.
+                  {t("pubForm.detailPrix", { tarif: tarifJour, n: durationDays })}
                   {couvreToutLePays
-                    ? " Le tarif couvre toute la Suisse ; viser quelques cantons le réduit."
-                    : ` Le tarif suit le territoire visé : ${selectedCantons.length} canton${selectedCantons.length > 1 ? "s" : ""} sur ${CANTONS.length}.`}
+                    ? t("pubForm.tarifSuisse")
+                    : t("pubForm.tarifTerritoire", { n: t("pubForm.nCantonsCourt", { n: selectedCantons.length }), total: CANTONS.length })}
                 </p>
               </>
             )}
@@ -637,15 +637,15 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             className="btn btn-marque btn-lg"
             style={{ flex: 1, fontSize: "clamp(13px, 3.5vw, 16px)", fontWeight: 800 }}>
             {pending
-              ? "Envoi en cours…"
+              ? t("pubForm.envoi")
               : sansCiblage
-                ? "Choisissez un territoire"
-                : `Payer CHF ${prix}`}
+                ? t("pubForm.choisirTerritoire")
+                : t("pubForm.payer", { prix })}
           </button>
-          <Link href="/profile/ads" className="btn btn-fantome">Annuler</Link>
+          <Link href="/profile/ads" className="btn btn-fantome">{t("pubForm.annuler")}</Link>
         </div>
         <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 12, textAlign: "center", lineHeight: 1.6 }}>
-          Paiement sécurisé par Stripe · Vous serez redirigé vers le paiement après soumission
+          {t("pubForm.basPage")}
         </p>
       </form>
     </div>

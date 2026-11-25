@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getUser, createClient } from "@/lib/supabase/server";
+import { tRequete, langueRequete } from "@/i18n/requete";
 
 export async function POST(request: Request) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
   try {
     if (!process.env.STRIPE_SECRET_KEY) {
-      return NextResponse.json({ error: "Stripe non configuré" }, { status: 500 });
+      return NextResponse.json({ error: (await tRequete())("pubs.eStripe") }, { status: 500 });
     }
 
     const user = await getUser();
-    if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    if (!user) return NextResponse.json({ error: (await tRequete())("pubs.eAuth") }, { status: 401 });
 
     const { campaign_id } = await request.json() as { campaign_id?: string };
     if (!campaign_id) return NextResponse.json({ error: "campaign_id requis" }, { status: 400 });
@@ -25,29 +26,31 @@ export async function POST(request: Request) {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (!campaign) return NextResponse.json({ error: "Campagne introuvable" }, { status: 404 });
+    if (!campaign) return NextResponse.json({ error: (await tRequete())("pubs.eIntrouvable2") }, { status: 404 });
     if (campaign.status !== "payment_pending") {
-      return NextResponse.json({ error: "Cette campagne a déjà été payée" }, { status: 409 });
+      return NextResponse.json({ error: (await tRequete())("pubs.eDejaPayee") }, { status: 409 });
     }
 
     const totalCents = Math.round(Number(campaign.total_budget_chf) * 100);
     if (totalCents < 500) {
       // Garde-fou : Stripe refuse les montants dérisoires, et un forfait
       // valide vaut au moins vingt et un francs.
-      return NextResponse.json({ error: "Montant invalide" }, { status: 400 });
+      return NextResponse.json({ error: (await tRequete())("pubs.eMontant") }, { status: 400 });
     }
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+    const [tr, langue] = await Promise.all([tRequete(), langueRequete()]);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      locale: langue === "de" ? "de" : "fr",
       customer_email: user.email ?? undefined,
       line_items: [{
         price_data: {
           currency: "chf",
           product_data: {
-            name: `Workie Ads : ${campaign.headline}`,
-            description: `Budget total campagne publicitaire`,
+            name: tr("stripe.pubNom", { titre: campaign.headline }),
+            description: tr("stripe.pubDescription"),
           },
           unit_amount: totalCents,
         },
@@ -67,7 +70,7 @@ export async function POST(request: Request) {
     });
 
     if (!session.url) {
-      return NextResponse.json({ error: "Stripe n'a pas retourné d'URL" }, { status: 500 });
+      return NextResponse.json({ error: (await tRequete())("pubs.eStripeUrl") }, { status: 500 });
     }
 
     return NextResponse.json({ url: session.url });

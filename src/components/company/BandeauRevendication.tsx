@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Building2, ArrowRight } from "lucide-react";
+import { useT } from "@/i18n/FournisseurLangue";
 
 /**
  * Arrivée depuis « Trouvez votre entreprise » (?gerer=1) : la personne voit
@@ -12,9 +13,10 @@ import { Building2, ArrowRight } from "lucide-react";
  */
 export function BandeauRevendication({ slug, dejaGeree }: { slug: string; dejaGeree: boolean }) {
   const params = useSearchParams();
+  const t = useT();
   if (params.get("gerer") !== "1") return null;
   return (
-    <div role="region" aria-label="Gérer cette fiche" style={{
+    <div role="region" aria-label={t("divers.gererFiche")} style={{
       maxWidth: 1100, margin: "16px auto 0", padding: "0 16px",
     }}>
       <div style={{
@@ -26,19 +28,19 @@ export function BandeauRevendication({ slug, dejaGeree }: { slug: string; dejaGe
         <div style={{ flex: "1 1 260px", minWidth: 0 }}>
           {dejaGeree ? (
             <>
-              <p style={{ fontWeight: 750, fontSize: 15 }}>Cette fiche est déjà gérée par l&apos;entreprise.</p>
-              <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>Pour obtenir un accès, adressez-vous à la personne qui la gère, ou écrivez à contact@workie.ch.</p>
+              <p style={{ fontWeight: 750, fontSize: 15 }}>{t("divers.dejaGeree")}</p>
+              <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>{t("divers.dejaGereeTexte")}</p>
             </>
           ) : (
             <>
-              <p style={{ fontWeight: 750, fontSize: 15 }}>C&apos;est bien votre entreprise ?</p>
-              <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>Vérifiez la fiche ci-dessous. Si c&apos;est la bonne, faites la demande pour la gérer.</p>
+              <p style={{ fontWeight: 750, fontSize: 15 }}>{t("divers.votreEntreprise")}</p>
+              <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>{t("divers.votreEntrepriseTexte")}</p>
             </>
           )}
         </div>
         {!dejaGeree && (
           <Link href={`/revendiquer/${slug}`} className="btn btn-marque">
-            Oui, gérer cette fiche <ArrowRight size={15} aria-hidden="true" />
+            {t("divers.ouiGerer")} <ArrowRight size={15} aria-hidden="true" />
           </Link>
         )}
       </div>

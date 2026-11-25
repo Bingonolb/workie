@@ -11,13 +11,13 @@ import { ApercuSwipe } from "@/components/ApercuSwipe";
 import { PiedAccueil } from "@/components/PiedAccueil";
 import { StylesLanding, NavLanding } from "@/components/StylesLanding";
 import { RechercheRevendication } from "@/app/[lang]/pour-les-entreprises/RechercheRevendication";
-import { getApercuEntreprises } from "@/lib/apercuAccueil";
+import { getApercuEntreprises, localiserApercu } from "@/lib/apercuAccueil";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { revendicationOuverte, accueilCompact, offresSynchro } from "@/lib/ouverture";
 import { AccueilCompact } from "@/components/AccueilCompact";
 import { fetchGridPage } from "@/lib/actions/companies";
 import type { Company } from "@/lib/types";
-import { langueDeLaPage } from "@/i18n/page";
+import { langueDeLaPage, tServeur } from "@/i18n/page";
 
 export const revalidate = 300; // ISR — redirect for logged-in users handled in middleware
 
@@ -65,7 +65,9 @@ export default async function Home() {
       secteurs={[...secteurs].sort((a, b) => a.localeCompare(b, "fr"))} />;
   }
 
-  const [counts, apercu, secteursEnLigne] = await Promise.all([getLandingCounts(), getApercuEntreprises(), getSecteursEnLigne()]);
+  const [counts, apercuFr, secteursEnLigne, t, langue] = await Promise.all([getLandingCounts(), getApercuEntreprises(), getSecteursEnLigne(), tServeur(), langueDeLaPage()]);
+  const apercu = await localiserApercu(apercuFr, langue);
+  const loc = langue === "de" ? "de-CH" : "fr-CH";
   const nCompanies = counts.companies;
   const nSecteurs = secteursEnLigne.length;
 
@@ -111,7 +113,7 @@ export default async function Home() {
               après lui. Un titre de page d'accueil se saisit d'un coup d'œil,
               il ne se lit pas. Le corps redescend de 58 à 50 px. */}
           <h1 className="hero-titre" style={{ fontSize: "clamp(32px, 4.4vw, 50px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.035em", marginBottom: 20, maxWidth: 560 }}>
-            Chercher du travail devient passionnant.
+            {t("landing.titre")}
           </h1>
 
           {/* Douze mots, pas vingt-sept. La phrase enumérait les données puis
@@ -119,15 +121,15 @@ export default async function Home() {
               demande une. Elle dit maintenant d'où viennent les notes, ce qui
               est la seule chose qu'un titre ne peut pas porter. */}
           <p className="hero-accroche" style={{ fontSize: "clamp(15.5px, 1.4vw, 17.5px)", color: "var(--text-sub)", maxWidth: 470, lineHeight: 1.6, marginBottom: 32 }}>
-            Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d&apos;emploi.
+            {t("landing.accroche")}
           </p>
 
           <div className="hero-cta-row" style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 34 }}>
             <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 26px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
-              Consulter les entreprises <ArrowRight size={17} aria-hidden="true" />
+              {t("landing.consulter")} <ArrowRight size={17} aria-hidden="true" />
             </Link>
             <Link href="/signup" style={{ display: "inline-flex", alignItems: "center", padding: "14px 24px", borderRadius: 10, border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 15.5, textDecoration: "none" }}>
-              Créer un compte
+              {t("landing.creerCompte")}
             </Link>
           </div>
 
@@ -145,9 +147,9 @@ export default async function Home() {
               // fonctionnement, pas de ce qui décide quelqu'un à entrer. Le
               // détail reste dans « Chercher, comparer, contribuer », où il est
               // à sa place.
-              { valeur: nCompanies.toLocaleString("fr-CH"), libelle: "entreprises" },
-              { valeur: "26", libelle: "cantons" },
-              { valeur: String(nSecteurs), libelle: "secteurs" },
+              { valeur: nCompanies.toLocaleString(loc), libelle: t("landing.entreprises") },
+              { valeur: "26", libelle: t("landing.cantons") },
+              { valeur: String(nSecteurs), libelle: t("landing.secteurs") },
             ].map(({ valeur, libelle }, i) => (
               <div key={libelle} style={{
                 // Filets verticaux plutôt que quatre blocs posés côte à côte :
@@ -194,7 +196,7 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700, textWrap: "balance" }}>
-            {nCompanies} entreprises en Suisse.
+            {t("landing.bande1", { n: nCompanies })}
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 700, marginTop: 18, textWrap: "balance" }}>
             {/* Cette phrase a d'abord répété trois éléments déjà lus plus haut,
@@ -202,7 +204,7 @@ export default async function Home() {
                 donne maintenant le cas concret qui justifie le titre : c'est
                 l'écart entre deux notes globales identiques qui rend le détail
                 utile, et ça, une généralité ne peut pas le montrer. */}
-            Vous avez l&apos;impression de toujours voir les mêmes offres ? Ici, ce ne sera jamais le cas.
+            {t("landing.bande1Texte")}
           </p>
         </div>
       </section>
@@ -219,7 +221,7 @@ export default async function Home() {
           chaque semaine. */}
       <section className="landing-section landing-ton" style={{ padding: "96px 24px" }}>
         <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-          <p className="landing-eyebrow">Postuler</p>
+          <p className="landing-eyebrow">{t("landing.postuler")}</p>
           {/* Le vrai écart avec un site d'annonces, et donc la raison d'être de
               cette section. Un site d'annonces ne peut montrer que ce qu'on lui
               a confié : son catalogue s'arrête aux employeurs qui ont choisi de
@@ -239,10 +241,10 @@ export default async function Home() {
               les offres d'un employeur donne, dont on voit la totalite parce
               qu'on va les lire chez lui. C'est ce que dit le chapeau, et c'est
               ce que le titre annonce maintenant. */}
-          <h2 className="landing-h2 avec-chapo">Plus qu&apos;une annonce.</h2>
+          <h2 className="landing-h2 avec-chapo">{t("landing.plusQuUne")}</h2>
 
           <p className="landing-chapo">
-            Chaque offre a une entreprise derrière elle. Rencontrez-la d&apos;abord.
+            {t("landing.chapo")}
           </p>
 
           {/* Les quatre questions qu'on se pose en cherchant du travail (où
@@ -251,14 +253,10 @@ export default async function Home() {
               l'ordre où on les rencontre. */}
           <div className="landing-quatre">
             {[
-              { etape: "Trouvez", titre: "Les entreprises autour de vous",
-                desc: "Par canton, par ville, par secteur. Y compris celles qui recrutent seulement sur leur propre site." },
-              { etape: "Découvrez", titre: "L'essentiel sur chacune",
-                desc: "Ce qu'elle fait, où elle se trouve, dans quelle langue on y travaille." },
-              { etape: "Sauvegardez", titre: "Vos favoris, au même endroit",
-                desc: "Une flamme, et l'entreprise rejoint vos favoris." },
-              { etape: "Postulez", titre: "Directement chez elle",
-                desc: "Tous ses postes ouverts, sur son site." },
+              { etape: t("landing.e1"), titre: t("landing.e1t"), desc: t("landing.e1d") },
+              { etape: t("landing.e2"), titre: t("landing.e2t"), desc: t("landing.e2d") },
+              { etape: t("landing.e3"), titre: t("landing.e3t"), desc: t("landing.e3d") },
+              { etape: t("landing.e4"), titre: t("landing.e4t"), desc: t("landing.e4d") },
             ].map(({ etape, titre, desc }) => (
               <div key={etape} className="landing-parcours-etape">
                 <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--brand)", marginBottom: 12 }}>
@@ -283,9 +281,9 @@ export default async function Home() {
       <section className="landing-section" style={{ padding: "96px 24px" }}>
         <div className="landing-pourqui">
           <div>
-            <p className="landing-eyebrow" style={{ textAlign: "left" }}>Pour qui</p>
+            <p className="landing-eyebrow" style={{ textAlign: "left" }}>{t("landing.pourQui")}</p>
             <h2 style={{ fontSize: "clamp(24px, 3.4vw, 36px)", fontWeight: 700, letterSpacing: "-0.032em", lineHeight: 1.18, maxWidth: 380, marginBottom: 26 }}>
-              Où que vous en soyez.
+              {t("landing.ouQue")}
             </h2>
             {/* Éventail de trois fiches réelles.
                 Une photographie d'illustration occupait cette place : elle
@@ -299,14 +297,10 @@ export default async function Home() {
               retrait suffisent à séparer les entrées, et le texte respire. */}
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
-              { Icone: GraduationCap, titre: "Vous terminez vos études",
-                desc: "Les employeurs de votre domaine, même ceux que vous ne connaissez pas." },
-              { Icone: Briefcase, titre: "Vous envisagez de changer",
-                desc: "Qui recrute dans votre métier, en quelques minutes." },
-              { Icone: Landmark, titre: "Vous êtes dans le public",
-                desc: "Le privé, secteur par secteur." },
-              { Icone: IconeMaison, titre: "Vous reprenez une activité",
-                desc: "Les employeurs de votre canton, gardés pour le bon moment." },
+              { Icone: GraduationCap, titre: t("landing.p1t"), desc: t("landing.p1d") },
+              { Icone: Briefcase, titre: t("landing.p2t"), desc: t("landing.p2d") },
+              { Icone: Landmark, titre: t("landing.p3t"), desc: t("landing.p3d") },
+              { Icone: IconeMaison, titre: t("landing.p4t"), desc: t("landing.p4d") },
             ].map(({ Icone, titre, desc }, i) => (
               <div key={titre} style={{
                 display: "flex", gap: 18, padding: "22px 0",
@@ -332,8 +326,8 @@ export default async function Home() {
           et aucun jugement publie. */}
       <section className="landing-section landing-ton" style={{ padding: "88px 24px" }}>
         <div style={{ maxWidth: 940, margin: "0 auto" }}>
-          <p className="landing-eyebrow">Notre promesse</p>
-          <h2 className="landing-h2">Vous savez ce que vous lisez.</h2>
+          <p className="landing-eyebrow">{t("landing.promesse")}</p>
+          <h2 className="landing-h2">{t("landing.savez")}</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 22 }}>
             {[
               // « Aucun texte libre » énonçait une interdiction, et la suite
@@ -341,12 +335,9 @@ export default async function Home() {
               // tournures négatives pour décrire un choix qui est positif. Le
               // fait est que les avis sont chiffrés, donc comparables. C'est ce
               // que la carte dit maintenant.
-              { Icone: Gauge, titre: "Des informations vérifiées",
-                desc: "Le nom, le secteur, le lieu et le lien officiel sont contrôlés avant publication." },
-              { Icone: ShieldCheck, titre: "Rien entre vous et l'employeur",
-                desc: "Vous postulez chez lui, directement." },
-              { Icone: Lock, titre: "Des faits",
-                desc: "Le métier, le lieu, la langue. Le jugement vous appartient." },
+              { Icone: Gauge, titre: t("landing.g1t"), desc: t("landing.g1d") },
+              { Icone: ShieldCheck, titre: t("landing.g2t"), desc: t("landing.g2d") },
+              { Icone: Lock, titre: t("landing.g3t"), desc: t("landing.g3d") },
             ].map(({ Icone, titre, desc }) => (
               <div key={titre}>
                 <Icone size={20} color="var(--brand)" strokeWidth={1.75} aria-hidden="true" />
@@ -367,10 +358,10 @@ export default async function Home() {
         <div className="landing-bande-voile" />
         <div className="landing-bande-texte">
           <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700, textWrap: "balance" }}>
-            26 cantons, 4 langues, {nCompanies.toLocaleString("fr-CH")} employeurs.
+            {t("landing.bande2", { n: nCompanies.toLocaleString(loc) })}
           </p>
           <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.72)", lineHeight: 1.65, maxWidth: 700, marginTop: 18, textWrap: "balance" }}>
-            Des grands groupes aux équipes de 3 personnes. Au même endroit.
+            {t("landing.bande2Texte")}
           </p>
         </div>
       </section>
@@ -379,17 +370,17 @@ export default async function Home() {
       <section className="landing-section landing-accent" style={{ padding: "92px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
           <h2 style={{ fontSize: "clamp(24px, 3.6vw, 34px)", fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 14 }}>
-            Commencez par votre secteur.
+            {t("landing.commencez")}
           </h2>
           <p style={{ fontSize: 15.5, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 32 }}>
-            Gratuit. Sans inscription.
+            {t("landing.gratuit")}
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/explore" style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 30px", borderRadius: 10, background: "var(--brand)", color: "#fff", fontWeight: 650, fontSize: 15.5, textDecoration: "none" }}>
-              Consulter les entreprises <ArrowRight size={17} aria-hidden="true" />
+              {t("landing.consulter")} <ArrowRight size={17} aria-hidden="true" />
             </Link>
             <Link href="/ranking" style={{ display: "inline-flex", alignItems: "center", padding: "14px 26px", borderRadius: 10, border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 15.5, textDecoration: "none" }}>
-              Voir le classement
+              {t("landing.classement")}
             </Link>
           </div>
         </div>
@@ -401,33 +392,31 @@ export default async function Home() {
       <section className="landing-section" style={{ padding: "88px 24px", borderTop: "1px solid var(--border)" }}>
         <div className="landing-pub" style={{ maxWidth: 1040, margin: "0 auto" }}>
           <div>
-            <p className="landing-eyebrow" style={{ textAlign: "left" }}>Employeurs</p>
+            <p className="landing-eyebrow" style={{ textAlign: "left" }}>{t("landing.employeurs")}</p>
             <h2 style={{ fontSize: "clamp(23px, 3.2vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", lineHeight: 1.18, marginBottom: 14 }}>
-              Votre entreprise est déjà sur Workie. Prenez-en les commandes.
+              {t("landing.commandes")}
             </h2>
             <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 500 }}>
-              Revendiquez votre fiche : présentez l&apos;entreprise avec vos mots et vos images,
-              menez les candidats droit vers votre page carrière, et voyez qui s&apos;intéresse
-              à vous, jour après jour.
+              {t("landing.revendiquez")}
             </p>
             <p style={{ fontSize: 15, fontWeight: 700, marginBottom: 22 }}>
-              129 CHF par mois <span style={{ fontWeight: 500, color: "var(--text-muted)" }}>· ou 1 290 CHF par an, 2 mois offerts</span>
+              {t("landing.prixMois")} <span style={{ fontWeight: 500, color: "var(--text-muted)" }}>{t("landing.prixAn")}</span>
             </p>
             <RechercheRevendication />
             <Link href="/pour-les-entreprises" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
-              Tout savoir sur l&apos;offre entreprise <ArrowRight size={15} aria-hidden="true" />
+              {t("landing.toutSavoir")} <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
           <div className="landing-ads-aside">
             {[
-              { t: "Une fiche à votre image", d: "Présentation, bannière, logo, langues de travail et lien carrière." },
-              { t: "Votre fréquentation", d: "Visites par jour, favoris, clics vers vos offres et cantons des visiteurs." },
-              { t: "Le badge vérifié", d: "Les candidats savent que la fiche est tenue par l'entreprise." },
-            ].map(({ t, d }) => (
-              <div key={t} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
+              { t: t("landing.f1t"), d: t("landing.f1d") },
+              { t: t("landing.f2t"), d: t("landing.f2d") },
+              { t: t("landing.f3t"), d: t("landing.f3d") },
+            ].map(({ t: titre, d }) => (
+              <div key={titre} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <Check size={16} color="var(--brand)" strokeWidth={2.5} aria-hidden="true" style={{ marginTop: 2, flexShrink: 0 }} />
                 <div>
-                  <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{t}</p>
+                  <p style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>{titre}</p>
                   <p style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.5 }}>{d}</p>
                 </div>
               </div>
@@ -443,10 +432,10 @@ export default async function Home() {
           <div className="landing-bande-voile" />
           <div className="landing-bande-texte">
             <p style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 700, lineHeight: 1.3, letterSpacing: "-0.025em", color: "#fff", maxWidth: 700, textWrap: "balance" }}>
-              Les candidats vous cherchent déjà.
+              {t("landing.vousCherchent")}
             </p>
             <p style={{ fontSize: "clamp(14px, 1.5vw, 16.5px)", color: "rgba(255,255,255,0.75)", lineHeight: 1.65, maxWidth: 640, marginTop: 16 }}>
-              Avant de postuler, ils ouvrent votre fiche. C&apos;est souvent la première chose qu&apos;ils lisent de vous.
+              {t("landing.avantPostuler")}
             </p>
           </div>
         </section>
@@ -459,23 +448,19 @@ export default async function Home() {
       <section className="landing-section" style={{ padding: "88px 24px", borderTop: "1px solid var(--border)" }}>
         <div className="landing-pub" style={{ maxWidth: 1040, margin: "0 auto" }}>
           <div>
-            <p className="landing-eyebrow" style={{ textAlign: "left" }}>Annonceurs</p>
+            <p className="landing-eyebrow" style={{ textAlign: "left" }}>{t("landing.annonceurs")}</p>
             <h2 style={{ fontSize: "clamp(23px, 3.2vw, 32px)", fontWeight: 750, letterSpacing: "-0.03em", lineHeight: 1.18, marginBottom: 14 }}>
-              Votre publicité au milieu de leur recherche.
+              {t("landing.pubMilieu")}
             </h2>
             <p style={{ fontSize: 15, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 22, maxWidth: 500 }}>
-              Changer de travail est une décision qui en entraîne beaucoup d&apos;autres :
-              déménager, acheter une voiture, revoir son assurance, reprendre une
-              formation. Les gens qui vivent ce moment sont ici, et ils sont attentifs à
-              tout ce qui peut les aider à le traverser. Votre publicité paraît là, ciblée par
-              canton et par secteur.
+              {t("landing.pubTexte")}
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 26 }}>
               {[
-                "Ciblage par canton et secteur",
-                "7, 14 ou 30 jours",
-                "Paiement unique",
-                "Statistiques en temps réel",
+                t("landing.a1"),
+                t("landing.a2"),
+                t("landing.a3"),
+                t("landing.a4"),
               ].map(f => (
                 <span key={f} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 550, padding: "5px 12px", borderRadius: 50, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text-muted)" }}>
                   <Check size={12} color="var(--brand)" strokeWidth={2.5} aria-hidden="true" /> {f}
@@ -483,7 +468,7 @@ export default async function Home() {
               ))}
             </div>
             <Link href="/annonceurs" className="btn btn-clair">
-              Faire de la publicité <ArrowRight size={16} aria-hidden="true" />
+              {t("landing.fairePub")} <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
           {/* La pile mêlant fiches et annonces reste sur la page Annonceurs.
@@ -492,8 +477,8 @@ export default async function Home() {
               silhouettes disent l'emplacement, ce qui suffit. */}
           <div className="landing-ads-aside">
             {[
-              { label: "Format carré", desc: "Dans la grille des entreprises", forme: "carre" },
-              { label: "Format plein écran", desc: "Dans le swipe, toutes les dix cartes", forme: "plein" },
+              { label: t("landing.carre"), desc: t("landing.carreD"), forme: "carre" },
+              { label: t("landing.plein"), desc: t("landing.pleinD"), forme: "plein" },
             ].map(({ label, desc, forme }) => (
               <div key={label} style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "15px 16px", display: "flex", gap: 14, alignItems: "flex-start" }}>
                 <div className={`apercu-format apercu-${forme}`} aria-hidden="true">

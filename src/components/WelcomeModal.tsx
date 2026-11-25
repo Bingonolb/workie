@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Flame, Briefcase, Search } from "lucide-react";
+import { useT } from "@/i18n/FournisseurLangue";
 
 export function WelcomeModal() {
   const searchParams = useSearchParams();
+  const t = useT();
   const router = useRouter();
   const pathname = usePathname();
   // Tiré de l'URL, connue dès le premier rendu. Passer par un effet faisait
@@ -50,7 +52,7 @@ export function WelcomeModal() {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Bienvenue sur Workie"
+        aria-label={t("divers.bienvenueAria")}
         style={{
           position: "fixed", top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
@@ -71,7 +73,7 @@ export function WelcomeModal() {
 
           <div style={{ position: "relative", textAlign: "center" }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.8)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Compte confirmé
+              {t("divers.compteConfirme")}
             </div>
           </div>
         </div>
@@ -79,23 +81,23 @@ export function WelcomeModal() {
         {/* Content */}
         <div style={{ padding: "32px 36px 36px" }}>
           <h2 style={{ margin: "0 0 12px", fontSize: 26, fontWeight: 900, color: "#111827", letterSpacing: "-0.03em", lineHeight: 1.2 }}>
-            {firstName ? `Bienvenue ${firstName}.` : "Bienvenue sur Workie."}
+            {firstName ? t("divers.bienvenuePrenom", { prenom: firstName }) : t("divers.bienvenue")}
           </h2>
 
           <p style={{ margin: "0 0 24px", fontSize: 15, color: "#6b7280", lineHeight: 1.65 }}>
-            Votre compte est prêt. Explorez les entreprises suisses, ajoutez en favori celles qui vous correspondent, et retrouvez-les quand vous voulez.
+            {t("divers.bienvenueTexte")}
           </p>
 
           {/* Features list */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
             {[
-              { Icone: Flame, text: "Sauvegardez les entreprises qui vous intéressent" },
-              { Icone: Briefcase, text: "Et leurs offres d'emploi" },
+              { Icone: Flame, text: t("divers.b1") },
+              { Icone: Briefcase, text: t("divers.b2") },
               // Le compte etait ecrit en dur, et annoncait 1 733 entreprises
               // pour 1 032 reelles : un chiffre fige derive du jour ou on le
               // recopie. Une borne basse reste vraie quand le catalogue
               // grandit, et ne peut pas mentir a la hausse.
-              { Icone: Search, text: "Des entreprises suisses" },
+              { Icone: Search, text: t("divers.b3") },
             ].map(f => (
               <div key={f.text} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f9fafb", border: "1px solid #f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
@@ -114,11 +116,11 @@ export function WelcomeModal() {
             letterSpacing: "-0.01em",
             boxShadow: "0 4px 20px rgba(139,92,246,0.35)",
           }}>
-            Explorer les entreprises →
+            {t("divers.explorer")}
           </button>
 
           <p style={{ margin: "14px 0 0", textAlign: "center", fontSize: 12, color: "#9ca3af" }}>
-            Toujours anonyme · Jamais de spam
+            {t("divers.anonyme")}
           </p>
         </div>
       </div>

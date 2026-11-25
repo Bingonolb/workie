@@ -1,3 +1,7 @@
+"use client";
+
+import { useT } from "@/i18n/FournisseurLangue";
+
 /**
  * La forme des deux formats d'annonce, dessinée.
  *
@@ -13,6 +17,7 @@
  *
  * L'illustration montre le contexte. Le format carré est une tuile parmi
  * quatre, parce qu'il s'insère dans la grille d'exploration entre les fiches ;
+import { useT } from "@/i18n/FournisseurLangue";
  * le format swipe occupe tout le cadre, parce qu'il prend l'écran. C'est
  * exactement ce que raconte le texte posé dessous, montré au lieu d'être
  * décrit.
@@ -35,13 +40,13 @@ type Props = {
   variante?: "glyphe" | "illustration";
 };
 
-const LIBELLES: Record<Format, string> = {
-  square: "Format carré",
-  swipe: "Format plein écran",
-};
+const LIBELLES = {
+  square: "divers.formatCarre",
+  swipe: "divers.formatPleinEcran",
+} as const;
 
 export function SilhouetteFormat({ format, taille = 14, variante = "glyphe" }: Props) {
-  const titre = LIBELLES[format];
+  const titre = useT()(LIBELLES[format]);
 
   if (variante === "illustration") {
     return (

@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useState } from "react";
 import Link from "next/link";
+import { useT } from "@/i18n/FournisseurLangue";
 
 // Cookie-based consent: persists on iOS Safari even after localStorage is cleared (ITP).
 const CONSENT_COOKIE = "wk_consent";
@@ -23,6 +24,7 @@ export function CookieBanner() {
   // Le premier rendu reste vide pour reproduire le HTML du serveur — la page
   // est servie depuis un cache, elle ne connaît pas ce cookie — et la décision
   // est prise avant peinture.
+  const t = useT();
   const [visible, setVisible] = useState(false);
 
   useLayoutEffect(() => {
@@ -38,7 +40,7 @@ export function CookieBanner() {
   if (!visible) return null;
 
   return (
-    <div role="dialog" aria-label="Consentement aux cookies" aria-live="polite" style={{
+    <div role="dialog" aria-label={t("divers.cookiesAria")} aria-live="polite" style={{
       position: "fixed",
       bottom: "calc(env(safe-area-inset-bottom) + 74px)",
       left: 16, right: 16,
@@ -51,9 +53,9 @@ export function CookieBanner() {
       display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12,
     }}>
       <p style={{ flex: 1, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5, margin: 0, minWidth: 200 }}>
-        Workie utilise uniquement des cookies essentiels (session, thème).{" "}
+        {t("divers.cookiesTexte")}{" "}
         <Link href="/confidentialite" style={{ color: "#8b5cf6", textDecoration: "none", fontWeight: 600 }}>
-          En savoir plus
+          {t("divers.enSavoirPlus")}
         </Link>
       </p>
       <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
@@ -62,14 +64,14 @@ export function CookieBanner() {
           background: "none", border: "1px solid var(--border)",
           borderRadius: 8, padding: "7px 14px", cursor: "pointer",
         }}>
-          Refuser
+          {t("divers.refuser")}
         </button>
         <button type="button" onClick={accept} style={{
           fontSize: 12, fontWeight: 700, color: "#fff",
           background: "#8b5cf6", border: "none",
           borderRadius: 8, padding: "7px 16px", cursor: "pointer",
         }}>
-          Accepter
+          {t("divers.accepter")}
         </button>
       </div>
     </div>

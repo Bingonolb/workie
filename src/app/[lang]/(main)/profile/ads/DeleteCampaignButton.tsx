@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
+import { useT } from "@/i18n/FournisseurLangue";
 
 /**
  * Supprime une campagne jamais payée.
@@ -19,6 +20,7 @@ export function DeleteCampaignButton({
   campaignId: string;
   onDelete: (id: string) => Promise<{ error?: string }>;
 }) {
+  const t = useT();
   const [confirme, setConfirme] = useState(false);
   const [erreur, setErreur] = useState("");
   const [enCours, demarrer] = useTransition();
@@ -40,16 +42,16 @@ export function DeleteCampaignButton({
         type="button"
         onClick={() => setConfirme(true)}
         style={boutonDiscret}
-        aria-label="Supprimer cette campagne"
+        aria-label={t("pubs.supprimerCampagne")}
       >
-        <Trash2 size={11} aria-hidden="true" /> Supprimer
+        <Trash2 size={11} aria-hidden="true" /> {t("pubs.supprimer")}
       </button>
     );
   }
 
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Supprimer&nbsp;?</span>
+      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{t("pubs.supprimerQ")}</span>
       <button type="button" onClick={supprimer} disabled={enCours} style={{
         ...boutonDiscret,
         color: "#ef4444",
@@ -57,10 +59,10 @@ export function DeleteCampaignButton({
         background: "rgba(239,68,68,0.08)",
         cursor: enCours ? "not-allowed" : "pointer",
       }}>
-        {enCours ? "…" : "Oui"}
+        {enCours ? "…" : t("pubs.oui")}
       </button>
       <button type="button" onClick={() => setConfirme(false)} disabled={enCours} style={boutonDiscret}>
-        Annuler
+        {t("pubs.annuler")}
       </button>
       {erreur && <span role="alert" style={{ fontSize: 11, color: "#ef4444" }}>{erreur}</span>}
     </span>

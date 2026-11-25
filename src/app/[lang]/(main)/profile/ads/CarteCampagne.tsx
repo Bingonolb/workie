@@ -6,6 +6,7 @@ import { PayUserCampaignButton } from "./PayUserCampaignButton";
 import { DeleteCampaignButton } from "./DeleteCampaignButton";
 import { SilhouetteFormat } from "@/components/ads/SilhouetteFormat";
 import { budgetPct, estExpiree, joursRestants, jour, etat } from "./etat";
+import type { Traduire } from "@/i18n/traduire";
 
 /**
  * Une campagne dans la liste.
@@ -17,15 +18,20 @@ import { budgetPct, estExpiree, joursRestants, jour, etat } from "./etat";
 export function CarteCampagne({
   c,
   onDelete,
+  t,
+  langue,
 }: {
   c: AdCampaign;
   onDelete: (id: string) => Promise<{ error?: string }>;
+  t: Traduire;
+  langue: string;
 }) {
-    const e = etat(c);
+    const e = etat(c, t);
+    const loc = langue === "de" ? "de-CH" : "fr-CH";
     const depense = Number(c.spent_chf);
     const pct = budgetPct(depense, Number(c.total_budget_chf));
     const expiree = estExpiree(c.end_date);
-    const restants = joursRestants(c.end_date);
+    const restants = joursRestants(c.end_date, t);
     // Relancer : une campagne jamais payée dont les dates sont passées, et une
   // campagne qui a fini sa diffusion. Dans les deux cas il n'y a plus rien à
   // faire sur celle-ci, et tout à refaire sur la suivante.
@@ -55,7 +61,7 @@ export function CarteCampagne({
             les clics atterrissaient sur le texte, et la carte
             paraissait inerte. Il passe au-dessus, la barre
             d'actions passe au-dessus de lui. */}
-        <Link href={`/profile/ads/${c.id}`} style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-label={`Voir la campagne ${c.headline}`} />
+        <Link href={`/profile/ads/${c.id}`} style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-label={t("pubs.voirCampagne", { titre: c.headline })} />
 
         <div style={{ display: "flex" }}>
           <div className="pub-carte-vignette" style={{ width: 96, flexShrink: 0, background: "var(--surface2)", position: "relative", overflow: "hidden" }}>
@@ -80,7 +86,7 @@ export function CarteCampagne({
                     ne décide pas, il a sa place dans le détail. */}
                 <p className="pub-carte-meta" style={{ fontSize: 12, color: "var(--text-muted)" }}>
                   CHF {Number(c.total_budget_chf).toFixed(0)}
-                  {c.start_date && <>{" · "}{jour(c.start_date)}{c.end_date ? ` au ${jour(c.end_date)}` : ""}</>}
+                  {c.start_date && <>{" · "}{c.end_date ? t("pubs.periodeAu", { du: jour(c.start_date, langue), au: jour(c.end_date, langue) }) : jour(c.start_date, langue)}</>}
                   {restants && <>{" · "}<span style={{ color: restants.urgent ? "#ef4444" : "var(--text-muted)", fontWeight: restants.urgent ? 700 : 400 }}>{restants.label}</span></>}
                 </p>
               </div>
@@ -92,12 +98,12 @@ export function CarteCampagne({
               {vues > 0 && (
                 <div style={{ display: "flex", gap: 16, flexShrink: 0 }}>
                   <div style={{ textAlign: "right" }}>
-                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{vues.toLocaleString("fr-CH")}</p>
-                    <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>vues</p>
+                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{vues.toLocaleString(loc)}</p>
+                    <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>{t("pubs.vues")}</p>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{clics.toLocaleString("fr-CH")}</p>
-                    <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>clics</p>
+                    <p style={{ fontSize: 16, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{clics.toLocaleString(loc)}</p>
+                    <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>{t("pubs.clics")}</p>
                   </div>
                 </div>
               )}
@@ -111,7 +117,7 @@ export function CarteCampagne({
                   <div style={{ height: "100%", width: `${pct}%`, background: pct >= 90 ? "#ef4444" : "var(--brand)", borderRadius: 50 }} />
                 </div>
                 <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                  CHF {depense.toFixed(2)} dépensés sur {Number(c.total_budget_chf).toFixed(0)} ({pct} %)
+                  {t("pubs.depenses", { depense: depense.toFixed(2), total: Number(c.total_budget_chf).toFixed(0), pct })}
                 </p>
               </div>
             )}
@@ -131,7 +137,7 @@ export function CarteCampagne({
           )}
           {c.status !== "payment_pending" && (
             <Link href={`/profile/ads/${c.id}`} className="btn btn-clair btn-sm">
-              Voir les stats
+              {t("pubs.voirStats")}
             </Link>
           )}
           <Link
@@ -142,8 +148,8 @@ export function CarteCampagne({
             className={aRelancer ? "btn btn-clair btn-sm" : "btn btn-fantome btn-sm"}
           >
             {aRelancer
-              ? <><RotateCcw size={11} aria-hidden="true" /> Relancer</>
-              : <><Copy size={11} aria-hidden="true" /> Dupliquer</>}
+              ? <><RotateCcw size={11} aria-hidden="true" /> {t("pubs.relancer")}</>
+              : <><Copy size={11} aria-hidden="true" /> {t("pubs.dupliquer")}</>}
           </Link>
           {/* La suppression s'écarte du bouton de paiement plutôt que de le
               jouxter : ce sont les deux actions les plus opposées de la carte,

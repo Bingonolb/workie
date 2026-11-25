@@ -2,15 +2,17 @@
 
 import { useTheme } from "@/providers/ThemeProvider";
 import { Moon, Sun } from "lucide-react";
+import { useT } from "@/i18n/FournisseurLangue";
 
 export function ThemeToggle() {
   const { theme, toggle } = useTheme();
+  const t = useT();
   return (
     <button
       type="button"
       onClick={toggle}
-      title={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
-      aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
+      title={theme === "dark" ? t("divers.modeClair") : t("divers.modeSombre")}
+      aria-label={theme === "dark" ? t("divers.modeClair") : t("divers.modeSombre")}
       style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         width: 34, height: 34, borderRadius: 8,
