@@ -499,5 +499,18 @@
     "errLimite": "Sie haben die Grenze von 5 Meldungen pro 24 Stunden erreicht.",
     "errDoublon": "Sie haben diesen Inhalt bereits gemeldet.",
     "errEnvoi": "Fehler beim Senden. Bitte versuchen Sie es erneut."
+  },
+  "erreur": {
+    "introuvable": "Diese Seite gibt es nicht",
+    "introuvableAide": "Die Unternehmen sind aber alle noch da.",
+    "explorerEntreprises": "Unternehmen entdecken",
+    "horsLigne": "Sie sind offline",
+    "unInstant": "Einen Moment",
+    "horsLigneAide": "Die Seite erscheint wieder, sobald die Verbindung zurück ist.",
+    "pasRepondu": "Etwas hat nicht geantwortet. Versuchen Sie es gleich nochmals.",
+    "reessayer": "Erneut versuchen",
+    "explorer": "Entdecken",
+    "malPasse": "Etwas ist schiefgelaufen",
+    "inattendue": "Ein unerwarteter Fehler ist aufgetreten. Unser Team wurde benachrichtigt."
   }
 }

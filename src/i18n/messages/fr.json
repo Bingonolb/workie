@@ -499,5 +499,18 @@
     "errLimite": "Vous avez atteint la limite de 5 signalements par 24h.",
     "errDoublon": "Vous avez déjà signalé ce contenu.",
     "errEnvoi": "Erreur lors de l'envoi. Veuillez réessayer."
+  },
+  "erreur": {
+    "introuvable": "Cette page n'existe pas",
+    "introuvableAide": "Les entreprises, elles, sont toujours là.",
+    "explorerEntreprises": "Explorer les entreprises",
+    "horsLigne": "Vous êtes hors ligne",
+    "unInstant": "Un instant",
+    "horsLigneAide": "La page reviendra dès que la connexion sera rétablie.",
+    "pasRepondu": "Quelque chose n'a pas répondu. Réessayez dans un moment.",
+    "reessayer": "Réessayer",
+    "explorer": "Explorer",
+    "malPasse": "Quelque chose s'est mal passé",
+    "inattendue": "Une erreur inattendue s'est produite. Notre équipe a été notifiée."
   }
 }

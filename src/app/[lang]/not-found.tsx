@@ -1,3 +1,6 @@
+"use client";
+
+import { useT } from "@/i18n/FournisseurLangue";
 import Link from "next/link";
 import { NavbarClient } from "@/components/NavbarClient";
 
@@ -8,6 +11,7 @@ import { NavbarClient } from "@/components/NavbarClient";
  * boutons. Il passe à l'encre, comme toute action qui ne demande rien.
  */
 export default function NotFound() {
+  const t = useT();
   return (
     <>
       <NavbarClient />
@@ -18,12 +22,12 @@ export default function NotFound() {
       }}>
         <p style={{ fontSize: 64, fontWeight: 900, color: "var(--text-muted)", lineHeight: 1, marginBottom: 12, letterSpacing: "-0.04em" }}>404</p>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 10, letterSpacing: "-0.02em" }}>
-          Cette page n&apos;existe pas
+          {t("erreur.introuvable")}
         </h1>
         <p style={{ fontSize: 14.5, color: "var(--text-muted)", marginBottom: 28, maxWidth: 340, lineHeight: 1.6 }}>
-          Les entreprises, elles, sont toujours là.
+          {t("erreur.introuvableAide")}
         </p>
-        <Link href="/explore" className="btn btn-encre">Explorer les entreprises</Link>
+        <Link href="/explore" className="btn btn-encre">{t("erreur.explorerEntreprises")}</Link>
       </div>
     </>
   );
