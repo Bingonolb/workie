@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ficheTestVisible } from "@/lib/fichesTest";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
@@ -31,7 +32,7 @@ export default async function PageRevendiquer({ params }: { params: Promise<{ sl
     getSecteursEnLigne(),
   ]);
   const c = data as { id: string; slug: string; name: string; sector: string; city: string; cover_url: string | null; cover_color: string | null; website_url: string | null } | null;
-  if (!c || !enLigne.includes(c.sector)) notFound();
+  if (!c || (!enLigne.includes(c.sector) && !ficheTestVisible(c.slug))) notFound();
 
   const etat = await etatRevendication(c.id);
   const langue = await langueDeLaPage();

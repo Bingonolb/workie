@@ -1,6 +1,7 @@
 "use server";
 
 import { unstable_cache } from "next/cache";
+import { ficheTestVisible } from "@/lib/fichesTest";
 import { localiserEntreprises } from "@/lib/traductionsEntreprises";
 import type { Langue } from "@/i18n/config";
 import { createClient } from "@/lib/supabase/server";
@@ -245,7 +246,8 @@ export const getCachedCompany = unstable_cache(
       getSecteursEnLigne(),
     ]);
     // Une fiche d'une catégorie pas encore publiée n'existe pas pour le public.
-    if (data && !enLigne.includes((data as unknown as { sector: string }).sector)) return null;
+    const ligne = data as unknown as { sector: string; slug: string } | null;
+    if (ligne && !enLigne.includes(ligne.sector) && !ficheTestVisible(ligne.slug)) return null;
     return data as Company | null;
   },
   ["company-v2"],
