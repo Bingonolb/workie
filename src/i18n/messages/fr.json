@@ -803,7 +803,10 @@
     "ePaiementIndispo": "Le paiement n'est pas disponible pour le moment.",
     "eNonVerifiee": "Cette demande n'est pas encore vérifiée.",
     "ePaiement": "Le paiement n'a pas pu démarrer.",
-    "ePaiementReessayer": "Le paiement n'a pas pu démarrer. Réessayez."
+    "ePaiementReessayer": "Le paiement n'a pas pu démarrer. Réessayez.",
+    "telephone": "Téléphone professionnel",
+    "telephoneAide": "Pour vous rappeler si nous devons vérifier la demande.",
+    "eTelephone": "Indiquez un numéro de téléphone valide."
   },
   "espace": {
     "titre": "Espace entreprise",

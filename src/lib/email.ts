@@ -1,6 +1,7 @@
 "use server";
 
 import { Resend } from "resend";
+import { SITE_URL } from "@/lib/siteUrl";
 import { traducteur } from "@/i18n/serveur";
 import { estOuverte, type Langue } from "@/i18n/config";
 import type { Traduire } from "@/i18n/traduire";
@@ -27,7 +28,9 @@ import type { Traduire } from "@/i18n/traduire";
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const FROM = "Workie <onboarding@workie.ch>";
-const BASE = "https://www.workie.ch";
+// Les liens mènent au site d'où part l'e-mail : un e-mail envoyé depuis
+// l'adresse d'essai renvoie à l'essai, sinon une fiche de test y serait introuvable.
+const BASE = SITE_URL;
 
 const ENCRE = "#101319";
 const MARQUE = "#4f3cc9";
@@ -89,7 +92,7 @@ function gabarit({ titre, accroche, paragraphes, cta, apres, langue, t }: Gabari
 <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border:1px solid ${FILET};border-radius:16px;overflow:hidden;">
   <tr>
     <td style="background:${ENCRE};padding:28px 36px;">
-      <img src="${BASE}/email-logo.png" width="134" height="36" alt="Workie" style="display:block;border:0;height:36px;width:auto;" />
+      <img src="https://www.workie.ch/email-logo.png" width="134" height="36" alt="Workie" style="display:block;border:0;height:36px;width:auto;" />
     </td>
   </tr>
   <tr>

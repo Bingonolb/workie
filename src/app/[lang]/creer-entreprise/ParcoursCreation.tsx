@@ -284,6 +284,11 @@ export function ParcoursCreation({ connecte, etatInitial, secteurs, cantons }: {
           <input name="email" type="email" required autoComplete="email" placeholder={t("revend.emailExemple", { domaine: "entreprise.ch" })} style={champ} />
           <span style={aide}>{t("creation.aideCode")}</span>
         </label>
+        <label>
+          <span style={etiquette}>{t("revend.telephone")}</span>
+          <input name="telephone" type="tel" required autoComplete="tel" placeholder="+41 32 000 00 00" style={champ} />
+          <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, display: "block" }}>{t("revend.telephoneAide")}</span>
+        </label>
         {!connecte && (
           <label><span style={etiquette}>{t("revend.motDePasse")}</span>
             <input name="mot_de_passe" type="password" required minLength={8} autoComplete="new-password" style={champ} />

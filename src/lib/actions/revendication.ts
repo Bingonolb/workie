@@ -1,6 +1,7 @@
 "use server";
 
 import { createHash, randomInt } from "crypto";
+import { SITE_URL } from "@/lib/siteUrl";
 import Stripe from "stripe";
 import { cookies, headers } from "next/headers";
 import { createClient, getUser } from "@/lib/supabase/server";
@@ -24,12 +25,13 @@ import { langueRequete, tRequete } from "@/i18n/requete";
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const telephoneValide = (x: string) => /^\+?[0-9 ()./-]{9,20}$/.test(x) && x.replace(/\D/g, "").length >= 9;
 const DUREE_CODE_MIN = 30;
 const ESSAIS_MAX = 5;
 const DEMANDES_PAR_JOUR = 5;
 
 type Ligne = {
-  id: string; company_id: string; user_id: string; prenom: string; nom: string; fonction: string;
+  id: string; company_id: string; user_id: string; prenom: string; nom: string; fonction: string; telephone?: string | null;
   email_pro: string; methode: "domaine" | "manuel"; statut: string; code_hash: string | null;
   code_expire: string | null; essais: number; cree_le: string;
 };
@@ -118,11 +120,13 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
     const prenom = String(formData.get("prenom") ?? "").trim().slice(0, 80);
     const nom = String(formData.get("nom") ?? "").trim().slice(0, 80);
     const fonction = String(formData.get("fonction") ?? "").trim().slice(0, 120);
+    const telephone = String(formData.get("telephone") ?? "").trim().slice(0, 30);
     const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 254);
     const motDePasse = String(formData.get("mot_de_passe") ?? "");
 
     if (!UUID.test(companyId)) return { error: t("revend.eFiche") };
     if (!prenom || !nom || !fonction) return { error: t("revend.eIdentite") };
+    if (!telephoneValide(telephone)) return { error: t("revend.eTelephone") };
     if (!emailValide(email)) return { error: t("revend.eEmail") };
     if (!user && motDePasse.length < 8) return { error: t("revend.eMdp") };
 
@@ -190,7 +194,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
 
     const parDomaine = emailDuDomaine(email, domaineOfficiel(c.website_url));
     const { data: rev, error } = await table().insert({
-      company_id: companyId, user_id: userId, prenom, nom, fonction, email_pro: email,
+      company_id: companyId, user_id: userId, prenom, nom, fonction, telephone, email_pro: email,
       methode: parDomaine ? "domaine" : "manuel", statut: "code_envoye",
       empreinte_ip: ip, compte_cree: compteCree, langue: await langueRequete(),
     }).select("id").single();
@@ -254,7 +258,7 @@ export async function verifierCodeRevendication(id: string, code: string): Promi
     // Création : pas encore de fiche, le nom vient de la fiche proposée.
     const fiche = (r as Ligne & { fiche?: { name?: string } | null }).fiche;
     const c = r.company_id ? await entreprise(r.company_id) : null;
-    await sendRevendicationAValider(c?.name ?? fiche?.name ?? "Entreprise", `${r.prenom} ${r.nom}, ${r.fonction}`, r.email_pro, !r.company_id);
+    await sendRevendicationAValider(c?.name ?? fiche?.name ?? "Entreprise", `${r.prenom} ${r.nom}, ${r.fonction}${r.telephone ? `, ${r.telephone}` : ""}`, r.email_pro, !r.company_id);
     if (!r.company_id) jar.delete("workie_creation");
     return { etat: { etape: "en_attente", email: masquer(r.email_pro) } };
   } catch {
@@ -281,7 +285,7 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
     if (!c) return { error: t("revend.eFiche") };
     if (c.is_subscribed) return { error: t("revend.eDejaGeree") };
 
-    const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+    const base = SITE_URL;
     const offre = ABONNEMENT[formule];
     const meta: Record<string, string> = creation
       ? { type: "creation_entreprise", revendication_id: r.id, user_id: user.id }

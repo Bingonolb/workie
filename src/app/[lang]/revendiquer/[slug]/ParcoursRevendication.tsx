@@ -153,6 +153,11 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
                   : t("revend.aideSansDomaine")}
               </span>
             </label>
+            <label>
+              <span style={etiquette}>{t("revend.telephone")}</span>
+              <input name="telephone" type="tel" required autoComplete="tel" placeholder="+41 32 000 00 00" style={champ} />
+              <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, display: "block" }}>{t("revend.telephoneAide")}</span>
+            </label>
             {!connecte && (
               <label>
                 <span style={etiquette}>{t("revend.motDePasse")}</span>

@@ -803,7 +803,10 @@
     "ePaiementIndispo": "Die Zahlung ist im Moment nicht verfügbar.",
     "eNonVerifiee": "Diese Anfrage ist noch nicht bestätigt.",
     "ePaiement": "Die Zahlung konnte nicht gestartet werden.",
-    "ePaiementReessayer": "Die Zahlung konnte nicht gestartet werden. Versuchen Sie es erneut."
+    "ePaiementReessayer": "Die Zahlung konnte nicht gestartet werden. Versuchen Sie es erneut.",
+    "telephone": "Geschäftliche Telefonnummer",
+    "telephoneAide": "Damit wir Sie zurückrufen können, falls wir die Anfrage prüfen müssen.",
+    "eTelephone": "Geben Sie eine gültige Telefonnummer an."
   },
   "espace": {
     "titre": "Unternehmensbereich",

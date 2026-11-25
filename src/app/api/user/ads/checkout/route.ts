@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { SITE_URL } from "@/lib/siteUrl";
 import { getUser, createClient } from "@/lib/supabase/server";
 import { tRequete, langueRequete } from "@/i18n/requete";
 
 export async function POST(request: Request) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+  const baseUrl = SITE_URL;
 
   try {
     if (!process.env.STRIPE_SECRET_KEY) {

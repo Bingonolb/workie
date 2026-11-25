@@ -50,7 +50,7 @@ export function ListeRevendications({ demandes }: { demandes: DemandeAdmin[] }) 
               <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 999, color: s.couleur, background: `${s.couleur}1f` }}>{s.libelle}</span>
             </div>
             <p style={{ fontSize: 13.5 }}>
-              <strong>{d.prenom} {d.nom}</strong>, {d.fonction} · {d.email_pro}
+              <strong>{d.prenom} {d.nom}</strong>, {d.fonction} · {d.email_pro}{d.telephone && <> · <a href={`tel:${d.telephone.replace(/[^+0-9]/g, "")}`}>{d.telephone}</a></>}
               <span style={{ color: "var(--text-muted)" }}> · {new Date(d.cree_le).toLocaleDateString("fr-CH", { timeZone: "Europe/Zurich" })}</span>
             </p>
             {d.fiche && !d.entreprise && (

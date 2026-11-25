@@ -120,10 +120,11 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
     }
 
     // ── La personne ──
-    const prenom = t("prenom", 80), nom = t("nom", 80), fonction = t("fonction", 120);
+    const prenom = t("prenom", 80), nom = t("nom", 80), fonction = t("fonction", 120), telephone = t("telephone", 30);
     const email = t("email", 254).toLowerCase();
     const motDePasse = String(formData.get("mot_de_passe") ?? "");
     if (!prenom || !nom || !fonction) return { error: (await tRequete())("creation.eIdentite") };
+    if (!(/^\+?[0-9 ()./-]{9,20}$/.test(telephone) && telephone.replace(/\D/g, "").length >= 9)) return { error: (await tRequete())("revend.eTelephone") };
     if (!emailValide(email)) return { error: (await tRequete())("creation.eEmail") };
     if (!user && motDePasse.length < 8) return { error: (await tRequete())("creation.eMdp") };
 
@@ -177,7 +178,7 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
       .in("statut", ["code_envoye", "en_attente", "verifiee"]);
 
     const { data: rev, error } = await table().insert({
-      company_id: null, fiche, user_id: userId, prenom, nom, fonction, email_pro: email,
+      company_id: null, fiche, user_id: userId, prenom, nom, fonction, telephone, email_pro: email,
       methode: "manuel", statut: "code_envoye", empreinte_ip: ip, compte_cree: compteCree, langue: await langueRequete(),
     }).select("id").single();
     if (error || !rev) return { error: (await tRequete())("creation.eEnregistrement") };
