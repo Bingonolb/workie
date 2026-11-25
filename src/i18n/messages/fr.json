@@ -96,7 +96,10 @@
     "parCanton": "Par canton",
     "entreprisesCanton": "Entreprises : {canton}",
     "slogan": "Chercher du travail devient passionnant.",
-    "hebergement": "Plateforme suisse, données hébergées en Europe"
+    "hebergement": "Plateforme suisse, données hébergées en Europe",
+    "annonceurs": "Annonceurs",
+    "cguCourt": "CGU",
+    "contact": "Contact"
   },
   "filtres": {
     "bouton": "Filtres",
@@ -512,5 +515,15 @@
     "explorer": "Explorer",
     "malPasse": "Quelque chose s'est mal passé",
     "inattendue": "Une erreur inattendue s'est produite. Notre équipe a été notifiée."
+  },
+  "juridique": {
+    "cguTitre": "Conditions générales d'utilisation",
+    "cguDescription": "Conditions générales d'utilisation de la plateforme Workie.",
+    "confidentialiteTitre": "Politique de confidentialité",
+    "confidentialiteDescription": "Comment Workie collecte, utilise et protège vos données personnelles.",
+    "mentionsTitre": "Mentions légales",
+    "mentionsDescription": "Informations légales de la plateforme Workie, opérée en Suisse.",
+    "faitFoi": "Seule la version française fait foi.",
+    "retour": "Retour à l'accueil"
   }
 }

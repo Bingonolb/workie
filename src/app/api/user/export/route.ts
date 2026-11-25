@@ -22,6 +22,8 @@ type LigneSignalementExport = { target_type: string; target_label: string | null
 type LigneCampagneExport = { headline: string; format: string; status: string; start_date: string | null; end_date: string | null; total_budget_chf: number | null; paid_at: string | null; created_at: string };
 type LigneRevendicationExport = { prenom: string; nom: string; fonction: string; email_pro: string; statut: string; cree_le: string; companies: { name: string | null } | null };
 type LigneClicOffreExport = { clique_le: string; companies: { name: string | null } | null };
+type LigneOffreGardeeExport = { created_at: string; job_offers: { title: string | null; apply_url: string | null; companies: { name: string | null } | null } | null };
+type LigneConsultationExport = { viewed_at: string; companies: { name: string | null } | null };
 
 
 export const dynamic = "force-dynamic";
@@ -37,7 +39,7 @@ export async function GET() {
   // complet, y compris pour une entreprise d'une catégorie pas encore publiée
   // (la lecture ordinaire la masquerait et le nom manquerait).
   const admin = createAdminClient();
-  const [profileRes, reviewsRes, favoritesRes, votesRes, notificationsRes, reportsRes, campagnesRes, revendicationsRes, clicsRes] =
+  const [profileRes, reviewsRes, favoritesRes, votesRes, notificationsRes, reportsRes, campagnesRes, revendicationsRes, clicsRes, offresRes, consultationsRes] =
     await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       // Colonnes explicites : les droits sur reviews sont par colonne depuis
@@ -55,6 +57,11 @@ export async function GET() {
       (admin.from("revendications" as any) as any).select("prenom, nom, fonction, email_pro, statut, cree_le, companies(name)").eq("user_id", user.id),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (admin.from("clics_offres" as any) as any).select("clique_le, companies(name)").eq("user_id", user.id),
+      // Les offres gardées (signet) et l historique des fiches ouvertes : deux données
+      // personnelles que l export oubliait.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (admin.from("offres_enregistrees" as any) as any).select("created_at, job_offers(title, apply_url, companies(name))").eq("user_id", user.id),
+      admin.from("company_views").select("viewed_at, companies(name)").eq("user_id", user.id).order("viewed_at", { ascending: false }).limit(5000),
     ]);
 
   // Strip internal/sensitive columns from profile before export
@@ -117,6 +124,8 @@ export async function GET() {
       work_email: r.email_pro, status: r.statut, created_at: r.cree_le,
     })),
     job_offer_clicks: ((clicsRes.data ?? []) as LigneClicOffreExport[]).map(c => ({ company: c.companies?.name, clicked_at: c.clique_le })),
+    saved_job_offers: ((offresRes.data ?? []) as LigneOffreGardeeExport[]).map(o => ({ title: o.job_offers?.title, company: o.job_offers?.companies?.name, url: o.job_offers?.apply_url, saved_at: o.created_at })),
+    company_pages_viewed: ((consultationsRes.data ?? []) as unknown as LigneConsultationExport[]).map(v => ({ company: v.companies?.name, viewed_at: v.viewed_at })),
   };
 
   const filename = `workie-export-${new Date().toISOString().slice(0, 10)}.json`;

@@ -96,7 +96,10 @@
     "parCanton": "Nach Kanton",
     "entreprisesCanton": "Unternehmen: {canton}",
     "slogan": "Jobsuche wird spannend.",
-    "hebergement": "Schweizer Plattform, Daten in Europa gespeichert"
+    "hebergement": "Schweizer Plattform, Daten in Europa gespeichert",
+    "annonceurs": "Werbekunden",
+    "cguCourt": "Nutzungsbedingungen",
+    "contact": "Kontakt"
   },
   "filtres": {
     "bouton": "Filter",
@@ -512,5 +515,15 @@
     "explorer": "Entdecken",
     "malPasse": "Etwas ist schiefgelaufen",
     "inattendue": "Ein unerwarteter Fehler ist aufgetreten. Unser Team wurde benachrichtigt."
+  },
+  "juridique": {
+    "cguTitre": "Allgemeine Nutzungsbedingungen",
+    "cguDescription": "Allgemeine Nutzungsbedingungen der Plattform Workie.",
+    "confidentialiteTitre": "Datenschutzerklärung",
+    "confidentialiteDescription": "Wie Workie Ihre Personendaten erhebt, verwendet und schützt.",
+    "mentionsTitre": "Impressum",
+    "mentionsDescription": "Rechtliche Angaben zur Plattform Workie, betrieben in der Schweiz.",
+    "faitFoi": "Dies ist eine Übersetzung. Massgebend ist allein die französische Fassung.",
+    "retour": "Zurück zur Startseite"
   }
 }

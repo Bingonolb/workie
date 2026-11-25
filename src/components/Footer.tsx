@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useT } from "@/i18n/FournisseurLangue";
 import { Logo } from "@/components/Logo";
 
 /**
@@ -19,6 +22,7 @@ import { Logo } from "@/components/Logo";
 const lien: React.CSSProperties = { fontSize: 12, color: "var(--text-muted)", textDecoration: "none" };
 
 export function Footer() {
+  const t = useT();
   return (
     <footer className="pied">
       <div className="pied-interieur">
@@ -28,11 +32,11 @@ export function Footer() {
         <nav className="pied-liens">
           {/* /salaires n'était liée depuis aucune navigation : page publique,
               indexée, mais introuvable depuis l'interface. */}
-          <Link href="/annonceurs" style={lien} className="pied-lien-large">Annonceurs</Link>
-          <Link href="/cgu" style={lien}>CGU</Link>
-          <Link href="/confidentialite" style={lien}>Confidentialité</Link>
-          <Link href="/mentions-legales" style={lien}>Mentions légales</Link>
-          <a href="mailto:contact@workie.ch" style={lien}>Contact</a>
+          <Link href="/annonceurs" style={lien} className="pied-lien-large">{t("pied.annonceurs")}</Link>
+          <Link href="/cgu" style={lien}>{t("pied.cguCourt")}</Link>
+          <Link href="/confidentialite" style={lien}>{t("pied.confidentialite")}</Link>
+          <Link href="/mentions-legales" style={lien}>{t("pied.mentions")}</Link>
+          <a href="mailto:contact@workie.ch" style={lien}>{t("pied.contact")}</a>
           <span style={lien}>© {new Date().getFullYear()} Workie</span>
         </nav>
       </div>
