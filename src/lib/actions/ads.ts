@@ -9,6 +9,8 @@ import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { tarifJournalier, dureeValide, dateDeFin } from "@/lib/ads/pricing";
 import { verifierAnnonce } from "@/lib/ads/moderation";
+import { estSuspendueParSignalements, decalerFin, montantARembourser } from "@/lib/ads/remboursement";
+import Stripe from "stripe";
 import type { AdFormat } from "@/lib/ads/pricing";
 import { captureServerError } from "@/lib/monitoring";
 
@@ -424,12 +426,16 @@ export async function reprendreCampagne(id: string): Promise<{ error?: string }>
     const { supabase, user } = await requireUser();
     const { data: campagne } = await supabase
       .from("ad_campaigns")
-      .select("end_date, paused_at")
+      .select("end_date, paused_at, admin_note")
       .eq("id", id)
       .eq("user_id", user.id)
       .eq("status", "paused")
       .maybeSingle();
     if (!campagne) return { error: "Cette campagne n'est pas en pause." };
+    // Suspendue après signalements : c'est l'équipe qui tranche, pas l'annonceur.
+    if (estSuspendueParSignalements((campagne as { admin_note?: string | null }).admin_note)) {
+      return { error: "Cette campagne a été signalée et est en cours d'examen." };
+    }
 
     // Les types générés depuis la base ne connaissent pas encore paused_at :
     // la colonne vient d'être ajoutée et le fichier de types n'a pas été
@@ -606,15 +612,47 @@ export async function adminSetCampaignStatus(
   try {
     await requireAdmin();
     const admin = createAdminClient();
-    // Block activating an unpaid campaign
-    if (status === "active") {
-      const { data: camp } = await admin.from("ad_campaigns").select("status").eq("id", campaignId).maybeSingle();
-      if (camp?.status === "payment_pending") return { error: "Cette campagne n'a pas encore été payée." };
+    const { data: lue } = await admin.from("ad_campaigns")
+      .select("status, end_date, paused_at, daily_budget_chf, total_budget_chf, stripe_session_id, paid_at")
+      .eq("id", campaignId).maybeSingle();
+    const camp = lue as unknown as {
+      status: string; end_date: string | null; paused_at: string | null;
+      daily_budget_chf: number | string; total_budget_chf: number | string;
+      stripe_session_id: string | null; paid_at: string | null;
+    } | null;
+    if (!camp) return { error: "Campagne introuvable." };
+    if (status === "active" && camp.status === "payment_pending") return { error: "Cette campagne n'a pas encore été payée." };
+
+    const maj: Record<string, unknown> = { status, admin_note: note ?? null };
+
+    // Rétablie après une pause : elle retrouve les jours perdus pendant l'examen.
+    if (status === "active" && camp.status === "paused") {
+      maj.end_date = decalerFin(camp.end_date, camp.paused_at);
+      maj.paused_at = null;
     }
-    const { error } = await admin
-      .from("ad_campaigns")
-      .update({ status, admin_note: note ?? null })
-      .eq("id", campaignId);
+
+    // Refusée après paiement : les jours qui n'ont pas été diffusés sont
+    // remboursés. Le remboursement passe avant la mise à jour : s'il échoue,
+    // rien ne change et l'admin peut réessayer (clé d'idempotence Stripe).
+    if (status === "rejected" && camp.paid_at && camp.stripe_session_id && camp.status !== "rejected") {
+      const montant = montantARembourser(camp);
+      if (montant > 0) {
+        if (!process.env.STRIPE_SECRET_KEY) return { error: "Stripe n'est pas configuré : remboursement impossible." };
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        const session = await stripe.checkout.sessions.retrieve(camp.stripe_session_id);
+        const pi = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
+        if (!pi) return { error: "Paiement Stripe introuvable : remboursement impossible." };
+        await stripe.refunds.create(
+          { payment_intent: pi, amount: Math.round(montant * 100), metadata: { campaign_id: campaignId } },
+          { idempotencyKey: `remboursement-campagne-${campaignId}` },
+        );
+        maj.admin_note = [note, `Remboursé : ${montant.toFixed(2)} CHF.`].filter(Boolean).join(" ");
+      }
+    }
+
+    // paused_at n'est pas encore dans les types générés.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from("ad_campaigns") as any).update(maj).eq("id", campaignId);
     if (error) return { error: error.message };
     revaliderPage("/admin/ads");
     revaliderPage("/explore");

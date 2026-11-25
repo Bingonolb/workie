@@ -83,7 +83,7 @@ function CguFr() {
         {revendicationOuverte && <p>La gestion d&apos;une fiche est proposée par abonnement : {TARIFS.mensuel.libelle} ou {TARIFS.annuel.libelle}, sans engagement. L&apos;abonnement se résilie à tout moment depuis l&apos;espace entreprise ; il reste actif jusqu&apos;à la fin de la période payée.</p>}
         <p>Les campagnes publicitaires sont vendues au forfait, pour une durée de 7 à 90 jours, payée une fois. Le prix dépend des cantons et des secteurs visés.</p>
         <p>Les paiements sont traités par <strong>Stripe</strong>, prestataire de paiement sécurisé. Workie ne stocke aucune donnée bancaire. En cas de problème de paiement, écrivez à {mail}.</p>
-        <p>Une campagne payée est diffusée aussitôt. Un filtre automatique refuse à la création les contenus inappropriés (violence, haine, contenu sexuel, contenu illicite), et une publicité signalée par les visiteurs peut être retirée.</p>
+        <p>Une campagne payée est diffusée aussitôt. Un filtre automatique refuse à la création les contenus inappropriés (violence, haine, contenu sexuel, contenu illicite), et une publicité signalée par les visiteurs est suspendue le temps d&apos;un examen. Si elle est rétablie, elle retrouve les jours perdus pendant la suspension ; si elle est retirée, les jours non diffusés sont remboursés.</p>
       </Section>
 
       <Section title="8. Propriété intellectuelle">
@@ -162,7 +162,7 @@ function CguDe() {
         {revendicationOuverte && <p>Die Verwaltung eines Profils wird im Abo angeboten: CHF {TARIFS.mensuel.chf} pro Monat oder CHF {TARIFS.annuel.chf} pro Jahr, ohne Mindestlaufzeit. Das Abo kann jederzeit im Unternehmensbereich gekündigt werden; es bleibt bis zum Ende der bezahlten Periode aktiv.</p>}
         <p>Werbekampagnen werden pauschal verkauft, für eine Dauer von 7 bis 90 Tagen, einmalig bezahlt. Der Preis hängt von den gewählten Kantonen und Branchen ab.</p>
         <p>Zahlungen werden von <strong>Stripe</strong> abgewickelt, einem sicheren Zahlungsdienstleister. Workie speichert keine Bankdaten. Bei Zahlungsproblemen schreiben Sie an {mail}.</p>
-        <p>Eine bezahlte Kampagne wird sofort ausgespielt. Ein automatischer Filter lehnt bei der Erstellung unangemessene Inhalte ab (Gewalt, Hass, sexuelle oder rechtswidrige Inhalte), und eine von Besucherinnen und Besuchern gemeldete Werbung kann entfernt werden.</p>
+        <p>Eine bezahlte Kampagne wird sofort ausgespielt. Ein automatischer Filter lehnt bei der Erstellung unangemessene Inhalte ab (Gewalt, Hass, sexuelle oder rechtswidrige Inhalte), und eine von Besucherinnen und Besuchern gemeldete Werbung wird für die Dauer einer Prüfung ausgesetzt. Wird sie wieder freigegeben, erhält sie die während der Aussetzung verlorenen Tage zurück; wird sie entfernt, werden die nicht ausgespielten Tage zurückerstattet.</p>
       </Section>
 
       <Section title="8. Geistiges Eigentum">
