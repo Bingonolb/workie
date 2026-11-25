@@ -1,9 +1,12 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { useState } from "react";
 import { Share2, Check } from "lucide-react";
 
 export function ShareButton({ name, url, companyId }: { name: string; url: string; companyId?: string }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   /**
@@ -29,7 +32,7 @@ export function ShareButton({ name, url, companyId }: { name: string; url: strin
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${name} sur Workie`, url });
+        await navigator.share({ title: t("fiche.partageTitre", { nom: name }), url });
         void declarer("systeme");
         return;
       } catch { /* user cancelled */ }
@@ -46,11 +49,11 @@ export function ShareButton({ name, url, companyId }: { name: string; url: strin
     <button
       type="button"
       onClick={handleShare}
-      title="Partager"
+      title={t("fiche.partager")}
       className="btn btn-photo"
     >
       {copied ? <Check size={15} aria-hidden="true" /> : <Share2 size={15} aria-hidden="true" />}
-      {copied ? "Copié !" : "Partager"}
+      {copied ? t("fiche.copie") : t("fiche.partager")}
     </button>
   );
 }

@@ -28,7 +28,7 @@ import { FournisseurEtatFiche } from "@/components/company/EtatFiche";
 import { ActionsFiche } from "@/components/company/Interactions";
 import { BoutonRetour } from "@/components/company/BoutonRetour";
 
-import { SECTOR_COLORS, lieuAffiche } from "@/lib/types";
+import { SECTOR_COLORS, lieuAffiche, CANTON_NAMES } from "@/lib/types";
 import { languesDeTravail, abregeLangue } from "@/lib/langues";
 import type { Review } from "@/lib/types";
 // Les 8 catégories notées vivent dans un module partagé : la synthèse, la carte
@@ -39,7 +39,11 @@ import { LigneSuggestion } from "@/components/company/LigneSuggestion";
 import { fondDensite, lireCadrage, styleCadrageFond, sourcesBandeau } from "@/lib/coverUrl";
 import { revendicationOuverte } from "@/lib/ouverture";
 import { langueDeLaPage } from "@/i18n/page";
-import { localiserEntreprise } from "@/lib/traductionsEntreprises";
+import { localiserEntreprise, localiserEntreprises } from "@/lib/traductionsEntreprises";
+import { tServeur } from "@/i18n/page";
+import type { Traduire } from "@/i18n/traduire";
+import { nomSecteur } from "@/i18n/secteurs";
+import { nomCanton } from "@/i18n/cantons";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -130,12 +134,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  * l'un en haut avec le lien, l'autre tout en bas avec les offres : sur
  * téléphone, les offres arrivaient après toute la page.
  */
-function BlocOffresEmploi({ url, companyId, companyName, jobs, total, slug, revendicable, className, style }: { url: string | null; companyId: string; companyName: string; jobs: Parameters<typeof JobOfferCard>[0]["job"][]; total: number; slug?: string | null; revendicable?: boolean; className?: string; style?: React.CSSProperties }) {
+function BlocOffresEmploi({ t, url, companyId, companyName, jobs, total, slug, revendicable, className, style }: { t: Traduire; url: string | null; companyId: string; companyName: string; jobs: Parameters<typeof JobOfferCard>[0]["job"][]; total: number; slug?: string | null; revendicable?: boolean; className?: string; style?: React.CSSProperties }) {
   const href = url ? (/^https?:\/\//.test(url) ? url : `https://${url}`) : null;
   return (
     <div className={className} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", ...style }}>
       <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-        Offres d&apos;emploi
+        {t("fiche.offresEmploi")}
         {total > 0 && <span style={{ fontSize: 12.5, fontWeight: 700, background: "var(--surface3)", color: "var(--text)", borderRadius: 50, padding: "2px 8px" }}>{total}</span>}
       </h3>
       {total > 0 && (
@@ -148,7 +152,7 @@ function BlocOffresEmploi({ url, companyId, companyName, jobs, total, slug, reve
           candidat de ce qu'il est venu faire. */}
       {revendicable && slug && (
         <Link href={`/revendiquer/${slug}`} style={{ display: "block", marginTop: 14, fontSize: 12.5, color: "var(--text-muted)", textDecoration: "underline" }}>
-          Vous représentez cette entreprise ? Gérer cette fiche
+          {t("fiche.representez")}
         </Link>
       )}
     </div>
@@ -166,12 +170,24 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
   const company = await getCachedCompany(id).then(async c => localiserEntreprise(c, await langueDeLaPage())).catch(() => null);
 
   if (!company) notFound();
+  const langue = await langueDeLaPage();
+  const t = await tServeur();
 
 
-  const [jobs, groupesSuggestions] = await Promise.all([
+  const [jobs, groupesBruts] = await Promise.all([
     getCachedJobOffers(id).catch(() => [] as never[]),
     getCachedSuggestions(company.id, company.sector, company.subsector ?? null, company.canton ?? null).catch(() => []),
   ]);
+
+  // Les suggestions dans la langue de la page : titre, sous-secteurs, villes.
+  const groupesSuggestions = await Promise.all(groupesBruts.map(async g => ({
+    ...g,
+    titre: g.genre === "metier" ? t("fiche.aussiDans", { nom: company.subsector ?? g.valeur })
+      : g.genre === "secteur" ? t("fiche.dansSecteur", { secteur: nomSecteur(g.valeur, langue) })
+      : g.genre === "canton" ? t("fiche.dansCanton", { canton: nomCanton(g.valeur, langue, CANTON_NAMES[g.valeur] ?? g.valeur) })
+      : t("fiche.populaires"),
+    entreprises: await localiserEntreprises(g.entreprises, langue),
+  })));
 
   // La page n'emporte que les premières offres ; le panneau charge le reste à la demande.
   const totalOffres = jobs.length;
@@ -289,7 +305,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                 <h1 className="company-hero-title" style={{ fontSize: 30, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em" }}>{company.name}</h1>
                 {company.is_verified && (
-                  <svg viewBox="0 0 22 22" style={{ width: 22, height: 22, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                  <svg viewBox="0 0 22 22" style={{ width: 22, height: 22, flexShrink: 0 }} aria-label={t("fiche.verifiee")}>
                     <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                     <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
                   </svg>
@@ -308,7 +324,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                   border: `1px solid color-mix(in srgb, ${sectorColor} 55%, transparent)`,
                   backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
                 }}>
-                  {company.sector}
+                  {nomSecteur(company.sector, langue)}
                 </span>
                 {/* Blanc à 50 % tombait à 2,6 sur une photo claire : à 85 %,
                     avec une ombre légère, il se lit sur n'importe quelle image. */}
@@ -348,7 +364,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
             {/* À propos — mobile only (before stats) */}
             {company.description && (
               <div className="about-mobile" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px", marginBottom: 32, display: "none" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>{t("fiche.aPropos")}</h3>
                 <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
               </div>
             )}
@@ -358,7 +374,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 après les avis. Or c'est ce qu'on vient y chercher : il remonte
                 donc ici, et la version de droite est masquée à cette taille. */}
             {(company.website_url || offres.length > 0) && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} total={totalOffres} slug={company.slug} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
+              <BlocOffresEmploi t={t} url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} total={totalOffres} slug={company.slug} className="liens-mobile" style={{ marginBottom: 32, display: "none" }} />
             )}
 
             {/* Key stats — seules les données réellement disponibles sont
@@ -374,11 +390,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 couleurs qui tiraient l'œil sans rien dire. */}
             <div className="company-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 32 }}>
               {([
-                { Icone: MapPin, value: lieuAffiche(company.city, company.canton), label: "Lieu" },
-                company.employee_range ? { Icone: Users, value: company.employee_range, label: "Employés" } : null,
+                { Icone: MapPin, value: lieuAffiche(company.city, company.canton, langue), label: t("fiche.lieu") },
+                company.employee_range ? { Icone: Users, value: company.employee_range, label: t("fiche.employes") } : null,
                 // Les langues remplacent la note : on ne postule pas dans une
                 // langue qu'on ne parle pas.
-                langues.length > 0 ? { Icone: Languages, value: "", codes: langues.map(abregeLangue), label: "Langues" } : null,
+                langues.length > 0 ? { Icone: Languages, value: "", codes: langues.map(l => abregeLangue(l, langue)), label: t("fiche.langues") } : null,
               ].filter(Boolean) as { Icone: typeof MapPin; value: string; codes?: string[]; label: string }[]).map(({ Icone, value, codes, label }) => (
                 <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 16px", minWidth: 0 }}>
                   <p style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", lineHeight: 1.2 }}>
@@ -416,13 +432,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
           <div className="company-sidebar" style={{ position: "sticky", top: 80, display: "flex", flexDirection: "column", gap: 16 }}>
             {company.description && (
               <div className="about-desktop" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>À propos</h3>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>{t("fiche.aPropos")}</h3>
                 <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.7 }}>{company.description}</p>
               </div>
             )}
 
             {(company.website_url || offres.length > 0) && (
-              <BlocOffresEmploi url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} total={totalOffres} slug={company.slug} className="liens-desktop" />
+              <BlocOffresEmploi t={t} url={company.website_url} companyId={company.id} companyName={company.name} jobs={offres} total={totalOffres} slug={company.slug} className="liens-desktop" />
             )}
 
             {/* Le bloc « Tags » a été retiré.
@@ -434,7 +450,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
             {company.founded_year && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "16px 20px", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>Fondée en</span>
+                <span style={{ fontSize: 14.5, color: "var(--text-muted)" }}>{t("fiche.fondee")}</span>
                 <span style={{ fontSize: 14.5, fontWeight: 700, color: "var(--text)" }}>{company.founded_year}</span>
               </div>
             )}

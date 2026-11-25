@@ -5,6 +5,8 @@ import { ChevronRight } from "lucide-react";
 import { CoverImage } from "@/components/CoverImage";
 import { useFicheProche } from "@/lib/useFicheProche";
 import { urlFiche } from "@/lib/urlFiche";
+import { useLangue, useT } from "@/i18n/FournisseurLangue";
+import { nomVille } from "@/i18n/lieux";
 
 /**
  * Une entreprise suggérée, en ligne.
@@ -15,6 +17,8 @@ import { urlFiche } from "@/lib/urlFiche";
  */
 export function LigneSuggestion({ c }: { c: { id: string; name: string; city: string; cover_url: string | null; cover_color: string | null; is_verified: boolean | null; subsector: string | null } }) {
   const ref = useFicheProche(urlFiche(c), c.cover_url);
+  const langue = useLangue();
+  const t = useT();
   return (
     <Link
       ref={ref}
@@ -39,14 +43,14 @@ export function LigneSuggestion({ c }: { c: { id: string; name: string; city: st
         }}>
           {c.name}
           {c.is_verified && (
-            <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+            <svg viewBox="0 0 22 22" style={{ width: 13, height: 13, flexShrink: 0 }} aria-label={t("fiche.verifiee")}>
               <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
               <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
             </svg>
           )}
         </p>
         <p style={{ fontSize: 13.5, color: "var(--text-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          {c.subsector ? `${c.subsector} · ` : ""}{c.city}
+          {c.subsector ? `${c.subsector} · ` : ""}{nomVille(c.city, langue)}
         </p>
       </div>
       <ChevronRight size={16} color="var(--text-muted)" aria-hidden="true" />

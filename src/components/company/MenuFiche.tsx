@@ -1,5 +1,7 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -18,6 +20,7 @@ import { ReportButton } from "@/components/ReportButton";
 export function MenuFiche({ companyId, companyName, slug, gerable, isLoggedIn }: {
   companyId: string; companyName: string; slug: string | null; gerable: boolean; isLoggedIn: boolean;
 }) {
+  const t = useT();
   const [ouvert, setOuvert] = useState(false);
   // Le menu est posé sur la page entière : le bandeau photo de la fiche coupe
   // tout ce qui en dépasse. Sa position suit le bouton.
@@ -58,7 +61,7 @@ export function MenuFiche({ companyId, companyName, slug, gerable, isLoggedIn }:
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button ref={boutonRef} type="button" className="btn btn-photo" aria-label="Plus d'options" aria-haspopup="menu" aria-expanded={ouvert}
+      <button ref={boutonRef} type="button" className="btn btn-photo" aria-label={t("fiche.plusOptions")} aria-haspopup="menu" aria-expanded={ouvert}
         onClick={basculer} style={{ padding: "8px 10px" }}>
         <MoreHorizontal size={18} aria-hidden="true" />
       </button>
@@ -69,12 +72,12 @@ export function MenuFiche({ companyId, companyName, slug, gerable, isLoggedIn }:
           boxShadow: "0 16px 40px rgba(0,0,0,0.18)", overflow: "hidden",
         }}>
           <button type="button" role="menuitem" style={ligne} onClick={() => { setOuvert(false); setSignaler(true); }}>
-            <Flag size={15} color="var(--text-muted)" aria-hidden="true" /> Signaler cette fiche
+            <Flag size={15} color="var(--text-muted)" aria-hidden="true" /> {t("fiche.signaler")}
           </button>
           {gerable && slug && (
             <Link role="menuitem" href={`/revendiquer/${slug}`} style={{ ...ligne, borderTop: "1px solid var(--border)" }} onClick={() => setOuvert(false)}>
               <Building2 size={15} color="var(--text-muted)" aria-hidden="true" />
-              <span>C&apos;est votre entreprise ? <span style={{ color: "var(--text-muted)" }}>Gérer la fiche</span></span>
+              <span>{t("fiche.votreEntreprise")} <span style={{ color: "var(--text-muted)" }}>{t("fiche.gererFiche")}</span></span>
             </Link>
           )}
         </div>,

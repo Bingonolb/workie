@@ -56,7 +56,7 @@ export const getApercuEntreprises = unstable_cache(
         sector: c.sector,
         subsector: c.subsector,
         lieu: lieuAffiche(c.city, c.canton),
-        langues: langues.map(abregeLangue).join(" · "),
+        langues: langues.map(l => abregeLangue(l)).join(" · "),
         description: c.description,
         cover_url: c.cover_url,
       };

@@ -1,5 +1,9 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { LOCALE_INTL } from "@/i18n/config";
+import { libelleContrat } from "@/i18n/contrat";
+
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, MapPin, ExternalLink, ChevronRight } from "lucide-react";
@@ -92,13 +96,15 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
   /** Mode contrôlé (swipe) : l'appelant décide de l'ouverture, et est prévenu de la fermeture. */
   ouvert?: boolean; onFermer?: () => void;
 }) {
+  const t = useT();
+  const langue = useLangue();
   const [ouvertInterne, setOuvertInterne] = useState(false);
   const controle = ouvert !== undefined;
   const open = controle ? ouvert : ouvertInterne;
   const setOpen = useCallback((v: boolean) => {
     if (controle) { if (!v) onFermer?.(); } else setOuvertInterne(v);
   }, [controle, onFermer]);
-  const taux = libelleTaux(job.taux_min, job.taux_max);
+  const taux = libelleTaux(job.taux_min, job.taux_max, langue);
   // Le clic sur « Postuler » compte pour l'entreprise (statistiques) et pour le
   // classement (une fois par compte). Rien n'est attendu : le site s'ouvre aussitôt.
   const auClicPostuler = () => {
@@ -122,7 +128,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
   return (
     <>
       {declencheur ? declencheur(() => setOpen(true)) : ligne ? (
-        <button type="button" className="jo-ligne" onClick={() => setOpen(true)} aria-label={`Voir l'offre : ${job.title}`}>
+        <button type="button" className="jo-ligne" onClick={() => setOpen(true)} aria-label={t("fiche.voirOffre", { titre: job.title })}>
           <span className="jo-ligne-texte">
             <span className="jo-ligne-titre">{job.title}</span>
             <span className="jo-ligne-meta">
@@ -135,7 +141,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={`Voir l'offre : ${job.title}`}
+        aria-label={t("fiche.voirOffre", { titre: job.title })}
         style={{
           width: "100%", textAlign: "left", borderRadius: 10,
           background: "var(--surface2)", padding: "12px 14px",
@@ -154,7 +160,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
         <p className="jo-titre" style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{job.title}</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
           {taux && <Badge label={taux} color="#0ea5e9" />}
-          {job.contract_type && <Badge label={job.contract_type} color="#8b5cf6" />}
+          {job.contract_type && <Badge label={libelleContrat(t, job.contract_type)!} color="#8b5cf6" />}
           {job.work_mode && <Badge label={job.work_mode} color="#10b981" />}
           {job.location && (
             <span className="jo-lieu" style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 3 }}>
@@ -200,7 +206,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Fermer"
+                aria-label={t("fiche.fermer")}
                 style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-muted)", flexShrink: 0 }}
               >
                 <X size={16} aria-hidden="true" />
@@ -211,7 +217,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
             {/* Badges */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
               {taux && <Badge label={taux} color="#0ea5e9" />}
-              {job.contract_type && <Badge label={job.contract_type} color="#8b5cf6" />}
+              {job.contract_type && <Badge label={libelleContrat(t, job.contract_type)!} color="#8b5cf6" />}
               {job.work_mode && <Badge label={job.work_mode} color="#10b981" />}
               {job.experience_level && <Badge label={job.experience_level} color="#f97316" />}
               {job.location && (
@@ -227,26 +233,26 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
             {job.description && (
               <p className="jo-texte" style={{ fontSize: 14.5, color: "var(--text)", lineHeight: 1.7, marginBottom: 22 }}>{lignesRiches(job.description)}</p>
             )}
-            <Section titre="Vos missions" texte={job.missions} />
-            <Section titre="Votre profil" texte={job.requirements} />
-            <Section titre="Ce que nous offrons" texte={job.avantages} />
+            <Section titre={t("fiche.missions")} texte={job.missions} />
+            <Section titre={t("fiche.profil")} texte={job.requirements} />
+            <Section titre={t("fiche.offrons")} texte={job.avantages} />
             {(job.entree || (job.langues?.length ?? 0) > 0) && (
               <dl style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 14, marginBottom: 22 }}>
-                {job.entree && <><dt style={{ color: "var(--text-muted)" }}>Entrée en fonction</dt><dd style={{ margin: 0, fontWeight: 600 }}>{job.entree}</dd></>}
-                {(job.langues?.length ?? 0) > 0 && <><dt style={{ color: "var(--text-muted)" }}>Langues</dt><dd style={{ margin: 0, fontWeight: 600 }}>{job.langues!.map(nomLangue).join(", ")}</dd></>}
+                {job.entree && <><dt style={{ color: "var(--text-muted)" }}>{t("fiche.entree")}</dt><dd style={{ margin: 0, fontWeight: 600 }}>{job.entree}</dd></>}
+                {(job.langues?.length ?? 0) > 0 && <><dt style={{ color: "var(--text-muted)" }}>{t("fiche.langues")}</dt><dd style={{ margin: 0, fontWeight: 600 }}>{job.langues!.map(l => nomLangue(l, langue)).join(", ")}</dd></>}
               </dl>
             )}
             {!job.description && !job.missions && !job.requirements && !job.avantages && (
               <p className="jo-texte" style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 24 }}>
                 {job.source
-                  ? <>Le détail du poste se trouve sur le site de l&apos;entreprise. Cliquez sur « En savoir plus » pour le lire et y postuler directement.</>
-                  : <>Cliquez sur « Postuler » pour lire l&apos;offre complète et envoyer votre candidature directement à l&apos;entreprise.</>}
+                  ? <>{t("fiche.detailSite")}</>
+                  : <>{t("fiche.detailPostuler")}</>}
               </p>
             )}
 
             {/* Date */}
             <p className="jo-date" style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 24 }}>
-              Publiée le {new Date(job.created_at).toLocaleDateString("fr-CH", { day: "numeric", month: "long", year: "numeric" })}
+              {t("fiche.publiee", { date: new Date(job.created_at).toLocaleDateString(LOCALE_INTL[langue], { day: "numeric", month: "long", year: "numeric" }) })}
             </p>
 
             {/* CTA : collé en bas de la fenêtre, toujours à portée du pouce. */}
@@ -270,11 +276,11 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
               >
                 {/* Offre synchronisée : Workie n'en montre qu'un résumé, la
                     suite (et la candidature) est chez l'employeur. */}
-                {job.source ? "En savoir plus" : "Postuler"} <ExternalLink size={15} aria-hidden="true" />
+                {job.source ? t("fiche.enSavoirPlus") : t("fiche.postuler")} <ExternalLink size={15} aria-hidden="true" />
               </a>
             ) : (
               <p style={{ textAlign: "center", fontSize: 13, color: "var(--text-muted)" }}>
-                Aucun lien de candidature disponible pour le moment.
+                {t("fiche.aucunLien")}
               </p>
             )}
             </div>
@@ -313,7 +319,7 @@ export function JobOfferCard({ job, companyName, companyId, ligne = false, decle
           .job-modal-overlay { padding: 0 !important; align-items: stretch !important; }
           .job-modal { max-width: none !important; max-height: none !important; height: 100% !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; padding: calc(20px + env(safe-area-inset-top)) 20px 28px !important; animation: fadeIn 0.18s ease !important; }
           .job-cta { margin: 0 -20px -28px !important; padding-left: 20px !important; padding-right: 20px !important; }
-          .job-modal button[aria-label="Fermer"], .job-modal .jo-signet { width: 44px !important; height: 44px !important; }
+          .job-modal button[aria-label={t("fiche.fermer")}], .job-modal .jo-signet { width: 44px !important; height: 44px !important; }
         }
       `}</style>
     </>

@@ -1,3 +1,5 @@
+import { nomVille } from "@/i18n/lieux";
+import type { Langue } from "@/i18n/config";
 export interface Company {
   id: string;
   /** Adresse lisible de la fiche : /entreprise/{slug}. */
@@ -493,10 +495,10 @@ export const CANTON_LIECHTENSTEIN = { code: "FL", nom: "Liechtenstein" };
  * Le lieu tel qu'on l'affiche : « Genève, GE », mais « Multi-sites » seul.
  * Le code « CH » est interne : affiché, il laissait croire à un canton.
  */
-export function lieuAffiche(ville: string | null | undefined, canton: string | null | undefined): string {
+export function lieuAffiche(ville: string | null | undefined, canton: string | null | undefined, langue: Langue = "fr"): string {
   const v = ville ?? "";
-  if (!canton || canton === CANTON_TOUTE_LA_SUISSE.code || v === CANTON_TOUTE_LA_SUISSE.nom) return v || CANTON_TOUTE_LA_SUISSE.nom;
-  return v ? `${v}, ${canton}` : canton;
+  if (!canton || canton === CANTON_TOUTE_LA_SUISSE.code || v === CANTON_TOUTE_LA_SUISSE.nom) return nomVille(v || CANTON_TOUTE_LA_SUISSE.nom, langue);
+  return v ? `${nomVille(v, langue)}, ${canton}` : canton;
 }
 
 /** Vrai pour un code accepté à l'enregistrement d'une fiche. */

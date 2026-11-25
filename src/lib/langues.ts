@@ -76,10 +76,14 @@ const ABREGE_FR: Record<string, string> = { FR: "FR", DE: "ALL", EN: "ANG", IT: 
 
 /** Nom complet, pour les endroits où l'on a la place : lisible par tous. */
 const NOM_FR: Record<string, string> = { FR: "Français", DE: "Allemand", EN: "Anglais", IT: "Italien" };
-export function nomLangue(code: string): string {
-  return NOM_FR[code.toUpperCase()] ?? code;
+const NOM_DE: Record<string, string> = { FR: "Französisch", DE: "Deutsch", EN: "Englisch", IT: "Italienisch" };
+/** En allemand, les codes de la norme se lisent tels quels (DE, EN). */
+const ABREGE_DE: Record<string, string> = { FR: "FR", DE: "DE", EN: "EN", IT: "IT" };
+
+export function nomLangue(code: string, langue: string = "fr"): string {
+  return (langue === "de" ? NOM_DE : NOM_FR)[code.toUpperCase()] ?? code;
 }
 
-export function abregeLangue(code: string): string {
-  return ABREGE_FR[code.toUpperCase()] ?? code;
+export function abregeLangue(code: string, langue: string = "fr"): string {
+  return (langue === "de" ? ABREGE_DE : ABREGE_FR)[code.toUpperCase()] ?? code;
 }

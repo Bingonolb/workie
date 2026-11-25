@@ -1,5 +1,7 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { Globe } from "lucide-react";
 
 /**
@@ -9,6 +11,7 @@ import { Globe } from "lucide-react";
  * compte de toute façon qu'un clic par compte.
  */
 export function LienOffres({ href, companyId }: { href: string; companyId: string }) {
+  const t = useT();
   const signaler = () => {
     try {
       const cle = "offres:" + companyId;
@@ -23,7 +26,7 @@ export function LienOffres({ href, companyId }: { href: string; companyId: strin
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" className="lien-site" onClick={signaler} onAuxClick={signaler}>
       <Globe size={14} aria-hidden="true" />
-      Site internet
+      {t("fiche.siteInternet")}
       <span aria-hidden="true" className="lien-site-fleche">↗</span>
     </a>
   );

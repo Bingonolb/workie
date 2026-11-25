@@ -1,5 +1,7 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { Bookmark } from "lucide-react";
 import { poserSignet, useOffresEnregistrees } from "@/lib/offresEnregistrees";
 
@@ -9,6 +11,7 @@ import { poserSignet, useOffresEnregistrees } from "@/lib/offresEnregistrees";
  * Le même bouton sur la carte, dans l'aperçu de l'offre et dans le swipe.
  */
 export function BoutonSignet({ offreId, titre, className = "carte-offre-signet" }: { offreId: string; titre: string; className?: string }) {
+  const t = useT();
   const { estEnregistree, pret } = useOffresEnregistrees();
   const garde = estEnregistree(offreId);
   return (
@@ -16,8 +19,8 @@ export function BoutonSignet({ offreId, titre, className = "carte-offre-signet" 
       type="button"
       className={className}
       aria-pressed={garde}
-      aria-label={garde ? `Retirer « ${titre} » des offres enregistrées` : `Enregistrer l'offre « ${titre} »`}
-      title={garde ? "Retirer des offres enregistrées" : "Enregistrer l'offre"}
+      aria-label={garde ? t("fiche.signetRetirer", { titre }) : t("fiche.signetGarder", { titre })}
+      title={garde ? t("fiche.signetRetirerCourt") : t("fiche.signetGarderCourt")}
       disabled={!pret}
       onClick={() => void poserSignet(offreId, !garde)}
     >

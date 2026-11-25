@@ -9,6 +9,7 @@ import { urlFiche } from "@/lib/urlFiche";
 import { revendicationOuverte } from "@/lib/ouverture";
 import type { Company } from "@/lib/types";
 import { tServeur, langueDeLaPage } from "@/i18n/page";
+import { nomVille } from "@/i18n/lieux";
 import { nomSecteur } from "@/i18n/secteurs";
 import { LOCALE_INTL } from "@/i18n/config";
 
@@ -187,7 +188,7 @@ export async function AccueilCompact({ entreprises, secteurs, chiffres }: {
           </div>
           <RailVitrine>
             {vitrine.map((c, i) => (
-              <Link key={c.id} href={urlFiche(c)} className="ae-carte" aria-label={`${c.name}, ${c.city}`}>
+              <Link key={c.id} href={urlFiche(c)} className="ae-carte" aria-label={`${c.name}, ${nomVille(c.city, langue)}`}>
                 {/* Les photos sont en paysage (16:9), la carte en portrait (3:4) :
                     pour la remplir sans flou, l'image doit être environ 2,4 fois
                     plus large que la carte. D'où « sizes » bien au-delà de la
@@ -199,7 +200,7 @@ export async function AccueilCompact({ entreprises, secteurs, chiffres }: {
                 <span className="ae-carte-txt">
                   <span className="ae-carte-sect" style={{ display: "block" }}>{c.subsector || nomSecteur(c.sector, langue)}</span>
                   <span className="ae-carte-nom" style={{ display: "block" }}>{c.name}</span>
-                  <span className="ae-carte-lieu" style={{ display: "block" }}>{c.city}</span>
+                  <span className="ae-carte-lieu" style={{ display: "block" }}>{nomVille(c.city, langue)}</span>
                 </span>
               </Link>
             ))}

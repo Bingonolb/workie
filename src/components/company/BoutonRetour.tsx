@@ -1,5 +1,7 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -24,6 +26,7 @@ import { ArrowLeft } from "lucide-react";
  * en cache, soit celui qui convient à un visiteur venu de l'extérieur.
  */
 export function BoutonRetour({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  const t = useT();
   const [retourPossible, setRetourPossible] = useState(false);
 
   useEffect(() => {
@@ -45,7 +48,7 @@ export function BoutonRetour({ className, style }: { className?: string; style?:
         window.history.back();
       }}
     >
-      <ArrowLeft size={14} aria-hidden="true" /> Retour
+      <ArrowLeft size={14} aria-hidden="true" /> {t("fiche.retour")}
     </Link>
   );
 }

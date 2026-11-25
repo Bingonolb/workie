@@ -1,5 +1,7 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Search, X } from "lucide-react";
@@ -24,6 +26,7 @@ const sansAccents = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").toL
  * mégaoctet pour chaque visiteur).
  */
 export function ListeOffres({ jobs, total, companyName, companyId }: { jobs: Offre[]; total: number; companyName: string; companyId: string }) {
+  const t = useT();
   const [ouvert, setOuvert] = useState(false);
 
   if (total <= SEUIL) {
@@ -35,7 +38,7 @@ export function ListeOffres({ jobs, total, companyName, companyId }: { jobs: Off
         {jobs.slice(0, APERCU).map(job => <JobOfferCard key={job.id} ligne job={job} companyName={companyName} companyId={companyId} />)}
       </div>
       <button type="button" className="btn btn-encre" onClick={() => setOuvert(true)} style={{ width: "100%", justifyContent: "center", minHeight: 46 }}>
-        Voir les {total} offres
+        {t("fiche.voirOffres", { n: total })}
       </button>
       {ouvert && <PanneauOffres apercu={jobs} total={total} companyName={companyName} companyId={companyId} fermer={() => setOuvert(false)} />}
       <style>{STYLES}</style>
@@ -47,6 +50,7 @@ export function ListeOffres({ jobs, total, companyName, companyId }: { jobs: Off
 const memoire = new Map<string, Offre[]>();
 
 function PanneauOffres({ apercu, total, companyName, companyId, fermer }: { apercu: Offre[]; total: number; companyName: string; companyId: string; fermer: () => void }) {
+  const t = useT();
   const [recherche, setRecherche] = useState("");
   const [ville, setVille] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Offre[]>(() => memoire.get(companyId) ?? apercu);
@@ -107,26 +111,26 @@ function PanneauOffres({ apercu, total, companyName, companyId, fermer }: { aper
 
   return createPortal(
     <div className="jo-panneau-fond" onClick={e => { if (e.target === e.currentTarget) fermer(); }}>
-      <div className="jo-panneau" role="dialog" aria-modal="true" aria-label={`Offres d'emploi chez ${companyName}`}>
+      <div className="jo-panneau" role="dialog" aria-modal="true" aria-label={t("fiche.offresChez", { nom: companyName })}>
         <header className="jo-panneau-tete">
           <div>
             <p className="jo-panneau-sur">{companyName}</p>
-            <h2 className="jo-panneau-titre">{total} offres d&apos;emploi</h2>
+            <h2 className="jo-panneau-titre">{t("fiche.nbOffres", { n: total })}</h2>
           </div>
-          <button type="button" className="jo-fermer" onClick={fermer} aria-label="Fermer"><X size={18} aria-hidden="true" /></button>
+          <button type="button" className="jo-fermer" onClick={fermer} aria-label={t("fiche.fermer")}><X size={18} aria-hidden="true" /></button>
         </header>
 
         <label className="jo-recherche">
           <Search size={17} aria-hidden="true" />
           <input
             type="search" value={recherche} onChange={e => setRecherche(e.target.value)}
-            placeholder={`Rechercher parmi ${total} offres`} aria-label="Rechercher une offre"
+            placeholder={t("fiche.rechercherParmi", { n: total })} aria-label={t("fiche.rechercherOffre")}
           />
         </label>
 
         {villes.length > 1 && (
-          <div className="jo-villes" role="group" aria-label="Filtrer par ville">
-            <button type="button" aria-pressed={!ville} className={!ville ? "actif" : ""} onClick={() => setVille(null)}>Toutes</button>
+          <div className="jo-villes" role="group" aria-label={t("fiche.filtrerVille")}>
+            <button type="button" aria-pressed={!ville} className={!ville ? "actif" : ""} onClick={() => setVille(null)}>{t("fiche.toutes")}</button>
             {villes.map(v => (
               <button key={v} type="button" aria-pressed={ville === v} className={ville === v ? "actif" : ""} onClick={() => setVille(ville === v ? null : v)}>{v}</button>
             ))}
@@ -134,15 +138,15 @@ function PanneauOffres({ apercu, total, companyName, companyId, fermer }: { aper
         )}
 
         <div className="jo-panneau-liste" aria-busy={etat === "charge"}>
-          {etat === "charge" && <p className="jo-etat">Chargement des {total} offres…</p>}
-          {etat === "erreur" && <p className="jo-etat">Les autres offres n&apos;ont pas pu être chargées. Fermez puis rouvrez pour réessayer.</p>}
+          {etat === "charge" && <p className="jo-etat">{t("fiche.chargementOffres", { n: total })}</p>}
+          {etat === "erreur" && <p className="jo-etat">{t("fiche.erreurOffres")}</p>}
           {visibles.length ? (
             <div className="jo-liste">
               {visibles.slice(0, montrees).map(job => <JobOfferCard key={job.id} ligne job={job} companyName={companyName} companyId={companyId} />)}
               {montrees < visibles.length && <div ref={setRepere} style={{ height: 1 }} aria-hidden="true" />}
             </div>
           ) : etat !== "charge" && (
-            <p className="jo-vide">Aucune offre ne correspond. Essayez un autre mot ou une autre ville.</p>
+            <p className="jo-vide">{t("fiche.aucuneOffre")}</p>
           )}
         </div>
       </div>

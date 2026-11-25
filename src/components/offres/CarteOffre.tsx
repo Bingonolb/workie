@@ -11,7 +11,7 @@ import { libelleTaux } from "@/lib/offres";
 import { lieuAffiche } from "@/lib/types";
 import { useT, useLangue } from "@/i18n/FournisseurLangue";
 import { nomSecteur } from "@/i18n/secteurs";
-import type { CleMessage } from "@/i18n/traduire";
+import { libelleContrat } from "@/i18n/contrat";
 
 /**
  * La carte d'une offre d'emploi, partout où des offres se listent (Explorer,
@@ -27,7 +27,6 @@ import type { CleMessage } from "@/i18n/traduire";
  * aucun classement : la flamme reste réservée aux entreprises.
  */
 
-const CONTRATS = new Set(["CDI", "CDD", "Stage", "Apprentissage", "Temporaire"]);
 const CODE_LANGUE: Record<string, string> = { fr: "FR", de: "DE", en: "EN", it: "IT" };
 
 function initiales(nom: string) {
@@ -39,10 +38,9 @@ export function CarteOffre({ o }: { o: OffreAffichee }) {
   const t = useT();
   const langueSite = useLangue();
   const e = o.entreprise;
-  const taux = libelleTaux(o.taux_min, o.taux_max);
-  const lieu = o.location || (e.city ? lieuAffiche(e.city, e.canton) : null);
-  // Les contrats connus se traduisent ; une valeur inattendue s'affiche telle quelle.
-  const contrat = o.contract_type && CONTRATS.has(o.contract_type) ? t(`contrat.${o.contract_type}` as CleMessage) : o.contract_type;
+  const taux = libelleTaux(o.taux_min, o.taux_max, langueSite);
+  const lieu = o.location || (e.city ? lieuAffiche(e.city, e.canton, langueSite) : null);
+  const contrat = libelleContrat(t, o.contract_type);
   const faits = [contrat, taux, o.langue ? CODE_LANGUE[o.langue] : null].filter(Boolean) as string[];
 
   const contenu = (

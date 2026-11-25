@@ -1,5 +1,8 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomVille } from "@/i18n/lieux";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -60,6 +63,8 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
   priority?: boolean;
   loading?: "eager" | "lazy";
 }) {
+  const t = useT();
+  const langue = useLangue();
   const router = useRouter();
   const refProche = useFicheProche(urlFiche(company), company.cover_url);
   // Suit la propriété : sur /explore, page statique, le favori n'est connu
@@ -103,7 +108,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
     <Link
       ref={refProche}
       href={urlFiche(company)}
-      aria-label={`Voir la fiche ${company.name}`}
+      aria-label={t("fiche.voirFiche", { nom: company.name })}
       style={{ textDecoration: "none", display: "block" }}
       // Le survol et le premier contact restent : ils couvrent le cas d'une
       // carte deja visible au chargement, avant que l'observateur ne se mette
@@ -186,7 +191,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             onClick={handleFav}
             disabled={pending}
             aria-pressed={fav}
-            aria-label={fav ? `Retirer ${company.name} des favoris` : `Ajouter ${company.name} aux favoris`}
+            aria-label={fav ? t("fiche.retirerFavorisNom", { nom: company.name }) : t("fiche.ajouterFavorisNom", { nom: company.name })}
             style={{
               position: "absolute", top: 8, right: 8,
               width: 40, height: 40, borderRadius: "50%",
@@ -255,7 +260,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
               } as React.CSSProperties}>
                 {company.name}
                 {company.is_verified && (
-                  <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 15, height: 15, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                  <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 15, height: 15, flexShrink: 0 }} aria-label={t("fiche.verifiee")}>
                     <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                     <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
                   </svg>
@@ -305,7 +310,7 @@ export function CompanyCard({ company, isFav = false, isLoggedIn = false, priori
             display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
             fontSize: 13.5, color: "var(--text-muted)", minHeight: 20,
           }}>
-            <span>{company.city}</span>
+            <span>{nomVille(company.city, langue)}</span>
             {score > 0 && (
               <>
                 <Separateur />

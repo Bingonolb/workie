@@ -341,7 +341,7 @@ export const getCachedSuggestions = unstable_cache(
     sector: string,
     subsector: string | null,
     canton: string | null,
-  ): Promise<{ titre: string; entreprises: Suggestion[] }[]> => {
+  ): Promise<{ titre: string; genre: "metier" | "secteur" | "canton" | "populaires"; valeur: string; entreprises: Suggestion[] }[]> => {
     const admin = createAdminClient();
     const enLigne = await getSecteursEnLigne();
     const req = (colonne: "subsector" | "sector" | "canton", valeur: string) =>
@@ -376,13 +376,13 @@ export const getCachedSuggestions = unstable_cache(
     };
 
     const groupes = [
-      { titre: subsector ? `Aussi dans « ${subsector} »` : "", entreprises: garder(memeMetier.data, 4) },
-      { titre: `Dans ${sector}`, entreprises: garder(memeSecteur.data, 4) },
-      { titre: canton ? `Dans le canton de ${CANTON_NAMES[canton] ?? canton}` : "", entreprises: garder(memeCanton.data, 4) },
-      { titre: "Les plus populaires", entreprises: garder(lesPlusVues.data, 4) },
+      { titre: subsector ? `Aussi dans « ${subsector} »` : "", genre: "metier" as const, valeur: subsector ?? "", entreprises: garder(memeMetier.data, 4) },
+      { titre: `Dans ${sector}`, genre: "secteur" as const, valeur: sector, entreprises: garder(memeSecteur.data, 4) },
+      { titre: canton ? `Dans le canton de ${CANTON_NAMES[canton] ?? canton}` : "", genre: "canton" as const, valeur: canton ?? "", entreprises: garder(memeCanton.data, 4) },
+      { titre: "Les plus populaires", genre: "populaires" as const, valeur: "", entreprises: garder(lesPlusVues.data, 4) },
     ];
     return groupes.filter(g => g.titre && g.entreprises.length > 0);
   },
-  ["suggestions-entreprise-v2"],
+  ["suggestions-entreprise-v3"],
   { revalidate: 300, tags: ["companies"] }
 );
