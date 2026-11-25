@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { revendicationOuverte } from "@/lib/ouverture";
+import { useT } from "@/i18n/FournisseurLangue";
 
 /**
  * Compte sans entreprise active.
@@ -14,6 +15,7 @@ import { revendicationOuverte } from "@/lib/ouverture";
  */
 export function SansEntreprise() {
   const bienvenue = useSearchParams().get("bienvenue");
+  const tr = useT();
   const lireEssais = () => { try { return Number(sessionStorage.getItem("workie_attente_abo") ?? 0); } catch { return 0; } };
   const [abandon] = useState(() => typeof window !== "undefined" && lireEssais() >= 10);
 
@@ -35,20 +37,20 @@ export function SansEntreprise() {
     <div style={{ maxWidth: 560, margin: "40px auto 0", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: 26, display: "grid", gap: 14 }}>
       {bienvenue ? (
         <>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>Paiement reçu, merci.</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>{tr("espace.payeTitre")}</h1>
           <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
             {abandon
-              ? "L'activation prend plus de temps que prévu. Votre paiement est bien reçu : écrivez-nous à contact@workie.ch et nous ouvrons votre espace aussitôt."
-              : "Nous ouvrons votre espace, cela prend quelques secondes. La page se met à jour toute seule."}
+              ? tr("espace.payeLent")
+              : tr("espace.payeAttente")}
           </p>
         </>
       ) : (
         <>
-          <h1 style={{ fontSize: 22, fontWeight: 800 }}>Vous ne gérez pas encore d&apos;entreprise</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 800 }}>{tr("espace.sansTitre")}</h1>
           <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-            Trouvez la fiche de votre entreprise sur Workie, puis faites la demande pour la gérer.
+            {tr("espace.sansTexte")}
           </p>
-          <Link href={revendicationOuverte ? "/pour-les-entreprises" : "/explore"} className="btn btn-encre">Trouver ma fiche</Link>
+          <Link href={revendicationOuverte ? "/pour-les-entreprises" : "/explore"} className="btn btn-encre">{tr("espace.trouverFiche")}</Link>
         </>
       )}
     </div>

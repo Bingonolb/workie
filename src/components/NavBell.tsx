@@ -5,17 +5,10 @@ import Link from "next/link";
 import { Bell, Briefcase, CheckCheck, MessageCircle, Trash2, MoreHorizontal, X } from "lucide-react";
 import { markAllRead, markRead, deleteNotification, getNotifications, type Notification } from "@/lib/actions/notifications";
 import { useEtatSynchronise } from "@/lib/useEtatSynchronise";
+import { useT } from "@/i18n/FournisseurLangue";
+import { texteNotification, depuis } from "@/lib/texteNotification";
 
 /* ── helpers ── */
-function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "À l'instant";
-  if (m < 60) return `Il y a ${m} min`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `Il y a ${h}h`;
-  return `Il y a ${Math.floor(h / 24)}j`;
-}
 
 const TYPE_CFG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   new_job_offer: { icon: <Briefcase size={15} />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
@@ -29,6 +22,8 @@ function NotifItem({ n, onRead, onDelete, onClose }: {
   onDelete: (id: string) => Promise<void>;
   onClose: () => void;
 }) {
+  const t = useT();
+  const texte = texteNotification(n, t);
   const cfg = TYPE_CFG[n.type] ?? { icon: <Bell size={15} />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" };
   const data = n.data as Record<string, string>;
   const href = n.type === "review_reply" && data.company_id
@@ -74,14 +69,14 @@ function NotifItem({ n, onRead, onDelete, onClose }: {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontSize: 13, fontWeight: n.read ? 600 : 800, color: "var(--text)", marginBottom: 2, lineHeight: 1.35 }}>
-            {n.title}
+            {texte.titre}
           </p>
-          {n.body && (
+          {texte.corps && (
             <p style={{ fontSize: 12, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {n.body}
+              {texte.corps}
             </p>
           )}
-          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>{timeAgo(n.created_at)}</p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>{depuis(n.created_at, t)}</p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
           {!n.read && <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#8b5cf6", marginTop: 4 }} />}
@@ -99,11 +94,11 @@ function NotifItem({ n, onRead, onDelete, onClose }: {
                 <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, width: 160, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.14)", zIndex: 10003, overflow: "hidden" }}>
                   {!n.read && (
                     <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onRead(n.id); }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "10px 14px", background: "none", border: "none", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text)", cursor: "pointer" }}>
-                      <CheckCheck size={13} color="var(--text-muted)" /> Marquer comme lu
+                      <CheckCheck size={13} color="var(--text-muted)" /> {t("notifs.marquerLu")}
                     </button>
                   )}
                   <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); triggerDelete(); }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "10px 14px", background: "none", border: "none", fontSize: 13, fontWeight: 600, color: "#ef4444", cursor: "pointer" }}>
-                    <Trash2 size={13} /> Supprimer
+                    <Trash2 size={13} /> {t("notifs.supprimer")}
                   </button>
                 </div>
               </>
@@ -119,6 +114,7 @@ function NotifItem({ n, onRead, onDelete, onClose }: {
 export function NavBell({ initialUnread }: { initialUnread: number }) {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useEtatSynchronise(initialUnread);
+  const t = useT();
   const [notifications, setNotifications] = useState<Notification[] | null>(null);
   const [loading, setLoading] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -175,7 +171,7 @@ export function NavBell({ initialUnread }: { initialUnread: number }) {
       <button
         type="button"
         onClick={openDrawer}
-        aria-label={unread > 0 ? `Notifications (${unread} non lues)` : "Notifications"}
+        aria-label={unread > 0 ? t("notifs.titreNonLues", { n: unread }) : t("notifs.titre")}
         style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 10, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", cursor: "pointer" }}
       >
         <Bell size={20} aria-hidden="true" />
@@ -220,7 +216,7 @@ export function NavBell({ initialUnread }: { initialUnread: number }) {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>Notifications</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>{t("notifs.titre")}</span>
             {unread > 0 && (
               <span style={{ fontSize: 11, fontWeight: 800, background: "#8b5cf6", color: "#fff", borderRadius: 50, padding: "2px 7px" }}>{unread}</span>
             )}
@@ -228,10 +224,10 @@ export function NavBell({ initialUnread }: { initialUnread: number }) {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {unread > 0 && (
               <button type="button" onClick={handleMarkAllRead} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "6px 10px", borderRadius: 8 }}>
-                <CheckCheck size={13} /> Tout lire
+                <CheckCheck size={13} /> {t("notifs.toutLire")}
               </button>
             )}
-            <button type="button" onClick={closeDrawer} aria-label="Fermer" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", cursor: "pointer" }}>
+            <button type="button" onClick={closeDrawer} aria-label={t("notifs.fermer")} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", cursor: "pointer" }}>
               <X size={16} />
             </button>
           </div>
@@ -251,10 +247,10 @@ export function NavBell({ initialUnread }: { initialUnread: number }) {
           {!loading && notifications?.length === 0 && (
             <div style={{ textAlign: "center", padding: "60px 20px", color: "var(--text-muted)" }}>
               <Bell size={40} style={{ opacity: 0.15, margin: "0 auto 16px", display: "block" }} />
-              <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Aucune notification</p>
-              <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 20 }}>Sauvegarde des entreprises pour recevoir leurs nouvelles offres d&apos;emploi.</p>
+              <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>{t("notifs.aucune")}</p>
+              <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 20 }}>{t("notifs.aucuneTexte")}</p>
               <Link href="/explore" onClick={closeDrawer} style={{ fontSize: 13, color: "#8b5cf6", fontWeight: 700, textDecoration: "none" }}>
-                Explorer les entreprises →
+                {t("notifs.explorer")}
               </Link>
             </div>
           )}

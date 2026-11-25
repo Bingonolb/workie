@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { ficheGeree } from "@/lib/actions/espaceEntreprise";
@@ -6,14 +5,16 @@ import { NavbarClient } from "@/components/NavbarClient";
 import { OngletsEspace } from "./OngletsEspace";
 import { SansEntreprise } from "./SansEntreprise";
 import { BandeauVueAdmin } from "./BandeauVueAdmin";
+import { meta } from "@/i18n/meta";
+import { tServeur } from "@/i18n/page";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Espace entreprise", robots: { index: false, follow: false } };
+export const generateMetadata = () => meta({ titre: "espace.titre", indexer: false });
 
 export default async function LayoutEspace({ children }: { children: React.ReactNode }) {
   const user = await getUser();
   if (!user) redirect("/login?next=/espace-entreprise");
-  const c = await ficheGeree();
+  const [c, t] = await Promise.all([ficheGeree(), tServeur()]);
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
@@ -24,7 +25,7 @@ export default async function LayoutEspace({ children }: { children: React.React
             {c.vueAdmin && <BandeauVueAdmin nom={c.name} retour={`/entreprise/${c.slug}`} />}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
               <div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.07em", textTransform: "uppercase" }}>Espace entreprise</p>
+                <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.07em", textTransform: "uppercase" }}>{t("espace.titre")}</p>
                 <h1 style={{ fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 800, letterSpacing: "-0.025em" }}>{c.name}</h1>
               </div>
             </div>

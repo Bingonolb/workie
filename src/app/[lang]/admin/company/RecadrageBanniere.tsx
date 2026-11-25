@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Move, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { CADRAGE_NEUTRE, ZOOM_MAX, estNeutre, type Cadrage } from "@/lib/coverUrl";
+import { useT } from "@/i18n/FournisseurLangue";
 
 /**
  * Recadrer une bannière sans toucher au fichier.
@@ -24,6 +25,7 @@ export function RecadrageBanniere({ src, cadrage, onChange }: {
 }) {
   const cadreRef = useRef<HTMLDivElement>(null);
   const depart = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
+  const t = useT();
   const [glisse, setGlisse] = useState(false);
 
   const origine = `${cadrage.x}% ${cadrage.y}%`;
@@ -84,13 +86,13 @@ export function RecadrageBanniere({ src, cadrage, onChange }: {
       {/* La fiche : le bandeau le plus allongé, celui qui coupe le plus. */}
       <div>
         <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
-          Sur la fiche
+          {t("ficheForm.surFiche")}
         </p>
         <div
           ref={cadreRef}
           role="slider"
           tabIndex={0}
-          aria-label="Cadrage de la bannière : faites glisser l'image, ou utilisez les flèches du clavier"
+          aria-label={t("ficheForm.cadrage")}
           aria-valuenow={Math.round(cadrage.x)}
           aria-valuemin={0}
           aria-valuemax={100}
@@ -116,7 +118,7 @@ export function RecadrageBanniere({ src, cadrage, onChange }: {
               padding: "6px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600,
               background: "rgba(0,0,0,0.55)", color: "#fff", pointerEvents: "none",
             }}>
-              <Move size={13} aria-hidden="true" /> Glissez pour cadrer
+              <Move size={13} aria-hidden="true" /> {t("ficheForm.glisser")}
             </span>
           )}
         </div>
@@ -126,7 +128,7 @@ export function RecadrageBanniere({ src, cadrage, onChange }: {
       <div style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
         <div>
           <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
-            Sur une carte
+            {t("ficheForm.surCarte")}
           </p>
           <div style={{ position: "relative", width: 200, aspectRatio: "1.9 / 1", borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)", background: "var(--surface3)" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -135,17 +137,17 @@ export function RecadrageBanniere({ src, cadrage, onChange }: {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 220 }}>
-          <button type="button" style={bouton} onClick={() => zoomer(cadrage.zoom - 0.1)} aria-label="Dézoomer" disabled={cadrage.zoom <= 1}>
+          <button type="button" style={bouton} onClick={() => zoomer(cadrage.zoom - 0.1)} aria-label={t("ficheForm.dezoomer")} disabled={cadrage.zoom <= 1}>
             <ZoomOut size={15} aria-hidden="true" />
           </button>
           <input
             type="range" min={1} max={ZOOM_MAX} step={0.01}
             value={cadrage.zoom}
             onChange={e => zoomer(Number(e.target.value))}
-            aria-label="Zoom de la bannière"
+            aria-label={t("ficheForm.zoom")}
             style={{ flex: 1, accentColor: "var(--brand)" }}
           />
-          <button type="button" style={bouton} onClick={() => zoomer(cadrage.zoom + 0.1)} aria-label="Zoomer" disabled={cadrage.zoom >= ZOOM_MAX}>
+          <button type="button" style={bouton} onClick={() => zoomer(cadrage.zoom + 0.1)} aria-label={t("ficheForm.zoomer")} disabled={cadrage.zoom >= ZOOM_MAX}>
             <ZoomIn size={15} aria-hidden="true" />
           </button>
           <span style={{ fontSize: 12, color: "var(--text-muted)", width: 38, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
@@ -157,7 +159,7 @@ export function RecadrageBanniere({ src, cadrage, onChange }: {
             disabled={estNeutre(cadrage)}
             style={{ ...bouton, width: "auto", padding: "0 10px", gap: 6, fontSize: 12, fontWeight: 600, opacity: estNeutre(cadrage) ? 0.45 : 1 }}
           >
-            <RotateCcw size={13} aria-hidden="true" /> Centrer
+            <RotateCcw size={13} aria-hidden="true" /> {t("ficheForm.centrer")}
           </button>
         </div>
       </div>

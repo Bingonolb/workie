@@ -7,6 +7,8 @@ import { Check, ShieldCheck, BarChart3, PenLine, BadgeCheck } from "lucide-react
 import {
   demarrerRevendication, verifierCodeRevendication, lancerAbonnement, type EtatRevendication,
 } from "@/lib/actions/revendication";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { riche } from "@/i18n/riche";
 import { ABONNEMENT, type Formule } from "@/lib/tarifs";
 
 const carte: React.CSSProperties = {
@@ -19,11 +21,12 @@ const champ: React.CSSProperties = {
 };
 const etiquette: React.CSSProperties = { fontSize: 12.5, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6, display: "block" };
 
-const ETAPES = ["Vos informations", "Vérification", "Abonnement"];
 
 function Progression({ actuelle }: { actuelle: number }) {
+  const t = useT();
+  const ETAPES = [t("revend.etapeInfos"), t("revend.etapeVerif"), t("revend.etapeAbo")];
   return (
-    <ol aria-label="Étapes" style={{ display: "flex", gap: 8, listStyle: "none", padding: 0, margin: "20px 0 0" }}>
+    <ol aria-label={t("revend.etapes")} style={{ display: "flex", gap: 8, listStyle: "none", padding: 0, margin: "20px 0 0" }}>
       {ETAPES.map((e, i) => (
         <li key={e} style={{ flex: 1 }}>
           <div style={{ height: 4, borderRadius: 2, background: i <= actuelle ? "var(--brand)" : "var(--border)" }} />
@@ -36,6 +39,8 @@ function Progression({ actuelle }: { actuelle: number }) {
 
 export function ParcoursRevendication({ companyId, slug, domaine, connecte, etatInitial }: { companyId: string; slug: string; domaine: string | null; connecte: boolean; etatInitial: EtatRevendication }) {
   const router = useRouter();
+  const t = useT();
+  const langue = useLangue();
   const [compteExistant, setCompteExistant] = useState(false);
   const lienConnexion = `/login?next=${encodeURIComponent(`/revendiquer/${slug}`)}`;
   const [etat, setEtat] = useState<EtatRevendication>(etatInitial);
@@ -80,18 +85,18 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
 
   const alerte = erreur && (
     <p role="alert" style={{ fontSize: 13.5, color: "#ef4444" }}>
-      {erreur}{compteExistant && <> <Link href={lienConnexion} style={{ color: "var(--brand)", fontWeight: 700 }}>Se connecter</Link></>}
+      {erreur}{compteExistant && <> <Link href={lienConnexion} style={{ color: "var(--brand)", fontWeight: 700 }}>{t("revend.seConnecter")}</Link></>}
     </p>
   );
 
   if (etat.etape === "deja_geree") {
     return (
       <div style={carte}>
-        <h1 style={{ fontSize: 20, fontWeight: 800 }}>Cette fiche est déjà gérée</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 800 }}>{t("revend.dejaGereeTitre")}</h1>
         <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-          Une personne de l&apos;entreprise gère déjà cette fiche. Pour obtenir un accès, adressez-vous à elle ou écrivez à contact@workie.ch.
+          {t("revend.dejaGereeTexte")}
         </p>
-        <Link href={`/entreprise/${slug}`} className="btn btn-clair">Retour à la fiche</Link>
+        <Link href={`/entreprise/${slug}`} className="btn btn-clair">{t("revend.retour")}</Link>
       </div>
     );
   }
@@ -99,12 +104,12 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
   if (etat.etape === "refusee") {
     return (
       <div style={carte}>
-        <h1 style={{ fontSize: 20, fontWeight: 800 }}>Demande non retenue</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 800 }}>{t("revend.refuseeTitre")}</h1>
         <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-          Nous n&apos;avons pas pu confirmer votre lien avec l&apos;entreprise. Recommencez avec une adresse e-mail de l&apos;entreprise : la vérification est alors immédiate.
+          {t("revend.refuseeTexte")}
         </p>
         <button type="button" className="btn btn-encre" onClick={() => setEtat({ etape: "formulaire", domaine })}>
-          Recommencer la demande
+          {t("revend.recommencer")}
         </button>
       </div>
     );
@@ -116,54 +121,54 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
         <Progression actuelle={0} />
         <div style={carte}>
           <div>
-            <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 6 }}>Vous représentez cette entreprise ?</h1>
+            <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 6 }}>{t("revend.titre")}</h1>
             <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-              Gérez sa fiche, suivez sa fréquentation et affichez le badge vérifié.
+              {t("revend.sousTitre")}
             </p>
           </div>
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
             {[
-              { I: PenLine, t: "Description, bannière, logo et lien carrière à jour" },
-              { I: BarChart3, t: "Visites, favoris et clics vers vos offres, jour par jour" },
-              { I: BadgeCheck, t: "Badge « Entreprise vérifiée » sur la fiche" },
-            ].map(({ I, t }) => (
-              <li key={t} style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 14 }}>
-                <I size={17} color="var(--brand)" aria-hidden="true" /> {t}
+              { I: PenLine, t: t("revend.avantage1") },
+              { I: BarChart3, t: t("revend.avantage2") },
+              { I: BadgeCheck, t: t("revend.avantage3") },
+            ].map(({ I, t: texte }) => (
+              <li key={texte} style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 14 }}>
+                <I size={17} color="var(--brand)" aria-hidden="true" /> {texte}
               </li>
             ))}
           </ul>
           <form action={envoyer} style={{ display: "grid", gap: 14 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <label><span style={etiquette}>Prénom</span><input name="prenom" required autoComplete="given-name" style={champ} /></label>
-              <label><span style={etiquette}>Nom</span><input name="nom" required autoComplete="family-name" style={champ} /></label>
+              <label><span style={etiquette}>{t("revend.prenom")}</span><input name="prenom" required autoComplete="given-name" style={champ} /></label>
+              <label><span style={etiquette}>{t("revend.nom")}</span><input name="nom" required autoComplete="family-name" style={champ} /></label>
             </div>
-            <label><span style={etiquette}>Fonction</span><input name="fonction" required placeholder="Responsable RH" autoComplete="organization-title" style={champ} /></label>
+            <label><span style={etiquette}>{t("revend.fonction")}</span><input name="fonction" required placeholder={t("revend.fonctionExemple")} autoComplete="organization-title" style={champ} /></label>
             <label>
-              <span style={etiquette}>E-mail professionnel</span>
+              <span style={etiquette}>{t("revend.email")}</span>
               <input name="email" type="email" required autoComplete="email"
-                placeholder={etat.domaine ? `prenom.nom@${etat.domaine}` : "prenom.nom@entreprise.ch"} style={champ} />
+                placeholder={etat.domaine ? t("revend.emailExemple", { domaine: etat.domaine }) : t("revend.emailExemple", { domaine: "entreprise.ch" })} style={champ} />
               <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, display: "block", lineHeight: 1.5 }}>
                 {etat.domaine
-                  ? <>Nous y envoyons un code. Avec une adresse en <strong>@{etat.domaine}</strong>, c&apos;est validé tout de suite ; sinon, notre équipe confirme ensuite à la main.</>
-                  : "Nous y envoyons un code, puis notre équipe confirme la demande à la main."}
+                  ? riche(t("revend.aideDomaine", { domaine: etat.domaine }))
+                  : t("revend.aideSansDomaine")}
               </span>
             </label>
             {!connecte && (
               <label>
-                <span style={etiquette}>Mot de passe de votre compte Workie Business</span>
+                <span style={etiquette}>{t("revend.motDePasse")}</span>
                 <input name="mot_de_passe" type="password" required minLength={8} autoComplete="new-password" style={champ} />
                 <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, display: "block" }}>
-                  8 caractères au minimum. Vous l&apos;utiliserez pour revenir dans votre espace entreprise.
+                  {t("revend.motDePasseAide")}
                 </span>
               </label>
             )}
             {alerte}
             <button type="submit" className="btn btn-encre btn-bloc" disabled={enCours}>
-              {enCours ? "Envoi…" : "Recevoir mon code"}
+              {enCours ? t("revend.envoi") : t("revend.recevoirCode")}
             </button>
             {!connecte && (
               <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center" }}>
-                Vous avez déjà un compte Workie ? <Link href={lienConnexion} style={{ color: "var(--brand)", fontWeight: 600 }}>Se connecter</Link>
+                {t("revend.dejaCompte")} <Link href={lienConnexion} style={{ color: "var(--brand)", fontWeight: 600 }}>{t("revend.seConnecter")}</Link>
               </p>
             )}
           </form>
@@ -177,20 +182,20 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
       <>
         <Progression actuelle={1} />
         <form onSubmit={verifier} style={carte}>
-          <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>Vérifiez votre adresse</h1>
+          <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>{t("revend.verifTitre")}</h1>
           <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-            Nous avons envoyé un code à 6 chiffres à <strong>{etat.email}</strong>. Il est valable 30 minutes.
+            {riche(t("revend.verifTexte", { email: etat.email }))}
           </p>
           <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            inputMode="numeric" autoComplete="one-time-code" autoFocus placeholder="123456" aria-label="Code à 6 chiffres"
+            inputMode="numeric" autoComplete="one-time-code" autoFocus placeholder="123456" aria-label={t("revend.codeLabel")}
             style={{ ...champ, fontSize: 24, letterSpacing: "0.3em", textAlign: "center", fontVariantNumeric: "tabular-nums" }} />
           {alerte}
           <button type="submit" className="btn btn-encre btn-bloc" disabled={code.length !== 6 || enCours}>
-            {enCours ? "Vérification…" : "Vérifier"}
+            {enCours ? t("revend.verification") : t("revend.verifier")}
           </button>
           <button type="button" onClick={() => { setErreur(null); setCode(""); setEtat({ etape: "formulaire", domaine }); }}
             style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 13, cursor: "pointer", textDecoration: "underline" }}>
-            Pas reçu ou mauvaise adresse ? Refaire la demande
+            {t("revend.refaire")}
           </button>
         </form>
       </>
@@ -203,12 +208,11 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
         <Progression actuelle={1} />
         <div style={carte}>
           <ShieldCheck size={28} color="var(--brand)" aria-hidden="true" />
-          <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>Demande reçue</h1>
+          <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>{t("revend.recueTitre")}</h1>
           <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-            Votre adresse est confirmée. Comme elle n&apos;appartient pas au domaine officiel de l&apos;entreprise, notre équipe vérifie encore la demande à la main.
-            Vous recevrez un e-mail à <strong>{etat.email}</strong> dès qu&apos;elle est acceptée.
+            {riche(t("revend.recueTexte", { email: etat.email }))}
           </p>
-          <Link href={`/entreprise/${slug}`} className="btn btn-clair btn-bloc">Retour à la fiche</Link>
+          <Link href={`/entreprise/${slug}`} className="btn btn-clair btn-bloc">{t("revend.retour")}</Link>
         </div>
       </>
     );
@@ -220,10 +224,10 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
       <Progression actuelle={2} />
       <div style={carte}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#10b981", fontSize: 13.5, fontWeight: 700 }}>
-          <Check size={16} aria-hidden="true" /> Vérification réussie
+          <Check size={16} aria-hidden="true" /> {t("revend.reussie")}
         </div>
-        <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>Choisissez votre formule</h1>
-        <div role="radiogroup" aria-label="Formule" style={{ display: "grid", gap: 10 }}>
+        <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>{t("revend.choisirFormule")}</h1>
+        <div role="radiogroup" aria-label={t("revend.formule")} style={{ display: "grid", gap: 10 }}>
           {(Object.keys(ABONNEMENT) as Formule[]).map(f => {
             const choisie = formule === f;
             return (
@@ -235,12 +239,12 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
                   display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, color: "var(--text)",
                 }}>
                 <span>
-                  <span style={{ display: "block", fontWeight: 700, fontSize: 15 }}>{f === "annuel" ? "Annuel" : "Mensuel"}</span>
-                  <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{ABONNEMENT[f].libelle}</span>
+                  <span style={{ display: "block", fontWeight: 700, fontSize: 15 }}>{f === "annuel" ? t("revend.annuel") : t("revend.mensuel")}</span>
+                  <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{t(f === "annuel" ? "revend.libelleAnnuel" : "revend.libelleMensuel", { chf: ABONNEMENT[f].chf.toLocaleString(langue === "de" ? "de-CH" : "fr-CH") })}</span>
                 </span>
                 {f === "annuel" && (
                   <span style={{ fontSize: 12, fontWeight: 700, color: "#10b981", background: "rgba(16,185,129,0.12)", padding: "3px 9px", borderRadius: 999, whiteSpace: "nowrap" }}>
-                    2 mois offerts
+                    {t("revend.deuxMois")}
                   </span>
                 )}
               </button>
@@ -248,11 +252,11 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
           })}
         </div>
         <p style={{ fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.5 }}>
-          Paiement sécurisé par Stripe. Résiliable à tout moment depuis votre espace entreprise.
+          {t("revend.stripe")}
         </p>
         {alerte}
         <button type="button" onClick={payer} className="btn btn-marque btn-bloc" disabled={enCours}>
-          {enCours ? "Ouverture du paiement…" : "Activer l'abonnement"}
+          {enCours ? t("revend.ouverture") : t("revend.activer")}
         </button>
       </div>
     </>

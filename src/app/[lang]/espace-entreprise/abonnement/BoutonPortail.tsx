@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { ouvrirPortailAbonnement } from "@/lib/actions/espaceEntreprise";
+import { useT } from "@/i18n/FournisseurLangue";
 
 export function BoutonPortail() {
+  const t = useT();
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, demarrer] = useTransition();
   return (
@@ -12,10 +14,10 @@ export function BoutonPortail() {
         setErreur(null);
         demarrer(async () => {
           const r = await ouvrirPortailAbonnement();
-          if (r.url) window.location.assign(r.url); else setErreur(r.error ?? "Erreur.");
+          if (r.url) window.location.assign(r.url); else setErreur(r.error ?? t("espace.erreur"));
         });
       }}>
-        {enCours ? "Ouverture…" : "Gérer mon abonnement"}
+        {enCours ? t("espace.ouverture") : t("espace.gererAbo")}
       </button>
       {erreur && <p role="alert" style={{ fontSize: 13, color: "#ef4444" }}>{erreur}</p>}
     </div>

@@ -8,7 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { domaineOfficiel, emailDuDomaine, emailValide } from "@/lib/domaineEntreprise";
 import { sendCodeRevendication, sendRevendicationAValider } from "@/lib/email";
 import { ABONNEMENT, type Formule } from "@/lib/tarifs";
-import { langueRequete } from "@/i18n/requete";
+import { langueRequete, tRequete } from "@/i18n/requete";
 
 /**
  * Revendiquer une fiche, en quatre temps :
@@ -111,6 +111,7 @@ export async function etatRevendication(companyId: string): Promise<EtatRevendic
  * validée au code ; sinon → validée au code PUIS par l'administration.
  */
 export async function demarrerRevendication(formData: FormData): Promise<{ error?: string; compteExistant?: boolean; etat?: EtatRevendication }> {
+  const t = await tRequete();
   try {
     const user = await getUser();
     const companyId = String(formData.get("company_id") ?? "");
@@ -120,14 +121,14 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
     const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 254);
     const motDePasse = String(formData.get("mot_de_passe") ?? "");
 
-    if (!UUID.test(companyId)) return { error: "Fiche introuvable." };
-    if (!prenom || !nom || !fonction) return { error: "Indiquez votre prénom, votre nom et votre fonction." };
-    if (!emailValide(email)) return { error: "Adresse e-mail invalide." };
-    if (!user && motDePasse.length < 8) return { error: "Choisissez un mot de passe d'au moins 8 caractères." };
+    if (!UUID.test(companyId)) return { error: t("revend.eFiche") };
+    if (!prenom || !nom || !fonction) return { error: t("revend.eIdentite") };
+    if (!emailValide(email)) return { error: t("revend.eEmail") };
+    if (!user && motDePasse.length < 8) return { error: t("revend.eMdp") };
 
     const c = await entreprise(companyId);
-    if (!c) return { error: "Fiche introuvable." };
-    if (c.is_subscribed) return { error: "Cette fiche est déjà gérée par l'entreprise." };
+    if (!c) return { error: t("revend.eFiche") };
+    if (c.is_subscribed) return { error: t("revend.eDejaGeree") };
 
     // Limites : par adresse IP, par e-mail et par compte, sur 24 heures.
     const h = await headers();
@@ -139,7 +140,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
       user ? table().select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("cree_le", depuis) : Promise.resolve({ count: 0 }),
     ]);
     if ((parIp.count ?? 0) >= DEMANDES_PAR_IP || (parEmail.count ?? 0) >= DEMANDES_PAR_EMAIL || (parCompte.count ?? 0) >= DEMANDES_PAR_JOUR) {
-      return { error: "Trop de demandes aujourd'hui. Réessayez demain." };
+      return { error: t("revend.eTrop") };
     }
 
     const admin = createAdminClient();
@@ -150,7 +151,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
       if (p?.claimed_company_id && p.claimed_company_id !== companyId) {
         const { data: autre } = await admin.from("companies").select("name, is_subscribed").eq("id", p.claimed_company_id).maybeSingle();
         if (autre?.is_subscribed) {
-          return { error: `Ce compte gère déjà ${autre.name}. Pour gérer une autre entreprise, utilisez un autre compte ou écrivez à contact@workie.ch.` };
+          return { error: t("revend.eAutre", { nom: autre.name }) };
         }
       }
     }
@@ -164,7 +165,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
       if (p?.id) {
         const { data: u } = await admin.auth.admin.getUserById(p.id);
         if (u?.user?.email_confirmed_at || !u?.user?.user_metadata?.compte_entreprise) {
-          return { error: "Un compte Workie existe déjà avec cette adresse. Connectez-vous pour continuer.", compteExistant: true };
+          return { error: t("revend.eCompte"), compteExistant: true };
         }
         await admin.auth.admin.updateUserById(p.id, { password: motDePasse });
         userId = p.id;
@@ -176,8 +177,8 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
         });
         if (error || !cree?.user) {
           const msg = (error?.message ?? "").toLowerCase();
-          if (msg.includes("password")) return { error: "Ce mot de passe est trop faible ou trop courant. Choisissez-en un autre." };
-          return { error: "Le compte n'a pas pu être créé. Réessayez." };
+          if (msg.includes("password")) return { error: t("revend.eFaible") };
+          return { error: t("revend.eCreation") };
         }
         userId = cree.user.id;
       }
@@ -193,7 +194,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
       methode: parDomaine ? "domaine" : "manuel", statut: "code_envoye",
       empreinte_ip: ip, compte_cree: compteCree, langue: await langueRequete(),
     }).select("id").single();
-    if (error || !rev) return { error: "La demande n'a pas pu être enregistrée. Réessayez." };
+    if (error || !rev) return { error: t("revend.eEnregistrement") };
 
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
     await table().update({
@@ -202,20 +203,21 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
       essais: 0,
     }).eq("id", rev.id);
     const parti = await sendCodeRevendication(email, prenom, c.name, code, await langueRequete());
-    if (!parti) return { error: "Le courriel n'a pas pu partir. Vérifiez l'adresse et réessayez." };
+    if (!parti) return { error: t("revend.eCourriel") };
 
     if (!user) {
       (await cookies()).set(COOKIE_REV, rev.id, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 2 * 3600 });
     }
     return { etat: { etape: "code", id: rev.id, email: masquer(email) } };
   } catch {
-    return { error: "Une erreur est survenue. Réessayez." };
+    return { error: t("revend.eGenerique") };
   }
 }
 
 export async function verifierCodeRevendication(id: string, code: string): Promise<{ error?: string; etat?: EtatRevendication }> {
+  const t = await tRequete();
   try {
-    if (!UUID.test(id)) return { error: "Demande introuvable." };
+    if (!UUID.test(id)) return { error: t("revend.eDemande") };
     const user = await getUser();
     const jar = await cookies();
     const { data } = await table().select("*").eq("id", id).maybeSingle();
@@ -223,14 +225,14 @@ export async function verifierCodeRevendication(id: string, code: string): Promi
     // Connecté : la demande doit être la sienne. Sans session : la demande
     // doit être celle que ce navigateur vient de lancer (cookie).
     const autorise = r && (user ? r.user_id === user.id : jar.get(COOKIE_REV)?.value === r.id);
-    if (!r || !autorise || r.statut !== "code_envoye") return { error: "Demande introuvable." };
-    if (r.essais >= ESSAIS_MAX) return { error: "Trop d'essais. Refaites la demande pour recevoir un nouveau code." };
+    if (!r || !autorise || r.statut !== "code_envoye") return { error: t("revend.eDemande") };
+    if (r.essais >= ESSAIS_MAX) return { error: t("revend.eEssais") };
     if (!r.code_expire || new Date(r.code_expire).getTime() < Date.now()) {
-      return { error: "Ce code a expiré. Refaites la demande pour en recevoir un nouveau." };
+      return { error: t("revend.eExpire") };
     }
     if (!/^\d{6}$/.test(code.trim()) || hacher(code.trim(), r.id) !== r.code_hash) {
       await table().update({ essais: r.essais + 1 }).eq("id", r.id);
-      return { error: "Code incorrect." };
+      return { error: t("revend.eCode") };
     }
 
     // Le code prouve l'adresse : le compte créé dans ce parcours est confirmé
@@ -256,27 +258,28 @@ export async function verifierCodeRevendication(id: string, code: string): Promi
     if (!r.company_id) jar.delete("workie_creation");
     return { etat: { etape: "en_attente", email: masquer(r.email_pro) } };
   } catch {
-    return { error: "Une erreur est survenue. Réessayez." };
+    return { error: t("revend.eGenerique") };
   }
 }
 /** Ouvre le paiement Stripe de l'abonnement, une fois la demande vérifiée. */
 export async function lancerAbonnement(id: string, formule: Formule): Promise<{ error?: string; url?: string }> {
+  const t = await tRequete();
   try {
     const user = await getUser();
-    if (!user || !UUID.test(id) || !(formule in ABONNEMENT)) return { error: "Demande introuvable." };
-    if (!process.env.STRIPE_SECRET_KEY) return { error: "Le paiement n'est pas disponible pour le moment." };
+    if (!user || !UUID.test(id) || !(formule in ABONNEMENT)) return { error: t("revend.eDemande") };
+    if (!process.env.STRIPE_SECRET_KEY) return { error: t("revend.ePaiementIndispo") };
 
     const { data } = await table().select("*").eq("id", id).eq("user_id", user.id).maybeSingle();
     const r = data as (Ligne & { fiche?: { name: string } | null }) | null;
-    if (!r || r.statut !== "verifiee") return { error: "Cette demande n'est pas encore vérifiée." };
+    if (!r || r.statut !== "verifiee") return { error: t("revend.eNonVerifiee") };
 
     // Création : la fiche n'existe pas encore, elle naîtra au paiement (webhook).
     const creation = !r.company_id && !!r.fiche;
     const c = creation
       ? { id: "", slug: "", name: r.fiche!.name, website_url: null, is_subscribed: false }
       : await entreprise(r.company_id);
-    if (!c) return { error: "Fiche introuvable." };
-    if (c.is_subscribed) return { error: "Cette fiche est déjà gérée par l'entreprise." };
+    if (!c) return { error: t("revend.eFiche") };
+    if (c.is_subscribed) return { error: t("revend.eDejaGeree") };
 
     const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
     const offre = ABONNEMENT[formule];
@@ -303,9 +306,9 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
       success_url: `${base}/espace-entreprise?bienvenue=1`,
       cancel_url: creation ? `${base}/creer-entreprise` : `${base}/revendiquer/${c.slug}`,
     });
-    return session.url ? { url: session.url } : { error: "Le paiement n'a pas pu démarrer." };
+    return session.url ? { url: session.url } : { error: t("revend.ePaiement") };
   } catch {
-    return { error: "Le paiement n'a pas pu démarrer. Réessayez." };
+    return { error: t("revend.ePaiementReessayer") };
   }
 }
 

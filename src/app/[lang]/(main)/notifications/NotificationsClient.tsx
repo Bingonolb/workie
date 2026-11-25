@@ -5,16 +5,9 @@ import Link from "next/link";
 import { Bell, Briefcase, Building2, CheckCheck, MessageCircle, Trash2, MoreHorizontal } from "lucide-react";
 import { markAllRead, markRead, deleteNotification, type Notification } from "@/lib/actions/notifications";
 import { urlFiche } from "@/lib/urlFiche";
+import { useT } from "@/i18n/FournisseurLangue";
+import { texteNotification, depuis } from "@/lib/texteNotification";
 
-function timeAgo(date: string) {
-  const diff = Date.now() - new Date(date).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "À l'instant";
-  if (m < 60) return `Il y a ${m} min`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `Il y a ${h}h`;
-  return `Il y a ${Math.floor(h / 24)}j`;
-}
 
 const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   new_job_offer: { icon: <Briefcase size={16} aria-hidden="true" />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
@@ -27,6 +20,8 @@ function NotificationItem({ n, onRead, onDelete }: {
   onRead: (id: string) => void;
   onDelete: (id: string) => Promise<void>;
 }) {
+  const t = useT();
+  const texte = texteNotification(n, t);
   const cfg = TYPE_CONFIG[n.type] ?? { icon: <Bell size={16} aria-hidden="true" />, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" };
   const data = n.data as Record<string, string>;
   // A "new companies" digest links to several companies at once, so it can't be
@@ -67,7 +62,7 @@ function NotificationItem({ n, onRead, onDelete }: {
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontSize: 14, fontWeight: n.read ? 600 : 800, color: "var(--text)", marginBottom: 2, lineHeight: 1.3 }}>
-            {n.title}
+            {texte.titre}
           </p>
           {isDigest ? (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
@@ -83,12 +78,12 @@ function NotificationItem({ n, onRead, onDelete }: {
                 </Link>
               ))}
             </div>
-          ) : n.body ? (
+          ) : texte.corps ? (
             <p style={{ fontSize: 13, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {n.body}
+              {texte.corps}
             </p>
           ) : null}
-          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: isDigest ? 10 : 4 }}>{timeAgo(n.created_at)}</p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: isDigest ? 10 : 4 }}>{depuis(n.created_at, t)}</p>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
@@ -99,7 +94,7 @@ function NotificationItem({ n, onRead, onDelete }: {
             <button
               type="button"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(o => !o); }}
-              aria-label="Options de la notification"
+              aria-label={t("notifs.options")}
               aria-expanded={menuOpen}
               className="notif-menu-btn"
               style={{
@@ -132,7 +127,7 @@ function NotificationItem({ n, onRead, onDelete }: {
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); onRead(n.id); }}
                       style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "10px 14px", background: "none", border: "none", borderBottom: "1px solid var(--border)", fontSize: 13, fontWeight: 600, color: "var(--text)", cursor: "pointer", textAlign: "left" }}
                     >
-                      <CheckCheck size={14} color="var(--text-muted)" aria-hidden="true" /> Marquer comme lu
+                      <CheckCheck size={14} color="var(--text-muted)" aria-hidden="true" /> {t("notifs.marquerLu")}
                     </button>
                   )}
                   <button
@@ -140,7 +135,7 @@ function NotificationItem({ n, onRead, onDelete }: {
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); triggerDelete(); }}
                     style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "10px 14px", background: "none", border: "none", fontSize: 13, fontWeight: 600, color: "#ef4444", cursor: "pointer", textAlign: "left" }}
                   >
-                    <Trash2 size={14} aria-hidden="true" /> Supprimer
+                    <Trash2 size={14} aria-hidden="true" /> {t("notifs.supprimer")}
                   </button>
                 </div>
               </>
@@ -181,6 +176,7 @@ export function NotificationsClient({ initialNotifications, initialUnread }: {
   initialNotifications: Notification[];
   initialUnread: number;
 }) {
+  const t = useT();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [unread, setUnread] = useState(initialUnread);
 
@@ -214,7 +210,7 @@ export function NotificationsClient({ initialNotifications, initialUnread }: {
         )}
         {unread > 0 && (
           <button type="button" onClick={handleMarkAllRead} style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: "6px 10px", borderRadius: 8 }}>
-            <CheckCheck size={14} aria-hidden="true" /> Tout lire
+            <CheckCheck size={14} aria-hidden="true" /> {t("notifs.toutLire")}
           </button>
         )}
       </div>
@@ -222,12 +218,12 @@ export function NotificationsClient({ initialNotifications, initialUnread }: {
       {notifications.length === 0 ? (
         <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
           <Bell size={44} aria-hidden="true" style={{ opacity: 0.15, margin: "0 auto 20px", display: "block" }} />
-          <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Aucune notification</p>
+          <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{t("notifs.aucune")}</p>
           <p style={{ fontSize: 13, lineHeight: 1.6 }}>
-            Sauvegarde des entreprises pour recevoir leurs nouvelles offres d&apos;emploi.
+            {t("notifs.aucuneTexte")}
           </p>
           <Link href="/explore" style={{ display: "inline-block", marginTop: 20, fontSize: 13, color: "#8b5cf6", fontWeight: 700, textDecoration: "none" }}>
-            Explorer les entreprises →
+            {t("notifs.explorer")}
           </Link>
         </div>
       ) : (

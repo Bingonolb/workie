@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
 
 export type Serie = { cle: string; libelle: string; couleur: string };
 type Jour = { jour: string } & Record<string, number | string>;
 
-const nf = (n: number) => n.toLocaleString("fr-CH");
+
 /** « 2026-11-17 » lu comme une date du calendrier suisse, sans décalage horaire. */
 const date = (j: string) => new Date(`${j}T12:00:00`);
-const court = (j: string) => date(j).toLocaleDateString("fr-CH", { day: "numeric", month: "short" });
-const long = (j: string) => date(j).toLocaleDateString("fr-CH", { weekday: "long", day: "numeric", month: "long" });
+
 
 /**
  * Histogramme par jour, lisible au doigt comme à la souris.
@@ -21,6 +21,11 @@ const long = (j: string) => date(j).toLocaleDateString("fr-CH", { weekday: "long
  * - Sans choix, c'est le dernier jour (aujourd'hui) qui est détaillé.
  */
 export function GraphiqueJours({ jours, series, hauteur = 160 }: { jours: Jour[]; series: Serie[]; hauteur?: number }) {
+  const t = useT();
+  const loc = useLangue() === "de" ? "de-CH" : "fr-CH";
+  const nf = (n: number) => n.toLocaleString(loc);
+  const court = (j: string) => date(j).toLocaleDateString(loc, { day: "numeric", month: "short" });
+  const long = (j: string) => date(j).toLocaleDateString(loc, { weekday: "long", day: "numeric", month: "long" });
   const [serie, setSerie] = useState(series[0].cle);
   const [choisi, setChoisi] = useState<number | null>(null);
   const s = series.find(x => x.cle === serie) ?? series[0];
@@ -31,12 +36,12 @@ export function GraphiqueJours({ jours, series, hauteur = 160 }: { jours: Jour[]
   const detail = jours[idx];
   const peu = jours.length <= 31;
 
-  if (jours.length === 0) return <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>Pas encore de données sur la période.</p>;
+  if (jours.length === 0) return <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>{t("graphique.vide")}</p>;
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
       {series.length > 1 && (
-        <div role="tablist" aria-label="Donnée affichée" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div role="tablist" aria-label={t("graphique.donnee")} style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {series.map(x => {
             const actif = x.cle === s.cle;
             const somme = jours.reduce((a, j) => a + Number(j[x.cle] ?? 0), 0);
@@ -66,7 +71,7 @@ export function GraphiqueJours({ jours, series, hauteur = 160 }: { jours: Jour[]
             </div>
           ))}
         </div>
-        <div role="group" aria-label={`${s.libelle} par jour, ${nf(total)} au total`}
+        <div role="group" aria-label={t("graphique.parJour", { serie: s.libelle, n: nf(total) })}
           style={{ display: "flex", alignItems: "stretch", height: hauteur, gap: peu ? 3 : 1, borderBottom: "1px solid var(--border)" }}>
           {jours.map((j, i) => {
             const v = valeurs[i];
@@ -86,13 +91,13 @@ export function GraphiqueJours({ jours, series, hauteur = 160 }: { jours: Jour[]
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 11, color: "var(--text-muted)" }}>
           <span>{court(jours[0].jour)}</span>
           {jours.length > 10 && <span>{court(jours[Math.floor(jours.length / 2)].jour)}</span>}
-          <span>Aujourd&apos;hui</span>
+          <span>{t("graphique.aujourdhui")}</span>
         </div>
       </div>
 
       {detail && (
         <div aria-live="polite" style={{ background: "var(--surface2)", borderRadius: 12, padding: "12px 14px", display: "grid", gap: 8 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, textTransform: "capitalize" }}>{idx === jours.length - 1 ? `Aujourd'hui, ${long(detail.jour)}` : long(detail.jour)}</p>
+          <p style={{ fontSize: 13, fontWeight: 700, textTransform: "capitalize" }}>{idx === jours.length - 1 ? t("graphique.aujourdhuiDate", { date: long(detail.jour) }) : long(detail.jour)}</p>
           <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(series.length, 4)}, minmax(0, 1fr))`, gap: 10 }}>
             {series.map(x => (
               <div key={x.cle}>
@@ -105,7 +110,7 @@ export function GraphiqueJours({ jours, series, hauteur = 160 }: { jours: Jour[]
           </div>
         </div>
       )}
-      <p style={{ fontSize: 11.5, color: "var(--text-muted)" }}>Touchez ou survolez un jour pour voir son détail.</p>
+      <p style={{ fontSize: 11.5, color: "var(--text-muted)" }}>{t("graphique.aide")}</p>
     </div>
   );
 }

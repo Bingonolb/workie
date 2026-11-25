@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
@@ -11,9 +10,13 @@ import { revendicationOuverte } from "@/lib/ouverture";
 import { NavbarClient } from "@/components/NavbarClient";
 import { CoverImage } from "@/components/CoverImage";
 import { ParcoursRevendication } from "./ParcoursRevendication";
+import { meta } from "@/i18n/meta";
+import { tServeur, langueDeLaPage } from "@/i18n/page";
+import { nomSecteur } from "@/i18n/secteurs";
+import { nomVille } from "@/i18n/lieux";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Gérer cette fiche", robots: { index: false, follow: false } };
+export const generateMetadata = () => meta({ titre: "revend.metaTitre", indexer: false });
 
 export default async function PageRevendiquer({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -31,13 +34,15 @@ export default async function PageRevendiquer({ params }: { params: Promise<{ sl
   if (!c || !enLigne.includes(c.sector)) notFound();
 
   const etat = await etatRevendication(c.id);
+  const langue = await langueDeLaPage();
+  const t = await tServeur();
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <NavbarClient />
       <main style={{ maxWidth: 560, margin: "0 auto", padding: "28px 16px 64px" }}>
         <Link href={urlFiche(c)} style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
-          ← Retour à la fiche
+          {t("revend.retourFiche")}
         </Link>
 
         <div style={{
@@ -49,10 +54,10 @@ export default async function PageRevendiquer({ params }: { params: Promise<{ sl
           </div>
           <div style={{ minWidth: 0 }}>
             <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2, display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--brand)" }}>Workie Business</span> · Gérer la fiche de
+              <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--brand)" }}>Workie Business</span> {t("revend.gererLaFiche")}
             </p>
             <p style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{c.sector} · {c.city}</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{nomSecteur(c.sector, langue)} · {nomVille(c.city, langue)}</p>
           </div>
         </div>
 

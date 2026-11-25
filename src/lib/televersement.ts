@@ -7,6 +7,7 @@ import { randomUUID } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { avecCadrage, lireCadrage, CADRAGE_NEUTRE, ZOOM_MAX, type Cadrage } from "@/lib/coverUrl";
 import { preparerVariantes } from "@/lib/variantesImage";
+import { tRequete } from "@/i18n/requete";
 
 /**
  * Le cadrage choisi dans l'éditeur, lu depuis le formulaire et borné.
@@ -58,10 +59,10 @@ export async function televerserCouverture(
 
   if (!(coverFile instanceof File) || coverFile.size === 0) return {};
   if (!ALLOWED_IMG.includes(coverFile.type)) {
-    return { avertissement: "Le texte est enregistré. L'image a été ignorée : format non supporté (JPG, PNG, WebP, GIF)." };
+    return { avertissement: (await tRequete())("ficheForm.aFormat") };
   }
   if (coverFile.size > MAX_IMG) {
-    return { avertissement: "Le texte est enregistré. L'image a été ignorée : trop lourde (7 Mo maximum)." };
+    return { avertissement: (await tRequete())("ficheForm.aPoids") };
   }
 
   const ext = EXT_MAP[coverFile.type] ?? "jpg";
@@ -73,7 +74,7 @@ export async function televerserCouverture(
   if (error) {
     // L'échec était jusqu'ici parfaitement silencieux : l'ancienne image
     // restait en place sans que personne ne sache pourquoi.
-    return { avertissement: "Le texte est enregistré. L'envoi de l'image a échoué." };
+    return { avertissement: (await tRequete())("ficheForm.aEnvoi") };
   }
   // Toutes ses tailles, préparées AVANT de renvoyer l'adresse : le site pointe
   // directement vers elles, une taille manquante serait une image cassée.
@@ -81,7 +82,7 @@ export async function televerserCouverture(
   const pret = await preparerVariantes(admin, path, Buffer.from(await coverFile.arrayBuffer())).catch(() => false);
   if (!pret) {
     await admin.storage.from("covers").remove([path]);
-    return { avertissement: "Le texte est enregistré. L'image n'a pas pu être préparée : essayez un autre fichier (JPG ou PNG)." };
+    return { avertissement: (await tRequete())("ficheForm.aPreparation") };
   }
   const { data: pub } = admin.storage.from("covers").getPublicUrl(path);
   return { url: pub.publicUrl };

@@ -8,6 +8,7 @@ import { getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { LANGUES_SAISIE, EMPLOYEE_RANGES } from "@/lib/types";
 import { banniereCadree, televerserCouverture } from "@/lib/televersement";
+import { tRequete } from "@/i18n/requete";
 import { CONTRATS, MODES, NIVEAUX, TAUX } from "@/lib/offres";
 
 /**
@@ -69,11 +70,11 @@ export async function ficheGeree(): Promise<(FicheGeree & { vueAdmin?: boolean }
 /** Admin : ouvrir l'espace entreprise d'une fiche, tel que l'entreprise le voit. */
 export async function entrerVueEntreprise(companyId: string): Promise<{ error?: string; code?: "aal" }> {
   const user = await getUser();
-  if (!user || !/^[0-9a-f-]{36}$/i.test(companyId)) return { error: "Accès refusé." };
+  if (!user || !/^[0-9a-f-]{36}$/i.test(companyId)) return { error: (await tRequete())("offresForm.eAcces") };
   if (!(await estAdminConfirme(user.id))) {
     // Admin sans le code à 6 chiffres dans cette session : on l'y envoie.
     const { data } = await createAdminClient().from("profiles").select("role").eq("id", user.id).maybeSingle();
-    return data?.role === "admin" ? { error: "Code de sécurité requis.", code: "aal" } : { error: "Accès refusé." };
+    return data?.role === "admin" ? { error: (await tRequete())("offresForm.eCode"), code: "aal" } : { error: (await tRequete())("offresForm.eAcces") };
   }
   (await cookies()).set(COOKIE_VUE_ADMIN, companyId, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 4 * 3600 });
   return {};
@@ -108,12 +109,12 @@ export async function statsFiche(jours: 7 | 30 | 90 = 30): Promise<Stats | null>
 export async function modifierFiche(formData: FormData): Promise<{ error?: string; avertissement?: string }> {
   try {
     const c = await ficheGeree();
-    if (!c) return { error: "Accès refusé : aucune entreprise active liée à ce compte." };
+    if (!c) return { error: (await tRequete())("offresForm.eSansEntreprise") };
     const admin = createAdminClient();
 
     let site = String(formData.get("website_url") || "").trim() || null;
     if (site && !/^https?:\/\//i.test(site)) site = `https://${site}`;
-    if (site) { try { new URL(site); } catch { return { error: "Le lien carrière n'est pas une adresse valide." }; } }
+    if (site) { try { new URL(site); } catch { return { error: (await tRequete())("offresForm.eLienCarriere") }; } }
 
     const taille = String(formData.get("employee_range") || "");
     const champs: Record<string, unknown> = {
@@ -136,7 +137,7 @@ export async function modifierFiche(formData: FormData): Promise<{ error?: strin
     champs.logo_url = logo.url ?? (logoGarde && logoGarde === c.logo_url ? logoGarde : null);
 
     const { error } = await admin.from("companies").update(champs as never).eq("id", c.id);
-    if (error) return { error: "L'enregistrement a échoué. Réessayez." };
+    if (error) return { error: (await tRequete())("offresForm.eEnregistrement") };
 
     revaliderPage("/entreprise/[slug]", "page");
     revaliderPage("/espace-entreprise");
@@ -144,7 +145,7 @@ export async function modifierFiche(formData: FormData): Promise<{ error?: strin
     const avertissement = depot.avertissement ?? logo.avertissement;
     return avertissement ? { avertissement } : {};
   } catch {
-    return { error: "Une erreur est survenue. Réessayez." };
+    return { error: (await tRequete())("offresForm.eGenerique") };
   }
 }
 
@@ -152,8 +153,8 @@ export async function modifierFiche(formData: FormData): Promise<{ error?: strin
 export async function ouvrirPortailAbonnement(): Promise<{ error?: string; url?: string }> {
   try {
     const c = await ficheGeree();
-    if (!c?.stripe_customer_id) return { error: "Abonnement introuvable." };
-    if (!process.env.STRIPE_SECRET_KEY) return { error: "Le portail n'est pas disponible pour le moment." };
+    if (!c?.stripe_customer_id) return { error: (await tRequete())("offresForm.eAbo") };
+    if (!process.env.STRIPE_SECRET_KEY) return { error: (await tRequete())("offresForm.ePortailIndispo") };
     const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
     const s = await new Stripe(process.env.STRIPE_SECRET_KEY).billingPortal.sessions.create({
       customer: c.stripe_customer_id,
@@ -161,7 +162,7 @@ export async function ouvrirPortailAbonnement(): Promise<{ error?: string; url?:
     });
     return { url: s.url };
   } catch {
-    return { error: "Le portail d'abonnement n'a pas pu s'ouvrir. Réessayez." };
+    return { error: (await tRequete())("offresForm.ePortail") };
   }
 }
 
@@ -196,25 +197,25 @@ function rafraichirFiche() {
 export async function enregistrerOffre(formData: FormData): Promise<{ error?: string }> {
   try {
     const c = await ficheGeree();
-    if (!c) return { error: "Accès refusé." };
+    if (!c) return { error: (await tRequete())("offresForm.eAcces") };
     const id = String(formData.get("id") || "");
     const titre = String(formData.get("title") || "").trim().slice(0, 120);
     let lien = String(formData.get("apply_url") || "").trim();
-    if (!titre) return { error: "Indiquez l'intitulé du poste." };
-    if (!lien) return { error: "Indiquez le lien pour postuler." };
+    if (!titre) return { error: (await tRequete())("offresForm.eIntitule") };
+    if (!lien) return { error: (await tRequete())("offresForm.eLien") };
     if (!/^https?:\/\//i.test(lien)) lien = `https://${lien}`;
-    try { new URL(lien); } catch { return { error: "Le lien pour postuler n'est pas une adresse valide." }; }
+    try { new URL(lien); } catch { return { error: (await tRequete())("offresForm.eLienInvalide") }; }
     const choix = <T extends readonly string[]>(v: FormDataEntryValue | null, liste: T) =>
       (liste as readonly string[]).includes(String(v)) ? String(v) : null;
     const jours = Math.min(120, Math.max(7, Number(formData.get("duree")) || 60));
     const texte = (nom: string) => String(formData.get(nom) || "").trim().slice(0, 4000) || null;
     const missions = texte("missions"), profil = texte("requirements"), avantages = texte("avantages");
-    if (!missions) return { error: "Décrivez les missions du poste." };
-    if (!profil) return { error: "Décrivez le profil recherché." };
-    if (!avantages) return { error: "Indiquez ce que vous offrez." };
+    if (!missions) return { error: (await tRequete())("offresForm.eMissions") };
+    if (!profil) return { error: (await tRequete())("offresForm.eProfil") };
+    if (!avantages) return { error: (await tRequete())("offresForm.eOffrons") };
     const tauxMin = Number(formData.get("taux_min")), tauxMax = Number(formData.get("taux_max"));
-    if (!TAUX.includes(tauxMin as never) || !TAUX.includes(tauxMax as never)) return { error: "Indiquez le taux d'activité." };
-    if (tauxMin > tauxMax) return { error: "Le taux minimum dépasse le taux maximum." };
+    if (!TAUX.includes(tauxMin as never) || !TAUX.includes(tauxMax as never)) return { error: (await tRequete())("offresForm.eTaux") };
+    if (tauxMin > tauxMax) return { error: (await tRequete())("offresForm.eTauxOrdre") };
     const entree = String(formData.get("entree") || "").trim().slice(0, 40) || null;
     const langues = String(formData.get("langues") || "").split(",").filter(l => ["FR", "DE", "EN", "IT"].includes(l));
 
@@ -233,27 +234,27 @@ export async function enregistrerOffre(formData: FormData): Promise<{ error?: st
     };
     const admin = createAdminClient();
     if (id) {
-      if (!/^[0-9a-f-]{36}$/i.test(id)) return { error: "Offre introuvable." };
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return { error: (await tRequete())("offresForm.eOffre") };
       const { error } = await admin.from("job_offers").update(champs).eq("id", id).eq("company_id", c.id);
-      if (error) return { error: "L'enregistrement a échoué. Réessayez." };
+      if (error) return { error: (await tRequete())("offresForm.eEnregistrement") };
     } else {
       const { count } = await admin.from("job_offers").select("id", { count: "exact", head: true }).eq("company_id", c.id).eq("is_active", true);
-      if ((count ?? 0) >= 50) return { error: "50 offres actives au maximum. Retirez-en une avant d'en ajouter." };
+      if ((count ?? 0) >= 50) return { error: (await tRequete())("offresForm.eMax") };
       const { error } = await admin.from("job_offers").insert({ ...champs, company_id: c.id });
-      if (error) return { error: "L'enregistrement a échoué. Réessayez." };
+      if (error) return { error: (await tRequete())("offresForm.eEnregistrement") };
     }
     rafraichirFiche();
     return {};
   } catch {
-    return { error: "Une erreur est survenue. Réessayez." };
+    return { error: (await tRequete())("offresForm.eGenerique") };
   }
 }
 
 export async function retirerOffre(id: string): Promise<{ error?: string }> {
   const c = await ficheGeree();
-  if (!c || !/^[0-9a-f-]{36}$/i.test(id)) return { error: "Accès refusé." };
+  if (!c || !/^[0-9a-f-]{36}$/i.test(id)) return { error: (await tRequete())("offresForm.eAcces") };
   const { error } = await createAdminClient().from("job_offers").delete().eq("id", id).eq("company_id", c.id);
-  if (error) return { error: "La suppression a échoué." };
+  if (error) return { error: (await tRequete())("offresForm.eSuppression") };
   rafraichirFiche();
   return {};
 }
