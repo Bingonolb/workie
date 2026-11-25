@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { meta } from "@/i18n/meta";
 import { Suspense } from "react";
 import { FavorisClient } from "./FavorisClient";
 
@@ -15,10 +16,7 @@ import { FavorisClient } from "./FavorisClient";
  * toujours ce chemin, et la route d'API refait la vérification côté serveur.
  * Un visiteur non connecté est renvoyé vers la connexion avant d'arriver ici.
  */
-export const metadata: Metadata = {
-  title: "Mes favoris",
-  robots: { index: false, follow: false },
-};
+export const generateMetadata = () => meta({ titre: "meta.favorisTitre", indexer: false });
 
 export default function FavoritesPage() {
   return (

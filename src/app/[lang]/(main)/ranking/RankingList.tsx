@@ -7,6 +7,9 @@ import type { Company } from "@/lib/types";
 import { SECTOR_COLORS } from "@/lib/types";
 import { logoAffichable } from "@/lib/logo";
 import { urlFiche } from "@/lib/urlFiche";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomSecteur } from "@/i18n/secteurs";
+import { nomVille } from "@/i18n/lieux";
 
 // Or, argent, bronze. Les trois premiers portaient des médailles en émoji,
 // dont le dessin change d'un système à l'autre et qui donnent à un classement
@@ -15,6 +18,8 @@ import { urlFiche } from "@/lib/urlFiche";
 const COULEURS_PODIUM = ["#d4a017", "#94a3b8", "#b45309"];
 
 export function RankingTable({ companies }: { companies: Company[] }) {
+  const t = useT();
+  const langue = useLangue();
   const [search, setSearch] = useState("");
   const [secteur, setSecteur] = useState("");
 
@@ -67,14 +72,14 @@ export function RankingTable({ companies }: { companies: Company[] }) {
             classe ; le classement ne mesure plus des notes mais l'interet
             reel, favoris, visites et partages. Le titre le dit. */}
         <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.02em", marginBottom: 2 }}>
-          {secteur || "Les plus populaires"}
+          {secteur ? nomSecteur(secteur, langue) : t("classement.populaires")}
         </h1>
         <p style={{ fontSize: 13, color: "var(--text-muted)", fontWeight: 500, marginBottom: 16 }}>
           {secteur
-            ? `${filtered.length} entreprise${filtered.length > 1 ? "s" : ""} sur ${companies.length}`
+            ? t("classement.nbSecteur", { n: filtered.length, total: companies.length })
             : q
-              ? `${filtered.length} résultat${filtered.length > 1 ? "s" : ""} sur ${companies.length}`
-              : `${companies.length} entreprises, les plus suivies en premier`}
+              ? t("classement.nbRecherche", { n: filtered.length, total: companies.length })
+              : t("classement.nb", { n: companies.length })}
         </p>
 
         {/* Chercher et filtrer sont deux intentions distinctes : on cherche une
@@ -88,19 +93,19 @@ export function RankingTable({ companies }: { companies: Company[] }) {
               className="ranking-champ ranking-recherche"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              aria-label="Chercher une entreprise ou une ville"
-              placeholder="Chercher une entreprise ou une ville..."
+              aria-label={t("classement.chercher")}
+              placeholder={t("classement.chercherPlaceholder")}
             />
           </div>
           <select
             className={`ranking-champ ranking-filtre${secteur ? " ranking-filtre--actif" : ""}`}
             value={secteur}
             onChange={e => setSecteur(e.target.value)}
-            aria-label="Filtrer par secteur"
+            aria-label={t("classement.filtrerSecteur")}
           >
-            <option value="">Tous les secteurs</option>
+            <option value="">{t("classement.tousSecteurs")}</option>
             {secteurs.map(sect => (
-              <option key={sect} value={sect}>{sect}</option>
+              <option key={sect} value={sect}>{nomSecteur(sect, langue)}</option>
             ))}
           </select>
         </div>
@@ -119,9 +124,9 @@ export function RankingTable({ companies }: { companies: Company[] }) {
       <div className="ranking-header">
         {[
           { label: "#", cls: "", align: "left" },
-          { label: "Entreprise", cls: "", align: "left" },
-          { label: "Secteur", cls: "ranking-col-sector", align: "left" },
-          { label: "Score", cls: "", align: "right" },
+          { label: t("classement.entreprise"), cls: "", align: "left" },
+          { label: t("classement.secteur"), cls: "ranking-col-sector", align: "left" },
+          { label: t("classement.score"), cls: "", align: "right" },
         ].map(({ label, cls, align }) => (
           <span key={label} className={cls} style={{
             // Un en-tête de tableau n'est pas du texte de lecture : il se
@@ -174,7 +179,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                   }}>
                     {c.name}
                     {c.is_verified && (
-                      <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 14, height: 14, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+                      <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, width: 14, height: 14, flexShrink: 0 }} aria-label={t("fiche.verifiee")}>
                         <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                         <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
                       </svg>
@@ -194,7 +199,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                     display: "flex", alignItems: "center", gap: 5,
                     overflow: "hidden", whiteSpace: "nowrap",
                   }}>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{c.city}</span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{nomVille(c.city, langue)}</span>
                   </p>
                 </div>
               </div>
@@ -214,7 +219,7 @@ export function RankingTable({ companies }: { companies: Company[] }) {
                 // Elle epouse maintenant son texte, et ne se tronque qu'au-dela.
                 display: "inline-block", justifySelf: "start", maxWidth: 172,
               }}>
-                {c.sector}
+                {nomSecteur(c.sector, langue)}
               </span>
 
               {/* Score : le seul nombre aligné à droite, donc le seul qui puisse
@@ -236,8 +241,8 @@ export function RankingTable({ companies }: { companies: Company[] }) {
           <div style={{ padding: "48px 16px", textAlign: "center", color: "var(--text-muted)" }}>
             <p style={{ fontSize: 14 }}>
               {secteur && !q
-                ? `Aucune entreprise du secteur ${secteur} dans ce classement.`
-                : "Aucune entreprise ne correspond à cette recherche."}
+                ? t("classement.aucunSecteur", { secteur: nomSecteur(secteur, langue) })
+                : t("classement.aucuneRecherche")}
             </p>
           </div>
         )}

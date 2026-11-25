@@ -1,11 +1,15 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { useActionState } from "react";
 import Link from "next/link";
 import { resetPassword } from "@/lib/actions/auth";
 import { Logo } from "@/components/Logo";
 
 export default function ResetPasswordPage() {
+  const t = useT();
+  const langue = useLangue();
   const [state, action, pending] = useActionState(resetPassword, undefined);
 
   return (
@@ -15,15 +19,16 @@ export default function ResetPasswordPage() {
       </Link>
 
       <div style={{ width: "100%", maxWidth: 400, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "36px 32px" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Nouveau mot de passe</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>{t("mdp.nouveau")}</h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>
-          Choisissez un nouveau mot de passe pour votre compte.
+          {t("mdp.nouveauAide")}
         </p>
 
         <form action={action} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <input type="hidden" name="langue" value={langue} />
           <div>
             <label htmlFor="reset-password" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>
-              Nouveau mot de passe
+              {t("mdp.nouveau")}
             </label>
             <input
               id="reset-password"
@@ -56,7 +61,7 @@ export default function ResetPasswordPage() {
               borderRadius: 10, padding: "13px 0", cursor: "pointer", opacity: pending ? 0.6 : 1,
             }}
           >
-            {pending ? "Enregistrement..." : "Changer le mot de passe"}
+            {pending ? t("mdp.enregistrement") : t("mdp.changer")}
           </button>
         </form>
       </div>

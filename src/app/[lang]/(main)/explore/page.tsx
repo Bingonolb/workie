@@ -1,25 +1,8 @@
 export const revalidate = 60; // ISR: Vercel CDN caches for 60s, auth/ads/filters are client-side
 
 import type { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Explorer les entreprises suisses",
-  description: "Parcourez les entreprises suisses par secteur, canton et langue de travail, et trouvez leurs offres d'emploi.",
-  alternates: { canonical: "https://www.workie.ch/explore" },
-  openGraph: {
-    title: "Explorer les entreprises suisses · Workie",
-    description: "Des entreprises suisses, leurs métiers, leurs lieux et leurs offres d'emploi.",
-    url: "https://www.workie.ch/explore",
-    siteName: "Workie",
-    type: "website",
-    locale: "fr_CH",
-    images: [{ url: "https://www.workie.ch/opengraph-image.png", width: 1200, height: 630, alt: "Explorer les entreprises suisses · Workie" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Explorer les entreprises suisses · Workie",
-    images: ["https://www.workie.ch/opengraph-image.png"],
-  },
-};
+import { meta } from "@/i18n/meta";
+export const generateMetadata = () => meta({ titre: "meta.exploreTitre", description: "meta.exploreDescription", chemin: "/explore" });
 import { fetchGridPage } from "@/lib/actions/companies";
 import { largeurCouverture } from "@/lib/coverUrl";
 import { ExploreClient } from "./ExploreClient";

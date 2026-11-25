@@ -1,5 +1,7 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { useEffect, useState } from "react";
 import { renvoyerConfirmation } from "@/lib/actions/auth";
 
@@ -10,6 +12,7 @@ import { renvoyerConfirmation } from "@/lib/actions/auth";
  * de toute façon, et le dire vaut mieux qu'un bouton qui échoue en silence.
  */
 export function RenvoyerCourriel({ email }: { email: string }) {
+  const t = useT();
   const [etat, setEtat] = useState<"pret" | "envoi" | "envoye" | "echec">("pret");
   const [attente, setAttente] = useState(0);
 
@@ -34,13 +37,13 @@ export function RenvoyerCourriel({ email }: { email: string }) {
         disabled={etat === "envoi" || attente > 0}
         className="btn btn-clair btn-bloc"
       >
-        {etat === "envoi" ? "Envoi…" : attente > 0 ? `Renvoyer dans ${attente} s` : "Renvoyer le courriel"}
+        {etat === "envoi" ? t("mdp.envoiCourt") : attente > 0 ? t("mdp.renvoyerDans", { n: attente }) : t("mdp.renvoyer")}
       </button>
       {etat === "envoye" && (
-        <p role="status" style={{ fontSize: 13, color: "var(--text-muted)" }}>Un nouveau lien est parti.</p>
+        <p role="status" style={{ fontSize: 13, color: "var(--text-muted)" }}>{t("mdp.nouveauLien")}</p>
       )}
       {etat === "echec" && (
-        <p role="status" style={{ fontSize: 13, color: "var(--text-muted)" }}>L&apos;envoi n&apos;a pas abouti. Réessayez dans une minute.</p>
+        <p role="status" style={{ fontSize: 13, color: "var(--text-muted)" }}>{t("mdp.echecEnvoi")}</p>
       )}
     </div>
   );

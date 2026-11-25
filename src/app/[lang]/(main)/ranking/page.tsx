@@ -1,38 +1,28 @@
 export const revalidate = 60;
 
 import type { Metadata } from "next";
+import { meta } from "@/i18n/meta";
 import { getCachedTopCompanies } from "@/lib/actions/scores";
 import { RankingTable } from "./RankingList";
 import type { Company } from "@/lib/types";
 import { lieuAffiche } from "@/lib/types";
 import { urlFiche } from "@/lib/urlFiche";
+import { tServeur, langueDeLaPage } from "@/i18n/page";
 
-export const metadata: Metadata = {
-  title: "Classement des entreprises suisses",
-  description: "Les entreprises suisses les plus suivies sur Workie : favoris et consultations.",
-  alternates: { canonical: "https://www.workie.ch/ranking" },
-  openGraph: {
-    title: "Classement des meilleurs employeurs suisses · Workie",
-    description: "Les entreprises suisses les plus suivies sur Workie : favoris et consultations.",
-    url: "https://www.workie.ch/ranking",
-    siteName: "Workie",
-    type: "website",
-    locale: "fr_CH",
-    images: [{ url: "https://www.workie.ch/opengraph-image.png", width: 1200, height: 630, alt: "Classement des employeurs suisses · Workie" }],
-  },
-  twitter: { card: "summary_large_image", title: "Classement des employeurs suisses · Workie", images: ["https://www.workie.ch/opengraph-image.png"] },
-};
+export const generateMetadata = () => meta({ titre: "meta.rankingTitre", description: "meta.rankingDescription", chemin: "/ranking" });
 
 export default async function RankingPage() {
   const companies = await getCachedTopCompanies(200).catch(() => [] as Company[]);
   const typedCompanies = companies as Company[];
+  const t = await tServeur();
+  const langue = await langueDeLaPage();
 
 
   const rankingJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "name": "Classement des meilleurs employeurs suisses",
-    "description": "Les 200 entreprises suisses les plus suivies sur Workie.",
+    "name": t("classement.titre"),
+    "description": t("classement.sousTitre"),
     "url": "https://www.workie.ch/ranking",
     "numberOfItems": typedCompanies.length,
     "itemListElement": typedCompanies.slice(0, 10).map((c, i) => ({
@@ -40,7 +30,7 @@ export default async function RankingPage() {
       "position": i + 1,
       "name": c.name,
       "url": `https://www.workie.ch${urlFiche(c)}`,
-      "description": lieuAffiche(c.city, c.canton),
+      "description": lieuAffiche(c.city, c.canton, langue),
     })),
   };
 
@@ -60,8 +50,8 @@ export default async function RankingPage() {
 
           {companies.length === 0 ? (
             <div style={{ padding: "80px 24px", textAlign: "center", color: "var(--text-muted)" }}>
-              <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Pas encore de données</p>
-              <p style={{ fontSize: 13 }}>Explorez les entreprises et ajoutez en favori celles qui vous correspondent.</p>
+              <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>{t("classement.vide")}</p>
+              <p style={{ fontSize: 13 }}>{t("classement.videAide")}</p>
             </div>
           ) : (
             <RankingTable companies={typedCompanies} />

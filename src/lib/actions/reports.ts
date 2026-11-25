@@ -4,6 +4,7 @@ import { revalidateTag } from "next/cache";
 import { createClient, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUser } from "@/lib/supabase/server";
+import { tRequete } from "@/i18n/requete";
 
 // « ad_campaign » : les annonces sont désormais diffusées dès le paiement,
 // sans relecture préalable. Le signalement est ce qui remplace ce blocage, et
@@ -34,11 +35,11 @@ export async function submitReport(payload: {
   explanation: string;
 }): Promise<{ error?: string }> {
   const user = await getUser();
-  if (!user) return { error: "Vous devez être connecté pour signaler." };
+  if (!user) return { error: (await tRequete())("signaler.errConnecte") };
 
   // Sanitize lengths to prevent oversized payloads
   if (payload.targetLabel.length > 500) payload = { ...payload, targetLabel: payload.targetLabel.slice(0, 500) };
-  if (payload.explanation.length > 2000) return { error: "L'explication ne peut pas dépasser 2000 caractères." };
+  if (payload.explanation.length > 2000) return { error: (await tRequete())("signaler.errLongueur") };
 
   const supabase = await createClient();
 
@@ -49,7 +50,7 @@ export async function submitReport(payload: {
     .select("id", { count: "exact", head: true })
     .eq("reporter_id", user.id)
     .gte("created_at", since);
-  if ((count ?? 0) >= 5) return { error: "Vous avez atteint la limite de 5 signalements par 24h." };
+  if ((count ?? 0) >= 5) return { error: (await tRequete())("signaler.errLimite") };
 
   // Deduplicate: prevent re-reporting the same content
   const { data: duplicate } = await supabase
@@ -59,7 +60,7 @@ export async function submitReport(payload: {
     .eq("target_type", payload.targetType)
     .eq("target_id", payload.targetId)
     .maybeSingle();
-  if (duplicate) return { error: "Vous avez déjà signalé ce contenu." };
+  if (duplicate) return { error: (await tRequete())("signaler.errDoublon") };
 
   const { error } = await supabase.from("reports").insert({
     reporter_id: user.id,
@@ -71,7 +72,7 @@ export async function submitReport(payload: {
     status: "pending",
   });
 
-  if (error) return { error: "Erreur lors de l'envoi. Veuillez réessayer." };
+  if (error) return { error: (await tRequete())("signaler.errEnvoi") };
   return {};
 }
 

@@ -14,7 +14,7 @@ export const viewport: Viewport = {
 import { Inter } from "next/font/google";
 import "../globals.css";
 import { notFound } from "next/navigation";
-import { OUVERTES, estOuverte, LOCALE_INTL } from "@/i18n/config";
+import { OUVERTES, estOuverte, LOCALE_INTL, LANGUE_PAR_DEFAUT } from "@/i18n/config";
 import { messagesDe } from "@/i18n/serveur";
 import { creerTraducteur } from "@/i18n/traduire";
 import fr from "@/i18n/messages/fr.json";
@@ -53,13 +53,17 @@ const inter = Inter({
 // Next ; cette adresse sert aux autres.
 const OG_URL = "https://www.workie.ch/opengraph-image.png";
 
-export const metadata: Metadata = {
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang: brute } = await params;
+  const langue = estOuverte(brute) ? brute : LANGUE_PAR_DEFAUT;
+  const t = creerTraducteur(langue, await messagesDe(langue), fr);
+  return {
   metadataBase: new URL("https://www.workie.ch"),
   title: {
-    default: "Workie : chercher du travail devient passionnant",
+    default: t("meta.siteTitre"),
     template: "%s · Workie",
   },
-  description: "Découvrez des entreprises suisses, trouvez celles qui vous correspondent et accédez directement à leurs offres d'emploi.",
+  description: t("meta.siteDescription"),
   keywords: ["emploi suisse", "employeurs suisses", "offres d'emploi suisse", "entreprises suisses", "chercher du travail en suisse", "workie"],
   authors: [{ name: "Workie", url: "https://www.workie.ch" }],
   creator: "Workie",
@@ -67,10 +71,10 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://www.workie.ch" },
   openGraph: {
     siteName: "Workie",
-    locale: "fr_CH",
+    locale: langue === "de" ? "de_CH" : "fr_CH",
     type: "website",
     url: "https://www.workie.ch",
-    images: [{ url: OG_URL, width: 1200, height: 630, alt: "Workie : chercher du travail en Suisse" }],
+    images: [{ url: OG_URL, width: 1200, height: 630, alt: t("meta.siteTitre") }],
   },
   twitter: {
     card: "summary_large_image",
@@ -82,7 +86,8 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
-};
+  };
+}
 
 const websiteSchema = {
   "@context": "https://schema.org",

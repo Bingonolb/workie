@@ -1,5 +1,7 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import { useActionState } from "react";
 import Link from "next/link";
 import { forgotPassword } from "@/lib/actions/auth";
@@ -7,6 +9,8 @@ import { ArrowLeft, Mail } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 export default function ForgotPasswordPage() {
+  const t = useT();
+  const langue = useLangue();
   const [state, action, pending] = useActionState(forgotPassword, undefined);
 
   const sent = state !== undefined && !state?.error;
@@ -24,37 +28,38 @@ export default function ForgotPasswordPage() {
             <div style={{ width: 56, height: 56, borderRadius: 16, background: "var(--surface2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
               <Mail size={24} color="var(--brand)" />
             </div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>Email envoyé</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>{t("mdp.envoye")}</h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 24 }}>
-              Si cette adresse est associée à un compte, vous recevrez un lien pour réinitialiser votre mot de passe dans les prochaines minutes.
+              {t("mdp.envoyeAide")}
             </p>
             <Link href="/login" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 14, fontWeight: 600, color: "var(--brand)", textDecoration: "none" }}>
-              <ArrowLeft size={14} aria-hidden="true" /> Retour à la connexion
+              <ArrowLeft size={14} aria-hidden="true" /> {t("mdp.retourConnexion")}
             </Link>
           </div>
         ) : (
           <>
             <div style={{ marginBottom: 28 }}>
               <Link href="/login" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
-                <ArrowLeft size={13} aria-hidden="true" /> Retour
+                <ArrowLeft size={13} aria-hidden="true" /> {t("mdp.retour")}
               </Link>
-              <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Mot de passe oublié</h1>
+              <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>{t("mdp.oublie")}</h1>
               <p style={{ fontSize: 14, color: "var(--text-muted)" }}>
-                Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+                {t("mdp.oublieAide")}
               </p>
             </div>
 
             <form action={action} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <input type="hidden" name="langue" value={langue} />
               <div>
                 <label htmlFor="forgot-email" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>
-                  Email
+                  {t("mdp.email")}
                 </label>
                 <input
                   id="forgot-email"
                   type="email"
                   name="email"
                   required
-                  placeholder="vous@exemple.ch"
+                  placeholder={t("auth.placeholderEmail")}
                   autoComplete="email"
                   style={{
                     width: "100%", background: "var(--surface2)", border: "1px solid var(--border2)",
@@ -79,7 +84,7 @@ export default function ForgotPasswordPage() {
                   borderRadius: 10, padding: "13px 0", cursor: "pointer", opacity: pending ? 0.6 : 1,
                 }}
               >
-                {pending ? "Envoi..." : "Envoyer le lien"}
+                {pending ? t("mdp.envoi") : t("mdp.envoyerLien")}
               </button>
             </form>
           </>

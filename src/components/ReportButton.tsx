@@ -4,6 +4,8 @@ import { useState, useTransition, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Flag, X, ChevronRight, CheckCircle } from "lucide-react";
 import { submitReport, type ReportTargetType } from "@/lib/actions/reports";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomMotif } from "@/i18n/motifs";
 
 const CATEGORIES: Record<ReportTargetType, string[]> = {
   review: [
@@ -39,13 +41,6 @@ const CATEGORIES: Record<ReportTargetType, string[]> = {
   ],
 };
 
-const TYPE_LABELS: Record<ReportTargetType, string> = {
-  review: "cet avis",
-  company: "cette entreprise",
-  profile: "ce profil",
-  ad_campaign: "cette annonce",
-};
-
 interface ReportButtonProps {
   targetType: ReportTargetType;
   targetId: string;
@@ -73,6 +68,8 @@ export function ReportButton({
   ouvert,
   onFermer,
 }: ReportButtonProps) {
+  const t = useT();
+  const langue = useLangue();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState("");
   const [explanation, setExplanation] = useState("");
@@ -129,7 +126,7 @@ export function ReportButton({
   }, [open, isPending]);
 
   function submit() {
-    if (!category) { setError("Choisissez d’abord un motif ci-dessus."); return; }
+    if (!category) { setError(t("signaler.choisirMotif")); return; }
     setError("");
     startTransition(async () => {
       const res = await submitReport({ targetType, targetId, targetLabel, category, explanation });
@@ -139,7 +136,7 @@ export function ReportButton({
   }
 
   const trigger = variant === "aucun" ? null : variant === "icon" ? (
-    <button type="button" onClick={openModal} title="Signaler" aria-label="Signaler ce contenu" style={{
+    <button type="button" onClick={openModal} title={t("signaler.bouton")} aria-label={t("signaler.contenu")} style={{
       display: "flex", alignItems: "center", justifyContent: "center",
       width: 32, height: 32, borderRadius: 8, border: "none",
       background: "transparent", cursor: "pointer", color: "var(--text-muted)",
@@ -157,7 +154,7 @@ export function ReportButton({
       background: "var(--surface2)", color: "var(--text-muted)", fontSize: 13,
       fontWeight: 600, cursor: "pointer",
     }}>
-      <Flag size={13} aria-hidden="true" /> Signaler
+      <Flag size={13} aria-hidden="true" /> {t("signaler.bouton")}
     </button>
   ) : (
     <button type="button" onClick={openModal} style={{
@@ -169,7 +166,7 @@ export function ReportButton({
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; (e.currentTarget as HTMLElement).style.color = "#ef4444"; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
     >
-      <Flag size={11} aria-hidden="true" /> Signaler
+      <Flag size={11} aria-hidden="true" /> {t("signaler.bouton")}
     </button>
   );
 
@@ -191,7 +188,7 @@ export function ReportButton({
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Signaler un contenu"
+            aria-label={t("signaler.unContenu")}
             style={{
               background: "var(--surface)", border: "1px solid var(--border)",
               borderRadius: 20, width: "100%", maxWidth: 480,
@@ -213,14 +210,14 @@ export function ReportButton({
                 </div>
                 <div>
                   <p style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em" }}>
-                    Signaler {TYPE_LABELS[targetType]}
+                    {t("signaler.titre", { cible: t(`signaler.${targetType}`) })}
                   </p>
                   <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 1 }}>
-                    Votre signalement sera examiné par notre équipe
+                    {t("signaler.examine")}
                   </p>
                 </div>
               </div>
-              <button type="button" onClick={close} disabled={isPending} aria-label="Fermer" style={{
+              <button type="button" onClick={close} disabled={isPending} aria-label={t("signaler.fermer")} style={{
                 width: 32, height: 32, borderRadius: 8, border: "none",
                 background: "var(--surface2)", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
@@ -243,26 +240,26 @@ export function ReportButton({
                     <CheckCircle size={24} color="#10b981" aria-hidden="true" />
                   </div>
                   <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>
-                    Signalement envoyé
+                    {t("signaler.envoye")}
                   </p>
                   <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 20 }}>
                     {onReported
-                      ? "Merci. Nous examinons ce contenu, et vous ne le reverrez pas sur cette page."
-                      : "Merci. Notre équipe examinera ce signalement et prendra les mesures appropriées."}
+                      ? t("signaler.merciMasque")
+                      : t("signaler.merci")}
                   </p>
                   <button type="button" onClick={close} style={{
                     padding: "10px 28px", borderRadius: 10,
                     background: "var(--surface2)", border: "1px solid var(--border2)",
                     color: "var(--text)", fontWeight: 600, fontSize: 14, cursor: "pointer",
                   }}>
-                    Fermer
+                    {t("signaler.fermer")}
                   </button>
                 </div>
               ) : (
                 <>
                   {/* ── Catégorie ── */}
                   <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
-                    Motif du signalement *
+                    {t("signaler.motif")}
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 18 }}>
                     {categories.map(cat => (
@@ -278,7 +275,7 @@ export function ReportButton({
                         transition: "all 0.12s",
                       }}>
                         <span style={{ fontSize: 13, fontWeight: category === cat ? 700 : 500, color: category === cat ? "#8b5cf6" : "var(--text)" }}>
-                          {cat}
+                          {nomMotif(cat, langue)}
                         </span>
                         {category === cat && (
                           <div style={{
@@ -296,14 +293,14 @@ export function ReportButton({
 
                   {/* ── Explication optionnelle ── */}
                   <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
-                    Détails <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>· optionnel</span>
+                    {t("signaler.details")} <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>{t("signaler.optionnel")}</span>
                   </p>
                   <textarea
                     value={explanation}
                     onChange={e => setExplanation(e.target.value)}
                     maxLength={500}
                     rows={3}
-                    placeholder="Expliquez brièvement pourquoi vous signalez ce contenu…"
+                    placeholder={t("signaler.placeholder")}
                     style={{
                       width: "100%", borderRadius: 10, padding: "10px 14px", fontSize: 13,
                       border: "1px solid var(--border2)", background: "var(--surface2)",
@@ -329,7 +326,7 @@ export function ReportButton({
                       color: "var(--text-muted)", fontWeight: 600, fontSize: 14, cursor: "pointer",
                       whiteSpace: "nowrap",
                     }}>
-                      Annuler
+                      {t("signaler.annuler")}
                     </button>
                     {/* Actif meme sans motif choisi.
                         Desactive, il ne disait pas pourquoi : on remplissait
@@ -347,12 +344,12 @@ export function ReportButton({
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                       transition: "all 0.15s",
                     }}>
-                      {isPending ? "Envoi…" : <><span>Envoyer le signalement</span><ChevronRight size={15} aria-hidden="true" /></>}
+                      {isPending ? t("signaler.envoi") : <><span>{t("signaler.envoyer")}</span><ChevronRight size={15} aria-hidden="true" /></>}
                     </button>
                   </div>
 
                   <p style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginTop: 12, lineHeight: 1.5 }}>
-                    Les signalements abusifs peuvent entraîner une suspension de compte.
+                    {t("signaler.abus")}
                   </p>
                 </>
               )}

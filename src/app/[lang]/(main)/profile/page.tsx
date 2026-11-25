@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { meta } from "@/i18n/meta";
 import { ProfilClient } from "./ProfilClient";
 
 /**
@@ -13,10 +14,7 @@ import { ProfilClient } from "./ProfilClient";
  * refait la vérification côté serveur. Rien de personnel n'est mis en cache —
  * la coquille ne contient que la mise en page.
  */
-export const metadata: Metadata = {
-  title: "Mon profil",
-  robots: { index: false, follow: false },
-};
+export const generateMetadata = () => meta({ titre: "meta.profilTitre", indexer: false });
 
 export default function ProfilePage() {
   return (

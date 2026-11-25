@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { meta } from "@/i18n/meta";
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -50,27 +51,7 @@ const getLandingCounts = unstable_cache(
   { revalidate: 300, tags: ["landing-counts-v2", "companies"] }
 );
 
-export const metadata: Metadata = {
-  // Le titre est le premier signal pour Google : « Emploi », « job » et
-  // « Suisse » y figurent, la marque vient après. « absolute » évite que le
-  // gabarit du site n'ajoute « · Workie » une seconde fois.
-  title: { absolute: "Emploi en Suisse : trouvez votre job chez le bon employeur · Workie" },
-  description: "Emploi et jobs en Suisse : découvrez les entreprises par métier, secteur et canton, puis postulez directement sur leurs offres officielles.",
-  openGraph: {
-    title: "Emploi en Suisse : trouvez votre job chez le bon employeur · Workie",
-    description: "Emploi et jobs en Suisse : découvrez les entreprises par métier, secteur et canton, puis postulez directement sur leurs offres officielles.",
-    url: "https://www.workie.ch",
-    siteName: "Workie",
-    type: "website",
-    locale: "fr_CH",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Emploi en Suisse : trouvez votre job chez le bon employeur · Workie",
-    description: "Emploi et jobs en Suisse : découvrez les entreprises par métier, secteur et canton, puis postulez directement sur leurs offres officielles.",
-  },
-  alternates: { canonical: "https://www.workie.ch" },
-};
+export const generateMetadata = () => meta({ titre: "meta.accueilTitre", description: "meta.accueilDescription", chemin: "/", absolu: true });
 
 export default async function Home() {
   // Accueil compact à l'essai : actif seulement là où l'interrupteur est posé.

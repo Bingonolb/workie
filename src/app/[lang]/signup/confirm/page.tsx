@@ -3,16 +3,18 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { Mail } from "lucide-react";
 import { RenvoyerCourriel } from "./RenvoyerCourriel";
+import { meta } from "@/i18n/meta";
+import { tServeur } from "@/i18n/page";
+import { riche } from "@/i18n/riche";
 
-export const metadata: Metadata = {
-  title: "Confirmez votre adresse · Workie",
-};
+export const generateMetadata = () => meta({ titre: "mdp.confirmerTitre", indexer: false });
 
-export default function ConfirmPage({
+export default async function ConfirmPage({
   searchParams,
 }: {
   searchParams: Promise<{ email?: string }>;
 }) {
+  const t = await tServeur();
   return (
     <main style={{ minHeight: "100dvh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <Link href="/" style={{ textDecoration: "none", marginBottom: 40 }}>
@@ -22,25 +24,25 @@ export default function ConfirmPage({
       <div style={{ width: "100%", maxWidth: 420, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "36px 32px", textAlign: "center" }}>
         <Mail size={40} color="var(--brand)" strokeWidth={1.6} aria-hidden="true" style={{ marginBottom: 20 }} />
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>
-          Vérifiez votre boîte mail
+          {t("mdp.verifiez")}
         </h1>
         <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 28 }}>
-          Nous avons envoyé un lien de confirmation à{" "}
+          {t("mdp.envoyeA")}{" "}
           <ConfirmEmail searchParams={searchParams} />
           {". "}
-          Cliquez dessus pour activer votre compte.
+          {t("mdp.cliquez")}
         </p>
 
         <div style={{ background: "var(--surface2)", border: "1px solid var(--border2)", borderRadius: 12, padding: "14px 18px", fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 28, textAlign: "left" }}>
-          <strong style={{ color: "var(--text)" }}>Vous ne voyez pas le courriel ?</strong><br />
-          Regardez dans vos courriers indésirables. Il vient de <em>noreply@workie.ch</em>.
+          <strong style={{ color: "var(--text)" }}>{t("mdp.pasRecu")}</strong><br />
+          {riche(t("mdp.indesirables"), { em: c => <em>{c}</em> })}
         </div>
 
         <Renvoyer searchParams={searchParams} />
 
 
         <Link href="/login" style={{ fontSize: 13, color: "var(--brand)", fontWeight: 600, textDecoration: "none" }}>
-          Déjà un compte ? Se connecter
+          {t("mdp.dejaCompte")}
         </Link>
       </div>
     </main>
