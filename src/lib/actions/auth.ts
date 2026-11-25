@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { traducteur } from "@/i18n/serveur";
 import { COOKIE_LANGUE } from "@/i18n/config";
 import type { Traduire } from "@/i18n/traduire";
+import { AGE_MINIMUM } from "@/lib/ageMinimum";
 
 /** La langue de la page qui a envoyé le formulaire, sinon celle gardée en cookie. */
 async function tAction(formData?: FormData): Promise<Traduire> {
@@ -114,7 +115,7 @@ export async function signUp(
     return { error: t("auth.errCanton") };
   }
   const currentYear = new Date().getFullYear();
-  if (!birthYear || birthYear < 1920 || birthYear > currentYear - 13) {
+  if (!birthYear || birthYear < 1920 || birthYear > currentYear - AGE_MINIMUM) {
     return { error: t("auth.errNaissance") };
   }
   if (password.length < 8) {

@@ -5,6 +5,7 @@ import { langueDeLaPage } from "@/i18n/page";
 import { revendicationOuverte } from "@/lib/ouverture";
 import { ABONNEMENT as TARIFS } from "@/lib/tarifs";
 import { Section, VersionFaitFoi, PiedJuridique, styleTitre, styleDate } from "@/components/juridique/Juridique";
+import { AGE_MINIMUM } from "@/lib/ageMinimum";
 
 export const generateMetadata = () => meta({ titre: "juridique.cguTitre", description: "juridique.cguDescription", chemin: "/cgu" });
 
@@ -47,7 +48,7 @@ function CguFr() {
         <p>Le catalogue et les offres d&apos;emploi sont consultables sans compte. Sans compte, les entreprises et les offres que vous gardez sont enregistrées sur votre appareil uniquement.</p>
         <p>La création d&apos;un compte permet de retrouver vos favoris et vos offres enregistrées sur tous vos appareils, et donne accès aux notifications. Vous devez :</p>
         <ul>
-          <li>Avoir au moins 18 ans</li>
+          <li>Avoir au moins {AGE_MINIMUM} ans, l&apos;âge minimum légal pour travailler en Suisse</li>
           <li>Fournir une adresse email valide et la confirmer</li>
           <li>Ne pas créer plusieurs comptes pour contourner les règles</li>
         </ul>
@@ -126,7 +127,7 @@ function CguDe() {
         <p>Das Verzeichnis und die Stellenangebote sind ohne Konto zugänglich. Ohne Konto werden die Unternehmen und Stellen, die Sie speichern, nur auf Ihrem Gerät gespeichert.</p>
         <p>Mit einem Konto finden Sie Ihre Favoriten und gespeicherten Stellen auf all Ihren Geräten wieder und erhalten Zugang zu den Benachrichtigungen. Sie müssen:</p>
         <ul>
-          <li>Mindestens 18 Jahre alt sein</li>
+          <li>Mindestens {AGE_MINIMUM} Jahre alt sein, das gesetzliche Mindestalter für eine Erwerbstätigkeit in der Schweiz</li>
           <li>Eine gültige E-Mail-Adresse angeben und bestätigen</li>
           <li>Keine mehreren Konten erstellen, um die Regeln zu umgehen</li>
         </ul>

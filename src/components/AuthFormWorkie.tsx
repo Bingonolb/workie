@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { CANTONS_SAISIE } from "@/lib/types";
 import { useT, useLangue } from "@/i18n/FournisseurLangue";
 import { nomCanton } from "@/i18n/cantons";
+import { AGE_MINIMUM } from "@/lib/ageMinimum";
 
 type ActionResult = { error?: string } | undefined;
 
@@ -36,7 +37,7 @@ export function AuthFormWorkie({
   const CANTONS = CANTONS_SAISIE.filter(c => c.code !== "CH" && c.code !== "FL");
 
   const currentYear = new Date().getFullYear();
-  const BIRTH_YEARS = Array.from({ length: currentYear - 13 - 1940 + 1 }, (_, i) => currentYear - 13 - i);
+  const BIRTH_YEARS = Array.from({ length: currentYear - AGE_MINIMUM - 1940 + 1 }, (_, i) => currentYear - AGE_MINIMUM - i);
 
   return (
     <div>
