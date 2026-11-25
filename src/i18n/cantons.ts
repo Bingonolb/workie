@@ -19,3 +19,10 @@ const NOMS: Partial<Record<Langue, Record<string, string>>> = { de: DE };
 export function nomCanton(code: string, langue: Langue, nomFrancais: string): string {
   return NOMS[langue]?.[code] ?? nomFrancais;
 }
+
+/** « dans le canton de Genève », « im Kanton Genf » : le lieu d'une page, avec sa préposition. */
+export function dansCanton(code: string, langue: Langue, dansFrancais: string, nomFrancais: string): string {
+  if (langue !== "de") return dansFrancais;
+  const nom = nomCanton(code, langue, nomFrancais);
+  return code === "AR" || code === "AI" ? `in ${nom}` : `im Kanton ${nom}`;
+}

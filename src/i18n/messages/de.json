@@ -525,5 +525,36 @@
     "mentionsDescription": "Rechtliche Angaben zur Plattform Workie, betrieben in der Schweiz.",
     "faitFoi": "Dies ist eine Übersetzung. Massgebend ist allein die französische Fassung.",
     "retour": "Zurück zur Startseite"
+  },
+  "emploi": {
+    "titreSecteur": "{secteur}: Jobs in der Schweiz",
+    "titreCanton": "Jobs {dans}",
+    "titreCroise": "{secteur}: Jobs {dans}",
+    "h1Secteur": "{secteur}: Unternehmen in der Schweiz",
+    "h1Canton": "Unternehmen {dans}",
+    "h1Croise": "{secteur}: Unternehmen {dans}",
+    "metaTitre": "{titre}, Stellen bei {n} Arbeitgebern",
+    "introSecteur": "Auf Workie sind {n} Arbeitgeber der Branche {secteur} aufgeführt, verteilt auf {c} Kantone.",
+    "introCanton": "Auf Workie sind {n} Arbeitgeber mit Sitz {dans} aufgeführt.",
+    "introCroise": "Auf Workie sind {n} Arbeitgeber der Branche {secteur} mit Sitz {dans} aufgeführt.",
+    "introNationales": {
+      "one": "{n} weiterer ist in der ganzen Schweiz präsent.",
+      "other": "{n} weitere sind in der ganzen Schweiz präsent."
+    },
+    "introFin": "Öffnen Sie ein Profil, um das Unternehmen kennenzulernen und direkt zu seiner offiziellen Karriereseite zu gelangen.",
+    "parCanton": "Nach Kanton",
+    "parSecteur": "Nach Branche",
+    "elargir": "Erweitern",
+    "secteurSuisse": "{secteur} in der ganzen Schweiz",
+    "toutCanton": "Ganzer Kanton {canton}",
+    "ariane": "Navigationspfad",
+    "emploi": "Jobs",
+    "basees": "Mit Sitz {dans}",
+    "nationales": "In der ganzen Schweiz präsent",
+    "introuvable": "Seite nicht gefunden",
+    "indexTitre": "Jobs in der Schweiz: nach Beruf, Branche und Kanton",
+    "indexDescription": "Finden Sie einen Job in der Schweiz: die Arbeitgeber auf Workie, nach Branche und Kanton geordnet, mit direktem Zugang zu ihren offiziellen Stellenangeboten.",
+    "indexH1": "Jobs in der Schweiz",
+    "indexIntro": "{n} Arbeitgeber auf Workie, nach Branche und Kanton geordnet."
   }
 }

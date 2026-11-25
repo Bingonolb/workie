@@ -525,5 +525,36 @@
     "mentionsDescription": "Informations légales de la plateforme Workie, opérée en Suisse.",
     "faitFoi": "Seule la version française fait foi.",
     "retour": "Retour à l'accueil"
+  },
+  "emploi": {
+    "titreSecteur": "Emploi {secteur} en Suisse",
+    "titreCanton": "Emploi {dans}",
+    "titreCroise": "Emploi {secteur} {dans}",
+    "h1Secteur": "Entreprises {secteur} en Suisse",
+    "h1Canton": "Entreprises {dans}",
+    "h1Croise": "Entreprises {secteur} {dans}",
+    "metaTitre": "{titre} : jobs chez {n} employeurs",
+    "introSecteur": "{n} employeurs du secteur {secteur} référencés sur Workie, répartis dans {c} cantons.",
+    "introCanton": "{n} employeurs basés {dans} sont référencés sur Workie.",
+    "introCroise": "{n} employeurs du secteur {secteur} basés {dans} sont référencés sur Workie.",
+    "introNationales": {
+      "one": "{n} autre est présent dans toute la Suisse.",
+      "other": "{n} autres sont présents dans toute la Suisse."
+    },
+    "introFin": "Ouvrez une fiche pour découvrir l'entreprise et accéder directement à sa page carrière officielle.",
+    "parCanton": "Par canton",
+    "parSecteur": "Par secteur",
+    "elargir": "Élargir",
+    "secteurSuisse": "{secteur} en Suisse",
+    "toutCanton": "Tout le canton de {canton}",
+    "ariane": "Fil d'Ariane",
+    "emploi": "Emploi",
+    "basees": "Basées {dans}",
+    "nationales": "Présentes dans toute la Suisse",
+    "introuvable": "Page introuvable",
+    "indexTitre": "Emploi en Suisse : jobs par métier, secteur et canton",
+    "indexDescription": "Trouvez un emploi en Suisse : les employeurs référencés sur Workie, classés par secteur et par canton, avec un accès direct à leurs offres de job officielles.",
+    "indexH1": "Emploi en Suisse",
+    "indexIntro": "{n} employeurs référencés sur Workie, classés par secteur et par canton."
   }
 }
