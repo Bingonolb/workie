@@ -29,7 +29,8 @@ function morceaux(texte: string, balises: Record<string, (contenu: ReactNode) =>
     const [entier, nom, contenu] = m;
     const debut = m.index ?? 0;
     if (debut > fin) sortie.push(texte.slice(fin, debut));
-    const rendre = balises[nom];
+    // <b> est le gras ordinaire, disponible partout sans le redéclarer.
+    const rendre = balises[nom] ?? (nom === "b" ? (x: ReactNode) => <strong>{x}</strong> : undefined);
     sortie.push(<Fragment key={debut}>{rendre ? rendre(contenu) : entier}</Fragment>);
     fin = debut + entier.length;
   }
