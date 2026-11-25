@@ -1,5 +1,7 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -21,6 +23,7 @@ export function Pagination({ page, pageCount, total, params }: {
   total: number;
   params: Params;
 }) {
+  const t = useT();
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
   const btnBase: React.CSSProperties = {
@@ -48,7 +51,7 @@ export function Pagination({ page, pageCount, total, params }: {
     }}>
       {/* Prev */}
       {page > 1 ? (
-        <Link href={buildHref(params, page - 1)} aria-label="Page précédente" style={btnBase}>
+        <Link href={buildHref(params, page - 1)} aria-label={t("explorer.pagePrec")} style={btnBase}>
           <ChevronLeft size={16} aria-hidden="true" />
         </Link>
       ) : (
@@ -74,7 +77,7 @@ export function Pagination({ page, pageCount, total, params }: {
 
       {/* Next */}
       {page < pageCount ? (
-        <Link href={buildHref(params, page + 1)} aria-label="Page suivante" style={btnBase}>
+        <Link href={buildHref(params, page + 1)} aria-label={t("explorer.pageSuiv")} style={btnBase}>
           <ChevronRight size={16} aria-hidden="true" />
         </Link>
       ) : (
@@ -84,7 +87,7 @@ export function Pagination({ page, pageCount, total, params }: {
       )}
 
       <span style={{ fontSize: 12, color: "var(--text-muted)", marginLeft: 8 }}>
-        Page {page} / {pageCount} · {total} entreprises
+        {t("explorer.pageSur", { page, pages: pageCount, total })}
       </span>
     </div>
   );

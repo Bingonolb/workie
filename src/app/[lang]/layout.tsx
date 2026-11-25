@@ -16,6 +16,8 @@ import "../globals.css";
 import { notFound } from "next/navigation";
 import { OUVERTES, estOuverte, LOCALE_INTL } from "@/i18n/config";
 import { messagesDe } from "@/i18n/serveur";
+import { creerTraducteur } from "@/i18n/traduire";
+import fr from "@/i18n/messages/fr.json";
 import { FournisseurLangue } from "@/i18n/FournisseurLangue";
 import { Suspense } from "react";
 import { QueryProvider } from "@/providers/QueryProvider";
@@ -145,7 +147,7 @@ export default async function RootLayout({ children, params }: { children: React
       </head>
       <body style={{ background: "var(--bg)", overflowX: "clip", width: "100%", position: "relative" }}>
         <a href="#main-content" className="skip-to-main">
-          Aller au contenu principal
+          {creerTraducteur(lang, messages, fr)("menu.allerContenu")}
         </a>
         <FournisseurLangue langue={lang} messages={messages}>
         <ThemeProvider>

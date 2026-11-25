@@ -12,7 +12,8 @@
     "accueil": "Workie, Startseite",
     "administration": "Verwaltung",
     "espaceEntreprise": "Unternehmensbereich",
-    "monEntreprise": "Mein Unternehmen"
+    "monEntreprise": "Mein Unternehmen",
+    "allerContenu": "Zum Hauptinhalt springen"
   },
   "vue": {
     "entreprises": "Unternehmen",
@@ -214,6 +215,81 @@
     "signetGarder": "Stelle «{titre}» speichern",
     "signetRetirerCourt": "Aus den gespeicherten Stellen entfernen",
     "signetGarderCourt": "Stelle speichern",
-    "entree": "Stellenantritt"
+    "entree": "Stellenantritt",
+    "metaTitreVille": "{nom}: Jobs in {ville}, {metier}",
+    "metaTitreSuisse": "{nom}: Jobs in der Schweiz, {metier}",
+    "metaSurWorkie": "{nom} auf Workie",
+    "metaIntrouvable": "Unternehmen nicht gefunden",
+    "metaDescription": "{nom}, {secteur} in {ville}. Stellenangebote, Arbeitssprachen und Unternehmen in der Nähe."
+  },
+  "swipe": {
+    "enregistre": "Gespeichert",
+    "enregistree": "Gespeichert",
+    "passe": "Übersprungen",
+    "passee": "Übersprungen",
+    "passerEntreprise": "Dieses Unternehmen überspringen",
+    "voirFiche": "Unternehmensprofil ansehen",
+    "sauverEntreprise": "Dieses Unternehmen speichern",
+    "aideEntreprises": "Karte nach rechts wischen zum Speichern, nach links zum Überspringen",
+    "sponsorise": "⚡ Gesponsert",
+    "ouvrir": "Öffnen →",
+    "passerOffre": "Diese Stelle überspringen",
+    "voirOffre": "Stelle ansehen",
+    "garderOffre": "Diese Stelle speichern",
+    "aideOffres": "Karte nach rechts wischen, um die Stelle zu speichern, nach links zum Überspringen",
+    "chargementOffres": "Stellen werden geladen…",
+    "toutVu": "Sie haben alle Stellen gesehen",
+    "toutVuAide": "Für diese Filter. Erweitern Sie sie oder schauen Sie sich Ihre gespeicherten Stellen an.",
+    "recommencer": "Von vorne beginnen",
+    "mesOffres": "Meine gespeicherten Stellen"
+  },
+  "explorer": {
+    "chargement": "Wird geladen",
+    "aucune": "Kein Unternehmen gefunden",
+    "autresFiltres": "Versuchen Sie andere Filter.",
+    "surTotal": "<b>{n}</b> von <b>{total}</b> Unternehmen",
+    "chargementCourt": "Wird geladen…",
+    "plus": "{n} weitere anzeigen",
+    "pagePrec": "Vorherige Seite",
+    "pageSuiv": "Nächste Seite",
+    "pageSur": "Seite {page} / {pages} · {total} Unternehmen"
+  },
+  "favoris": {
+    "titre": "Meine Favoriten",
+    "erreur": "Ihre Favoriten konnten nicht geladen werden",
+    "erreurAide": "Sie sind noch da, nur die Anzeige hat nicht funktioniert.",
+    "reessayer": "Erneut versuchen",
+    "appareil": "<b>Ihre Favoriten sind auf diesem Gerät gespeichert.</b> Erstellen Sie ein kostenloses Konto, um sie überall wiederzufinden, auf dem Smartphone wie auf dem Computer.",
+    "creerCompte": "Konto erstellen",
+    "aucun": "Noch keine Favoriten",
+    "aucunAide": "Tippen Sie auf die Flamme eines Unternehmens, um es hier zu speichern.",
+    "explorer": "Unternehmen entdecken",
+    "nbEntreprises": {
+      "one": "{n} Unternehmen",
+      "other": "{n} Unternehmen"
+    },
+    "erreurOffres": "Ihre gespeicherten Stellen konnten nicht geladen werden",
+    "erreurOffresAide": "Sie sind noch da, nur die Anzeige hat nicht funktioniert.",
+    "appareilOffres": "<b>Ihre Stellen sind auf diesem Gerät gespeichert.</b> Erstellen Sie ein kostenloses Konto, um sie überall wiederzufinden.",
+    "aucuneOffre": "Keine gespeicherten Stellen",
+    "aucuneOffreAide": "Tippen Sie auf das Lesezeichen einer Stelle, um sie hier zu speichern.",
+    "explorerOffres": "Stellen entdecken",
+    "nbOffres": {
+      "one": "{n} Stelle",
+      "other": "{n} Stellen"
+    }
+  },
+  "recherche": {
+    "fermer": "Schliessen",
+    "placeholder": "Unternehmen suchen…",
+    "effacer": "Löschen",
+    "enCours": "Suche läuft…",
+    "aucunResultat": "Keine Ergebnisse",
+    "aucunePour": "Kein Unternehmen für «{q}»",
+    "recentes": "Zuletzt gesucht",
+    "toutEffacer": "Alle löschen",
+    "retirerRecente": "{nom} aus den letzten Suchen entfernen",
+    "titre": "Unternehmen suchen",
+    "aide": "Name, Ort oder Branche"
   }
 }

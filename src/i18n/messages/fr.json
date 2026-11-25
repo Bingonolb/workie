@@ -12,7 +12,8 @@
     "accueil": "Workie, accueil",
     "administration": "Administration",
     "espaceEntreprise": "Espace entreprise",
-    "monEntreprise": "Mon entreprise"
+    "monEntreprise": "Mon entreprise",
+    "allerContenu": "Aller au contenu principal"
   },
   "vue": {
     "entreprises": "Entreprises",
@@ -214,6 +215,81 @@
     "signetGarder": "Enregistrer l'offre « {titre} »",
     "signetRetirerCourt": "Retirer des offres enregistrées",
     "signetGarderCourt": "Enregistrer l'offre",
-    "entree": "Entrée en fonction"
+    "entree": "Entrée en fonction",
+    "metaTitreVille": "{nom} : emploi à {ville}, {metier}",
+    "metaTitreSuisse": "{nom} : emploi en Suisse, {metier}",
+    "metaSurWorkie": "{nom} sur Workie",
+    "metaIntrouvable": "Entreprise introuvable",
+    "metaDescription": "{nom}, {secteur} à {ville}. Offres d'emploi, langues de travail et entreprises voisines."
+  },
+  "swipe": {
+    "enregistre": "Enregistré",
+    "enregistree": "Enregistrée",
+    "passe": "Passé",
+    "passee": "Passée",
+    "passerEntreprise": "Passer cette entreprise",
+    "voirFiche": "Voir la fiche entreprise",
+    "sauverEntreprise": "Sauvegarder cette entreprise",
+    "aideEntreprises": "Glissez la carte à droite pour sauvegarder, à gauche pour passer",
+    "sponsorise": "⚡ Sponsorisé",
+    "ouvrir": "Ouvrir →",
+    "passerOffre": "Passer cette offre",
+    "voirOffre": "Voir l'offre",
+    "garderOffre": "Enregistrer cette offre",
+    "aideOffres": "Glissez la carte à droite pour garder l'offre, à gauche pour passer",
+    "chargementOffres": "Chargement des offres…",
+    "toutVu": "Vous avez vu toutes les offres",
+    "toutVuAide": "Pour ces filtres. Élargissez-les, ou retrouvez celles que vous avez gardées.",
+    "recommencer": "Recommencer",
+    "mesOffres": "Mes offres gardées"
+  },
+  "explorer": {
+    "chargement": "Chargement",
+    "aucune": "Aucune entreprise trouvée",
+    "autresFiltres": "Essayez d'autres filtres.",
+    "surTotal": "<b>{n}</b> sur <b>{total}</b> entreprises",
+    "chargementCourt": "Chargement…",
+    "plus": "Voir {n} de plus",
+    "pagePrec": "Page précédente",
+    "pageSuiv": "Page suivante",
+    "pageSur": "Page {page} / {pages} · {total} entreprises"
+  },
+  "favoris": {
+    "titre": "Mes favoris",
+    "erreur": "Impossible de charger vos favoris",
+    "erreurAide": "Ils sont toujours là, c'est l'affichage qui a échoué.",
+    "reessayer": "Réessayer",
+    "appareil": "<b>Vos favoris sont gardés sur cet appareil.</b> Créez un compte gratuit pour les retrouver partout, sur téléphone comme sur ordinateur.",
+    "creerCompte": "Créer un compte",
+    "aucun": "Aucun favori pour l'instant",
+    "aucunAide": "Touchez la flamme d'une entreprise pour la sauvegarder ici.",
+    "explorer": "Explorer les entreprises",
+    "nbEntreprises": {
+      "one": "{n} entreprise",
+      "other": "{n} entreprises"
+    },
+    "erreurOffres": "Impossible de charger vos offres enregistrées",
+    "erreurOffresAide": "Elles sont toujours là, c'est l'affichage qui a échoué.",
+    "appareilOffres": "<b>Vos offres sont gardées sur cet appareil.</b> Créez un compte gratuit pour les retrouver partout.",
+    "aucuneOffre": "Aucune offre enregistrée",
+    "aucuneOffreAide": "Touchez le signet d'une offre pour la garder ici.",
+    "explorerOffres": "Explorer les offres",
+    "nbOffres": {
+      "one": "{n} offre",
+      "other": "{n} offres"
+    }
+  },
+  "recherche": {
+    "fermer": "Fermer",
+    "placeholder": "Rechercher une entreprise…",
+    "effacer": "Effacer",
+    "enCours": "Recherche…",
+    "aucunResultat": "Aucun résultat",
+    "aucunePour": "Aucune entreprise pour « {q} »",
+    "recentes": "Récentes",
+    "toutEffacer": "Tout effacer",
+    "retirerRecente": "Retirer {nom} des recherches récentes",
+    "titre": "Rechercher une entreprise",
+    "aide": "Nom, ville ou secteur d'activité"
   }
 }

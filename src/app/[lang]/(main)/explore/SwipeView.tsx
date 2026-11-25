@@ -1,5 +1,8 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomSecteur } from "@/i18n/secteurs";
+
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Users, X, Flame, Info, ExternalLink } from "lucide-react";
@@ -56,6 +59,7 @@ export function SwipeView({
   filters?: { sector?: string; canton?: string; search?: string };
   swipeAds?: PublicAdCampaign[];
 }) {
+  const t = useT();
   const router = useRouter();
 
   const stateKey = `workie_swipe_${filters?.sector ?? ""}_${filters?.canton ?? ""}`;
@@ -309,11 +313,11 @@ export function SwipeView({
       // présent ne doit pas être retiré par un swipe à droite.
       if (isLoggedIn) { if (!favIds.has(id)) toggleFavorite(id); }
       else ajouterFavoriInvite(id);
-      showToast("Enregistré", "#f97316");
+      showToast(t("swipe.enregistre"), "#f97316");
     } else {
-      showToast("Passé", "#ef4444");
+      showToast(t("swipe.passe"), "#ef4444");
     }
-  }, [isLoggedIn, favIds]);
+  }, [isLoggedIn, favIds, t]);
 
   const avancer = useCallback(() => setIndex(i => i + 1), []);
 
@@ -346,13 +350,13 @@ export function SwipeView({
               temps de l'animation, pour qu'un second appui n'avance pas de
               deux cartes. */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-            <BoutonRond taille={64} couleur="239,68,68" onClick={() => agir("left")} disabled={occupe} label="Passer cette entreprise">
+            <BoutonRond taille={64} couleur="239,68,68" onClick={() => agir("left")} disabled={occupe} label={t("swipe.passerEntreprise")}>
               <X size={26} strokeWidth={2.5} aria-hidden="true" />
             </BoutonRond>
-            <BoutonRond taille={48} couleur="99,102,241" teinte="#818cf8" onClick={() => !isAd(current) && router.push(urlFiche(current))} disabled={occupe || isAd(current)} label="Voir la fiche entreprise">
+            <BoutonRond taille={48} couleur="99,102,241" teinte="#818cf8" onClick={() => !isAd(current) && router.push(urlFiche(current))} disabled={occupe || isAd(current)} label={t("swipe.voirFiche")}>
               <Info size={18} strokeWidth={2} aria-hidden="true" />
             </BoutonRond>
-            <BoutonRond taille={64} couleur="249,115,22" onClick={() => agir("right")} disabled={occupe} label="Sauvegarder cette entreprise"
+            <BoutonRond taille={64} couleur="249,115,22" onClick={() => agir("right")} disabled={occupe} label={t("swipe.sauverEntreprise")}
               plein={!isAd(current) && flameIds.has(current.id)}>
               <Flame size={26} fill={!isAd(current) && flameIds.has(current.id) ? "#fff" : "none"} strokeWidth={2} aria-hidden="true" />
             </BoutonRond>
@@ -361,7 +365,7 @@ export function SwipeView({
               (on peut aussi glisser, et se servir des flèches du clavier). */}
           <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
             <p style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
-              Glissez la carte à droite pour sauvegarder, à gauche pour passer
+              {t("swipe.aideEntreprises")}
               {" "}&nbsp;·{" "}<Touche>←</Touche>{" "}<Touche>→</Touche>
             </p>
           </div>
@@ -403,6 +407,8 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
   company: Company; flameIds: Set<string>;
   overlayDir: "left" | "right" | null; overlayOpacity: number;
 }) {
+  const t = useT();
+  const langue = useLangue();
   const sectorColor = SECTOR_COLORS[company.sector] ?? "#8b5cf6";
   const isFav = flameIds.has(company.id);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -453,7 +459,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
             photo, là où le voile est le plus léger, l'ancienne disparaissait
             sur les images claires. */}
         <div style={{ position: "absolute", top: 16, left: 16, background: `color-mix(in srgb, ${sectorColor} 38%, rgba(10,10,14,0.55))`, border: `1px solid color-mix(in srgb, ${sectorColor} 55%, transparent)`, borderRadius: 50, padding: "5px 14px", fontSize: 13.5, fontWeight: 700, color: `color-mix(in srgb, ${sectorColor} 30%, #fff)`, backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }}>
-          {company.sector}
+          {nomSecteur(company.sector, langue)}
         </div>
         {isFav && (
           <div style={{ position: "absolute", top: 16, right: 16, background: "rgba(249,115,22,0.9)", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -463,7 +469,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
         <div style={{ position: "absolute", bottom: 16, left: 20, right: 20 }}>
           <p style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
             {company.name}{company.is_verified && (
-              <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 7, width: 20, height: 20, flexShrink: 0 }} aria-label="Entreprise vérifiée">
+              <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 7, width: 20, height: 20, flexShrink: 0 }} aria-label={t("fiche.verifiee")}>
                 <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
                 <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
               </svg>
@@ -478,7 +484,7 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           erreur de mise en page. */}
       <div style={{ padding: "20px 18px 24px", display: "flex", flexDirection: "column", gap: 13, flexShrink: 0 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          <Chip icon={<MapPin size={12} aria-hidden="true" />} label={lieuAffiche(company.city, company.canton)} />
+          <Chip icon={<MapPin size={12} aria-hidden="true" />} label={lieuAffiche(company.city, company.canton, langue)} />
           {company.employee_range && <Chip icon={<Users size={12} aria-hidden="true" />} label={`${company.employee_range} emp.`} />}
           {/* Aucun salaire affiché (décision du 2026-11-16). */}
         </div>
@@ -503,6 +509,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
   overlayDir: "left" | "right" | null;
   overlayOpacity: number;
 }) {
+  const t = useT();
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 22, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border2)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", userSelect: "none", display: "flex", flexDirection: "column", cursor: "pointer" }}>
       {/* Image zone — same 55% as SwipeCard */}
@@ -518,7 +525,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
 
         {/* Sponsored badge — gradient, more visible */}
         <div style={{ position: "absolute", top: 14, left: 14, background: "var(--brand)", borderRadius: 50, padding: "4px 12px", display: "flex", alignItems: "center", gap: 5 }}>
-          <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", textTransform: "uppercase", letterSpacing: "0.12em" }}>⚡ Sponsorisé</span>
+          <span style={{ fontSize: 9, fontWeight: 800, color: "#fff", textTransform: "uppercase", letterSpacing: "0.12em" }}>{t("swipe.sponsorise")}</span>
         </div>
 
         {/* Headline over image */}
@@ -540,7 +547,7 @@ function AdSwipeCard({ campaign, overlayDir, overlayOpacity }: {
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderRadius: 14, background: "var(--brand)", boxShadow: "0 4px 16px rgba(139,92,246,0.35)" }}>
           <ExternalLink size={15} color="#fff" aria-hidden="true" />
           <span style={{ fontSize: 14, fontWeight: 800, color: "#fff", flex: 1, letterSpacing: "-0.01em" }}>{campaign.cta_label}</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>Ouvrir →</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>{t("swipe.ouvrir")}</span>
         </div>
       </div>
     </div>

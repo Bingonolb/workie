@@ -6,6 +6,7 @@ import type { OffreAffichee } from "@/lib/offresTypes";
 import { CarteOffre, StylesCartesOffre } from "@/components/offres/CarteOffre";
 import { useT } from "@/i18n/FournisseurLangue";
 import { riche } from "@/i18n/riche";
+import { langueDocument } from "@/i18n/langueDocument";
 
 const GRAS = { b: (c: React.ReactNode) => <strong style={{ color: "var(--text)" }}>{c}</strong> };
 
@@ -47,7 +48,7 @@ export function ListeOffresExplore({ filtres, q, onQ }: { filtres: Filtres; q: s
     if (q.trim()) p.set("q", q.trim());
     if (n) p.set("page", String(n));
     try {
-      const r = await fetch(`/api/offres?${p}`);
+      const r = await fetch(`/api/offres?${p}&site=${langueDocument()}`);
       if (!r.ok) throw new Error(String(r.status));
       const d = await r.json() as { offres: OffreAffichee[]; total: number; recherche: Compris };
       // Seule la dernière demande décide de l'affichage.

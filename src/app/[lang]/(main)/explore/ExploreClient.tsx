@@ -1,5 +1,8 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { riche } from "@/i18n/riche";
+
 import { useState, useMemo, useCallback, useRef, useTransition, useEffect, useLayoutEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { CompanyCard } from "@/components/CompanyCard";
@@ -120,6 +123,7 @@ export function ExploreClient({
   initialSort?: string;
   squareAds: PublicAdCampaign[];
 }) {
+  const t = useT();
   // La vue suit l'URL, lue auprès du routeur et non du navigateur.
   //
   // `window.location` ne convient pas ici. En arrivant depuis une autre page,
@@ -864,7 +868,7 @@ export function ExploreClient({
               qui apparaissent un à un pendant qu'on tire, sans tourner, puis
               tournent par crans une fois le chargement lancé. */}
           {(tirage > 0 || melangeEnCours) && (
-            <svg width="28" height="28" viewBox="0 0 28 28" aria-label={melangeEnCours ? "Chargement" : undefined}
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-label={melangeEnCours ? t("explorer.chargement") : undefined}
               style={{ animation: melangeEnCours ? "roue-tirage 0.8s steps(8) infinite" : undefined }}>
               {Array.from({ length: 8 }, (_, i) => {
                 const visibles = Math.min(8, Math.floor((tirage / SEUIL_TIRAGE) * 8));
@@ -887,8 +891,8 @@ export function ExploreClient({
       }}>
         {visibleCompanies.length === 0 && !isPending ? (
           <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
-            <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Aucune entreprise trouvée</p>
-            <p style={{ fontSize: 14 }}>Essayez d&apos;autres filtres.</p>
+            <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{t("explorer.aucune")}</p>
+            <p style={{ fontSize: 14 }}>{t("explorer.autresFiltres")}</p>
           </div>
         ) : (
           <>
@@ -947,7 +951,7 @@ export function ExploreClient({
             {hasMore && (
               <div style={{ textAlign: "center", marginTop: 40 }}>
                 <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
-                  <span style={{ color: "var(--text)", fontWeight: 700 }}>{companies.length}</span> sur <span style={{ fontWeight: 700 }}>{total}</span> entreprises
+                  {riche(t("explorer.surTotal", { n: companies.length, total }), { b: c => <span style={{ color: "var(--text)", fontWeight: 700 }}>{c}</span> })}
                 </p>
                 <button
                   onClick={loadMore}
@@ -960,7 +964,7 @@ export function ExploreClient({
                   onMouseEnter={e => { if (!loadingMore) { (e.currentTarget as HTMLButtonElement).style.background = "var(--surface2)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--text-muted)"; }}}
                   onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "var(--surface)"; (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border2)"; }}
                 >
-                  {loadingMore ? "Chargement…" : `Voir ${Math.min(GRID_PAGE_SIZE, total - companies.length)} de plus`}
+                  {loadingMore ? t("explorer.chargementCourt") : t("explorer.plus", { n: Math.min(GRID_PAGE_SIZE, total - companies.length) })}
                 </button>
               </div>
             )}

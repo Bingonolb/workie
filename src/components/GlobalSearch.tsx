@@ -7,10 +7,15 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { lireRecentes, ajouterRecente, retirerRecente, viderRecentes, type EntrepriseRecente } from "@/lib/recherchesRecentes";
 import { urlFiche } from "@/lib/urlFiche";
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomVille } from "@/i18n/lieux";
+import { nomSecteur } from "@/i18n/secteurs";
 
 type Suggestion = { id: string; name: string; city: string; sector: string; logo_url?: string | null };
 
 export function GlobalSearch({ onClose }: { onClose: () => void }) {
+  const t = useT();
+  const langue = useLangue();
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -292,7 +297,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
       }}>
         <button
           onClick={fermer}
-          aria-label="Fermer"
+          aria-label={t("recherche.fermer")}
           style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: 10, background: "none", border: "none", cursor: "pointer", color: "var(--text)", flexShrink: 0 }}
         >
           <ArrowLeft size={21} aria-hidden="true" />
@@ -308,7 +313,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
               if (e.key === "Enter" && suggestions[0]) { ouvrir(suggestions[0]); router.replace(urlFiche(suggestions[0])); }
               if (e.key === "Escape") fermer();
             }}
-            placeholder="Rechercher une entreprise…"
+            placeholder={t("recherche.placeholder")}
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
@@ -323,7 +328,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
           {query && (
             <button
               onClick={() => { setQuery(""); setSuggestions([]); inputRef.current?.focus(); }}
-              aria-label="Effacer"
+              aria-label={t("recherche.effacer")}
               style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", padding: 4 }}
             >
               <X size={15} aria-hidden="true" />
@@ -382,13 +387,13 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
         style={{ paddingBottom: clavier }}
       >
         {loading && (
-          <div style={{ padding: "16px 20px", fontSize: 13, color: "var(--text-muted)" }}>Recherche…</div>
+          <div style={{ padding: "16px 20px", fontSize: 13, color: "var(--text-muted)" }}>{t("recherche.enCours")}</div>
         )}
 
         {!loading && query && suggestions.length === 0 && (
           <div style={{ padding: "48px 20px", textAlign: "center" }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Aucun résultat</p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Aucune entreprise pour « {query} »</p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{t("recherche.aucunResultat")}</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{t("recherche.aucunePour", { q: query })}</p>
           </div>
         )}
 
@@ -405,7 +410,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
               <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {s.name}
               </p>
-              <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{s.city} · {s.sector}</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{nomVille(s.city, langue)} · {nomSecteur(s.sector, langue)}</p>
             </div>
             <Search size={13} color="var(--text-muted)" aria-hidden="true" style={{ flexShrink: 0, opacity: 0.35 }} />
           </Link>
@@ -421,13 +426,13 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "16px 20px 10px",
             }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Récentes</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{t("recherche.recentes")}</p>
               <button
                 type="button"
                 onClick={() => setRecentes(viderRecentes())}
                 style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "var(--text-muted)", fontFamily: "inherit" }}
               >
-                Tout effacer
+                {t("recherche.toutEffacer")}
               </button>
             </div>
             {recentes.map(r => (
@@ -442,13 +447,13 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                   <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {r.name}
                   </p>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{r.city} · {r.sector}</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{nomVille(r.city, langue)} · {nomSecteur(r.sector, langue)}</p>
                 </Link>
                 {/* La croix retire la ligne, et rien d'autre : elle ne doit
                     pas ouvrir la fiche par-dessus le marche. */}
                 <button
                   type="button"
-                  aria-label={`Retirer ${r.name} des recherches récentes`}
+                  aria-label={t("recherche.retirerRecente", { nom: r.name })}
                   onClick={e => { e.preventDefault(); e.stopPropagation(); setRecentes(retirerRecente(r.id)); }}
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "center",
@@ -465,8 +470,8 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
 
         {!query && recentes.length === 0 && (
           <div style={{ padding: "48px 20px", textAlign: "center" }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>Rechercher une entreprise</p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nom, ville ou secteur d&apos;activité</p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{t("recherche.titre")}</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{t("recherche.aide")}</p>
           </div>
         )}
       </div>

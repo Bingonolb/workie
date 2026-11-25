@@ -6,6 +6,8 @@ import { CONTRATS } from "@/lib/offres";
 import { unstable_cache } from "next/cache";
 import { analyser, motsDe, pertinence } from "@/lib/rechercheOffres";
 import { COLONNES_OFFRE, versOffreAffichee } from "@/lib/offresAffichage";
+import { localiserOffres } from "@/lib/traductionsEntreprises";
+import { estOuverte } from "@/i18n/config";
 
 /**
  * Les offres d'emploi d'Explorer, vue « Offres ».
@@ -114,7 +116,9 @@ export async function GET(req: Request) {
     data = r.data; count = r.count;
   }
 
-  const offres = (data ?? []).map(versOffreAffichee);
+  const site = p.get("site");
+  // « site » : la langue de la page (« langue » filtre celle des annonces).
+  const offres = await localiserOffres((data ?? []).map(versOffreAffichee), estOuverte(site) ? site : "fr");
 
   return NextResponse.json({
     offres, total: count ?? offres.length, parPage: PAR_PAGE,

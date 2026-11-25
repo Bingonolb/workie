@@ -62,3 +62,11 @@ export async function localiserEntreprise<T extends { id: string; description?: 
   if (!entreprise) return entreprise;
   return (await localiserEntreprises([entreprise], langue))[0];
 }
+
+/** Des offres, avec le sous-secteur de leur entreprise dans la langue demandée. */
+export async function localiserOffres<O extends { entreprise: { id: string; subsector?: string | null } }>(offres: O[], langue: Langue): Promise<O[]> {
+  if (langue === "fr" || offres.length === 0) return offres;
+  const entreprises = await localiserEntreprises([...new Map(offres.map(o => [o.entreprise.id, o.entreprise])).values()], langue);
+  const parId = new Map(entreprises.map(e => [e.id, e]));
+  return offres.map(o => ({ ...o, entreprise: parId.get(o.entreprise.id) ?? o.entreprise }));
+}

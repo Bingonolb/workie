@@ -1,5 +1,10 @@
 "use client";
 
+import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { nomSecteur } from "@/i18n/secteurs";
+import { libelleContrat } from "@/i18n/contrat";
+import { langueDocument } from "@/i18n/langueDocument";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bookmark, Info, MapPin, X } from "lucide-react";
@@ -37,6 +42,7 @@ function ecrireVues(f: Filtres, vues: Set<string>) {
 }
 
 export function SwipeOffres({ filtres }: { filtres: Filtres }) {
+  const t = useT();
   const router = useRouter();
   const { estEnregistree, ids: gardees } = useOffresEnregistrees();
   const [paquet, setPaquet] = useState<OffreAffichee[]>([]);
@@ -61,7 +67,7 @@ export function SwipeOffres({ filtres }: { filtres: Filtres }) {
       if (filtres.langue) p.set("langue", filtres.langue);
       if (filtres.contrat) p.set("contrat", filtres.contrat);
       if (page.current) p.set("page", String(page.current));
-      const r = await fetch(`/api/offres?${p}`);
+      const r = await fetch(`/api/offres?${p}&site=${langueDocument()}`);
       if (!r.ok) return;
       const d = await r.json() as { offres: OffreAffichee[]; total: number; parPage: number };
       page.current += 1;
@@ -96,21 +102,21 @@ export function SwipeOffres({ filtres }: { filtres: Filtres }) {
     if (dir === "right") {
       // Garder : intention explicite, jamais une bascule (déjà gardée → reste gardée).
       if (!estEnregistree(o.id)) void poserSignet(o.id, true);
-      montrer("Enregistrée", `rgb(${BRAND})`);
-    } else montrer("Passée", "#ef4444");
-  }, [filtres, estEnregistree]);
+      montrer(t("swipe.enregistree"), `rgb(${BRAND})`);
+    } else montrer(t("swipe.passee"), "#ef4444");
+  }, [filtres, estEnregistree, t]);
 
   const avancer = useCallback(() => setIndex(i => i + 1), []);
 
   if (!courant) {
-    if (!fin) return <p style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>Chargement des offres…</p>;
+    if (!fin) return <p style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>{t("swipe.chargementOffres")}</p>;
     return (
       <div style={{ textAlign: "center", padding: "72px 24px", color: "var(--text-muted)" }}>
-        <p style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Vous avez vu toutes les offres</p>
-        <p style={{ fontSize: 14, marginBottom: 22 }}>Pour ces filtres. Élargissez-les, ou retrouvez celles que vous avez gardées.</p>
+        <p style={{ fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>{t("swipe.toutVu")}</p>
+        <p style={{ fontSize: 14, marginBottom: 22 }}>{t("swipe.toutVuAide")}</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-          <button type="button" className="btn btn-clair" onClick={() => { vues.current = new Set(); ecrireVues(filtres, vues.current); page.current = 0; setPaquet([]); setIndex(0); setFin(false); setTimeout(() => void charger(), 0); }}>Recommencer</button>
-          <button type="button" className="btn btn-encre" onClick={() => router.push("/favorites?vue=offres")}>Mes offres gardées</button>
+          <button type="button" className="btn btn-clair" onClick={() => { vues.current = new Set(); ecrireVues(filtres, vues.current); page.current = 0; setPaquet([]); setIndex(0); setFin(false); setTimeout(() => void charger(), 0); }}>{t("swipe.recommencer")}</button>
+          <button type="button" className="btn btn-encre" onClick={() => router.push("/favorites?vue=offres")}>{t("swipe.mesOffres")}</button>
         </div>
       </div>
     );
@@ -130,19 +136,19 @@ export function SwipeOffres({ filtres }: { filtres: Filtres }) {
         boutons={(agir, occupe) => (
           <>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-              <BoutonRond taille={64} couleur="239,68,68" onClick={() => agir("left")} disabled={occupe} label="Passer cette offre">
+              <BoutonRond taille={64} couleur="239,68,68" onClick={() => agir("left")} disabled={occupe} label={t("swipe.passerOffre")}>
                 <X size={26} strokeWidth={2.5} aria-hidden="true" />
               </BoutonRond>
-              <BoutonRond taille={48} couleur="99,102,241" teinte="#818cf8" onClick={() => setApercu(courant)} disabled={occupe} label="Voir l'offre">
+              <BoutonRond taille={48} couleur="99,102,241" teinte="#818cf8" onClick={() => setApercu(courant)} disabled={occupe} label={t("swipe.voirOffre")}>
                 <Info size={18} strokeWidth={2} aria-hidden="true" />
               </BoutonRond>
-              <BoutonRond taille={64} couleur={BRAND} onClick={() => agir("right")} disabled={occupe} label="Enregistrer cette offre" plein={estEnregistree(courant.id)}>
+              <BoutonRond taille={64} couleur={BRAND} onClick={() => agir("right")} disabled={occupe} label={t("swipe.garderOffre")} plein={estEnregistree(courant.id)}>
                 <Bookmark size={26} fill={estEnregistree(courant.id) ? "#fff" : "none"} strokeWidth={2} aria-hidden="true" />
               </BoutonRond>
             </div>
             <div className="swipe-legend" style={{ flexDirection: "column", alignItems: "center", gap: 6 }}>
               <p style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
-                Glissez la carte à droite pour garder l&apos;offre, à gauche pour passer
+                {t("swipe.aideOffres")}
                 {" "}&nbsp;·{" "}<Touche>←</Touche>{" "}<Touche>→</Touche>
               </p>
             </div>
@@ -166,12 +172,14 @@ export function SwipeOffres({ filtres }: { filtres: Filtres }) {
 
 /** La carte d'une offre dans le swipe : l'entreprise en image, le poste en titre, les faits dessous. */
 function CarteSwipeOffre({ o, direction, intensite, gardee }: { o: OffreAffichee; direction: Direction | null; intensite: number; gardee: boolean }) {
+  const t = useT();
+  const langue = useLangue();
   const e = o.entreprise;
   const couleur = SECTOR_COLORS[e.sector ?? ""] ?? "#8b5cf6";
   const [chargee, setChargee] = useState(false);
-  const taux = libelleTaux(o.taux_min, o.taux_max);
-  const lieu = o.location || (e.city ? lieuAffiche(e.city, e.canton) : null);
-  const faits = [o.contract_type, taux, o.langue ? CODE_LANGUE[o.langue] : null].filter(Boolean) as string[];
+  const taux = libelleTaux(o.taux_min, o.taux_max, langue);
+  const lieu = o.location || (e.city ? lieuAffiche(e.city, e.canton, langue) : null);
+  const faits = [libelleContrat(t, o.contract_type), taux, o.langue ? CODE_LANGUE[o.langue] : null].filter(Boolean) as string[];
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: 22, overflow: "hidden", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", userSelect: "none", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: 1, minHeight: 0, position: "relative", overflow: "hidden", background: e.cover_color || (e.cover_url ? "var(--surface2)" : `linear-gradient(135deg, ${couleur} 0%, #0f172a 100%)`) }}>
@@ -193,7 +201,7 @@ function CarteSwipeOffre({ o, direction, intensite, gardee }: { o: OffreAffichee
           </div>
         )}
         <div style={{ position: "absolute", bottom: 16, left: 20, right: 20 }}>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>{e.subsector || e.sector}</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", marginBottom: 4 }}>{e.subsector || nomSecteur(e.sector, langue)}</p>
           <p style={{ fontSize: 24, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.15, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{o.title}</p>
         </div>
       </div>

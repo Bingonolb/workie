@@ -12,6 +12,8 @@ import { SelecteurVue, type VueListe } from "@/components/offres/SelecteurVue";
 import { FavorisOffres } from "./FavorisOffres";
 import { useT } from "@/i18n/FournisseurLangue";
 import { langueDocument } from "@/i18n/langueDocument";
+import { riche } from "@/i18n/riche";
+const GRAS = { b: (c: React.ReactNode) => <strong style={{ color: "var(--text)" }}>{c}</strong> };
 
 /**
  * Les favoris : entreprises (flamme) ou offres (signet), au choix du même
@@ -47,6 +49,7 @@ export function FavorisClient() {
  * écran vide à une grille pleine, en poussant tout vers le bas.
  */
 function FavorisEntreprises() {
+  const t = useT();
   // On relit la réponse brute de l'API, la même forme que celle rangée par le
   // préchargement du lien. Les deux écrivaient auparavant des formes
   // différentes — un objet d'un côté, un tableau de l'autre — et le composant
@@ -98,8 +101,8 @@ function FavorisEntreprises() {
   if (echec) {
     return (
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "48px 32px", textAlign: "center" }}>
-        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Impossible de charger vos favoris</p>
-        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>Ils sont toujours là, c&apos;est l&apos;affichage qui a échoué.</p>
+        <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>{t("favoris.erreur")}</p>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>{t("favoris.erreurAide")}</p>
         <button
           onClick={() => window.location.reload()}
           style={{
@@ -108,7 +111,7 @@ function FavorisEntreprises() {
             fontSize: 14, cursor: "pointer",
           }}
         >
-          Réessayer
+          {t("favoris.reessayer")}
         </button>
       </div>
     );
@@ -124,9 +127,9 @@ function FavorisEntreprises() {
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap",
       background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "14px 18px", marginBottom: 22 }}>
       <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.5, maxWidth: 560 }}>
-        <strong style={{ color: "var(--text)" }}>Vos favoris sont gardés sur cet appareil.</strong> Créez un compte gratuit pour les retrouver partout, sur téléphone comme sur ordinateur.
+        {riche(t("favoris.appareil"), GRAS)}
       </p>
-      <Link href="/signup?next=/favorites" className="btn btn-encre btn-sm">Créer un compte</Link>
+      <Link href="/signup?next=/favorites" className="btn btn-encre btn-sm">{t("favoris.creerCompte")}</Link>
     </div>
   );
 
@@ -137,9 +140,9 @@ function FavorisEntreprises() {
         <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(249,115,22,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
           <Flame size={28} color="#f97316" aria-hidden="true" />
         </div>
-        <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Aucun favori pour l&apos;instant</p>
-        <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>Touchez la flamme d&apos;une entreprise pour la sauvegarder ici.</p>
-        <Link href="/explore" className="btn btn-encre">Explorer les entreprises</Link>
+        <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>{t("favoris.aucun")}</p>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>{t("favoris.aucunAide")}</p>
+        <Link href="/explore" className="btn btn-encre">{t("favoris.explorer")}</Link>
       </div>
       </>
     );
@@ -153,7 +156,7 @@ function FavorisEntreprises() {
           longue pour mériter une recherche. Discret et en haut de page, pas
           sur les cartes, où il ferait doublon avec le compteur 🔥. */}
       <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
-        {liste.length} entreprise{liste.length > 1 ? "s" : ""}
+        {t("favoris.nbEntreprises", { n: liste.length })}
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "44px 30px" }}>
         {liste.map((c, i) => (

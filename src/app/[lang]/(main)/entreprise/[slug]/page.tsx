@@ -15,9 +15,11 @@ import { slugifier } from "@/lib/pagesEmploi";
  * Le titre que Google affiche : le nom, ce qu'on y cherche (l'emploi), le
  * lieu et le métier. « Omega : emploi à Bienne, Horlogerie de luxe ».
  */
-function titreFiche(c: { name: string; city: string | null; sector: string; subsector?: string | null }): string {
-  const lieu = !c.city || /multi/i.test(c.city) ? "en Suisse" : `à ${c.city}`;
-  return `${c.name} : emploi ${lieu}, ${c.subsector || c.sector}`;
+function titreFiche(c: { name: string; city: string | null; sector: string; subsector?: string | null }, t: Traduire, langue: Langue): string {
+  const metier = c.subsector || nomSecteur(c.sector, langue);
+  return !c.city || /multi/i.test(c.city)
+    ? t("fiche.metaTitreSuisse", { nom: c.name, metier })
+    : t("fiche.metaTitreVille", { nom: c.name, ville: nomVille(c.city, langue), metier });
 }
 import { MapPin, Users, ArrowLeft, TrendingUp, CheckCircle, Languages } from "lucide-react";
 import { ShareButton } from "@/components/ShareButton";
@@ -44,6 +46,8 @@ import { tServeur } from "@/i18n/page";
 import type { Traduire } from "@/i18n/traduire";
 import { nomSecteur } from "@/i18n/secteurs";
 import { nomCanton } from "@/i18n/cantons";
+import { nomVille } from "@/i18n/lieux";
+import type { Langue } from "@/i18n/config";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
 
@@ -79,11 +83,13 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const id = await idDeFiche((await params).slug);
-  const company = await localiserEntreprise(await getCachedCompany(id), await langueDeLaPage());
-  if (!company) return { title: "Entreprise introuvable" };
+  const langue = await langueDeLaPage();
+  const t = await tServeur();
+  const company = await localiserEntreprise(await getCachedCompany(id), langue);
+  if (!company) return { title: t("fiche.metaIntrouvable") };
   const desc = company.description
     ? company.description.slice(0, 155) + (company.description.length > 155 ? "…" : "")
-    : `${company.name}, ${company.sector} à ${company.city}. Offres d'emploi, langues de travail et entreprises voisines.`;
+    : t("fiche.metaDescription", { nom: company.name, secteur: nomSecteur(company.sector, langue), ville: nomVille(company.city ?? "", langue) });
   const url = `${BASE_URL}${urlFiche(company)}`;
   // Sans photo de couverture, l'aperçu est dessiné à la demande, avec le nom
   // de l'entreprise, sa ville et son secteur.
@@ -93,21 +99,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     ? [{ url: lireCadrage(company.cover_url).src, width: 1200, height: 630, alt: company.name }]
     : [{ url: apercuDessine, width: 1200, height: 630, alt: company.name }];
   return {
-    title: titreFiche(company),
+    title: titreFiche(company, t, langue),
     description: desc,
     alternates: { canonical: url },
     openGraph: {
-      title: `${company.name} sur Workie`,
+      title: t("fiche.metaSurWorkie", { nom: company.name }),
       description: desc,
       url,
       siteName: "Workie",
       type: "website",
-      locale: "fr_CH",
+      locale: langue === "de" ? "de_CH" : "fr_CH",
       images: ogImage,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${company.name} sur Workie`,
+      title: t("fiche.metaSurWorkie", { nom: company.name }),
       description: desc,
       images: ogImage.map(i => i.url),
     },
@@ -167,7 +173,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
   // le cache. Ce qui dépend du visiteur est chargé par FournisseurEtatFiche.
   // Les avis ne sont plus lus : ils ne sont ni affichés ni résumés, et une
   // donnée qu'on ne montre pas ne doit pas être envoyée avec la page.
-  const company = await getCachedCompany(id).then(async c => localiserEntreprise(c, await langueDeLaPage())).catch(() => null);
+  // La fiche brute (français) sert aux recherches en base ; la fiche traduite, à l affichage.
+  const brute = await getCachedCompany(id).catch(() => null);
+  const company = await localiserEntreprise(brute, await langueDeLaPage()).catch(() => brute);
 
   if (!company) notFound();
   const langue = await langueDeLaPage();
@@ -176,7 +184,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
   const [jobs, groupesBruts] = await Promise.all([
     getCachedJobOffers(id).catch(() => [] as never[]),
-    getCachedSuggestions(company.id, company.sector, company.subsector ?? null, company.canton ?? null).catch(() => []),
+    getCachedSuggestions(company.id, company.sector, brute?.subsector ?? null, company.canton ?? null).catch(() => []),
   ]);
 
   // Les suggestions dans la langue de la page : titre, sous-secteurs, villes.
