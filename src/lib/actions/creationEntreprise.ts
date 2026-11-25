@@ -10,7 +10,7 @@ import { getSecteursEnLigne } from "@/lib/secteursEnLigne";
 import { cantonValide, EMPLOYEE_RANGES, LANGUES_SAISIE } from "@/lib/types";
 import { creationOuverte } from "@/lib/ouverture";
 import type { EtatRevendication } from "@/lib/actions/revendication";
-import { langueRequete } from "@/i18n/requete";
+import { langueRequete, tRequete } from "@/i18n/requete";
 
 /**
  * Créer la fiche d'une entreprise absente de Workie.
@@ -89,7 +89,7 @@ export async function fichesProches(nom: string): Promise<{ name: string; slug: 
 
 export async function demarrerCreation(formData: FormData): Promise<{ error?: string; compteExistant?: boolean; doublons?: { name: string; slug: string; city: string }[]; etat?: EtatRevendication }> {
   try {
-    if (!creationOuverte) return { error: "Cette fonction n'est pas encore ouverte." };
+    if (!creationOuverte) return { error: (await tRequete())("creation.eFermee") };
     const user = await getUser();
     const t = (k: string, max: number) => String(formData.get(k) ?? "").trim().slice(0, max);
 
@@ -97,7 +97,7 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
     const enLigne = await getSecteursEnLigne();
     let site = t("website_url", 300);
     if (site && !/^https?:\/\//i.test(site)) site = `https://${site}`;
-    try { if (site) new URL(site); } catch { return { error: "L'adresse du site n'est pas valide." }; }
+    try { if (site) new URL(site); } catch { return { error: (await tRequete())("creation.eSite") }; }
     const taille = t("employee_range", 20);
     const fiche: FicheProposee = {
       name: t("name", 120), sector: t("sector", 80), city: t("city", 80),
@@ -105,12 +105,12 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
       employee_range: (EMPLOYEE_RANGES as readonly string[]).includes(taille) ? taille : null,
       langues: t("langues", 40).split(",").map(l => l.trim().toUpperCase()).filter(l => LANGUES_SAISIE.some(x => x.code === l)),
     };
-    if (fiche.name.length < 2) return { error: "Indiquez le nom de l'entreprise." };
-    if (!enLigne.includes(fiche.sector)) return { error: "Choisissez un secteur dans la liste." };
-    if (!fiche.city) return { error: "Indiquez la ville du siège ou du site principal." };
-    if (!cantonValide(fiche.canton) || fiche.canton === "CH") return { error: "Choisissez un canton dans la liste." };
-    if (!fiche.website_url) return { error: "Indiquez le site de l'entreprise : sa page carrière, ou à défaut son site officiel." };
-    if (fiche.description.length < 80) return { error: "Décrivez l'entreprise en quelques phrases (80 caractères au moins)." };
+    if (fiche.name.length < 2) return { error: (await tRequete())("creation.eNom") };
+    if (!enLigne.includes(fiche.sector)) return { error: (await tRequete())("creation.eSecteur") };
+    if (!fiche.city) return { error: (await tRequete())("creation.eVille") };
+    if (!cantonValide(fiche.canton) || fiche.canton === "CH") return { error: (await tRequete())("creation.eCanton") };
+    if (!fiche.website_url) return { error: (await tRequete())("creation.eSiteManquant") };
+    if (fiche.description.length < 80) return { error: (await tRequete())("creation.eDescription") };
 
     // Doublon probable : on le dit avant de créer quoi que ce soit, sauf si la
     // personne a confirmé qu'il s'agit bien d'une autre entreprise.
@@ -123,9 +123,9 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
     const prenom = t("prenom", 80), nom = t("nom", 80), fonction = t("fonction", 120);
     const email = t("email", 254).toLowerCase();
     const motDePasse = String(formData.get("mot_de_passe") ?? "");
-    if (!prenom || !nom || !fonction) return { error: "Indiquez votre prénom, votre nom et votre fonction." };
-    if (!emailValide(email)) return { error: "Adresse e-mail invalide." };
-    if (!user && motDePasse.length < 8) return { error: "Choisissez un mot de passe d'au moins 8 caractères." };
+    if (!prenom || !nom || !fonction) return { error: (await tRequete())("creation.eIdentite") };
+    if (!emailValide(email)) return { error: (await tRequete())("creation.eEmail") };
+    if (!user && motDePasse.length < 8) return { error: (await tRequete())("creation.eMdp") };
 
     // Limites sur 24 heures, partagées avec la revendication.
     const h = await headers();
@@ -135,14 +135,14 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
       table().select("id", { count: "exact", head: true }).eq("empreinte_ip", ip).gte("cree_le", depuis),
       table().select("id", { count: "exact", head: true }).ilike("email_pro", email).gte("cree_le", depuis),
     ]);
-    if ((parIp.count ?? 0) >= 10 || (parEmail.count ?? 0) >= 5) return { error: "Trop de demandes aujourd'hui. Réessayez demain." };
+    if ((parIp.count ?? 0) >= 10 || (parEmail.count ?? 0) >= 5) return { error: (await tRequete())("creation.eTrop") };
 
     const admin = createAdminClient();
     if (user) {
       const { data: p } = await admin.from("profiles").select("claimed_company_id").eq("id", user.id).maybeSingle();
       if (p?.claimed_company_id) {
         const { data: autre } = await admin.from("companies").select("name, is_subscribed").eq("id", p.claimed_company_id).maybeSingle();
-        if (autre?.is_subscribed) return { error: `Ce compte gère déjà ${autre.name}. Pour une autre entreprise, utilisez un autre compte ou écrivez à contact@workie.ch.` };
+        if (autre?.is_subscribed) return { error: (await tRequete())("creation.eAutre", { nom: autre.name }) };
       }
     }
 
@@ -153,7 +153,7 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
       if (p?.id) {
         const { data: u } = await admin.auth.admin.getUserById(p.id);
         if (u?.user?.email_confirmed_at || !u?.user?.user_metadata?.compte_entreprise) {
-          return { error: "Un compte Workie existe déjà avec cette adresse. Connectez-vous pour continuer.", compteExistant: true };
+          return { error: (await tRequete())("creation.eCompte"), compteExistant: true };
         }
         await admin.auth.admin.updateUserById(p.id, { password: motDePasse });
         userId = p.id;
@@ -161,11 +161,11 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
         const username = `${prenom}${nom}`.normalize("NFD").replace(/[^a-z0-9]/gi, "").toLowerCase().slice(0, 24) || "entreprise";
         const { data: cree, error } = await admin.auth.admin.createUser({
           email, password: motDePasse, email_confirm: false,
-          user_metadata: { full_name: `${prenom} ${nom}`, first_name: prenom, last_name: nom, username, compte_entreprise: true },
+          user_metadata: { full_name: `${prenom} ${nom}`, first_name: prenom, last_name: nom, username, compte_entreprise: true, langue: await langueRequete() },
         });
         if (error || !cree?.user) {
-          if ((error?.message ?? "").toLowerCase().includes("password")) return { error: "Ce mot de passe est trop faible ou trop courant. Choisissez-en un autre." };
-          return { error: "Le compte n'a pas pu être créé. Réessayez." };
+          if ((error?.message ?? "").toLowerCase().includes("password")) return { error: (await tRequete())("creation.eFaible") };
+          return { error: (await tRequete())("creation.eCreation") };
         }
         userId = cree.user.id;
       }
@@ -180,14 +180,14 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
       company_id: null, fiche, user_id: userId, prenom, nom, fonction, email_pro: email,
       methode: "manuel", statut: "code_envoye", empreinte_ip: ip, compte_cree: compteCree, langue: await langueRequete(),
     }).select("id").single();
-    if (error || !rev) return { error: "La demande n'a pas pu être enregistrée. Réessayez." };
+    if (error || !rev) return { error: (await tRequete())("creation.eEnregistrement") };
 
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
     await table().update({
       code_hash: hacher(code, rev.id), code_expire: new Date(Date.now() + DUREE_CODE_MIN * 60_000).toISOString(), essais: 0,
     }).eq("id", rev.id);
     if (!(await sendCodeRevendication(email, prenom, fiche.name, code, await langueRequete()))) {
-      return { error: "Le courriel n'a pas pu partir. Vérifiez l'adresse et réessayez." };
+      return { error: (await tRequete())("creation.eCourriel") };
     }
     // Sans session : la vérification du code reconnaît la demande par ce cookie
     // (même nom que la revendication, lu par verifierCodeRevendication).
@@ -195,6 +195,6 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
     if (!user) (await cookies()).set(COOKIE, rev.id, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 2 * 3600 });
     return { etat: { etape: "code", id: rev.id, email: masquer(email) } };
   } catch {
-    return { error: "Une erreur est survenue. Réessayez." };
+    return { error: (await tRequete())("creation.eGenerique") };
   }
 }
