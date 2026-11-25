@@ -298,7 +298,9 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
         price_data: {
           currency: "chf",
           product_data: { name: t("stripe.aboNom", { nom: c.name }), description: t("stripe.aboDescription") },
-          unit_amount: offre.chf * 100,
+          // ABO_PRIX_TEST (CHF) : prix encaissé à l'essai seulement, pour payer
+          // un vrai abonnement de test. L'affichage garde le vrai tarif.
+          unit_amount: Math.round((Number(process.env.ABO_PRIX_TEST) >= 1 ? Number(process.env.ABO_PRIX_TEST) : offre.chf) * 100),
           recurring: { interval: offre.intervalle },
         },
         quantity: 1,
