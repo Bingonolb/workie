@@ -259,3 +259,29 @@ export async function retirerOffre(id: string): Promise<{ error?: string }> {
   rafraichirFiche();
   return {};
 }
+
+/**
+ * Relit l'abonnement chez Stripe et met la fiche à jour : résiliation
+ * programmée, date de fin, fin effective. Appelée à l'ouverture de la page
+ * Abonnement (où l'on revient du portail Stripe), pour que l'écran dise la
+ * vérité même si l'avis de Stripe tarde ou n'arrive pas.
+ */
+export async function synchroniserAbonnement(companyId: string): Promise<void> {
+  try {
+    if (!process.env.STRIPE_SECRET_KEY || !/^[0-9a-f-]{36}$/i.test(companyId)) return;
+    const admin = createAdminClient();
+    const { data } = await admin.from("companies").select("stripe_subscription_id").eq("id", companyId).maybeSingle();
+    const subId = (data as { stripe_subscription_id?: string | null } | null)?.stripe_subscription_id;
+    if (!subId) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sub = await new Stripe(process.env.STRIPE_SECRET_KEY).subscriptions.retrieve(subId) as any;
+    const active = sub.status === "active" || sub.status === "trialing" || sub.status === "past_due";
+    const periodEnd: number = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end ?? 0;
+    await admin.from("companies").update({
+      is_subscribed: active,
+      ...(active ? {} : { is_verified: false }),
+      subscription_ends_at: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+      subscription_cancel_at_period_end: sub.cancel_at_period_end ?? false,
+    }).eq("id", companyId);
+  } catch { /* l'avis de Stripe reste le second chemin */ }
+}

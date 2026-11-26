@@ -1,8 +1,10 @@
-import { ficheGeree } from "@/lib/actions/espaceEntreprise";
+import { ficheGeree, synchroniserAbonnement } from "@/lib/actions/espaceEntreprise";
 import { BoutonPortail } from "./BoutonPortail";
 import { tServeur, langueDeLaPage } from "@/i18n/page";
 
 export default async function PageAbonnement() {
+  const avant = await ficheGeree();
+  if (avant) await synchroniserAbonnement(avant.id);
   const [c, t, langue] = await Promise.all([ficheGeree(), tServeur(), langueDeLaPage()]);
   if (!c) return null;
   const fin = c.subscription_ends_at ? new Date(c.subscription_ends_at).toLocaleDateString(langue === "de" ? "de-CH" : "fr-CH", { timeZone: "Europe/Zurich" }) : null;
