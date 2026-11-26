@@ -304,7 +304,21 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
     const meta: Record<string, string> = creation
       ? { type: "creation_entreprise", revendication_id: r.id, user_id: user.id }
       : { type: "abonnement_entreprise", company_id: c.id, revendication_id: r.id, user_id: user.id };
-    const session = await new Stripe(process.env.STRIPE_SECRET_KEY).checkout.sessions.create({
+    // Un seul paiement possible par demande. La page de paiement précédente,
+    // si elle existe : déjà payée, on active au lieu d'encaisser une seconde
+    // fois ; encore ouverte, on l'expire, pour qu'un deuxième onglet ne puisse
+    // pas payer en double.
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const precedente = (r as { stripe_session?: string | null }).stripe_session;
+    if (precedente) {
+      const p = await stripe.checkout.sessions.retrieve(precedente).catch(() => null);
+      if (p?.status === "complete") {
+        await activerAbonnementDepuisSession(stripe, p);
+        return { url: `${base}/espace-entreprise` };
+      }
+      if (p?.status === "open") await stripe.checkout.sessions.expire(p.id).catch(() => {});
+    }
+    const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       locale: (await langueRequete()) === "de" ? "de" : "fr",
       customer_email: r.email_pro,
@@ -327,6 +341,7 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
       success_url: `${base}/espace-entreprise?bienvenue=1&session={CHECKOUT_SESSION_ID}`,
       cancel_url: creation ? `${base}/creer-entreprise` : `${base}/revendiquer/${c.slug}`,
     });
+    await table().update({ stripe_session: session.id }).eq("id", r.id);
     return session.url ? { url: session.url } : { error: t("revend.ePaiement") };
   } catch {
     return { error: t("revend.ePaiementReessayer") };

@@ -53,6 +53,7 @@ const stripe = {
   subscriptions: {
     retrieve: vi.fn(async () => ({ id: "sub_1", metadata: {}, current_period_end: 1_900_000_000 })),
     update: vi.fn(),
+    cancel: vi.fn(async () => ({})),
   },
 } as never;
 
@@ -104,6 +105,14 @@ describe("abonnement entreprise", () => {
     await activer.activerAbonnementDepuisSession(stripe, sessionAbonnement());
     expect(envoyerEmail).toHaveBeenCalledTimes(1);
     expect(tables.companies[0].is_subscribed).toBe(true);
+  });
+
+  it("résilie un second abonnement sur une fiche déjà abonnée", async () => {
+    tables.companies[0] = { ...tables.companies[0], is_subscribed: true, stripe_subscription_id: "sub_premier" };
+    await activer.activerAbonnementDepuisSession(stripe, sessionAbonnement());
+    expect((stripe as unknown as { subscriptions: { cancel: ReturnType<typeof vi.fn> } }).subscriptions.cancel).toHaveBeenCalledWith("sub_1");
+    expect(tables.companies[0].stripe_subscription_id).toBe("sub_premier");
+    expect(envoyerEmail).not.toHaveBeenCalled();
   });
 
   it("ne lie pas un compte qui n'est pas celui de la demande", async () => {

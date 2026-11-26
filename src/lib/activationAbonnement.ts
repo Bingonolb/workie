@@ -42,6 +42,17 @@ export async function activerAbonnementDepuisSession(stripe: Stripe, session: St
   }
   if (!companyId) return null;
 
+  // Deuxième abonnement sur une fiche déjà abonnée (deux paiements au même
+  // instant) : il est résilié tout de suite, pour qu'il ne se renouvelle
+  // jamais. Le premier reste. Le remboursement du doublon se fait à la main.
+  const { data: actuelle } = await supabase.from("companies").select("is_subscribed, stripe_subscription_id").eq("id", companyId).maybeSingle();
+  const deja = actuelle as { is_subscribed?: boolean; stripe_subscription_id?: string | null } | null;
+  if (deja?.is_subscribed && deja.stripe_subscription_id && deja.stripe_subscription_id !== sub.id) {
+    console.error("[abonnement] doublon résilié, à rembourser :", sub.id, "fiche", companyId);
+    await stripe.subscriptions.cancel(sub.id).catch(() => {});
+    return companyId;
+  }
+
   const periodEnd: number = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end ?? 0;
   const { error: subErr } = await supabase.from("companies").update({
     is_subscribed: true,
