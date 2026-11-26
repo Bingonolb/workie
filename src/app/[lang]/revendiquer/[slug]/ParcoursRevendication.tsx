@@ -147,7 +147,7 @@ export function ParcoursRevendication({ companyId, slug, domaine, connecte, etat
             <label>
               <span style={etiquette}>{t("revend.email")}</span>
               <input name="email" type="email" required autoComplete="email"
-                placeholder={etat.domaine ? t("revend.emailExemple", { domaine: etat.domaine }) : t("revend.emailExemple", { domaine: "entreprise.ch" })} style={champ} />
+                placeholder={etat.domaine ? t("revend.emailExemple", { domaine: etat.domaine }) : t("revend.emailExemple", { domaine: t("revend.domaineExemple") })} style={champ} />
               <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, display: "block", lineHeight: 1.5 }}>
                 {etat.domaine
                   ? riche(t("revend.aideDomaine", { domaine: etat.domaine }))

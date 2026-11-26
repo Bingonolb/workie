@@ -46,6 +46,7 @@ function ConfidentialiteFr() {
         <p><strong>Données de profil</strong> : nom complet et canton, modifiables depuis votre profil.</p>
         <p><strong>Données d&apos;usage</strong> : entreprises mises en favori, offres d&apos;emploi enregistrées, fiches consultées, clics vers les offres d&apos;emploi. Elles servent votre propre compte et ne sont jamais affichées à d&apos;autres visiteurs.</p>
         <p><strong>Données techniques</strong> : adresse IP, utilisée pour la prévention des abus et une localisation approximative (canton, ville) ; type de navigateur. Les statistiques de visite reposent sur une empreinte anonyme qui change chaque jour, sans conserver l&apos;adresse IP.</p>
+        <p><strong>Gestion d&apos;une fiche d&apos;entreprise</strong> : prénom, nom, fonction, e-mail et téléphone professionnels de la personne qui demande à gérer ou à créer une fiche. Ils servent uniquement à vérifier son lien avec l&apos;entreprise et à la contacter à ce sujet. Seule l&apos;équipe de Workie y a accès, ils ne sont jamais publiés ni transmis à des tiers, et ils sont effacés avec le compte.</p>
         <p><strong>Données de paiement</strong> : traitées exclusivement par Stripe. Workie ne stocke aucun numéro de carte bancaire.</p>
       </Section>
 
@@ -147,6 +148,7 @@ function ConfidentialiteDe() {
         <p><strong>Profildaten</strong>: vollständiger Name und Kanton, in Ihrem Profil änderbar.</p>
         <p><strong>Nutzungsdaten</strong>: als Favoriten gespeicherte Unternehmen, gespeicherte Stellenangebote, besuchte Profile, Klicks zu den Stellenangeboten. Sie dienen Ihrem eigenen Konto und werden nie anderen Besucherinnen und Besuchern angezeigt.</p>
         <p><strong>Technische Daten</strong>: IP-Adresse, verwendet zur Missbrauchsverhinderung und für eine ungefähre Lokalisierung (Kanton, Ort); Browsertyp. Die Besuchsstatistiken beruhen auf einem anonymen Fingerabdruck, der sich täglich ändert, ohne die IP-Adresse zu speichern.</p>
+        <p><strong>Verwaltung eines Unternehmensprofils</strong>: Vorname, Nachname, Funktion, geschäftliche E-Mail-Adresse und Telefonnummer der Person, die die Verwaltung oder Erstellung eines Profils beantragt. Sie dienen nur dazu, ihre Verbindung zum Unternehmen zu prüfen und sie dazu zu kontaktieren. Nur das Team von Workie hat Zugriff darauf, sie werden nie veröffentlicht oder an Dritte weitergegeben und mit dem Konto gelöscht.</p>
         <p><strong>Zahlungsdaten</strong>: ausschliesslich von Stripe verarbeitet. Workie speichert keine Kreditkartennummern.</p>
       </Section>
 

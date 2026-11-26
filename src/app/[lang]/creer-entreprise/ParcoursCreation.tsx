@@ -282,7 +282,7 @@ export function ParcoursCreation({ connecte, etatInitial, secteurs, cantons }: {
         </div>
         <label><span style={etiquette}>{t("revend.fonction")}</span><input name="fonction" required placeholder={t("revend.fonctionExemple")} autoComplete="organization-title" style={champ} /></label>
         <label><span style={etiquette}>{t("revend.email")}</span>
-          <input name="email" type="email" required autoComplete="email" placeholder={t("revend.emailExemple", { domaine: "entreprise.ch" })} style={champ} />
+          <input name="email" type="email" required autoComplete="email" placeholder={t("revend.emailExemple", { domaine: t("revend.domaineExemple") })} style={champ} />
           <span style={aide}>{t("creation.aideCode")}</span>
         </label>
         <label>

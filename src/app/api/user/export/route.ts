@@ -54,7 +54,7 @@ export async function GET() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (admin.from("ad_campaigns") as any).select("headline, format, status, start_date, end_date, total_budget_chf, paid_at, created_at").eq("user_id", user.id),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (admin.from("revendications" as any) as any).select("prenom, nom, fonction, email_pro, statut, cree_le, companies(name)").eq("user_id", user.id),
+      (admin.from("revendications" as any) as any).select("prenom, nom, fonction, telephone, email_pro, statut, cree_le, companies(name)").eq("user_id", user.id),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (admin.from("clics_offres" as any) as any).select("clique_le, companies(name)").eq("user_id", user.id),
       // Les offres gardées (signet) et l historique des fiches ouvertes : deux données

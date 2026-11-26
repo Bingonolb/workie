@@ -806,7 +806,8 @@
     "ePaiementReessayer": "Die Zahlung konnte nicht gestartet werden. Versuchen Sie es erneut.",
     "telephone": "Geschäftliche Telefonnummer",
     "telephoneAide": "Damit wir Sie zurückrufen können, falls wir die Anfrage prüfen müssen.",
-    "eTelephone": "Geben Sie eine gültige Telefonnummer an."
+    "eTelephone": "Geben Sie eine gültige Telefonnummer an.",
+    "domaineExemple": "unternehmen.ch"
   },
   "espace": {
     "titre": "Unternehmensbereich",

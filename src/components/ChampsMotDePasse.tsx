@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useT } from "@/i18n/FournisseurLangue";
 
@@ -19,6 +19,12 @@ export function ChampsMotDePasse({ libelle, aide, styleChamp, styleEtiquette }: 
   const [mdp, setMdp] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const different = confirmation.length > 0 && confirmation !== mdp;
+  const champConfirmation = useRef<HTMLInputElement>(null);
+  // Revérifié quand l'un OU l'autre change : corriger le premier champ après
+  // coup doit aussi lever (ou poser) le blocage.
+  useEffect(() => {
+    champConfirmation.current?.setCustomValidity(confirmation !== mdp ? t("mdpChamp.different") : "");
+  }, [mdp, confirmation, t]);
 
   const oeil = (
     <button type="button" onClick={() => setVisible(v => !v)}
@@ -45,10 +51,8 @@ export function ChampsMotDePasse({ libelle, aide, styleChamp, styleEtiquette }: 
         <span style={{ position: "relative", display: "block" }}>
           <input name="mot_de_passe_confirmation" type={type} required autoComplete="new-password"
             value={confirmation}
-            onChange={e => {
-              setConfirmation(e.target.value);
-              e.target.setCustomValidity(e.target.value !== mdp ? t("mdpChamp.different") : "");
-            }}
+            ref={champConfirmation}
+            onChange={e => setConfirmation(e.target.value)}
             aria-invalid={different}
             style={{ ...styleChamp, paddingRight: 48, borderColor: different ? "#ef4444" : undefined }} />
           {oeil}
