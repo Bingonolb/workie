@@ -1767,7 +1767,7 @@ button.kpi { cursor: pointer; }
 .badge-evol { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 750; font-variant-numeric: tabular-nums; }
 .badge-evol[data-sens="haut"] { background: rgba(16,185,129,0.15); color: #34d399; }
 .badge-evol[data-sens="bas"] { background: rgba(239,68,68,0.15); color: #f87171; }
-.badge-evol[data-sens="neutre"] { background: var(--surface2); color: var(--text-muted); }
+.badge-evol[data-sens="neutre"] { background: rgba(124,92,255,0.14); color: var(--brand); justify-self: start; }
 html.light .badge-evol[data-sens="haut"] { color: #047857; }
 html.light .badge-evol[data-sens="bas"] { color: #b91c1c; }
 .liste-espace { list-style: none; margin: 0; padding: 0; }
