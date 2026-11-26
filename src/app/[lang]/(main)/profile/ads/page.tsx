@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import Stripe from "stripe";
 import { activerCampagneDepuisSession } from "@/lib/activationAbonnement";
 import Link from "next/link";
-import { getUser } from "@/lib/supabase/server";
+import { getUser, getBusinessCompanyId } from "@/lib/supabase/server";
 import { getUserCampaigns, deleteUserCampaign } from "@/lib/actions/ads";
 
 import Image from "next/image";
@@ -33,7 +33,7 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
       await activerCampagneDepuisSession(session, user.id);
     } catch { /* le webhook reste le second chemin */ }
   }
-  const [{ campaigns = [], error }, t, langue] = await Promise.all([getUserCampaigns(), tServeur(), langueDeLaPage()]);
+  const [{ campaigns = [], error }, t, langue, entreprise] = await Promise.all([getUserCampaigns(), tServeur(), langueDeLaPage(), getBusinessCompanyId()]);
   const loc = langue === "de" ? "de-CH" : "fr-CH";
   const activeTab = sp.tab ?? "all";
   const paymentSuccess = sp.payment === "success";
@@ -74,8 +74,10 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
     <div className="page-root">
       <main className="page-main-md" style={{ paddingTop: 24, paddingBottom: 48 }}>
 
-        <Link href="/profile" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
-          <ArrowLeft size={14} aria-hidden="true" /> {t("pubs.monProfil")}
+        {/* Ouverte depuis l'onglet « Publicités » de l'espace entreprise : le
+            retour y ramène, plutôt que vers le profil personnel. */}
+        <Link href={entreprise ? "/espace-entreprise" : "/profile"} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
+          <ArrowLeft size={14} aria-hidden="true" /> {entreprise ? t("espace.titre") : t("pubs.monProfil")}
         </Link>
 
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
