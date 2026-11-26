@@ -73,53 +73,43 @@ export function GestionCoulisses({ initiales }: { initiales: PhotoCoulisses[] })
 
   const plein = photos.length >= MAX;
 
+  const ajout = (
+    <input ref={entree} type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={plein || !!envoi} onChange={ajouter} style={{ display: "none" }} />
+  );
+
   return (
-    <section style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px", display: "grid", gap: 16, maxWidth: 760 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
-        <div style={{ maxWidth: 480 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 750, letterSpacing: "-0.01em" }}>
-            {t("coulisses.titre")} <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text-muted)", marginLeft: 6 }}>{t("coulisses.compteur", { n: photos.length, max: MAX })}</span>
-          </h2>
-          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5, marginTop: 4 }}>{t("coulisses.espaceAide")}</p>
-        </div>
+    <section className="carte-espace" style={{ maxWidth: 760 }}>
+      <div className="carte-titre">
+        <h2 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {t("coulisses.titre")}
+          <span style={{ fontSize: 12, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: "var(--surface2)", color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>{t("coulisses.compteur", { n: photos.length, max: MAX })}</span>
+        </h2>
         <label className="btn btn-clair btn-sm" aria-disabled={plein || !!envoi} style={{ cursor: plein || envoi ? "not-allowed" : "pointer", opacity: plein ? 0.5 : 1 }}>
           <ImagePlus size={15} aria-hidden="true" /> {t("coulisses.ajouter")}
-          <input ref={entree} type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={plein || !!envoi} onChange={ajouter} style={{ display: "none" }} />
+          {ajout}
         </label>
       </div>
 
-      {envoi && <p role="status" style={{ fontSize: 13, color: "var(--text-muted)" }}>{envoi}</p>}
+      <div style={{ padding: "16px 22px 22px", display: "grid", gap: 16 }}>
+        <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.55, maxWidth: 560 }}>{t("coulisses.espaceAide")}</p>
+        {envoi && <p role="status" style={{ fontSize: 13, color: "var(--text-muted)" }}>{envoi}</p>}
 
-      {photos.length === 0 && !envoi ? (
-        <button type="button" onClick={() => entree.current?.click()} style={{
-          display: "grid", placeItems: "center", gap: 8, padding: "34px 16px", borderRadius: 14,
-          border: "1.5px dashed var(--border2)", background: "var(--surface2)", color: "var(--text-muted)", fontSize: 13.5, cursor: "pointer",
-        }}>
-          <ImagePlus size={22} aria-hidden="true" />
-          {t("coulisses.vide")}
-        </button>
-      ) : (
-        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 200px), 1fr))", gap: 14 }}>
+        <ul className="coulisses-gestion">
           {photos.map((p, i) => (
-            <li key={p.id} style={{ display: "grid", gap: 8, alignContent: "start" }}>
-              <div style={{ position: "relative", aspectRatio: "4 / 3", borderRadius: 12, overflow: "hidden", background: "var(--surface2)" }}>
+            <li key={p.id} className="coulisses-carte">
+              <div style={{ position: "relative", aspectRatio: "4 / 3", background: "var(--surface2)" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={largeurCouverture(p.url, 480)} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                {i === 0 && (
-                  <span style={{ position: "absolute", top: 8, left: 8, fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "rgba(10,10,14,0.6)", color: "#fff", backdropFilter: "blur(6px)" }}>
-                    {t("coulisses.principale")}
-                  </span>
-                )}
-                <div style={{ position: "absolute", right: 6, bottom: 6, display: "flex", gap: 4 }}>
+                {i === 0 && <span className="coulisses-principale">{t("coulisses.principale")}</span>}
+                {/* Une seule pastille de verre pour les trois gestes, plutôt que
+                    trois boutons posés côte à côte sur la photo. */}
+                <div className="coulisses-outils">
                   {[
                     { Icone: ArrowLeft, label: t("coulisses.avant"), action: () => deplacer(i, -1), off: i === 0 },
                     { Icone: ArrowRight, label: t("coulisses.apres"), action: () => deplacer(i, 1), off: i === photos.length - 1 },
                     { Icone: Trash2, label: t("coulisses.retirer"), action: () => retirer(p), off: false },
                   ].map(({ Icone, label, action, off }) => (
-                    <button key={label} type="button" onClick={action} disabled={off} aria-label={label} title={label} style={{
-                      width: 36, height: 36, display: "grid", placeItems: "center", borderRadius: 9, border: "1px solid rgba(255,255,255,0.2)",
-                      background: "rgba(10,10,14,0.55)", color: "#fff", backdropFilter: "blur(6px)", cursor: off ? "default" : "pointer", opacity: off ? 0.35 : 1,
-                    }}>
+                    <button key={label} type="button" onClick={action} disabled={off} aria-label={label} title={label}>
                       <Icone size={15} aria-hidden="true" />
                     </button>
                   ))}
@@ -128,13 +118,23 @@ export function GestionCoulisses({ initiales }: { initiales: PhotoCoulisses[] })
               <input type="text" maxLength={90} defaultValue={p.legende ?? ""} aria-label={t("coulisses.legende")} placeholder={t("coulisses.legendeEx")}
                 onBlur={e => legender(p, e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); } }}
-                style={{ width: "100%", padding: "8px 10px", borderRadius: 9, border: "1px solid var(--border)", background: "var(--surface2)", color: "var(--text)", fontSize: 13.5 }} />
+                className="coulisses-legende" />
             </li>
           ))}
+          {/* La place suivante, à l'endroit où la photo arrivera. */}
+          {!plein && (
+            <li>
+              <label className="coulisses-place" aria-disabled={!!envoi}>
+                <ImagePlus size={22} strokeWidth={1.8} aria-hidden="true" />
+                <span>{photos.length === 0 ? t("coulisses.vide") : t("coulisses.ajouter")}</span>
+                {ajout}
+              </label>
+            </li>
+          )}
         </ul>
-      )}
 
-      {etat && <p role="status" style={{ fontSize: 13, color: etat.ok ? "#10b981" : "#ef4444" }}>{etat.texte}</p>}
+        {etat && <p role="status" style={{ fontSize: 13, color: etat.ok ? "#10b981" : "#ef4444" }}>{etat.texte}</p>}
+      </div>
     </section>
   );
 }

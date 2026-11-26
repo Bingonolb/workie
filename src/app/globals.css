@@ -1792,3 +1792,18 @@ html.light .badge-evol[data-sens="bas"] { color: #b91c1c; }
   .kpi { padding: 16px 16px; }
   .kpi-valeur { font-size: 24px; }
 }
+
+/* En coulisses, côté gestion : chaque photo et sa légende forment une carte. */
+.coulisses-gestion { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 14px; }
+.coulisses-carte { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); }
+.coulisses-principale { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: rgba(10,10,14,0.55); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.18); }
+.coulisses-outils { position: absolute; right: 10px; bottom: 10px; display: flex; padding: 3px; gap: 2px; border-radius: 12px; background: rgba(10,10,14,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.16); }
+.coulisses-outils button { width: 34px; height: 34px; display: grid; place-items: center; border: 0; border-radius: 9px; background: none; color: #fff; cursor: pointer; transition: background .15s; }
+.coulisses-outils button:disabled { opacity: .3; cursor: default; }
+@media (hover: hover) and (pointer: fine) { .coulisses-outils button:not(:disabled):hover { background: rgba(255,255,255,0.16); } }
+.coulisses-legende { display: block; width: 100%; padding: 12px 14px; border: 0; border-top: 1px solid var(--border); background: transparent; color: var(--text); font-size: 13.5px; outline: none; }
+.coulisses-legende:focus { background: var(--surface2); }
+.coulisses-legende::placeholder { color: var(--text-muted); opacity: .8; }
+.coulisses-place { display: grid; place-items: center; align-content: center; gap: 8px; height: 100%; min-height: 150px; aspect-ratio: auto; padding: 18px; border-radius: 14px; border: 1.5px dashed var(--border2); color: var(--text-muted); font-size: 13.5px; font-weight: 600; text-align: center; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+@media (hover: hover) and (pointer: fine) { .coulisses-place:hover { border-color: var(--brand); color: var(--text); background: var(--surface2); } }
+.coulisses-place[aria-disabled="true"] { opacity: .5; pointer-events: none; }
