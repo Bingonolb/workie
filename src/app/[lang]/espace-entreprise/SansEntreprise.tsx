@@ -17,40 +17,48 @@ import { useT } from "@/i18n/FournisseurLangue";
 export function SansEntreprise() {
   const bienvenue = useSearchParams().get("bienvenue");
   const tr = useT();
-  const lireEssais = () => { try { return Number(sessionStorage.getItem("workie_attente_abo") ?? 0); } catch { return 0; } };
-  const [abandon] = useState(() => typeof window !== "undefined" && lireEssais() >= 10);
-
-  // Compteur gardé dans l'onglet : un rechargement remet l'état React à zéro,
-  // et sans lui la page se rechargerait sans fin si l'activation échouait.
-  // Retour de Stripe : on confirme le paiement directement, une seule fois.
   const session = useSearchParams().get("session");
-  useEffect(() => {
-    if (!bienvenue) return;
-    confirmerPaiement(session ?? "").then(r => { if (r.ok) window.location.replace("/espace-entreprise"); });
-  }, [bienvenue, session]);
+  const [abandon, setAbandon] = useState(false);
 
+  // Retour de Stripe : on demande à Workie de vérifier le paiement auprès de
+  // Stripe, jusqu'à dix fois à trois secondes d'intervalle. Dès que c'est bon,
+  // l'espace s'ouvre. Pas de rechargement de page : la vérification en cours
+  // n'est jamais coupée.
   useEffect(() => {
     if (!bienvenue) return;
-    const n = lireEssais();
-    if (n >= 10) return;
-    const t = window.setTimeout(() => {
-      try { sessionStorage.setItem("workie_attente_abo", String(n + 1)); } catch { /* sans conséquence */ }
-      window.location.reload();
-    }, 3000);
-    return () => window.clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bienvenue]);
+    let fini = false;
+    (async () => {
+      for (let essai = 0; essai < 10 && !fini; essai++) {
+        const r = await confirmerPaiement(session ?? "").catch(() => ({ ok: false }));
+        if (r.ok) { window.location.replace("/espace-entreprise"); return; }
+        await new Promise(ok => setTimeout(ok, 3000));
+      }
+      if (!fini) setAbandon(true);
+    })();
+    return () => { fini = true; };
+  }, [bienvenue, session]);
 
   return (
     <div style={{ maxWidth: 560, margin: "40px auto 0", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: 26, display: "grid", gap: 14 }}>
       {bienvenue ? (
         <>
           <h1 style={{ fontSize: 22, fontWeight: 800 }}>{tr("espace.payeTitre")}</h1>
+          {!abandon && (
+            <div role="status" aria-live="polite" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span aria-hidden="true" className="chargement-rond" />
+              <span style={{ fontSize: 14.5, fontWeight: 600 }}>{tr("espace.payeOuverture")}</span>
+            </div>
+          )}
           <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
             {abandon
               ? tr("espace.payeLent")
               : tr("espace.payeAttente")}
           </p>
+          <style>{`
+            .chargement-rond { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--border2); border-top-color: var(--brand); animation: tourner .8s linear infinite; flex-shrink: 0; }
+            @keyframes tourner { to { transform: rotate(360deg); } }
+            @media (prefers-reduced-motion: reduce) { .chargement-rond { animation-duration: 2.4s; } }
+          `}</style>
         </>
       ) : (
         <>

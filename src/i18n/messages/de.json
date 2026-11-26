@@ -879,7 +879,8 @@
     "provenance": "Woher Ihre Besucher kommen",
     "provenanceAide": "Kanton geschätzt anhand der Verbindung, bei {n} Besuchen im Zeitraum.",
     "pasDeVisites": "Noch keine Besuche im Zeitraum.",
-    "nonLocalisees": "Nicht lokalisiert"
+    "nonLocalisees": "Nicht lokalisiert",
+    "payeOuverture": "Ihr Bereich wird geöffnet…"
   },
   "graphique": {
     "vide": "Noch keine Daten für den Zeitraum.",

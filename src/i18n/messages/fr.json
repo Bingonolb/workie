@@ -879,7 +879,8 @@
     "provenance": "D'où viennent vos visiteurs",
     "provenanceAide": "Canton estimé à partir de la connexion, sur les {n} visites de la période.",
     "pasDeVisites": "Pas encore de visites sur la période.",
-    "nonLocalisees": "Non localisées"
+    "nonLocalisees": "Non localisées",
+    "payeOuverture": "Ouverture de votre espace…"
   },
   "graphique": {
     "vide": "Pas encore de données sur la période.",
