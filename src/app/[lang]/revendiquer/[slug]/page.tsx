@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ficheTestVisible } from "@/lib/fichesTest";
 import { getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -21,6 +21,10 @@ export const generateMetadata = () => meta({ titre: "revend.metaTitre", indexer:
 
 export default async function PageRevendiquer({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // Fiche de test : elle n'existe que sur l'adresse d'essai. Un lien reçu depuis
+  // workie.ch (e-mail envoyé par l'administration du site) y renvoie, vers une
+  // adresse fixe, sans rien lire en base.
+  if (process.env.VERCEL_ENV === "production" && slug === "wevenz-sarl") redirect("https://workie-test.vercel.app/revendiquer/wevenz-sarl");
   // Fermée au public tant que l'offre entreprise n'est pas ouverte.
   if (!revendicationOuverte) notFound();
   // Ouverte sans compte : le parcours Workie Business crée le compte avec la demande.
