@@ -880,7 +880,13 @@
     "provenanceAide": "Kanton geschätzt anhand der Verbindung, bei {n} Besuchen im Zeitraum.",
     "pasDeVisites": "Noch keine Besuche im Zeitraum.",
     "nonLocalisees": "Nicht lokalisiert",
-    "payeOuverture": "Ihr Bereich wird geöffnet…"
+    "payeOuverture": "Ihr Bereich wird geöffnet…",
+    "finBandeau": {
+      "one": "Ihr Abonnement endet am {date}, morgen. Bis dahin bleibt alles zugänglich.",
+      "other": "Ihr Abonnement endet am {date}, in {n} Tagen. Bis dahin bleibt alles zugänglich."
+    },
+    "finAujourdhui": "Ihr Abonnement endet heute. Bis heute Abend bleibt alles zugänglich.",
+    "reactiver": "Reaktivieren"
   },
   "graphique": {
     "vide": "Noch keine Daten für den Zeitraum.",

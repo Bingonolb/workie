@@ -880,7 +880,13 @@
     "provenanceAide": "Canton estimé à partir de la connexion, sur les {n} visites de la période.",
     "pasDeVisites": "Pas encore de visites sur la période.",
     "nonLocalisees": "Non localisées",
-    "payeOuverture": "Ouverture de votre espace…"
+    "payeOuverture": "Ouverture de votre espace…",
+    "finBandeau": {
+      "one": "Votre abonnement prend fin le {date}, demain. Tout reste accessible jusque-là.",
+      "other": "Votre abonnement prend fin le {date}, dans {n} jours. Tout reste accessible jusque-là."
+    },
+    "finAujourdhui": "Votre abonnement prend fin aujourd'hui. Tout reste accessible jusqu'à ce soir.",
+    "reactiver": "Réactiver"
   },
   "graphique": {
     "vide": "Pas encore de données sur la période.",
