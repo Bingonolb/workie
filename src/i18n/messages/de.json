@@ -886,7 +886,25 @@
       "other": "Ihr Abonnement endet am {date}, in {n} Tagen. Bis dahin bleibt alles zugänglich."
     },
     "finAujourdhui": "Ihr Abonnement endet heute. Bis heute Abend bleibt alles zugänglich.",
-    "reactiver": "Reaktivieren"
+    "reactiver": "Reaktivieren",
+    "activite": "Aktivität",
+    "evolAide": "ggü. den {n} Tagen davor",
+    "nouveau": "Neu",
+    "clics": {
+      "one": "{n} Klick",
+      "other": "{n} Klicks"
+    },
+    "visitesN": {
+      "one": "{n} Besuch",
+      "other": "{n} Besuche"
+    },
+    "etatActif": "Abonnement aktiv",
+    "etatFin": "Endet am {date}",
+    "renouv": "Verlängerung am {date}",
+    "rangCourt": "Rang",
+    "rangSur": "von {n} in {secteur}",
+    "courbe": "Verlauf: {serie} pro Tag",
+    "partVisites": "der Besuche"
   },
   "graphique": {
     "vide": "Noch keine Daten für den Zeitraum.",

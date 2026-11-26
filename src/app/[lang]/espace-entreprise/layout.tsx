@@ -20,20 +20,42 @@ export default async function LayoutEspace({ children }: { children: React.React
   return (
     <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
       <NavbarClient />
-      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "28px 16px 72px" }}>
+      <main style={{ maxWidth: 1040, margin: "0 auto", padding: "24px 16px 72px" }}>
         {c ? (
           <>
             {c.vueAdmin && <BandeauVueAdmin nom={c.name} retour={`/entreprise/${c.slug}`} />}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
-              <div>
-                <p style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 2 }}>
-                  <span style={{ color: "var(--brand)" }}>Workie Business</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{t("espace.titre")}</span>
-                </p>
-                <h1 style={{ fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 800, letterSpacing: "-0.025em" }}>{c.name}</h1>
+            {/* En-tête dans la langue du profil : bandeau sombre, filet violet,
+                puis l'état de l'abonnement et les onglets dans la même carte. */}
+            <header className="espace-entete">
+              <div className="espace-bandeau">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="espace-filigrane" src="/workie-mot.svg" alt="" aria-hidden="true" />
+                <div style={{ width: 32, height: 3, borderRadius: 2, background: "var(--brand)", marginBottom: 14 }} />
+                <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", marginBottom: 6 }}>Workie Business</p>
+                <h1 style={{ fontSize: "clamp(24px, 3.2vw, 30px)", fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.1, margin: 0 }}>{c.name}</h1>
               </div>
-            </div>
+              <div className="espace-etat">
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+                  <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: "50%", background: c.subscription_cancel_at_period_end ? "#f59e0b" : "#10b981" }} />
+                  <strong style={{ color: "var(--text)", fontWeight: 650 }}>{t("espace.etatActif")}</strong>
+                </span>
+                {c.subscription_ends_at && (
+                  <span>{t(c.subscription_cancel_at_period_end ? "espace.etatFin" : "espace.renouv", { date: new Date(c.subscription_ends_at).toLocaleDateString(langue === "de" ? "de-CH" : "fr-CH", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Zurich" }) })}</span>
+                )}
+              </div>
+              <OngletsEspace slug={c.slug} />
+            </header>
+            <style>{`
+              .espace-entete { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); margin-bottom: 16px; }
+              .espace-bandeau { position: relative; overflow: hidden; background: #101319; padding: 30px 32px 26px; }
+              .espace-filigrane { position: absolute; right: 32px; top: 50%; transform: translateY(-50%); height: 72px; width: auto; opacity: 0.08; pointer-events: none; user-select: none; }
+              .espace-etat { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding: 13px 32px; font-size: 13.5px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+              @media (max-width: 700px) {
+                .espace-filigrane { display: none; }
+                .espace-bandeau { padding: 24px 18px 20px; }
+                .espace-etat { padding: 12px 18px; }
+              }
+            `}</style>
             {c.subscription_cancel_at_period_end && c.subscription_ends_at && (() => {
               // Résiliation programmée : l'espace reste ouvert jusqu'à la fin de la
               // période payée, et chaque page le rappelle avec les jours restants.
@@ -47,8 +69,7 @@ export default async function LayoutEspace({ children }: { children: React.React
                 </div>
               );
             })()}
-            <OngletsEspace slug={c.slug} />
-            <div style={{ marginTop: 22 }}>{children}</div>
+            <div>{children}</div>
           </>
         ) : (
           <SansEntreprise />

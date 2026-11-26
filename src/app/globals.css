@@ -1742,3 +1742,53 @@ body { overscroll-behavior-y: none; }
    ne découvre jamais une autre couleur. */
 html { background: var(--bg); }
 #main-content ~ .page-root { min-height: calc(100vh - 56px); min-height: calc(100dvh - 56px); }
+
+/* ── Espace entreprise (Workie Business) ────────────────────────────────────
+   Même langue que le profil : cartes à barre de titre, chiffres séparés par
+   des filets, une couleur par donnée et rien d'autre. */
+.carte-espace { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.carte-titre { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 22px; border-bottom: 1px solid var(--border); min-height: 58px; }
+.carte-titre h2 { font-size: 15px; font-weight: 750; letter-spacing: -0.01em; color: var(--text); }
+.carte-titre .aide { font-size: 12.5px; color: var(--text-muted); }
+.segment { display: inline-flex; padding: 3px; gap: 2px; border-radius: 11px; background: var(--surface2); }
+.segment a { display: inline-flex; align-items: center; min-height: 34px; padding: 0 12px; border-radius: 8px; font-size: 13px; font-weight: 650; color: var(--text-muted); text-decoration: none; transition: background .15s, color .15s; }
+.segment a[aria-current="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 0 0 1px var(--border); }
+.kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid var(--border); }
+.kpi { display: grid; gap: 6px; align-content: start; text-align: left; padding: 18px 20px; background: none; border: 0; font: inherit; color: inherit; min-width: 0; transition: background .15s; }
+button.kpi { cursor: pointer; }
+.kpi + .kpi { border-left: 1px solid var(--border); }
+.kpi[aria-selected="true"] { background: var(--surface2); }
+@media (hover: hover) and (pointer: fine) { button.kpi:hover { background: var(--surface2); } }
+.kpi:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.kpi-tete { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-muted); }
+.kpi-pastille { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
+.kpi-valeur { font-size: 28px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--text); }
+.kpi-detail { font-size: 12px; line-height: 1.45; color: var(--text-muted); }
+.badge-evol { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.badge-evol[data-sens="haut"] { background: rgba(16,185,129,0.15); color: #34d399; }
+.badge-evol[data-sens="bas"] { background: rgba(239,68,68,0.15); color: #f87171; }
+.badge-evol[data-sens="neutre"] { background: var(--surface2); color: var(--text-muted); }
+html.light .badge-evol[data-sens="haut"] { color: #047857; }
+html.light .badge-evol[data-sens="bas"] { color: #b91c1c; }
+.liste-espace { list-style: none; margin: 0; padding: 0; }
+.liste-espace li { display: flex; align-items: center; gap: 14px; padding: 13px 22px; font-size: 14px; }
+.liste-espace li + li { border-top: 1px solid var(--border); }
+.liste-espace .rang { width: 22px; font-size: 12.5px; font-weight: 700; color: var(--text-muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.liste-espace .nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.liste-espace .chiffre { font-weight: 750; font-variant-numeric: tabular-nums; color: var(--text); flex-shrink: 0; }
+.liste-espace .part { width: 52px; text-align: right; font-size: 12.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.grille-espace { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi + .kpi { border-left: 0; }
+  .kpi { border-top: 1px solid var(--border); }
+  .kpi:nth-child(-n+2) { border-top: 0; }
+  .kpi:nth-child(even) { border-left: 1px solid var(--border); }
+  .kpi-fixe { grid-column: 1 / -1; border-left: 0 !important; }
+}
+@media (max-width: 700px) {
+  .grille-espace { grid-template-columns: 1fr; }
+  .carte-titre, .liste-espace li { padding-left: 18px; padding-right: 18px; }
+  .kpi { padding: 16px 16px; }
+  .kpi-valeur { font-size: 24px; }
+}

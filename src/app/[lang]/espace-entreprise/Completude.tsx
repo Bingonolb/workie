@@ -25,26 +25,29 @@ export async function Completude({ c, offres }: { c: FicheGeree; offres: Offre[]
   const restants = points.filter(p => !p.ok);
 
   return (
-    <section style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 20px", display: "grid", gap: 12 }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-        <h2 style={{ fontSize: 15, fontWeight: 700 }}>{t("espace.completeA", { pct })}</h2>
-        <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{t("espace.completeAide")}</span>
+    <section className="carte-espace">
+      <div className="carte-titre">
+        <h2>{t("espace.completeA", { pct })}</h2>
+        <span className="aide">{t("espace.completeAide")}</span>
       </div>
-      <div style={{ height: 8, borderRadius: 4, background: "var(--surface2)", overflow: "hidden" }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={t("espace.complete")}>
-        <div style={{ width: `${pct}%`, height: "100%", background: "var(--brand)", borderRadius: 4 }} />
+      <div style={{ padding: "16px 22px 6px" }}>
+        <div style={{ height: 6, borderRadius: 3, background: "var(--surface2)", overflow: "hidden" }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={t("espace.complete")}>
+          <div style={{ width: `${pct}%`, height: "100%", background: "var(--brand)", borderRadius: 3 }} />
+        </div>
       </div>
-      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 6 }}>
+      <ul className="liste-espace">
         {restants.map(p => (
-          <li key={p.t}>
-            <Link href={p.href} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "var(--text)", textDecoration: "none" }}>
-              <span style={{ width: 18, height: 18, borderRadius: "50%", border: "2px solid var(--border2)", flexShrink: 0 }} />
-              {p.t} <ArrowRight size={14} color="var(--text-muted)" aria-hidden="true" />
+          <li key={p.t} style={{ padding: 0 }}>
+            <Link href={p.href} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "12px 22px", color: "var(--text)", textDecoration: "none" }}>
+              <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: "50%", border: "1.5px solid var(--border2)", flexShrink: 0 }} />
+              <span style={{ flex: 1 }}>{p.t}</span>
+              <ArrowRight size={15} color="var(--text-muted)" aria-hidden="true" />
             </Link>
           </li>
         ))}
-        {points.filter(p => p.ok).length > 0 && (
-          <li style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)" }}>
-            <Check size={16} color="#10b981" aria-hidden="true" /> {t("espace.pointsFaits", { n: faits })}
+        {faits > 0 && (
+          <li style={{ color: "var(--text-muted)", fontSize: 13 }}>
+            <Check size={18} color="#10b981" aria-hidden="true" /> {t("espace.pointsFaits", { n: faits })}
           </li>
         )}
       </ul>
