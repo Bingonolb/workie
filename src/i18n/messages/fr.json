@@ -1393,5 +1393,29 @@
     "different": "Les deux mots de passe ne sont pas identiques.",
     "afficher": "Afficher le mot de passe",
     "masquer": "Masquer le mot de passe"
+  },
+  "coulisses": {
+    "titre": "En coulisses",
+    "sousTitre": "Là où l'on travaille, chez {nom}.",
+    "espaceAide": "Vos bureaux, votre atelier, votre équipe au travail. Des photos réelles, en format paysage, en disent plus long qu'un texte. La première s'affiche en grand.",
+    "ajouter": "Ajouter des photos",
+    "compteur": "{n} sur {max}",
+    "legende": "Légende (facultative)",
+    "legendeEx": "Ex. : la salle de pause, au 3e étage",
+    "avant": "Avancer la photo",
+    "apres": "Reculer la photo",
+    "retirer": "Retirer la photo",
+    "confirmerRetrait": "Retirer cette photo de votre fiche ?",
+    "envoi": "Envoi de la photo {i} sur {n}…",
+    "vide": "Aucune photo pour l'instant.",
+    "eMax": "{n} photos au plus : retirez-en une pour en ajouter une autre.",
+    "voirToutes": "Voir les {n} photos",
+    "fermer": "Fermer",
+    "precedente": "Photo précédente",
+    "suivante": "Photo suivante",
+    "photoDe": "Photo de {nom}",
+    "enregistree": "Légende enregistrée",
+    "principale": "Photo principale",
+    "plus": "+{n}"
   }
 }

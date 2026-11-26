@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { HautDePage } from "@/components/HautDePage";
 import Link from "next/link";
 import Image from "next/image";
-import { getCachedCompany, getCachedJobOffers, getCachedSuggestions } from "@/lib/actions/companies";
+import { getCachedCompany, getCachedJobOffers, getCachedSuggestions, getCachedPhotosCoulisses } from "@/lib/actions/companies";
+import { EnCoulisses } from "@/components/company/EnCoulisses";
 import { LienOffres } from "@/components/company/LienOffres";
 import { BandeauRevendication } from "@/components/company/BandeauRevendication";
 import { Suspense } from "react";
@@ -182,9 +183,12 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
   const t = await tServeur();
 
 
-  const [jobs, groupesBruts] = await Promise.all([
+  const [jobs, groupesBruts, photos] = await Promise.all([
     getCachedJobOffers(id).catch(() => [] as never[]),
     getCachedSuggestions(company.id, company.sector, brute?.subsector ?? null, company.canton ?? null).catch(() => []),
+    // Réservé aux fiches abonnées : à la fin de l'abonnement, les photos
+    // restent en base mais ne s'affichent plus.
+    company.is_subscribed ? getCachedPhotosCoulisses(company.id).catch(() => []) : Promise.resolve([]),
   ]);
 
   // Les suggestions dans la langue de la page : titre, sous-secteurs, villes.
@@ -420,6 +424,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
                 </div>
               ))}
             </div>
+
+            <EnCoulisses photos={photos} nom={company.name} />
 
             {/* Les entreprises voisines, en liste et par groupes.
                 En grille, quatre vignettes se regardent en même temps et

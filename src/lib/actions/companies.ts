@@ -388,3 +388,16 @@ export const getCachedSuggestions = unstable_cache(
   ["suggestions-entreprise-v3"],
   { revalidate: 300, tags: ["companies"] }
 );
+
+/** Photos « En coulisses » d'une fiche, dans l'ordre choisi par l'entreprise. */
+export const getCachedPhotosCoulisses = unstable_cache(
+  async (companyId: string) => {
+    // Table hors des types générés.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (createAdminClient() as any).from("company_photos")
+      .select("id, url, legende").eq("company_id", companyId).order("position").order("created_at").limit(8);
+    return (data ?? []) as { id: string; url: string; legende: string | null }[];
+  },
+  ["photos-coulisses"],
+  { revalidate: 300, tags: ["companies"] }
+);

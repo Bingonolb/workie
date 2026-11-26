@@ -11,6 +11,7 @@ import { LANGUES_SAISIE, EMPLOYEE_RANGES } from "@/lib/types";
 import { banniereCadree, televerserCouverture } from "@/lib/televersement";
 import { tRequete } from "@/i18n/requete";
 import { CONTRATS, MODES, NIVEAUX, TAUX } from "@/lib/offres";
+import { LARGEURS_VARIANTES, cheminVariante } from "@/lib/coverUrl";
 
 /**
  * Espace entreprise. Chaque action relit en base, côté serveur, le lien entre
@@ -284,4 +285,89 @@ export async function synchroniserAbonnement(companyId: string): Promise<void> {
       subscription_cancel_at_period_end: sub.cancel_at_period_end ?? false,
     }).eq("id", companyId);
   } catch { /* l'avis de Stripe reste le second chemin */ }
+}
+
+// ── En coulisses : les photos des locaux ────────────────────────────────────
+//
+// Huit photos au plus, envoyées une à une (chaque envoi prépare dix tailles
+// dans le stockage ; plusieurs à la fois ont déjà saturé la base). La table
+// n'accorde aucun droit au navigateur : tout passe par ces actions, qui
+// relisent la fiche gérée et l'abonnement à chaque appel.
+
+export type PhotoCoulisses = { id: string; url: string; legende: string | null; position: number };
+// Fichier d'actions : seules des fonctions asynchrones peuvent en sortir.
+const MAX_PHOTOS_COULISSES = 8;
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tablePhotos = () => (createAdminClient() as any).from("company_photos");
+
+export async function listerPhotos(): Promise<PhotoCoulisses[]> {
+  const c = await ficheGeree();
+  if (!c) return [];
+  const { data } = await tablePhotos().select("id, url, legende, position").eq("company_id", c.id).order("position").order("created_at");
+  return (data ?? []) as PhotoCoulisses[];
+}
+
+export async function ajouterPhoto(formData: FormData): Promise<{ error?: string; photo?: PhotoCoulisses }> {
+  const t = await tRequete();
+  try {
+    const c = await ficheGeree();
+    if (!c) return { error: t("offresForm.eSansEntreprise") };
+    const actuelles = await listerPhotos();
+    if (actuelles.length >= MAX_PHOTOS_COULISSES) return { error: t("coulisses.eMax", { n: MAX_PHOTOS_COULISSES }) };
+
+    const admin = createAdminClient();
+    const depot = await televerserCouverture(admin, c.id, formData.get("photo"), "coulisses");
+    if (!depot.url) return { error: depot.avertissement ?? t("ficheForm.aEnvoi") };
+
+    const position = actuelles.reduce((m, p) => Math.max(m, p.position), -1) + 1;
+    const { data, error } = await tablePhotos().insert({ company_id: c.id, url: depot.url, position }).select("id, url, legende, position").single();
+    if (error) return { error: t("offresForm.eEnregistrement") };
+    rafraichirFiche();
+    return { photo: data as PhotoCoulisses };
+  } catch {
+    return { error: t("offresForm.eGenerique") };
+  }
+}
+
+export async function legenderPhoto(id: string, legende: string): Promise<{ error?: string }> {
+  const t = await tRequete();
+  const c = await ficheGeree();
+  if (!c || !UUID.test(id)) return { error: t("offresForm.eAcces") };
+  const texte = legende.replace(/\s+/g, " ").trim().slice(0, 90) || null;
+  const { error } = await tablePhotos().update({ legende: texte }).eq("id", id).eq("company_id", c.id);
+  if (error) return { error: t("offresForm.eEnregistrement") };
+  rafraichirFiche();
+  return {};
+}
+
+/** Nouvel ordre complet : seules les photos de la fiche sont prises en compte. */
+export async function ordonnerPhotos(ids: string[]): Promise<{ error?: string }> {
+  const t = await tRequete();
+  const c = await ficheGeree();
+  if (!c || !Array.isArray(ids) || ids.length > MAX_PHOTOS_COULISSES || !ids.every(i => UUID.test(i))) return { error: t("offresForm.eAcces") };
+  for (const [position, id] of ids.entries()) {
+    await tablePhotos().update({ position }).eq("id", id).eq("company_id", c.id);
+  }
+  rafraichirFiche();
+  return {};
+}
+
+export async function retirerPhoto(id: string): Promise<{ error?: string }> {
+  const t = await tRequete();
+  const c = await ficheGeree();
+  if (!c || !UUID.test(id)) return { error: t("offresForm.eAcces") };
+  const { data } = await tablePhotos().select("url").eq("id", id).eq("company_id", c.id).maybeSingle();
+  if (!data) return { error: t("offresForm.eAcces") };
+  await tablePhotos().delete().eq("id", id).eq("company_id", c.id);
+  // L'original et ses tailles quittent aussi le stockage, s'ils sont bien
+  // dans le dossier de cette fiche.
+  const chemin = String(data.url).split("/storage/v1/object/public/covers/")[1]?.split(/[?#]/)[0];
+  if (chemin?.startsWith(`coulisses/${c.id}/`)) {
+    await createAdminClient().storage.from("covers").remove([chemin, ...LARGEURS_VARIANTES.map(w => cheminVariante(chemin, w))]);
+  }
+  rafraichirFiche();
+  return {};
 }

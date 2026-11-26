@@ -19,6 +19,10 @@ function empreinte(ip: string, ua: string): string {
   return createHash("sha256").update(`${sel}|${jour}|${ip}|${ua}`).digest("hex").slice(0, 32);
 }
 
+function enSuisse(h: Headers): boolean {
+  return h.get("x-vercel-ip-country") === "CH";
+}
+
 const ROBOT = /bot|crawl|spider|slurp|preview|fetch|curl|wget|python|headless|lighthouse/i;
 
 /**
@@ -37,6 +41,13 @@ export async function trackCompanyView(companyId: string): Promise<void> {
     const cle = user ? `u:${user.id}` : empreinte(ip, ua);
 
     const admin = createAdminClient();
+    // Les visites de l'entreprise sur sa propre fiche, et celles de
+    // l'administration, ne sont pas des visiteurs : elles gonflaient le
+    // tableau de bord (et le classement) à chaque contrôle.
+    if (user) {
+      const { data: p } = await admin.from("profiles").select("role, claimed_company_id").eq("id", user.id).maybeSingle();
+      if (p?.role === "admin" || p?.claimed_company_id === companyId) return;
+    }
     const depuis = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     // Table et colonne hors des types générés.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,8 +61,10 @@ export async function trackCompanyView(companyId: string): Promise<void> {
       company_id: companyId,
       user_id: user?.id ?? null,
       empreinte: cle,
-      viewer_canton: h.get("x-vercel-ip-country-region") ?? null,
-      viewer_city: h.get("x-vercel-ip-city") ?? null,
+      // La région n'est un canton que pour une connexion suisse : une visite
+      // depuis Paris arrivait avec « IDF » et s'affichait comme un canton.
+      viewer_canton: enSuisse(h) ? h.get("x-vercel-ip-country-region") ?? null : null,
+      viewer_city: enSuisse(h) ? h.get("x-vercel-ip-city") ?? null : null,
     });
   } catch { /* silencieux : une statistique ne doit jamais casser une page */ }
 }
@@ -60,7 +73,7 @@ export async function trackJobApplyClick(jobId: string, companyId: string): Prom
   try {
     if (!UUID_RE.test(jobId) || !UUID_RE.test(companyId)) return;
     const hdrs = await headers();
-    const canton = hdrs.get("x-vercel-ip-country-region") ?? null;
+    const canton = enSuisse(hdrs) ? hdrs.get("x-vercel-ip-country-region") ?? null : null;
     const admin = createAdminClient();
     const { data: job } = await admin.from("job_offers").select("id").eq("id", jobId).eq("company_id", companyId).maybeSingle();
     if (!job) return;

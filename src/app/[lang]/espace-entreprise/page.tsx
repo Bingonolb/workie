@@ -47,8 +47,13 @@ export default async function TableauDeBord({ searchParams }: { searchParams: Pr
   const { nf, jourCourt } = formats(langue === "de" ? "de-CH" : "fr-CH");
   if (!s) return <p style={{ color: "var(--text-muted)" }}>{t("espace.statsIndispo")}</p>;
 
-  const localisees = s.cantons.reduce((a, x) => a + Number(x.n), 0);
-  const totalVisites = localisees + s.non_localisees;
+  // Seuls les vrais cantons sont nommés ; une région étrangère enregistrée
+  // avant le correctif rejoint les visites non localisées.
+  const cantons = s.cantons.filter(x => CANTON_NAMES[x.canton]);
+  const horsSuisse = s.cantons.filter(x => !CANTON_NAMES[x.canton]).reduce((a, x) => a + Number(x.n), 0);
+  const nonLocalisees = s.non_localisees + horsSuisse;
+  const localisees = cantons.reduce((a, x) => a + Number(x.n), 0);
+  const totalVisites = localisees + nonLocalisees;
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -111,7 +116,7 @@ export default async function TableauDeBord({ searchParams }: { searchParams: Pr
           <p style={{ fontSize: 13.5, color: "var(--text-muted)" }}>{t("espace.pasDeVisites")}</p>
         ) : (
           <div style={{ display: "grid", gap: 10 }}>
-            {[...s.cantons.map(x => ({ nom: nomCanton(x.canton, langue, CANTON_NAMES[x.canton] ?? x.canton), n: Number(x.n), autre: false })), ...(s.non_localisees ? [{ nom: t("espace.nonLocalisees"), n: s.non_localisees, autre: true }] : [])].map(x => {
+            {[...cantons.map(x => ({ nom: nomCanton(x.canton, langue, CANTON_NAMES[x.canton]), n: Number(x.n), autre: false })), ...(nonLocalisees ? [{ nom: t("espace.nonLocalisees"), n: nonLocalisees, autre: true }] : [])].map(x => {
               const pct = (x.n / totalVisites) * 100;
               return (
                 <div key={x.nom} style={{ display: "grid", gridTemplateColumns: "minmax(90px, 140px) 1fr auto", alignItems: "center", gap: 10, fontSize: 13.5 }}>

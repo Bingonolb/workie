@@ -1393,5 +1393,29 @@
     "different": "Die beiden Passwörter stimmen nicht überein.",
     "afficher": "Passwort anzeigen",
     "masquer": "Passwort verbergen"
+  },
+  "coulisses": {
+    "titre": "Hinter den Kulissen",
+    "sousTitre": "Hier wird bei {nom} gearbeitet.",
+    "espaceAide": "Ihre Büros, Ihre Werkstatt, Ihr Team bei der Arbeit. Echte Fotos im Querformat sagen mehr als jeder Text. Das erste wird gross angezeigt.",
+    "ajouter": "Fotos hinzufügen",
+    "compteur": "{n} von {max}",
+    "legende": "Bildunterschrift (optional)",
+    "legendeEx": "z. B. der Pausenraum im 3. Stock",
+    "avant": "Foto nach vorne",
+    "apres": "Foto nach hinten",
+    "retirer": "Foto entfernen",
+    "confirmerRetrait": "Dieses Foto aus Ihrem Profil entfernen?",
+    "envoi": "Foto {i} von {n} wird hochgeladen…",
+    "vide": "Noch keine Fotos.",
+    "eMax": "Höchstens {n} Fotos: Entfernen Sie eines, um ein neues hinzuzufügen.",
+    "voirToutes": "Alle {n} Fotos ansehen",
+    "fermer": "Schliessen",
+    "precedente": "Vorheriges Foto",
+    "suivante": "Nächstes Foto",
+    "photoDe": "Foto von {nom}",
+    "enregistree": "Bildunterschrift gespeichert",
+    "principale": "Hauptfoto",
+    "plus": "+{n}"
   }
 }

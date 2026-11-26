@@ -48,7 +48,7 @@ export async function televerserCouverture(
   companyId: string,
   coverFile: FormDataEntryValue | null,
   // Le logo suit exactement le même chemin que la bannière, dans son propre dossier.
-  dossier: "covers" | "logos" = "covers",
+  dossier: "covers" | "logos" | "coulisses" = "covers",
 ): Promise<{ url?: string; avertissement?: string }> {
   const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   const EXT_MAP: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };

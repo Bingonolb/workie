@@ -1,8 +1,14 @@
-import { ficheGeree } from "@/lib/actions/espaceEntreprise";
+import { ficheGeree, listerPhotos } from "@/lib/actions/espaceEntreprise";
 import { FormulaireFiche } from "./FormulaireFiche";
+import { GestionCoulisses } from "./GestionCoulisses";
 
 export default async function PageFiche() {
-  const c = await ficheGeree();
+  const [c, photos] = await Promise.all([ficheGeree(), listerPhotos()]);
   if (!c) return null;
-  return <FormulaireFiche c={c} />;
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <FormulaireFiche c={c} />
+      <GestionCoulisses initiales={photos} />
+    </div>
+  );
 }

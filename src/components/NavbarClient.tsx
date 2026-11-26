@@ -49,7 +49,10 @@ async function fusionnerFavorisInvite() {
  * une barre réduite au logo : un visiteur venu lire une offre commerciale ne
  * doit pas se retrouver dans la navigation du chercheur d'emploi.
  */
-const PAGES_APPLI = ["/explore", "/favorites", "/ranking", "/profile", "/company", "/entreprise", "/emploi", "/notifications"];
+const PAGES_APPLI = ["/explore", "/favorites", "/ranking", "/profile", "/company", "/entreprise", "/emploi", "/notifications",
+  // L'espace entreprise est réservé aux comptes connectés : ses menus
+  // permettent de repasser à l'exploration sans chercher.
+  "/espace-entreprise"];
 function estPageAppli(cheminBrut: string) {
   // Les pages allemandes portent le préfixe /de : sans le retirer, aucune
   // page en allemand n'avait ses menus.
