@@ -129,6 +129,7 @@ export async function demarrerRevendication(formData: FormData): Promise<{ error
     if (!telephoneValide(telephone)) return { error: t("revend.eTelephone") };
     if (!emailValide(email)) return { error: t("revend.eEmail") };
     if (!user && motDePasse.length < 8) return { error: t("revend.eMdp") };
+    if (!user && motDePasse !== String(formData.get("mot_de_passe_confirmation") ?? "")) return { error: t("mdpChamp.different") };
 
     const c = await entreprise(companyId);
     if (!c) return { error: t("revend.eFiche") };

@@ -1374,5 +1374,11 @@
     "eSiteManquant": "Indiquez le site de l'entreprise : sa page carrière, ou à défaut son site officiel.",
     "eDescription": "Décrivez l'entreprise en quelques phrases (80 caractères au moins).",
     "eAutre": "Ce compte gère déjà {nom}. Pour une autre entreprise, utilisez un autre compte ou écrivez à contact@workie.ch."
+  },
+  "mdpChamp": {
+    "confirmer": "Confirmez le mot de passe",
+    "different": "Les deux mots de passe ne sont pas identiques.",
+    "afficher": "Afficher le mot de passe",
+    "masquer": "Masquer le mot de passe"
   }
 }

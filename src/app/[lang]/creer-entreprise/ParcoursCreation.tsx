@@ -9,6 +9,7 @@ import { verifierCodeRevendication, lancerAbonnement, type EtatRevendication } f
 import { ABONNEMENT, type Formule } from "@/lib/tarifs";
 import { EMPLOYEE_RANGES, LANGUES_SAISIE } from "@/lib/types";
 import { useT, useLangue } from "@/i18n/FournisseurLangue";
+import { ChampsMotDePasse } from "@/components/ChampsMotDePasse";
 import { riche } from "@/i18n/riche";
 import { nomSecteur } from "@/i18n/secteurs";
 import { nomLangue } from "@/lib/langues";
@@ -290,10 +291,7 @@ export function ParcoursCreation({ connecte, etatInitial, secteurs, cantons }: {
           <span style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 6, display: "block" }}>{t("revend.telephoneAide")}</span>
         </label>
         {!connecte && (
-          <label><span style={etiquette}>{t("revend.motDePasse")}</span>
-            <input name="mot_de_passe" type="password" required minLength={8} autoComplete="new-password" style={champ} />
-            <span style={aide}>{t("revend.motDePasseAide")}</span>
-          </label>
+          <ChampsMotDePasse libelle={t("revend.motDePasse")} aide={t("revend.motDePasseAide")} styleChamp={champ} styleEtiquette={etiquette} />
         )}
         {alerte}
         <button type="submit" className="btn btn-encre btn-bloc" disabled={enCours}>{enCours ? t("revend.envoi") : t("revend.recevoirCode")}</button>

@@ -127,6 +127,7 @@ export async function demarrerCreation(formData: FormData): Promise<{ error?: st
     if (!(/^\+?[0-9 ()./-]{9,20}$/.test(telephone) && telephone.replace(/\D/g, "").length >= 9)) return { error: (await tRequete())("revend.eTelephone") };
     if (!emailValide(email)) return { error: (await tRequete())("creation.eEmail") };
     if (!user && motDePasse.length < 8) return { error: (await tRequete())("creation.eMdp") };
+    if (!user && motDePasse !== String(formData.get("mot_de_passe_confirmation") ?? "")) return { error: (await tRequete())("mdpChamp.different") };
 
     // Limites sur 24 heures, partagées avec la revendication.
     const h = await headers();

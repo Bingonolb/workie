@@ -1374,5 +1374,11 @@
     "eSiteManquant": "Geben Sie die Website des Unternehmens an: seine Karriereseite oder sonst die offizielle Website.",
     "eDescription": "Beschreiben Sie das Unternehmen in einigen Sätzen (mindestens 80 Zeichen).",
     "eAutre": "Dieses Konto verwaltet bereits {nom}. Für ein anderes Unternehmen verwenden Sie ein anderes Konto oder schreiben Sie an contact@workie.ch."
+  },
+  "mdpChamp": {
+    "confirmer": "Passwort bestätigen",
+    "different": "Die beiden Passwörter stimmen nicht überein.",
+    "afficher": "Passwort anzeigen",
+    "masquer": "Passwort verbergen"
   }
 }
