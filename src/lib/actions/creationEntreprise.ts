@@ -57,9 +57,17 @@ function etatDe(r: Ligne | null): EtatRevendication {
 }
 
 /** Où en est la personne : sa dernière demande de création encore ouverte. */
-export async function etatCreation(): Promise<EtatRevendication & { nom?: string }> {
+export async function etatCreation(demandeId?: string): Promise<EtatRevendication & { nom?: string }> {
   if (!creationOuverte) return { etape: "formulaire", domaine: null };
   const user = await getUser();
+  // Lien reçu par e-mail : voir etatRevendication.
+  if (demandeId && UUID.test(demandeId)) {
+    const { data } = await table().select("id, statut, email_pro, fiche, user_id").eq("id", demandeId).is("company_id", null).maybeSingle();
+    const d = data as (Ligne & { user_id: string }) | null;
+    if (d && ["code_envoye", "en_attente", "verifiee"].includes(d.statut) && d.user_id !== user?.id) {
+      return { etape: "connexion", email: masquer(d.email_pro), autreCompte: !!user, nom: d.fiche?.name };
+    }
+  }
   let r: Ligne | null = null;
   if (user) {
     const { data } = await table().select("id, statut, email_pro, fiche").eq("user_id", user.id).is("company_id", null)

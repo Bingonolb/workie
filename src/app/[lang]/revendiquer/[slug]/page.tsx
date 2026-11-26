@@ -19,8 +19,9 @@ import { nomVille } from "@/i18n/lieux";
 export const dynamic = "force-dynamic";
 export const generateMetadata = () => meta({ titre: "revend.metaTitre", indexer: false });
 
-export default async function PageRevendiquer({ params }: { params: Promise<{ slug: string }> }) {
+export default async function PageRevendiquer({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ demande?: string }> }) {
   const { slug } = await params;
+  const { demande } = await searchParams;
   // Fiche de test : elle n'existe que sur l'adresse d'essai. Un lien reçu depuis
   // workie.ch (e-mail envoyé par l'administration du site) y renvoie, vers une
   // adresse fixe, sans rien lire en base.
@@ -38,7 +39,7 @@ export default async function PageRevendiquer({ params }: { params: Promise<{ sl
   const c = data as { id: string; slug: string; name: string; sector: string; city: string; cover_url: string | null; cover_color: string | null; website_url: string | null } | null;
   if (!c || (!enLigne.includes(c.sector) && !ficheTestVisible(c.slug))) notFound();
 
-  const etat = await etatRevendication(c.id);
+  const etat = await etatRevendication(c.id, demande);
   const langue = await langueDeLaPage();
   const t = await tServeur();
 

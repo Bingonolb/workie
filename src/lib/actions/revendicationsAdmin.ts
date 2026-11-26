@@ -4,6 +4,7 @@ import { revaliderPage } from "@/lib/revaliderPage";
 import { createClient, getUser, getNiveauAal } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendRevendicationAcceptee, sendRevendicationRefusee } from "@/lib/email";
+import { SITE_URL } from "@/lib/siteUrl";
 
 async function exigerAdmin() {
   const [user, supabase, niveau] = await Promise.all([getUser(), createClient(), getNiveauAal()]);
@@ -55,11 +56,12 @@ export async function deciderRevendication(id: string, accepter: boolean, note: 
 
     // Revendication : lien vers la fiche. Création : lien vers le parcours, où
     // l'entreprise retrouve l'étape du paiement.
-    const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+    const base = SITE_URL;
     const nomFiche: string | undefined = r.entreprise?.name ?? r.fiche?.name;
     // Le lien mène à la version du site dans la langue du demandeur.
     const prefixe = r.langue && r.langue !== "fr" ? `/${r.langue}` : "";
-    const lien = r.entreprise ? `${base}${prefixe}/revendiquer/${r.entreprise.slug}` : `${base}${prefixe}/creer-entreprise`;
+    // Le numéro de demande permet de la reprendre depuis n'importe quel navigateur.
+    const lien = (r.entreprise ? `${base}${prefixe}/revendiquer/${r.entreprise.slug}` : `${base}${prefixe}/creer-entreprise`) + `?demande=${r.id}`;
     if (nomFiche && accepter) await sendRevendicationAcceptee(r.email_pro, r.prenom, nomFiche, lien, r.langue);
     else if (nomFiche) await sendRevendicationRefusee(r.email_pro, r.prenom, nomFiche, r.langue);
     revaliderPage("/admin/revendications");

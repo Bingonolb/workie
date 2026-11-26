@@ -102,6 +102,22 @@ export function ParcoursCreation({ connecte, etatInitial, secteurs, cantons }: {
     </p>
   );
 
+  if (etat.etape === "connexion") {
+    const retour = "/creer-entreprise";
+    const connexion = `/login?next=${encodeURIComponent(retour)}`;
+    return (
+      <div style={carte}>
+        <h1 style={{ fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>{t("revend.repriseTitre")}</h1>
+        <p style={{ fontSize: 14.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
+          {riche(t(etat.autreCompte ? "revend.repriseAutre" : "revend.repriseTexte", { email: etat.email }))}
+        </p>
+        {etat.autreCompte
+          ? <a href={`/api/auth/signout?next=${encodeURIComponent(connexion)}`} className="btn btn-encre btn-bloc">{t("revend.repriseDeconnexion")}</a>
+          : <Link href={connexion} className="btn btn-encre btn-bloc">{t("revend.repriseConnexion")}</Link>}
+      </div>
+    );
+  }
+
   if (etat.etape === "refusee") {
     return (
       <div style={carte}>

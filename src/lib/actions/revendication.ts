@@ -61,7 +61,9 @@ export type EtatRevendication =
   | { etape: "code"; id: string; email: string }
   | { etape: "en_attente"; email: string }
   | { etape: "paiement"; id: string }
-  | { etape: "refusee" };
+  | { etape: "refusee" }
+  /** Lien de l'e-mail ouvert sans le compte de la demande : il faut s'y connecter. */
+  | { etape: "connexion"; email: string; autreCompte: boolean };
 
 const COOKIE_REV = "workie_revendication";
 const DEMANDES_PAR_IP = 10;
@@ -88,12 +90,22 @@ function etatDe(r: Ligne | null, domaine: string | null): EtatRevendication {
 }
 
 /** Où en est la personne (connectée, ou repérée par sa demande en cours). */
-export async function etatRevendication(companyId: string): Promise<EtatRevendication> {
+export async function etatRevendication(companyId: string, demandeId?: string): Promise<EtatRevendication> {
   const c = UUID.test(companyId) ? await entreprise(companyId) : null;
   if (!c) return { etape: "formulaire", domaine: null };
   if (c.is_subscribed) return { etape: "deja_geree" };
   const domaine = domaineOfficiel(c.website_url);
   const user = await getUser();
+  // Lien reçu par e-mail : la demande est retrouvée par son numéro, quel que
+  // soit le navigateur. Le numéro est imprévisible ; il ne révèle que l'adresse
+  // masquée, pour dire avec quel compte se connecter.
+  if (demandeId && UUID.test(demandeId)) {
+    const { data } = await table().select("*").eq("id", demandeId).eq("company_id", companyId).maybeSingle();
+    const d = data as Ligne | null;
+    if (d && ["code_envoye", "en_attente", "verifiee"].includes(d.statut) && d.user_id !== user?.id) {
+      return { etape: "connexion", email: masquer(d.email_pro), autreCompte: !!user };
+    }
+  }
   if (!user) {
     const r = await revendicationDuCookie(companyId);
     return r?.statut === "code_envoye" ? etatDe(r, domaine) : { etape: "formulaire", domaine };

@@ -807,7 +807,12 @@
     "telephone": "Téléphone professionnel",
     "telephoneAide": "Pour vous rappeler si nous devons vérifier la demande.",
     "eTelephone": "Indiquez un numéro de téléphone valide.",
-    "domaineExemple": "entreprise.ch"
+    "domaineExemple": "entreprise.ch",
+    "repriseTitre": "Reprenez votre demande",
+    "repriseTexte": "Votre demande est enregistrée. Connectez-vous avec le compte <b>{email}</b> pour continuer.",
+    "repriseAutre": "Vous êtes connecté avec un autre compte. Déconnectez-vous, puis connectez-vous avec <b>{email}</b> pour continuer votre demande.",
+    "repriseConnexion": "Se connecter et continuer",
+    "repriseDeconnexion": "Changer de compte"
   },
   "espace": {
     "titre": "Espace entreprise",

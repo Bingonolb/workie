@@ -807,7 +807,12 @@
     "telephone": "Geschäftliche Telefonnummer",
     "telephoneAide": "Damit wir Sie zurückrufen können, falls wir die Anfrage prüfen müssen.",
     "eTelephone": "Geben Sie eine gültige Telefonnummer an.",
-    "domaineExemple": "unternehmen.ch"
+    "domaineExemple": "unternehmen.ch",
+    "repriseTitre": "Setzen Sie Ihre Anfrage fort",
+    "repriseTexte": "Ihre Anfrage ist gespeichert. Melden Sie sich mit dem Konto <b>{email}</b> an, um fortzufahren.",
+    "repriseAutre": "Sie sind mit einem anderen Konto angemeldet. Melden Sie sich ab und anschliessend mit <b>{email}</b> an, um Ihre Anfrage fortzusetzen.",
+    "repriseConnexion": "Anmelden und fortfahren",
+    "repriseDeconnexion": "Konto wechseln"
   },
   "espace": {
     "titre": "Unternehmensbereich",

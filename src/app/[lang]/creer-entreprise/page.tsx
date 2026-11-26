@@ -14,9 +14,10 @@ import { ParcoursCreation } from "./ParcoursCreation";
 export const dynamic = "force-dynamic";
 export const generateMetadata = () => meta({ titre: "creation.metaTitre", indexer: false });
 
-export default async function PageCreerEntreprise() {
+export default async function PageCreerEntreprise({ searchParams }: { searchParams: Promise<{ demande?: string }> }) {
+  const { demande } = await searchParams;
   if (!creationOuverte) notFound();
-  const [user, secteurs, etat, t, langue] = await Promise.all([getUser(), getSecteursEnLigne(), etatCreation(), tServeur(), langueDeLaPage()]);
+  const [user, secteurs, etat, t, langue] = await Promise.all([getUser(), getSecteursEnLigne(), etatCreation(demande), tServeur(), langueDeLaPage()]);
   const cantons = Object.entries(CANTON_NAMES)
     .filter(([code]) => code !== "CH")
     .map(([code, nom]) => ({ code, nom: nomCanton(code, langue, nom) }))
