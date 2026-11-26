@@ -144,7 +144,9 @@ function Visionneuse({ photos, depart, alt, onFermer }: { photos: PhotoPublique[
       <div style={{ position: "relative", display: "grid", placeItems: "center", minHeight: 0, padding: "0 16px" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img key={p.id} src={largeurCouverture(p.url, 1920)} srcSet={srcSet(p.url)} sizes="100vw" alt={alt(p)} onClick={e => e.stopPropagation()}
-          style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: 10 }} />
+          // Hauteur bornée explicitement : un pourcentage dans une rangée de
+          // grille n'était pas respecté, et la photo débordait sous la légende.
+          style={{ maxWidth: "min(100%, 1600px)", maxHeight: "calc(100dvh - 160px)", width: "auto", height: "auto", objectFit: "contain", borderRadius: 10, background: "rgba(255,255,255,0.04)" }} />
         {n > 1 && (
           <>
             <button type="button" onClick={e => { e.stopPropagation(); aller(-1); }} aria-label={t("coulisses.precedente")} style={{ ...bouton, position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }}><ChevronLeft size={22} aria-hidden="true" /></button>
