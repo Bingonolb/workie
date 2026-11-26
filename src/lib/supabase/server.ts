@@ -67,3 +67,9 @@ export const getIsAdmin = cache(async () => {
   return profile?.role === "admin" && niveau === "aal2";
 });
 
+
+/** Fiche gérée par le compte connecté, ou null. */
+export const getBusinessCompanyId = cache(async () => {
+  const profile = await getProfile();
+  return (profile?.claimed_company_id as string | null | undefined) ?? null;
+});
