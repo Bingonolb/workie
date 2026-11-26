@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { SITE_URL } from "@/lib/siteUrl";
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { traducteur } from "@/i18n/serveur";
@@ -84,7 +85,7 @@ export async function renvoyerConfirmation(email: string): Promise<{ ok: boolean
  * que le bouton mène à workie.ch et non à supabase.co (un lien vers un
  * domaine étranger à l'expéditeur envoyait le courriel en indésirables).
  */
-const RETOUR = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch"}/auth/callback?e=1`;
+const RETOUR = `${SITE_URL}/auth/callback?e=1`;
 
 function suiteInscription(formData: FormData): string {
   const n = String(formData.get("next") || "");
@@ -211,7 +212,7 @@ export async function forgotPassword(
   if (!email) return { error: t("auth.errEmailRequis") };
 
   const supabase = await createClient();
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+  const base = SITE_URL;
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${base}/auth/callback?next=/reset-password`,
   });
@@ -306,7 +307,7 @@ export async function signInWithGoogle(formData: FormData) {
   const next = /^\/(?![/\\])/.test(rawNext) && !rawNext.toLowerCase().includes("javascript:") ? rawNext : "";
 
   const supabase = await createClient();
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+  const base = SITE_URL;
   // Sans destination demandée, le rappel décide : accueil des nouveaux
   // comptes (?welcome=1), espace entreprise, ou Explorer.
   const { data, error } = await supabase.auth.signInWithOAuth({

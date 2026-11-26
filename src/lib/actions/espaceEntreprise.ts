@@ -1,6 +1,7 @@
 "use server";
 
 import { revaliderPage } from "@/lib/revaliderPage";
+import { SITE_URL } from "@/lib/siteUrl";
 import Stripe from "stripe";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
@@ -155,7 +156,7 @@ export async function ouvrirPortailAbonnement(): Promise<{ error?: string; url?:
     const c = await ficheGeree();
     if (!c?.stripe_customer_id) return { error: (await tRequete())("offresForm.eAbo") };
     if (!process.env.STRIPE_SECRET_KEY) return { error: (await tRequete())("offresForm.ePortailIndispo") };
-    const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.workie.ch";
+    const base = SITE_URL;
     const s = await new Stripe(process.env.STRIPE_SECRET_KEY).billingPortal.sessions.create({
       customer: c.stripe_customer_id,
       return_url: `${base}/espace-entreprise/abonnement`,
