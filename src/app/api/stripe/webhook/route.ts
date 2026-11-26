@@ -3,8 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { revalidateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendAbonnementActif } from "@/lib/email";
-import { creerFicheDepuisDemande } from "@/lib/creationFiche";
+import { activerAbonnementDepuisSession, activerCampagneDepuisSession } from "@/lib/activationAbonnement";
 
 export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
@@ -48,65 +47,12 @@ export async function POST(req: NextRequest) {
         // deux signalements distincts mettent l'annonce en pause et préviennent
         // l'administration.
         if (session.mode === "payment" && session.metadata?.type === "ad_campaign") {
-          const campaignId = session.metadata.campaign_id ?? session.client_reference_id;
-          if (campaignId) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { error } = await (supabase.from("ad_campaigns") as any).update({
-              status: "active",
-              stripe_session_id: session.id,
-              paid_at: new Date().toISOString(),
-            }).eq("id", campaignId).eq("status", "payment_pending");
-            if (error) console.error("[webhook] ad_campaign payment update failed:", error.message);
-          }
+          await activerCampagneDepuisSession(session);
           break;
         }
 
         // Abonnement entreprise : la revendication vérifiée devient active.
-        if (session.mode !== "subscription") break;
-        const revId = session.metadata?.revendication_id;
-        const userId = session.metadata?.user_id;
-        let companyId = session.client_reference_id;
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let sub = await stripe.subscriptions.retrieve(session.subscription as string) as any;
-
-        // Création d'entreprise : la fiche naît maintenant, payée. L'abonnement
-        // reçoit son identifiant, pour que renouvellements et résiliation la
-        // retrouvent ensuite.
-        if (session.metadata?.type === "creation_entreprise") {
-          companyId = revId && userId ? await creerFicheDepuisDemande(revId, userId) : null;
-          if (!companyId) {
-            console.error("[webhook] creation: fiche introuvable pour la demande", revId);
-            break;
-          }
-          sub = await stripe.subscriptions.update(sub.id, { metadata: { ...sub.metadata, company_id: companyId } });
-        }
-        if (!companyId) break;
-        const periodEnd: number = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end ?? 0;
-        const endsAt = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
-
-        const { error: subErr } = await supabase.from("companies").update({
-          is_subscribed: true,
-          is_verified: true,
-          stripe_customer_id: typeof session.customer === "string" ? session.customer : null,
-          stripe_subscription_id: sub.id,
-          subscription_ends_at: endsAt,
-          subscription_cancel_at_period_end: false,
-        }).eq("id", companyId);
-        if (subErr) console.error("[webhook] subscription activate failed:", subErr.message);
-
-        if (revId && userId) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const revs = supabase.from("revendications" as any) as any;
-          const { data: rev } = await revs.select("prenom, email_pro, user_id, company_id, langue")
-            .eq("id", revId).maybeSingle();
-          if (rev && rev.user_id === userId && rev.company_id === companyId) {
-            await revs.update({ statut: "active", activee_le: new Date().toISOString() }).eq("id", revId);
-            await supabase.from("profiles").update({ claimed_company_id: companyId }).eq("id", userId);
-            const { data: c } = await supabase.from("companies").select("name").eq("id", companyId).maybeSingle();
-            await sendAbonnementActif(rev.email_pro, rev.prenom, c?.name ?? "Workie", rev.langue);
-          }
-        }
+        await activerAbonnementDepuisSession(stripe, session);
         break;
       }
       case "customer.subscription.updated": {

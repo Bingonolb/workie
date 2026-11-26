@@ -2,6 +2,8 @@ import { meta } from "@/i18n/meta";
 export const generateMetadata = () => meta({ titre: "pubs.metaListe", indexer: false });
 
 import { redirect } from "next/navigation";
+import Stripe from "stripe";
+import { activerCampagneDepuisSession } from "@/lib/activationAbonnement";
 import Link from "next/link";
 import { getUser } from "@/lib/supabase/server";
 import { getUserCampaigns, deleteUserCampaign } from "@/lib/actions/ads";
@@ -22,6 +24,15 @@ export default async function UserAdsPage({ searchParams }: { searchParams: Prom
   const [user, sp] = await Promise.all([getUser(), searchParams]);
   if (!user) redirect("/login?next=/profile/ads");
 
+  // Retour de paiement : la campagne est activée ici, en demandant à Stripe,
+  // sans attendre le webhook. Avant la lecture de la liste, pour qu'elle
+  // apparaisse déjà « active ».
+  if (sp.payment === "success" && /^cs_[A-Za-z0-9_]{10,200}$/.test(sp.session ?? "") && process.env.STRIPE_SECRET_KEY) {
+    try {
+      const session = await new Stripe(process.env.STRIPE_SECRET_KEY).checkout.sessions.retrieve(sp.session);
+      await activerCampagneDepuisSession(session, user.id);
+    } catch { /* le webhook reste le second chemin */ }
+  }
   const [{ campaigns = [], error }, t, langue] = await Promise.all([getUserCampaigns(), tServeur(), langueDeLaPage()]);
   const loc = langue === "de" ? "de-CH" : "fr-CH";
   const activeTab = sp.tab ?? "all";

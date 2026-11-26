@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { revendicationOuverte } from "@/lib/ouverture";
+import { confirmerPaiement } from "@/lib/actions/revendication";
 import { useT } from "@/i18n/FournisseurLangue";
 
 /**
@@ -21,6 +22,13 @@ export function SansEntreprise() {
 
   // Compteur gardé dans l'onglet : un rechargement remet l'état React à zéro,
   // et sans lui la page se rechargerait sans fin si l'activation échouait.
+  // Retour de Stripe : on confirme le paiement directement, une seule fois.
+  const session = useSearchParams().get("session");
+  useEffect(() => {
+    if (!bienvenue) return;
+    confirmerPaiement(session ?? "").then(r => { if (r.ok) window.location.replace("/espace-entreprise"); });
+  }, [bienvenue, session]);
+
   useEffect(() => {
     if (!bienvenue) return;
     const n = lireEssais();

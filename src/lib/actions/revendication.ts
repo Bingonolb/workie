@@ -3,6 +3,7 @@
 import { createHash, randomInt } from "crypto";
 import { SITE_URL } from "@/lib/siteUrl";
 import Stripe from "stripe";
+import { activerAbonnementDepuisSession } from "@/lib/activationAbonnement";
 import { cookies, headers } from "next/headers";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -323,7 +324,7 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
       subscription_data: { metadata: meta },
       allow_promotion_codes: true,
       billing_address_collection: "required",
-      success_url: `${base}/espace-entreprise?bienvenue=1`,
+      success_url: `${base}/espace-entreprise?bienvenue=1&session={CHECKOUT_SESSION_ID}`,
       cancel_url: creation ? `${base}/creer-entreprise` : `${base}/revendiquer/${c.slug}`,
     });
     return session.url ? { url: session.url } : { error: t("revend.ePaiement") };
@@ -332,3 +333,33 @@ export async function lancerAbonnement(id: string, formule: Formule): Promise<{ 
   }
 }
 
+
+/**
+ * Retour de paiement : Workie demande lui-même à Stripe si la session est
+ * payée, au lieu d'attendre le webhook. Le client qui vient de payer entre dans
+ * son espace tout de suite, même si la notification de Stripe tarde ou se perd.
+ *
+ * Seule la personne connectée qui a lancé le paiement peut l'activer : la
+ * session doit porter son identifiant.
+ */
+export async function confirmerPaiement(sessionId: string): Promise<{ ok: boolean }> {
+  try {
+    const user = await getUser();
+    if (!user || !process.env.STRIPE_SECRET_KEY) return { ok: false };
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    // Avec l'identifiant de session (retour normal de Stripe), ou sans : on
+    // cherche alors parmi les paiements de la semaine celui de cette personne.
+    // Un client qui a perdu l'adresse de retour n'est jamais bloqué.
+    const sessions: Stripe.Checkout.Session[] = /^cs_[A-Za-z0-9_]{10,200}$/.test(sessionId)
+      ? [await stripe.checkout.sessions.retrieve(sessionId)]
+      : (await stripe.checkout.sessions.list({ limit: 100, created: { gte: Math.floor(Date.now() / 1000) - 7 * 86400 } })).data
+          .filter(s => s.mode === "subscription" && s.status === "complete");
+    for (const session of sessions) {
+      if (session.metadata?.user_id !== user.id) continue;
+      if (await activerAbonnementDepuisSession(stripe, session)) return { ok: true };
+    }
+    return { ok: false };
+  } catch {
+    return { ok: false };
+  }
+}

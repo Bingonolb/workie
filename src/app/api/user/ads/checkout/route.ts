@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       payment_intent_data: {
         metadata: { type: "ad_campaign", campaign_id },
       },
-      success_url: `${baseUrl}/profile/ads?payment=success`,
+      success_url: `${baseUrl}/profile/ads?payment=success&session={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${baseUrl}/profile/ads?payment=canceled`,
     });
 
