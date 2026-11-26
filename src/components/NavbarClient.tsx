@@ -50,7 +50,10 @@ async function fusionnerFavorisInvite() {
  * doit pas se retrouver dans la navigation du chercheur d'emploi.
  */
 const PAGES_APPLI = ["/explore", "/favorites", "/ranking", "/profile", "/company", "/entreprise", "/emploi", "/notifications"];
-function estPageAppli(chemin: string) {
+function estPageAppli(cheminBrut: string) {
+  // Les pages allemandes portent le préfixe /de : sans le retirer, aucune
+  // page en allemand n'avait ses menus.
+  const chemin = cheminBrut.replace(/^\/de(?=\/|$)/, "") || "/";
   if (chemin === "/profile/ads" || chemin.startsWith("/profile/ads/")) return false;
   return PAGES_APPLI.some(p => chemin === p || chemin.startsWith(p + "/"));
 }

@@ -26,7 +26,11 @@ export default async function LayoutEspace({ children }: { children: React.React
             {c.vueAdmin && <BandeauVueAdmin nom={c.name} retour={`/entreprise/${c.slug}`} />}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
               <div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.07em", textTransform: "uppercase" }}>{t("espace.titre")}</p>
+                <p style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 2 }}>
+                  <span style={{ color: "var(--brand)" }}>Workie Business</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{t("espace.titre")}</span>
+                </p>
                 <h1 style={{ fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 800, letterSpacing: "-0.025em" }}>{c.name}</h1>
               </div>
             </div>

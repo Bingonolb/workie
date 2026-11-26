@@ -9,12 +9,17 @@ import { nomCanton } from "@/i18n/cantons";
 import type { Traduire } from "@/i18n/traduire";
 
 const PERIODES = [7, 30, 90] as const;
-let LOC = "fr-CH";
-const nf = (n: number) => Number(n).toLocaleString(LOC);
-const jourCourt = (j: string) => new Date(`${j}T12:00:00`).toLocaleDateString(LOC, { day: "numeric", month: "long" });
+// La langue passe par une variable de requête, jamais par une variable de
+// module : celle-ci est partagée entre les requêtes simultanées, et une page
+// allemande pouvait sortir avec les dates d'une page française.
+type Fmt = { nf: (n: number) => string; jourCourt: (j: string) => string };
+const formats = (loc: string): Fmt => ({
+  nf: n => Number(n).toLocaleString(loc),
+  jourCourt: j => new Date(`${j}T12:00:00`).toLocaleDateString(loc, { day: "numeric", month: "long", timeZone: "Europe/Zurich" }),
+});
 
 /** Évolution par rapport à la période précédente de même durée. */
-function Evolution({ maintenant, avant, t }: { maintenant: number; avant: number; t: Traduire }) {
+function Evolution({ maintenant, avant, t, nf }: { maintenant: number; avant: number; t: Traduire; nf: Fmt["nf"] }) {
   if (avant === 0) return maintenant > 0 ? <span>{t("espace.premierePeriode")}</span> : null;
   const pct = Math.round(((maintenant - avant) / avant) * 100);
   const couleur = pct > 0 ? "#10b981" : pct < 0 ? "#ef4444" : "var(--text-muted)";
@@ -39,7 +44,7 @@ export default async function TableauDeBord({ searchParams }: { searchParams: Pr
   const { p } = await searchParams;
   const periode = (PERIODES as readonly number[]).includes(Number(p)) ? (Number(p) as 7 | 30 | 90) : 30;
   const [s, c, offres, t, langue] = await Promise.all([statsFiche(periode), ficheGeree(), listerOffres(), tServeur(), langueDeLaPage()]);
-  LOC = langue === "de" ? "de-CH" : "fr-CH";
+  const { nf, jourCourt } = formats(langue === "de" ? "de-CH" : "fr-CH");
   if (!s) return <p style={{ color: "var(--text-muted)" }}>{t("espace.statsIndispo")}</p>;
 
   const localisees = s.cantons.reduce((a, x) => a + Number(x.n), 0);
@@ -63,8 +68,8 @@ export default async function TableauDeBord({ searchParams }: { searchParams: Pr
         <p style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{t("espace.duAu", { du: jourCourt(s.du), au: jourCourt(s.au) })}</p>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 210px), 1fr))", gap: 12 }}>
-        <Tuile couleur="#7c5cff" valeur={nf(s.visites)} libelle={t("espace.tVisites")} detail={<Evolution maintenant={s.visites} avant={s.visites_avant} t={t} />} />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 170px), 1fr))", gap: 12 }}>
+        <Tuile couleur="#7c5cff" valeur={nf(s.visites)} libelle={t("espace.tVisites")} detail={<Evolution maintenant={s.visites} avant={s.visites_avant} t={t} nf={nf} />} />
         <Tuile couleur="#10b981" valeur={nf(s.postuler)} libelle={t("espace.tPostuler")} detail={t("espace.tPostulerAide")} />
         <Tuile couleur="#f59e0b" valeur={nf(s.clics_offres)} libelle={t("espace.tSite")} detail={t("espace.tSiteAide")} />
         <Tuile couleur="#ef4444" valeur={nf(s.favoris_total)} libelle={t("espace.tFavoris")} detail={t("espace.tFavorisAide", { n: `${s.favoris_nouveaux > 0 ? "+" : ""}${nf(s.favoris_nouveaux)}` })} />
