@@ -166,7 +166,7 @@ export function ProfilClient() {
     { Icone: Flame, value: d ? String(d.favCount) : "—", label: t("profil.sauvegardees"), color: "#f97316", href: "/favorites" },
     // Toujours affichée, même à 0 : demandé par Luc le 2026-11-15. La tuile
     // sert aussi de porte vers la régie, sur mobile comme sur ordinateur.
-    { Icone: Megaphone, value: d ? String(adsActives) : "—", label: `Campagne${adsActives > 1 ? "s" : ""} active${adsActives > 1 ? "s" : ""}`, color: "#8b5cf6", href: "/profile/ads" },
+    { Icone: Megaphone, value: d ? String(adsActives) : "—", label: t("profil.campagnesActives", { n: adsActives }), color: "#8b5cf6", href: "/profile/ads" },
   ];
 
   return (

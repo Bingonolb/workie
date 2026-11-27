@@ -411,7 +411,11 @@
     "proEmail": "Geschäftliche E-Mail",
     "proTel": "Telefon",
     "proAide": "Diese Angaben stammen aus Ihrer Anfrage. Für Änderungen schreiben Sie uns an contact@workie.ch.",
-    "proOuvrir": "Unternehmensbereich"
+    "proOuvrir": "Unternehmensbereich",
+    "campagnesActives": {
+      "one": "Aktive Kampagne",
+      "other": "Aktive Kampagnen"
+    }
   },
   "meta": {
     "siteTitre": "Workie: Jobsuche wird spannend",

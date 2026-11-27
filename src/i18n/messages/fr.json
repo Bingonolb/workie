@@ -411,7 +411,11 @@
     "proEmail": "E-mail professionnel",
     "proTel": "Téléphone",
     "proAide": "Ces informations viennent de votre demande de gestion. Pour les modifier, écrivez-nous à contact@workie.ch.",
-    "proOuvrir": "Espace entreprise"
+    "proOuvrir": "Espace entreprise",
+    "campagnesActives": {
+      "one": "Campagne active",
+      "other": "Campagnes actives"
+    }
   },
   "meta": {
     "siteTitre": "Workie : chercher du travail devient passionnant",
