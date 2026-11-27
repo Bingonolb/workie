@@ -1,29 +1,17 @@
 "use server";
 
-import { createHash } from "crypto";
+import { empreinteDuJour as empreinte, ROBOT } from "@/lib/empreinte";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/**
- * Empreinte anonyme du visiteur, valable une journée : hachage de l'IP, du
- * navigateur et de la date avec un secret serveur. Elle reconnaît une rafale
- * de rechargements sans conserver l'adresse IP, et change chaque jour, ce qui
- * empêche de suivre quelqu'un dans le temps.
- */
-function empreinte(ip: string, ua: string): string {
-  const sel = process.env.EMPREINTE_SEL ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-  const jour = new Date().toISOString().slice(0, 10);
-  return createHash("sha256").update(`${sel}|${jour}|${ip}|${ua}`).digest("hex").slice(0, 32);
-}
-
+/** La région n'est un canton que pour une connexion suisse. */
 function enSuisse(h: Headers): boolean {
   return h.get("x-vercel-ip-country") === "CH";
 }
 
-const ROBOT = /bot|crawl|spider|slurp|preview|fetch|curl|wget|python|headless|lighthouse/i;
 
 /**
  * Une visite de fiche : 1 point au classement. Comptée une fois par personne,

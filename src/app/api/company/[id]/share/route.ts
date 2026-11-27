@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { cleVisiteur } from "@/lib/empreinte";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { captureServerError } from "@/lib/monitoring";
@@ -12,12 +14,12 @@ import { captureServerError } from "@/lib/monitoring";
  * suivi d'une annulation ne compte pas, et c'est tout l'intérêt : le partage
  * vaut cinquante points au classement, soit cinq favoris.
  *
- * Deux garde-fous, parce que cinquante points se convoitent :
- *   un partage par personne et par entreprise et par jour, quand la personne
- *   est connectée ; et côté visiteur anonyme, une seule déclaration par
- *   entreprise et par session d'onglet, posée par le bouton lui-même.
+ * Garde-fou, parce que cinquante points se convoitent : un partage par
+ * personne, par entreprise et par jour, avec ou sans compte (empreinte
+ * anonyme du jour pour un visiteur sans compte, sans adresse IP conservée).
+ * Le bouton n'envoie en plus qu'une déclaration par onglet.
  *
- * Le second est contournable, le premier ne l'est pas. Tant que la triche
+ * L'empreinte reste contournable en changeant de réseau. Tant que la triche
  * resterait le fait d'une poignée de gens, cela suffit ; le jour où le
  * classement vaudra de l'argent, il faudra l'adosser à un compte.
  */
@@ -35,6 +37,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const admin = createAdminClient() as any;
 
+    // Un partage par personne, par fiche et par jour, avec ou sans compte :
+    // le compte quand il y en a un, sinon l'empreinte anonyme du jour.
+    const cle = cleVisiteur(await headers(), user?.id);
+    if (!cle) return NextResponse.json({ compte: false });
     if (user) {
       // L'entreprise qui partage sa propre fiche, ou l'administration, ne
       // compte pas : même règle que pour les visites.
@@ -48,11 +54,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         .eq("user_id", user.id)
         .gte("partage_le", depuis);
       if ((count ?? 0) > 0) return NextResponse.json({ compte: false });
+    } else {
+      const depuis = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count } = await admin
+        .from("company_shares")
+        .select("id", { count: "exact", head: true })
+        .eq("company_id", id)
+        .eq("empreinte", cle)
+        .gte("partage_le", depuis);
+      if ((count ?? 0) > 0) return NextResponse.json({ compte: false });
     }
 
     const { error } = await admin.from("company_shares").insert({
       company_id: id,
       user_id: user?.id ?? null,
+      empreinte: cle,
       canal: canal === "systeme" || canal === "lien" ? canal : null,
     });
     if (error) return NextResponse.json({ compte: false });
