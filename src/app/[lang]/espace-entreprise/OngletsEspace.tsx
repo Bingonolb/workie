@@ -11,8 +11,7 @@ const ONGLETS = [
   { href: "/espace-entreprise/fiche", label: "espace.ongletFiche" },
   { href: "/espace-entreprise/offres", label: "espace.ongletOffres" },
   { href: "/espace-entreprise/abonnement", label: "espace.ongletAbo" },
-  // Les campagnes vivent dans la régie existante, rattachée au même compte.
-  { href: "/profile/ads", label: "espace.ongletPub" },
+  { href: "/espace-entreprise/publicites", label: "espace.ongletPub" },
 ] as const;
 
 export function OngletsEspace({ slug }: { slug: string }) {

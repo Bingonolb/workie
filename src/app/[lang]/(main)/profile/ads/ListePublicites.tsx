@@ -1,0 +1,244 @@
+import Stripe from "stripe";
+import { activerCampagneDepuisSession } from "@/lib/activationAbonnement";
+import Link from "next/link";
+import { getUser } from "@/lib/supabase/server";
+import { getUserCampaigns, deleteUserCampaign } from "@/lib/actions/ads";
+
+import Image from "next/image";
+import { Plus, Eye, MousePointer, TrendingUp, CheckCircle, XCircle, ArrowLeft, Megaphone } from "lucide-react";
+import type { AdCampaign } from "@/lib/actions/ads";
+import { CarteCampagne } from "./CarteCampagne";
+import { STATUS_CONFIG } from "./etat";
+import { tServeur, langueDeLaPage } from "@/i18n/page";
+
+
+function ctr(imp: number, clk: number) {
+  return imp ? `${((clk / imp) * 100).toFixed(1)}%` : "–";
+}
+
+/**
+ * La liste des campagnes, partagée par deux pages : « Mes publicités » du
+ * profil, pour un compte sans entreprise, et l'onglet « Publicités » de
+ * l'espace entreprise, où elle prend l'en-tête et les cartes de l'espace.
+ */
+export async function ListePublicites({ sp, dansEspace }: { sp: Record<string, string>; dansEspace: boolean }) {
+  const user = await getUser();
+  if (!user) return null;
+
+  // Retour de paiement : la campagne est activée ici, en demandant à Stripe,
+  // sans attendre le webhook. Avant la lecture de la liste, pour qu'elle
+  // apparaisse déjà « active ».
+  if (sp.payment === "success" && /^cs_[A-Za-z0-9_]{10,200}$/.test(sp.session ?? "") && process.env.STRIPE_SECRET_KEY) {
+    try {
+      const session = await new Stripe(process.env.STRIPE_SECRET_KEY).checkout.sessions.retrieve(sp.session);
+      await activerCampagneDepuisSession(session, user.id);
+    } catch { /* le webhook reste le second chemin */ }
+  }
+  const [{ campaigns = [], error }, t, langue] = await Promise.all([getUserCampaigns(), tServeur(), langueDeLaPage()]);
+  const loc = langue === "de" ? "de-CH" : "fr-CH";
+  const activeTab = sp.tab ?? "all";
+  const paymentSuccess = sp.payment === "success";
+  const paymentCanceled = sp.payment === "canceled";
+
+  const counts = {
+    all: campaigns.length,
+    payment_pending: campaigns.filter(c => c.status === "payment_pending").length,
+    active: campaigns.filter(c => c.status === "active").length,
+    pending: campaigns.filter(c => c.status === "pending").length,
+    paused: campaigns.filter(c => c.status === "paused").length,
+    completed: campaigns.filter(c => c.status === "completed").length,
+    rejected: campaigns.filter(c => c.status === "rejected").length,
+  };
+
+  const totalImpressions = campaigns.reduce((s, c) => s + Number(c.impression_count), 0);
+  const totalClicks = campaigns.reduce((s, c) => s + Number(c.click_count), 0);
+  const totalSpent = campaigns.reduce((s, c) => s + Number(c.spent_chf ?? 0), 0);
+  const activeCampaigns = campaigns.filter(c => c.status === "active");
+
+  // Les filtres ne servent qu'à séparer. Tant que toutes les campagnes portent
+  // le même état, « Toutes 2 » et « À payer 2 » désignent la même liste : deux
+  // boutons pour un seul résultat.
+  const etatsDistincts = new Set(campaigns.map(c => c.status)).size;
+  const filtresUtiles = etatsDistincts > 1;
+
+  // Le filtre de l'adresse est ignoré quand les boutons ne sont pas affichés,
+  // sans quoi un ancien lien en « ?tab=active » viderait la liste sans laisser
+  // de quoi revenir en arrière.
+  const filtreApplique = filtresUtiles ? activeTab : "all";
+  const filtered = campaigns.filter(c => filtreApplique === "all" || c.status === filtreApplique);
+
+  // Les compteurs n'apprennent rien avant la première diffusion : trois tuiles
+  // pour annoncer zéro, zéro et un tiret.
+  const chiffresUtiles = totalImpressions > 0;
+
+  const resume = campaigns.length === 0
+    ? t("pubs.aucune")
+    : t("pubs.nbCampagnes", { n: campaigns.length }) + (activeCampaigns.length > 0 ? t("pubs.nbActives", { n: activeCampaigns.length }) : "");
+
+  const contenu = (
+    <>
+        {dansEspace ? (
+          <section className="carte-espace" style={{ marginBottom: 16 }}>
+            <div className="carte-titre">
+              <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}><Megaphone size={16} aria-hidden="true" /> {t("pubs.titre")}</h2>
+              {campaigns.length > 0 && <Link href="/profile/ads/new" className="btn btn-marque btn-sm"><Plus size={15} aria-hidden="true" /> {t("pubs.nouvelle")}</Link>}
+            </div>
+            {campaigns.length > 0 ? (
+              <p style={{ padding: "12px 22px 14px", fontSize: 13.5, color: "var(--text-muted)" }}>{resume}</p>
+            ) : (
+              // Rien encore : l'invitation tient dans la carte, avec un seul bouton.
+              <div style={{ textAlign: "center", padding: "36px 22px 34px" }}>
+                <div style={{ width: 56, height: 56, borderRadius: 16, background: "var(--surface2)", display: "grid", placeItems: "center", margin: "0 auto 16px" }}>
+                  <Megaphone size={24} color="var(--brand)" strokeWidth={1.7} aria-hidden="true" />
+                </div>
+                <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>{t("pubs.aucune")}</p>
+                <p style={{ fontSize: 13.5, color: "var(--text-muted)", maxWidth: 380, margin: "0 auto 20px", lineHeight: 1.6 }}>{t("pubs.aucuneTexte")}</p>
+                <Link href="/profile/ads/new" className="btn btn-marque"><Plus size={16} aria-hidden="true" /> {t("pubs.premiere")}</Link>
+              </div>
+            )}
+          </section>
+        ) : (
+          <>
+            <Link href="/profile" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 20 }}>
+              <ArrowLeft size={14} aria-hidden="true" /> {t("pubs.monProfil")}
+            </Link>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
+              <div>
+                <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 4 }}>{t("pubs.titre")}</h1>
+                <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{resume}</p>
+              </div>
+              <Link href="/profile/ads/new" className="btn btn-marque">
+                <Plus size={16} aria-hidden="true" /> {t("pubs.nouvelle")}
+              </Link>
+            </div>
+          </>
+        )}
+
+        {paymentSuccess && (
+          <div role="status" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", borderRadius: 12, padding: "14px 18px", color: "#10b981", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+            <CheckCircle size={16} aria-hidden="true" /> {t("pubs.payeOk")}
+          </div>
+        )}
+        {paymentCanceled && (
+          <div role="alert" style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 18px", color: "#ef4444", fontSize: 14, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+            <XCircle size={16} aria-hidden="true" /> {t("pubs.payeAnnule")}
+          </div>
+        )}
+        {error && (
+          <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "12px 16px", color: "#ef4444", fontSize: 14, marginBottom: 20 }}>
+            {error}
+          </div>
+        )}
+
+        {campaigns.length === 0 ? (dansEspace ? null :
+          <div style={{ textAlign: "center", padding: "80px 24px 60px" }}>
+            <div style={{ width: 72, height: 72, borderRadius: 20, background: "var(--surface2)", border: "1px solid var(--border2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+              <Megaphone size={30} color="var(--brand)" strokeWidth={1.7} aria-hidden="true" />
+            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 10 }}>{t("pubs.aucune")}</h2>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 28px", lineHeight: 1.7 }}>
+              {t("pubs.aucuneTexte")}
+            </p>
+            <Link href="/profile/ads/new" className="btn btn-marque btn-lg">
+              <Plus size={16} aria-hidden="true" /> {t("pubs.premiere")}
+            </Link>
+          </div>
+        ) : (
+          <>
+            {chiffresUtiles && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 24 }}>
+                {[
+                  { label: t("pubs.vuesTotales"), value: totalImpressions.toLocaleString(loc), icon: <Eye size={14} aria-hidden="true" />, color: "#8b5cf6" },
+                  { label: t("pubs.clicsTotaux"), value: totalClicks.toLocaleString(loc), icon: <MousePointer size={14} aria-hidden="true" />, color: "#f97316" },
+                  { label: t("pubs.ctrMoyen"), value: ctr(totalImpressions, totalClicks), icon: <TrendingUp size={14} aria-hidden="true" />, color: "#10b981" },
+                ].map(({ label, value, icon, color }) => (
+                  <div key={label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: 10, background: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center", color, flexShrink: 0 }}>{icon}</div>
+                    <div>
+                      <p style={{ fontSize: 20, fontWeight: 900, color: "var(--text)", lineHeight: 1 }}>{value}</p>
+                      <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>{label}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {totalSpent > 0 && (
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>
+                {t("pubs.budgetDepense")} <strong style={{ color: "var(--text)" }}>CHF {totalSpent.toFixed(2)}</strong>
+              </p>
+            )}
+
+            {filtresUtiles && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+                {([
+                  ["all", t("pubs.fToutes"), counts.all],
+                  ["payment_pending", t("pubs.fAPayer"), counts.payment_pending],
+                  ["pending", t("pubs.fRevision"), counts.pending],
+                  ["active", t("pubs.fActives"), counts.active],
+                  ["paused", t("pubs.fPause"), counts.paused],
+                  ["completed", t("pubs.fTerminees"), counts.completed],
+                  ["rejected", t("pubs.fRejetees"), counts.rejected],
+                ] as [string, string, number][]).filter(([s, , n]) => s === "all" || n > 0).map(([status, label, n]) => {
+                  const isActive = filtreApplique === status;
+                  return (
+                    // L'onglet courant se dit a l'encre, comme partout
+                    // ailleurs : pleine quand il est choisi, effacee sinon.
+                    <a key={status} href={`?tab=${status}`}
+                      className={isActive ? "btn btn-encre btn-sm" : "btn btn-fantome btn-sm"}
+                      style={{ borderRadius: 50, fontWeight: 600 }}>
+                      {status !== "all" && (
+                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: STATUS_CONFIG[status as keyof typeof STATUS_CONFIG]?.dot ?? "#6b7280", display: "inline-block" }} />
+                      )}
+                      {label}
+                      {n > 0 && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{n}</span>}
+                    </a>
+                  );
+                })}
+              </div>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {filtered.map((c: AdCampaign) => (
+                <CarteCampagne key={c.id} c={c} onDelete={deleteUserCampaign} t={t} langue={langue} />
+              ))}
+            </div>
+
+            <Link href="/profile/ads/new" style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              marginTop: 16, padding: "16px", borderRadius: 16,
+              border: "1.5px dashed var(--border2)", background: "var(--surface2)",
+              color: "#8b5cf6", fontWeight: 700, fontSize: 14, textDecoration: "none",
+            }}>
+              <Plus size={18} aria-hidden="true" /> {t("pubs.lancer")}
+            </Link>
+          </>
+        )}
+
+        <div style={{ marginTop: 28, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <Megaphone size={14} color="#8b5cf6" aria-hidden="true" />
+            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{t("pubs.comment")}</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
+            {[
+              { step: "1", text: t("pubs.etape1") },
+              { step: "2", text: t("pubs.etape2") },
+              { step: "3", text: t("pubs.etape3") },
+              { step: "4", text: t("pubs.etape4") },
+            ].map(({ step, text }) => (
+              <div key={step} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                <div style={{ width: 20, height: 20, borderRadius: 6, background: "var(--surface3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 900, color: "var(--text)", flexShrink: 0 }}>{step}</div>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+    </>
+  );
+
+  return dansEspace ? contenu : (
+    <div className="page-root">
+      <main className="page-main-md" style={{ paddingTop: 24, paddingBottom: 48 }}>{contenu}</main>
+    </div>
+  );
+}

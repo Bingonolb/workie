@@ -244,6 +244,7 @@ export async function createUserCampaign(
 
     if (error || !inserted) return { error: error?.message ?? "Erreur lors de la création de la campagne" };
     revaliderPage("/profile/ads");
+    revaliderPage("/espace-entreprise/publicites");
     return { campaignId: inserted.id };
   } catch (e) { return { error: (e as Error).message }; }
 }
@@ -409,6 +410,7 @@ export async function pauseUserCampaign(id: string): Promise<{ error?: string }>
     if (error) return { error: (await tRequete())("pubs.ePause") };
     if (!data?.length) return { error: (await tRequete())("pubs.ePausePas") };
     revaliderPage("/profile/ads");
+    revaliderPage("/espace-entreprise/publicites");
     revalidateTag("ad-campaigns", {});
     return {};
   } catch (e) { return { error: (e as Error).message }; }
@@ -465,6 +467,7 @@ export async function reprendreCampagne(id: string): Promise<{ error?: string }>
     if (error) return { error: (await tRequete())("pubs.eRelance") };
     if (!maj?.length) return { error: (await tRequete())("pubs.eRelancePas") };
     revaliderPage("/profile/ads");
+    revaliderPage("/espace-entreprise/publicites");
     revalidateTag("ad-campaigns", {});
     return {};
   } catch (e) { return { error: (e as Error).message }; }
@@ -506,6 +509,7 @@ export async function deleteUserCampaign(id: string): Promise<{ error?: string }
       if (!count) await admin.storage.from("covers").remove([decodeURIComponent(chemin)]);
     }
     revaliderPage("/profile/ads");
+    revaliderPage("/espace-entreprise/publicites");
     return {};
   } catch (e) { return { error: (e as Error).message }; }
 }
