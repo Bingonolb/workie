@@ -904,7 +904,9 @@
     "rangCourt": "Rang",
     "rangSur": "sur {n} dans {secteur}",
     "courbe": "Courbe des {serie} par jour",
-    "partVisites": "des visites"
+    "partVisites": "des visites",
+    "sPartages": "Partages",
+    "tPartagesAide": "Lien de votre fiche envoyé ou copié"
   },
   "graphique": {
     "vide": "Pas encore de données sur la période.",

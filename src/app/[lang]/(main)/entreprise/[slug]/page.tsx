@@ -10,6 +10,7 @@ import { BandeauRevendication } from "@/components/company/BandeauRevendication"
 import { Suspense } from "react";
 import { idDeFiche } from "@/lib/resoudreFiche";
 import { urlFiche } from "@/lib/urlFiche";
+import { SITE_URL } from "@/lib/siteUrl";
 import { slugifier } from "@/lib/pagesEmploi";
 
 /**
@@ -349,7 +350,9 @@ export default async function CompanyPage({ params }: { params: Promise<{ slug: 
 
             {/* Actions */}
             <div className="company-hero-actions" style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
-              <ShareButton name={company.name} url={`${BASE_URL}${urlFiche(company)}`} companyId={company.id} />
+              {/* Le lien partagé mène au site qui tourne : depuis l'essai, vers l'essai.
+                  Il menait toujours à workie.ch, où une fiche de test n'existe pas. */}
+              <ShareButton name={company.name} url={`${SITE_URL}${urlFiche(company)}`} companyId={company.id} />
               <ActionsFiche companyId={company.id} companyName={company.name} slug={company.slug} gerable={revendicationOuverte && !company.is_subscribed} />
             </div>
           </div>

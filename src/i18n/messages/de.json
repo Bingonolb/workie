@@ -904,7 +904,9 @@
     "rangCourt": "Rang",
     "rangSur": "von {n} in {secteur}",
     "courbe": "Verlauf: {serie} pro Tag",
-    "partVisites": "der Besuche"
+    "partVisites": "der Besuche",
+    "sPartages": "Geteilt",
+    "tPartagesAide": "Link zu Ihrem Profil gesendet oder kopiert"
   },
   "graphique": {
     "vide": "Noch keine Daten für den Zeitraum.",

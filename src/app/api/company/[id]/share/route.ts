@@ -36,6 +36,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const admin = createAdminClient() as any;
 
     if (user) {
+      // L'entreprise qui partage sa propre fiche, ou l'administration, ne
+      // compte pas : même règle que pour les visites.
+      const { data: p } = await admin.from("profiles").select("role, claimed_company_id").eq("id", user.id).maybeSingle();
+      if (p?.role === "admin" || p?.claimed_company_id === id) return NextResponse.json({ compte: false });
       const depuis = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { count } = await admin
         .from("company_shares")

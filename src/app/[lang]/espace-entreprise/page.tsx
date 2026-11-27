@@ -29,9 +29,9 @@ export default async function TableauDeBord({ searchParams }: { searchParams: Pr
       {c && <Completude c={c} offres={offres} />}
 
       <Activite
-        jours={s.par_jour.map(j => ({ jour: j.jour, visites: Number(j.visites), postuler: Number(j.postuler), site: Number(j.site), favoris: Number(j.favoris) }))}
+        jours={s.par_jour.map(j => ({ jour: j.jour, visites: Number(j.visites), postuler: Number(j.postuler), site: Number(j.site), favoris: Number(j.favoris), partages: Number(j.partages ?? 0) }))}
         periode={periode}
-        totaux={{ visites: Number(s.visites), postuler: Number(s.postuler), site: Number(s.clics_offres), favoris: Number(s.favoris_nouveaux) }}
+        totaux={{ visites: Number(s.visites), postuler: Number(s.postuler), site: Number(s.clics_offres), favoris: Number(s.favoris_nouveaux), partages: Number(s.partages) }}
         visitesAvant={Number(s.visites_avant)} favorisTotal={Number(s.favoris_total)}
         rang={Number(s.rang_secteur)} totalSecteur={Number(s.total_secteur)} secteur={c ? nomSecteur(c.sector, langue) : ""}
       />

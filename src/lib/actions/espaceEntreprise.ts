@@ -92,7 +92,9 @@ export type Stats = {
   postuler: number;
   /** Clics vers le site de l'entreprise (comptes connectés, une fois par personne). */
   clics_offres: number;
-  par_jour: { jour: string; visites: number; postuler: number; site: number; favoris: number }[];
+  /** Partages aboutis (hors l'entreprise elle-même et l'administration). */
+  partages: number;
+  par_jour: { jour: string; visites: number; postuler: number; site: number; favoris: number; partages: number }[];
   cantons: { canton: string; n: number }[]; non_localisees: number;
   offres: { id: string; titre: string; clics: number }[];
   rang_secteur: number; total_secteur: number;
@@ -105,7 +107,7 @@ export async function statsFiche(jours: 7 | 30 | 90 = 30): Promise<Stats | null>
   const { data } = await (createAdminClient() as any).rpc("stats_entreprise", { p_company: c.id, p_jours: jours });
   if (!data) return null;
   const s = data as Stats;
-  return { ...s, par_jour: s.par_jour ?? [], cantons: s.cantons ?? [], offres: s.offres ?? [], non_localisees: Number(s.non_localisees ?? 0), postuler: Number(s.postuler ?? 0) };
+  return { ...s, par_jour: s.par_jour ?? [], cantons: s.cantons ?? [], offres: s.offres ?? [], non_localisees: Number(s.non_localisees ?? 0), postuler: Number(s.postuler ?? 0), partages: Number(s.partages ?? 0) };
 }
 
 export async function modifierFiche(formData: FormData): Promise<{ error?: string; avertissement?: string }> {

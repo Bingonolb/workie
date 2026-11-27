@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Eye, MousePointerClick, ExternalLink, Flame, Trophy } from "lucide-react";
+import { Eye, MousePointerClick, ExternalLink, Flame, Share2, Trophy } from "lucide-react";
 import { useT, useLangue } from "@/i18n/FournisseurLangue";
 
-type Jour = { jour: string; visites: number; postuler: number; site: number; favoris: number };
-type Cle = "visites" | "postuler" | "site" | "favoris";
+type Jour = { jour: string; visites: number; postuler: number; site: number; favoris: number; partages: number };
+type Cle = "visites" | "postuler" | "site" | "favoris" | "partages";
 
 /**
  * Le cœur du tableau de bord : les chiffres de la période et leur courbe,
@@ -33,6 +33,7 @@ export function Activite({ jours, periode, totaux, visitesAvant, favorisTotal, r
     { cle: "postuler", libelle: t("espace.sPostuler"), Icone: MousePointerClick, couleur: "#10b981", valeur: totaux.postuler, detail: t("espace.tPostulerAide") },
     { cle: "site", libelle: t("espace.sSite"), Icone: ExternalLink, couleur: "#f59e0b", valeur: totaux.site, detail: t("espace.tSiteAide") },
     { cle: "favoris", libelle: t("espace.sFavoris"), Icone: Flame, couleur: "#f43f5e", valeur: favorisTotal, detail: t("espace.tFavorisAide", { n: `${totaux.favoris > 0 ? "+" : ""}${nf(totaux.favoris)}` }) },
+    { cle: "partages", libelle: t("espace.sPartages"), Icone: Share2, couleur: "#0ea5e9", valeur: totaux.partages, detail: t("espace.tPartagesAide") },
   ];
   const active = series.find(s => s.cle === cle)!;
 
