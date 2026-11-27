@@ -852,7 +852,7 @@
     },
     "aboResilie": "Résiliation programmée",
     "aboActif": "Actif",
-    "aboTitre": "Abonnement Workie Entreprise",
+    "aboTitre": "Abonnement Workie Business",
     "aboFin": "Votre abonnement prend fin le {date}. Jusque-là, tout reste accessible.",
     "aboRenouvellement": "Prochain renouvellement le {date}.",
     "aboActifTexte": "Votre abonnement est actif.",
@@ -914,7 +914,11 @@
     "courbe": "Courbe des {serie} par jour",
     "partVisites": "des visites",
     "sPartages": "Partages",
-    "tPartagesAide": "Lien de votre fiche envoyé ou copié"
+    "tPartagesAide": "Lien de votre fiche envoyé ou copié",
+    "aboStatut": "Statut",
+    "aboDate": "Prochain renouvellement",
+    "aboDateFin": "Fin de l'abonnement",
+    "aboGerer": "Gestion"
   },
   "graphique": {
     "vide": "Pas encore de données sur la période.",
@@ -972,7 +976,9 @@
     "aFormat": "Le texte est enregistré. L'image a été ignorée : format non supporté (JPG, PNG, WebP, GIF).",
     "aPoids": "Le texte est enregistré. L'image a été ignorée : trop lourde (7 Mo maximum).",
     "aEnvoi": "Le texte est enregistré. L'envoi de l'image a échoué.",
-    "aPreparation": "Le texte est enregistré. L'image n'a pas pu être préparée : essayez un autre fichier (JPG ou PNG)."
+    "aPreparation": "Le texte est enregistré. L'image n'a pas pu être préparée : essayez un autre fichier (JPG ou PNG).",
+    "blocInfos": "Informations",
+    "blocImages": "Bannière et logo"
   },
   "offresForm": {
     "nonPrecise": "Non précisé",

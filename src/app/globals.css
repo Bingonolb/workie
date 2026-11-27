@@ -1851,3 +1851,14 @@ html.light .badge-evol[data-sens="bas"] { color: #b91c1c; }
 @media (max-width: 640px) {
   .liste-pro > div { grid-template-columns: 1fr; gap: 2px; padding: 8px 18px; }
 }
+
+/* Offres d'emploi de l'espace entreprise : une liste dans une carte. */
+.liste-offres { list-style: none; margin: 0; padding: 8px 0 6px; }
+.liste-offres li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 22px; }
+.liste-offres li + li { border-top: 1px solid var(--border); }
+.etat-offre { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; font-size: 12px; font-weight: 650; color: #34d399; }
+html.light .etat-offre { color: #047857; }
+.etat-offre span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.etat-offre[data-expiree] { color: #f87171; }
+html.light .etat-offre[data-expiree] { color: #b91c1c; }
+@media (max-width: 700px) { .liste-offres li { padding: 14px 18px; } }

@@ -12,7 +12,6 @@ import { nomLangue } from "@/lib/langues";
 
 const lbl: React.CSSProperties = { display: "block", fontSize: 12.5, fontWeight: 700, color: "var(--text-muted)", marginBottom: 6 };
 const inp: React.CSSProperties = { width: "100%", padding: "11px 13px", borderRadius: 11, border: "1px solid var(--border)", background: "var(--surface2)", color: "var(--text)", fontSize: 15 };
-const carte: React.CSSProperties = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "18px 20px" };
 
 
 function Choix({ nom, liste, valeur, libelle }: { nom: string; liste: readonly string[]; valeur: string | null; libelle: string }) {
@@ -84,8 +83,9 @@ function Formulaire({ offre, onFini }: { offre: Offre | null; onFini: () => void
     });
   };
   return (
-    <form action={envoyer} style={{ ...carte, display: "grid", gap: 14 }}>
-      <p style={{ fontWeight: 800, fontSize: 16 }}>{offre ? t("offresForm.modifier") : t("offresForm.nouvelle")}</p>
+    <form action={envoyer} className="carte-espace">
+      <div className="carte-titre"><h2>{offre ? t("offresForm.modifier") : t("offresForm.nouvelle")}</h2></div>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 14, padding: "18px 22px 22px" }}>
       {offre && <input type="hidden" name="id" value={offre.id} />}
       <div style={{ display: "grid", gap: 14 }}>
         <label><span style={lbl}>{t("offresForm.intitule")}</span><input name="title" required maxLength={120} defaultValue={v.title ?? ""} placeholder={t("offresForm.intituleEx")} style={inp} /></label>
@@ -156,6 +156,7 @@ function Formulaire({ offre, onFini }: { offre: Offre | null; onFini: () => void
         <button type="button" className="btn btn-fantome" onClick={onFini} disabled={enCours}>{t("offresForm.annuler")}</button>
         <button type="submit" className="btn btn-encre" disabled={enCours}>{enCours ? t("offresForm.enregistrement") : offre ? t("offresForm.enregistrer") : t("offresForm.publier")}</button>
       </div>
+      </div>
     </form>
   );
 }
@@ -173,46 +174,53 @@ export function GestionOffres({ offres, maintenant }: { offres: Offre[]; mainten
   };
 
   return (
-    <div style={{ display: "grid", gap: 14, maxWidth: 820 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <p style={{ fontSize: 14.5, color: "var(--text-muted)", maxWidth: 520, lineHeight: 1.55 }}>
-          {t("offresForm.intro")}
-        </p>
-        {edition === null && (
-          <button type="button" className="btn btn-encre" onClick={() => setEdition("nouvelle")}><Plus size={16} aria-hidden="true" /> {t("offresForm.ajouter")}</button>
-        )}
-      </div>
-
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 16, maxWidth: 820 }}>
       {edition !== null && <Formulaire offre={edition === "nouvelle" ? null : edition} onFini={() => setEdition(null)} />}
 
-      {offres.length === 0 && edition === null && (
-        <div style={{ ...carte, textAlign: "center", padding: "36px 20px" }}>
-          <p style={{ fontWeight: 700, marginBottom: 6 }}>{t("offresForm.aucune")}</p>
-          <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{t("offresForm.aucuneAide")}</p>
+      <section className="carte-espace">
+        <div className="carte-titre">
+          <h2 style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {t("espace.ongletOffres")}
+            <span style={{ fontSize: 12, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: "var(--surface2)", color: "var(--text-muted)", fontVariantNumeric: "tabular-nums" }}>{offres.length}</span>
+          </h2>
+          {edition === null && (
+            <button type="button" className="btn btn-encre btn-sm" onClick={() => setEdition("nouvelle")}><Plus size={15} aria-hidden="true" /> {t("offresForm.ajouter")}</button>
+          )}
         </div>
-      )}
+        <p style={{ padding: "14px 22px 4px", fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.55, maxWidth: 600 }}>{t("offresForm.intro")}</p>
 
-      {offres.map(o => {
-        const expiree = o.expires_at ? new Date(o.expires_at).getTime() < maintenant : false;
-        return (
-          <div key={o.id} style={{ ...carte, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ flex: "1 1 260px", minWidth: 0 }}>
-              <p style={{ fontWeight: 750, fontSize: 15.5 }}>{o.title}</p>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 3 }}>
-                {[libelleTaux(o.taux_min, o.taux_max, langue), libelleValeurOffre(t, o.contract_type), libelleValeurOffre(t, o.work_mode), o.location].filter(Boolean).join(" · ")}
-              </p>
-              <p style={{ fontSize: 12.5, marginTop: 6, color: expiree ? "#ef4444" : "#10b981", fontWeight: 600 }}>
-                {expiree ? t("offresForm.expiree", { date: date(o.expires_at) }) : t("offresForm.enLigneJusqua", { date: date(o.expires_at) })}
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              {o.apply_url && <a href={o.apply_url} target="_blank" rel="noopener noreferrer" className="btn btn-clair btn-sm" aria-label={t("offresForm.voirSite")}><ExternalLink size={14} aria-hidden="true" /></a>}
-              <button type="button" className="btn btn-clair btn-sm" onClick={() => setEdition(o)} disabled={enCours}><Pencil size={14} aria-hidden="true" /> {t("offresForm.modifierCourt")}</button>
-              <button type="button" className="btn btn-fantome btn-sm" onClick={() => supprimer(o)} disabled={enCours} aria-label={t("offresForm.retirerOffre", { titre: o.title })}><Trash2 size={14} aria-hidden="true" /></button>
-            </div>
+        {offres.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "30px 22px 34px" }}>
+            <p style={{ fontWeight: 700, marginBottom: 6 }}>{t("offresForm.aucune")}</p>
+            <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{t("offresForm.aucuneAide")}</p>
           </div>
-        );
-      })}
+        ) : (
+          <ul className="liste-offres">
+            {offres.map(o => {
+              const expiree = o.expires_at ? new Date(o.expires_at).getTime() < maintenant : false;
+              return (
+                <li key={o.id}>
+                  <div style={{ minWidth: 0, flex: "1 1 240px" }}>
+                    <p style={{ fontWeight: 750, fontSize: 15, color: "var(--text)" }}>{o.title}</p>
+                    <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 3 }}>
+                      {[libelleTaux(o.taux_min, o.taux_max, langue), libelleValeurOffre(t, o.contract_type), libelleValeurOffre(t, o.work_mode), o.location].filter(Boolean).join(" · ")}
+                    </p>
+                    <p className="etat-offre" data-expiree={expiree ? "1" : undefined}>
+                      <span aria-hidden="true" />
+                      {expiree ? t("offresForm.expiree", { date: date(o.expires_at) }) : t("offresForm.enLigneJusqua", { date: date(o.expires_at) })}
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                    {o.apply_url && <a href={o.apply_url} target="_blank" rel="noopener noreferrer" className="btn btn-clair btn-sm" aria-label={t("offresForm.voirSite")} title={t("offresForm.voirSite")}><ExternalLink size={14} aria-hidden="true" /></a>}
+                    <button type="button" className="btn btn-clair btn-sm" onClick={() => setEdition(o)} disabled={enCours}><Pencil size={14} aria-hidden="true" /> {t("offresForm.modifierCourt")}</button>
+                    <button type="button" className="btn btn-fantome btn-sm" onClick={() => supprimer(o)} disabled={enCours} aria-label={t("offresForm.retirerOffre", { titre: o.title })} title={t("offresForm.retirerOffre", { titre: o.title })}><Trash2 size={14} aria-hidden="true" /></button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
