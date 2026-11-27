@@ -17,7 +17,7 @@ import { CoverImage } from "@/components/CoverImage";
 // appartient au systeme d'exploitation : il change d'un appareil a l'autre,
 // n'a ni la graisse ni la geometrie des icones utilisees partout ailleurs sur
 // le site, et se colore tout seul en travers de la teinte de la tuile.
-import { Flame, TrendingUp, Megaphone, Download, ChevronRight, Building2 } from "lucide-react";
+import { Flame, TrendingUp, Megaphone, Download, ChevronRight, Building2, Lock } from "lucide-react";
 import { revendicationOuverte } from "@/lib/ouverture";
 import { urlFiche } from "@/lib/urlFiche";
 import { ProfilVisiteur } from "./ProfilVisiteur";
@@ -33,6 +33,7 @@ type Donnees = {
   favCount: number;
   adsActives: number;
   adsTotal: number;
+  pro?: { entreprise: string; slug: string; prenom: string | null; nom: string | null; fonction: string | null; email: string | null; telephone: string | null } | null;
 };
 
 /**
@@ -305,6 +306,8 @@ export function ProfilClient() {
       {/* ── Main grid ── */}
       <div className="profile-grid" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16, alignItems: "start" }}>
 
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, minWidth: 0 }}>
+        {d?.pro && <CartePro pro={d.pro} />}
         {/* Reprendre où l'on en était.
             « Mes avis » occupait cette place. En retirant les avis, la page se
             vidait de sa seule colonne de gauche : elle porte désormais ce que
@@ -363,6 +366,7 @@ export function ProfilClient() {
               </Link>
             ))
           )}
+        </div>
         </div>
 
         {/* Right column */}
@@ -483,5 +487,44 @@ export function ProfilClient() {
 
       </div>
     </div>
+  );
+}
+
+
+/** « +41799343472 » → « +41 79 934 34 72 ». Tout autre format reste tel quel. */
+function telSuisse(n: string | null): string | null {
+  if (!n) return n;
+  const m = n.replace(/[\s.\-()]/g, "").match(/^(?:\+41|0041|0)(\d{2})(\d{3})(\d{2})(\d{2})$/);
+  return m ? `+41 ${m[1]} ${m[2]} ${m[3]} ${m[4]}` : n;
+}
+
+/** Les informations de la demande de gestion, en lecture seule. */
+function CartePro({ pro }: { pro: NonNullable<Donnees["pro"]> }) {
+  const t = useT();
+  const lignes = [
+    { label: t("profil.proNom"), valeur: [pro.prenom, pro.nom].filter(Boolean).join(" ") },
+    { label: t("profil.proFonction"), valeur: pro.fonction },
+    { label: t("profil.proEmail"), valeur: pro.email },
+    { label: t("profil.proTel"), valeur: telSuisse(pro.telephone) },
+  ].filter(l => l.valeur);
+  return (
+    <section className="carte-espace">
+      <div className="carte-titre">
+        <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}><Building2 size={16} aria-hidden="true" /> {t("profil.proTitre")}</h2>
+        <Link href="/espace-entreprise" className="btn btn-clair btn-sm">{t("profil.proOuvrir")} <ChevronRight size={14} aria-hidden="true" /></Link>
+      </div>
+      <div style={{ padding: "14px 22px 4px" }}>
+        <p style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-0.01em", color: "var(--text)" }}>{pro.entreprise}</p>
+      </div>
+      <dl className="liste-pro">
+        {lignes.map(l => (
+          <div key={l.label}>
+            <dt>{l.label}</dt>
+            <dd><Lock size={12} aria-hidden="true" /> {l.valeur}</dd>
+          </div>
+        ))}
+      </dl>
+      <p style={{ padding: "0 22px 16px", fontSize: 12.5, color: "var(--text-muted)", lineHeight: 1.5 }}>{t("profil.proAide")}</p>
+    </section>
   );
 }

@@ -3,11 +3,11 @@
 import { useT } from "@/i18n/FournisseurLangue";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Compass, Flame, User, Search, Layers } from "lucide-react";
+import { Compass, Flame, User, Search, Layers, Building2 } from "lucide-react";
 import { ouvrirRecherche } from "./SearchButton";
 import { Suspense } from "react";
 
-function NavLinksInner() {
+function NavLinksInner({ entreprise = false }: { entreprise?: boolean }) {
   const t = useT();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -18,7 +18,12 @@ function NavLinksInner() {
     { href: "/explore?view=swipe", label: t("menu.swipe"), icon: <Layers  size={15} aria-hidden="true" />, active: isSwipe },
     { href: "/favorites",          label: t("menu.favoris"), icon: <Flame   size={15} aria-hidden="true" />, active: pathname.startsWith("/favorites") },
   ];
-  const PROFIL = { href: "/profile", label: t("menu.profil"), icon: <User size={15} aria-hidden="true" />, active: pathname.startsWith("/profile") };
+  // Pour un compte entreprise, l'espace entreprise prend la place du profil :
+  // c'est là qu'il travaille. Le profil passe dans la pastille de droite.
+  const sansLangue = pathname.replace(/^\/de(?=\/|$)/, "") || "/";
+  const PROFIL = entreprise
+    ? { href: "/espace-entreprise", label: t("menu.entreprise"), icon: <Building2 size={15} aria-hidden="true" />, active: sansLangue.startsWith("/espace-entreprise") }
+    : { href: "/profile", label: t("menu.profil"), icon: <User size={15} aria-hidden="true" />, active: sansLangue.startsWith("/profile") };
   const style = (active: boolean): React.CSSProperties => ({
     display: "flex", alignItems: "center", gap: 5,
     padding: "8px 10px", borderRadius: 8,
@@ -65,10 +70,10 @@ function NavLinksInner() {
   );
 }
 
-export function NavLinks() {
+export function NavLinks({ entreprise = false }: { entreprise?: boolean }) {
   return (
     <Suspense fallback={null}>
-      <NavLinksInner />
+      <NavLinksInner entreprise={entreprise} />
     </Suspense>
   );
 }

@@ -13,7 +13,8 @@
     "administration": "Administration",
     "espaceEntreprise": "Espace entreprise",
     "monEntreprise": "Mon entreprise",
-    "allerContenu": "Aller au contenu principal"
+    "allerContenu": "Aller au contenu principal",
+    "entreprise": "Entreprise"
   },
   "vue": {
     "entreprises": "Entreprises",
@@ -403,7 +404,14 @@
     "deconnecterQ": "Se déconnecter ?",
     "deconnecterAide": "Vos favoris restent dans votre compte. Vous les retrouverez en vous reconnectant.",
     "deconnexion": "Déconnexion…",
-    "confirmer": "Confirmer"
+    "confirmer": "Confirmer",
+    "proTitre": "Votre entreprise",
+    "proNom": "Nom",
+    "proFonction": "Fonction",
+    "proEmail": "E-mail professionnel",
+    "proTel": "Téléphone",
+    "proAide": "Ces informations viennent de votre demande de gestion. Pour les modifier, écrivez-nous à contact@workie.ch.",
+    "proOuvrir": "Espace entreprise"
   },
   "meta": {
     "siteTitre": "Workie : chercher du travail devient passionnant",

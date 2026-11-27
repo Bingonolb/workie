@@ -70,8 +70,24 @@ export async function GET() {
       if (vuesUniques.length === 8) break;
     }
 
+    // Compte entreprise : ce qui a été déclaré dans la demande de gestion,
+    // affiché en lecture seule. Seule l'équipe Workie peut le modifier.
+    let pro: { entreprise: string; slug: string; prenom: string | null; nom: string | null; fonction: string | null; email: string | null; telephone: string | null } | null = null;
+    const ficheId = (profile as { claimed_company_id?: string | null } | null)?.claimed_company_id;
+    if (ficheId) {
+      const [{ data: dem }, { data: fiche }] = await Promise.all([
+        admin.from("revendications" as never).select("prenom, nom, fonction, email_pro, telephone")
+          .eq("user_id", user.id).eq("company_id", ficheId).order("cree_le", { ascending: false }).limit(1).maybeSingle(),
+        admin.from("companies").select("name, slug").eq("id", ficheId).maybeSingle(),
+      ]);
+      const r = dem as { prenom: string | null; nom: string | null; fonction: string | null; email_pro: string | null; telephone: string | null } | null;
+      const c = fiche as { name: string; slug: string } | null;
+      if (c) pro = { entreprise: c.name, slug: c.slug, prenom: r?.prenom ?? null, nom: r?.nom ?? null, fonction: r?.fonction ?? null, email: r?.email_pro ?? null, telephone: r?.telephone ?? null };
+    }
+
     return NextResponse.json({
       authentifie: true,
+      pro,
       // Identité du destinataire. Le client refuse d'afficher une réponse
       // qui ne lui appartient pas — voir cacheSession.
       compte: user.id,

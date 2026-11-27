@@ -13,7 +13,8 @@
     "administration": "Verwaltung",
     "espaceEntreprise": "Unternehmensbereich",
     "monEntreprise": "Mein Unternehmen",
-    "allerContenu": "Zum Hauptinhalt springen"
+    "allerContenu": "Zum Hauptinhalt springen",
+    "entreprise": "Unternehmen"
   },
   "vue": {
     "entreprises": "Unternehmen",
@@ -403,7 +404,14 @@
     "deconnecterQ": "Abmelden?",
     "deconnecterAide": "Ihre Favoriten bleiben in Ihrem Konto. Sie finden sie wieder, wenn Sie sich erneut anmelden.",
     "deconnexion": "Wird abgemeldet…",
-    "confirmer": "Bestätigen"
+    "confirmer": "Bestätigen",
+    "proTitre": "Ihr Unternehmen",
+    "proNom": "Name",
+    "proFonction": "Funktion",
+    "proEmail": "Geschäftliche E-Mail",
+    "proTel": "Telefon",
+    "proAide": "Diese Angaben stammen aus Ihrer Anfrage. Für Änderungen schreiben Sie uns an contact@workie.ch.",
+    "proOuvrir": "Unternehmensbereich"
   },
   "meta": {
     "siteTitre": "Workie: Jobsuche wird spannend",

@@ -3,12 +3,12 @@
 import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { Compass, Search, Flame, User, Layers } from "lucide-react";
+import { Compass, Search, Flame, User, Layers, Building2 } from "lucide-react";
 import { ouvrirRecherche } from "./SearchButton";
 import { useT } from "@/i18n/FournisseurLangue";
 import { precharger, CLE_PROFIL, CLE_FAVORIS } from "@/lib/cacheSession";
 
-function BottomNavInner() {
+function BottomNavInner({ entreprise = false }: { entreprise?: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -20,7 +20,11 @@ function BottomNavInner() {
     { href: "/explore?view=swipe", Icon: Layers,     label: t("menu.swipe"), active: isSwipeActive },
     { href: "/favorites",          Icon: Flame,      label: t("menu.favoris"), active: pathname.startsWith("/favorites") },
   ];
-  const PROFIL = { href: "/profile", Icon: User, label: t("menu.profil"), active: pathname.startsWith("/profile") };
+  // Compte entreprise : l'espace entreprise à la place du profil (voir NavLinks).
+  const sansLangue = pathname.replace(/^\/de(?=\/|$)/, "") || "/";
+  const PROFIL = entreprise
+    ? { href: "/espace-entreprise", Icon: Building2, label: t("menu.entreprise"), active: sansLangue.startsWith("/espace-entreprise") }
+    : { href: "/profile", Icon: User, label: t("menu.profil"), active: sansLangue.startsWith("/profile") };
 
   const handleClick = (href: string, active: boolean) => (e: React.MouseEvent) => {
     // Recherche ouverte : on ne revient pas d'abord sur la page d'en dessous
@@ -137,19 +141,19 @@ function fermerRecherche() {
   else window.dispatchEvent(new Event("workie:recherche-fermer"));
 }
 
-export function BottomNav() {
+export function BottomNav({ entreprise = false }: { entreprise?: boolean }) {
   useClavier();
   return (
     <Suspense fallback={
       <nav className="bottom-nav" aria-hidden="true">
-        {[Compass, Layers, Flame, Search, User].map((Icon, i) => (
+        {[Compass, Layers, Flame, Search, entreprise ? Building2 : User].map((Icon, i) => (
           <span key={i} className="bottom-nav-item" style={{ opacity: 0.4 }}>
             <Icon size={22} strokeWidth={1.8} />
           </span>
         ))}
       </nav>
     }>
-      <BottomNavInner />
+      <BottomNavInner entreprise={entreprise} />
     </Suspense>
   );
 }

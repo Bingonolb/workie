@@ -1827,3 +1827,13 @@ html.light .badge-evol[data-sens="bas"] { color: #b91c1c; }
   .rouage { animation-duration: 2.4s; }
   .coulisses-img { transition: none; }
 }
+
+/* Profil d'un compte entreprise : la demande de gestion, en lecture seule. */
+.liste-pro { margin: 0; padding: 6px 0 10px; }
+.liste-pro > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; padding: 9px 22px; font-size: 14px; }
+.liste-pro dt { color: var(--text-muted); }
+.liste-pro dd { margin: 0; color: var(--text); font-weight: 600; display: flex; align-items: center; gap: 6px; overflow-wrap: anywhere; }
+.liste-pro dd svg { color: var(--text-muted); flex-shrink: 0; }
+@media (max-width: 640px) {
+  .liste-pro > div { grid-template-columns: 1fr; gap: 2px; padding: 8px 18px; }
+}

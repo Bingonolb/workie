@@ -4,7 +4,7 @@ import { useT } from "@/i18n/FournisseurLangue";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Shield, Building2 } from "lucide-react";
+import { Shield, Building2, User } from "lucide-react";
 import { NavLinks } from "./NavLinks";
 import { BottomNav } from "./BottomNav";
 import { ClassementBouton, RechercheHote } from "./SearchButton";
@@ -131,7 +131,7 @@ export function NavbarClient() {
         {/* Menus et recherche pour tous : le site se parcourt entièrement sans
             compte (favoris gardés dans le navigateur, profil visiteur). */}
         <div className="nav-links-desktop" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          {menus && <NavLinks />}
+          {menus && <NavLinks entreprise={isLoggedIn && !!ctx?.estEntreprise} />}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -151,11 +151,12 @@ export function NavbarClient() {
               <span className="nav-label">Admin</span>
             </Link>
           )}
-          {/* Accès à l'espace entreprise, pour un compte qui gère une fiche. */}
+          {/* Compte entreprise : l'espace entreprise est dans les menus, à la
+              place du profil ; le profil personnel passe dans cette pastille. */}
           {isLoggedIn && ctx?.estEntreprise && (
-            <Link href="/espace-entreprise" className="nav-admin" aria-label={t("menu.espaceEntreprise")}>
-              <Building2 size={14} aria-hidden="true" />
-              <span className="nav-label">{t("menu.monEntreprise")}</span>
+            <Link href="/profile" className="nav-admin" aria-label={t("menu.profil")}>
+              <User size={14} aria-hidden="true" />
+              <span className="nav-label">{t("menu.profil")}</span>
             </Link>
           )}
           {menus && <ClassementBouton />}
@@ -175,7 +176,7 @@ export function NavbarClient() {
         </div>
       </nav>
 
-      {menus && <BottomNav />}
+      {menus && <BottomNav entreprise={isLoggedIn && !!ctx?.estEntreprise} />}
       <RechercheHote />
       <div id="main-content" tabIndex={-1} style={{ outline: "none" }} />
     </>
