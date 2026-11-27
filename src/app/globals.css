@@ -483,6 +483,20 @@ main, .page-main, .page-main-sm, .page-main-md {
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
   }
+  /* Le fond de la barre se prolonge sous le bord de l'écran.
+     Sur iPhone, quand Safari réduit sa barre d'adresse pendant le défilement,
+     il replace les éléments fixés en bas avec un temps de retard : la barre
+     décollait d'une ligne et laissait voir la page dessous. Ce prolongement,
+     de la même couleur et sans bordure, comble l'interstice : la barre paraît
+     collée au bas quoi qu'il arrive. Il ne capte aucun toucher. */
+  .bottom-nav::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 100%;
+    height: 140px;
+    background: var(--nav-bg);
+    pointer-events: none;
+  }
   .bottom-nav-item {
     display: flex;
     flex-direction: column;
