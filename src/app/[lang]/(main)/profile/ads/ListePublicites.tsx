@@ -81,7 +81,7 @@ export async function ListePublicites({ sp, dansEspace }: { sp: Record<string, s
           <section className="carte-espace" style={{ marginBottom: 16 }}>
             <div className="carte-titre">
               <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}><Megaphone size={16} aria-hidden="true" /> {t("pubs.titre")}</h2>
-              {campaigns.length > 0 && <Link href="/profile/ads/new" className="btn btn-marque btn-sm"><Plus size={15} aria-hidden="true" /> {t("pubs.nouvelle")}</Link>}
+              {campaigns.length > 0 && <Link href={dansEspace ? "/espace-entreprise/publicites/nouvelle" : "/profile/ads/new"} className="btn btn-marque btn-sm"><Plus size={15} aria-hidden="true" /> {t("pubs.nouvelle")}</Link>}
             </div>
             {campaigns.length > 0 ? (
               <p style={{ padding: "12px 22px 14px", fontSize: 13.5, color: "var(--text-muted)" }}>{resume}</p>
@@ -93,7 +93,7 @@ export async function ListePublicites({ sp, dansEspace }: { sp: Record<string, s
                 </div>
                 <p style={{ fontSize: 16, fontWeight: 800, color: "var(--text)", marginBottom: 6 }}>{t("pubs.aucune")}</p>
                 <p style={{ fontSize: 13.5, color: "var(--text-muted)", maxWidth: 380, margin: "0 auto 20px", lineHeight: 1.6 }}>{t("pubs.aucuneTexte")}</p>
-                <Link href="/profile/ads/new" className="btn btn-marque"><Plus size={16} aria-hidden="true" /> {t("pubs.premiere")}</Link>
+                <Link href={dansEspace ? "/espace-entreprise/publicites/nouvelle" : "/profile/ads/new"} className="btn btn-marque"><Plus size={16} aria-hidden="true" /> {t("pubs.premiere")}</Link>
               </div>
             )}
           </section>
@@ -107,7 +107,7 @@ export async function ListePublicites({ sp, dansEspace }: { sp: Record<string, s
                 <h1 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 4 }}>{t("pubs.titre")}</h1>
                 <p style={{ fontSize: 14, color: "var(--text-muted)" }}>{resume}</p>
               </div>
-              <Link href="/profile/ads/new" className="btn btn-marque">
+              <Link href={dansEspace ? "/espace-entreprise/publicites/nouvelle" : "/profile/ads/new"} className="btn btn-marque">
                 <Plus size={16} aria-hidden="true" /> {t("pubs.nouvelle")}
               </Link>
             </div>
@@ -139,7 +139,7 @@ export async function ListePublicites({ sp, dansEspace }: { sp: Record<string, s
             <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 28px", lineHeight: 1.7 }}>
               {t("pubs.aucuneTexte")}
             </p>
-            <Link href="/profile/ads/new" className="btn btn-marque btn-lg">
+            <Link href={dansEspace ? "/espace-entreprise/publicites/nouvelle" : "/profile/ads/new"} className="btn btn-marque btn-lg">
               <Plus size={16} aria-hidden="true" /> {t("pubs.premiere")}
             </Link>
           </div>
@@ -203,7 +203,7 @@ export async function ListePublicites({ sp, dansEspace }: { sp: Record<string, s
               ))}
             </div>
 
-            <Link href="/profile/ads/new" style={{
+            <Link href={dansEspace ? "/espace-entreprise/publicites/nouvelle" : "/profile/ads/new"} style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
               marginTop: 16, padding: "16px", borderRadius: 16,
               border: "1.5px dashed var(--border2)", background: "var(--surface2)",

@@ -56,7 +56,7 @@ function styleRegion(active: boolean): React.CSSProperties {
   };
 }
 
-export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCtaLabel, prefillCtaUrl, prefillImage, cantonProfil }: {
+export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCtaLabel, prefillCtaUrl, prefillImage, cantonProfil, retour = "/profile/ads" }: {
   prefillHeadline?: string;
   prefillFormat?: "square" | "swipe";
   prefillCtaLabel?: string;
@@ -64,6 +64,8 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
   prefillImage?: string;
   /** Le canton du profil, pour ouvrir le formulaire sur un ciblage lisible. */
   cantonProfil?: string | null;
+  /** Où ramènent « Retour » et « Annuler » : la liste du profil ou de l'espace. */
+  retour?: string;
 }) {
   const t = useT();
   const langue = useLangue();
@@ -181,7 +183,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
             <div style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}><AlertTriangle size={30} strokeWidth={1.7} color="#ef4444" aria-hidden="true" /></div>
             <h1 style={{ fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.03em", marginBottom: 12 }}>{t("pubForm.erreurPaiement")}</h1>
             <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28 }}>{checkoutError}</p>
-            <Link href="/profile/ads" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
+            <Link href={retour} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, background: "var(--surface2)", border: "1px solid var(--border2)", color: "var(--text)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
               {t("pubForm.retour")}
             </Link>
           </>
@@ -205,7 +207,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
 
   return (
     <div style={{ maxWidth: 820 }}>
-      <Link href="/profile/ads" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 24 }}>
+      <Link href={retour} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", textDecoration: "none", marginBottom: 24 }}>
         <ArrowLeft size={14} aria-hidden="true" /> {t("pubs.titre")}
       </Link>
 
@@ -642,7 +644,7 @@ export function NewUserCampaignForm({ prefillHeadline, prefillFormat, prefillCta
                 ? t("pubForm.choisirTerritoire")
                 : t("pubForm.payer", { prix })}
           </button>
-          <Link href="/profile/ads" className="btn btn-fantome">{t("pubForm.annuler")}</Link>
+          <Link href={retour} className="btn btn-fantome">{t("pubForm.annuler")}</Link>
         </div>
         <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 12, textAlign: "center", lineHeight: 1.6 }}>
           {t("pubForm.basPage")}

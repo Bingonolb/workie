@@ -28,7 +28,7 @@ export function OngletsEspace({ slug }: { slug: string }) {
   return (
     <nav ref={barre} aria-label={t("espace.titre")} className="espace-onglets" style={{ display: "flex", gap: 2, padding: "0 18px", overflowX: "auto", scrollbarWidth: "none" }}>
       {ONGLETS.map(o => {
-        const actif = chemin === o.href;
+        const actif = chemin === o.href || (o.href === "/espace-entreprise/publicites" && (chemin ?? "").startsWith(o.href + "/"));
         return (
           <Link key={o.href} href={o.href} aria-current={actif ? "page" : undefined} style={{
             display: "inline-flex", alignItems: "center", minHeight: 50, padding: "0 14px", fontSize: 14, fontWeight: actif ? 700 : 550, whiteSpace: "nowrap",
