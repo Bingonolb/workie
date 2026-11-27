@@ -83,7 +83,11 @@ export default async function PourLesEntreprises() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={PHOTO(3184291, 1100)} alt={t("pro.photoAlt")} />
           <div className="pe-carte-flottante" aria-hidden="true">
-            <BadgeCheck size={26} color="#1D9BF0" style={{ flexShrink: 0 }} />
+            {/* Le même rond bleu que sur les fiches, pas la rosette festonnée de l'icône. */}
+            <svg viewBox="0 0 22 22" width={26} height={26} style={{ flexShrink: 0 }} aria-hidden="true">
+              <circle cx="11" cy="11" r="10.5" fill="#1D9BF0" />
+              <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
+            </svg>
             <div style={{ minWidth: 0 }}>
               <p style={{ fontSize: 14, fontWeight: 800 }}>{t("pro.verifiee")}</p>
               <p style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{t("pro.verifieeAide")}</p>

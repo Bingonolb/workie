@@ -14,7 +14,7 @@ import { nomVille } from "@/i18n/lieux";
 
 const lbl: React.CSSProperties = { display: "block", fontSize: 12.5, fontWeight: 700, color: "var(--text-muted)", marginBottom: 6 };
 const inp: React.CSSProperties = { width: "100%", padding: "11px 13px", borderRadius: 11, border: "1px solid var(--border)", background: "var(--surface2)", color: "var(--text)", fontSize: 15 };
-const bloc: React.CSSProperties = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px", display: "grid", gap: 18 };
+const bloc: React.CSSProperties = { minWidth: 0, gridTemplateColumns: "minmax(0, 1fr)", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "20px 22px", display: "grid", gap: 18 };
 
 export function FormulaireFiche({ c }: { c: FicheGeree }) {
   const t = useT();
@@ -59,12 +59,12 @@ export function FormulaireFiche({ c }: { c: FicheGeree }) {
   const banniere = apercu ?? (coverUrl || null);
 
   return (
-    <form action={enregistrer} style={{ display: "grid", gap: 16, maxWidth: 760 }}>
+    <form action={enregistrer} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 16, maxWidth: 760, minWidth: 0 }}>
       <section style={bloc}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13, color: "var(--text-muted)" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 8px", alignItems: "center", fontSize: 13, color: "var(--text-muted)" }}>
           <Lock size={14} aria-hidden="true" />
           {t("ficheForm.nom")} <strong style={{ color: "var(--text)" }}>{c.name}</strong> · {nomSecteur(c.sector, langue)} · {nomVille(c.city, langue)}
-          <span style={{ marginLeft: "auto" }}>{t("ficheForm.pourModifier")}</span>
+          <span style={{ marginLeft: "auto", overflowWrap: "anywhere" }}>{t("ficheForm.pourModifier")}</span>
         </div>
 
         <div>

@@ -1434,6 +1434,9 @@
     "photoDe": "Photo de {nom}",
     "enregistree": "Légende enregistrée",
     "principale": "Photo principale",
-    "plus": "+{n}"
+    "plus": "+{n}",
+    "attente": "En attente",
+    "preparation": "Préparation…",
+    "envoiCourt": "Envoi…"
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { useT } from "@/i18n/FournisseurLangue";
@@ -17,8 +18,16 @@ const ONGLETS = [
 export function OngletsEspace({ slug }: { slug: string }) {
   const chemin = usePathname();
   const t = useT();
+  const barre = useRef<HTMLElement>(null);
+  // Sur téléphone, l'onglet ouvert peut être hors de l'écran : la barre
+  // glisse jusqu'à lui, sans faire défiler la page.
+  useEffect(() => {
+    const nav = barre.current;
+    const actif = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (nav && actif) nav.scrollLeft = actif.offsetLeft - (nav.clientWidth - actif.offsetWidth) / 2;
+  }, [chemin]);
   return (
-    <nav aria-label={t("espace.titre")} className="espace-onglets" style={{ display: "flex", gap: 2, padding: "0 18px", overflowX: "auto", scrollbarWidth: "none" }}>
+    <nav ref={barre} aria-label={t("espace.titre")} className="espace-onglets" style={{ display: "flex", gap: 2, padding: "0 18px", overflowX: "auto", scrollbarWidth: "none" }}>
       {ONGLETS.map(o => {
         const actif = chemin === o.href;
         return (

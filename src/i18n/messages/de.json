@@ -1434,6 +1434,9 @@
     "photoDe": "Foto von {nom}",
     "enregistree": "Bildunterschrift gespeichert",
     "principale": "Hauptfoto",
-    "plus": "+{n}"
+    "plus": "+{n}",
+    "attente": "Wartet",
+    "preparation": "Wird vorbereitet…",
+    "envoiCourt": "Wird hochgeladen…"
   }
 }

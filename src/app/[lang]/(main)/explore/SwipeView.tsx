@@ -470,7 +470,9 @@ function SwipeCard({ company, flameIds, overlayDir, overlayOpacity }: {
           <p style={{ fontSize: 26, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
             {company.name}{company.is_verified && (
               <svg viewBox="0 0 22 22" style={{ display: "inline", verticalAlign: "middle", marginLeft: 7, width: 20, height: 20, flexShrink: 0 }} aria-label={t("fiche.verifiee")}>
-                <circle cx="11" cy="11" r="11" fill="#1D9BF0" />
+                {/* Rayon 10,5 et non 11 : un cercle qui touche les bords de son cadre
+                        y est rogné au rendu et perd sa rondeur. */}
+                    <circle cx="11" cy="11" r="10.5" fill="#1D9BF0" />
                 <path d="M9.5 15.5l-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z" fill="#fff" />
               </svg>
             )}

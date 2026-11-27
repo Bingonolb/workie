@@ -1746,7 +1746,7 @@ html { background: var(--bg); }
 /* ── Espace entreprise (Workie Business) ────────────────────────────────────
    Même langue que le profil : cartes à barre de titre, chiffres séparés par
    des filets, une couleur par donnée et rien d'autre. */
-.carte-espace { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.carte-espace { min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
 .carte-titre { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 22px; border-bottom: 1px solid var(--border); min-height: 58px; }
 .carte-titre h2 { font-size: 15px; font-weight: 750; letter-spacing: -0.01em; color: var(--text); }
 .carte-titre .aide { font-size: 12.5px; color: var(--text-muted); }
@@ -1807,3 +1807,24 @@ html.light .badge-evol[data-sens="bas"] { color: #b91c1c; }
 .coulisses-place { display: grid; place-items: center; align-content: center; gap: 8px; height: 100%; min-height: 150px; aspect-ratio: auto; padding: 18px; border-radius: 14px; border: 1.5px dashed var(--border2); color: var(--text-muted); font-size: 13.5px; font-weight: 600; text-align: center; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
 @media (hover: hover) and (pointer: fine) { .coulisses-place:hover { border-color: var(--brand); color: var(--text); background: var(--surface2); } }
 .coulisses-place[aria-disabled="true"] { opacity: .5; pointer-events: none; }
+
+/* Onglets de l'espace sur téléphone : un fondu à droite dit qu'il y en a d'autres. */
+@media (max-width: 700px) {
+  .espace-onglets { -webkit-mask-image: linear-gradient(to right, #000 85%, transparent); mask-image: linear-gradient(to right, #000 85%, transparent); }
+}
+
+/* Envoi des photos : aperçu immédiat, voile et indicateur, puis fondu. */
+.coulisses-img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .35s ease; }
+.coulisses-img[data-pret] { opacity: 1; }
+.coulisses-carte { animation: coulisses-entree .35s cubic-bezier(.2,.7,.2,1); }
+@keyframes coulisses-entree { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+.coulisses-voile { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 8px; background: rgba(10,10,14,0.45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); color: #fff; font-size: 12.5px; font-weight: 650; transition: background .3s; }
+.coulisses-encours[data-etat="attente"] .coulisses-voile { background: rgba(10,10,14,0.6); color: rgba(255,255,255,0.8); }
+.rouage { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border2); border-top-color: var(--brand); animation: rouage .8s linear infinite; flex-shrink: 0; }
+.rouage-clair { width: 26px; height: 26px; border-width: 2.5px; border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
+@keyframes rouage { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .coulisses-carte { animation: none; }
+  .rouage { animation-duration: 2.4s; }
+  .coulisses-img { transition: none; }
+}

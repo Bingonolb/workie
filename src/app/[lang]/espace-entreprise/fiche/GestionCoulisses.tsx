@@ -8,6 +8,11 @@ import { useT } from "@/i18n/FournisseurLangue";
 
 const MAX = 8;
 
+type EnCours = { cle: string; apercu: string; etat: "attente" | "preparation" | "envoi" };
+
+/** Une vignette n'apparaît qu'une fois chargée, en fondu (déjà en cache : tout de suite). */
+const pretSiCharge = (el: HTMLImageElement | null) => { if (el?.complete && el.naturalWidth) el.dataset.pret = "1"; };
+
 /**
  * « En coulisses » : les photos des locaux, gérées à part du formulaire de la
  * fiche. Chaque geste est enregistré tout de suite ; il n'y a rien à valider
@@ -17,27 +22,46 @@ export function GestionCoulisses({ initiales }: { initiales: PhotoCoulisses[] })
   const t = useT();
   const [photos, setPhotos] = useState(initiales);
   const [etat, setEtat] = useState<{ ok: boolean; texte: string } | null>(null);
-  const [envoi, setEnvoi] = useState<string | null>(null);
+  const [enCours, setEnCours] = useState<EnCours[]>([]);
+  const [total, setTotal] = useState(0);
+  const envoi = enCours.length ? t("coulisses.envoi", { i: total - enCours.length + 1, n: total }) : null;
   const [, demarrer] = useTransition();
   const entree = useRef<HTMLInputElement>(null);
+  // L'aperçu local de chaque photo envoyée reste sous la vignette du serveur
+  // le temps qu'elle arrive : aucune case vide, aucun clignotement.
+  const apercus = useRef<Record<string, string>>({});
 
   const ajouter = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const fichiers = [...(e.target.files ?? [])].slice(0, MAX - photos.length);
     e.target.value = "";
     if (!fichiers.length) return;
     setEtat(null);
+    // Chaque photo apparaît tout de suite à sa place, en attente.
+    const file = fichiers.map((f, i) => ({ cle: `${Date.now()}-${i}`, apercu: URL.createObjectURL(f), etat: "attente" as const }));
+    setEnCours(file);
+    setTotal(file.length);
     const { preparerImage } = await import("@/lib/preparerImage");
     // Une photo après l'autre : chacune prépare dix tailles dans le stockage.
     for (const [i, f] of fichiers.entries()) {
-      setEnvoi(t("coulisses.envoi", { i: i + 1, n: fichiers.length }));
+      const cle = file[i].cle;
+      const marquer = (etatTuile: EnCours["etat"]) => setEnCours(x => x.map(y => (y.cle === cle ? { ...y, etat: etatTuile } : y)));
+      marquer("preparation");
       const { fichier } = await preparerImage(f);
+      marquer("envoi");
       const fd = new FormData();
       fd.set("photo", fichier);
       const r = await ajouterPhoto(fd);
-      if (r.photo) setPhotos(p => [...p, r.photo!]);
-      else { setEtat({ ok: false, texte: r.error ?? "" }); break; }
+      if (r.photo) {
+        apercus.current[r.photo.id] = file[i].apercu;
+        setPhotos(p => [...p, r.photo!]);
+        setEnCours(x => x.filter(y => y.cle !== cle));
+      } else {
+        setEtat({ ok: false, texte: r.error ?? "" });
+        file.slice(i).forEach(x => URL.revokeObjectURL(x.apercu));
+        setEnCours([]);
+        break;
+      }
     }
-    setEnvoi(null);
   };
 
   const deplacer = (i: number, sens: -1 | 1) => {
@@ -71,7 +95,7 @@ export function GestionCoulisses({ initiales }: { initiales: PhotoCoulisses[] })
     });
   };
 
-  const plein = photos.length >= MAX;
+  const plein = photos.length + enCours.length >= MAX;
 
   const ajout = (
     <input ref={entree} type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={plein || !!envoi} onChange={ajouter} style={{ display: "none" }} />
@@ -92,14 +116,14 @@ export function GestionCoulisses({ initiales }: { initiales: PhotoCoulisses[] })
 
       <div style={{ padding: "16px 22px 22px", display: "grid", gap: 16 }}>
         <p style={{ fontSize: 13.5, color: "var(--text-muted)", lineHeight: 1.55, maxWidth: 560 }}>{t("coulisses.espaceAide")}</p>
-        {envoi && <p role="status" style={{ fontSize: 13, color: "var(--text-muted)" }}>{envoi}</p>}
+        {envoi && <p role="status" style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)" }}><span className="rouage" aria-hidden="true" />{envoi}</p>}
 
         <ul className="coulisses-gestion">
           {photos.map((p, i) => (
             <li key={p.id} className="coulisses-carte">
-              <div style={{ position: "relative", aspectRatio: "4 / 3", background: "var(--surface2)" }}>
+              <div style={{ position: "relative", aspectRatio: "4 / 3", background: apercus.current[p.id] ? `center / cover no-repeat url(${apercus.current[p.id]})` : "var(--surface2)" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={largeurCouverture(p.url, 480)} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                <img ref={pretSiCharge} onLoad={e => { e.currentTarget.dataset.pret = "1"; }} className="coulisses-img" src={largeurCouverture(p.url, 480)} alt="" loading="lazy" decoding="async" />
                 {i === 0 && <span className="coulisses-principale">{t("coulisses.principale")}</span>}
                 {/* Une seule pastille de verre pour les trois gestes, plutôt que
                     trois boutons posés côte à côte sur la photo. */}
@@ -119,6 +143,17 @@ export function GestionCoulisses({ initiales }: { initiales: PhotoCoulisses[] })
                 onBlur={e => legender(p, e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); } }}
                 className="coulisses-legende" />
+            </li>
+          ))}
+          {enCours.map(x => (
+            <li key={x.cle} className="coulisses-carte coulisses-encours" data-etat={x.etat} aria-busy="true">
+              <div style={{ position: "relative", aspectRatio: "4 / 3", background: `center / cover no-repeat url(${x.apercu}), var(--surface2)` }}>
+                <div className="coulisses-voile">
+                  {x.etat === "attente" ? null : <span className="rouage rouage-clair" aria-hidden="true" />}
+                  <span>{x.etat === "attente" ? t("coulisses.attente") : x.etat === "preparation" ? t("coulisses.preparation") : t("coulisses.envoiCourt")}</span>
+                </div>
+              </div>
+              <div className="coulisses-legende" aria-hidden="true" style={{ color: "transparent" }}>.</div>
             </li>
           ))}
           {/* La place suivante, à l'endroit où la photo arrivera. */}
