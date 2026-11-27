@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Eye, MousePointerClick, ExternalLink, Flame, Share2, Trophy } from "lucide-react";
+import { Eye, MousePointerClick, Link2, Flame, Share2, Trophy } from "lucide-react";
 import { useT, useLangue } from "@/i18n/FournisseurLangue";
 
 type Jour = { jour: string; visites: number; postuler: number; site: number; favoris: number; partages: number };
@@ -31,7 +31,7 @@ export function Activite({ jours, periode, totaux, visitesAvant, favorisTotal, r
   const series: { cle: Cle; libelle: string; Icone: typeof Eye; couleur: string; valeur: number; detail?: React.ReactNode }[] = [
     { cle: "visites", libelle: t("espace.sVisites"), Icone: Eye, couleur: "#7c5cff", valeur: totaux.visites, detail: <Evolution maintenant={totaux.visites} avant={visitesAvant} periode={periode} /> },
     { cle: "postuler", libelle: t("espace.sPostuler"), Icone: MousePointerClick, couleur: "#10b981", valeur: totaux.postuler, detail: t("espace.tPostulerAide") },
-    { cle: "site", libelle: t("espace.sSite"), Icone: ExternalLink, couleur: "#f59e0b", valeur: totaux.site, detail: t("espace.tSiteAide") },
+    { cle: "site", libelle: t("espace.sSite"), Icone: Link2, couleur: "#f59e0b", valeur: totaux.site, detail: t("espace.tSiteAide") },
     { cle: "favoris", libelle: t("espace.sFavoris"), Icone: Flame, couleur: "#f43f5e", valeur: favorisTotal, detail: t("espace.tFavorisAide", { n: `${totaux.favoris > 0 ? "+" : ""}${nf(totaux.favoris)}` }) },
     { cle: "partages", libelle: t("espace.sPartages"), Icone: Share2, couleur: "#0ea5e9", valeur: totaux.partages, detail: t("espace.tPartagesAide") },
   ];
