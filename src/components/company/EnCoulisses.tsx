@@ -61,9 +61,14 @@ export function EnCoulisses({ photos, nom }: { photos: PhotoPublique[]; nom: str
             margin: 0 -20px; padding: 0 20px; scroll-padding: 0 20px; scrollbar-width: none; }
           .coulisses-grille::-webkit-scrollbar { display: none; }
           .coulisses-grille .coulisses-tuile, .coulisses-grille[data-n] .coulisses-tuile { flex: 0 0 ${photos.length === 1 ? "100%" : "82%"}; aspect-ratio: 4 / 3; scroll-snap-align: start; grid-row: auto; }
-          .coulisses-desktop { display: none; }
+          /* Même poids que la règle « display: flex » ci-dessus : avec la seule
+             classe, la mosaïque d'ordinateur restait visible sur téléphone et
+             la galerie s'affichait deux fois. */
+          .coulisses-grille.coulisses-desktop { display: none; }
         }
-        @media (min-width: 701px) { .coulisses-mobile { display: none; } }
+        @media (min-width: 701px) { .coulisses-grille.coulisses-mobile { display: none; } }
+        /* Sur téléphone on glisse du doigt : les flèches masqueraient la photo. */
+        @media (max-width: 700px) { .visionneuse-fleche { display: none !important; } }
         @media (prefers-reduced-motion: reduce) { .coulisses-tuile img { transition: none; } }
       `}</style>
 
@@ -149,8 +154,8 @@ function Visionneuse({ photos, depart, alt, onFermer }: { photos: PhotoPublique[
           style={{ maxWidth: "min(100%, 1600px)", maxHeight: "calc(100dvh - 160px)", width: "auto", height: "auto", objectFit: "contain", borderRadius: 10, background: "rgba(255,255,255,0.04)" }} />
         {n > 1 && (
           <>
-            <button type="button" onClick={e => { e.stopPropagation(); aller(-1); }} aria-label={t("coulisses.precedente")} style={{ ...bouton, position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }}><ChevronLeft size={22} aria-hidden="true" /></button>
-            <button type="button" onClick={e => { e.stopPropagation(); aller(1); }} aria-label={t("coulisses.suivante")} style={{ ...bouton, position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}><ChevronRight size={22} aria-hidden="true" /></button>
+            <button type="button" onClick={e => { e.stopPropagation(); aller(-1); }} aria-label={t("coulisses.precedente")} className="visionneuse-fleche" style={{ ...bouton, position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)" }}><ChevronLeft size={22} aria-hidden="true" /></button>
+            <button type="button" onClick={e => { e.stopPropagation(); aller(1); }} aria-label={t("coulisses.suivante")} className="visionneuse-fleche" style={{ ...bouton, position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}><ChevronRight size={22} aria-hidden="true" /></button>
           </>
         )}
       </div>
