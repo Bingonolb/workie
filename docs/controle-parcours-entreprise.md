@@ -45,12 +45,29 @@ sur téléphone. Avant de commencer : effacer le compte de test et sa demande.
 
 ## 4. Espace entreprise
 
-- [ ] Tableau de bord, fiche, offres, abonnement : tout s'affiche, dans la
-      bonne langue.
+- [ ] Menus : « Entreprise » à la place de « Profil » (haut et bas), la
+      pastille en haut à droite mène au profil.
+- [ ] En-tête Workie Business, état de l'abonnement, onglets ; sur téléphone
+      l'onglet ouvert est visible.
+- [ ] Tableau de bord : 6 chiffres (visites, postuler, votre site, favoris,
+      partages, rang), toucher un chiffre change la courbe, 7/30/90 jours.
+- [ ] Profil : carte « Votre entreprise » (nom, fonction, e-mail, téléphone),
+      en lecture seule.
 - [ ] Modifier la description, la bannière, le logo : visible sur la fiche.
+- [ ] En coulisses : ajouter 2 photos (aperçu, « Envoi… », fondu), légende,
+      ordre, retrait ; sur la fiche : mosaïque (ordinateur), bande
+      (téléphone), plein écran.
 - [ ] Ajouter, modifier, retirer une offre.
-- [ ] Pub : création, page Stripe à 5,00 CHF, retour : la campagne est
-      « Active » tout de suite.
+- [ ] Pub : création depuis l'onglet Publicités, page Stripe à 5,00 CHF,
+      retour dans l'onglet : la campagne est « Active » tout de suite.
+
+## 4 bis. Statistiques (depuis un autre appareil, sans compte)
+
+- [ ] Ouvrir la fiche : +1 visite (pas plus en rechargeant le même jour).
+- [ ] Cliquer « Offres d'emploi » : +1 « Votre site ».
+- [ ] Partager la fiche : +1 « Partages ». Le lien partagé ouvre bien la
+      fiche (workie-test sur l'essai, workie.ch en production).
+- [ ] Les mêmes gestes faits par le compte de l'entreprise ne comptent pas.
 
 ## 5. Fin d'abonnement
 
