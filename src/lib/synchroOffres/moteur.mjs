@@ -323,13 +323,22 @@ const LECTEURS = {
   // `attributPays` : chez certains (Bühler), le champ « pays » donne le pays du
   // siège pour toutes les offres ; le vrai pays est dans un filtre du site.
   async prospective({ medium, attribut, garder, exclure, cantons, attributPays }) {
-    const jobs = [];
-    for (let offset = 0; offset < 5000; offset += 100) {
-      const page = await json(`https://ohws.prospective.ch/public/v1/medium/${medium}/jobs?lang=fr&offset=${offset}&limit=100`);
-      jobs.push(...(page.jobs ?? []));
-      if ((page.jobs ?? []).length < 100 || jobs.length >= page.total) break;
-      await pause(300);
+    // La liste est lue deux fois et fusionnée. Son ordre bouge pendant la
+    // lecture (Coop : 1841 puis 1847 offres à une minute d'écart) : d'une page
+    // à l'autre, quelques offres glissaient entre deux pages, étaient fermées
+    // à tort puis rouvertes la nuit suivante.
+    const parId = new Map();
+    for (let passe = 0; passe < 2; passe++) {
+      let lues = 0;
+      for (let offset = 0; offset < 5000; offset += 100) {
+        const page = await json(`https://ohws.prospective.ch/public/v1/medium/${medium}/jobs?lang=fr&offset=${offset}&limit=100`);
+        for (const j of page.jobs ?? []) parId.set(j.id, j);
+        lues += (page.jobs ?? []).length;
+        if ((page.jobs ?? []).length < 100 || lues >= page.total) break;
+        await pause(300);
+      }
     }
+    const jobs = [...parId.values()];
     const societes = j => (attribut ? j.attributes?.[attribut] ?? [] : []);
     return jobs
       .filter(j => !garder || societes(j).some(s => garder.includes(s)))
