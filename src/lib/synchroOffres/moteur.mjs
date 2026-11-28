@@ -1,3 +1,4 @@
+import { StringDecoder } from "node:string_decoder";
 // Moteur de synchronisation des offres d'emploi.
 //
 // Lit le flux officiel de l'outil de recrutement de chaque entreprise (table
@@ -37,7 +38,7 @@ const propreHtml = s => entites((s ?? "").replace(/<[^>]+>/g, " ")).replace(/\s+
  * alors qu'il accepte la même demande sans eux. On s'identifie toujours
  * clairement (WorkieSync), on ne se fait passer pour rien d'autre.
  */
-function requete(url, { method = "GET", headers = {}, body } = {}, redirections = 5) {
+function requete(url, { method = "GET", headers = {}, body, surMorceau } = {}, redirections = 5) {
   return new Promise((resoudre, rejeter) => {
     const u = new URL(url);
     const corps = body === undefined ? undefined : Buffer.from(body);
@@ -47,10 +48,22 @@ function requete(url, { method = "GET", headers = {}, body } = {}, redirections 
     }, rep => {
       if (rep.statusCode >= 300 && rep.statusCode < 400 && rep.headers.location && redirections > 0) {
         rep.resume();
-        return resoudre(requete(new URL(rep.headers.location, u).toString(), { method: rep.statusCode === 303 ? "GET" : method, headers, body: rep.statusCode === 303 ? undefined : body }, redirections - 1));
+        return resoudre(requete(new URL(rep.headers.location, u).toString(), { method: rep.statusCode === 303 ? "GET" : method, headers, body: rep.statusCode === 303 ? undefined : body, surMorceau }, redirections - 1));
       }
       const enc = rep.headers["content-encoding"];
       const flux = enc === "gzip" ? rep.pipe(zlib.createGunzip()) : enc === "deflate" ? rep.pipe(zlib.createInflate()) : enc === "br" ? rep.pipe(zlib.createBrotliDecompress()) : rep;
+      // Lecture au fil de l'eau : le texte part par morceaux vers `surMorceau`
+      // au lieu d'être gardé en entier. Pour les très gros flux (EY : 138 Mo
+      // pour le monde entier), tout garder puis découper faisait dépasser la
+      // mémoire de la fonction de nuit, qui était tuée avant d'écrire quoi que
+      // ce soit.
+      if (surMorceau && rep.statusCode >= 200 && rep.statusCode < 300) {
+        const decodeur = new StringDecoder("utf8");
+        flux.on("data", m => surMorceau(decodeur.write(m)));
+        flux.on("error", rejeter);
+        flux.on("end", () => { surMorceau(decodeur.end()); resoudre({ ok: true, status: rep.statusCode, text: async () => "", json: async () => null }); });
+        return;
+      }
       const morceaux = [];
       flux.on("data", m => morceaux.push(m));
       flux.on("error", rejeter);
@@ -272,13 +285,35 @@ const LECTEURS = {
   // SAP SuccessFactors (sites carrière « Career Site Builder ») : le fichier
   // /sitemal.xml est le flux d'offres publié pour Google Jobs, texte compris.
   // Une seule requête par entreprise.
+  // Le flux est lu offre par offre, sans jamais le garder en entier : celui
+  // d'EY fait 138 Mo (le monde entier) et seule la Suisse nous intéresse.
   async successfactors({ site, cantons }) {
-    const xml = await (await lireUrl(`${site.replace(/\/$/, "")}/sitemal.xml`)).text();
     const champ = (b, n) => (b.match(new RegExp(`<${n}>([\\s\\S]*?)</${n}>`)) ?? [])[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim() ?? "";
-    return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(([, b]) => {
-      const lieu = champ(b, "g:location");
-      return { lieu, ref: champ(b, "g:id") || champ(b, "guid"), titre: champ(b, "title").replace(/\s*\([^()]*\)\s*$/, ""), html: entites(champ(b, "description")), url: champ(b, "link") };
-    }).filter(o => lieuEnSuisse(o.lieu, { cantons }));
+    const offres = new Map();
+    let reste = "";
+    const lire = morceau => {
+      reste += morceau;
+      let fin;
+      while ((fin = reste.indexOf("</item>")) !== -1) {
+        const debut = reste.lastIndexOf("<item>", fin);
+        if (debut !== -1) {
+          const b = reste.slice(debut + 6, fin);
+          const lieu = champ(b, "g:location");
+          if (lieuEnSuisse(lieu, { cantons })) {
+            const ref = champ(b, "g:id") || champ(b, "guid");
+            offres.set(ref, { lieu, ref, titre: champ(b, "title").replace(/\s*\([^()]*\)\s*$/, ""), html: entites(champ(b, "description")), url: champ(b, "link") });
+          }
+        }
+        reste = reste.slice(fin + 7);
+      }
+      // Rien de complet en attente : on ne garde que l'offre commencée.
+      const ouvert = reste.lastIndexOf("<item>");
+      reste = ouvert === -1 ? reste.slice(-16) : reste.slice(ouvert);
+    };
+    // Une nouvelle tentative relit tout depuis le début ; les doublons se
+    // fondent par référence.
+    await lireUrl(`${site.replace(/\/$/, "")}/sitemal.xml`, { surMorceau: m => lire(m) });
+    return [...offres.values()];
   },
 
   // Prospective (outil suisse) : interface publique du « career center » que la
