@@ -5,6 +5,7 @@
     { "path": "/api/cron/synchro-offres", "schedule": "0 3 * * *" },
     { "path": "/api/cron/synchro-offres", "schedule": "30 3 * * *" },
     { "path": "/api/cron/synchro-offres", "schedule": "0 4 * * *" },
-    { "path": "/api/cron/synchro-offres", "schedule": "30 4 * * *" }
+    { "path": "/api/cron/synchro-offres", "schedule": "30 4 * * *" },
+    { "path": "/api/cron/synchro-offres", "schedule": "0 11 * * *" }
   ]
 }
